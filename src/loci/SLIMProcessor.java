@@ -13,13 +13,17 @@ import ij.gui.*;
 import ij.plugin.PlugIn;
 import ij.process.*;
 
+import java.awt.Color;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.prefs.*;
 
 import loci.common.DataTools;
+import loci.curvefitter.*;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
 import loci.formats.FormatTools;
@@ -27,9 +31,12 @@ import loci.formats.IFormatReader;
 
 /**
  *
- * @author aivar
+ * @author aivar TODO acknowledge sources
  */
 public class SLIMProcessor {
+    //TODO total kludge; just to get started
+    private boolean m_fakeData = false;
+
     private static final String FILE_KEY = "file";
     private String m_file;
 
@@ -63,11 +70,23 @@ public class SLIMProcessor {
     public void run(String arg) {
         if (showFileDialog(getFileFromPreferences())) {
             if (loadFile(m_file)) {
-                saveFileInPreferences(m_file);
+                if (m_fakeData) {
+                    fakeData();
+                }
+                else {
+                  saveFileInPreferences(m_file);
+                  
+                }
                 if (showParamsDialog()) {
-                    loadData();
+                    if (!m_fakeData) {
+                        loadData();
+                    }
                     createGlobalGrayScale();
                     createGlobalHistogram();
+
+                    fitData();
+                    showColorized(1000.0);
+
                     System.out.println(arg);
                 }
             }
@@ -93,6 +112,7 @@ public class SLIMProcessor {
         GenericDialog dialog = new GenericDialog("Load Data");
         dialog.addStringField("File:", defaultFile, 24);
         dialog.addNumericField("Test:", 100, 0);
+        dialog.addNumericField("Fake data", 0, 0);
         dialog.showDialog();
         if (dialog.wasCanceled()) {
             return false;
@@ -100,6 +120,8 @@ public class SLIMProcessor {
 
         m_file = dialog.getNextString();
         int test = (int) dialog.getNextNumber();
+        int fakeData = (int) dialog.getNextNumber();
+        m_fakeData = (0 != fakeData);
 
         IJ.showMessage("file " + m_file);
 
@@ -113,6 +135,7 @@ public class SLIMProcessor {
 
     // based on loci.slim.SlimData constructor
     private boolean loadFile(String file) {
+        if (m_fakeData) return true;
         boolean status = false;
         try {
             // read file header
@@ -157,6 +180,29 @@ public class SLIMProcessor {
 
         }
         return status;
+    }
+
+    private boolean fakeData() {
+        m_width = 10;
+        m_height = 100;
+        m_timeBins = m_width;
+        m_channels = 1;
+        m_timeRange = 10.0f;
+        m_minWave = 400;
+        m_waveStep = 10;
+
+        double A = 1.0;
+        double lambda = 2.0;
+        double b = 3.0;
+
+        m_data = new int[m_channels][m_height][m_width][m_timeBins];
+        for (int y = 0; y < m_height; ++y) {
+            for (int x = 0; x < m_width; ++x) {
+                double tmpX = x;
+                m_data[0][y][x][0] = (int)(A * Math.exp(-lambda * tmpX) + b);
+            }
+        }
+        return true;
     }
 
     private boolean showParamsDialog() {
@@ -311,4 +357,74 @@ public class SLIMProcessor {
         printStream.close();
     }
 
+    private void fitData() {
+        int height = m_height;
+        int width = m_width;
+        double max = 2000.0;
+        ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                ICurveFitData curveFitData = new CurveFitData();
+                double params[] = new double[4];
+                curveFitData.setParams(params);
+                double yDataArray[] = new double[m_timeBins];
+                for (int b = 0; b < m_timeBins; ++b) {
+                    yDataArray[b] = m_data[0][y][x][b];
+                }
+                curveFitData.setYData(yDataArray);
+                double yFitted[] = new double[m_timeBins];
+                curveFitData.setYFitted(yFitted);
+                curveFitDataList.add(curveFitData);
+            }
+        }
+        ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
+        ICurveFitter curveFitter = new AkutanCurveFitter();
+        curveFitter.fitData(dataArray);
+
+        ImageProcessor imageProcessor = new ColorProcessor(width, height);
+        ImagePlus imagePlus = new ImagePlus("Lifetimes", imageProcessor);
+        int index = 0;
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                double lifetime = dataArray[index++].getParams()[1];
+                Color color = lifetimeColorMap(max, lifetime);
+                imageProcessor.setColor(color);
+                imageProcessor.drawDot(x, y);
+            }
+        }
+        imagePlus.show();
+    }
+    
+    private void showColorized(double max) {
+    }
+
+    private Color lifetimeColorMap(double max, double tau) {
+        Color returnColor = Color.BLACK;
+        if (tau > 0.0) {
+            if (tau < max/2.0) {
+                returnColor = interpolateColor(Color.BLUE, Color.GREEN, 2.0 * tau / max);
+            }
+            else if (tau < max) {
+                returnColor = interpolateColor(Color.GREEN, Color.RED, 2.0 * (tau - max / 2.0) / max);
+            }
+        }
+        return returnColor;
+    }
+
+    private Color interpolateColor(Color start, Color end, double blend) {
+        int startRed   = start.getRed();
+        int startGreen = start.getGreen();
+        int startBlue  = start.getBlue();
+        int endRed   = end.getRed();
+        int endGreen = end.getGreen();
+        int endBlue  = end.getBlue();
+        int red   = interpolateColorComponent(startRed, endRed, blend);
+        int green = interpolateColorComponent(startGreen, endGreen, blend);
+        int blue  = interpolateColorComponent(startBlue, endBlue, blend);
+        return new Color(red, green, blue);
+    }
+
+    private int interpolateColorComponent(int start, int end, double blend) {
+        return (int)(blend * (end - start) + start);
+    }
 }
