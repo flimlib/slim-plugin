@@ -10,6 +10,7 @@ package loci;
 
 import ij.*;
 import ij.gui.*;
+import ij.gui.ProgressBar;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
@@ -44,8 +45,11 @@ import loci.formats.IFormatReader;
  * @author aivar TODO acknowledge sources
  */
 public class SLIMProcessor {
-    // this affects how lambdas are colorized:
-    private static final double MAXIMUM_LAMBDA = 0.075;
+    // this affects how lifetimes are colorized:
+    private static final double MAXIMUM_LIFETIME = 0.075; // for fitting fake with Jaolho // for fitting brian with barber triple integral 100.0f X tau vs lambda issue here
+
+    // this affects how many pixels we process at once
+    private static final int PIXEL_COUNT = 32;//16;
 
     //TODO total kludge; just to get started
     private boolean m_fakeData = false;
@@ -57,6 +61,8 @@ public class SLIMProcessor {
 
     // Actual data values, dimensioned [channel][row][column][bin]
     protected int[][][][] m_data;
+
+    private ImageProcessor m_grayscaleImageProcessor;
 
     // data parameters //TODO Curtis has these as protected
     private int m_width;
@@ -86,7 +92,7 @@ public class SLIMProcessor {
     }
 
     public enum FitAlgorithm { //TODO not really algorithm, usu. LMA
-       JAOLHO, AKUTAN, BARBER
+       JAOLHO, AKUTAN, BARBER_RLD, BARBER_LMA
     }
 
     public enum FitFunction {
@@ -118,6 +124,7 @@ public class SLIMProcessor {
 
     private int m_startBin;
     private int m_stopBin;
+    private int m_startX;
     private int m_threshold;
     private float m_chiSqTarget;
 
@@ -239,28 +246,32 @@ public class SLIMProcessor {
         double b = 1.0;
 
         // show colorized lifetimes
-        ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
-        ImagePlus imagePlus = new ImagePlus("Fake Data", imageProcessor);
+        DataColorizer dataColorizer = new DataColorizer(m_width, m_height, "Fake Data");
+        //ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
+        //ImagePlus imagePlus = new ImagePlus("Fake Data", imageProcessor);
 
         m_data = new int[m_channels][m_height][m_width][m_timeBins];
         for (int y = 0; y < m_height; ++y) {
-            A = 1000.0 + y  * 1000.0;
+            A = 1000.0 + y  * 10000.0; // was 1000.0; bumped up Tuesday July 27 trying to get Barber LMA to work - didn't help.
             for (int x = 0; x < m_width; ++x) {
                 double tmpX = x;
                 lambda = 0.05 + x * 0.0005d; //0.0001 + x * .001; //0.5 + x * 0.01; // .002500 + x * .01;
                 //System.out.println("lambda " + lambda + " color " + lambdaColorMap(MAXIMUM_LAMBDA, lambda));
-                imageProcessor.setColor(lambdaColorMap(MAXIMUM_LAMBDA, lambda));
-                imageProcessor.drawPixel(x, y);
+                dataColorizer.setData(x, y, lambda);
+                //imageProcessor.setColor(lifetimeColorMap(MAXIMUM_LIFETIME, lambda));
+                //imageProcessor.drawPixel(x, y);
                 for (int t = 0; t < m_timeBins; ++t) {
                     m_data[0][y][x][t] = (int)(A * Math.exp(-lambda * m_timeRange * t) + b);
                 }
                 //System.out.print(" " + m_data[0][y][x][0]);
-                if (5 == x && 5 == y) System.out.println("at 5, 5 A is " + A + " lambda " + lambda + " b " + b);
-                if (10 == x && 10 == y) System.out.println("at 5, 5 A is " + A + " lambda " + lambda + " b " + b);
+                if (5 == x && 5 == y) System.out.println("at (5, 5) A is " + A + " lambda " + lambda + " b " + b);
+                if (10 == x && 10 == y) System.out.println("at (10, 10) A is " + A + " lambda " + lambda + " b " + b);
+                if (49 == x && 49 == y) System.out.println("at (49, 49) A is " + A + " lambda " + lambda + " b " + b);
             }
-            System.out.println();
+            //System.out.println();
         }
-        imagePlus.show();
+        //imagePlus.show();
+        dataColorizer.update(true);
         return true;
     }
 
@@ -365,6 +376,7 @@ public class SLIMProcessor {
             }
         }
         imagePlus.show();
+        m_grayscaleImageProcessor = imageProcessor; //TODO for now
         return true;
     }
 
@@ -376,7 +388,7 @@ public class SLIMProcessor {
             "Summed");
         dialog.addChoice(
             "Algorithm",
-            new String[] { "Jaolho", "Akutan", "Barber" },
+            new String[] { "Jaolho", "Akutan", "Barber RLD", "Barber LMA" },
             "Jaolho");
         dialog.addChoice(
             "Function",
@@ -470,6 +482,7 @@ public class SLIMProcessor {
         }
         dialog.addNumericField("Start", m_startBin, 0, 2, "bins");
         dialog.addNumericField("Stop", m_stopBin, 0, 2, "bins");
+        dialog.addNumericField("Start X", m_startX, 0, 2, "bins");
         dialog.addNumericField("Threshold", m_threshold, 0, 2, "photons");
         dialog.addNumericField("Chi Square Targer", m_chiSqTarget, 0, 2, null);
         dialog.showDialog();
@@ -522,10 +535,18 @@ public class SLIMProcessor {
         }
         m_startBin = (int) dialog.getNextNumber();
         m_stopBin  = (int) dialog.getNextNumber();
+        m_startX = (int) dialog.getNextNumber();
+        m_threshold = (int) dialog.getNextNumber();
+      //  m_chiSqTarget = (double) dialog.getNextNumber();
         return true;
     }
 
     private void fitData() {
+        if (m_region.EACH == m_region) {
+            fitEachPixel();
+            return;
+        }
+
         // build the params
         double params[] = null;
          switch (m_function) {
@@ -558,8 +579,11 @@ public class SLIMProcessor {
         }
         //TODO problem: only use predetermined params for a fixed fit?
          for (int i = 0; i < params.length; ++i) {
-             params[i] = 1.0;
+             params[i] = 1.0 + i * 1.0;
          }
+         params[0] = m_fitA1;
+         params[1] = m_fitT1;
+         params[2] = m_fitC;
 
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
@@ -591,7 +615,9 @@ public class SLIMProcessor {
                 curveFitDataList.add(curveFitData);
                 break;
             case ROI:
+                int roiNumber = 0;
                 for (Roi roi: getRois()) {
+                    ++roiNumber;
                     curveFitData = new CurveFitData();
                     curveFitData.setParams(params.clone());
                     yDataArray = new double[m_timeBins];
@@ -602,6 +628,7 @@ public class SLIMProcessor {
                     for (int x = 0; x < bounds.width; ++x) {
                         for (int y = 0; y < bounds.height; ++y) {
                             if (roi.contains(bounds.x + x, bounds.y + y)) {
+                                System.out.println("roi " + roiNumber + " x " + x + " Y " + y);
                                 for (int b = 0; b < m_timeBins; ++b) {
                                     yDataArray[b] += m_data[0][y][x][b];
                                 }
@@ -626,7 +653,7 @@ public class SLIMProcessor {
                 curveFitData.setYFitted(yFitted);
                 curveFitDataList.add(curveFitData);
                 break;
-            case EACH:
+            case EACH: //TODO this is handled in fitEachPixel below
                 Roi[] rois = getRois();
                 if (0 < rois.length) {
                     for (Roi roi: rois) {
@@ -678,13 +705,16 @@ public class SLIMProcessor {
             case AKUTAN:
                 curveFitter = new AkutanCurveFitter();
                 break;
-            case BARBER:
-                curveFitter = new GrayCurveFitter();
+            case BARBER_RLD:
+                curveFitter = new GrayCurveFitter(0);
                 break;
-
+            case BARBER_LMA:
+                curveFitter = new GrayCurveFitter(1);
+                break;
         }
         curveFitter.setXInc(m_timeRange);
-        curveFitter.fitData(dataArray, m_startBin, m_stopBin);
+        int startBin = m_startBin + (256 * m_startX);
+        curveFitter.fitData(dataArray, startBin, m_stopBin);
 
         if (0 < dataArray.length) {
             //TODO need to be able to examine any fitted pixel; for now just show the last fitted pixel. // first!
@@ -706,13 +736,13 @@ public class SLIMProcessor {
             case ROI: {
                 // show colorized lifetimes
                 ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
-                ImagePlus imagePlus = new ImagePlus("Fitted Lambdas", imageProcessor);
+                ImagePlus imagePlus = new ImagePlus("Fitted Lifetimes", imageProcessor);
 
                 int i = 0;
                 for (Roi roi: getRois()) {
                     IJ.showMessage("Roi " + i + " " + dataArray[i].getParams()[0] + " " + dataArray[i].getParams()[1] + " " + dataArray[i].getParams()[2]);
-                    double lambda = dataArray[i++].getParams()[1];
-                    imageProcessor.setColor(lambdaColorMap(MAXIMUM_LAMBDA, lambda));
+                    double lifetime = dataArray[i++].getParams()[1];
+                    imageProcessor.setColor(lifetimeColorMap(MAXIMUM_LIFETIME, lifetime));
 
                     Rectangle bounds = roi.getBounds();
                     for (int x = 0; x < bounds.width; ++x) {
@@ -729,7 +759,7 @@ public class SLIMProcessor {
                 //TODO display results for single point?
                 IJ.showMessage("Point " + dataArray[0].getParams()[0] + " " + dataArray[0].getParams()[1] + " " + dataArray[0].getParams()[2]);
                 break;
-            case EACH:
+            case EACH: //TODO this is handled in fitEachPixel below
                 // show colorized lifetimes
                 ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
                 ImagePlus imagePlus = new ImagePlus("Fitted Lambdas", imageProcessor);
@@ -743,8 +773,8 @@ public class SLIMProcessor {
                             for (int y = 0; y < bounds.height; ++y) {
                                 if (roi.contains(bounds.x + x,  bounds.y + y)) {
                                     double lambda = dataArray[i++].getParams()[1];
-                                    imageProcessor.setColor(lambdaColorMap(MAXIMUM_LAMBDA, lambda));
-                                    imageProcessor.drawPixel(bounds.x + x, bounds.y + y);
+                                    imageProcessor.setColor(lifetimeColorMap(MAXIMUM_LIFETIME, lambda));
+                                    imageProcessor.drawPixel(bounds.x + x, m_height - bounds.y - y - 1);
                                 }
                             }
                         }
@@ -755,8 +785,8 @@ public class SLIMProcessor {
                     for (int y = 0; y < m_height; ++y) {
                         for (int x = 0; x < m_width; ++x) {
                             double lambda = dataArray[i++].getParams()[1];
-                            imageProcessor.setColor(lambdaColorMap(MAXIMUM_LAMBDA, lambda));
-                            imageProcessor.drawPixel(x, y);
+                            imageProcessor.setColor(lifetimeColorMap(MAXIMUM_LIFETIME, lambda));
+                            imageProcessor.drawPixel(x, m_height - y - 1);
                         }
                     }
                 }
@@ -794,6 +824,190 @@ public class SLIMProcessor {
         }
     }
 
+    int m_maxX = 0;
+    int m_maxY = 0;
+    int m_maxValue = -1;
+
+    private void fitEachPixel() {
+        // build the params
+        double params[] = null;
+         switch (m_function) {
+            case SINGLE_EXPONENTIAL:
+                params = new double[3];
+                params[0] = m_fitA1;
+                params[1] = m_fitT1;
+                params[2] = m_fitC;
+                break;
+            case DOUBLE_EXPONENTIAL:
+                params = new double[5];
+                params[0] = m_fitA1;
+                params[1] = m_fitT1;
+                params[2] = m_fitA2;
+                params[3] = m_fitT2;
+                params[4] = m_fitC;
+                break;
+            case TRIPLE_EXPONENTIAL:
+                params = new double[7];
+                params[0] = m_fitA1;
+                params[1] = m_fitT1;
+                params[2] = m_fitA2;
+                params[3] = m_fitT2;
+                params[4] = m_fitA3;
+                params[5] = m_fitT3;
+                params[6] = m_fitC;
+                break;
+            case STRETCHED_EXPONENTIAL:
+                break;
+        }
+        //TODO problem: only use predetermined params for a fixed fit?
+         for (int i = 0; i < params.length; ++i) {
+             params[i] = 1.0;
+        }
+         params[0] = m_fitA1;
+         params[1] = m_fitT1;
+         params[2] = m_fitC;
+
+        // show colorized lifetimes
+        //ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
+        //ImagePlus imagePlus = new ImagePlus("Fitted Lifetimes", imageProcessor);
+        //imagePlus.show();
+        DataColorizer dataColorizer = new DataColorizer(m_width, m_height, "Fitted Lifetimes");
+
+        // build the data
+        ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
+        ArrayList<ChunkyPixel> pixelList = new ArrayList<ChunkyPixel>();
+        ICurveFitData curveFitData;
+        double yDataArray[];
+        double yFitted[];
+
+        ChunkyPixelEffectIterator pixelIterator = new ChunkyPixelEffectIterator(new ChunkyPixelTableImpl(), m_width, m_height);
+        
+        int pixelCount = 0;
+        int pixelsToProcessCount = 0;
+
+        while (pixelIterator.hasNext()) {
+            ++pixelCount;
+            IJ.showProgress(pixelCount, m_height * m_width);
+            ChunkyPixel pixel = pixelIterator.next();
+            if (fitThisPixel(pixel.getX(), pixel.getY())) {
+                curveFitData = new CurveFitData();
+                curveFitData.setParams(params.clone());
+                yDataArray = new double[m_timeBins];
+                for (int b = 0; b < m_timeBins; ++b) {
+                    yDataArray[b] = m_data[0][pixel.getY()][pixel.getX()][b];
+                }
+                curveFitData.setYData(yDataArray);
+                yFitted = new double[m_timeBins];
+                curveFitData.setYFitted(yFitted);
+                curveFitDataList.add(curveFitData);
+                pixelList.add(pixel);
+
+
+                if (++pixelsToProcessCount >= PIXEL_COUNT) {
+                    //processPixels(imagePlus, imageProcessor, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
+                    processPixels(dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
+                    curveFitDataList.clear();
+                    pixelList.clear();
+                    pixelsToProcessCount = 0;
+                }
+            }
+        }
+        if (0 < pixelsToProcessCount) {
+            //processPixels(imagePlus, imageProcessor, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
+            processPixels(dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
+        }
+        System.out.println("m_maxX, " + m_maxX + " m_maxY " + m_maxY + " m_maxVaue " + m_maxValue);
+    }
+
+//    void processPixels(ImagePlus imagePlus, ImageProcessor imageProcessor, ICurveFitData data[], ChunkyPixel pixels[]) {
+    void processPixels(DataColorizer dataColorizer, int height, ICurveFitData data[], ChunkyPixel pixels[]) {
+        // do the fit
+        ICurveFitter curveFitter = null;
+        switch (m_algorithm) {
+            case JAOLHO:
+                curveFitter = new JaolhoCurveFitter();
+                break;
+            case AKUTAN:
+                curveFitter = new AkutanCurveFitter();
+                break;
+            case BARBER_RLD:
+                curveFitter = new GrayCurveFitter(0);
+                break;
+            case BARBER_LMA:
+                curveFitter = new GrayCurveFitter(1);
+                break;
+
+        }
+        curveFitter.setXInc(m_timeRange);
+        int startBin = m_startBin + (256 * m_startX);
+        curveFitter.fitData(data, startBin, m_stopBin);
+
+        // draw as you go
+        for (int i = 0; i < pixels.length; ++i) {
+            ChunkyPixel pixel = pixels[i];
+            double lifetime = data[i].getParams()[1];
+            //TODO BUG:
+            // With the table as is, you can get
+            //   x   y   w   h
+            //   12  15  2   1
+            //   14  15  2   1
+            // all within the same drawing cycle.
+            // So it looks like a 4x1 slice gets drawn (it
+            // is composed of two adjacent 2x1 slices with
+            // potentially two different colors).
+            if (pixel.getWidth() == 2) {
+                System.out.println("x " + pixel.getX() + " y " + pixel.getY() + " w " + pixel.getWidth() + " h " + pixel.getHeight());
+            }
+            //System.out.println("w " + pixel.getWidth() + " h " + pixel.getHeight());
+            //System.out.println("lifetime is " + lifetime);
+            //Color color = lifetimeColorMap(MAXIMUM_LIFETIME, lifetime);
+            //imageProcessor.setColor(color);
+
+            boolean firstTime = true;
+            for (int x = pixel.getX(); x < pixel.getX() + pixel.getWidth(); ++x) {
+                for (int y = pixel.getY(); y < pixel.getY() + pixel.getHeight(); ++y) {
+                    if (fitThisPixel(x, y)) { //TODO WAS if (isIncluded(x, y))  {
+                        //imageProcessor.drawPixel(x, height - y - 1);
+                        dataColorizer.setData(firstTime, x, height - y - 1 , lifetime);
+                        firstTime = false;
+                    }
+                }
+            }
+        }
+        //imagePlus.draw();
+        dataColorizer.update(true);
+    }
+
+    boolean fitThisPixel(int x, int y) {
+        if (m_threshold <= m_grayscaleImageProcessor.getPixel(x,m_height - y - 1)) {
+            if (m_grayscaleImageProcessor.getPixel(x, m_height - y - 1) > m_maxValue) {
+                m_maxValue = m_grayscaleImageProcessor.getPixel(x, m_height - y - 1);
+                m_maxX = x;
+                m_maxY = y;
+            }
+            return isIncluded(x,y);
+        }
+        else {
+            // System.out.println("dont fit " + m_grayscaleImageProcessor.getPixel(x, y) + " x " + x + " y " + y);
+            return false;
+        }
+    }
+
+    boolean isIncluded(int x, int y) {
+        Roi[] rois = getRois();
+        if (0 < rois.length) {
+            for (Roi roi: rois) {
+                if (roi.contains(x, y)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
     private Roi[] getRois() {
         Roi[] rois = {};
         RoiManager manager = RoiManager.getInstance();
@@ -802,19 +1016,17 @@ public class SLIMProcessor {
         }
         return rois;
     }
-    
-    private void showColorized(double max) {
-    }
 
-    private Color lambdaColorMap(double max, double tau) {
+    private Color lifetimeColorMap(double max, double lifetime) {
         Color returnColor = Color.BLACK;
-        if (tau > 0.0) {
-            if (tau < max/2.0) {
-                returnColor = interpolateColor(Color.BLUE, Color.GREEN, 2.0 * tau / max);
+        if (lifetime > 0.0) {
+            if (lifetime < max/2.0) {
+                returnColor = interpolateColor(Color.BLUE, Color.GREEN, 2.0 * lifetime / max);
             }
-            else if (tau < max) {
-                returnColor = interpolateColor(Color.GREEN, Color.RED, 2.0 * (tau - max / 2.0) / max);
+            else if (lifetime < max) {
+                returnColor = interpolateColor(Color.GREEN, Color.RED, 2.0 * (lifetime - max / 2.0) / max);
             }
+            else returnColor = Color.RED;
         }
         return returnColor;
     }
