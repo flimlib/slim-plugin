@@ -223,7 +223,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
         XYSeries series3 = new XYSeries("Data");
         XYSeries series4 = new XYSeries("Residuals");
 
-      XYSeries series5 = new XYSeries("Sanity Check");
+     //// XYSeries series5 = new XYSeries("Sanity Check");
       double params[] = data.getParams();
 
         double yData, yFitted;
@@ -241,9 +241,9 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
                 series4.add(xCurrent, yData - yFitted);
                 }
 
-                double newlyCalculated;
-series5.add(xCurrent, newlyCalculated = params[0] * Math.exp(-params[1] * xCurrent) + params[2]);
-System.out.println(" i " + i + " " + newlyCalculated);
+////                double newlyCalculated;
+////series5.add(xCurrent, newlyCalculated = params[0] * Math.exp(-params[1] * xCurrent) + params[2]);
+////System.out.println(" i " + i + " " + newlyCalculated);
                 //series5.add(xCurrent, Math.exp(-params[1] * xCurrent) + params[2]);
             }
             else {
@@ -258,7 +258,7 @@ System.out.println(" i " + i + " " + newlyCalculated);
         m_decayDataset.addSeries(series1);
         m_decayDataset.addSeries(series2);
         m_decayDataset.addSeries(series3);
-    m_decayDataset.addSeries(series5);
+ ////   m_decayDataset.addSeries(series5);
 
         m_residualDataset = new XYSeriesCollection();
         m_residualDataset.addSeries(series4);
