@@ -6,6 +6,7 @@
 package loci;
 
 import javax.swing.*;
+import java.awt.BasicStroke;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.Ellipse2D;
@@ -76,20 +77,19 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
     JFreeChart m_residualsChart;
 
     DecayGraph(double timeInc, int start, int stop, ICurveFitData data) {
-        m_start = start;
-        m_stop = stop;
         m_bins = data.getYData().length;
         JFreeChart chart = createCombinedChart(m_bins, timeInc, start, stop, data); //TODO got ugly; rethink params, globals etc.
+        setStartStop(start, stop);
         m_panel = new ChartPanel(chart, true, true, true, false, true);
         m_panel.setDomainZoomable(false);
         m_panel.setRangeZoomable(false);
         m_panel.setPreferredSize(new java.awt.Dimension(500, 270));
-        try {
-        ChartUtilities.saveChartAsPNG(new File("CHART_FILE"), chart, 500, 270);
-        }
-        catch (Exception e) {
-            System.out.println("exception " + e);
-        }
+        //try {
+        //ChartUtilities.saveChartAsPNG(new File("CHART_FILE"), chart, 500, 270);
+        //}
+        //catch (Exception e) {
+        //    System.out.println("exception " + e);
+        //}
     }
 
     void setLogarithmic(boolean logarithmic) {
@@ -115,10 +115,10 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
         m_start = start;
         m_stop = stop;
         if (null != m_startStopDraggingUI) {
-            //System.out.println("start comes in " + start + " " + stop);
+            System.out.println("start comes in " + start + " stop " + stop);
             double startProportion = (double) start / m_bins;
             double stopProportion = (double) stop / m_bins;
-            //System.out.println("startP " + startProportion + " " + stopProportion);
+            System.out.println("startP " + startProportion + " stopP " + stopProportion);
             
             m_startStopDraggingUI.setStartStopProportions(startProportion, stopProportion);
         }
@@ -320,9 +320,10 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
             double width = area.getWidth();
             m_xStart = (int) (x + width * m_startMarkerProportion);
             m_xStop = (int) (x + width * m_stopMarkerProportion);
+            System.out.println("startP " + m_startMarkerProportion + " stopP " + m_stopMarkerProportion + " xStart " + m_xStart + " xStop " + m_xStop);
 
             // custom painting is here
-            g2.setColor(Color.lightGray);
+            g2.setXORMode(Color.MAGENTA);
             g2.setStroke(new BasicStroke(2f));
             g2.drawLine(m_xStart, m_y0, m_xStart, m_y1);
             g2.drawLine(m_xStop, m_y0, m_xStop, m_y1);
