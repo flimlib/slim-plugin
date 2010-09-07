@@ -8,8 +8,14 @@
 
 package loci;
 
+import loci.colorizer.DataColorizer;
+
+import fiji.util.gui.GenericDialogPlus;
+
 import ij.*;
 import ij.gui.*;
+import ij.gui.GenericDialog;
+import ij.gui.NonBlockingGenericDialog;
 import ij.gui.ProgressBar;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
@@ -50,6 +56,13 @@ public class SLIMProcessor {
 
     // this affects how many pixels we process at once
     private static final int PIXEL_COUNT = 32;//16;
+
+    // Unicode special characters
+    private static final Character CHI = '\u03c7';
+    private static final Character SQUARE = '\u00b2';
+    private static final Character TAU = '\u03c4';
+    private static final Character LAMBDA = '\u03bb';
+    private static final Character SIGMA = '\u03c3';
 
     //TODO total kludge; just to get started
     private boolean m_fakeData = false;
@@ -92,7 +105,7 @@ public class SLIMProcessor {
     }
 
     public enum FitAlgorithm { //TODO not really algorithm, usu. LMA
-       JAOLHO, AKUTAN, BARBER_RLD, BARBER_LMA
+       JAOLHO, /*AKUTAN,*/ BARBER_RLD, BARBER_LMA, MARKWARDT, BARBER2_RLD, BARBER2_LMA
     }
 
     public enum FitFunction {
@@ -168,8 +181,8 @@ public class SLIMProcessor {
 
     private boolean showFileDialog(String defaultFile) {
         //TODO shouldn't UI be in separate class?
-        GenericDialog dialog = new GenericDialog("Load Data");
-        dialog.addStringField("File:", defaultFile, 24);
+        GenericDialogPlus dialog = new GenericDialogPlus("Load Data");
+        dialog.addFileField("File:", defaultFile, 24);
         dialog.addCheckbox("Fake data", m_fakeData);
         dialog.showDialog();
         if (dialog.wasCanceled()) {
@@ -179,7 +192,6 @@ public class SLIMProcessor {
         m_file = dialog.getNextString();
         m_fakeData = dialog.getNextBoolean();
 
-        if (!m_fakeData) IJ.showMessage("file " + m_file);
         return true;
     }
 
@@ -270,8 +282,7 @@ public class SLIMProcessor {
             }
             //System.out.println();
         }
-        //imagePlus.show();
-        dataColorizer.update(true);
+        dataColorizer.update();
         return true;
     }
 
@@ -381,14 +392,14 @@ public class SLIMProcessor {
     }
 
     private boolean showFitDialog() {
-        GenericDialog dialog = new GenericDialog("Fit Type");
+        NonBlockingGenericDialog dialog = new NonBlockingGenericDialog("Fit Type");
         dialog.addChoice(
             "Region",
             new String[] { "Sum all", "Sum each ROI", "Single pixel", "Each pixel" },
             "Summed");
         dialog.addChoice(
             "Algorithm",
-            new String[] { "Jaolho", "Akutan", "Barber RLD", "Barber LMA" },
+            new String[] { "Jaolho", /*"Akutan",*/ "old Barber RLD", "old Barber LMA", "Markwardt", "Barber NR RLD", "Barber NR LMA" },
             "Jaolho");
         dialog.addChoice(
             "Function",
@@ -441,7 +452,7 @@ public class SLIMProcessor {
             case SINGLE_EXPONENTIAL:
                 dialog.addNumericField("A", m_fitA1, 5);
                 dialog.addCheckbox("Fix", m_fitA1fixed);
-                dialog.addNumericField("T", m_fitT1, 5);
+                dialog.addNumericField("" + LAMBDA, m_fitT1, 5);
                 dialog.addCheckbox("Fix", m_fitT1fixed);
                 dialog.addNumericField("C", m_fitC, 5);
                 dialog.addCheckbox("Fix", m_fitCfixed);
@@ -449,11 +460,11 @@ public class SLIMProcessor {
             case DOUBLE_EXPONENTIAL:
                 dialog.addNumericField("A1", m_fitA1, 5);
                 dialog.addCheckbox("Fix", m_fitA1fixed);
-                dialog.addNumericField("T1", m_fitT1, 5);
+                dialog.addNumericField("" + LAMBDA + "1", m_fitT1, 5);
                 dialog.addCheckbox("Fix", m_fitT1fixed);
                 dialog.addNumericField("A2", m_fitA2, 5);
                 dialog.addCheckbox("Fix", m_fitA2fixed);
-                dialog.addNumericField("T2", m_fitT2, 5);
+                dialog.addNumericField("" + LAMBDA + "2", m_fitT2, 5);
                 dialog.addCheckbox("Fix", m_fitT2fixed);
                 dialog.addNumericField("C", m_fitC, 5);
                 dialog.addCheckbox("Fix", m_fitCfixed);
@@ -461,15 +472,15 @@ public class SLIMProcessor {
             case TRIPLE_EXPONENTIAL:
                 dialog.addNumericField("A1", m_fitA1, 5);
                 dialog.addCheckbox("Fix", m_fitA1fixed);
-                dialog.addNumericField("T1", m_fitT1, 5);
+                dialog.addNumericField("" + LAMBDA + "1", m_fitT1, 5);
                 dialog.addCheckbox("Fix", m_fitT1fixed);
                 dialog.addNumericField("A2", m_fitA2, 5);
                 dialog.addCheckbox("Fix", m_fitA2fixed);
-                dialog.addNumericField("T2", m_fitT2, 5);
+                dialog.addNumericField("" + LAMBDA + "2", m_fitT2, 5);
                 dialog.addCheckbox("Fix", m_fitT2fixed);
                 dialog.addNumericField("A3", m_fitA3, 5);
                 dialog.addCheckbox("Fix", m_fitA3fixed);
-                dialog.addNumericField("T3", m_fitT3, 5);
+                dialog.addNumericField("" + LAMBDA + "3", m_fitT3, 5);
                 dialog.addCheckbox("Fix", m_fitT3fixed);
                 dialog.addNumericField("C", m_fitC, 5);
                 dialog.addCheckbox("Fix", m_fitCfixed);
@@ -484,7 +495,7 @@ public class SLIMProcessor {
         dialog.addNumericField("Stop", m_stopBin, 0, 2, "bins");
         dialog.addNumericField("Start X", m_startX, 0, 2, "bins");
         dialog.addNumericField("Threshold", m_threshold, 0, 2, "photons");
-        dialog.addNumericField("Chi Square Targer", m_chiSqTarget, 0, 2, null);
+        dialog.addNumericField("" + CHI + SQUARE + " Target", m_chiSqTarget, 0, 2, null);
         dialog.showDialog();
         if (dialog.wasCanceled()) {
             return false;
@@ -576,10 +587,6 @@ public class SLIMProcessor {
                 break;
             case STRETCHED_EXPONENTIAL:
                 break;
-        }
-        //TODO problem: only use predetermined params for a fixed fit?
-         for (int i = 0; i < params.length; ++i) {
-             params[i] = 1.0 + i * 1.0;
          }
          params[0] = m_fitA1;
          params[1] = m_fitT1;
@@ -646,7 +653,7 @@ public class SLIMProcessor {
                 curveFitData.setParams(params);
                 yDataArray = new double[m_timeBins];
                 for (int b = 0; b < m_timeBins; ++b) {
-                    yDataArray[b] = m_data[0][m_y][m_x][b];
+                    yDataArray[b] = m_data[0][m_height - m_y - 1][m_x][b];
                 }
                 curveFitData.setYData(yDataArray);
                 yFitted = new double[m_timeBins];
@@ -702,14 +709,23 @@ public class SLIMProcessor {
             case JAOLHO:
                 curveFitter = new JaolhoCurveFitter();
                 break;
-            case AKUTAN:
+           /* case AKUTAN:
                 curveFitter = new AkutanCurveFitter();
-                break;
+                break; */
             case BARBER_RLD:
                 curveFitter = new GrayCurveFitter(0);
                 break;
             case BARBER_LMA:
                 curveFitter = new GrayCurveFitter(1);
+                break;
+            case MARKWARDT:
+                curveFitter = new MarkwardtCurveFitter();
+                break;
+            case BARBER2_RLD:
+                curveFitter = new GrayNRCurveFitter(0);
+                break;
+            case BARBER2_LMA:
+                curveFitter = new GrayNRCurveFitter(1);
                 break;
         }
         curveFitter.setXInc(m_timeRange);
@@ -757,9 +773,10 @@ public class SLIMProcessor {
                 break; }
             case POINT:
                 //TODO display results for single point?
-                IJ.showMessage("Point " + dataArray[0].getParams()[0] + " " + dataArray[0].getParams()[1] + " " + dataArray[0].getParams()[2]);
+                IJ.showMessage("Point A " + dataArray[0].getParams()[0] + " " + LAMBDA + " " + dataArray[0].getParams()[1] + " b " + dataArray[0].getParams()[2]);
                 break;
-            case EACH: //TODO this is handled in fitEachPixel below
+            case EACH: //TODO DEFUNCT CODE this is handled in fitEachPixel below
+                //TODO new version uses "chunky pixel effect" drawing.
                 // show colorized lifetimes
                 ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
                 ImagePlus imagePlus = new ImagePlus("Fitted Lambdas", imageProcessor);
@@ -871,7 +888,7 @@ public class SLIMProcessor {
         //ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
         //ImagePlus imagePlus = new ImagePlus("Fitted Lifetimes", imageProcessor);
         //imagePlus.show();
-        DataColorizer dataColorizer = new DataColorizer(m_width, m_height, "Fitted Lifetimes");
+        DataColorizer dataColorizer = new DataColorizer(m_width, m_height, m_algorithm + " Fitted Lifetimes");
 
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
@@ -927,16 +944,25 @@ public class SLIMProcessor {
             case JAOLHO:
                 curveFitter = new JaolhoCurveFitter();
                 break;
-            case AKUTAN:
+            /* case AKUTAN:
                 curveFitter = new AkutanCurveFitter();
-                break;
+                break; */
             case BARBER_RLD:
                 curveFitter = new GrayCurveFitter(0);
                 break;
             case BARBER_LMA:
                 curveFitter = new GrayCurveFitter(1);
                 break;
-
+            case MARKWARDT:
+                curveFitter = new MarkwardtCurveFitter();
+                break;
+            //TODO ARG this same switch statement is in 2 places!!!
+            case BARBER2_RLD:
+                curveFitter = new GrayNRCurveFitter(0);
+                break;
+            case BARBER2_LMA:
+                curveFitter = new GrayNRCurveFitter(1);
+                break;
         }
         curveFitter.setXInc(m_timeRange);
         int startBin = m_startBin + (256 * m_startX);
@@ -955,9 +981,9 @@ public class SLIMProcessor {
             // So it looks like a 4x1 slice gets drawn (it
             // is composed of two adjacent 2x1 slices with
             // potentially two different colors).
-            if (pixel.getWidth() == 2) {
-                System.out.println("x " + pixel.getX() + " y " + pixel.getY() + " w " + pixel.getWidth() + " h " + pixel.getHeight());
-            }
+            //if (pixel.getWidth() == 2) {
+            //    System.out.println("x " + pixel.getX() + " y " + pixel.getY() + " w " + pixel.getWidth() + " h " + pixel.getHeight());
+            //}
             //System.out.println("w " + pixel.getWidth() + " h " + pixel.getHeight());
             //System.out.println("lifetime is " + lifetime);
             //Color color = lifetimeColorMap(MAXIMUM_LIFETIME, lifetime);
@@ -974,8 +1000,7 @@ public class SLIMProcessor {
                 }
             }
         }
-        //imagePlus.draw();
-        dataColorizer.update(true);
+        dataColorizer.update();
     }
 
     boolean fitThisPixel(int x, int y) {
