@@ -27,12 +27,6 @@
   </licenses>
 
   <dependencies>
-    <!--
-    TODO:
-    fiji.util.gui.GenericDialogPlus
-    org.jdesktop.jxlayer.JXLayer
-    -->
-
     <!-- loci -->
     <dependency>
       <groupId>loci</groupId>
@@ -55,6 +49,11 @@
       <groupId>imagej</groupId>
       <artifactId>ij</artifactId>
       <version>1.43</version>
+    </dependency>
+    <dependency>
+      <groupId>fiji</groupId>
+      <artifactId>fiji-lib</artifactId>
+      <version>20100908</version>
     </dependency>
 
     <!-- central -->
