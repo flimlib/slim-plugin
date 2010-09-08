@@ -1,6 +1,7 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+ * This was an expirement in using JFreeChart BarCharts for a histogram.
+ *
+ * Aivar Grislis
  */
 
 package loci.colorizer;
@@ -58,7 +59,7 @@ public class LifetimeHistogram {
 
     public LifetimeHistogram() {
         m_dataset = initDataset();
-BarRenderer.setDefaultShadowsVisible(false);
+//BarRenderer.setDefaultShadowsVisible(false);
         boolean legend = false;
         boolean tooltips = false;
         boolean url = false;
