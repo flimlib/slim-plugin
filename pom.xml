@@ -50,6 +50,7 @@
       <artifactId>ij</artifactId>
       <version>1.43</version>
     </dependency>
+    <!-- TODO: define a real POM for fiji-lib -->
     <dependency>
       <groupId>fiji</groupId>
       <artifactId>fiji-lib</artifactId>
