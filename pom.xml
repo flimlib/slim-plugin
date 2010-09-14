@@ -22,6 +22,7 @@
   <licenses>
     <license>
       <name>BSD</name>
+      <url>http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/LICENSE.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>

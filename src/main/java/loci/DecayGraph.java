@@ -1,7 +1,36 @@
+//
+// DecayGraph.java
+//
+
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+SLIMPlugin for combined spectral-lifetime image analysis.
+
+Copyright (c) 2010, UW-Madison LOCI
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the UW-Madison LOCI nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
 
 package loci;
 
@@ -46,17 +75,13 @@ import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 
 /**
- * Used within DecayGraph, to communicate with StartStopDraggingUI inner class.
- * 
- * @author aivar
- */
-interface IStartStopProportionListener {
-    public void setStartStopProportion(double startProportion, double stopProportion);
-}
-    
-/**
+ * TODO
  *
- * @author aivar
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/java/browser/trunk/projects/slim-plugin/src/main/java/loci/DecayGraph.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/src/main/java/loci/DecayGraph.java">SVN</a></dd></dl>
+ *
+ * @author Aivar Grislis grislis at wisc.edu
  */
 public class DecayGraph implements IStartStopListener, IStartStopProportionListener {
     static final Color DECAY_COLOR = Color.BLUE;
@@ -98,7 +123,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
 
     /**
      * Registers an external start/stop listener.
-     * 
+     *
      * @param startStopListener
      */
     void setStartStopListener(IStartStopListener startStopListener) {
@@ -107,7 +132,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
 
     /**
      * Handles start and stop being set externally.  Passes it on to the start/stop dragging UI layer.
-     * 
+     *
      * @param start index
      * @param stop index, inclusive
      */
@@ -119,15 +144,15 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
             double startProportion = (double) start / m_bins;
             double stopProportion = (double) stop / m_bins;
             System.out.println("startP " + startProportion + " stopP " + stopProportion);
-            
+
             m_startStopDraggingUI.setStartStopProportions(startProportion, stopProportion);
         }
     }
-    
+
     /**
      * Handles start and stop being set internally, from the start/stop dragging UI layer.  Validates
      * and passes changes on to external listener.
-     * 
+     *
      * @param startProportion
      * @param stopProportion
      */
@@ -145,7 +170,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
             }
         }
     }
-    
+
     JFreeChart createCombinedChart(int bins, double timeInc, int start, int stop, ICurveFitData data) {
 
         createDatasets(timeInc, start, stop, bins, data);
@@ -276,7 +301,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
         layer.setUI(m_startStopDraggingUI);
         return layer;
     }
-    
+
     /**
      * UI which allows us to paint on top of the components, using JXLayer.
      *
@@ -299,7 +324,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
             m_plot = plot;
             m_listener = listener;
         }
-        
+
         void setStartStopProportions(double startMarkerProportion, double stopMarkerProportion) {
             //System.out.println("in UI getting new proportions " + startMarkerProportion + " " + stopMarkerProportion);
             m_startMarkerProportion = startMarkerProportion;
@@ -311,7 +336,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
         protected void paintLayer(Graphics2D g2, JXLayer<? extends V> l) {
             // this paints layer as is
             super.paintLayer(g2, l);
-            
+
             // adjust to current size
             Rectangle2D area = m_plot.getArea();
             double x = area.getX();
@@ -377,7 +402,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
                     if (Math.abs(x - m_xStart) < CLOSE_ENOUGH) {
                         // start dragging start line
                         m_draggingStartMarker = true;
-                        
+
                     }
                     else if (Math.abs(x - m_xStop) < CLOSE_ENOUGH) {
                         // start dragging stop line
@@ -402,7 +427,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
             }
         }
     }
-    
+
     /**
      * Bit of a kludge.<p>
      * XYPlot & Plot don't provide a method to get the size of the
@@ -428,4 +453,13 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
             return m_area;
         }
     }
+}
+
+/**
+ * Used within DecayGraph, to communicate with StartStopDraggingUI inner class.
+ *
+ * @author Aivar Grislis grislis at wisc.edu
+ */
+interface IStartStopProportionListener {
+    public void setStartStopProportion(double startProportion, double stopProportion);
 }

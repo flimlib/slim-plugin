@@ -1,8 +1,3 @@
-//
-// IColorizeRangeListener.java
-//
-
-/*
 SLIMPlugin for combined spectral-lifetime image analysis.
 
 Copyright (c) 2010, UW-Madison LOCI
@@ -30,19 +25,3 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-*/
-
-package loci.colorizer;
-
-/**
- * TODO
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/java/browser/trunk/projects/slim-plugin/src/main/java/loci/colorizer/IColorizeRangeListener.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/src/main/java/loci/colorizer/IColorizeRangeListener.java">SVN</a></dd></dl>
- *
- * @author Aivar Grislis grislis at wisc.edu
- */
-public interface IColorizeRangeListener {
-    public void setRange(boolean auto, double start, double stop, double max);
-}
