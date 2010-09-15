@@ -36,7 +36,7 @@ package loci;
 
 import loci.colorizer.DataColorizer;
 
-import fiji.util.gui.GenericDialogPlus;
+//TODO ARG need to add fiji-lib.jar to maven repository, import fiji.util.gui.GenericDialogPlus;
 
 import ij.*;
 import ij.gui.*;
@@ -165,6 +165,7 @@ public class SLIMProcessor {
     private boolean m_fitA3fixed;
     private boolean m_fitT3fixed;
     private boolean m_fitCfixed;
+    private boolean m_free[] = { true, true, true, true, true, true, true };
 
     private int m_startBin;
     private int m_stopBin;
@@ -212,8 +213,10 @@ public class SLIMProcessor {
 
     private boolean showFileDialog(String defaultFile) {
         //TODO shouldn't UI be in separate class?
-        GenericDialogPlus dialog = new GenericDialogPlus("Load Data");
-        dialog.addFileField("File:", defaultFile, 24);
+        //TODO need to include fiji-lib.jar in repository, GenericDialogPlus dialog = new GenericDialogPlus("Load Data");
+        GenericDialog dialog = new GenericDialog("Load Data");
+        //TODO works with GenericDialogPlus, dialog.addFileField("File:", defaultFile, 24);
+        dialog.addStringField("File", defaultFile);
         dialog.addCheckbox("Fake data", m_fakeData);
         dialog.showDialog();
         if (dialog.wasCanceled()) {
@@ -760,6 +763,7 @@ public class SLIMProcessor {
                 break;
         }
         curveFitter.setXInc(m_timeRange);
+        curveFitter.setFree(m_free);
         int startBin = m_startBin + (256 * m_startX);
         curveFitter.fitData(dataArray, startBin, m_stopBin);
 
@@ -996,6 +1000,7 @@ public class SLIMProcessor {
                 break;
         }
         curveFitter.setXInc(m_timeRange);
+        curveFitter.setFree(m_free);
         int startBin = m_startBin + (256 * m_startX);
         curveFitter.fitData(data, startBin, m_stopBin);
 
