@@ -136,7 +136,7 @@ public class SLIMProcessor {
     }
 
     public enum FitAlgorithm { //TODO not really algorithm, usu. LMA
-       JAOLHO, /*AKUTAN,*/ BARBER_RLD, BARBER_LMA, MARKWARDT, BARBER2_RLD, BARBER2_LMA
+       JAOLHO, /*AKUTAN,*/ BARBER_RLD, BARBER_LMA, MARKWARDT, BARBER2_RLD, BARBER2_LMA, SLIMCURVE_RLD, SLIMCURVE_LMA
     }
 
     public enum FitFunction {
@@ -173,6 +173,11 @@ public class SLIMProcessor {
     private int m_threshold;
     private float m_chiSqTarget;
 
+    /**
+     * Run thread for the plugin.
+     *
+     * @param arg
+     */
     public void run(String arg) {
         // ask for which file to load
         if (showFileDialog(getFileFromPreferences())) {
@@ -211,6 +216,12 @@ public class SLIMProcessor {
         }
     }
 
+    /**
+     * Prompts for a .sdt file.
+     *
+     * @param defaultFile
+     * @return
+     */
     private boolean showFileDialog(String defaultFile) {
         //TODO shouldn't UI be in separate class?
         //TODO need to include fiji-lib.jar in repository, GenericDialogPlus dialog = new GenericDialogPlus("Load Data");
@@ -229,7 +240,13 @@ public class SLIMProcessor {
         return true;
     }
 
-    // based on loci.slim.SlimData constructor
+    /**
+     * Loads the .sdt file.
+     * Based on the loci.slim.SlimData constructor.
+     *
+     * @param file
+     * @return
+     */
     private boolean loadFile(String file) {
         if (m_fakeData) return true;
         boolean status = false;
@@ -278,7 +295,12 @@ public class SLIMProcessor {
         return status;
     }
 
-   private boolean fakeData() {
+    /**
+     * This routine creates an artificial set of data that is useful to test fitting.
+     *
+     * @return
+     */
+    private boolean fakeData() {
         m_width = 50;
         m_height = 50;
         m_timeBins = 20;
@@ -320,16 +342,32 @@ public class SLIMProcessor {
         return true;
     }
 
+    /**
+     * Restores file name from Java Preferences.
+     *
+     * @return
+     */
     private String getFileFromPreferences() {
        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
        return prefs.get(FILE_KEY, "");
     }
 
+    /**
+     * Saves the file name to Java Preferences.
+     *
+     * @param file
+     */
     private void saveFileInPreferences(String file) {
         Preferences prefs = Preferences.userNodeForPackage(this.getClass());
         prefs.put(FILE_KEY, file);
     }
 
+    /**
+     * This dialog shows the parameters from the .sdt file.  Currently this is
+     * only for display.  I believe SLIMPlotter lets you edit them.
+     *
+     * @return
+     */
     private boolean showParamsDialog() {
         //TODO shouldn't UI be in separate class?
         GenericDialog dialog = new GenericDialog("Parameters");
@@ -347,7 +385,12 @@ public class SLIMProcessor {
         return true;
     }
 
-    // based on loci.slim.SlimData constructor
+    /**
+     * Loads the data from the .sdt file.
+     * Based on loci.slim.SlimData constructor.
+     *
+     * @return whether or not successful
+     */
     private boolean loadData() {
         boolean success = false;
         try {
@@ -392,6 +435,12 @@ public class SLIMProcessor {
         return success;
     }
 
+    /**
+     * This routine sums all of the photon data and creates a grayscale
+     * image for the data.
+     *
+     * @return
+     */
     private boolean createGlobalGrayScale() {
         int[][] pixels = new int[m_width][m_height];
 
@@ -425,6 +474,12 @@ public class SLIMProcessor {
         return true;
     }
 
+    /**
+     * This dialog box collects settings relating to the fit.  Pressing OK
+     * starts the fit, Cancel cancels the whole plugin.
+     *
+     * @return
+     */
     private boolean showFitDialog() {
         NonBlockingGenericDialog dialog = new NonBlockingGenericDialog("Fit Type");
         dialog.addChoice(
@@ -433,7 +488,7 @@ public class SLIMProcessor {
             "Summed");
         dialog.addChoice(
             "Algorithm",
-            new String[] { "Jaolho", /*"Akutan",*/ "old Barber RLD", "old Barber LMA", "Markwardt", "Barber NR RLD", "Barber NR LMA" },
+            new String[] { "Jaolho", /*"Akutan",*/ "old Barber RLD", "old Barber LMA", "Markwardt", "Barber NR RLD", "Barber NR LMA", "SLIMCurve RLD", "SLIMCurve LMA" },
             "Jaolho");
         dialog.addChoice(
             "Function",
@@ -449,6 +504,8 @@ public class SLIMProcessor {
         return true;
     }
 
+    // The following was an attempt to drive the fitting process from the OK button on the
+    // Fit Dialog.
 /*    private class MyDialogListener implements DialogListener {
         public boolean dialogItemChanged(GenericDialog dialog, AWTEvent e) {
             if (dialog.equals(m_fitDialog)) {
@@ -476,6 +533,11 @@ public class SLIMProcessor {
         }
     }*///TODO unfortunately NonBlockingGenericDialog doesn't call this for OK or Cancel button!
 
+    /**
+     * This dialog box collects settings for the current fit.
+     *
+     * @return
+     */
     private boolean showFitParamsDialog() {
         GenericDialog dialog = new GenericDialog("Fit Params");
         if (FitRegion.POINT == m_region) {
@@ -586,6 +648,16 @@ public class SLIMProcessor {
         return true;
     }
 
+    /**
+     * This routine does the fit, once all settings have
+     * been specified.
+     *
+     * Note that fitting each pixel is a special case, which is
+     * handled by fitEachPixel.  This routine therefore only
+     * handles fitting a single set of data from a single pixel
+     * or summed from all the pixels.  It can also sum the data
+     * and fit by ROI.
+     */
     private void fitData() {
         if (m_region.EACH == m_region) {
             fitEachPixel();
@@ -761,6 +833,12 @@ public class SLIMProcessor {
             case BARBER2_LMA:
                 curveFitter = new GrayNRCurveFitter(1);
                 break;
+            case SLIMCURVE_RLD:
+                curveFitter = new SLIMCurveFitter(0);
+                break;
+            case SLIMCURVE_LMA:
+                curveFitter = new SLIMCurveFitter(1);
+                break;
         }
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(m_free);
@@ -880,7 +958,20 @@ public class SLIMProcessor {
     int m_maxY = 0;
     int m_maxValue = -1;
 
+    /**
+     * Fits each & every pixel in the image that is
+     * selected by fitThisPixel.
+     *
+     * Starts up a DataColorizer to show dynamically colorized
+     * lifetimes.
+     *
+     * Uses a ChunkyPixelEffectIterator to decide which pixel to
+     * fit next.  Batches up pixels and calls processPixels to
+     * do the fit.
+     */
     private void fitEachPixel() {
+        long start = System.nanoTime();
+
         // build the params
         double params[] = null;
          switch (m_function) {
@@ -912,12 +1003,12 @@ public class SLIMProcessor {
                 break;
         }
         //TODO problem: only use predetermined params for a fixed fit?
-         for (int i = 0; i < params.length; ++i) {
-             params[i] = 1.0;
+        for (int i = 0; i < params.length; ++i) {
+            params[i] = 1.0;
         }
-         params[0] = m_fitA1;
-         params[1] = m_fitT1;
-         params[2] = m_fitC;
+        params[0] = m_fitA1;
+        params[1] = m_fitT1;
+        params[2] = m_fitC;
 
         // show colorized lifetimes
         //ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
@@ -968,10 +1059,18 @@ public class SLIMProcessor {
             //processPixels(imagePlus, imageProcessor, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
             processPixels(dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
         }
-        System.out.println("m_maxX, " + m_maxX + " m_maxY " + m_maxY + " m_maxVaue " + m_maxValue);
+        long elapsed = System.nanoTime() - start;
+        System.out.println("m_maxX, " + m_maxX + " m_maxY " + m_maxY + " m_maxVaue " + m_maxValue + " nanoseconds " + elapsed);
     }
 
-//    void processPixels(ImagePlus imagePlus, ImageProcessor imageProcessor, ICurveFitData data[], ChunkyPixel pixels[]) {
+    /**
+     * Processes (fits) a batch of pixels.
+     *
+     * @param dataColorizer automatically sets colorization range and updates colorized image
+     * @param height passed in to fix a vertical orientation problem
+     * @param data list of data corresponding to pixels to be fitted
+     * @param pixels parallel list of rectangles with which to draw the fitted pixel
+     */
     void processPixels(DataColorizer dataColorizer, int height, ICurveFitData data[], ChunkyPixel pixels[]) {
         // do the fit
         ICurveFitter curveFitter = null;
@@ -998,13 +1097,19 @@ public class SLIMProcessor {
             case BARBER2_LMA:
                 curveFitter = new GrayNRCurveFitter(1);
                 break;
+            case SLIMCURVE_RLD:
+                curveFitter = new SLIMCurveFitter(0);
+                break;
+            case SLIMCURVE_LMA:
+                curveFitter = new SLIMCurveFitter(1);
+                break;
         }
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(m_free);
         int startBin = m_startBin + (256 * m_startX);
         curveFitter.fitData(data, startBin, m_stopBin);
 
-        // draw as you go
+        // draw as you go; 'chunky' pixels get smaller as the overall fit progresses
         for (int i = 0; i < pixels.length; ++i) {
             ChunkyPixel pixel = pixels[i];
             double lifetime = data[i].getParams()[1];
@@ -1028,8 +1133,8 @@ public class SLIMProcessor {
             boolean firstTime = true;
             for (int x = pixel.getX(); x < pixel.getX() + pixel.getWidth(); ++x) {
                 for (int y = pixel.getY(); y < pixel.getY() + pixel.getHeight(); ++y) {
-                    if (fitThisPixel(x, y)) { //TODO WAS if (isIncluded(x, y))  {
-                        //imageProcessor.drawPixel(x, height - y - 1);
+                    if (fitThisPixel(x, y)) {
+                        // (flip vertically)
                         dataColorizer.setData(firstTime, x, height - y - 1 , lifetime);
                         firstTime = false;
                     }
@@ -1039,8 +1144,15 @@ public class SLIMProcessor {
         dataColorizer.update();
     }
 
+    /**
+     * Checks criterion for whether this pixel needs to get fitted or drawn.
+     *
+     * @param x
+     * @param y
+     * @return whether to include or ignore this pixel
+     */
     boolean fitThisPixel(int x, int y) {
-        if (m_threshold <= m_grayscaleImageProcessor.getPixel(x,m_height - y - 1)) {
+        if (m_threshold <= m_grayscaleImageProcessor.getPixel(x, m_height - y - 1)) {
             if (m_grayscaleImageProcessor.getPixel(x, m_height - y - 1) > m_maxValue) {
                 m_maxValue = m_grayscaleImageProcessor.getPixel(x, m_height - y - 1);
                 m_maxX = x;
@@ -1049,10 +1161,18 @@ public class SLIMProcessor {
             return isIncluded(x,y);
         }
         else {
-            // System.out.println("dont fit " + m_grayscaleImageProcessor.getPixel(x, y) + " x " + x + " y " + y);
             return false;
         }
     }
+
+    /**
+     * Checks whether a given pixel is included in ROIs.  If no ROIs are
+     * selected then all pixels are included.
+     *
+     * @param x
+     * @param y
+     * @return whether or not included in ROIs
+     */
 
     boolean isIncluded(int x, int y) {
         Roi[] rois = getRois();
@@ -1069,6 +1189,11 @@ public class SLIMProcessor {
         }
     }
 
+    /**
+     * Gets a list of ROIs (may be empty).
+     *
+     * @return array of ROIs.
+     */
     private Roi[] getRois() {
         Roi[] rois = {};
         RoiManager manager = RoiManager.getInstance();
@@ -1078,7 +1203,18 @@ public class SLIMProcessor {
         return rois;
     }
 
-    private Color lifetimeColorMap(double max, double lifetime) {
+    /**
+     * Colorizes a given lifetime value.
+     *
+     * Note this is much cruder than the DataColorizer that is
+     * used in fitEachPixel.
+     *
+     * @param max
+     * @param lifetime
+     * @return
+     */
+
+     private Color lifetimeColorMap(double max, double lifetime) {
         Color returnColor = Color.BLACK;
         if (lifetime > 0.0) {
             if (lifetime < max/2.0) {
@@ -1092,6 +1228,14 @@ public class SLIMProcessor {
         return returnColor;
     }
 
+     /**
+      * Interpolates between two colors based on a blend factor.
+      *
+      * @param start color
+      * @param end color
+      * @param blend factor
+      * @return interpolated color
+      */
     private Color interpolateColor(Color start, Color end, double blend) {
         int startRed   = start.getRed();
         int startGreen = start.getGreen();
@@ -1105,6 +1249,15 @@ public class SLIMProcessor {
         return new Color(red, green, blue);
     }
 
+    /**
+     * Interpolates a single RGB component between two values based on
+     * a blend factor.
+     *
+     * @param start component value
+     * @param end component value
+     * @param blend factor
+     * @return interpolated component value
+     */
     private int interpolateColorComponent(int start, int end, double blend) {
         return (int)(blend * (end - start) + start);
     }
