@@ -34,39 +34,36 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci;
 
-import loci.colorizer.DataColorizer;
+//TODO need to add fiji-lib.jar to maven repository:
+//import fiji.util.gui.GenericDialogPlus;
 
-//TODO ARG need to add fiji-lib.jar to maven repository, import fiji.util.gui.GenericDialogPlus;
-
-import ij.*;
-import ij.gui.*;
+import ij.IJ;
+import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.NonBlockingGenericDialog;
-import ij.gui.ProgressBar;
 import ij.gui.Roi;
-import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
-import ij.process.*;
+import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
+import ij.process.ImageProcessor;
 
-
-import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.prefs.*;
+import java.util.prefs.Preferences;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
+import loci.colorizer.DataColorizer;
 import loci.common.DataTools;
-import loci.curvefitter.*;
+import loci.curvefitter.CurveFitData;
+import loci.curvefitter.GrayCurveFitter;
+import loci.curvefitter.GrayNRCurveFitter;
+import loci.curvefitter.ICurveFitData;
+import loci.curvefitter.ICurveFitter;
+import loci.curvefitter.JaolhoCurveFitter;
+import loci.curvefitter.MarkwardtCurveFitter;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
 import loci.formats.FormatTools;
@@ -224,7 +221,8 @@ public class SLIMProcessor {
      */
     private boolean showFileDialog(String defaultFile) {
         //TODO shouldn't UI be in separate class?
-        //TODO need to include fiji-lib.jar in repository, GenericDialogPlus dialog = new GenericDialogPlus("Load Data");
+        //TODO need to include fiji-lib.jar in repository:
+        //GenericDialogPlus dialog = new GenericDialogPlus("Load Data");
         GenericDialog dialog = new GenericDialog("Load Data");
         //TODO works with GenericDialogPlus, dialog.addFileField("File:", defaultFile, 24);
         dialog.addStringField("File", defaultFile);
@@ -833,12 +831,12 @@ public class SLIMProcessor {
             case BARBER2_LMA:
                 curveFitter = new GrayNRCurveFitter(1);
                 break;
-            case SLIMCURVE_RLD:
-                curveFitter = new SLIMCurveFitter(0);
-                break;
-            case SLIMCURVE_LMA:
-                curveFitter = new SLIMCurveFitter(1);
-                break;
+//            case SLIMCURVE_RLD:
+//                curveFitter = new SLIMCurveFitter(0);
+//                break;
+//            case SLIMCURVE_LMA:
+//                curveFitter = new SLIMCurveFitter(1);
+//                break;
         }
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(m_free);
@@ -1024,7 +1022,7 @@ public class SLIMProcessor {
         double yFitted[];
 
         ChunkyPixelEffectIterator pixelIterator = new ChunkyPixelEffectIterator(new ChunkyPixelTableImpl(), m_width, m_height);
-        
+
         int pixelCount = 0;
         int pixelsToProcessCount = 0;
 
@@ -1097,12 +1095,12 @@ public class SLIMProcessor {
             case BARBER2_LMA:
                 curveFitter = new GrayNRCurveFitter(1);
                 break;
-            case SLIMCURVE_RLD:
-                curveFitter = new SLIMCurveFitter(0);
-                break;
-            case SLIMCURVE_LMA:
-                curveFitter = new SLIMCurveFitter(1);
-                break;
+//            case SLIMCURVE_RLD:
+//                curveFitter = new SLIMCurveFitter(0);
+//                break;
+//            case SLIMCURVE_LMA:
+//                curveFitter = new SLIMCurveFitter(1);
+//                break;
         }
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(m_free);
@@ -1273,7 +1271,7 @@ public class SLIMProcessor {
            System.out.println("start " + start + " stop " + stop);
        }
     }
-    
+
    /* private class MyDialogListener implements DialogListener {
         public boolean dialogItemChanged(GenericDialog dialog, AWTEvent e) {
             boolean showNextDialog = false;
@@ -1287,7 +1285,6 @@ public class SLIMProcessor {
                 showNextDialog = true;
             }
             else {
-                
                 System.out.println("!Event " + e);
                 System.out.println(dialog.getChoices().get(0));
             }
