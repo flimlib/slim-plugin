@@ -83,7 +83,7 @@ public class SLIMProcessor {
     private static final double MAXIMUM_LIFETIME = 0.075; // for fitting fake with Jaolho // for fitting brian with barber triple integral 100.0f X tau vs lambda issue here
 
     // this affects how many pixels we process at once
-    private static final int PIXEL_COUNT = 32;//16;
+    private static final int PIXEL_COUNT = 128; //32;//16;
 
     // Unicode special characters
     private static final Character CHI = '\u03c7';
@@ -921,7 +921,7 @@ public class SLIMProcessor {
                 imagePlus.show();
                 break;
         }
-
+        
         if (0 < dataArray.length) {
             params = dataArray[0].getParams();
             switch (m_function) {
@@ -1030,7 +1030,7 @@ public class SLIMProcessor {
             ++pixelCount;
             IJ.showProgress(pixelCount, m_height * m_width);
             ChunkyPixel pixel = pixelIterator.next();
-            if (fitThisPixel(pixel.getX(), pixel.getY())) {
+            if (wantFitted(pixel.getX(), pixel.getY())) {
                 curveFitData = new CurveFitData();
                 curveFitData.setParams(params.clone());
                 yDataArray = new double[m_timeBins];
@@ -1111,6 +1111,12 @@ public class SLIMProcessor {
         for (int i = 0; i < pixels.length; ++i) {
             ChunkyPixel pixel = pixels[i];
             double lifetime = data[i].getParams()[1];
+
+            //TODO debugging:
+            if (lifetime > 2 * m_fitT1) {
+                System.out.println("BAD FIT??? x " + pixel.getX() + " y " + pixel.getY() + " fitted lifetime " + lifetime);
+            }
+
             //TODO BUG:
             // With the table as is, you can get
             //   x   y   w   h
@@ -1131,7 +1137,7 @@ public class SLIMProcessor {
             boolean firstTime = true;
             for (int x = pixel.getX(); x < pixel.getX() + pixel.getWidth(); ++x) {
                 for (int y = pixel.getY(); y < pixel.getY() + pixel.getHeight(); ++y) {
-                    if (fitThisPixel(x, y)) {
+                    if (wantFitted(x, y)) {
                         // (flip vertically)
                         dataColorizer.setData(firstTime, x, height - y - 1 , lifetime);
                         firstTime = false;
@@ -1149,7 +1155,7 @@ public class SLIMProcessor {
      * @param y
      * @return whether to include or ignore this pixel
      */
-    boolean fitThisPixel(int x, int y) {
+    boolean wantFitted(int x, int y) {
         if (m_threshold <= m_grayscaleImageProcessor.getPixel(x, m_height - y - 1)) {
             if (m_grayscaleImageProcessor.getPixel(x, m_height - y - 1) > m_maxValue) {
                 m_maxValue = m_grayscaleImageProcessor.getPixel(x, m_height - y - 1);
