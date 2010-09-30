@@ -70,10 +70,6 @@ public class SLIM_PlugIn implements PlugIn {
   String arch = System.getProperties().getProperty("os.arch");
   String version = System.getProperties().getProperty("os.version");
   System.out.println("name " + name + " arch " + arch + " version " + version);
-  //System.loadLibrary("test.dylib");
-	CLibrary lib = (CLibrary) Native.loadLibrary("test", CLibrary.class);
-        lib.hello();
-        lib.hello();
         
         plugIn.run("");
         System.exit(0);
