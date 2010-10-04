@@ -102,7 +102,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
     JFreeChart m_residualsChart;
 
     DecayGraph(double timeInc, int start, int stop, ICurveFitData data) {
-        m_bins = data.getYData().length;
+        m_bins = data.getYCount().length;
         JFreeChart chart = createCombinedChart(m_bins, timeInc, start, stop, data); //TODO got ugly; rethink params, globals etc.
         setStartStop(start, stop);
         m_panel = new ChartPanel(chart, true, true, true, false, true);
@@ -254,7 +254,7 @@ public class DecayGraph implements IStartStopListener, IStartStopProportionListe
         double yData, yFitted;
         double xCurrent = 0;
         for (int i = 0; i < bins; ++i) {
-            yData = data.getYData()[i];
+            yData = data.getYCount()[i];
             series3.add(xCurrent, yData);
             // are we in fitted region?
             if (start <= i && i <= stop) {
