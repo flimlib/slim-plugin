@@ -64,6 +64,7 @@ import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.JaolhoCurveFitter;
 import loci.curvefitter.MarkwardtCurveFitter;
+import loci.curvefitter.SLIMCurveFitter;
 import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
 import loci.formats.FormatTools;
@@ -91,6 +92,9 @@ public class SLIMProcessor {
     private static final Character TAU = '\u03c4';
     private static final Character LAMBDA = '\u03bb';
     private static final Character SIGMA = '\u03c3';
+    private static final Character SUB_1 = '\u2081';
+    private static final Character SUB_2 = '\u2082';
+    private static final Character SUB_3 = '\u2083';
 
     //TODO total kludge; just to get started
     private boolean m_fakeData = false;
@@ -147,13 +151,8 @@ public class SLIMProcessor {
     private int m_x;
     private int m_y;
 
-    private double m_fitA1;
-    private double m_fitT1;
-    private double m_fitA2;
-    private double m_fitT2;
-    private double m_fitA3;
-    private double m_fitT3;
-    private double m_fitC;
+    private double[] m_param = new double[7];
+    private boolean[] m_free = { true, true, true, true, true, true, true };
 
     private boolean m_fitA1fixed;
     private boolean m_fitT1fixed;
@@ -162,7 +161,6 @@ public class SLIMProcessor {
     private boolean m_fitA3fixed;
     private boolean m_fitT3fixed;
     private boolean m_fitCfixed;
-    private boolean m_free[] = { true, true, true, true, true, true, true };
 
     private int m_startBin;
     private int m_stopBin;
@@ -543,6 +541,7 @@ public class SLIMProcessor {
             dialog.addNumericField("Y", m_y, 0);
         }
         switch (m_function) {
+            /*
             case SINGLE_EXPONENTIAL:
                 dialog.addNumericField("A", m_fitA1, 5);
                 dialog.addCheckbox("Fix", m_fitA1fixed);
@@ -581,6 +580,76 @@ public class SLIMProcessor {
                 break;
             case STRETCHED_EXPONENTIAL:
                 break;
+            */
+            case SINGLE_EXPONENTIAL:
+                dialog.addNumericField("A",
+                        m_param[0], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[0]);
+                dialog.addNumericField("" + LAMBDA,
+                        m_param[1], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[1]);
+                dialog.addNumericField("C",
+                        m_param[2], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[2]);
+                break;
+            case DOUBLE_EXPONENTIAL:
+                dialog.addNumericField("A" + SUB_1,
+                        m_param[0], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[0]);
+                dialog.addNumericField("" + LAMBDA + SUB_1,
+                        m_param[1], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[1]);
+                dialog.addNumericField("A" + SUB_2,
+                        m_param[2], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[2]);
+                dialog.addNumericField("" + LAMBDA + SUB_2,
+                        m_param[3], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[3]);
+                dialog.addNumericField("C",
+                        m_param[4], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[4]);
+                break;
+            case TRIPLE_EXPONENTIAL:
+                dialog.addNumericField("A" + SUB_1,
+                        m_param[0], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[0]);
+                dialog.addNumericField("" + LAMBDA + SUB_1,
+                        m_param[1], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[1]);
+                dialog.addNumericField("A" + SUB_2,
+                        m_param[2], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[2]);
+                dialog.addNumericField("" + LAMBDA + SUB_2,
+                        m_param[3], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[3]);
+                dialog.addNumericField("A" + SUB_3,
+                        m_param[4], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[4]);
+                dialog.addNumericField("" + LAMBDA + SUB_3,
+                        m_param[5], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[5]);
+                dialog.addNumericField("C",
+                        m_param[6], 5);
+                dialog.addCheckbox("Fix",
+                        !m_free[6]);
+                break;
+            case STRETCHED_EXPONENTIAL:
+                break;
+
         }
         if (0 == m_stopBin) {
             m_stopBin = m_timeBins - 1;
@@ -600,40 +669,40 @@ public class SLIMProcessor {
         }
         switch (m_function) {
             case SINGLE_EXPONENTIAL:
-                m_fitA1 = dialog.getNextNumber();
-                m_fitA1fixed = dialog.getNextBoolean();
-                m_fitT1 = dialog.getNextNumber();
-                m_fitT1fixed = dialog.getNextBoolean();
-                m_fitC = dialog.getNextNumber();
-                m_fitCfixed = dialog.getNextBoolean();
+                m_param[0] = dialog.getNextNumber();
+                m_free[0] = !dialog.getNextBoolean();
+                m_param[1] = dialog.getNextNumber();
+                m_free[1] = !dialog.getNextBoolean();
+                m_param[2] = dialog.getNextNumber();
+                m_free[2] = !dialog.getNextBoolean();
                 break;
             case DOUBLE_EXPONENTIAL:
-                m_fitA1 = dialog.getNextNumber();
-                m_fitA1fixed = dialog.getNextBoolean();
-                m_fitT1 = dialog.getNextNumber();
-                m_fitT1fixed = dialog.getNextBoolean();
-                m_fitA2 = dialog.getNextNumber();
-                m_fitA2fixed = dialog.getNextBoolean();
-                m_fitT2 = dialog.getNextNumber();
-                m_fitT2fixed = dialog.getNextBoolean();
-                m_fitC = dialog.getNextNumber();
-                m_fitCfixed = dialog.getNextBoolean();
+                m_param[0] = dialog.getNextNumber();
+                m_free[0] = !dialog.getNextBoolean();
+                m_param[1] = dialog.getNextNumber();
+                m_free[1] = !dialog.getNextBoolean();
+                m_param[2] = dialog.getNextNumber();
+                m_free[2] = !dialog.getNextBoolean();
+                m_param[3] = dialog.getNextNumber();
+                m_free[3] = !dialog.getNextBoolean();
+                m_param[4] = dialog.getNextNumber();
+                m_free[4] = !dialog.getNextBoolean();
                 break;
             case TRIPLE_EXPONENTIAL:
-                m_fitA1 = dialog.getNextNumber();
-                m_fitA1fixed = dialog.getNextBoolean();
-                m_fitT1 = dialog.getNextNumber();
-                m_fitT1fixed = dialog.getNextBoolean();
-                m_fitA2 = dialog.getNextNumber();
-                m_fitA2fixed = dialog.getNextBoolean();
-                m_fitT2 = dialog.getNextNumber();
-                m_fitT2fixed = dialog.getNextBoolean();
-                m_fitA3 = dialog.getNextNumber();
-                m_fitA3fixed = dialog.getNextBoolean();
-                m_fitT3 = dialog.getNextNumber();
-                m_fitT3fixed = dialog.getNextBoolean();
-                m_fitC = dialog.getNextNumber();
-                m_fitCfixed = dialog.getNextBoolean();
+                m_param[0] = dialog.getNextNumber();
+                m_free[0] = !dialog.getNextBoolean();
+                m_param[1] = dialog.getNextNumber();
+                m_free[1] = !dialog.getNextBoolean();
+                m_param[2] = dialog.getNextNumber();
+                m_free[2] = !dialog.getNextBoolean();
+                m_param[3] = dialog.getNextNumber();
+                m_free[3] = !dialog.getNextBoolean();
+                m_param[4] = dialog.getNextNumber();
+                m_free[4] = !dialog.getNextBoolean();
+                m_param[5] = dialog.getNextNumber();
+                m_free[5] = !dialog.getNextBoolean();
+                m_param[6] = dialog.getNextNumber();
+                m_free[6] = !dialog.getNextBoolean();
                break;
             case STRETCHED_EXPONENTIAL:
                 break;
@@ -667,60 +736,57 @@ public class SLIMProcessor {
          switch (m_function) {
             case SINGLE_EXPONENTIAL:
                 params = new double[3];
-                params[0] = m_fitA1;
-                params[1] = m_fitT1;
-                params[2] = m_fitC;
+                params[0] = m_param[0];
+                params[1] = m_param[1];
+                params[2] = m_param[2];
                 break;
             case DOUBLE_EXPONENTIAL:
                 params = new double[5];
-                params[0] = m_fitA1;
-                params[1] = m_fitT1;
-                params[2] = m_fitA2;
-                params[3] = m_fitT2;
-                params[4] = m_fitC;
+                params[0] = m_param[0];
+                params[1] = m_param[1];
+                params[2] = m_param[2];
+                params[3] = m_param[3];
+                params[4] = m_param[4];
                 break;
             case TRIPLE_EXPONENTIAL:
                 params = new double[7];
-                params[0] = m_fitA1;
-                params[1] = m_fitT1;
-                params[2] = m_fitA2;
-                params[3] = m_fitT2;
-                params[4] = m_fitA3;
-                params[5] = m_fitT3;
-                params[6] = m_fitC;
+                params[0] = m_param[0];
+                params[1] = m_param[1];
+                params[2] = m_param[2];
+                params[3] = m_param[3];
+                params[4] = m_param[4];
+                params[5] = m_param[5];
+                params[6] = m_param[6];
                 break;
             case STRETCHED_EXPONENTIAL:
                 break;
          }
-         params[0] = m_fitA1;
-         params[1] = m_fitT1;
-         params[2] = m_fitC;
 
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
         ICurveFitData curveFitData;
-        double yDataArray[];
+        double yCount[];
         double yFitted[];
         switch (m_region) {
             case SUMMED:
                 // sum up all the photons
                 curveFitData = new CurveFitData();
                 curveFitData.setParams(params);
-                yDataArray = new double[m_timeBins];
+                yCount = new double[m_timeBins];
                 for (int b = 0; b < m_timeBins; ++b) {
-                    yDataArray[b] = 0.0;
+                    yCount[b] = 0.0;
                 }
                 int photons = 0;
                 for (int y = 0; y < m_height; ++y) {
                     for (int x = 0; x < m_width; ++x) {
                         for (int b = 0; b < m_timeBins; ++b) {
-                            yDataArray[b] += m_data[0][y][x][b];
+                            yCount[b] += m_data[0][y][x][b];
                             photons += m_data[0][y][x][b];
                         }
                     }
                 }
                 System.out.println("SUMMED photons " + photons);
-                curveFitData.setYData(yDataArray);
+                curveFitData.setYCount(yCount);
                 yFitted = new double[m_timeBins];
                 curveFitData.setYFitted(yFitted);
                 curveFitDataList.add(curveFitData);
@@ -731,9 +797,9 @@ public class SLIMProcessor {
                     ++roiNumber;
                     curveFitData = new CurveFitData();
                     curveFitData.setParams(params.clone());
-                    yDataArray = new double[m_timeBins];
+                    yCount = new double[m_timeBins];
                     for (int b = 0; b < m_timeBins; ++b) {
-                        yDataArray[b] = 0.0;
+                        yCount[b] = 0.0;
                     }
                     Rectangle bounds = roi.getBounds();
                     for (int x = 0; x < bounds.width; ++x) {
@@ -741,12 +807,12 @@ public class SLIMProcessor {
                             if (roi.contains(bounds.x + x, bounds.y + y)) {
                                 System.out.println("roi " + roiNumber + " x " + x + " Y " + y);
                                 for (int b = 0; b < m_timeBins; ++b) {
-                                    yDataArray[b] += m_data[0][y][x][b];
+                                    yCount[b] += m_data[0][y][x][b];
                                 }
                             }
                         }
                     }
-                    curveFitData.setYData(yDataArray);
+                    curveFitData.setYCount(yCount);
                     yFitted = new double[m_timeBins];
                     curveFitData.setYFitted(yFitted);
                     curveFitDataList.add(curveFitData);
@@ -755,11 +821,11 @@ public class SLIMProcessor {
             case POINT:
                 curveFitData = new CurveFitData();
                 curveFitData.setParams(params);
-                yDataArray = new double[m_timeBins];
+                yCount = new double[m_timeBins];
                 for (int b = 0; b < m_timeBins; ++b) {
-                    yDataArray[b] = m_data[0][m_height - m_y - 1][m_x][b];
+                    yCount[b] = m_data[0][m_height - m_y - 1][m_x][b];
                 }
-                curveFitData.setYData(yDataArray);
+                curveFitData.setYCount(yCount);
                 yFitted = new double[m_timeBins];
                 curveFitData.setYFitted(yFitted);
                 curveFitDataList.add(curveFitData);
@@ -774,11 +840,11 @@ public class SLIMProcessor {
                                 if (roi.contains(bounds.x + x, bounds.y + y)) {
                                     curveFitData = new CurveFitData();
                                     curveFitData.setParams(params.clone()); //TODO if you don't clone here each pixel fit uses results of previous fit to start
-                                    yDataArray = new double[m_timeBins];
+                                    yCount = new double[m_timeBins];
                                     for (int b = 0; b < m_timeBins; ++b) {
-                                        yDataArray[b] = m_data[0][y][x][b];
+                                        yCount[b] = m_data[0][y][x][b];
                                     }
-                                    curveFitData.setYData(yDataArray);
+                                    curveFitData.setYCount(yCount);
                                     yFitted = new double[m_timeBins];
                                     curveFitData.setYFitted(yFitted);
                                     curveFitDataList.add(curveFitData);
@@ -792,11 +858,11 @@ public class SLIMProcessor {
                         for (int x = 0; x < m_width; ++x) {
                             curveFitData = new CurveFitData();
                             curveFitData.setParams(params.clone()); //TODO if you don't clone here each pixel fit uses results of previous fit to start
-                            yDataArray = new double[m_timeBins];
+                            yCount = new double[m_timeBins];
                             for (int b = 0; b < m_timeBins; ++b) {
-                                yDataArray[b] = m_data[0][y][x][b];
+                                yCount[b] = m_data[0][y][x][b];
                             }
-                            curveFitData.setYData(yDataArray);
+                            curveFitData.setYCount(yCount);
                             yFitted = new double[m_timeBins];
                             curveFitData.setYFitted(yFitted);
                             curveFitDataList.add(curveFitData);
@@ -831,12 +897,12 @@ public class SLIMProcessor {
             case BARBER2_LMA:
                 curveFitter = new GrayNRCurveFitter(1);
                 break;
-//            case SLIMCURVE_RLD:
-//                curveFitter = new SLIMCurveFitter(0);
-//                break;
-//            case SLIMCURVE_LMA:
-//                curveFitter = new SLIMCurveFitter(1);
-//                break;
+            case SLIMCURVE_RLD:
+                curveFitter = new SLIMCurveFitter(0);
+                break;
+            case SLIMCURVE_LMA:
+                curveFitter = new SLIMCurveFitter(1);
+                break;
         }
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(m_free);
@@ -926,25 +992,25 @@ public class SLIMProcessor {
             params = dataArray[0].getParams();
             switch (m_function) {
                 case SINGLE_EXPONENTIAL:
-                    m_fitA1 = params[0];
-                    m_fitT1 = params[1];
-                    m_fitC  = params[2];
+                    m_param[0] = params[0];
+                    m_param[1] = params[1];
+                    m_param[2]  = params[2];
                     break;
                 case DOUBLE_EXPONENTIAL:
-                    m_fitA1 = params[0];
-                    m_fitT1 = params[1];
-                    m_fitA2 = params[2];
-                    m_fitT2 = params[3];
-                    m_fitC  = params[4];
+                    m_param[0] = params[0];
+                    m_param[1] = params[1];
+                    m_param[2] = params[2];
+                    m_param[3] = params[3];
+                    m_param[4] = params[4];
                     break;
                 case TRIPLE_EXPONENTIAL:
-                    m_fitA1 = params[0];
-                    m_fitT1 = params[1];
-                    m_fitA2 = params[2];
-                    m_fitT2 = params[3];
-                    m_fitA3 = params[4];
-                    m_fitT3 = params[5];
-                    m_fitC  = params[6];
+                    m_param[0] = params[0];
+                    m_param[1] = params[1];
+                    m_param[2] = params[2];
+                    m_param[3] = params[3];
+                    m_param[4] = params[4];
+                    m_param[5] = params[5];
+                    m_param[6] = params[6];
                     break;
                 case STRETCHED_EXPONENTIAL:
                     break;
@@ -975,38 +1041,31 @@ public class SLIMProcessor {
          switch (m_function) {
             case SINGLE_EXPONENTIAL:
                 params = new double[3];
-                params[0] = m_fitA1;
-                params[1] = m_fitT1;
-                params[2] = m_fitC;
+                params[0] = m_param[0];
+                params[1] = m_param[1];
+                params[2] = m_param[2];
                 break;
             case DOUBLE_EXPONENTIAL:
                 params = new double[5];
-                params[0] = m_fitA1;
-                params[1] = m_fitT1;
-                params[2] = m_fitA2;
-                params[3] = m_fitT2;
-                params[4] = m_fitC;
+                params[0] = m_param[0];
+                params[1] = m_param[1];
+                params[2] = m_param[2];
+                params[3] = m_param[3];
+                params[4] = m_param[4];
                 break;
             case TRIPLE_EXPONENTIAL:
                 params = new double[7];
-                params[0] = m_fitA1;
-                params[1] = m_fitT1;
-                params[2] = m_fitA2;
-                params[3] = m_fitT2;
-                params[4] = m_fitA3;
-                params[5] = m_fitT3;
-                params[6] = m_fitC;
+                params[0] = m_param[0];
+                params[1] = m_param[1];
+                params[2] = m_param[2];
+                params[3] = m_param[3];
+                params[4] = m_param[4];
+                params[5] = m_param[5];
+                params[6] = m_param[6];
                 break;
             case STRETCHED_EXPONENTIAL:
                 break;
         }
-        //TODO problem: only use predetermined params for a fixed fit?
-        for (int i = 0; i < params.length; ++i) {
-            params[i] = 1.0;
-        }
-        params[0] = m_fitA1;
-        params[1] = m_fitT1;
-        params[2] = m_fitC;
 
         // show colorized lifetimes
         //ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
@@ -1018,7 +1077,7 @@ public class SLIMProcessor {
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
         ArrayList<ChunkyPixel> pixelList = new ArrayList<ChunkyPixel>();
         ICurveFitData curveFitData;
-        double yDataArray[];
+        double yCount[];
         double yFitted[];
 
         ChunkyPixelEffectIterator pixelIterator = new ChunkyPixelEffectIterator(new ChunkyPixelTableImpl(), m_width, m_height);
@@ -1033,11 +1092,11 @@ public class SLIMProcessor {
             if (wantFitted(pixel.getX(), pixel.getY())) {
                 curveFitData = new CurveFitData();
                 curveFitData.setParams(params.clone());
-                yDataArray = new double[m_timeBins];
+                yCount = new double[m_timeBins];
                 for (int b = 0; b < m_timeBins; ++b) {
-                    yDataArray[b] = m_data[0][pixel.getY()][pixel.getX()][b];
+                    yCount[b] = m_data[0][pixel.getY()][pixel.getX()][b];
                 }
-                curveFitData.setYData(yDataArray);
+                curveFitData.setYCount(yCount);
                 yFitted = new double[m_timeBins];
                 curveFitData.setYFitted(yFitted);
                 curveFitDataList.add(curveFitData);
@@ -1095,12 +1154,12 @@ public class SLIMProcessor {
             case BARBER2_LMA:
                 curveFitter = new GrayNRCurveFitter(1);
                 break;
-//            case SLIMCURVE_RLD:
-//                curveFitter = new SLIMCurveFitter(0);
-//                break;
-//            case SLIMCURVE_LMA:
-//                curveFitter = new SLIMCurveFitter(1);
-//                break;
+            case SLIMCURVE_RLD:
+                curveFitter = new SLIMCurveFitter(0);
+                break;
+            case SLIMCURVE_LMA:
+                curveFitter = new SLIMCurveFitter(1);
+                break;
         }
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(m_free);
@@ -1113,7 +1172,7 @@ public class SLIMProcessor {
             double lifetime = data[i].getParams()[1];
 
             //TODO debugging:
-            if (lifetime > 2 * m_fitT1) {
+            if (lifetime > 2 * m_param[1]) {
                 System.out.println("BAD FIT??? x " + pixel.getX() + " y " + pixel.getY() + " fitted lifetime " + lifetime);
             }
 
