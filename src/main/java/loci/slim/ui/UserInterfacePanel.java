@@ -116,7 +116,7 @@ getContentPane().setLayout(
 
 link
  */
-public class UserInterfacePanel extends JFrame implements IUserInterfacePanel, ItemListener {
+public class UserInterfacePanel /*extends JFrame*/ implements IUserInterfacePanel, ItemListener {
     // Unicode special characters
     private static final Character CHI    = '\u03c7';
     private static final Character SQUARE = '\u00b2';
