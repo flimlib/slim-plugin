@@ -41,7 +41,7 @@ import ij.gui.*;
 import ij.plugin.PlugIn;
 import ij.process.*;
 
-import loci.SLIMProcessor;
+import loci.slim.SLIMProcessor;
 
 /**
  * TODO
