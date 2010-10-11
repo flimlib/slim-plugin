@@ -495,7 +495,6 @@ public class UserInterfacePanel /*extends JFrame*/ implements IUserInterfacePane
         return m_free;
     }
 
-    @Override
     public void itemStateChanged(ItemEvent e) {
         
     }
