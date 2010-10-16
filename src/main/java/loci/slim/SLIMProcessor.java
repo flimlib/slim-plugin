@@ -34,9 +34,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
-//TODO need to add fiji-lib.jar to maven repository:
-//import fiji.util.gui.GenericDialogPlus;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -48,6 +45,8 @@ import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
+import imagej.process.ImageUtils;
+
 import imagej.io.ImageOpener;
 
 import java.awt.Canvas;
@@ -57,7 +56,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.prefs.Preferences;
 
 import javax.swing.JComponent;
@@ -67,7 +69,6 @@ import javax.swing.JPanel;
 import loci.slim.colorizer.DataColorizer;
 import loci.slim.ui.IStartStopListener;
 import loci.slim.ui.IUserInterfacePanel;
-import loci.slim.ui.IUserInterfacePanelListener;
 import loci.slim.ui.UserInterfacePanel;
 import loci.common.DataTools;
 import loci.curvefitter.CurveFitData;
@@ -83,11 +84,12 @@ import loci.formats.FormatException;
 import loci.formats.FormatTools;
 import loci.formats.IFormatReader;
 
-import mpicbg.imglib.cursor.Cursor;
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
-//import mpicbg.imglib.Type;
 import mpicbg.imglib.type.numeric.RealType;
+
+import net.java.sezpoz.Index;
+import net.java.sezpoz.IndexItem;
 
 /**
  * TODO
@@ -99,7 +101,6 @@ import mpicbg.imglib.type.numeric.RealType;
  * @author Aivar Grislis grislis at wisc.edu
  */
 public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
-//public class SLIMProcessor <T extends Type> {
     private static final String X = "X";
     private static final String Y = "Y";
     private static final String LIFETIME = "Lifetime";
@@ -155,13 +156,6 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
     private float m_timeRange;
     private int m_minWave, m_waveStep; //, m_maxWave;
 
-    // fit parameters
-   // private int m_numExp;
-   // private int m_binRadius;
-   // private int m_cutBins;
-   // private int m_maxPeak;
-
-
     public enum FitRegion {
         SUMMED, ROI, POINT, EACH
     }
@@ -193,17 +187,72 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
 
     private int m_debug = 0;
 
+    public SLIMProcessor() {
+        m_fitInProgress = false;
+        m_fitted = false;
+    }
+
+    public void processImage(Image<T> image) {
+        boolean success = false;
+System.out.println("processImage " + image);
+        if (newLoadData(image)) {
+            // create a grayscale image from the data
+            createGlobalGrayScale();
+            while (true) {
+                // ask what kind fo fit
+                if (!showFitDialog()) {
+                    break;
+                }
+                // ask for fit parameters
+                if (!showFitParamsDialog()) {
+                    break;
+                }
+                fitData();
+            }
+        }
+        /*
+        m_width = ImageUtils.getWidth(image);
+        m_height = ImageUtils.getHeight(image);
+        m_timeBins = ImageUtils.getDimSize(image, FormatTools.LIFETIME, 0);
+        
+        m_data = new int[m_channels][m_height][m_width][m_timeBins];
+        final LocalizableByDimCursor<?> cursor = image.createLocalizableByDimCursor();
+        int x, y, bin, channel;
+        for (channel = 0; channel < m_channels; ++channel) {
+            if (null != channelIndex) {
+                dimensions[channelIndex] = channel;
+            }
+            for (y = 0; y < m_height; ++y) {
+                dimensions[yIndex] = y;
+                for (x = 0; x < m_width; ++x) {
+                    dimensions[xIndex] = x;
+                    for (bin = 0; bin < m_timeBins; ++bin) {
+                        dimensions[lifetimeIndex] = bin;
+                        cursor.moveTo(dimensions);
+                        m_data[channel][y][x][bin] = (int) cursor.getType().getRealFloat();
+                        if (m_data[channel][y][x][bin] > 100 && ++m_debug < 100) {
+                            System.out.println("m_data " + m_data[channel][y][x][bin] + " cursor " + cursor.getType().getRealFloat());
+                        }
+                    }
+                }
+            }
+        }
+
+        // patch things up
+        m_timeRange = 10.0f;
+        m_minWave = 400;
+        m_waveStep = 10;
+        */
+    }
+
     /**
-     * Run thread for the plugin.
+     * Run method for the plugin.  Throws up a file dialog.
      *
      * @param arg
      */
-    public void run(String arg) {
-        m_fitInProgress = false;
-        m_fitted = false;
-
-        IUserInterfacePanel uiPanel = new UserInterfacePanel(true);
-        JPanel panel = uiPanel.getPanel();
+    public void process(String arg) {
+        //IUserInterfacePanel uiPanel = new UserInterfacePanel(true);
+        //JPanel panel = uiPanel.getPanel();
         
         m_channel = 0; //TODO s/b a JSlider that controls current channel
         
@@ -214,7 +263,7 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
                 success = true;
             }
             else {
-                if (newLoadData(m_file)) {
+                if (newLoadData(loadImage(m_file))) {
                     saveFileInPreferences(m_file);
                     success = true;
                 }
@@ -236,42 +285,6 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
                 fitData();
             }
         }
-
-        // ask for which file to load
-       /* if (showFileDialog(getFileFromPreferences())) {
-            // load the file
-            if (loadFile(m_file)) {
-                if (m_fakeData) {
-                    fakeData();
-                }
-                else {
-                    saveFileInPreferences(m_file);
-                }
-                // show parameters from file
-                if (showParamsDialog()) {
-                    if (!m_fakeData) {
-                        loadData();
-                    }
-                    // create a grayscale image from the data
-                    createGlobalGrayScale();
-                    while (true) {
-                        // ask what kind of fit
-                        if (!showFitDialog()) {
-                            break;
-                        }
-                        // ask for fit parameters
-                        if (!showFitParamsDialog()) {
-                            break;
-                        }
-                        fitData();
-                    }
-                }
-            }
-            else {
-                //TODO shouldn't UI be separate?
-                IJ.error("File Error", "Unable to load file.");
-            }
-        }*/
     }
 
     /**
@@ -299,7 +312,7 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
         return true;
     }
 
-    private boolean newLoadData(String file) {
+    private Image<T> loadImage(String file) {
         ImageOpener imageOpener = new ImageOpener();
         Image<T> image = null;
         try {
@@ -308,8 +321,13 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
         catch (Exception e) {
             System.out.println("Error " + e.getMessage());
         }
-
+        return image;
+    }
+   
+    private boolean newLoadData(Image<T> image) {
         int[] dimensions = image.getDimensions();
+        System.out.println("dimensions size is " + dimensions.length);
+        /*
         Map map = dimensionMap(image.getName());
         Integer xIndex, yIndex, lifetimeIndex, channelIndex;
         xIndex = (Integer) map.get(X);
@@ -327,8 +345,27 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
         m_channels = 1;
         channelIndex = (Integer) map.get(CHANNELS);
         if (null != channelIndex) {
+            System.out.println("Do have channel dimension");
             m_channels = dimensions[channelIndex];
         }
+        else System.out.println("Don't have channel dimension");
+        */
+        Integer xIndex, yIndex, lifetimeIndex, channelIndex;
+        m_width = ImageUtils.getWidth(image);
+        m_height = ImageUtils.getHeight(image);
+        m_channels = ImageUtils.getNChannels(image);
+        m_timeBins = ImageUtils.getDimSize(image, FormatTools.LIFETIME);
+        System.out.println("timeBins is " + m_timeBins);
+        int index = 0;
+        xIndex = index++;
+        yIndex = index++;
+        if (m_channels > 1) {
+            channelIndex = index++;
+        }
+        else {
+            channelIndex = null;
+        }
+        lifetimeIndex = index;
 
         System.out.println("width " + m_width + " height " + m_height + " timeBins " + m_timeBins + " channels " + m_channels);
         m_data = new int[m_channels][m_height][m_width][m_timeBins];
@@ -346,9 +383,6 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
                         dimensions[lifetimeIndex] = bin;
                         cursor.moveTo(dimensions);
                         m_data[channel][y][x][bin] = (int) cursor.getType().getRealFloat();
-                        if (m_data[channel][y][x][bin] > 100 && ++m_debug < 100) {
-                            System.out.println("m_data " + m_data[channel][y][x][bin] + " cursor " + cursor.getType().getRealFloat());
-                        }
                     }
                 }
             }
@@ -363,6 +397,8 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
 
         // patch things up
         m_timeRange = 10.0f;
+        m_minWave = 400;
+        m_waveStep = 10;
 
         return true;
     }
@@ -370,12 +406,14 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
     /*
      * This method parses a string of the format:
      * "Name [X Y Timebins]" and builds a map with
-     * the dimensions 'X', 'Y', and 'Timebins'.
+     * the dimensions 'X', 'Y', and 'Timebins' mapped
+     * to the dimension indices.
      *
      * Temporary kludge.
      */
-    private Map dimensionMap(String name) {
-        Map map = new HashMap<String, Integer>();
+    private Map<String, Integer> dimensionMap(String name) {
+        System.out.println("name is " + name);
+        Map<String, Integer> map = new HashMap<String, Integer>();
         int startIndex = name.indexOf('[') + 1;
         int endIndex = name.indexOf(']');
         String coded = name.substring(startIndex, endIndex);
