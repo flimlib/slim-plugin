@@ -53,11 +53,6 @@
     </dependency>
 
     <!-- 3rd party -->
-    <dependency>
-      <groupId>imagej</groupId>
-      <artifactId>ij</artifactId>
-      <version>1.43</version>
-    </dependency>
     <!-- TODO: define a real POM for fiji-lib -->
     <dependency>
       <groupId>fiji</groupId>
@@ -80,6 +75,26 @@
       <groupId>org.swinglabs</groupId>
       <artifactId>jxlayer</artifactId>
       <version>3.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>imagej</groupId>
+      <artifactId>bf-imglib</artifactId>
+      <version>2.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>imagej</groupId>
+      <artifactId>ij-visad</artifactId>
+      <version>2.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>net.java.sezpoz</groupId>
+      <artifactId>sezpoz</artifactId>
+      <version>1.7</version>
+    </dependency>
+    <dependency>
+      <groupId>imagej</groupId>
+      <artifactId>ij</artifactId>
+      <version>2.0-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
@@ -127,3 +142,5 @@
   </repositories>
 
 </project>
+
+
