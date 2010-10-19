@@ -682,7 +682,7 @@ System.out.println("processImage " + image);
         dialog.addChoice(
             "Region",
             new String[] { "Sum all", "Sum each ROI", "Single pixel", "Each pixel" },
-            "Summed");
+            "Each pixel");
         dialog.addChoice(
             "Algorithm",
             new String[] { "Jaolho", /*"Akutan",*/ "old Barber RLD", "old Barber LMA", "Markwardt", "Barber NR RLD", "Barber NR LMA", "SLIMCurve RLD", "SLIMCurve LMA" },
