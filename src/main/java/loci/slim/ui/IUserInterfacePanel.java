@@ -34,7 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.ui;
 
-import javax.swing.JPanel;
+import javax.swing.JFrame;
 
 import loci.slim.SLIMProcessor.FitAlgorithm;
 import loci.slim.SLIMProcessor.FitFunction;
@@ -52,11 +52,21 @@ import loci.slim.SLIMProcessor.FitRegion;
 public interface IUserInterfacePanel {
 
     /**
-     * Gets the UI JPanel.
+     * Gets the UI JFrame.
      *
-     * @return JPanel
+     * @return JFrame
      */
-    public JPanel getPanel();
+    public JFrame getFrame();
+
+    /**
+     * Sets the listener
+     */
+    public void setListener(IUserInterfacePanelListener listener);
+
+    /**
+     * Resets the UI after a fit.
+     */
+    public void reset();
 
     /**
      * Gets region the fit applies to.
