@@ -43,7 +43,7 @@ package loci.slim.ui;
  *
  * @author Aivar Grislis grislis at wisc.edu
  */
-public interface IUserInterfacePanelListener extends IStartStopListener {
+public interface IUserInterfacePanelListener {
 
     /**
      * Triggers a fit.
