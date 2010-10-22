@@ -69,6 +69,7 @@ import javax.swing.JPanel;
 import loci.slim.colorizer.DataColorizer;
 import loci.slim.ui.IStartStopListener;
 import loci.slim.ui.IUserInterfacePanel;
+import loci.slim.ui.IUserInterfacePanelListener;
 import loci.slim.ui.UserInterfacePanel;
 import loci.common.DataTools;
 import loci.curvefitter.CurveFitData;
@@ -123,6 +124,8 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
     private static final Character SUB_3  = '\u2083';
 
     private Object m_synchFit = new Object();
+    private volatile boolean m_quit;
+    private volatile boolean m_cancel;
     private volatile boolean m_fitInProgress;
     private volatile boolean m_fitted;
 
@@ -188,17 +191,49 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
     private int m_debug = 0;
 
     public SLIMProcessor() {
+        m_quit = false;
+        m_cancel = false;
         m_fitInProgress = false;
         m_fitted = false;
     }
 
     public void processImage(Image<T> image) {
         boolean success = false;
-System.out.println("processImage " + image);
+
         if (newLoadData(image)) {
             // create a grayscale image from the data
             createGlobalGrayScale();
-            while (true) {
+            
+            // show the UI; do fits
+            final IUserInterfacePanel uiPanel = new UserInterfacePanel(true);
+            uiPanel.setListener(
+                    new IUserInterfacePanelListener() {
+                        public void doFit() {
+                            m_cancel = false;
+                            getFitSettings(uiPanel);
+                            fitData();
+                            uiPanel.reset();
+                        }
+
+                        public void cancelFit() {
+                            m_cancel = true;
+                        }
+
+                    }
+                );
+
+
+            while (!m_quit) {
+                try {
+                    Thread.sleep(1000);
+                }
+                catch (InterruptedException e) {
+
+                }
+            }
+        }
+
+     /*       while (true) {
                 // ask what kind fo fit
                 if (!showFitDialog()) {
                     break;
@@ -209,7 +244,7 @@ System.out.println("processImage " + image);
                 }
                 fitData();
             }
-        }
+        } */
         /*
         m_width = ImageUtils.getWidth(image);
         m_height = ImageUtils.getHeight(image);
@@ -273,7 +308,40 @@ System.out.println("processImage " + image);
         if (success) {
             // create a grayscale image from the data
             createGlobalGrayScale();
-            while (true) {
+
+            // show the UI; do fits
+            final IUserInterfacePanel uiPanel = new UserInterfacePanel(true);
+            uiPanel.setListener(
+                    new IUserInterfacePanelListener() {
+                        public void doFit() {
+                            m_cancel = false;
+                            getFitSettings(uiPanel);
+                            fitData();
+                            uiPanel.reset();
+                        }
+
+                        public void cancelFit() {
+                            m_cancel = true;
+                        }
+
+                    }
+                );
+
+            while (!m_quit) {
+                try {
+                    Thread.sleep(1000);
+                }
+                catch (InterruptedException e) {
+                    
+                }
+            }
+
+
+
+
+
+
+           /* while (true) {
                 // ask what kind fo fit
                 if (!showFitDialog()) {
                     break;
@@ -283,8 +351,24 @@ System.out.println("processImage " + image);
                     break;
                 }
                 fitData();
-            }
+            } */
         }
+    }
+
+    private void getFitSettings(IUserInterfacePanel uiPanel) {
+        m_region = uiPanel.getRegion();
+        m_algorithm = uiPanel.getAlgorithm();
+        m_function = uiPanel.getFunction();
+
+        m_x = uiPanel.getX();
+        m_y = uiPanel.getY();
+        m_startBin = uiPanel.getStart();
+        m_stopBin = uiPanel.getStop();
+        m_threshold = uiPanel.getThreshold();
+
+        int components = uiPanel.getComponents();
+        m_param = uiPanel.getParameters();
+        m_free = uiPanel.getFree();
     }
 
     /**
@@ -1179,6 +1263,9 @@ System.out.println("m_fitInProgress goes false");
             int pixelsToProcessCount = 0;
             while (pixelIterator.hasNext()) {
                 ++pixelCount;
+                if (m_cancel) {
+                    return;
+                }
                 IJ.showProgress(pixelCount, m_height * m_width);
                 ChunkyPixel pixel = pixelIterator.next();
                 if (wantFitted(pixel.getX(), pixel.getY())) {
@@ -1203,7 +1290,7 @@ System.out.println("m_fitInProgress goes false");
                     }
                 }
             }
-            if (0 < pixelsToProcessCount) {
+            if (!m_cancel && 0 < pixelsToProcessCount) {
                 processPixels(dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
             }
         }
@@ -1222,6 +1309,9 @@ System.out.println("m_fitInProgress goes false");
                             if (roi.contains(bounds.x + x, bounds.y + y)) {
                                 for (int channel = 0; channel < m_channels; ++channel) {
                                     if (channel != visibleChannel) {
+                                        if (m_cancel) {
+                                            return;
+                                        }
                                         if (wantFitted(bounds.x + x, bounds.y + y)) {
                                             curveFitData = new CurveFitData();
                                             curveFitData.setParams(params.clone());
@@ -1247,6 +1337,9 @@ System.out.println("m_fitInProgress goes false");
                     if (channel != visibleChannel) {
                         for (int y = 0; y < m_height; ++y) {
                             for (int x = 0; x < m_width; ++x) {
+                                if (m_cancel) {
+                                    return;
+                                }
                                 if (aboveThreshold(x, y)) {
                                     curveFitData = new CurveFitData();
                                     curveFitData.setParams(params.clone());
@@ -1268,6 +1361,9 @@ System.out.println("m_fitInProgress goes false");
         }     
         //TODO break the fit up into chunks to lower memory requirements
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
+        if (m_cancel) {
+            return;
+        }
         doFit(dataArray);
         //TODO save results
 
@@ -1539,14 +1635,10 @@ System.out.println("m_fitInProgress goes false");
     private void showDecayGraph(ICurveFitData dataArray[]) {
         if (0 < dataArray.length) {
             //TODO need to be able to examine any fitted pixel; for now just show the last fitted pixel. // first!
-            DecayGraph decayGraph = new DecayGraph(m_timeRange, m_startBin, m_stopBin, dataArray[0]); //dataArray.length - 1]);
+            DecayGraph decayGraph = new DecayGraph(m_startBin, m_stopBin, m_timeBins, m_timeRange, dataArray[0]); //dataArray.length - 1]);
             decayGraph.setStartStopListener(new MyListener());
-                    JFrame window = new JFrame("SLIM");
-                    JComponent component = decayGraph.getComponent();
-                    window.getContentPane().add(component);
-                    window.setSize(450, 450);
-                    window.pack();
-                    window.setVisible(true);
+            JFrame frame = decayGraph.getFrame();
+            frame.setVisible(true);
         }
         
     }
@@ -1786,14 +1878,10 @@ System.out.println("m_fitInProgress goes false");
 
         if (0 < dataArray.length) {
             //TODO need to be able to examine any fitted pixel; for now just show the last fitted pixel. // first!
-            DecayGraph decayGraph = new DecayGraph(curveFitter.getXInc(), m_startBin, m_stopBin, dataArray[0]); //dataArray.length - 1]);
+            DecayGraph decayGraph = new DecayGraph(m_startBin, m_stopBin, m_timeBins, curveFitter.getXInc(), dataArray[0]); //dataArray.length - 1]);
             decayGraph.setStartStopListener(new MyListener());
-                    JFrame window = new JFrame("SLIM");
-                    JComponent component = decayGraph.getComponent();
-                    window.getContentPane().add(component);
-                    window.setSize(450, 450);
-                    window.pack();
-                    window.setVisible(true);
+            JFrame frame = decayGraph.getFrame();
+            frame.setVisible(true);
         }
 
         switch (m_region) {
