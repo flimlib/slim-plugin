@@ -101,7 +101,7 @@ import net.java.sezpoz.IndexItem;
  *
  * @author Aivar Grislis grislis at wisc.edu
  */
-public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
+public class SLIMProcessor <T extends RealType<T>> {
     private static final String X = "X";
     private static final String Y = "Y";
     private static final String LIFETIME = "Lifetime";
@@ -122,6 +122,10 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
     private static final Character SUB_1  = '\u2081';
     private static final Character SUB_2  = '\u2082';
     private static final Character SUB_3  = '\u2083';
+
+    private static final double[] DEFAULT_SINGLE_EXP_PARAMS = { 5000.0, 0.005, 0.5 };
+    private static final double[] DEFAULT_DOUBLE_EXP_PARAMS = { 0.0 };
+    private static final double[] DEFAULT_TRIPLE_EXP_PARAMS = { 0.0 };
 
     private Object m_synchFit = new Object();
     private volatile boolean m_quit;
@@ -200,37 +204,42 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
     public void processImage(Image<T> image) {
         boolean success = false;
 
-        if (newLoadData(image)) {
-            // create a grayscale image from the data
-            createGlobalGrayScale();
-            
+        if (newLoadData(image)) {            
             // show the UI; do fits
-            final IUserInterfacePanel uiPanel = new UserInterfacePanel(true);
+            IUserInterfacePanel uiPanel = new UserInterfacePanel(false); // using lambda
+            uiPanel.setX(0);
+            uiPanel.setY(0);
+            uiPanel.setStart(0);
+            uiPanel.setStop(m_timeBins - 1);
+            uiPanel.setThreshold(100);
+            uiPanel.setFunctionParameters(0, DEFAULT_SINGLE_EXP_PARAMS);
+            //uiPanel.setFunctionParameters(1, DEFAULT_DOUBLE_EXP_PARAMS);
+            //uiPanel.setFunctionParameters(2, DEFAULT_TRIPLE_EXP_PARAMS);
             uiPanel.setListener(
                     new IUserInterfacePanelListener() {
                         public void doFit() {
                             m_cancel = false;
-                            getFitSettings(uiPanel);
-                            fitData();
-                            uiPanel.reset();
+                            m_fitInProgress = true;
                         }
 
                         public void cancelFit() {
                             m_cancel = true;
                         }
 
+                        public void quit() {
+                            m_quit = true;
+                        }
+
                     }
                 );
+            uiPanel.getFrame().setLocationRelativeTo(null);
+            uiPanel.getFrame().setVisible(true);
 
+            // create a grayscale image from the data
+            createGlobalGrayScale("TITLE", uiPanel);
 
-            while (!m_quit) {
-                try {
-                    Thread.sleep(1000);
-                }
-                catch (InterruptedException e) {
-
-                }
-            }
+            // loops infinitely; waits for UI
+            doFits(uiPanel);
         }
 
      /*       while (true) {
@@ -286,9 +295,6 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
      * @param arg
      */
     public void process(String arg) {
-        //IUserInterfacePanel uiPanel = new UserInterfacePanel(true);
-        //JPanel panel = uiPanel.getPanel();
-        
         m_channel = 0; //TODO s/b a JSlider that controls current channel
         
         boolean success = false;
@@ -306,52 +312,70 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
         }
         
         if (success) {
-            // create a grayscale image from the data
-            createGlobalGrayScale();
-
             // show the UI; do fits
-            final IUserInterfacePanel uiPanel = new UserInterfacePanel(true);
+            IUserInterfacePanel uiPanel = new UserInterfacePanel(false); // using lambda
+            uiPanel.setX(0);
+            uiPanel.setY(0);
+            uiPanel.setStart(0);
+            uiPanel.setStop(m_timeBins - 1);
+            uiPanel.setThreshold(100);
+            uiPanel.setFunctionParameters(0, DEFAULT_SINGLE_EXP_PARAMS);
+            //uiPanel.setFunctionParameters(1, DEFAULT_DOUBLE_EXP_PARAMS);
+           // uiPanel.setFunctionParameters(2, DEFAULT_TRIPLE_EXP_PARAMS);
             uiPanel.setListener(
-                    new IUserInterfacePanelListener() {
-                        public void doFit() {
-                            m_cancel = false;
-                            getFitSettings(uiPanel);
-                            fitData();
-                            uiPanel.reset();
-                        }
-
-                        public void cancelFit() {
-                            m_cancel = true;
-                        }
-
+                new IUserInterfacePanelListener() {
+                    public void doFit() {
+                        m_cancel = false;
+                        m_fitInProgress = true;
                     }
-                );
 
-            while (!m_quit) {
+                    public void cancelFit() {
+                        m_cancel = true;
+                    }
+
+                    public void quit() {
+                        m_quit = true;
+                    }
+
+                }
+            );
+            uiPanel.getFrame().setLocationRelativeTo(null);
+            uiPanel.getFrame().setVisible(true);
+
+            // create a grayscale image from the data
+            createGlobalGrayScale("TITLE", uiPanel);
+
+            // loops infinitely; waits for UI
+            doFits(uiPanel);
+        }
+    }
+
+    /**
+     * Loops until quitting time and handles fit requests.
+     * Fitting is driven by a button on the UI panel.
+     *
+     * @param uiPanel
+     */
+    private void doFits(IUserInterfacePanel uiPanel) {
+        while (!m_quit) {
+            while (!m_fitInProgress) {
                 try {
                     Thread.sleep(1000);
                 }
                 catch (InterruptedException e) {
-                    
+
+                }
+                if (m_quit) {
+                    return;
                 }
             }
+            // get settings of requested fit
+            getFitSettings(uiPanel);
 
+            fitData(uiPanel); //TODO currently also diddles with m_fitInProgress; uses synch block
 
-
-
-
-
-           /* while (true) {
-                // ask what kind fo fit
-                if (!showFitDialog()) {
-                    break;
-                }
-                // ask for fit parameters
-                if (!showFitParamsDialog()) {
-                    break;
-                }
-                fitData();
-            } */
+            m_fitInProgress = false;
+            uiPanel.reset();
         }
     }
 
@@ -715,9 +739,10 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
      * This routine sums all of the photon data and creates a grayscale
      * image for the data.
      *
+     * @param uiPanel associated UI panel
      * @return whether successful
      */
-    private boolean createGlobalGrayScale() {
+    private boolean createGlobalGrayScale(String name, final IUserInterfacePanel uiPanel) {
         int[][] pixels = new int[m_width][m_height];
 
         int maxPixel = 0;
@@ -737,7 +762,7 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
         }
 
         ImageProcessor imageProcessor = new ByteProcessor(m_width, m_height);
-        ImagePlus imagePlus = new ImagePlus("Global GrayScale", imageProcessor);
+        ImagePlus imagePlus = new ImagePlus(name + " GrayScale", imageProcessor);
         byte[] outPixels = (byte[]) imageProcessor.getPixels();
         for (int x = 0; x < m_width; ++x) {
             for (int y = 0; y < m_height; ++y) {
@@ -751,7 +776,23 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
         // hook up mouse listener
         ImageWindow imageWindow = imagePlus.getWindow();
         m_grayscaleCanvas = imageWindow.getCanvas();
-        m_grayscaleCanvas.addMouseListener(this);
+        m_grayscaleCanvas.addMouseListener(
+            new MouseListener() {
+                public void mousePressed(MouseEvent e) {}
+                public void mouseExited(MouseEvent e) {}
+                public void mouseClicked(MouseEvent e) {}
+                public void mouseEntered(MouseEvent e) {}
+ 
+                public void mouseReleased(MouseEvent e) {
+                    // just ignore clicks during a fit
+                    if (!m_fitInProgress) {
+                        uiPanel.setX(e.getX());
+                        uiPanel.setY(e.getY());
+                        fitPixel(uiPanel, e.getX(), e.getY());
+                    }
+                }
+            }
+        );
         return true;
     }
 
@@ -761,7 +802,7 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
      *
      * @return
      */
-    private boolean showFitDialog() {
+    private boolean XshowFitDialog() {
         NonBlockingGenericDialog dialog = new NonBlockingGenericDialog("Fit Type");
         dialog.addChoice(
             "Region",
@@ -819,7 +860,7 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
      *
      * @return
      */
-    private boolean showFitParamsDialog() {
+    private boolean XshowFitParamsDialog() {
         GenericDialog dialog = new GenericDialog("Fit Params");
         if (FitRegion.POINT == m_region) {
             dialog.addNumericField("X", m_x, 0);
@@ -1000,60 +1041,7 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
         return true;
     }
 
-    /**
-     * MouseListener handler for button press.
-     * Ignored.
-     *
-     * @param e
-     */
-    public void mousePressed(MouseEvent e) {
-    }
-    
-    /**
-     * MouseListener handler for mouse exit.
-     * Ignored.
-     *
-     * @param e
-     */
-    public void mouseExited(MouseEvent e) {
-    }
-    
-    /**
-     * MouseListener handler for button click.
-     * Ignored.
-     *
-     * @param e
-     */
-    public void mouseClicked(MouseEvent e) {
-    }
-    
-    /**
-     * MouseListener handler for mouse enter.
-     * Ignored.
-     *
-     * @param e
-     */
-    public void mouseEntered(MouseEvent e) {
-    }
-
-
-    /**
-     * MouseListener handler for button release.
-     * Clicking on a pixel triggers a fit.
-     *
-     * @param e
-     */
-    public void mouseReleased(MouseEvent e) {
-        // just ignore clicks during a fit
-        System.out.println("mouseReleased " + e);
-        if (!m_fitInProgress) {
-            System.out.println("fit " + e.getX() + " " + e.getY());
-            fitPixel(e.getX(), e.getY());
-        }
-     }
-    
-    private void fitData() {
-        System.out.println("FIT DATA");
+    private void fitData(IUserInterfacePanel uiPanel) {
         // only one fit at a time
         synchronized (m_synchFit) {
             // disable mouse click pixel fits
@@ -1062,22 +1050,21 @@ public class SLIMProcessor <T extends RealType<T>> implements MouseListener {
             switch (m_region) {
                 case SUMMED:
                     // sum all pixels
-                    fitSummed();
+                    fitSummed(uiPanel);
                     break;
                 case ROI:
                     // fit summed ROIs
-                    fitROIs();
+                    fitROIs(uiPanel);
                     break;
                 case POINT:
                     // fit single pixel
-                    fitPixel(m_x, m_y);
+                    fitPixel(uiPanel, m_x, m_y);
                     break;
                 case EACH:
                     // fit every pixel
-                    fitEachPixel();
+                    fitEachPixel(uiPanel);
                     break;
             }
-System.out.println("m_fitInProgress goes false");
             m_fitInProgress = false;
         }
     }
@@ -1085,8 +1072,8 @@ System.out.println("m_fitInProgress goes false");
     /*
      * Sums all pixels and fits the result.
      */
-    private void fitSummed() {
-        double params[] = getParams();
+    private void fitSummed(IUserInterfacePanel uiPanel) {
+        double params[] = uiPanel.getParameters();
         
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
@@ -1118,20 +1105,19 @@ System.out.println("m_fitInProgress goes false");
 
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-        doFit(dataArray);
-        
-        //TODO display results for summed?
-        IJ.showMessage("Summed " + dataArray[0].getParams()[0] + " " + dataArray[0].getParams()[1] + " " + dataArray[0].getParams()[2]);
+        doFit(uiPanel, dataArray);
 
-        showDecayGraph(dataArray);
-        saveParams(dataArray);
+        // show decay and update UI parameters
+        showDecayGraph(uiPanel, dataArray);
+        uiPanel.setParameters(dataArray[0].getParams());
+        uiPanel.setChiSquare(dataArray[0].getChiSquare());
     }
 
     /*
      * Sums and fits each ROI.
      */
-    private void fitROIs() {
-        double params[] = getParams();
+    private void fitROIs(IUserInterfacePanel uiPanel) {
+        double params[] = uiPanel.getParameters();
         
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
@@ -1167,16 +1153,15 @@ System.out.println("m_fitInProgress goes false");
         
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-        doFit(dataArray);
+        doFit(uiPanel, dataArray);
         
-        showDecayGraph(dataArray);
+        showDecayGraph(uiPanel, dataArray);
         
         // show colorized lifetimes
         ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
         ImagePlus imagePlus = new ImagePlus("Fitted Lifetimes", imageProcessor);
         int i = 0;
         for (Roi roi: getRois()) {
-            IJ.showMessage("Roi " + i + " " + dataArray[i].getParams()[0] + " " + dataArray[i].getParams()[1] + " " + dataArray[i].getParams()[2]);
             double lifetime = dataArray[i++].getParams()[1];
             imageProcessor.setColor(lifetimeColorMap(MAXIMUM_LIFETIME, lifetime));
 
@@ -1190,8 +1175,10 @@ System.out.println("m_fitInProgress goes false");
             }
         }
         imagePlus.show();  
-        
-        saveParams(dataArray);
+
+        // update UI parameters
+        uiPanel.setParameters(dataArray[0].getParams());
+        uiPanel.setChiSquare(dataArray[0].getChiSquare()); //TODO what is the validity here of just choosing the first ROI?  How do we report multiple ROIs?
     }
 
     /*
@@ -1200,8 +1187,8 @@ System.out.println("m_fitInProgress goes false");
      * @param x
      * @param y
      */
-    private void fitPixel(int x, int y) {
-        double params[] = getParams();
+    private void fitPixel(IUserInterfacePanel uiPanel, int x, int y) {
+        double params[] = uiPanel.getParameters();
         
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
@@ -1222,14 +1209,13 @@ System.out.println("m_fitInProgress goes false");
         
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-        doFit(dataArray);
+        doFit(uiPanel, dataArray);
         
-        showDecayGraph(dataArray);
-        
-        //TODO display results for single point?
-        IJ.showMessage("Point A " + dataArray[0].getParams()[0] + " " + LAMBDA + " " + dataArray[0].getParams()[1] + " b " + dataArray[0].getParams()[2]);
-        
-        saveParams(dataArray);
+        showDecayGraph(uiPanel, dataArray);
+
+        // update UI parameters
+        uiPanel.setParameters(dataArray[0].getParams());
+        uiPanel.setChiSquare(dataArray[0].getChiSquare());
     }
  
     /*
@@ -1239,10 +1225,10 @@ System.out.println("m_fitInProgress goes false");
      *
      * Results of the fit go to VisAD for analysis.
      */
-    private void fitEachPixel() {
+    private void fitEachPixel(IUserInterfacePanel uiPanel) {
         long start = System.nanoTime();
         
-        double params[] = getParams();
+        double params[] = uiPanel.getParameters();
         
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
@@ -1283,7 +1269,7 @@ System.out.println("m_fitInProgress goes false");
 
 
                     if (++pixelsToProcessCount >= PIXEL_COUNT) {
-                        processPixels(dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
+                        processPixels(uiPanel, dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
                         curveFitDataList.clear();
                         pixelList.clear();
                         pixelsToProcessCount = 0;
@@ -1291,7 +1277,7 @@ System.out.println("m_fitInProgress goes false");
                 }
             }
             if (!m_cancel && 0 < pixelsToProcessCount) {
-                processPixels(dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
+                processPixels(uiPanel, dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
             }
         }
  
@@ -1364,7 +1350,7 @@ System.out.println("m_fitInProgress goes false");
         if (m_cancel) {
             return;
         }
-        doFit(dataArray);
+        doFit(uiPanel, dataArray);
         //TODO save results
 
         long elapsed = System.nanoTime() - start;
@@ -1379,8 +1365,8 @@ System.out.println("m_fitInProgress goes false");
      * @param data list of data corresponding to pixels to be fitted
      * @param pixels parallel list of rectangles with which to draw the fitted pixel
      */
-    void processPixels(DataColorizer dataColorizer, int height, ICurveFitData data[], ChunkyPixel pixels[]) {
-        doFit(data);
+    void processPixels(IUserInterfacePanel uiPanel, DataColorizer dataColorizer, int height, ICurveFitData data[], ChunkyPixel pixels[]) {
+        doFit(uiPanel, data);
         //TODO save results
 
         // draw as you go; 'chunky' pixels get smaller as the overall fit progresses
@@ -1389,9 +1375,9 @@ System.out.println("m_fitInProgress goes false");
             double lifetime = data[i].getParams()[1];
 
             //TODO debugging:
-            if (lifetime > 2 * m_param[1]) {
-                System.out.println("BAD FIT??? x " + pixel.getX() + " y " + pixel.getY() + " fitted lifetime " + lifetime);
-            }
+            //if (lifetime > 2 * m_param[1]) {
+            //    System.out.println("BAD FIT??? x " + pixel.getX() + " y " + pixel.getY() + " fitted lifetime " + lifetime);
+            //}
 
             //TODO BUG:
             // With the table as is, you can get
@@ -1544,55 +1530,15 @@ System.out.println("m_fitInProgress goes false");
     }
 
     /*
-     * Helper function for the fit.  Initializes params array.
-     * 
-     * @return initialized params array
-     */
-    private double[] getParams() {
-        // build the params
-        double params[] = null;
-        switch (m_function) {
-            case SINGLE_EXPONENTIAL:
-                params = new double[3];
-                params[0] = m_param[0];
-                params[1] = m_param[1];
-                params[2] = m_param[2];
-                break;
-            case DOUBLE_EXPONENTIAL:
-                params = new double[5];
-                params[0] = m_param[0];
-                params[1] = m_param[1];
-                params[2] = m_param[2];
-                params[3] = m_param[3];
-                params[4] = m_param[4];
-                break;
-            case TRIPLE_EXPONENTIAL:
-                params = new double[7];
-                params[0] = m_param[0];
-                params[1] = m_param[1];
-                params[2] = m_param[2];
-                params[3] = m_param[3];
-                params[4] = m_param[4];
-                params[5] = m_param[5];
-                params[6] = m_param[6];
-                break;
-            case STRETCHED_EXPONENTIAL:
-                System.out.println("NOT IMPLEMENTED YET");
-                break;
-        }
-        return params;
-    }
- 
-    /*
      * Helper function for the fit.  Does the actual fit.
      * 
      * @param dataArray array of data to fit
      */
     //TODO s/b a mechanism to add these curve fit libraries?
-    private void doFit(ICurveFitData dataArray[]) {
+    private void doFit(IUserInterfacePanel uiPanel, ICurveFitData dataArray[]) {
         // do the fit
         ICurveFitter curveFitter = null;
-        switch (m_algorithm) {
+        switch (uiPanel.getAlgorithm()) {
             case JAOLHO:
                 curveFitter = new JaolhoCurveFitter();
                 break;
@@ -1623,8 +1569,7 @@ System.out.println("m_fitInProgress goes false");
         }
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(m_free);
-        int startBin = m_startBin + (256 * m_startX);
-        curveFitter.fitData(dataArray, startBin, m_stopBin);        
+        curveFitter.fitData(dataArray, m_startBin, m_stopBin);
     }
 
     /*
@@ -1632,482 +1577,21 @@ System.out.println("m_fitInProgress goes false");
      * 
      * @param dataArray array of fitted data
      */
-    private void showDecayGraph(ICurveFitData dataArray[]) {
+    private void showDecayGraph(final IUserInterfacePanel uiPanel, ICurveFitData dataArray[]) {
         if (0 < dataArray.length) {
-            //TODO need to be able to examine any fitted pixel; for now just show the last fitted pixel. // first!
+            //TODO need to be able to examine any fitted pixel; for now just show the first.  // was last
             DecayGraph decayGraph = new DecayGraph(m_startBin, m_stopBin, m_timeBins, m_timeRange, dataArray[0]); //dataArray.length - 1]);
-            decayGraph.setStartStopListener(new MyListener());
+            decayGraph.setStartStopListener(
+                new IStartStopListener() {
+                    public void setStartStop(int start, int stop) {
+                        uiPanel.setStart(start);
+                        uiPanel.setStop(stop);
+                    }
+                }
+            );
             JFrame frame = decayGraph.getFrame();
+            frame.setLocationRelativeTo(uiPanel.getFrame());
             frame.setVisible(true);
-        }
-        
+        }        
     }
-
-    /*
-     * Helper function for the fit.  Saves params array.
-     * 
-     * @param dataArray array of fitted data
-     */
-    //TODO params are saved to the UI now
-    private void saveParams(ICurveFitData dataArray[]) {
-        double params[] = null;
-        if (0 < dataArray.length) {
-            params = dataArray[0].getParams();
-            switch (m_function) {
-                case SINGLE_EXPONENTIAL:
-                    m_param[0] = params[0];
-                    m_param[1] = params[1];
-                    m_param[2] = params[2];
-                    break;
-                case DOUBLE_EXPONENTIAL:
-                    m_param[0] = params[0];
-                    m_param[1] = params[1];
-                    m_param[2] = params[2];
-                    m_param[3] = params[3];
-                    m_param[4] = params[4];
-                    break;
-                case TRIPLE_EXPONENTIAL:
-                    m_param[0] = params[0];
-                    m_param[1] = params[1];
-                    m_param[2] = params[2];
-                    m_param[3] = params[3];
-                    m_param[4] = params[4];
-                    m_param[5] = params[5];
-                    m_param[6] = params[6];
-                    break;
-                case STRETCHED_EXPONENTIAL:
-                    System.out.println("Not implemented yet");
-                    break;
-            }
-        }
-    }
-    
-    /**
-     * This routine does the fit, once all settings have
-     * been specified.
-     *
-     * Note that fitting each pixel is a special case, which is
-     * handled by fitEachPixel.  This routine therefore only
-     * handles fitting a single set of data from a single pixel
-     * or summed from all the pixels.  It can also sum the data
-     * and fit by ROI.
-     */
-    private void fitDataXX() {
-        if (m_region.EACH == m_region) {
-            fitEachPixel();
-            return;
-        }
-
-        // build the params
-        double params[] = null;
-         switch (m_function) {
-            case SINGLE_EXPONENTIAL:
-                params = new double[3];
-                params[0] = m_param[0];
-                params[1] = m_param[1];
-                params[2] = m_param[2];
-                break;
-            case DOUBLE_EXPONENTIAL:
-                params = new double[5];
-                params[0] = m_param[0];
-                params[1] = m_param[1];
-                params[2] = m_param[2];
-                params[3] = m_param[3];
-                params[4] = m_param[4];
-                break;
-            case TRIPLE_EXPONENTIAL:
-                params = new double[7];
-                params[0] = m_param[0];
-                params[1] = m_param[1];
-                params[2] = m_param[2];
-                params[3] = m_param[3];
-                params[4] = m_param[4];
-                params[5] = m_param[5];
-                params[6] = m_param[6];
-                break;
-            case STRETCHED_EXPONENTIAL:
-                break;
-         }
-
-        // build the data
-        ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
-        ICurveFitData curveFitData;
-        double yCount[];
-        double yFitted[];
-        switch (m_region) {
-            case SUMMED:
-                // sum up all the photons
-                curveFitData = new CurveFitData();
-                curveFitData.setParams(params);
-                yCount = new double[m_timeBins];
-                for (int b = 0; b < m_timeBins; ++b) {
-                    yCount[b] = 0.0;
-                }
-                int photons = 0;
-                for (int y = 0; y < m_height; ++y) {
-                    for (int x = 0; x < m_width; ++x) {
-                        for (int b = 0; b < m_timeBins; ++b) {
-                            yCount[b] += m_data[0][y][x][b];
-                            photons += m_data[0][y][x][b];
-                        }
-                    }
-                }
-                System.out.println("SUMMED photons " + photons);
-                curveFitData.setYCount(yCount);
-                yFitted = new double[m_timeBins];
-                curveFitData.setYFitted(yFitted);
-                curveFitDataList.add(curveFitData);
-                break;
-            case ROI:
-                int roiNumber = 0;
-                for (Roi roi: getRois()) {
-                    ++roiNumber;
-                    curveFitData = new CurveFitData();
-                    curveFitData.setParams(params.clone());
-                    yCount = new double[m_timeBins];
-                    for (int b = 0; b < m_timeBins; ++b) {
-                        yCount[b] = 0.0;
-                    }
-                    Rectangle bounds = roi.getBounds();
-                    for (int x = 0; x < bounds.width; ++x) {
-                        for (int y = 0; y < bounds.height; ++y) {
-                            if (roi.contains(bounds.x + x, bounds.y + y)) {
-                                System.out.println("roi " + roiNumber + " x " + x + " Y " + y);
-                                for (int b = 0; b < m_timeBins; ++b) {
-                                    yCount[b] += m_data[0][y][x][b];
-                                }
-                            }
-                        }
-                    }
-                    curveFitData.setYCount(yCount);
-                    yFitted = new double[m_timeBins];
-                    curveFitData.setYFitted(yFitted);
-                    curveFitDataList.add(curveFitData);
-                }
-                break;
-            case POINT:
-                curveFitData = new CurveFitData();
-                curveFitData.setParams(params);
-                yCount = new double[m_timeBins];
-                for (int b = 0; b < m_timeBins; ++b) {
-                    yCount[b] = m_data[0][m_height - m_y - 1][m_x][b];
-                }
-                curveFitData.setYCount(yCount);
-                yFitted = new double[m_timeBins];
-                curveFitData.setYFitted(yFitted);
-                curveFitDataList.add(curveFitData);
-                break;
-            case EACH: //TODO this is handled in fitEachPixel below
-                Roi[] rois = getRois();
-                if (0 < rois.length) {
-                    for (Roi roi: rois) {
-                        Rectangle bounds = roi.getBounds();
-                        for (int x = 0; x < bounds.width; ++x) {
-                            for (int y = 0; y < bounds.height; ++y) {
-                                if (roi.contains(bounds.x + x, bounds.y + y)) {
-                                    curveFitData = new CurveFitData();
-                                    curveFitData.setParams(params.clone()); //TODO if you don't clone here each pixel fit uses results of previous fit to start
-                                    yCount = new double[m_timeBins];
-                                    for (int b = 0; b < m_timeBins; ++b) {
-                                        yCount[b] = m_data[0][y][x][b];
-                                    }
-                                    curveFitData.setYCount(yCount);
-                                    yFitted = new double[m_timeBins];
-                                    curveFitData.setYFitted(yFitted);
-                                    curveFitDataList.add(curveFitData);
-                                }
-                            }
-                        }
-                    }
-                }
-                else {
-                    for (int y = 0; y < m_height; ++y) {
-                        for (int x = 0; x < m_width; ++x) {
-                            curveFitData = new CurveFitData();
-                            curveFitData.setParams(params.clone()); //TODO if you don't clone here each pixel fit uses results of previous fit to start
-                            yCount = new double[m_timeBins];
-                            for (int b = 0; b < m_timeBins; ++b) {
-                                yCount[b] = m_data[0][y][x][b];
-                            }
-                            curveFitData.setYCount(yCount);
-                            yFitted = new double[m_timeBins];
-                            curveFitData.setYFitted(yFitted);
-                            curveFitDataList.add(curveFitData);
-                        }
-                    }
-                }
-                break;
-        }
-        ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-
-        // do the fit
-        ICurveFitter curveFitter = null;
-        switch (m_algorithm) {
-            case JAOLHO:
-                curveFitter = new JaolhoCurveFitter();
-                break;
-           /* case AKUTAN:
-                curveFitter = new AkutanCurveFitter();
-                break; */
-            case BARBER_RLD:
-                curveFitter = new GrayCurveFitter(0);
-                break;
-            case BARBER_LMA:
-                curveFitter = new GrayCurveFitter(1);
-                break;
-            case MARKWARDT:
-                curveFitter = new MarkwardtCurveFitter();
-                break;
-            case BARBER2_RLD:
-                curveFitter = new GrayNRCurveFitter(0);
-                break;
-            case BARBER2_LMA:
-                curveFitter = new GrayNRCurveFitter(1);
-                break;
-            case SLIMCURVE_RLD:
-                curveFitter = new SLIMCurveFitter(0);
-                break;
-            case SLIMCURVE_LMA:
-                curveFitter = new SLIMCurveFitter(1);
-                break;
-        }
-        curveFitter.setXInc(m_timeRange);
-        curveFitter.setFree(m_free);
-        int startBin = m_startBin + (256 * m_startX);
-        curveFitter.fitData(dataArray, startBin, m_stopBin);
-
-        if (0 < dataArray.length) {
-            //TODO need to be able to examine any fitted pixel; for now just show the last fitted pixel. // first!
-            DecayGraph decayGraph = new DecayGraph(m_startBin, m_stopBin, m_timeBins, curveFitter.getXInc(), dataArray[0]); //dataArray.length - 1]);
-            decayGraph.setStartStopListener(new MyListener());
-            JFrame frame = decayGraph.getFrame();
-            frame.setVisible(true);
-        }
-
-        switch (m_region) {
-            case SUMMED:
-                //TODO display results for summed?
-                IJ.showMessage("Summed " + dataArray[0].getParams()[0] + " " + dataArray[0].getParams()[1] + " " + dataArray[0].getParams()[2]);
-                break;
-            case ROI: {
-                // show colorized lifetimes
-                ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
-                ImagePlus imagePlus = new ImagePlus("Fitted Lifetimes", imageProcessor);
-
-                int i = 0;
-                for (Roi roi: getRois()) {
-                    IJ.showMessage("Roi " + i + " " + dataArray[i].getParams()[0] + " " + dataArray[i].getParams()[1] + " " + dataArray[i].getParams()[2]);
-                    double lifetime = dataArray[i++].getParams()[1];
-                    imageProcessor.setColor(lifetimeColorMap(MAXIMUM_LIFETIME, lifetime));
-
-                    Rectangle bounds = roi.getBounds();
-                    for (int x = 0; x < bounds.width; ++x) {
-                        for (int y = 0; y < bounds.height; ++y) {
-                            if (roi.contains(bounds.x + x, bounds.y + y)) {
-                                imageProcessor.drawPixel(bounds.x + x, bounds.y + y);
-                            }
-                        }
-                    }
-                }
-                imagePlus.show();
-                break; }
-            case POINT:
-                //TODO display results for single point?
-                IJ.showMessage("Point A " + dataArray[0].getParams()[0] + " " + LAMBDA + " " + dataArray[0].getParams()[1] + " b " + dataArray[0].getParams()[2]);
-                break;
-            case EACH: //TODO DEFUNCT CODE this is handled in fitEachPixel below
-                //TODO new version uses "chunky pixel effect" drawing.
-                // show colorized lifetimes
-                ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
-                ImagePlus imagePlus = new ImagePlus("Fitted Lambdas", imageProcessor);
-
-                int i = 0;
-                Roi[] rois = getRois();
-                if (0 < rois.length) {
-                    for (Roi roi: rois) {
-                        Rectangle bounds = roi.getBounds();
-                        for (int x = 0; x < bounds.width; ++x) {
-                            for (int y = 0; y < bounds.height; ++y) {
-                                if (roi.contains(bounds.x + x,  bounds.y + y)) {
-                                    double lambda = dataArray[i++].getParams()[1];
-                                    imageProcessor.setColor(lifetimeColorMap(MAXIMUM_LIFETIME, lambda));
-                                    imageProcessor.drawPixel(bounds.x + x, m_height - bounds.y - y - 1);
-                                }
-                            }
-                        }
-
-                    }
-                }
-                else {
-                    for (int y = 0; y < m_height; ++y) {
-                        for (int x = 0; x < m_width; ++x) {
-                            double lambda = dataArray[i++].getParams()[1];
-                            imageProcessor.setColor(lifetimeColorMap(MAXIMUM_LIFETIME, lambda));
-                            imageProcessor.drawPixel(x, m_height - y - 1);
-                        }
-                    }
-                }
-                imagePlus.show();
-                break;
-        }
-        
-        if (0 < dataArray.length) {
-            params = dataArray[0].getParams();
-            switch (m_function) {
-                case SINGLE_EXPONENTIAL:
-                    m_param[0] = params[0];
-                    m_param[1] = params[1];
-                    m_param[2]  = params[2];
-                    break;
-                case DOUBLE_EXPONENTIAL:
-                    m_param[0] = params[0];
-                    m_param[1] = params[1];
-                    m_param[2] = params[2];
-                    m_param[3] = params[3];
-                    m_param[4] = params[4];
-                    break;
-                case TRIPLE_EXPONENTIAL:
-                    m_param[0] = params[0];
-                    m_param[1] = params[1];
-                    m_param[2] = params[2];
-                    m_param[3] = params[3];
-                    m_param[4] = params[4];
-                    m_param[5] = params[5];
-                    m_param[6] = params[6];
-                    break;
-                case STRETCHED_EXPONENTIAL:
-                    break;
-            }
-        }
-    }
-
-    /**
-     * Fits each & every pixel in the image that is
-     * selected by fitThisPixel.
-     *
-     * Starts up a DataColorizer to show dynamically colorized
-     * lifetimes.
-     *
-     * Uses a ChunkyPixelEffectIterator to decide which pixel to
-     * fit next.  Batches up pixels and calls processPixels to
-     * do the fit.
-     */
-    private void fitEachPixelX() {
-        long start = System.nanoTime();
-
-        // build the params
-        double params[] = null;
-         switch (m_function) {
-            case SINGLE_EXPONENTIAL:
-                params = new double[3];
-                params[0] = m_param[0];
-                params[1] = m_param[1];
-                params[2] = m_param[2];
-                break;
-            case DOUBLE_EXPONENTIAL:
-                params = new double[5];
-                params[0] = m_param[0];
-                params[1] = m_param[1];
-                params[2] = m_param[2];
-                params[3] = m_param[3];
-                params[4] = m_param[4];
-                break;
-            case TRIPLE_EXPONENTIAL:
-                params = new double[7];
-                params[0] = m_param[0];
-                params[1] = m_param[1];
-                params[2] = m_param[2];
-                params[3] = m_param[3];
-                params[4] = m_param[4];
-                params[5] = m_param[5];
-                params[6] = m_param[6];
-                break;
-            case STRETCHED_EXPONENTIAL:
-                break;
-        }
-
-        // show colorized lifetimes
-        //ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
-        //ImagePlus imagePlus = new ImagePlus("Fitted Lifetimes", imageProcessor);
-        //imagePlus.show();
-        DataColorizer dataColorizer = new DataColorizer(m_width, m_height, m_algorithm + " Fitted Lifetimes");
-
-        // build the data
-        ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
-        ArrayList<ChunkyPixel> pixelList = new ArrayList<ChunkyPixel>();
-        ICurveFitData curveFitData;
-        double yCount[];
-        double yFitted[];
-
-        ChunkyPixelEffectIterator pixelIterator = new ChunkyPixelEffectIterator(new ChunkyPixelTableImpl(), m_width, m_height);
-
-        int pixelCount = 0;
-        int pixelsToProcessCount = 0;
-
-        while (pixelIterator.hasNext()) {
-            ++pixelCount;
-            IJ.showProgress(pixelCount, m_height * m_width);
-            ChunkyPixel pixel = pixelIterator.next();
-            if (wantFitted(pixel.getX(), pixel.getY())) {
-                curveFitData = new CurveFitData();
-                curveFitData.setParams(params.clone());
-                yCount = new double[m_timeBins];
-                for (int b = 0; b < m_timeBins; ++b) {
-                    yCount[b] = m_data[0][pixel.getY()][pixel.getX()][b];
-                }
-                curveFitData.setYCount(yCount);
-                yFitted = new double[m_timeBins];
-                curveFitData.setYFitted(yFitted);
-                curveFitDataList.add(curveFitData);
-                pixelList.add(pixel);
-
-
-                if (++pixelsToProcessCount >= PIXEL_COUNT) {
-                    //processPixels(imagePlus, imageProcessor, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
-                    processPixels(dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
-                    curveFitDataList.clear();
-                    pixelList.clear();
-                    pixelsToProcessCount = 0;
-                }
-            }
-        }
-        if (0 < pixelsToProcessCount) {
-            //processPixels(imagePlus, imageProcessor, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
-            processPixels(dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
-        }
-        long elapsed = System.nanoTime() - start;
-        System.out.println("nanoseconds " + elapsed);
-    }
-
-    private class MyListener implements IStartStopListener {
-     /**
-     * Listens for changes to the start and stop indices of the fit.
-     *
-     * @param start index
-     * @param stop index inclusive
-     */
-       public void setStartStop(int start, int stop) {
-           System.out.println("start " + start + " stop " + stop);
-       }
-    }
-
-   /* private class MyDialogListener implements DialogListener {
-        public boolean dialogItemChanged(GenericDialog dialog, AWTEvent e) {
-            boolean showNextDialog = false;
-            System.out.println("dialogItemChanged");
-            if (null == e) {
-                showNextDialog = true;
-            }
-            else if (e instanceof ActionEvent) {
-                System.out.println("!>" + ((ActionEvent) e).getActionCommand() + "<");
-                System.out.println("!OK button pressed");
-                showNextDialog = true;
-            }
-            else {
-                System.out.println("!Event " + e);
-                System.out.println(dialog.getChoices().get(0));
-            }
-            return true;
-        }
-    }*/
 }
