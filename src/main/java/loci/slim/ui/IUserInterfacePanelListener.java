@@ -54,4 +54,9 @@ public interface IUserInterfacePanelListener {
      * Cancels ongoing fit.
      */
     public void cancelFit();
+
+    /**
+     * Quits running plugin.
+     */
+    public void quit();
 }
