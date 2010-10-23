@@ -288,6 +288,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         regionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         fitPanel.add(regionLabel);
         m_regionComboBox = new JComboBox(REGION_ITEMS);
+     m_regionComboBox.setSelectedItem(ALL_REGION); // for demo
         fitPanel.add(m_regionComboBox);
 
         JLabel algorithmLabel = new JLabel("Algorithm");
