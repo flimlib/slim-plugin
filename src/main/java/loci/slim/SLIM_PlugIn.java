@@ -45,7 +45,6 @@ public class SLIM_PlugIn implements PlugIn {
 
     public static void main(String [] args)
     {
-        System.out.println("HELLO THERE");
         new ImageJ();
         SLIM_PlugIn plugIn = new SLIM_PlugIn();
         plugIn.run("");
