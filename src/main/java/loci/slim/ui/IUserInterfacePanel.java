@@ -97,6 +97,13 @@ public interface IUserInterfacePanel {
     public int getStart();
 
     /**
+     * Sets starting bin of fit.
+     *
+     * @param bin
+     */
+    public void setStart(int bin);
+
+    /**
      * Gets stopping bin of fit (inclusive).
      *
      * @return stop
@@ -104,11 +111,25 @@ public interface IUserInterfacePanel {
     public int getStop();
 
     /**
+     * Sets stopping bin of fit.
+     *
+     * @param bin
+     */
+    public void setStop(int bin);
+
+    /**
      * Gets photon count threshold to fit a pixel.
      *
      * @return threshold
      */
     public int getThreshold();
+
+    /**
+     * Sets photon count threshold to fit a pixel.
+     *
+     * @param threshold
+     */
+    public void setThreshold(int threshold);
 
     /**
      * Gets pixel x.
@@ -153,9 +174,31 @@ public interface IUserInterfacePanel {
     public double[] getParameters();
 
     /**
+     * Sets the parameters of the fit
+     *
+     * @param parameters
+     */
+    public void setParameters(double parameters[]);
+
+    /**
+     * Sets the parameters of the fit by function.
+     *
+     * @param function index
+     * @param parameters
+     */
+    public void setFunctionParameters(int function, double parameters[]);
+
+    /**
      * Gets which parameters aren't fixed.
      *
      * @return free parameters
      */
     public boolean[] getFree();
+
+    /**
+     * Sets the chi squared value.
+     *
+     * @param chiSquare value
+     */
+    public void setChiSquare(double chiSquare);
 }
