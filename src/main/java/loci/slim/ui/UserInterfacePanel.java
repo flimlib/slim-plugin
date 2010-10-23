@@ -73,7 +73,7 @@ import loci.slim.SLIMProcessor.FitRegion;
  * @author Aivar Grislis grislis at wisc.edu
  */
 
-public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
+public class UserInterfacePanel implements IUserInterfacePanel {
     // Unicode special characters
     private static final Character CHI    = '\u03c7';
     private static final Character SQUARE = '\u00b2';
@@ -174,6 +174,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
     JTextField m_chiSqParam3;
     JCheckBox m_startParam3;
 
+    JButton m_quitButton;
     JButton m_fitButton;
 
     public UserInterfacePanel(boolean showTau) {
@@ -213,10 +214,36 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
         buttonPanel.add(Box.createHorizontalGlue());
-        //buttonPanel.add(new JButton("Panic Button"));
-        //buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        m_quitButton = new JButton("Quit");
+        m_quitButton.addActionListener(
+            new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    m_listener.quit();
+                }
+            }
+        );
+        buttonPanel.add(m_quitButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         m_fitButton = new JButton("Do Fit");
-        m_fitButton.addActionListener(new FitButtonListener());
+        m_fitButton.addActionListener(
+            new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    String text = (String)e.getActionCommand();
+                    if (text.equals("Do Fit")){
+                        setFitButtonState(false);
+                        if (null != m_listener) {
+                            m_listener.doFit();
+                        }
+                    }
+                    else{
+                        setFitButtonState(true);
+                        if (null != m_listener) {
+                            m_listener.cancelFit();
+                        }
+                    }
+                }
+            }
+        );
         buttonPanel.add(m_fitButton);
 
         outerPanel.add(buttonPanel);
@@ -238,7 +265,6 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
                     }
 
         });
-        m_frame.setVisible(true);
     }
 
     public JFrame getFrame() {
@@ -274,7 +300,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
         functionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         fitPanel.add(functionLabel);
         m_functionComboBox = new JComboBox(FUNCTION_ITEMS);
-        m_functionComboBox.addItemListener(this);
+        m_functionComboBox.addItemListener(
+            new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    CardLayout cl = (CardLayout)(m_cardPanel.getLayout());
+                    cl.show(m_cardPanel, (String)e.getItem());
+                }
+            }
+        );
         fitPanel.add(m_functionComboBox);
 
         // rows, cols, initX, initY, xPad, yPad
@@ -389,6 +422,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
         panel.add("North", expPanel);
 
         m_startParam1 = new JCheckBox("Use as starting parameters for fit");
+     m_startParam1.setSelected(true);
+     m_startParam1.setEnabled(false);
+
         panel.add("South", m_startParam1);
         return panel;
     }
@@ -474,6 +510,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
         panel.add("North", expPanel);
 
         m_startParam2 = new JCheckBox("Use as starting parameters for fit");
+      m_startParam2.setSelected(true);
+      m_startParam2.setEnabled(false);
         panel.add("South", m_startParam2);
         return panel;
     }
@@ -582,6 +620,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
         panel.add("North", expPanel);
 
         m_startParam3 = new JCheckBox("Use as starting parameters for fit");
+      m_startParam2.setSelected(true);
+      m_startParam2.setEnabled(false);
         panel.add("South", m_startParam3);
         return panel;
 
@@ -685,6 +725,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
         return parseInt(m_thresholdField);
     }
 
+    public void setThreshold(int threshold) {
+        m_thresholdField.setText("" + threshold);
+    }
+
     public int getComponents() {
         int components = 0;
         String function = (String) m_functionComboBox.getSelectedItem();
@@ -733,26 +777,52 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
     public void setParameters(double params[]) {
         String function = (String) m_functionComboBox.getSelectedItem();
         if (function.equals(SINGLE_COMPONENT)) {
-            m_a1Param1.setText("" + params[0]);
-            m_t1Param1.setText("" + params[1]);
-            m_cParam1.setText("" + params[2]);
+            m_a1Param1.setText("" + (float) params[0]);
+            m_t1Param1.setText("" + (float) params[1]);
+            m_cParam1.setText( "" + (float) params[2]);
         }
         else if (function.equals(DOUBLE_COMPONENT)) {
-            m_a1Param2.setText("" + params[0]);
-            m_t1Param2.setText("" + params[1]);
-            m_a2Param2.setText("" + params[2]);
-            m_t2Param2.setText("" + params[3]);
-            m_cParam2.setText("" + params[4]);
+            m_a1Param2.setText("" + (float) params[0]);
+            m_t1Param2.setText("" + (float) params[1]);
+            m_a2Param2.setText("" + (float) params[2]);
+            m_t2Param2.setText("" + (float) params[3]);
+            m_cParam2.setText( "" + (float) params[4]);
         }
         else if (function.equals(TRIPLE_COMPONENT)) {
-            m_a1Param3.setText("" + params[0]);
-            m_t1Param3.setText("" + params[1]);
-            m_a2Param3.setText("" + params[2]);
-            m_t2Param3.setText("" + params[3]);
-            m_a3Param3.setText("" + params[4]);
-            m_t3Param3.setText("" + params[5]);
-            m_cParam3.setText("" + params[6]);
+            m_a1Param3.setText("" + (float) params[0]);
+            m_t1Param3.setText("" + (float) params[1]);
+            m_a2Param3.setText("" + (float) params[2]);
+            m_t2Param3.setText("" + (float) params[3]);
+            m_a3Param3.setText("" + (float) params[4]);
+            m_t3Param3.setText("" + (float) params[5]);
+            m_cParam3.setText( "" + (float) params[6]);
          }
+    }
+
+    public void setFunctionParameters(int function, double params[]) {
+        switch (function) {
+            case 0:
+                m_a1Param1.setText("" + (float) params[0]);
+                m_t1Param1.setText("" + (float) params[1]);
+                m_cParam1.setText( "" + (float) params[2]);
+                break;
+            case 1:
+                m_a1Param2.setText("" + (float) params[0]);
+                m_t1Param2.setText("" + (float) params[1]);
+                m_a2Param2.setText("" + (float) params[2]);
+                m_t2Param2.setText("" + (float) params[3]);
+                m_cParam2.setText( "" + (float) params[4]);
+                break;
+            case 2:
+                m_a1Param3.setText("" + (float) params[0]);
+                m_t1Param3.setText("" + (float) params[1]);
+                m_a2Param3.setText("" + (float) params[2]);
+                m_t2Param3.setText("" + (float) params[3]);
+                m_a3Param3.setText("" + (float) params[4]);
+                m_t3Param3.setText("" + (float) params[5]);
+                m_cParam3.setText( "" + (float) params[6]);
+                break;
+        }
     }
 
     public boolean[] getFree() {
@@ -786,9 +856,17 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
         return free;
     }
 
-    public void itemStateChanged(ItemEvent e) { //TODO this class is a listener, vs inner class (below), vs anonymous inner class
-        CardLayout cl = (CardLayout)(m_cardPanel.getLayout());
-        cl.show(m_cardPanel, (String)e.getItem());
+    public void setChiSquare(double chiSquare) {
+        String function = (String) m_functionComboBox.getSelectedItem();
+        if (function.equals(SINGLE_COMPONENT)) {
+            m_chiSqParam1.setText("" + (float) chiSquare);
+        }
+        else if (function.equals(DOUBLE_COMPONENT)) {
+            m_chiSqParam2.setText("" + (float) chiSquare);
+        }
+        else if (function.equals(TRIPLE_COMPONENT)) {
+            m_chiSqParam3.setText("" + (float) chiSquare);
+         }
     }
 
     private int parseInt(JTextField field) {
@@ -801,23 +879,4 @@ public class UserInterfacePanel implements IUserInterfacePanel, ItemListener {
         }
         return value;
     }
-
-    private class FitButtonListener implements ActionListener {
-        public void actionPerformed(ActionEvent e){
-            String text = (String)e.getActionCommand();
-            if (text.equals("Do Fit")){
-                setFitButtonState(false);
-                if (null != m_listener) {
-                    m_listener.doFit();
-                }
-            }
-            else{
-                setFitButtonState(true);
-                if (null != m_listener) {
-                    m_listener.cancelFit();
-                }
-            }
-        }
-    }
-
 }
