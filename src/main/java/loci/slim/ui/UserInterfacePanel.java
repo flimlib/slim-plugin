@@ -295,6 +295,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         algorithmLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         fitPanel.add(algorithmLabel);
         m_algorithmComboBox = new JComboBox(ALGORITHM_ITEMS);
+     m_algorithmComboBox.setSelectedItem(SLIM_CURVE_LMA_ALGORITHM);
         fitPanel.add(m_algorithmComboBox);
 
         JLabel functionLabel = new JLabel("Function");
