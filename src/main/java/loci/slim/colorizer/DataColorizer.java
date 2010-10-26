@@ -200,6 +200,11 @@ public class DataColorizer implements IColorizeRangeListener {
         }
     }
 
+    public void quit() {
+        m_imagePlus.close();
+        m_ui.quit();
+    }
+
     private void recolorize() {
         for (int y = 0; y < m_height; ++y) {
             for (int x = 0; x < m_width; ++x) {
