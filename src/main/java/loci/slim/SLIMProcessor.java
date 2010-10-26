@@ -36,6 +36,7 @@ package loci.slim;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.NonBlockingGenericDialog;
@@ -54,6 +55,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.ColorModel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -123,9 +125,9 @@ public class SLIMProcessor <T extends RealType<T>> {
     private static final Character SUB_2  = '\u2082';
     private static final Character SUB_3  = '\u2083';
 
-    private static final double[] DEFAULT_SINGLE_EXP_PARAMS = { 5000.0, 0.005, 0.5 };
-    private static final double[] DEFAULT_DOUBLE_EXP_PARAMS = { 0.0 };
-    private static final double[] DEFAULT_TRIPLE_EXP_PARAMS = { 0.0 };
+    private static final double[] DEFAULT_SINGLE_EXP_PARAMS = { 100.0, 0.5, 0.5 };
+    private static final double[] DEFAULT_DOUBLE_EXP_PARAMS = { 50.0, 0.5, 50, 0.25, 0.5 };
+    private static final double[] DEFAULT_TRIPLE_EXP_PARAMS = { 40.0, 0.5, 30.0, 0.25, 30, 0.10, 0.5 };
 
     private Object m_synchFit = new Object();
     private volatile boolean m_quit;
@@ -213,8 +215,8 @@ public class SLIMProcessor <T extends RealType<T>> {
             uiPanel.setStop(m_timeBins - 1);
             uiPanel.setThreshold(100);
             uiPanel.setFunctionParameters(0, DEFAULT_SINGLE_EXP_PARAMS);
-            //uiPanel.setFunctionParameters(1, DEFAULT_DOUBLE_EXP_PARAMS);
-            //uiPanel.setFunctionParameters(2, DEFAULT_TRIPLE_EXP_PARAMS);
+            uiPanel.setFunctionParameters(1, DEFAULT_DOUBLE_EXP_PARAMS);
+            uiPanel.setFunctionParameters(2, DEFAULT_TRIPLE_EXP_PARAMS);
             uiPanel.setListener(
                     new IUserInterfacePanelListener() {
                         public void doFit() {
@@ -316,12 +318,12 @@ public class SLIMProcessor <T extends RealType<T>> {
             IUserInterfacePanel uiPanel = new UserInterfacePanel(false); // using lambda
             uiPanel.setX(0);
             uiPanel.setY(0);
-            uiPanel.setStart(0);
+            uiPanel.setStart(m_timeBins / 2);
             uiPanel.setStop(m_timeBins - 1);
             uiPanel.setThreshold(100);
             uiPanel.setFunctionParameters(0, DEFAULT_SINGLE_EXP_PARAMS);
-            //uiPanel.setFunctionParameters(1, DEFAULT_DOUBLE_EXP_PARAMS);
-           // uiPanel.setFunctionParameters(2, DEFAULT_TRIPLE_EXP_PARAMS);
+            uiPanel.setFunctionParameters(1, DEFAULT_DOUBLE_EXP_PARAMS);
+            uiPanel.setFunctionParameters(2, DEFAULT_TRIPLE_EXP_PARAMS);
             uiPanel.setListener(
                 new IUserInterfacePanelListener() {
                     public void doFit() {
@@ -433,6 +435,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     }
    
     private boolean newLoadData(Image<T> image) {
+        System.out.println("Image is " + image);
         int[] dimensions = image.getDimensions();
         System.out.println("dimensions size is " + dimensions.length);
         /*
@@ -491,6 +494,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                         dimensions[lifetimeIndex] = bin;
                         cursor.moveTo(dimensions);
                         m_data[channel][y][x][bin] = (int) cursor.getType().getRealFloat();
+                        m_data[channel][y][x][bin] /= 10.0f; //TODO in accordance with TRI2
                     }
                 }
             }
@@ -504,7 +508,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         //cursor.close();
 
         // patch things up
-        m_timeRange = 10.0f;
+        m_timeRange = 10.0f / 64.0f; //TODO ARG this patches things up in accord with TRI2 for brian/gpl1.sdt; very odd value here
         m_minWave = 400;
         m_waveStep = 10;
 
@@ -744,7 +748,40 @@ public class SLIMProcessor <T extends RealType<T>> {
      */
     private boolean createGlobalGrayScale(String name, final IUserInterfacePanel uiPanel) {
         int[][] pixels = new int[m_width][m_height];
+        byte[] outPixels = new byte[m_width * m_height];
 
+
+        ImageStack imageStack = new ImageStack(m_width, m_height, ColorModel.getRGBdefault(), null);
+        for (int c = 0; c < m_channels; ++c) {
+            // sum photon counts
+            int maxPixel = 0;
+            for (int x = 0; x < m_width; ++x) {
+                for (int y = 0; y < m_height; ++y) {
+                    pixels[x][y] = 0;
+                    for (int b = 0; b < m_timeBins; ++b) {
+                        pixels[x][y] += m_data[c][y][x][b];
+                    }
+                    if (pixels[x][y] > maxPixel) {
+                        maxPixel = pixels[x][y];
+                    }
+                }
+            }
+
+            // convert to grayscale
+            for (int x = 0; x < m_width; ++x) {
+                for (int y = 0; y < m_height; ++y) {
+                    // flip y axis to correspond with Slim Plotter image
+                    outPixels[y * m_width + x] = (byte) (pixels[x][m_height - y - 1] * 255 / maxPixel);
+                }
+            }
+
+            // add a slice
+            imageStack.addSlice("" + c, true, outPixels);
+        }
+        ImagePlus imagePlus = new ImagePlus(name + " GrayScale", imageStack);
+        imagePlus.show();
+        m_grayscaleImageProcessor = imagePlus.getChannelProcessor();
+        /*
         int maxPixel = 0;
         for (int x = 0; x < m_width; ++x) {
             for (int y = 0; y < m_height; ++y) {
@@ -772,7 +809,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
         imagePlus.show();
         m_grayscaleImageProcessor = imageProcessor; //TODO for now
-
+*/
         // hook up mouse listener
         ImageWindow imageWindow = imagePlus.getWindow();
         m_grayscaleCanvas = imageWindow.getCanvas();
@@ -1201,6 +1238,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         yCount = new double[m_timeBins];
         for (int b = 0; b < m_timeBins; ++b) {
             yCount[b] = m_data[m_channel][m_height - y - 1][x][b];
+            //System.out.println("" + b + " " + yCount[b]);
         }
         curveFitData.setYCount(yCount);
         yFitted = new double[m_timeBins];
@@ -1250,6 +1288,8 @@ public class SLIMProcessor <T extends RealType<T>> {
             while (pixelIterator.hasNext()) {
                 ++pixelCount;
                 if (m_cancel) {
+                    IJ.showProgress(0, 0); //TODO kludgy to have this here and also below
+                    dataColorizer.quit();
                     return;
                 }
                 IJ.showProgress(pixelCount, m_height * m_width);
@@ -1279,6 +1319,11 @@ public class SLIMProcessor <T extends RealType<T>> {
             if (!m_cancel && 0 < pixelsToProcessCount) {
                 processPixels(uiPanel, dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
             }
+        }
+        if (m_cancel) {
+            IJ.showProgress(0, 0); //TODO the code below s/b showing progress also
+           // dataColorizer.quit(); //TODO no longer visible in this code
+            return;
         }
  
         // any channels remaining?
@@ -1534,6 +1579,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * 
      * @param dataArray array of data to fit
      */
+    //TODO shouldn't be creating many curveFitters for each chunk of pixels.
     //TODO s/b a mechanism to add these curve fit libraries?
     private void doFit(IUserInterfacePanel uiPanel, ICurveFitData dataArray[]) {
         // do the fit
@@ -1568,7 +1614,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 break;
         }
         curveFitter.setXInc(m_timeRange);
-        curveFitter.setFree(m_free);
+        curveFitter.setFree(uiPanel.getFree());
         curveFitter.fitData(dataArray, m_startBin, m_stopBin);
     }
 
