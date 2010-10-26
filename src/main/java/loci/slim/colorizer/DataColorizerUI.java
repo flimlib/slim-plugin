@@ -77,6 +77,7 @@ import org.jfree.ui.RefineryUtilities;
  */
 public class DataColorizerUI implements IColorizeRangeListener {
     Object m_synchObject = new Object();
+    JFrame m_frame;
     IColorizeRangeListener m_listener;
     Histogram m_histogram;
     ColorBar m_colorBar;
@@ -96,14 +97,14 @@ public class DataColorizerUI implements IColorizeRangeListener {
         m_colorBar = new ColorBar(320, 20, colorize);
         m_inputPanel = new InputPanel(this);
 
-        JFrame frame = new JFrame("Colorize");
-        frame.setDefaultCloseOperation(frame.EXIT_ON_CLOSE);
-        frame.setResizable(false);
-        frame.getContentPane().add(m_histogram, BorderLayout.NORTH);
-        frame.getContentPane().add(m_colorBar, BorderLayout.CENTER);
-        frame.getContentPane().add(m_inputPanel, BorderLayout.SOUTH);
-        frame.pack();
-        frame.setVisible(true);
+        m_frame = new JFrame("Colorize");
+        m_frame.setDefaultCloseOperation(m_frame.EXIT_ON_CLOSE);
+        m_frame.setResizable(false);
+        m_frame.getContentPane().add(m_histogram, BorderLayout.NORTH);
+        m_frame.getContentPane().add(m_colorBar, BorderLayout.CENTER);
+        m_frame.getContentPane().add(m_inputPanel, BorderLayout.SOUTH);
+        m_frame.pack();
+        m_frame.setVisible(true);
     }
 
     void updateData(double lifetime[], double max) {
@@ -131,5 +132,9 @@ public class DataColorizerUI implements IColorizeRangeListener {
 
            m_listener.setRange(auto, start, stop, max);
         }
+    }
+
+    public void quit() {
+        m_frame.dispose(); //TODO ? what should I call here
     }
 }
