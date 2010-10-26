@@ -91,9 +91,6 @@ import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.RealType;
 
-import net.java.sezpoz.Index;
-import net.java.sezpoz.IndexItem;
-
 /**
  * TODO
  *
