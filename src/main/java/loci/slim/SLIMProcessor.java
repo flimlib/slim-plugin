@@ -211,7 +211,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             IUserInterfacePanel uiPanel = new UserInterfacePanel(false); // using lambda
             uiPanel.setX(0);
             uiPanel.setY(0);
-            uiPanel.setStart(0);
+            uiPanel.setStart(m_timeBins / 2);
             uiPanel.setStop(m_timeBins - 1);
             uiPanel.setThreshold(100);
             uiPanel.setFunctionParameters(0, DEFAULT_SINGLE_EXP_PARAMS);
