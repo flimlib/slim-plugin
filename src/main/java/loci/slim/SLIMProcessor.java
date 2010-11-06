@@ -91,6 +91,32 @@ import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.RealType;
 
+
+import mpicbg.imglib.container.Container;
+import mpicbg.imglib.container.basictypecontainer.PlanarAccess;
+import mpicbg.imglib.container.basictypecontainer.array.ArrayDataAccess;
+import mpicbg.imglib.container.basictypecontainer.array.ByteArray;
+import mpicbg.imglib.container.basictypecontainer.array.CharArray;
+import mpicbg.imglib.container.basictypecontainer.array.DoubleArray;
+import mpicbg.imglib.container.basictypecontainer.array.FloatArray;
+import mpicbg.imglib.container.basictypecontainer.array.IntArray;
+import mpicbg.imglib.container.basictypecontainer.array.LongArray;
+import mpicbg.imglib.container.basictypecontainer.array.ShortArray;
+import mpicbg.imglib.container.planar.PlanarContainerFactory;
+import mpicbg.imglib.cursor.Cursor;
+import mpicbg.imglib.cursor.LocalizableByDimCursor;
+import mpicbg.imglib.image.Image;
+import mpicbg.imglib.image.ImageFactory;
+import mpicbg.imglib.type.numeric.RealType;
+import mpicbg.imglib.type.numeric.integer.ByteType;
+import mpicbg.imglib.type.numeric.integer.IntType;
+import mpicbg.imglib.type.numeric.integer.ShortType;
+import mpicbg.imglib.type.numeric.integer.UnsignedByteType;
+import mpicbg.imglib.type.numeric.integer.UnsignedIntType;
+import mpicbg.imglib.type.numeric.integer.UnsignedShortType;
+import mpicbg.imglib.type.numeric.real.DoubleType;
+import mpicbg.imglib.type.numeric.real.FloatType;
+
 /**
  * TODO
  *
@@ -105,6 +131,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     private static final String Y = "Y";
     private static final String LIFETIME = "Lifetime";
     private static final String CHANNELS = "Channels";
+    private static final boolean USE_TAU = true;
+    private static final boolean USE_LAMBDA = false;
 
     // this affects how lifetimes are colorized:
     private static final double MAXIMUM_LIFETIME = 0.075; // for fitting fake with Jaolho // for fitting brian with barber triple integral 100.0f X tau vs lambda issue here
@@ -125,6 +153,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     private static final double[] DEFAULT_SINGLE_EXP_PARAMS = { 100.0, 0.5, 0.5 };
     private static final double[] DEFAULT_DOUBLE_EXP_PARAMS = { 50.0, 0.5, 50, 0.25, 0.5 };
     private static final double[] DEFAULT_TRIPLE_EXP_PARAMS = { 40.0, 0.5, 30.0, 0.25, 30, 0.10, 0.5 };
+    private static final double[] DEFAULT_STRETCH_EXP_PARAMS = { 100.0, 0.5, 0.5, 0.5 };
 
     private Object m_synchFit = new Object();
     private volatile boolean m_quit;
@@ -145,6 +174,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 
     private ImageProcessor m_grayscaleImageProcessor;
     private Canvas m_grayscaleCanvas;
+
+    private Image<DoubleType> m_fittedImage = null;
+    private int m_fittedComponents = 0;
 
     // data parameters //TODO Curtis has these as protected
     private int m_width;
@@ -214,6 +246,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             uiPanel.setFunctionParameters(0, DEFAULT_SINGLE_EXP_PARAMS);
             uiPanel.setFunctionParameters(1, DEFAULT_DOUBLE_EXP_PARAMS);
             uiPanel.setFunctionParameters(2, DEFAULT_TRIPLE_EXP_PARAMS);
+            uiPanel.setFunctionParameters(3, DEFAULT_STRETCH_EXP_PARAMS);
             uiPanel.setListener(
                     new IUserInterfacePanelListener() {
                         public void doFit() {
@@ -240,52 +273,6 @@ public class SLIMProcessor <T extends RealType<T>> {
             // loops infinitely; waits for UI
             doFits(uiPanel);
         }
-
-     /*       while (true) {
-                // ask what kind fo fit
-                if (!showFitDialog()) {
-                    break;
-                }
-                // ask for fit parameters
-                if (!showFitParamsDialog()) {
-                    break;
-                }
-                fitData();
-            }
-        } */
-        /*
-        m_width = ImageUtils.getWidth(image);
-        m_height = ImageUtils.getHeight(image);
-        m_timeBins = ImageUtils.getDimSize(image, FormatTools.LIFETIME, 0);
-        
-        m_data = new int[m_channels][m_height][m_width][m_timeBins];
-        final LocalizableByDimCursor<?> cursor = image.createLocalizableByDimCursor();
-        int x, y, bin, channel;
-        for (channel = 0; channel < m_channels; ++channel) {
-            if (null != channelIndex) {
-                dimensions[channelIndex] = channel;
-            }
-            for (y = 0; y < m_height; ++y) {
-                dimensions[yIndex] = y;
-                for (x = 0; x < m_width; ++x) {
-                    dimensions[xIndex] = x;
-                    for (bin = 0; bin < m_timeBins; ++bin) {
-                        dimensions[lifetimeIndex] = bin;
-                        cursor.moveTo(dimensions);
-                        m_data[channel][y][x][bin] = (int) cursor.getType().getRealFloat();
-                        if (m_data[channel][y][x][bin] > 100 && ++m_debug < 100) {
-                            System.out.println("m_data " + m_data[channel][y][x][bin] + " cursor " + cursor.getType().getRealFloat());
-                        }
-                    }
-                }
-            }
-        }
-
-        // patch things up
-        m_timeRange = 10.0f;
-        m_minWave = 400;
-        m_waveStep = 10;
-        */
     }
 
     /**
@@ -312,7 +299,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         if (success) {
             // show the UI; do fits
-            IUserInterfacePanel uiPanel = new UserInterfacePanel(false); // using lambda
+            IUserInterfacePanel uiPanel = new UserInterfacePanel(USE_TAU);
             uiPanel.setX(0);
             uiPanel.setY(0);
             uiPanel.setStart(m_timeBins / 2);
@@ -321,6 +308,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             uiPanel.setFunctionParameters(0, DEFAULT_SINGLE_EXP_PARAMS);
             uiPanel.setFunctionParameters(1, DEFAULT_DOUBLE_EXP_PARAMS);
             uiPanel.setFunctionParameters(2, DEFAULT_TRIPLE_EXP_PARAMS);
+            uiPanel.setFunctionParameters(3, DEFAULT_STRETCH_EXP_PARAMS);
             uiPanel.setListener(
                 new IUserInterfacePanelListener() {
                     public void doFit() {
@@ -351,7 +339,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 
     /**
      * Loops until quitting time and handles fit requests.
-     * Fitting is driven by a button on the UI panel.
+     * Fitting is driven by a button on the UI panel which
+     * sets the global m_fitInProgress.
      *
      * @param uiPanel
      */
@@ -371,7 +360,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             // get settings of requested fit
             getFitSettings(uiPanel);
 
-            fitData(uiPanel); //TODO currently also diddles with m_fitInProgress; uses synch block
+            fitData(uiPanel);
 
             m_fitInProgress = false;
             uiPanel.reset();
@@ -379,19 +368,19 @@ public class SLIMProcessor <T extends RealType<T>> {
     }
 
     private void getFitSettings(IUserInterfacePanel uiPanel) {
-        m_region = uiPanel.getRegion();
-        m_algorithm = uiPanel.getAlgorithm();
-        m_function = uiPanel.getFunction();
+        m_region       = uiPanel.getRegion();
+        m_algorithm    = uiPanel.getAlgorithm();
+        m_function     = uiPanel.getFunction();
 
-        m_x = uiPanel.getX();
-        m_y = uiPanel.getY();
-        m_startBin = uiPanel.getStart();
-        m_stopBin = uiPanel.getStop();
-        m_threshold = uiPanel.getThreshold();
+        m_x            = uiPanel.getX();
+        m_y            = uiPanel.getY();
+        m_startBin     = uiPanel.getStart();
+        m_stopBin      = uiPanel.getStop();
+        m_threshold    = uiPanel.getThreshold();
 
-        int components = uiPanel.getComponents();
-        m_param = uiPanel.getParameters();
-        m_free = uiPanel.getFree();
+        int components = uiPanel.getComponents(); //TODO warum?
+        m_param        = uiPanel.getParameters();
+        m_free         = uiPanel.getFree();
     }
 
     /**
@@ -435,29 +424,6 @@ public class SLIMProcessor <T extends RealType<T>> {
         System.out.println("Image is " + image);
         int[] dimensions = image.getDimensions();
         System.out.println("dimensions size is " + dimensions.length);
-        /*
-        Map map = dimensionMap(image.getName());
-        Integer xIndex, yIndex, lifetimeIndex, channelIndex;
-        xIndex = (Integer) map.get(X);
-        yIndex = (Integer) map.get(Y);
-        lifetimeIndex = (Integer) map.get(LIFETIME);
-        if (null != xIndex && null != yIndex && null != lifetimeIndex) {
-            m_width = dimensions[xIndex];
-            m_height = dimensions[yIndex];
-            m_timeBins = dimensions[lifetimeIndex];
-        }
-        else {
-            System.out.println("Can't find dimensions of .sdt Image " + image.getName());
-            return false;
-        }
-        m_channels = 1;
-        channelIndex = (Integer) map.get(CHANNELS);
-        if (null != channelIndex) {
-            System.out.println("Do have channel dimension");
-            m_channels = dimensions[channelIndex];
-        }
-        else System.out.println("Don't have channel dimension");
-        */
         Integer xIndex, yIndex, lifetimeIndex, channelIndex;
         m_width = ImageUtils.getWidth(image);
         m_height = ImageUtils.getHeight(image);
@@ -504,89 +470,23 @@ public class SLIMProcessor <T extends RealType<T>> {
         //System.out.println("\tType = " + cursor.getType().getClass().getName());
         //cursor.close();
 
+        //TODO from a former version:
+     //TODO won't compile with my version of the jar: Number timeBase = (Number) m_reader.getGlobalMetadata().get("time base");
+     //TODO fix:
+         //   Number timeBase = null;
+         //   m_timeRange = timeBase == null ? Float.NaN : timeBase.floatValue();
+         ////   if (m_timeRange != m_timeRange) m_timeRange = 10.0f;
+         //   m_minWave = 400;
+         //   m_waveStep = 10;
+            //m_binRadius = 3;
+
+
         // patch things up
         m_timeRange = 10.0f / 64.0f; //TODO ARG this patches things up in accord with TRI2 for brian/gpl1.sdt; very odd value here
         m_minWave = 400;
         m_waveStep = 10;
 
         return true;
-    }
-
-    /*
-     * This method parses a string of the format:
-     * "Name [X Y Timebins]" and builds a map with
-     * the dimensions 'X', 'Y', and 'Timebins' mapped
-     * to the dimension indices.
-     *
-     * Temporary kludge.
-     */
-    private Map<String, Integer> dimensionMap(String name) {
-        System.out.println("name is " + name);
-        Map<String, Integer> map = new HashMap<String, Integer>();
-        int startIndex = name.indexOf('[') + 1;
-        int endIndex = name.indexOf(']');
-        String coded = name.substring(startIndex, endIndex);
-        String dimensions[] = coded.split(" ");
-        int index = 0;
-        for (String dimension : dimensions) {
-            map.put(dimension, index++);
-        }
-        return map;
-    }
-
-    /**
-     * Loads the .sdt file.
-     * Based on the loci.slim.SlimData constructor.
-     *
-     * @param file
-     * @return whether successful
-     */
-    private boolean loadFile(String file) {
-        if (m_fakeData) return true;
-        boolean status = false;
-        try {
-            // read file header
-            m_reader = new ChannelSeparator();
-            m_reader.setId(file);
-            m_width = m_reader.getSizeX();
-            m_height = m_reader.getSizeY();
-            m_cLengths = m_reader.getChannelDimLengths();
-            String[] cTypes = m_reader.getChannelDimTypes();
-            m_timeBins = m_channels = 1;
-            m_lifetimeIndex = m_spectraIndex = -1;
-            for (int i=0; i<cTypes.length; i++) {
-                if (cTypes[i].equals(FormatTools.LIFETIME)) {
-                    m_timeBins = m_cLengths[i];
-                    m_lifetimeIndex = i;
-                }
-                else if (cTypes[i].equals(FormatTools.SPECTRA)) {
-                    m_channels = m_cLengths[i];
-                    m_spectraIndex = i;
-                }
-                else if (m_lifetimeIndex < 0 && cTypes[i].equals(FormatTools.CHANNEL)) {
-                    m_timeBins = m_cLengths[i];
-                    m_lifetimeIndex = i;
-                }
-            }
-            m_little = m_reader.isLittleEndian();
-            m_pixelType = m_reader.getPixelType();
-            m_bpp = FormatTools.getBytesPerPixel(m_pixelType);
-            m_floating = FormatTools.isFloatingPoint(m_pixelType);
-
-     //TODO won't compile with my version of the jar: Number timeBase = (Number) m_reader.getGlobalMetadata().get("time base");
-     //TODO fix:
-            Number timeBase = null;
-            m_timeRange = timeBase == null ? Float.NaN : timeBase.floatValue();
-            if (m_timeRange != m_timeRange) m_timeRange = 10.0f;
-            m_minWave = 400;
-            m_waveStep = 10;
-            //m_binRadius = 3;
-            status = true;
-        }
-        catch (Exception e) {
-
-        }
-        return status;
     }
 
     /**
@@ -687,56 +587,6 @@ public class SLIMProcessor <T extends RealType<T>> {
     }
 
     /**
-     * Loads the data from the .sdt file.
-     * Based on loci.slim.SlimData constructor.
-     *
-     * @return whether successful
-     */
-    private boolean loadData() {
-        boolean success = false;
-        try {
-            byte[] plane = new byte[m_bpp * m_height * m_width];
-            m_data = new int[m_channels][m_height][m_width][m_timeBins];
-            int imageCount = m_reader.getImageCount();
-            for (int i=0; i<imageCount; i++) {
-                int[] zct = m_reader.getZCTCoords(i);
-                if (zct[0] != 0 || zct[2] != 0) {
-                    continue; // process only first Z and T
-                }
-                int[] sub = FormatTools.rasterToPosition(m_cLengths, zct[1]);
-                int c = m_spectraIndex < 0 ? 0 : sub[m_spectraIndex];
-                int t = m_lifetimeIndex < 0 ? 0 : sub[m_lifetimeIndex];
-                m_reader.openBytes(i, plane, 0, 0, m_width, m_height);
-                for (int y=0; y<m_height; y++) {
-                    for (int x=0; x<m_width; x++) {
-                        int index = m_bpp * (y * m_width + x);
-                        int val;
-                        if (m_pixelType == FormatTools.FLOAT) {
-                            val = (int) DataTools.bytesToFloat(plane, index, m_bpp, m_little);
-                        }
-                        else if (m_pixelType == FormatTools.DOUBLE) {
-                            val = (int) DataTools.bytesToDouble(plane, index, m_bpp, m_little);
-                        }
-                        else if (!m_floating) {
-                            val = DataTools.bytesToInt(plane, index, m_bpp, m_little);
-                        }
-                        else {
-                            throw new FormatException("Unsupported pixel type: " +
-                                FormatTools.getPixelTypeString(m_pixelType));
-                        }
-                        m_data[c][y][x][t] = val;
-                    }
-                }
-            }
-            m_reader.close();
-            success = true;
-        }
-        catch (Exception e) {
-        }
-        return success;
-    }
-
-    /**
      * This routine sums all of the photon data and creates a grayscale
      * image for the data.
      *
@@ -778,35 +628,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         ImagePlus imagePlus = new ImagePlus(name + " GrayScale", imageStack);
         imagePlus.show();
         m_grayscaleImageProcessor = imagePlus.getChannelProcessor();
-        /*
-        int maxPixel = 0;
-        for (int x = 0; x < m_width; ++x) {
-            for (int y = 0; y < m_height; ++y) {
-                pixels[x][y] = 0;
-                for (int c = 0; c < m_channels; ++c) {
-                    for (int b = 0; b < m_timeBins; ++b) {
-                        //System.out.println("x " + x + " y " + y + " c " + c + " b " + b);
-                        pixels[x][y] += m_data[c][y][x][b];
-                    }
-                }
-                if (pixels[x][y] > maxPixel) {
-                    maxPixel = pixels[x][y];
-                }
-            }
-        }
 
-        ImageProcessor imageProcessor = new ByteProcessor(m_width, m_height);
-        ImagePlus imagePlus = new ImagePlus(name + " GrayScale", imageProcessor);
-        byte[] outPixels = (byte[]) imageProcessor.getPixels();
-        for (int x = 0; x < m_width; ++x) {
-            for (int y = 0; y < m_height; ++y) {
-                // flip y axis to correspond with Slim Plotter image
-                outPixels[y * m_width + x] = (byte) (pixels[x][m_height - y - 1] * 255 / maxPixel);
-            }
-        }
-        imagePlus.show();
-        m_grayscaleImageProcessor = imageProcessor; //TODO for now
-*/
         // hook up mouse listener
         ImageWindow imageWindow = imagePlus.getWindow();
         m_grayscaleCanvas = imageWindow.getCanvas();
@@ -820,9 +642,12 @@ public class SLIMProcessor <T extends RealType<T>> {
                 public void mouseReleased(MouseEvent e) {
                     // just ignore clicks during a fit
                     if (!m_fitInProgress) {
-                        uiPanel.setX(e.getX());
-                        uiPanel.setY(e.getY());
-                        fitPixel(uiPanel, e.getX(), e.getY());
+                        synchronized (m_synchFit) {
+                            uiPanel.setX(e.getX());
+                            uiPanel.setY(e.getY());
+                            // fit on the pixel clicked
+                            fitPixel(uiPanel, e.getX(), e.getY());
+                        }
                     }
                 }
             }
@@ -830,257 +655,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         return true;
     }
 
-    /**
-     * This dialog box collects settings relating to the fit.  Pressing OK
-     * starts the fit, Cancel cancels the whole plugin.
-     *
-     * @return
+    /*
+     * Fits the data as requested by UI.
      */
-    private boolean XshowFitDialog() {
-        NonBlockingGenericDialog dialog = new NonBlockingGenericDialog("Fit Type");
-        dialog.addChoice(
-            "Region",
-            new String[] { "Sum all", "Sum each ROI", "Single pixel", "Each pixel" },
-            "Each pixel");
-        dialog.addChoice(
-            "Algorithm",
-            new String[] { "Jaolho", /*"Akutan",*/ "old Barber RLD", "old Barber LMA", "Markwardt", "Barber NR RLD", "Barber NR LMA", "SLIMCurve RLD", "SLIMCurve LMA" },
-            "Jaolho");
-        dialog.addChoice(
-            "Function",
-            new String[] { "Single Exponential", "Double Exponential", "Triple Exponential", "Stretched Exponential" },
-            "Single Exponential");
-        dialog.showDialog();
-        if (dialog.wasCanceled()) {
-            return false;
-        }
-        m_region = FitRegion.class.getEnumConstants()[dialog.getNextChoiceIndex()];
-        m_algorithm = FitAlgorithm.class.getEnumConstants()[dialog.getNextChoiceIndex()];
-        m_function = FitFunction.class.getEnumConstants()[dialog.getNextChoiceIndex()];
-        return true;
-    }
-
-    // The following was an attempt to drive the fitting process from the OK button on the
-    // Fit Dialog.
-/*    private class MyDialogListener implements DialogListener {
-        public boolean dialogItemChanged(GenericDialog dialog, AWTEvent e) {
-            if (dialog.equals(m_fitDialog)) {
-                if (dialog.wasCanceled()) {
-                    System.out.println("Dialgo canceled");
-                    m_done = true;
-                }
-                else if (dialog.wasOKed()) {
-                    System.out.println("Dialog okayed");
-                    m_region = FitRegion.class.getEnumConstants()[dialog.getNextChoiceIndex()];
-                    m_algorithm = FitAlgorithm.class.getEnumConstants()[dialog.getNextChoiceIndex()];
-                    m_function = FitFunction.class.getEnumConstants()[dialog.getNextChoiceIndex()];
-
-                    // ask for fit parameters
-                    if (showFitParamsDialog()) {
-                        System.out.println("ABOUT TO FIT");
-                        fitData();
-                        showFitDialog(); // probably not the best way to do this
-                    }
-                    else System.out.println("FIT PARAMS DIALOG CACNELLDE");
-                }
-                else System.out.println("NOT CANCELLED OR OKAYED<, SOMETHING ELSE");
-            }
-            return true;
-        }
-    }*///TODO unfortunately NonBlockingGenericDialog doesn't call this for OK or Cancel button!
-
-    /**
-     * This dialog box collects settings for the current fit.
-     *
-     * @return
-     */
-    private boolean XshowFitParamsDialog() {
-        GenericDialog dialog = new GenericDialog("Fit Params");
-        if (FitRegion.POINT == m_region) {
-            dialog.addNumericField("X", m_x, 0);
-            dialog.addNumericField("Y", m_y, 0);
-        }
-        switch (m_function) {
-            /*
-            case SINGLE_EXPONENTIAL:
-                dialog.addNumericField("A", m_fitA1, 5);
-                dialog.addCheckbox("Fix", m_fitA1fixed);
-                dialog.addNumericField("" + LAMBDA, m_fitT1, 5);
-                dialog.addCheckbox("Fix", m_fitT1fixed);
-                dialog.addNumericField("C", m_fitC, 5);
-                dialog.addCheckbox("Fix", m_fitCfixed);
-                break;
-            case DOUBLE_EXPONENTIAL:
-                dialog.addNumericField("A1", m_fitA1, 5);
-                dialog.addCheckbox("Fix", m_fitA1fixed);
-                dialog.addNumericField("" + LAMBDA + "1", m_fitT1, 5);
-                dialog.addCheckbox("Fix", m_fitT1fixed);
-                dialog.addNumericField("A2", m_fitA2, 5);
-                dialog.addCheckbox("Fix", m_fitA2fixed);
-                dialog.addNumericField("" + LAMBDA + "2", m_fitT2, 5);
-                dialog.addCheckbox("Fix", m_fitT2fixed);
-                dialog.addNumericField("C", m_fitC, 5);
-                dialog.addCheckbox("Fix", m_fitCfixed);
-                break;
-            case TRIPLE_EXPONENTIAL:
-                dialog.addNumericField("A1", m_fitA1, 5);
-                dialog.addCheckbox("Fix", m_fitA1fixed);
-                dialog.addNumericField("" + LAMBDA + "1", m_fitT1, 5);
-                dialog.addCheckbox("Fix", m_fitT1fixed);
-                dialog.addNumericField("A2", m_fitA2, 5);
-                dialog.addCheckbox("Fix", m_fitA2fixed);
-                dialog.addNumericField("" + LAMBDA + "2", m_fitT2, 5);
-                dialog.addCheckbox("Fix", m_fitT2fixed);
-                dialog.addNumericField("A3", m_fitA3, 5);
-                dialog.addCheckbox("Fix", m_fitA3fixed);
-                dialog.addNumericField("" + LAMBDA + "3", m_fitT3, 5);
-                dialog.addCheckbox("Fix", m_fitT3fixed);
-                dialog.addNumericField("C", m_fitC, 5);
-                dialog.addCheckbox("Fix", m_fitCfixed);
-                break;
-            case STRETCHED_EXPONENTIAL:
-                break;
-            */
-            case SINGLE_EXPONENTIAL:
-                dialog.addNumericField("A",
-                        m_param[0], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[0]);
-                dialog.addNumericField("" + LAMBDA,
-                        m_param[1], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[1]);
-                dialog.addNumericField("C",
-                        m_param[2], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[2]);
-                break;
-            case DOUBLE_EXPONENTIAL:
-                dialog.addNumericField("A" + SUB_1,
-                        m_param[0], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[0]);
-                dialog.addNumericField("" + LAMBDA + SUB_1,
-                        m_param[1], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[1]);
-                dialog.addNumericField("A" + SUB_2,
-                        m_param[2], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[2]);
-                dialog.addNumericField("" + LAMBDA + SUB_2,
-                        m_param[3], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[3]);
-                dialog.addNumericField("C",
-                        m_param[4], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[4]);
-                break;
-            case TRIPLE_EXPONENTIAL:
-                dialog.addNumericField("A" + SUB_1,
-                        m_param[0], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[0]);
-                dialog.addNumericField("" + LAMBDA + SUB_1,
-                        m_param[1], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[1]);
-                dialog.addNumericField("A" + SUB_2,
-                        m_param[2], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[2]);
-                dialog.addNumericField("" + LAMBDA + SUB_2,
-                        m_param[3], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[3]);
-                dialog.addNumericField("A" + SUB_3,
-                        m_param[4], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[4]);
-                dialog.addNumericField("" + LAMBDA + SUB_3,
-                        m_param[5], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[5]);
-                dialog.addNumericField("C",
-                        m_param[6], 5);
-                dialog.addCheckbox("Fix",
-                        !m_free[6]);
-                break;
-            case STRETCHED_EXPONENTIAL:
-                break;
-
-        }
-        if (0 == m_stopBin) {
-            m_stopBin = m_timeBins - 1;
-        }
-        dialog.addNumericField("Start", m_startBin, 0, 2, "bins");
-        dialog.addNumericField("Stop", m_stopBin, 0, 2, "bins");
-        dialog.addNumericField("Start X", m_startX, 0, 2, "bins");
-        dialog.addNumericField("Threshold", m_threshold, 0, 2, "photons");
-        dialog.addNumericField("" + CHI + SQUARE + " Target", m_chiSqTarget, 0, 2, null);
-        dialog.showDialog();
-        if (dialog.wasCanceled()) {
-            return false;
-        }
-        if (FitRegion.POINT == m_region) {
-            m_x = (int) dialog.getNextNumber();
-            m_y = (int) dialog.getNextNumber();
-        }
-        switch (m_function) {
-            case SINGLE_EXPONENTIAL:
-                m_param[0] = dialog.getNextNumber();
-                m_free[0] = !dialog.getNextBoolean();
-                m_param[1] = dialog.getNextNumber();
-                m_free[1] = !dialog.getNextBoolean();
-                m_param[2] = dialog.getNextNumber();
-                m_free[2] = !dialog.getNextBoolean();
-                break;
-            case DOUBLE_EXPONENTIAL:
-                m_param[0] = dialog.getNextNumber();
-                m_free[0] = !dialog.getNextBoolean();
-                m_param[1] = dialog.getNextNumber();
-                m_free[1] = !dialog.getNextBoolean();
-                m_param[2] = dialog.getNextNumber();
-                m_free[2] = !dialog.getNextBoolean();
-                m_param[3] = dialog.getNextNumber();
-                m_free[3] = !dialog.getNextBoolean();
-                m_param[4] = dialog.getNextNumber();
-                m_free[4] = !dialog.getNextBoolean();
-                break;
-            case TRIPLE_EXPONENTIAL:
-                m_param[0] = dialog.getNextNumber();
-                m_free[0] = !dialog.getNextBoolean();
-                m_param[1] = dialog.getNextNumber();
-                m_free[1] = !dialog.getNextBoolean();
-                m_param[2] = dialog.getNextNumber();
-                m_free[2] = !dialog.getNextBoolean();
-                m_param[3] = dialog.getNextNumber();
-                m_free[3] = !dialog.getNextBoolean();
-                m_param[4] = dialog.getNextNumber();
-                m_free[4] = !dialog.getNextBoolean();
-                m_param[5] = dialog.getNextNumber();
-                m_free[5] = !dialog.getNextBoolean();
-                m_param[6] = dialog.getNextNumber();
-                m_free[6] = !dialog.getNextBoolean();
-               break;
-            case STRETCHED_EXPONENTIAL:
-                break;
-        }
-        m_startBin = (int) dialog.getNextNumber();
-        m_stopBin  = (int) dialog.getNextNumber();
-        m_startX = (int) dialog.getNextNumber();
-        m_threshold = (int) dialog.getNextNumber();
-      //  m_chiSqTarget = (double) dialog.getNextNumber();
-        return true;
-    }
-
     private void fitData(IUserInterfacePanel uiPanel) {
         // only one fit at a time
         synchronized (m_synchFit) {
-            // disable mouse click pixel fits
-            m_fitInProgress = true;
-            
             switch (m_region) {
                 case SUMMED:
                     // sum all pixels
@@ -1099,7 +679,6 @@ public class SLIMProcessor <T extends RealType<T>> {
                     fitEachPixel(uiPanel);
                     break;
             }
-            m_fitInProgress = false;
         }
     }
 
@@ -1139,7 +718,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-        doFit(uiPanel, dataArray);
+        getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
 
         // show decay and update UI parameters
         showDecayGraph(uiPanel, dataArray);
@@ -1187,7 +766,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-        doFit(uiPanel, dataArray);
+        getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
         
         showDecayGraph(uiPanel, dataArray);
         
@@ -1244,7 +823,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-        doFit(uiPanel, dataArray);
+        getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
         
         showDecayGraph(uiPanel, dataArray);
 
@@ -1262,8 +841,23 @@ public class SLIMProcessor <T extends RealType<T>> {
      */
     private void fitEachPixel(IUserInterfacePanel uiPanel) {
         long start = System.nanoTime();
-        
+
+        ICurveFitter curveFitter = getCurveFitter(uiPanel);     
         double params[] = uiPanel.getParameters();
+
+        boolean useFittedParams;
+        LocalizableByDimCursor<DoubleType> cursor = null;
+        if (null == m_fittedImage || uiPanel.getComponents() != m_fittedComponents) {
+            // can't use previous results
+            useFittedParams = false;
+            m_fittedComponents = uiPanel.getComponents();
+            m_fittedImage = makeImage(100, 200, m_fittedComponents);
+        }
+        else {
+            // ask UI whether to use previous results
+            useFittedParams = uiPanel.refineFit();
+        }
+        cursor = m_fittedImage.createLocalizableByDimCursor();
         
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
@@ -1287,13 +881,19 @@ public class SLIMProcessor <T extends RealType<T>> {
                 if (m_cancel) {
                     IJ.showProgress(0, 0); //TODO kludgy to have this here and also below
                     dataColorizer.quit();
+                    cancelImageFit();
                     return;
                 }
                 IJ.showProgress(pixelCount, m_height * m_width);
                 ChunkyPixel pixel = pixelIterator.next();
                 if (wantFitted(pixel.getX(), pixel.getY())) {
                     curveFitData = new CurveFitData();
-                    curveFitData.setParams(params.clone());
+                    curveFitData.setX(pixel.getX());
+                    curveFitData.setY(pixel.getY());
+                    curveFitData.setParams(
+                            useFittedParams ?
+                                getFittedParams(cursor, pixel.getX(), pixel.getY(), m_fittedComponents) :
+                                params.clone());
                     yCount = new double[m_timeBins];
                     for (int b = 0; b < m_timeBins; ++b) {
                         yCount[b] = m_data[visibleChannel][pixel.getY()][pixel.getX()][b];
@@ -1306,7 +906,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 
                     if (++pixelsToProcessCount >= PIXEL_COUNT) {
-                        processPixels(uiPanel, dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
+                        ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
+                        curveFitter.fitData(data, m_startBin, m_stopBin);
+                        setFittedParamsFromData(cursor, data);
+                        colorizePixels(dataColorizer, m_height, data, pixelList.toArray(new ChunkyPixel[0]));
+
                         curveFitDataList.clear();
                         pixelList.clear();
                         pixelsToProcessCount = 0;
@@ -1314,12 +918,16 @@ public class SLIMProcessor <T extends RealType<T>> {
                 }
             }
             if (!m_cancel && 0 < pixelsToProcessCount) {
-                processPixels(uiPanel, dataColorizer, m_height, curveFitDataList.toArray(new ICurveFitData[0]), pixelList.toArray(new ChunkyPixel[0]));
+                ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
+                curveFitter.fitData(data, m_startBin, m_stopBin);
+                setFittedParamsFromData(cursor, data);
+                colorizePixels(dataColorizer, m_height, data, pixelList.toArray(new ChunkyPixel[0]));
             }
         }
         if (m_cancel) {
             IJ.showProgress(0, 0); //TODO the code below s/b showing progress also
            // dataColorizer.quit(); //TODO no longer visible in this code
+            cancelImageFit();
             return;
         }
  
@@ -1338,11 +946,17 @@ public class SLIMProcessor <T extends RealType<T>> {
                                 for (int channel = 0; channel < m_channels; ++channel) {
                                     if (channel != visibleChannel) {
                                         if (m_cancel) {
+                                            cancelImageFit();
                                             return;
                                         }
                                         if (wantFitted(bounds.x + x, bounds.y + y)) {
                                             curveFitData = new CurveFitData();
-                                            curveFitData.setParams(params.clone());
+                                            curveFitData.setX(bounds.x + x);
+                                            curveFitData.setY(bounds.y + y);
+                                            curveFitData.setParams(
+                                                    useFittedParams ?
+                                                        getFittedParams(cursor, bounds.x + x, bounds.y + y, m_fittedComponents) :
+                                                        params.clone());
                                             yCount = new double[m_timeBins];
                                             for (int b = 0; b < m_timeBins; ++b) {
                                                 yCount[b] = m_data[channel][y][x][b];
@@ -1366,11 +980,17 @@ public class SLIMProcessor <T extends RealType<T>> {
                         for (int y = 0; y < m_height; ++y) {
                             for (int x = 0; x < m_width; ++x) {
                                 if (m_cancel) {
+                                    cancelImageFit();
                                     return;
                                 }
                                 if (aboveThreshold(x, y)) {
                                     curveFitData = new CurveFitData();
-                                    curveFitData.setParams(params.clone());
+                                    curveFitData.setX(x);
+                                    curveFitData.setY(y);
+                                    curveFitData.setParams(
+                                            useFittedParams ?
+                                                getFittedParams(cursor, x, y, m_fittedComponents) :
+                                                params.clone());
                                     yCount = new double[m_timeBins];
                                     for (int b = 0; b < m_timeBins; ++b) {
                                         yCount[b] = m_data[channel][y][x][b];
@@ -1390,26 +1010,94 @@ public class SLIMProcessor <T extends RealType<T>> {
         //TODO break the fit up into chunks to lower memory requirements
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
         if (m_cancel) {
+            cancelImageFit();
             return;
         }
-        doFit(uiPanel, dataArray);
-        //TODO save results
+        // do the fit
+        curveFitter.fitData(dataArray, m_startBin, m_stopBin);
+        // save the fitted information
+        setFittedParamsFromData(cursor, dataArray);
+
+        uiPanel.setFittedComponents(m_fittedComponents); //TODO kind of strange since I got that info from uiPanel earlier...  This s/b reset(true) or something
+
+        ImagePlus imp = ImageUtils.createImagePlus(m_fittedImage, "Fitted results");
+        IJ.runPlugIn(imp, "imagej.visad.VisADPlugin", "");
 
         long elapsed = System.nanoTime() - start;
         System.out.println("nanoseconds " + elapsed);
     }
 
     /**
-     * Processes (fits) a batch of pixels.
+     * Helper routine to create imglib.Image to store fitted results.
+     *
+     * @param width
+     * @param height
+     * @param components
+     * @return
+     */
+    private Image<DoubleType> makeImage(int width, int height, int components) {
+        Image<DoubleType> image = null;
+
+        // create image object
+        int dim[] = { width, height, components }; //TODO when we keep chi square in image  ++components };
+        image = new ImageFactory<DoubleType>(new DoubleType(), new PlanarContainerFactory()).createImage(dim, "Fitted");
+
+        // initialize image
+        Cursor<DoubleType> cursor = image.createCursor();
+        while (cursor.hasNext()) {
+            cursor.fwd();
+            cursor.getType().set(Double.NaN);
+        }
+
+        return image;
+    }
+
+    private double[] getFittedParams(LocalizableByDimCursor<DoubleType> cursor, int x, int y, int components) {
+        double params[] = new double[components];
+        int position[] = new int[3];
+        position[0] = x;
+        position[1] = y;
+        for (int i = 0; i < components; ++i) {
+            position[2] = i;
+            cursor.setPosition(position);
+            params[i] = cursor.getType().getRealDouble();
+        }
+        return params;
+    }
+
+    private void setFittedParamsFromData(LocalizableByDimCursor<DoubleType> cursor, ICurveFitData dataArray[]) {
+        int x, y;
+        double[] params;
+        for (ICurveFitData data : dataArray) {
+            setFittedParams(cursor, data.getX(), data.getY(), data.getParams());
+        }
+    }
+
+    private void setFittedParams(LocalizableByDimCursor<DoubleType> cursor, int x, int y, double[] params) {
+        int position[] = new int[3];
+        position[0] = x;
+        position[1] = y;
+        for (int i = 0; i < params.length; ++i) {
+            position[2] = i;
+            cursor.setPosition(position);
+            cursor.getType().set(params[i]);
+        }
+    }
+
+    private void cancelImageFit() {
+        m_fittedImage = null;
+        m_fittedComponents = 0;
+    }
+
+    /**
+     * Visibly processes a batch of pixels.
      *
      * @param dataColorizer automatically sets colorization range and updates colorized image
      * @param height passed in to fix a vertical orientation problem
      * @param data list of data corresponding to pixels to be fitted
      * @param pixels parallel list of rectangles with which to draw the fitted pixel
      */
-    void processPixels(IUserInterfacePanel uiPanel, DataColorizer dataColorizer, int height, ICurveFitData data[], ChunkyPixel pixels[]) {
-        doFit(uiPanel, data);
-        //TODO save results
+    void colorizePixels(DataColorizer dataColorizer, int height, ICurveFitData data[], ChunkyPixel pixels[]) {
 
         // draw as you go; 'chunky' pixels get smaller as the overall fit progresses
         for (int i = 0; i < pixels.length; ++i) {
@@ -1572,14 +1260,11 @@ public class SLIMProcessor <T extends RealType<T>> {
     }
 
     /*
-     * Helper function for the fit.  Does the actual fit.
-     * 
-     * @param dataArray array of data to fit
+     * Gets the appropriate curve fitter for the current fit.
+     *
+     * @param uiPanel has curve fitter selection
      */
-    //TODO shouldn't be creating many curveFitters for each chunk of pixels.
-    //TODO s/b a mechanism to add these curve fit libraries?
-    private void doFit(IUserInterfacePanel uiPanel, ICurveFitData dataArray[]) {
-        // do the fit
+    private ICurveFitter getCurveFitter(IUserInterfacePanel uiPanel) {
         ICurveFitter curveFitter = null;
         switch (uiPanel.getAlgorithm()) {
             case JAOLHO:
@@ -1612,7 +1297,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(uiPanel.getFree());
-        curveFitter.fitData(dataArray, m_startBin, m_stopBin);
+        return curveFitter;
     }
 
     /*
