@@ -42,10 +42,12 @@ import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.RealType;
 
 /**
+ * With this class the plugin is invoked automatically when a
+ * file with the required dimensions is opened in ImageJ.
  *
- * @author aivar
+ * @author Aivar Grislis
  */
-@Dimensions(required="X,Y,Lifetime", optional="Channel")
+@Dimensions(required="X,Y,Lifetime", optional="Channel,Spectra")
 public class SLIMPlugInAuto implements IAutoDisplayPlugin {
     private Image<?> m_image;
 
