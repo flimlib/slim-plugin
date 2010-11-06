@@ -167,6 +167,13 @@ public interface IUserInterfacePanel {
     public int getComponents();
 
     /**
+     * Sets number of fitted components after a successful fit.
+     *
+     * @param components
+     */
+    public void setFittedComponents(int components);
+
+    /**
      * Gets the parameters of the fit
      *
      * @return fit parameters
@@ -201,4 +208,11 @@ public interface IUserInterfacePanel {
      * @param chiSquare value
      */
     public void setChiSquare(double chiSquare);
+
+    /**
+     * Gets whether to start next fit with results of last fit.
+     *
+     * @return
+     */
+    public boolean refineFit();
 }
