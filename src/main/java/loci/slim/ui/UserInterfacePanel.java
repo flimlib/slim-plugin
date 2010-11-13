@@ -62,6 +62,7 @@ import javax.swing.border.EmptyBorder;
 import loci.slim.SLIMProcessor.FitAlgorithm;
 import loci.slim.SLIMProcessor.FitFunction;
 import loci.slim.SLIMProcessor.FitRegion;
+import loci.slim.analysis.SLIMAnalysis;
 
 /**
  * TODO
@@ -112,7 +113,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     
     public IUserInterfacePanelListener m_listener;
 
-    int m_fittedComponents = 0;
+    int m_fittedParameterCount = 0;
 
     // UI panel
     JPanel m_COMPONENT;
@@ -122,6 +123,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JComboBox m_regionComboBox;
     JComboBox m_algorithmComboBox;
     JComboBox m_functionComboBox;
+    JComboBox m_analysisComboBox;
+    JCheckBox m_fitAllChannels;
 
     // fit settings
     JTextField m_xField;
@@ -191,11 +194,11 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JButton m_quitButton;
     JButton m_fitButton;
 
-    public UserInterfacePanel(boolean showTau) {
+    public UserInterfacePanel(boolean showTau, SLIMAnalysis analysis) {
         String lifetimeLabel = "" + (showTau ? TAU : LAMBDA);
         
         m_frame = new JFrame("SLIM Plugin");
-        m_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //m_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // create outer panel
         JPanel outerPanel = new JPanel();
@@ -205,7 +208,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         JPanel innerPanel = new JPanel();
         innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.X_AXIS));
 
-        JPanel fitPanel = createFitPanel();
+        JPanel fitPanel = createFitPanel(analysis);
         fitPanel.setBorder(border("Fit"));
         innerPanel.add(fitPanel);
 
@@ -296,7 +299,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         setFitButtonState(true);
     }
 
-    private JPanel createFitPanel() {
+    private JPanel createFitPanel(SLIMAnalysis analysis) {
         JPanel fitPanel = new JPanel();
         fitPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
         fitPanel.setLayout(new SpringLayout());
@@ -330,12 +333,22 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         );
         fitPanel.add(m_functionComboBox);
 
+        JLabel analysisLabel = new JLabel("Analysis");
+        analysisLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        fitPanel.add(analysisLabel);
+        m_analysisComboBox = new JComboBox(analysis.getNames());
+        fitPanel.add(m_analysisComboBox);
+
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(fitPanel, 3, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(fitPanel, 4, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", fitPanel);
 
+        m_fitAllChannels = new JCheckBox("Fit all channels");
+        m_fitAllChannels.setSelected(true);
+
+        panel.add("South", m_fitAllChannels);
         return panel;
     }
 
@@ -757,11 +770,14 @@ public class UserInterfacePanel implements IUserInterfacePanel {
      * @param enable
      */
     private void enableAll(boolean enable) {
+        // fit algorithm settings
         m_regionComboBox.setEnabled(enable);
         m_algorithmComboBox.setEnabled(enable);
         m_functionComboBox.setEnabled(enable);
+        m_analysisComboBox.setEnabled(enable);
+        m_fitAllChannels.setEnabled(enable);
 
-        // fit settings
+        // fit control settings
         m_xField.setEditable(enable);
         m_yField.setEditable(enable);
         m_startField.setEditable(enable);
@@ -876,6 +892,15 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         return function;
     }
 
+    public String getAnalysis() {
+        String selected = (String) m_analysisComboBox.getSelectedItem();
+        return selected;
+    }
+
+    public boolean getFitAllChannels() {
+        return m_fitAllChannels.isSelected();
+    }
+
     public int getX() {
         return parseInt(m_xField);
     }
@@ -916,26 +941,26 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_thresholdField.setText("" + threshold);
     }
 
-    public int getComponents() {
-        int components = 0;
+    public int getParameterCount() {
+        int count = 0;
         String function = (String) m_functionComboBox.getSelectedItem();
         if (function.equals(SINGLE_EXPONENTIAL)) {
-            components = 3;
+            count = 3;
         }
         else if (function.equals(DOUBLE_EXPONENTIAL)) {
-            components = 5;
+            count = 5;
         }
         else if (function.equals(TRIPLE_EXPONENTIAL)) {
-            components = 7;
+            count = 7;
         }
         else if (function.equals(STRETCHED_EXPONENTIAL)) {
-            components = 4;
+            count = 4;
         }
-        return components;
+        return count;
     }
 
-    public void setFittedComponents(int components) {
-        m_fittedComponents = components;
+    public void setFittedParameterCount(int count) {
+        m_fittedParameterCount = count;
     }
 
     public double[] getParameters() {
@@ -1121,8 +1146,13 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         return value;
     }
 
-    void reconcileStartParam() {
-        boolean enable = (m_fittedComponents == getComponents());
+    /**
+     * This decides whether the existing parameters could be used as the
+     * initial values for another fit.
+     */
+    private void reconcileStartParam() {
+        // parameter counts happen to be unique for each fit function
+        boolean enable = (m_fittedParameterCount == getParameterCount());
         m_startParam1.setEnabled(enable);
         m_startParam2.setEnabled(enable);
         m_startParam3.setEnabled(enable);
