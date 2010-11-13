@@ -40,12 +40,8 @@ import java.awt.Graphics;
 import javax.swing.JPanel;
 
 /**
- * Displays a color bar (typically under the histogram) with the
- * current colorization scheme.
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/java/browser/trunk/projects/slim-plugin/src/main/java/loci/colorizer/ColorBar.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/src/main/java/loci/colorizer/ColorBar.java">SVN</a></dd></dl>
+ * Displays a color bar with the current colorization scheme.  Live,
+ * reflects ongoing changes.
  *
  * @author Aivar Grislis grislis at wisc.edu
  */
@@ -56,6 +52,7 @@ public class ColorBar extends JPanel implements IColorizeRangeListener {
     IColorize m_colorize;
     double m_start;
     double m_stop;
+    double m_min;
     double m_max;
 
     /**
@@ -73,7 +70,7 @@ public class ColorBar extends JPanel implements IColorizeRangeListener {
         
         setPreferredSize(new Dimension(width, height));
 
-        m_start = m_stop = m_max = 0.0;
+        m_start = m_stop = m_min = m_max = 0.0;
     }
 
     @Override
@@ -94,9 +91,10 @@ public class ColorBar extends JPanel implements IColorizeRangeListener {
      * @param auto (ignored)
      * @param start
      * @param stop
+     * @param min
      * @param max
      */
-    public void setRange(boolean auto, double start, double stop, double max) {
+    public void setRange(boolean auto, double start, double stop, double min, double max) {
         boolean changed = false;
         synchronized (m_synchObject) {
             if (start != m_start) {
@@ -105,6 +103,10 @@ public class ColorBar extends JPanel implements IColorizeRangeListener {
             }
             if (stop != m_stop) {
                 m_stop = stop;
+                changed = true;
+            }
+            if (min != m_min) {
+                m_min = min;
                 changed = true;
             }
             if (max != m_max) {
