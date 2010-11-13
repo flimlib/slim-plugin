@@ -36,42 +36,12 @@ package loci.slim.colorizer;
 
 import java.awt.BorderLayout;
 
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.axis.LogarithmicAxis;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.plot.CombinedDomainXYPlot;
-import org.jfree.chart.plot.Plot;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYDotRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
-import org.jfree.chart.renderer.xy.XYSplineRenderer;
-import org.jfree.chart.title.TextTitle;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.XYDataItem;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RefineryUtilities;
 
 /**
- * TODO
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/java/browser/trunk/projects/slim-plugin/src/main/java/loci/colorizer/DataColorizerUI.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/src/main/java/loci/colorizer/DataColorizerUI.java">SVN</a></dd></dl>
+ * This frame shows a histogram of current lifetime distributions, a color bar
+ * used to colorize the lifetime data, and an input panel that allows the user
+ * to control the colorization.
  *
  * @author Aivar Grislis grislis at wisc.edu
  */
@@ -85,13 +55,14 @@ public class DataColorizerUI implements IColorizeRangeListener {
     boolean m_auto;
     double m_start;
     double m_stop;
+    double m_min;
     double m_max;
 
     public DataColorizerUI(IColorize colorize, IColorizeRangeListener listener) {
         m_listener = listener;
         
         m_auto = true;
-        m_start = m_stop = m_max = 0.0;
+        m_start = m_stop = m_min = m_max = 0.0;
 
         m_histogram = new Histogram(320, 160, this);
         m_colorBar = new ColorBar(320, 20, colorize);
@@ -107,33 +78,58 @@ public class DataColorizerUI implements IColorizeRangeListener {
         m_frame.setVisible(true);
     }
 
-    void updateData(double lifetime[], double max) {
+    /**
+     * Gets updates periodically as the fit progresses and the lifetime
+     * distribution changes.
+     *
+     * @param lifetime
+     * @param min
+     * @param max
+     */
+    void updateData(double lifetime[], double min, double max) {
         synchronized (m_synchObject) {
+            m_min = min;
             m_max = max;
-            m_histogram.updateData(lifetime, max);
+            m_histogram.updateData(lifetime, min, max);
             if (m_auto) {
+                m_start = min;
                 m_stop = max;
             }
-            m_colorBar.setRange(m_auto, m_start, m_stop, max);
-            m_inputPanel.setRange(m_auto, m_start, m_stop, max);
+            m_colorBar.setRange(m_auto, m_start, m_stop, min, max);
+            m_inputPanel.setRange(m_auto, m_start, m_stop, min, max);
         }
     }
 
-    public void setRange(boolean auto, double start, double stop, double max) {
+    /**
+     * Responds to external changes in the range settings.  Passes
+     * them on to the histogram, color bar, and input panel and any
+     * registered listener.
+     *
+     * @param auto
+     * @param start
+     * @param stop
+     * @param min
+     * @param max
+     */
+    public void setRange(boolean auto, double start, double stop, double min, double max) {
         synchronized (m_synchObject) {
            m_auto = auto;
            m_start = start;
            m_stop = stop;
+           m_min = min;
            m_max = max;
 
-           m_histogram.setRange(auto, start, stop, max);
-           m_colorBar.setRange(auto, start, stop, max);
-           m_inputPanel.setRange(auto, start, stop, max);
+           m_histogram.setRange(auto, start, stop, min, max);
+           m_colorBar.setRange(auto, start, stop, min, max);
+           m_inputPanel.setRange(auto, start, stop, min, max);
 
-           m_listener.setRange(auto, start, stop, max);
+           m_listener.setRange(auto, start, stop, min, max);
         }
     }
 
+    /**
+     * Makes this UI go away if a fit is cancelled.
+     */
     public void quit() {
         m_frame.dispose(); //TODO ? what should I call here
     }
