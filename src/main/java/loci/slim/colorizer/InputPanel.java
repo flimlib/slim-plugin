@@ -49,21 +49,20 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JTextField;
 
 /**
- * TODO
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/java/browser/trunk/projects/slim-plugin/src/main/java/loci/colorizer/InputPanel.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/src/main/java/loci/colorizer/InputPanel.java">SVN</a></dd></dl>
+ * The input panel allows the user to select/deselect automatic colorizer
+ * range selection.  When automatic mode is off it allows the user to enter
+ * minimum and maximum values.
  *
  * @author Aivar Grislis grislis at wisc.edu
  */
-public class InputPanel extends JPanel implements IColorizeRangeListener, ItemListener, ActionListener {
+public class InputPanel extends JPanel implements IColorizeRangeListener {
     JCheckBox m_autoCheckBox;
     JTextField m_startTextField;
     JTextField m_stopTextField;
     boolean m_auto;
     double m_start;
     double m_stop;
+    double m_min;
     double m_max;
     IColorizeRangeListener m_listener;
 
@@ -80,28 +79,66 @@ public class InputPanel extends JPanel implements IColorizeRangeListener, ItemLi
         m_listener = listener;
 
         m_auto = true;
-        m_start = m_stop = m_max = 0.0;
+        m_start = m_stop = m_min = m_max = 0.0;
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
         m_autoCheckBox = new JCheckBox("Auto", m_auto);
-        m_autoCheckBox.addItemListener(this);
+        m_autoCheckBox.addItemListener(
+            new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    m_auto = m_autoCheckBox.isSelected();
+                    if (m_auto) {
+                        m_start = m_min;
+                        m_startTextField.setText("" + m_start);
+
+                        m_stop = m_max;
+                        m_stopTextField.setText("" + m_stop);
+                    }
+                    enableAppropriately();
+                    m_listener.setRange(m_auto, m_start, m_stop, m_min, m_max);
+                }
+            }
+        );
         add(m_autoCheckBox);
 
         m_startTextField = new JTextField();
         m_startTextField.setText("" + m_start);
-        m_startTextField.addActionListener(this);
+        m_startTextField.addActionListener(
+            new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    m_start = Double.parseDouble(m_startTextField.getText());
+                    m_listener.setRange(m_auto, m_start, m_stop, m_min, m_max);
+                }
+            }
+        );
         add(m_startTextField);
 
         m_stopTextField = new JTextField();
         m_startTextField.setText("" + m_stop);
-        m_stopTextField.addActionListener(this);
+        m_stopTextField.addActionListener(
+            new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    m_stop = Double.parseDouble(m_stopTextField.getText());
+                    m_listener.setRange(m_auto, m_start, m_stop, m_min, m_max);
+                }
+            }
+        );
         add(m_stopTextField);
 
         enableAppropriately();
     }
 
-    public void setRange(boolean auto, double start, double stop, double max) {
+    /**
+     * IColorizeRangeListener method.  Gets external changes to settings.
+     *
+     * @param auto
+     * @param start
+     * @param stop
+     * @param min
+     * @param max
+     */
+    public void setRange(boolean auto, double start, double stop, double min, double max) {
         if (auto != m_auto) {
             m_auto = auto;
             m_autoCheckBox.setSelected(auto);
@@ -117,43 +154,15 @@ public class InputPanel extends JPanel implements IColorizeRangeListener, ItemLi
             m_stop = stop;
             m_stopTextField.setText("" + stop);
         }
+        m_min = min;
         m_max = max;
     }
 
+    /**
+     * Enable/disable start/stop text fields.
+     */
     private void enableAppropriately() {
-        m_startTextField.enable(!m_auto);
-        m_stopTextField.enable(!m_auto);
-    }
-
-    public void itemStateChanged(ItemEvent e) {
-        Object source = e.getItemSelectable();
-        if (source == m_autoCheckBox) {
-            m_auto = m_autoCheckBox.isSelected();
-            if (m_auto) {
-                m_start = 0.0;
-                m_startTextField.setText("" + m_start);
-
-                m_stop = m_max;
-                m_stopTextField.setText("" + m_stop);
-            }
-            enableAppropriately();
-            m_listener.setRange(m_auto, m_start, m_stop, m_max);
-        }
-    }
-
-    public void actionPerformed(ActionEvent e) {
-        boolean changed = false;
-        Object source = e.getSource();
-        if (source == m_startTextField) {
-            changed = true;
-            m_start = Double.parseDouble(m_startTextField.getText());
-        }
-        else if (source == m_stopTextField) {
-            changed = true;
-            m_stop = Double.parseDouble(m_stopTextField.getText());
-        }
-        if (changed) {
-            m_listener.setRange(m_auto, m_start, m_stop, m_max);
-        }
+        m_startTextField.setEnabled(!m_auto);
+        m_stopTextField.setEnabled(!m_auto);
     }
 }
