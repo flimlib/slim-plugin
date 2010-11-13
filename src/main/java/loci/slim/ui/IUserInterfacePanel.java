@@ -90,6 +90,20 @@ public interface IUserInterfacePanel {
     public FitFunction getFunction();
 
     /**
+     * Gets analysis plugin name.
+     *
+     * @return analysis plugin name
+     */
+    public String getAnalysis();
+
+    /**
+     * Gets whether or not to fit all channels.
+     *
+     * @return fit all channels
+     */
+    public boolean getFitAllChannels();
+
+    /**
      * Gets starting bin of fit.
      *
      * @return start
@@ -160,18 +174,18 @@ public interface IUserInterfacePanel {
     public void setY(int y);
 
     /**
-     * Gets number of fit components
+     * Gets number of fit parameters
      *
-     * @return components
+     * @return count
      */
-    public int getComponents();
+    public int getParameterCount();
 
     /**
-     * Sets number of fitted components after a successful fit.
+     * Sets number of fitted parameters after a successful fit.
      *
      * @param components
      */
-    public void setFittedComponents(int components);
+    public void setFittedParameterCount(int count);
 
     /**
      * Gets the parameters of the fit
