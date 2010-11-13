@@ -62,6 +62,7 @@ public class Histogram extends JPanel implements IColorizeRangeListener {
     private boolean m_auto;
     private double m_start;
     private double m_stop;
+    private double m_min;
     private double m_max;
 
     /**
@@ -80,7 +81,7 @@ public class Histogram extends JPanel implements IColorizeRangeListener {
         setPreferredSize(new Dimension(width, height));
 
         m_auto = true;
-        m_start = m_stop = m_max = 0.0;
+        m_start = m_stop = m_min = m_max = 0.0;
 
         m_count = new int[width];
         for (int i = 0; i < width; ++i) {
@@ -183,9 +184,10 @@ public class Histogram extends JPanel implements IColorizeRangeListener {
      * Keeps the histogram live as the fit progresses.
      *
      * @param lifetime
+     * @param min
      * @param max
      */
-    void updateData(double lifetime[], double max) {
+    void updateData(double lifetime[], double min, double max) {
         //System.out.println("Histogram.updateData max is " + max);
         synchronized (m_synchObject) {
 
@@ -206,8 +208,10 @@ public class Histogram extends JPanel implements IColorizeRangeListener {
                 }
             }
 
+            m_min = min;
             m_max = max;
             if (m_auto) {
+                m_start = min;
                 m_stop = max;
             }
         }
@@ -222,7 +226,7 @@ public class Histogram extends JPanel implements IColorizeRangeListener {
      * @param start
      * @param stop
      */
-    public void setRange(boolean auto, double start, double stop, double max) {
+    public void setRange(boolean auto, double start, double stop, double min, double max) {
         boolean redraw = false;
         synchronized (m_synchObject) {
             m_auto = auto;
@@ -234,6 +238,7 @@ public class Histogram extends JPanel implements IColorizeRangeListener {
                 m_stop = stop;
                 redraw = true;
             }
+            m_min = min;
             m_max = max;
         }
         if (redraw) {
