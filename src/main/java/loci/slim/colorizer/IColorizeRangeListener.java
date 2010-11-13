@@ -35,14 +35,20 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.colorizer;
 
 /**
- * TODO
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/java/browser/trunk/projects/slim-plugin/src/main/java/loci/colorizer/IColorizeRangeListener.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/src/main/java/loci/colorizer/IColorizeRangeListener.java">SVN</a></dd></dl>
+ * Passes around settings changes.
  *
  * @author Aivar Grislis grislis at wisc.edu
  */
 public interface IColorizeRangeListener {
-    public void setRange(boolean auto, double start, double stop, double max);
+
+    /**
+     * Set new range settings.
+     *
+     * @param auto
+     * @param start
+     * @param stop
+     * @param min
+     * @param max
+     */
+    public void setRange(boolean auto, double start, double stop, double min, double max);
 }
