@@ -41,11 +41,8 @@ import ij.process.ImageProcessor;
 import java.awt.Color;
 
 /**
- * TODO
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/java/browser/trunk/projects/slim-plugin/src/main/java/loci/colorizer/DataColorizer.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/src/main/java/loci/colorizer/DataColorizer.java">SVN</a></dd></dl>
+ * Displays a colorized lifetime image and a UI that shows the lifetime histogram
+ * and controls the colorization.
  *
  * @author Aivar Grislis grislis at wisc.edu
  */
@@ -56,7 +53,9 @@ public class DataColorizer implements IColorizeRangeListener {
     boolean m_auto;
     double m_start;
     double m_stop;
+    double m_min;
     double m_max;
+    double m_workMin;
     double m_workMax;
     ImagePlus m_imagePlus;
     ImageProcessor m_imageProcessor;
@@ -66,6 +65,13 @@ public class DataColorizer implements IColorizeRangeListener {
     IColorize m_colorize;
     DataColorizerUI m_ui;
 
+    /**
+     * Constructor, creates a new imagePlus.
+     *
+     * @param width
+     * @param height
+     * @param title
+     */
     public DataColorizer(int width, int height, String title) {
         m_width = width;
         m_height = height;
@@ -74,6 +80,11 @@ public class DataColorizer implements IColorizeRangeListener {
         init();
     }
 
+    /**
+     * Constructor, uses an existing imagePlus.
+     *
+     * @param imagePlus
+     */
     public DataColorizer(ImagePlus imagePlus) {
         m_imagePlus = imagePlus;
         m_imageProcessor = imagePlus.getProcessor();
@@ -82,6 +93,10 @@ public class DataColorizer implements IColorizeRangeListener {
         init();
     }
 
+    /**
+     * Common initialization.
+     *
+     */
     private void init() {
         m_imagePlus.show();
         m_histogramData = new double[m_width * m_height];
@@ -89,8 +104,8 @@ public class DataColorizer implements IColorizeRangeListener {
         m_imageData = new double[m_width][m_height];
         
         m_auto = true;
-        m_start = m_stop = m_max = 0.0;
-        m_workMax = 0.0; 
+        m_start = m_min = m_workMin = Double.MAX_VALUE;
+        m_stop = m_max = m_workMax = 0.0;
  
         m_colorize = new FiveColorColorize(Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED); //ThreeColorColorize(Color.GREEN, Color.YELLOW, Color.RED);
         m_ui = new DataColorizerUI(m_colorize, this);
@@ -107,20 +122,28 @@ public class DataColorizer implements IColorizeRangeListener {
      */
     public void setData(boolean firstTime, int x, int y, double datum) {
         synchronized (m_synchObject) {
+            // we only want to count data once per actual, final pixel
             if (firstTime) {
+                dumpInfo("before", datum);
                 // add to histogram
                 m_histogramData[m_histogramDataIndex++] = datum;
+
+                // keep track of minimum
+                if (datum < m_workMin) {
+                    m_workMin = datum;
+                }
 
                 // keep track of maximum
                 if (datum > m_workMax) {
                     m_workMax = datum;
                 }
+                dumpInfo("after", datum);
             }
 
-            // save value for possible recolorization
+            // save value for possible recolorization as color map changes
             m_imageData[x][y] = datum;
 
-            // are we past the initial update cycle?
+            // are we live?  (past the initial update cycle)
             if (m_max > 0.0) {
                 // show colorized pixel
                 m_imageProcessor.setColor(lookUpColor(datum));
@@ -129,16 +152,8 @@ public class DataColorizer implements IColorizeRangeListener {
         }
     }
 
-    /**
-     * During the fit, ets the data for a given x, y and updates
-     * the colorized version also.
-     *
-     * @param x
-     * @param y
-     * @param value
-     */
-    public void setData(int x, int y, double value) {
-        setData(true, x, y, value);
+    private void dumpInfo(String title, double datum) {
+        System.out.println(title + " " + datum + " wMin " + m_workMin + " wMax " + m_workMax);
     }
 
     /**
@@ -148,36 +163,47 @@ public class DataColorizer implements IColorizeRangeListener {
      */
     public void update() {
         synchronized (m_synchObject) {
-            // did the maximum grow?
-            if (m_workMax > m_max) {
-
-                // first update or on automatic
+            // did minimum or maximum change?
+            if (m_workMin < m_min || m_workMax > m_max) {
+                dumpInfo2("BEFORE ");
+                // first update or on automatic?
                 if (0.0 == m_max || m_auto) {
+                    m_min = m_workMin;
                     m_max = m_workMax;
-                    
+
                     // handle automatic colorization
                     if (m_auto) {
-                        m_stop = m_max;
+                        m_start = m_min;
+                        m_stop  = m_max;
                     }
-                    // recolorize, based on new maximum, colors have shifted
+
+                    // recolorize, based on new min and max, colors have shifted
                     recolorize();
                 }
                 else {
+                    m_min = m_workMin;
                     m_max = m_workMax;
                 }
-
-                //TODO ARG enable this code to show the progression of drawing
-                // with each update call.
-                //m_imageProcessor = new ColorProcessor(m_width, m_height);
-                //m_imagePlus = new ImagePlus("...", m_imageProcessor);
-
+                dumpInfo2("AFTER");
             }
-            m_ui.updateData(m_histogramData, m_max);
+            m_ui.updateData(m_histogramData, m_min, m_max);
             m_imagePlus.draw();
         }
     }
 
-    public void setRange(boolean auto, double start, double stop, double max) {
+    private void dumpInfo2(String title) {
+        System.out.println(title + " m_min " + m_min + " m_max " + m_max);
+    }
+    /**
+     * Listens for external changes to the range settings.
+     *
+     * @param auto
+     * @param start
+     * @param stop
+     * @param min
+     * @param max
+     */
+    public void setRange(boolean auto, double start, double stop, double min, double max) {
         boolean redo = false;
         if (auto != m_auto) {
             m_auto = auto;
@@ -200,11 +226,17 @@ public class DataColorizer implements IColorizeRangeListener {
         }
     }
 
+    /**
+     * Called when a fit is cancelled.
+     */
     public void quit() {
         m_imagePlus.close();
         m_ui.quit();
     }
 
+    /**
+     * Redraws the entire colorized image.
+     */
     private void recolorize() {
         for (int y = 0; y < m_height; ++y) {
             for (int x = 0; x < m_width; ++x) {
@@ -216,6 +248,12 @@ public class DataColorizer implements IColorizeRangeListener {
         }
     }
 
+    /**
+     * Colorizes, converts a lifetime to a color.
+     *
+     * @param datum
+     * @return color
+     */
     private Color lookUpColor(double datum) {
         return m_colorize.colorize(m_start, m_stop, datum);
     }
