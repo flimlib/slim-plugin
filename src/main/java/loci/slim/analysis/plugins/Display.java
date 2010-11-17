@@ -95,18 +95,17 @@ public class Display implements ISLIMAnalyzer {
     private static final int BAR_HEIGHT = 3;
 
     private Color m_bar[];
-    String m_minText;
-    String m_maxText;
 
     /**
      * Enum that contains the possible formulas for the values to be displayed.
+     * This table is very specifically tied to the order of parameter indices.
      */
     private static enum Formula {
         T_FORMULA(T, 2),
         T1_FORMULA(T1, 2),
         T2_FORMULA(T2, 4),
         T3_FORMULA(T3, 6),
-        T1_T2_FORMULA(T1_T2, 2, 4), // T1/T2
+        T1_T2_FORMULA(T1_T2, 2, 4), // specifies T1/T2, parameter index 2 divided by parameter index 4
         T2_T1_FORMULA(T2_T1 ,4, 2),
         T1_T3_FORMULA(T1_T3, 2, 6),
         T3_T1_FORMULA(T3_T1, 6, 2),
@@ -185,7 +184,7 @@ public class Display implements ISLIMAnalyzer {
      * @param function
      */
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
-        boolean combineMinMax = true; //false; //TODO needs to be set from UI.
+        boolean combineMinMax = false; //TODO needs to be set from UI.
 
         // is this plugin appropriate for current data?
         if (FitRegion.EACH != region) {
@@ -399,6 +398,8 @@ public class Display implements ISLIMAnalyzer {
         private double m_value[][];
         private double m_max = 0.0;
         private double m_min = Double.MAX_VALUE;
+        private String m_minText;
+        private String m_maxText;
 
         /**
          * Creates a display cell.
@@ -508,9 +509,9 @@ public class Display implements ISLIMAnalyzer {
          * @param colorize
          */
         private void display(ColorProcessor processor, IColorize colorize) {
-            // set up color bar one time
+            // set up color bar in outer class one time
             if (null == m_bar) {
-                m_bar = colorize.bar(m_width); //TODO each cell makes it's own bar; that doesn't make sense
+                m_bar = colorize.bar(m_width);
             }
 
             // label at top
