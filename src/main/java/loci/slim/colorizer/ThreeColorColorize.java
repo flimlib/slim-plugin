@@ -37,25 +37,36 @@ package loci.slim.colorizer;
 import java.awt.Color;
 
 /**
- * TODO
+ * Colorizes data based on a sequence of three colors.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/java/browser/trunk/projects/slim-plugin/src/main/java/loci/colorizer/ThreeColorColorize.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/src/main/java/loci/colorizer/ThreeColorColorize.java">SVN</a></dd></dl>
- *
- * @author Aivar Grislis grislis at wisc.edu
+ * @author Aivar Grislis
  */
-public class ThreeColorColorize implements IColorize {
+public class ThreeColorColorize extends MultiColorColorize implements IColorize {
     Color m_color1;
     Color m_color2;
     Color m_color3;
 
+    /**
+     * Constructor.  Specifies the sequence of three colors.
+     *
+     * @param color1
+     * @param color2
+     * @param color3
+     */
     public ThreeColorColorize(Color color1, Color color2, Color color3) {
         m_color1 = color1;
         m_color2 = color2;
         m_color3 = color3;
     }
 
+    /**
+     * Colorizes a data value.
+     *
+     * @param start value associated with starting color
+     * @param stop value associated with ending color
+     * @param value to colorize
+     * @return interpolated Color value
+     */
     public Color colorize(double start, double stop, double value) {
         Color returnColor = Color.BLACK;
         if (value > 0.0) {
@@ -73,29 +84,4 @@ public class ThreeColorColorize implements IColorize {
         }
         return returnColor;
     }
-
-    private Color interpolateColor(Color start, Color end, double blend) {
-        int startRed   = start.getRed();
-        int startGreen = start.getGreen();
-        int startBlue  = start.getBlue();
-        int endRed   = end.getRed();
-        int endGreen = end.getGreen();
-        int endBlue  = end.getBlue();
-        int red   = interpolateColorComponent(startRed, endRed, blend);
-        int green = interpolateColorComponent(startGreen, endGreen, blend);
-        int blue  = interpolateColorComponent(startBlue, endBlue, blend);
-        Color returnColor = Color.BLACK;
-        try {
-            returnColor = new Color(red, green, blue);
-        }
-        catch (Exception e) {
-            System.out.println("Exception " + e + " " + red + " " + green + " " + blue);
-        }
-        return returnColor;
-    }
-
-    private int interpolateColorComponent(int start, int end, double blend) {
-        return (int)(blend * (end - start) + start);
-    }
-
 }
