@@ -34,18 +34,14 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.analysis.plugins;
 
-import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.GenericDialog;
 import ij.gui.MessageDialog;
-import ij.gui.Roi;
-import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import java.awt.Color;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.prefs.*;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 
 import loci.slim.SLIMProcessor.FitFunction;
 import loci.slim.SLIMProcessor.FitRegion;
@@ -54,13 +50,8 @@ import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.colorizer.FiveColorColorize;
 import loci.slim.colorizer.IColorize;
 
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.real.DoubleType;
-import mpicbg.imglib.container.planar.PlanarContainerFactory;
-import mpicbg.imglib.cursor.Cursor;
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
-import mpicbg.imglib.image.ImageFactory;
 import mpicbg.imglib.type.numeric.RealType;
 import mpicbg.imglib.type.numeric.real.DoubleType;
 
@@ -72,6 +63,7 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
 @SLIMAnalyzer(name="Display Fit Results")
 public class Display implements ISLIMAnalyzer {
     private static final Character TAU = 'T'; //TODO IJ doesn't handle Unicode, was: = '\u03c4';
+    private static final String T = "" + TAU;
     private static final String T1 = "" + TAU + '1';
     private static final String T2 = "" + TAU + '2';
     private static final String T3 = "" + TAU + '3';
@@ -81,6 +73,7 @@ public class Display implements ISLIMAnalyzer {
     private static final String T3_T1 = "" + TAU + "3/" + TAU + '1';
     private static final String T2_T3 = "" + TAU + "2/" + TAU + '3';
     private static final String T3_T2 = "" + TAU + "3/" + TAU + '2';
+    private static final String A = "A";
     private static final String A1 = "A1";
     private static final String A2 = "A2";
     private static final String A3 = "A3";
@@ -92,15 +85,24 @@ public class Display implements ISLIMAnalyzer {
     private static final String A3_A2 = "A3/A2";
     private static final String C = "C";
 
-    private static int TOP_OFFSET = 20;
-    private static int SIDE_OFFSET = 10;
-    private static int BOTTOM_OFFSET = 20;
-    private static int TEXT_OFFSET = 10;
+    private static final boolean MIN = true;
+    private static final boolean MAX = false;
+
+    private static final int TOP_OFFSET = 20;
+    private static final int SIDE_OFFSET = 10;
+    private static final int BOTTOM_OFFSET = 20;
+    private static final int TEXT_OFFSET = 18;
+    private static final int BAR_HEIGHT = 3;
+
+    private Color m_bar[];
+    String m_minText;
+    String m_maxText;
 
     /**
      * Enum that contains the possible formulas for the values to be displayed.
      */
     private static enum Formula {
+        T_FORMULA(T, 2),
         T1_FORMULA(T1, 2),
         T2_FORMULA(T2, 4),
         T3_FORMULA(T3, 6),
@@ -110,6 +112,7 @@ public class Display implements ISLIMAnalyzer {
         T3_T1_FORMULA(T3_T1, 6, 2),
         T2_T3_FORMULA(T2_T3, 4, 6),
         T3_T2_FORMULA(T3_T2, 6, 4),
+        A_FORMULA(A, 1),
         A1_FORMULA(A1, 1),
         A2_FORMULA(A2, 3),
         A3_FORMULA(A3, 5),
@@ -128,7 +131,8 @@ public class Display implements ISLIMAnalyzer {
         private final int m_indices[];
 
         /**
-         * Simple formula, just use a given parameter.
+         * Constructor.  Simple formula, just use a given parameter, specified
+         * by index.
          *
          * @param index
          */
@@ -139,7 +143,8 @@ public class Display implements ISLIMAnalyzer {
         }
 
         /**
-         * Divisor formula, divide first parameter specified by index by second.
+         * Constructor.  Divisor formula, divide first parameter specified by
+         * index by second parameter specified by index.
          *
          * @param dividendIndex
          * @param divisorIndex
@@ -151,20 +156,36 @@ public class Display implements ISLIMAnalyzer {
             m_indices[1] = divisorIndex;
         }
 
+        /**
+         * Returns the displayable String name.
+         *
+         * @return
+         */
         private String getName() {
             return m_name;
         }
 
+        /**
+         * Returns an array of indices to be used in the formula.  An array
+         * of one index specifies a parameter to be used as is.  An array with
+         * two indices means the first parameter is divided by the second.
+         *
+         * @return
+         */
         private int[] getIndices() {
             return m_indices;
         }
     }
 
-    public Display() {
-    }
-
+    /**
+     * Main method of ISLIMAnalyzer.
+     *
+     * @param image
+     * @param region
+     * @param function
+     */
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
-        boolean combineMinMax = true;
+        boolean combineMinMax = true; //false; //TODO needs to be set from UI.
 
         // is this plugin appropriate for current data?
         if (FitRegion.EACH != region) {
@@ -172,7 +193,10 @@ public class Display implements ISLIMAnalyzer {
             MessageDialog dialog = new MessageDialog(null, "Display Fit Results", "Requires each pixel be fitted.");
             return;
         }
+
+        // look at image dimensions
         int dimensions[] = image.getDimensions();
+        //TODO for debugging only
         for (int i = 0; i < dimensions.length; ++i) {
             System.out.println("dim " + i + " " + dimensions[i]);
         }
@@ -185,10 +209,11 @@ public class Display implements ISLIMAnalyzer {
         int channels = dimensions[cIndex];
         int params   = dimensions[pIndex];
 
+        // get appropriate formula for image dimensions
         Formula formulas[] = null;
         switch (function) {
             case SINGLE_EXPONENTIAL:
-                formulas = new Formula[] { Formula.A1_FORMULA, Formula.T1_FORMULA, Formula.C_FORMULA }; //TODO these three formulas are just for testing.
+                formulas = new Formula[] { Formula.A_FORMULA, Formula.T_FORMULA, Formula.C_FORMULA }; //TODO these three formulas are just for testing.
                 break;
             case DOUBLE_EXPONENTIAL:
                 formulas = new Formula[] { Formula.A1_A2_FORMULA, Formula.T1_T2_FORMULA };
@@ -199,15 +224,16 @@ public class Display implements ISLIMAnalyzer {
             case STRETCHED_EXPONENTIAL:
                 break;
         }
-        DisplayCell cells[][] = new DisplayCell[channels][formulas.length];
 
+        // build display cells
+        DisplayCell cells[][] = new DisplayCell[channels][formulas.length];
         int cellX = 0, cellY = 0;
         int cellWidth = width + 2 * SIDE_OFFSET;
         int cellHeight = height + TOP_OFFSET + BOTTOM_OFFSET;
         for (int c = 0; c < channels; ++c) {
             cellY = 0;
             for (int f = 0; f < formulas.length; ++f) {
-                cells[c][f] = new DisplayCell(formulas[f], cellX, cellY, width, height);
+                cells[c][f] = new DisplayCell("" + (c + 1), formulas[f], cellX, cellY, width, height);
                 cellY += cellHeight;
             }
             cellX += cellWidth;
@@ -215,44 +241,74 @@ public class Display implements ISLIMAnalyzer {
         int totalWidth = cellX;
         int totalHeight = cellY;
 
-        int dim[] = new int[4];
-        double paramArray[] = new double[params];
-        double minValue, maxValue;
+        // traverse the image
         final LocalizableByDimCursor<?> cursor = image.createLocalizableByDimCursor();
+        int dimForCursor[] = new int[4];
+        double paramArray[] = new double[params];
+
+        // keep track of minimum and maximum values per formula
+        double minValue[] = new double[formulas.length];
+        double maxValue[] = new double[formulas.length];
+        initMinMax(minValue, maxValue);
+
+        // get the parameters for each pixel,
         for (int c = 0; c < channels; ++c) {
-            dim[cIndex] = c;
+            dimForCursor[cIndex] = c;
+
             for (int y = 0; y < height; ++y) {
-                dim[yIndex] = y;
+                dimForCursor[yIndex] = y;
+
                 for (int x = 0; x < width; ++x) {
-                    dim[xIndex] = x;
+                    dimForCursor[xIndex] = x;
+
+                    // get the fitted parameters for c, y, x
                     for (int p = 0; p < params; ++p) {
-                        dim[pIndex] = p;
-                        cursor.moveTo(dim);
+                        dimForCursor[pIndex] = p;
+
+                        // get the fitted parameter
+                        cursor.moveTo(dimForCursor);
                         paramArray[p] = ((RealType) cursor.getType()).getRealFloat();
                     }
-                    minValue = Double.MAX_VALUE;
-                    maxValue = 0.0;
+
+                    // calculate for this c, y, x pixel
                     for (int f = 0; f < formulas.length; ++f) {
+                        // accumulate minimum and maximum results for all pixels
+                        cells[c][f].setMin(minValue[f]);
+                        cells[c][f].setMax(maxValue[f]);
+
+                        // do the calculation
                         cells[c][f].calculate(x, y, paramArray);
-                        if (combineMinMax) {
-                            if (cells[c][f].getMin() < minValue) {
-                                minValue = cells[c][f].getMin();
-                            }
-                            if (cells[c][f].getMax() > maxValue) {
-                                maxValue = cells[c][f].getMax();
-                            }
-                        }
-                    }
-                    if (combineMinMax) {
-                        for (int f = 0; f < formulas.length; ++f) {
-                            cells[c][f].setMin(minValue);
-                            cells[c][f].setMax(maxValue);
-                        }
-                    }
+
+                        minValue[f] = cells[c][f].getMin();
+                        maxValue[f] = cells[c][f].getMax();
+
+                    } // f loop
+
+                } // x loop
+
+            } // y loop
+
+            if (!combineMinMax) {
+                // save minimum and maximum results for each formula for each channel
+                for (int f = 0; f < formulas.length; ++f) {
+                    Converter minConverter = new Converter(MIN, minValue[f]);
+                    Converter maxConverter = new Converter(MAX, maxValue[f]);
+                    double minimumValue = minConverter.getValue();
+                    double maximumValue = maxConverter.getValue();
+                    String minimumText = minConverter.getText();
+                    String maximumText = maxConverter.getText();
+
+                    cells[c][f].setMin(minimumValue);
+                    cells[c][f].setMax(maximumValue);
+                    cells[c][f].setMinText(minimumText);
+                    cells[c][f].setMaxText(maximumText);
                 }
+                // reset minimum and maximum for each formula
+                initMinMax(minValue, maxValue);
             }
         }
 
+        // display cell data
         ColorProcessor outputProcessor = new ColorProcessor(totalWidth, totalHeight);
         outputProcessor.setAntialiasedText(true);
         outputProcessor.setColor(Color.BLACK);
@@ -260,33 +316,117 @@ public class Display implements ISLIMAnalyzer {
         ImagePlus imp = new ImagePlus("Display Results", outputProcessor);
 
         IColorize colorizer = new FiveColorColorize(Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED);
-        for (int c = 0; c < channels; ++c) {
-            for (int f = 0; f < formulas.length; ++f) {
-                cells[c][f].display(outputProcessor, colorizer);
+        for (int f = 0; f < formulas.length; ++f) {
+            if (combineMinMax) {
+                // save minimum and maximum results for all channels
+                Converter minConverter = new Converter(MIN, minValue[f]);
+                Converter maxConverter = new Converter(MAX, maxValue[f]);
+                double minimumValue = minConverter.getValue();
+                double maximumValue = maxConverter.getValue();
+                String minimumText = minConverter.getText();
+                String maximumText = maxConverter.getText();
+                for (int c = 0; c < channels; ++c) {
+                    cells[c][f].setMin(minimumValue);
+                    cells[c][f].setMax(maximumValue);
+                    cells[c][f].setMinText(minimumText);
+                    cells[c][f].setMaxText(maximumText);
+                    cells[c][f].display(outputProcessor, colorizer);
+                }
+
+            }
+            else {
+                // minimum and maximum results already saved
+                for (int c = 0; c < channels; ++c) {
+                    cells[c][f].display(outputProcessor, colorizer);
+                }
             }
         }
         imp.show();
     }
 
-    private class DisplayCell {
-        Formula m_formula;
-        int m_x;
-        int m_y;
-        int m_width;
-        int m_height;
-        double m_value[][];
-        double m_max = 0.0;
-        double m_min = Double.MAX_VALUE;
+    private void initMinMax(double minValue[], double maxValue[]) {
+        for (int i = 0; i < minValue.length; ++i) {
+            minValue[i] = Double.MAX_VALUE;
+            maxValue[i] = 0.0;
+        }
+    }
 
-        private DisplayCell(Formula formula, int x, int y, int width, int height) {
+    /**
+     * Inner class.  Builds a maximum or minimum value, rounding and
+     * formatting appropriately.
+     */
+    private class Converter {
+        double m_value;
+        String m_text;
+
+        private Converter(boolean min, double value) {
+            MathContext context = new MathContext(2, min ? RoundingMode.FLOOR : RoundingMode.CEILING);
+            BigDecimal bigDecimalValue = BigDecimal.valueOf(value).round(context);
+            m_value = bigDecimalValue.doubleValue();
+            m_text = bigDecimalValue.toEngineeringString();
+        }
+
+        /**
+         * Gets the rounded value.
+         *
+         * @return rounded value
+         */
+        private double getValue() {
+            return m_value;
+        }
+
+        /**
+         * Gets the formatted string representation of value.
+         *
+         * @return formatted string
+         */
+        private String getText() {
+            return m_text;
+        }
+    }
+
+
+    /**
+     * Inner class.  Calculates and accumulates data for a given cell of the display.
+     */
+    private class DisplayCell {
+        private String m_label;
+        private Formula m_formula;
+        private int m_x;
+        private int m_y;
+        private int m_width;
+        private int m_height;
+        private double m_value[][];
+        private double m_max = 0.0;
+        private double m_min = Double.MAX_VALUE;
+
+        /**
+         * Creates a display cell.
+         *
+         * @param label for this channel
+         * @param formula to use for calculations
+         * @param x leftmost coordinate of the cell
+         * @param y uppermost coordinate of the cell
+         * @param width of the colorized data image
+         * @param height of the colorized data image
+         */
+        private DisplayCell(String label, Formula formula, int x, int y, int width, int height) {
+            m_label   = label;
             m_formula = formula;
-            m_x = x;
-            m_y = y;
-            m_width = width;
-            m_height = height;
+            m_x       = x;
+            m_y       = y;
+            m_width   = width;
+            m_height  = height;
             m_value = new double[width][height];
         }
 
+        /**
+         * Applies the cell's formula to a set of parameters for a given pixel.
+         *
+         * @param x of current colorized data image pixel
+         * @param y of current colorized data image pixel
+         * @param parameters data for this pixel
+         */
         private void calculate(int x, int y, double[] parameters) {
             double result = 0.0;
             int indices[] = m_formula.getIndices();
@@ -305,36 +445,107 @@ public class Display implements ISLIMAnalyzer {
             }
         }
 
+        /**
+         * Gets minimum calculated value.
+         *
+         * @return
+         */
         private double getMin() {
             return m_min;
         }
 
+        /**
+         * Sets minimum value.  Used to initialize the minimum value and to
+         * set the final minimum value.
+         *
+         * @param min
+         */
         private void setMin(double min) {
             m_min = min;
         }
 
+        /**
+         * Sets the formatted String representation of the final minimum value.
+         *
+         * @param minText
+         */
+        private void setMinText(String minText) {
+            m_minText = minText;
+        }
+
+        /**
+         * Gets maximum calculated value.
+         *
+         * @return
+         */
         private double getMax() {
             return m_max;
         }
 
+        /**
+         * Sets maximum value.  Used to initialize the maximum value and to
+         * set the final maximum value.
+         *
+         * @param max
+         */
         private void setMax(double max) {
             m_max = max;
         }
 
+        /**
+         * Sets the formatted String representation of the final maximum value.
+         *
+         * @param maxText
+         */
+        private void setMaxText(String maxText) {
+            m_maxText = maxText;
+        }
+
+        /**
+         * Displays the colorized data image, color bar, and labelling.
+         * 
+         * @param processor 
+         * @param colorize
+         */
         private void display(ColorProcessor processor, IColorize colorize) {
+            // set up color bar one time
+            if (null == m_bar) {
+                m_bar = colorize.bar(m_width); //TODO each cell makes it's own bar; that doesn't make sense
+            }
+
+            // label at top
             processor.setColor(Color.WHITE);
             processor.moveTo(m_x + SIDE_OFFSET, m_y + TEXT_OFFSET);
             processor.drawString(m_formula.getName());
-            String channelName = "440nm";
-            int width = processor.getStringWidth(channelName);
-            processor.moveTo(m_x + m_width - width, m_y + TEXT_OFFSET);
-            processor.drawString(channelName);
+            int width = processor.getStringWidth(m_label);
+            processor.moveTo(m_x + SIDE_OFFSET + m_width - width, m_y + TEXT_OFFSET);
+            processor.drawString(m_label);
+
+            // draw image
             for (int x = 0; x < m_width; ++x) {
                 for (int y = 0; y < m_height; ++y) {
                     processor.setColor(colorize.colorize(m_min, m_max, m_value[x][y]));
                     processor.drawPixel(m_x + SIDE_OFFSET + x, m_y + TOP_OFFSET + y);
                 }
             }
+
+            // draw color bar
+            int barX = m_x + SIDE_OFFSET;
+            int barY = m_y + TOP_OFFSET + m_height;
+            for (int x = barX; x < barX + m_width; ++x) {
+                processor.setColor(m_bar[x - barX]);
+                for (int y = barY; y < barY + BAR_HEIGHT; ++y) {
+                    processor.drawPixel(x, y);
+                }
+            }
+
+            // label color bar
+            processor.setColor(Color.WHITE);
+            processor.moveTo(barX, barY + TEXT_OFFSET);
+            processor.drawString(m_minText);
+            width = processor.getStringWidth(m_maxText);
+            processor.moveTo(barX + m_width - width, barY + TEXT_OFFSET);
+            processor.drawString(m_maxText);
         }
     }
 }
