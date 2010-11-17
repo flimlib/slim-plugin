@@ -48,8 +48,8 @@ import java.awt.Color;
 public interface IColorize {
 
     /**
-     * Expresses the value as a Color interpolated between the
-     * start and stop values.
+     * Expresses the value as a interpolated Color, given the start
+     * and stop values.
      *
      * @param start
      * @param stop
@@ -58,4 +58,11 @@ public interface IColorize {
      */
     public Color colorize(double start, double stop, double value);
 
+    /**
+     * Generates a color bar or ramp.
+     *
+     * @param pixels
+     * @return
+     */
+    public Color[] bar(int pixels);
 }
