@@ -362,23 +362,65 @@ public class Display implements ISLIMAnalyzer {
         Map<String, Formula[]> map = new HashMap<String, Formula[]>();
         switch (function) {
             case SINGLE_EXPONENTIAL:
-                map.put("T", new Formula[] { Formula.T_FORMULA });
-                map.put("A T", new Formula[] { Formula.A_FORMULA, Formula.T_FORMULA });
-                map.put("A T C", new Formula[] { Formula.A_FORMULA, Formula.T_FORMULA, Formula.C_FORMULA });
+                map.put("T", new Formula[] {
+                    Formula.T_FORMULA });
+                map.put("A T", new Formula[] {
+                    Formula.A_FORMULA,
+                    Formula.T_FORMULA });
+                map.put("A T C", new Formula[] {
+                    Formula.A_FORMULA,
+                    Formula.T_FORMULA,
+                    Formula.C_FORMULA });
                 break;
             case DOUBLE_EXPONENTIAL:
-                map.put("T1/T2", new Formula[] { Formula.T1_T2_FORMULA });
-                map.put("A1/A2 T1/T2", new Formula[] { Formula.A1_A2_FORMULA, Formula.T1_T2_FORMULA });
-                map.put("T1 T2", new Formula[] { Formula.T1_FORMULA, Formula.T2_FORMULA });
-                map.put("A1 A2 T1 T2", new Formula[] { Formula.A1_FORMULA, Formula.A2_FORMULA, Formula.T1_FORMULA, Formula.T2_FORMULA });
-                map.put("A1 A2 T1 T2 C", new Formula[] { Formula.A1_FORMULA, Formula.A2_FORMULA, Formula.T1_FORMULA, Formula.T2_FORMULA, Formula.C_FORMULA });
+                map.put("T1/T2", new Formula[] {
+                    Formula.T1_T2_FORMULA });
+                map.put("A1/A2 T1/T2", new Formula[] {
+                    Formula.A1_A2_FORMULA,
+                    Formula.T1_T2_FORMULA });
+                map.put("T1 T2", new Formula[] {
+                    Formula.T1_FORMULA,
+                    Formula.T2_FORMULA });
+                map.put("A1 A2 T1 T2", new Formula[] {
+                    Formula.A1_FORMULA,
+                    Formula.A2_FORMULA,
+                    Formula.T1_FORMULA,
+                    Formula.T2_FORMULA });
+                map.put("A1 A2 T1 T2 C", new Formula[] {
+                    Formula.A1_FORMULA,
+                    Formula.A2_FORMULA,
+                    Formula.T1_FORMULA,
+                    Formula.T2_FORMULA,
+                    Formula.C_FORMULA });
                 break;
             case TRIPLE_EXPONENTIAL:
-                map.put("T1/T2 T1/T3", new Formula[] { Formula.T1_T2_FORMULA, Formula.T1_T3_FORMULA });
-                map.put("A1/A2 A1/A3 T1/T2 T1/T3", new Formula[] { Formula.A1_A2_FORMULA, Formula.A1_A3_FORMULA, Formula.T1_T2_FORMULA, Formula.T1_T3_FORMULA });
-                map.put("T1 T2 T3", new Formula[] { Formula.T1_FORMULA, Formula.T2_FORMULA, Formula.T3_FORMULA });
-                map.put("A1 A2 A3 T1 T2 T3", new Formula[] { Formula.A1_FORMULA, Formula.A2_FORMULA, Formula.A3_FORMULA, Formula.T1_FORMULA, Formula.T2_FORMULA, Formula.T3_FORMULA });
-                map.put("A1 A2 A3 T1 T2 T3 C", new Formula[] { Formula.A1_FORMULA, Formula.A2_FORMULA, Formula.A3_FORMULA, Formula.T1_FORMULA, Formula.T2_FORMULA, Formula.T3_FORMULA, Formula.C_FORMULA });
+                map.put("T1/T2 T1/T3", new Formula[] {
+                    Formula.T1_T2_FORMULA,
+                    Formula.T1_T3_FORMULA });
+                map.put("A1/A2 A1/A3 T1/T2 T1/T3", new Formula[] {
+                    Formula.A1_A2_FORMULA,
+                    Formula.A1_A3_FORMULA,
+                    Formula.T1_T2_FORMULA,
+                    Formula.T1_T3_FORMULA });
+                map.put("T1 T2 T3", new Formula[] {
+                    Formula.T1_FORMULA,
+                    Formula.T2_FORMULA,
+                    Formula.T3_FORMULA });
+                map.put("A1 A2 A3 T1 T2 T3", new Formula[] {
+                    Formula.A1_FORMULA,
+                    Formula.A2_FORMULA,
+                    Formula.A3_FORMULA,
+                    Formula.T1_FORMULA,
+                    Formula.T2_FORMULA,
+                    Formula.T3_FORMULA });
+                map.put("A1 A2 A3 T1 T2 T3 C", new Formula[] {
+                    Formula.A1_FORMULA,
+                    Formula.A2_FORMULA,
+                    Formula.A3_FORMULA,
+                    Formula.T1_FORMULA,
+                    Formula.T2_FORMULA,
+                    Formula.T3_FORMULA,
+                    Formula.C_FORMULA });
                 break;
             case STRETCHED_EXPONENTIAL:
                 break;
