@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.analysis.plugins;
 
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.gui.MessageDialog;
 import ij.process.ColorProcessor;
 import java.awt.Color;
@@ -42,6 +43,9 @@ import java.awt.Color;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import loci.slim.SLIMProcessor.FitFunction;
 import loci.slim.SLIMProcessor.FitRegion;
@@ -62,7 +66,7 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  */
 @SLIMAnalyzer(name="Display Fit Results")
 public class Display implements ISLIMAnalyzer {
-    private static final Character TAU = 'T'; //TODO IJ doesn't handle Unicode, was: = '\u03c4';
+    private static final Character TAU = 'T'; //TODO IJ1 doesn't display Unicode, was: = '\u03c4';
     private static final String T = "" + TAU;
     private static final String T1 = "" + TAU + '1';
     private static final String T2 = "" + TAU + '2';
@@ -100,6 +104,7 @@ public class Display implements ISLIMAnalyzer {
      * Enum that contains the possible formulas for the values to be displayed.
      * This table is very specifically tied to the order of parameter indices.
      */
+    //TODO need Ta, Ti, Tm
     private static enum Formula {
         T_FORMULA(T, 2),
         T1_FORMULA(T1, 2),
@@ -184,7 +189,9 @@ public class Display implements ISLIMAnalyzer {
      * @param function
      */
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
-        boolean combineMinMax = false; //TODO needs to be set from UI.
+        // Used to build optional lists of formulas
+        Map<String, Formula[]> formulasMap = null;
+        boolean combineMinMax = false;
 
         // is this plugin appropriate for current data?
         if (FitRegion.EACH != region) {
@@ -208,20 +215,21 @@ public class Display implements ISLIMAnalyzer {
         int channels = dimensions[cIndex];
         int params   = dimensions[pIndex];
 
-        // get appropriate formula for image dimensions
+        // allow user to select formula to display
         Formula formulas[] = null;
-        switch (function) {
-            case SINGLE_EXPONENTIAL:
-                formulas = new Formula[] { Formula.A_FORMULA, Formula.T_FORMULA, Formula.C_FORMULA }; //TODO these three formulas are just for testing.
-                break;
-            case DOUBLE_EXPONENTIAL:
-                formulas = new Formula[] { Formula.A1_A2_FORMULA, Formula.T1_T2_FORMULA };
-                break;
-            case TRIPLE_EXPONENTIAL:
-                formulas = new Formula[] { Formula.T1_T2_FORMULA, Formula.T1_T3_FORMULA };
-                break;
-            case STRETCHED_EXPONENTIAL:
-                break;
+        if (null == formulasMap) {
+            formulasMap = initFormulasMap(function);
+        }
+        GenericDialog dialog = new GenericDialog("Display Formula");
+        String choices[] = formulasMap.keySet().toArray(new String[0]);
+        dialog.addChoice("Show", choices, choices[0]);
+        if (channels > 1) {
+            dialog.addCheckbox("Use common range for all channels", true);
+        }
+        dialog.showDialog();
+        formulas = formulasMap.get(dialog.getNextChoice());
+        if (channels > 1) {
+            combineMinMax = dialog.getNextBoolean();
         }
 
         // build display cells
@@ -343,6 +351,47 @@ public class Display implements ISLIMAnalyzer {
         imp.show();
     }
 
+    /**
+     * Builds lists of formulas and associated descriptions that are appropriate
+     * to a given fit function.
+     *
+     * @param function
+     * @return
+     */
+    private Map<String, Formula[]> initFormulasMap(FitFunction function) {
+        Map<String, Formula[]> map = new HashMap<String, Formula[]>();
+        switch (function) {
+            case SINGLE_EXPONENTIAL:
+                map.put("T", new Formula[] { Formula.T_FORMULA });
+                map.put("A T", new Formula[] { Formula.A_FORMULA, Formula.T_FORMULA });
+                map.put("A T C", new Formula[] { Formula.A_FORMULA, Formula.T_FORMULA, Formula.C_FORMULA });
+                break;
+            case DOUBLE_EXPONENTIAL:
+                map.put("T1/T2", new Formula[] { Formula.T1_T2_FORMULA });
+                map.put("A1/A2 T1/T2", new Formula[] { Formula.A1_A2_FORMULA, Formula.T1_T2_FORMULA });
+                map.put("T1 T2", new Formula[] { Formula.T1_FORMULA, Formula.T2_FORMULA });
+                map.put("A1 A2 T1 T2", new Formula[] { Formula.A1_FORMULA, Formula.A2_FORMULA, Formula.T1_FORMULA, Formula.T2_FORMULA });
+                map.put("A1 A2 T1 T2 C", new Formula[] { Formula.A1_FORMULA, Formula.A2_FORMULA, Formula.T1_FORMULA, Formula.T2_FORMULA, Formula.C_FORMULA });
+                break;
+            case TRIPLE_EXPONENTIAL:
+                map.put("T1/T2 T1/T3", new Formula[] { Formula.T1_T2_FORMULA, Formula.T1_T3_FORMULA });
+                map.put("A1/A2 A1/A3 T1/T2 T1/T3", new Formula[] { Formula.A1_A2_FORMULA, Formula.A1_A3_FORMULA, Formula.T1_T2_FORMULA, Formula.T1_T3_FORMULA });
+                map.put("T1 T2 T3", new Formula[] { Formula.T1_FORMULA, Formula.T2_FORMULA, Formula.T3_FORMULA });
+                map.put("A1 A2 A3 T1 T2 T3", new Formula[] { Formula.A1_FORMULA, Formula.A2_FORMULA, Formula.A3_FORMULA, Formula.T1_FORMULA, Formula.T2_FORMULA, Formula.T3_FORMULA });
+                map.put("A1 A2 A3 T1 T2 T3 C", new Formula[] { Formula.A1_FORMULA, Formula.A2_FORMULA, Formula.A3_FORMULA, Formula.T1_FORMULA, Formula.T2_FORMULA, Formula.T3_FORMULA, Formula.C_FORMULA });
+                break;
+            case STRETCHED_EXPONENTIAL:
+                break;
+        }
+        return map;
+    }
+
+    /**
+     * Initializes minimum and maximum value arrays.
+     *
+     * @param minValue
+     * @param maxValue
+     */
     private void initMinMax(double minValue[], double maxValue[]) {
         for (int i = 0; i < minValue.length; ++i) {
             minValue[i] = Double.MAX_VALUE;
