@@ -59,10 +59,11 @@ import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-import loci.slim.SLIMProcessor.FitAlgorithm;
-import loci.slim.SLIMProcessor.FitFunction;
-import loci.slim.SLIMProcessor.FitRegion;
+import loci.slim.ui.IUserInterfacePanel.FitAlgorithm;
+import loci.slim.ui.IUserInterfacePanel.FitFunction;
+import loci.slim.ui.IUserInterfacePanel.FitRegion;
 import loci.slim.analysis.SLIMAnalysis;
+import loci.slim.binning.SLIMBinning;
 
 /**
  * TODO
@@ -132,6 +133,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JTextField m_startField;
     JTextField m_stopField;
     JTextField m_thresholdField;
+    JComboBox m_binningComboBox;
 
     // parameter panel
     JPanel m_paramPanel;
@@ -194,11 +196,10 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JButton m_quitButton;
     JButton m_fitButton;
 
-    public UserInterfacePanel(boolean showTau, SLIMAnalysis analysis) {
+    public UserInterfacePanel(boolean showTau, String[] analysisChoices, String[] binningChoices) {
         String lifetimeLabel = "" + (showTau ? TAU : LAMBDA);
-        
+
         m_frame = new JFrame("SLIM Plugin");
-        //m_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // create outer panel
         JPanel outerPanel = new JPanel();
@@ -208,11 +209,11 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         JPanel innerPanel = new JPanel();
         innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.X_AXIS));
 
-        JPanel fitPanel = createFitPanel(analysis);
+        JPanel fitPanel = createFitPanel(analysisChoices);
         fitPanel.setBorder(border("Fit"));
         innerPanel.add(fitPanel);
 
-        JPanel controlPanel = createControlPanel();
+        JPanel controlPanel = createControlPanel(binningChoices);
         controlPanel.setBorder(border("Control"));
         innerPanel.add(controlPanel);
 
@@ -299,7 +300,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         setFitButtonState(true);
     }
 
-    private JPanel createFitPanel(SLIMAnalysis analysis) {
+    private JPanel createFitPanel(String[] analysisChoices) {
         JPanel fitPanel = new JPanel();
         fitPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
         fitPanel.setLayout(new SpringLayout());
@@ -336,7 +337,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         JLabel analysisLabel = new JLabel("Analysis");
         analysisLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         fitPanel.add(analysisLabel);
-        m_analysisComboBox = new JComboBox(analysis.getNames());
+        m_analysisComboBox = new JComboBox(analysisChoices);
         fitPanel.add(m_analysisComboBox);
 
         // rows, cols, initX, initY, xPad, yPad
@@ -355,7 +356,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     /*
      * Creates a panel that has some settings that control the fit.
      */
-    private JPanel createControlPanel() {
+    private JPanel createControlPanel(String[] binningChoices) {
         JPanel controlPanel = new JPanel();
         controlPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
         controlPanel.setLayout(new SpringLayout());
@@ -390,8 +391,14 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_thresholdField = new JTextField(9);
         controlPanel.add(m_thresholdField);
 
+        JLabel binningLabel = new JLabel("Bin");
+        binningLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        controlPanel.add(binningLabel);
+        m_binningComboBox = new JComboBox(binningChoices);
+        controlPanel.add(m_binningComboBox);
+
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(controlPanel, 5, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(controlPanel, 6, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", controlPanel);
@@ -783,6 +790,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_startField.setEditable(enable);
         m_stopField.setEditable(enable);
         m_thresholdField.setEditable(enable);
+        m_binningComboBox.setEnabled(enable);
 
         // single exponent fit
         m_aParam1.setEditable(enable);
@@ -941,20 +949,25 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_thresholdField.setText("" + threshold);
     }
 
+    public String getBinning() {
+        String selected = (String) m_binningComboBox.getSelectedItem();
+        return selected;
+    }
+
     public int getParameterCount() {
         int count = 0;
         String function = (String) m_functionComboBox.getSelectedItem();
         if (function.equals(SINGLE_EXPONENTIAL)) {
-            count = 3;
+            count = 4;
         }
         else if (function.equals(DOUBLE_EXPONENTIAL)) {
-            count = 5;
+            count = 6;
         }
         else if (function.equals(TRIPLE_EXPONENTIAL)) {
-            count = 7;
+            count = 8;
         }
         else if (function.equals(STRETCHED_EXPONENTIAL)) {
-            count = 4;
+            count = 5;
         }
         return count;
     }
@@ -967,98 +980,107 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         double parameters[] = null;
         String function = (String) m_functionComboBox.getSelectedItem();
         if (function.equals(SINGLE_EXPONENTIAL)) {
-            parameters = new double[3];
-            parameters[0] = Double.valueOf(m_aParam1.getText());
-            parameters[1] = Double.valueOf(m_tParam1.getText());
-            parameters[2] = Double.valueOf(m_cParam1.getText());
+            parameters = new double[4];
+            parameters[2] = Double.valueOf(m_aParam1.getText());
+            parameters[3] = Double.valueOf(m_tParam1.getText());
+            parameters[1] = Double.valueOf(m_cParam1.getText());
         }
         else if (function.equals(DOUBLE_EXPONENTIAL)) {
-            parameters = new double[5];
-            parameters[0] = Double.valueOf(m_a1Param2.getText());
-            parameters[1] = Double.valueOf(m_t1Param2.getText());
-            parameters[2] = Double.valueOf(m_a2Param2.getText());
-            parameters[3] = Double.valueOf(m_t2Param2.getText());
-            parameters[4] = Double.valueOf(m_cParam2.getText());
+            parameters = new double[6];
+            parameters[2] = Double.valueOf(m_a1Param2.getText());
+            parameters[3] = Double.valueOf(m_t1Param2.getText());
+            parameters[4] = Double.valueOf(m_a2Param2.getText());
+            parameters[5] = Double.valueOf(m_t2Param2.getText());
+            parameters[1] = Double.valueOf(m_cParam2.getText());
         }
         else if (function.equals(TRIPLE_EXPONENTIAL)) {
-            parameters = new double[7];
-            parameters[0] = Double.valueOf(m_a1Param3.getText());
-            parameters[1] = Double.valueOf(m_t1Param3.getText());
-            parameters[2] = Double.valueOf(m_a2Param3.getText());
-            parameters[3] = Double.valueOf(m_t2Param3.getText());
-            parameters[4] = Double.valueOf(m_a3Param3.getText());
-            parameters[5] = Double.valueOf(m_t3Param3.getText());
-            parameters[6] = Double.valueOf(m_cParam3.getText());
+            parameters = new double[8];
+            parameters[2] = Double.valueOf(m_a1Param3.getText());
+            parameters[3] = Double.valueOf(m_t1Param3.getText());
+            parameters[4] = Double.valueOf(m_a2Param3.getText());
+            parameters[5] = Double.valueOf(m_t2Param3.getText());
+            parameters[6] = Double.valueOf(m_a3Param3.getText());
+            parameters[7] = Double.valueOf(m_t3Param3.getText());
+            parameters[1] = Double.valueOf(m_cParam3.getText());
         }
         else if (function.equals(STRETCHED_EXPONENTIAL)) {
-            parameters = new double[4];
-            parameters[0] = Double.valueOf(m_aParam4.getText());
-            parameters[1] = Double.valueOf(m_tParam4.getText());
-            parameters[2] = Double.valueOf(m_hParam4.getText());
-            parameters[3] = Double.valueOf(m_cParam4.getText());
+            parameters = new double[5];
+            parameters[2] = Double.valueOf(m_aParam4.getText());
+            parameters[3] = Double.valueOf(m_tParam4.getText());
+            parameters[4] = Double.valueOf(m_hParam4.getText());
+            parameters[1] = Double.valueOf(m_cParam4.getText());
         }
+        parameters[0] = 0.0;
         return parameters;
     }
 
     public void setParameters(double params[]) {
         String function = (String) m_functionComboBox.getSelectedItem();
         if (function.equals(SINGLE_EXPONENTIAL)) {
-            m_aParam1.setText("" + (float) params[0]);
-            m_tParam1.setText("" + (float) params[1]);
-            m_cParam1.setText( "" + (float) params[2]);
+            m_aParam1.setText    ("" + (float) params[2]);
+            m_tParam1.setText    ("" + (float) params[3]);
+            m_cParam1.setText    ("" + (float) params[1]);
+            m_chiSqParam1.setText("" + (float) params[0]);
         }
         else if (function.equals(DOUBLE_EXPONENTIAL)) {
-            m_a1Param2.setText("" + (float) params[0]);
-            m_t1Param2.setText("" + (float) params[1]);
-            m_a2Param2.setText("" + (float) params[2]);
-            m_t2Param2.setText("" + (float) params[3]);
-            m_cParam2.setText( "" + (float) params[4]);
+            m_a1Param2.setText   ("" + (float) params[2]);
+            m_t1Param2.setText   ("" + (float) params[3]);
+            m_a2Param2.setText   ("" + (float) params[4]);
+            m_t2Param2.setText   ("" + (float) params[5]);
+            m_cParam2.setText    ("" + (float) params[1]);
+            m_chiSqParam2.setText("" + (float) params[0]);
         }
         else if (function.equals(TRIPLE_EXPONENTIAL)) {
-            m_a1Param3.setText("" + (float) params[0]);
-            m_t1Param3.setText("" + (float) params[1]);
-            m_a2Param3.setText("" + (float) params[2]);
-            m_t2Param3.setText("" + (float) params[3]);
-            m_a3Param3.setText("" + (float) params[4]);
-            m_t3Param3.setText("" + (float) params[5]);
-            m_cParam3.setText( "" + (float) params[6]);
-         }
+            m_a1Param3.setText   ("" + (float) params[2]);
+            m_t1Param3.setText   ("" + (float) params[3]);
+            m_a2Param3.setText   ("" + (float) params[4]);
+            m_t2Param3.setText   ("" + (float) params[5]);
+            m_a3Param3.setText   ("" + (float) params[6]);
+            m_t3Param3.setText   ("" + (float) params[7]);
+            m_cParam3.setText    ("" + (float) params[1]);
+            m_chiSqParam3.setText("" + (float) params[0]);
+        }
         else if (function.equals(STRETCHED_EXPONENTIAL)) {
-            m_aParam4.setText("" + (float) params[0]);
-            m_tParam4.setText("" + (float) params[1]);
-            m_hParam4.setText("" + (float) params[2]);
-            m_cParam4.setText("" + (float) params[3]);
+            m_aParam4.setText    ("" + (float) params[2]);
+            m_tParam4.setText    ("" + (float) params[3]);
+            m_hParam4.setText    ("" + (float) params[4]);
+            m_cParam4.setText    ("" + (float) params[1]);
+            m_chiSqParam4.setText("" + (float) params[0]);
         }
     }
 
     public void setFunctionParameters(int function, double params[]) {
         switch (function) {
             case 0:
-                m_aParam1.setText("" + (float) params[0]);
-                m_tParam1.setText("" + (float) params[1]);
-                m_cParam1.setText( "" + (float) params[2]);
+                m_aParam1.setText    ("" + (float) params[2]);
+                m_tParam1.setText    ("" + (float) params[3]);
+                m_cParam1.setText    ("" + (float) params[1]);
+                m_chiSqParam1.setText("" + (float) params[0]);
                 break;
             case 1:
-                m_a1Param2.setText("" + (float) params[0]);
-                m_t1Param2.setText("" + (float) params[1]);
-                m_a2Param2.setText("" + (float) params[2]);
-                m_t2Param2.setText("" + (float) params[3]);
-                m_cParam2.setText( "" + (float) params[4]);
+                m_a1Param2.setText   ("" + (float) params[2]);
+                m_t1Param2.setText   ("" + (float) params[3]);
+                m_a2Param2.setText   ("" + (float) params[4]);
+                m_t2Param2.setText   ("" + (float) params[5]);
+                m_cParam2.setText    ("" + (float) params[1]);
+                m_chiSqParam2.setText("" + (float) params[0]);
                 break;
             case 2:
-                m_a1Param3.setText("" + (float) params[0]);
-                m_t1Param3.setText("" + (float) params[1]);
-                m_a2Param3.setText("" + (float) params[2]);
-                m_t2Param3.setText("" + (float) params[3]);
-                m_a3Param3.setText("" + (float) params[4]);
-                m_t3Param3.setText("" + (float) params[5]);
-                m_cParam3.setText( "" + (float) params[6]);
+                m_a1Param3.setText   ("" + (float) params[2]);
+                m_t1Param3.setText   ("" + (float) params[3]);
+                m_a2Param3.setText   ("" + (float) params[4]);
+                m_t2Param3.setText   ("" + (float) params[5]);
+                m_a3Param3.setText   ("" + (float) params[6]);
+                m_t3Param3.setText   ("" + (float) params[7]);
+                m_cParam3.setText    ("" + (float) params[1]);
+                m_chiSqParam3.setText("" + (float) params[0]);
                 break;
             case 3:
-                m_aParam4.setText("" + (float) params[0]);
-                m_tParam4.setText("" + (float) params[1]);
-                m_hParam4.setText("" + (float) params[2]);
-                m_cParam4.setText("" + (float) params[3]);
+                m_aParam4.setText    ("" + (float) params[0]);
+                m_tParam4.setText    ("" + (float) params[1]);
+                m_hParam4.setText    ("" + (float) params[2]);
+                m_cParam4.setText    ("" + (float) params[1]);
+                m_chiSqParam4.setText("" + (float) params[0]);
                 break;
         }
     }
@@ -1099,22 +1121,6 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             free[3] = !m_cFix4.isSelected();
         }
         return free;
-    }
-
-    public void setChiSquare(double chiSquare) {
-        String function = (String) m_functionComboBox.getSelectedItem();
-        if (function.equals(SINGLE_EXPONENTIAL)) {
-            m_chiSqParam1.setText("" + (float) chiSquare);
-        }
-        else if (function.equals(DOUBLE_EXPONENTIAL)) {
-            m_chiSqParam2.setText("" + (float) chiSquare);
-        }
-        else if (function.equals(TRIPLE_EXPONENTIAL)) {
-            m_chiSqParam3.setText("" + (float) chiSquare);
-        }
-        else if (function.equals(STRETCHED_EXPONENTIAL)) {
-            m_chiSqParam4.setText("" + (float) chiSquare);
-        }
     }
 
     public boolean refineFit() {
