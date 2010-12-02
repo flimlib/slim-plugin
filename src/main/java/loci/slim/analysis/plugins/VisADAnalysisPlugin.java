@@ -10,8 +10,8 @@ import ij.ImagePlus;
 
 import imagej.process.ImageUtils;
 
-import loci.slim.SLIMProcessor.FitFunction;
-import loci.slim.SLIMProcessor.FitRegion;
+import loci.slim.ui.IUserInterfacePanel.FitFunction;
+import loci.slim.ui.IUserInterfacePanel.FitRegion;
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
 
