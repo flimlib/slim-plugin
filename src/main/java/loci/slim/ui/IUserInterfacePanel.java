@@ -36,20 +36,24 @@ package loci.slim.ui;
 
 import javax.swing.JFrame;
 
-import loci.slim.SLIMProcessor.FitAlgorithm;
-import loci.slim.SLIMProcessor.FitFunction;
-import loci.slim.SLIMProcessor.FitRegion;
-
 /**
- * TODO
+ * Interface to the User Interface Panel
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/java/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/IUserInterfacePanel.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/IUserInterfacePanel.java">SVN</a></dd></dl>
- *
- * @author Aivar Grislis grislis at wisc.edu
+ * @author Aivar Grislis
  */
 public interface IUserInterfacePanel {
+    public static enum FitRegion {
+        SUMMED, ROI, POINT, EACH
+    }
+
+    public static enum FitAlgorithm { //TODO not really algorithm, usu. LMA
+       JAOLHO, /*AKUTAN,*/ BARBER_RLD, BARBER_LMA, MARKWARDT, BARBER2_RLD, BARBER2_LMA, SLIMCURVE_RLD, SLIMCURVE_LMA
+    }
+
+    public static enum FitFunction {
+        SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL
+    }
+
 
     /**
      * Gets the UI JFrame.
@@ -146,6 +150,13 @@ public interface IUserInterfacePanel {
     public void setThreshold(int threshold);
 
     /**
+     * Gets binning plugin name.
+     *
+     * @return binning plugin name
+     */
+    public String getBinning();
+
+    /**
      * Gets pixel x.
      *
      * @return x
@@ -215,13 +226,6 @@ public interface IUserInterfacePanel {
      * @return free parameters
      */
     public boolean[] getFree();
-
-    /**
-     * Sets the chi squared value.
-     *
-     * @param chiSquare value
-     */
-    public void setChiSquare(double chiSquare);
 
     /**
      * Gets whether to start next fit with results of last fit.
