@@ -47,12 +47,12 @@ import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 
-import loci.slim.SLIMProcessor.FitFunction;
-import loci.slim.SLIMProcessor.FitRegion;
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.colorizer.FiveColorColorize;
 import loci.slim.colorizer.IColorize;
+import loci.slim.ui.IUserInterfacePanel.FitFunction;
+import loci.slim.ui.IUserInterfacePanel.FitRegion;
 
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
@@ -106,27 +106,27 @@ public class Display implements ISLIMAnalyzer {
      */
     //TODO need Ta, Ti, Tm
     private static enum Formula {
-        T_FORMULA(T, 2),
-        T1_FORMULA(T1, 2),
-        T2_FORMULA(T2, 4),
-        T3_FORMULA(T3, 6),
-        T1_T2_FORMULA(T1_T2, 2, 4), // specifies T1/T2, parameter index 2 divided by parameter index 4
-        T2_T1_FORMULA(T2_T1 ,4, 2),
-        T1_T3_FORMULA(T1_T3, 2, 6),
-        T3_T1_FORMULA(T3_T1, 6, 2),
-        T2_T3_FORMULA(T2_T3, 4, 6),
-        T3_T2_FORMULA(T3_T2, 6, 4),
-        A_FORMULA(A, 1),
-        A1_FORMULA(A1, 1),
-        A2_FORMULA(A2, 3),
-        A3_FORMULA(A3, 5),
-        A1_A2_FORMULA(A1_A2, 1, 3),
-        A2_A1_FORMULA(A2_A1, 3, 1),
-        A1_A3_FORMULA(A1_A3, 1, 5),
-        A3_A1_FORMULA(A3_A1, 5, 1),
-        A2_A3_FORMULA(A2_A3, 3, 5),
-        A3_A2_FORMULA(A3_A2, 5, 3),
-        C_FORMULA(C, 0);
+        T_FORMULA(T, 3),
+        T1_FORMULA(T1, 3),
+        T2_FORMULA(T2, 5),
+        T3_FORMULA(T3, 7),
+        T1_T2_FORMULA(T1_T2, 3, 5), // specifies T1/T2, parameter index 3 divided by parameter index 5
+        T2_T1_FORMULA(T2_T1 ,5, 3),
+        T1_T3_FORMULA(T1_T3, 3, 7),
+        T3_T1_FORMULA(T3_T1, 7, 3),
+        T2_T3_FORMULA(T2_T3, 5, 7),
+        T3_T2_FORMULA(T3_T2, 7, 5),
+        A_FORMULA(A, 2),
+        A1_FORMULA(A1, 2),
+        A2_FORMULA(A2, 4),
+        A3_FORMULA(A3, 6),
+        A1_A2_FORMULA(A1_A2, 2, 4),
+        A2_A1_FORMULA(A2_A1, 4, 2),
+        A1_A3_FORMULA(A1_A3, 2, 6),
+        A3_A1_FORMULA(A3_A1, 6, 2),
+        A2_A3_FORMULA(A2_A3, 4, 6),
+        A3_A2_FORMULA(A3_A2, 6, 4),
+        C_FORMULA(C, 1);
 
         // This contains the displayable name
         private final String m_name;
