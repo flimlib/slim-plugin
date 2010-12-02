@@ -11,8 +11,8 @@ import ij.ImagePlus;
 import java.util.ArrayList;
 import java.util.List;
 
-import loci.slim.SLIMProcessor.FitFunction;
-import loci.slim.SLIMProcessor.FitRegion;
+import loci.slim.ui.IUserInterfacePanel.FitFunction;
+import loci.slim.ui.IUserInterfacePanel.FitRegion;
 
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.real.DoubleType;
@@ -25,6 +25,7 @@ import net.java.sezpoz.IndexItem;
  * @author Aivar Grislis
  */
 public class SLIMAnalysis {
+    public static final String NONE = "None";
     IndexItem<SLIMAnalyzer, ISLIMAnalyzer> m_plugins[];
     String m_names[];
 
@@ -32,7 +33,7 @@ public class SLIMAnalysis {
         // get list of plugins and their names
         List<String> names = new ArrayList<String>();
         List<IndexItem> plugins = new ArrayList<IndexItem>();
-        names.add("None");
+        names.add(NONE);
         plugins.add(null);
 
         // look for matches
@@ -45,7 +46,7 @@ public class SLIMAnalysis {
         m_names = names.toArray(new String[0]);
     }
 
-    public String[] getNames() {
+    public String[] getChoices() {
         return m_names;
     }
 
