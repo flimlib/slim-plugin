@@ -14,10 +14,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.prefs.*;
 
-import loci.slim.SLIMProcessor.FitFunction;
-import loci.slim.SLIMProcessor.FitRegion;
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
+import loci.slim.ui.IUserInterfacePanel.FitFunction;
+import loci.slim.ui.IUserInterfacePanel.FitRegion;
 
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.real.DoubleType;
