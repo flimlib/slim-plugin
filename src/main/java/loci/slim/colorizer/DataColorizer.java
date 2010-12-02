@@ -124,7 +124,7 @@ public class DataColorizer implements IColorizeRangeListener {
         synchronized (m_synchObject) {
             // we only want to count data once per actual, final pixel
             if (firstTime) {
-                dumpInfo("before", datum);
+                //dumpInfo("before", datum);
                 // add to histogram
                 m_histogramData[m_histogramDataIndex++] = datum;
 
@@ -137,7 +137,7 @@ public class DataColorizer implements IColorizeRangeListener {
                 if (datum > m_workMax) {
                     m_workMax = datum;
                 }
-                dumpInfo("after", datum);
+                //dumpInfo("after", datum);
             }
 
             // save value for possible recolorization as color map changes
