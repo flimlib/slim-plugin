@@ -124,7 +124,8 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
             }
 
             // add a slice
-            m_imageStack.addSlice("" + c, true, outPixels);
+           // m_imageStack.addSlice("" + c, true, outPixels); // stopped working 12/1/10
+            m_imageStack.addSlice("" + c, outPixels);
             m_saveOutPixels[c] = outPixels;
         }
         ImagePlus imagePlus = new ImagePlus(title, m_imageStack);
