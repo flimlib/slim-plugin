@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
     http://maven.apache.org/maven-v4_0_0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
+
   <parent>
     <groupId>loci</groupId>
     <artifactId>loci-base-pom</artifactId>
@@ -12,8 +13,8 @@
 
   <groupId>loci</groupId>
   <artifactId>slim-plugin</artifactId>
-  <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
+
   <name>SLIMPlugin</name>
   <description>An ImageJ plugin for combined spectral-lifetime image analysis.</description>
   <url>http://loci.wisc.edu/software</url>
@@ -28,7 +29,32 @@
   </licenses>
 
   <dependencies>
-    <!-- loci -->
+    <!-- TODO: define a real POM for fiji-lib -->
+    <dependency>
+      <groupId>fiji</groupId>
+      <artifactId>fiji-lib</artifactId>
+      <version>20100908</version>
+    </dependency>
+    <dependency>
+      <groupId>imagej</groupId>
+      <artifactId>bf-imglib</artifactId>
+      <version>2.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>imagej</groupId>
+      <artifactId>ij</artifactId>
+      <version>1.43</version>
+    </dependency>
+    <dependency>
+      <groupId>imagej</groupId>
+      <artifactId>ij-visad</artifactId>
+      <version>2.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>jfree</groupId>
+      <artifactId>jfreechart</artifactId>
+      <version>1.0.12</version>
+    </dependency>
     <dependency>
       <groupId>loci</groupId>
       <artifactId>bio-formats</artifactId>
@@ -44,47 +70,10 @@
       <artifactId>loci-common</artifactId>
       <version>5.0-SNAPSHOT</version>
     </dependency>
-
-    <!-- imagej -->
-    <dependency>
-      <groupId>imagej</groupId>
-      <artifactId>bf-imglib</artifactId>
-      <version>2.0-SNAPSHOT</version>
-    </dependency>
-
-    <!-- 3rd party -->
-    <!-- TODO: define a real POM for fiji-lib -->
-    <dependency>
-      <groupId>fiji</groupId>
-      <artifactId>fiji-lib</artifactId>
-      <version>20100908</version>
-    </dependency>
-
-    <!-- central -->
-    <dependency>
-      <groupId>jfree</groupId>
-      <artifactId>jfreechart</artifactId>
-      <version>1.0.12</version>
-    </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
       <version>3.2.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.swinglabs</groupId>
-      <artifactId>jxlayer</artifactId>
-      <version>3.0.4</version>
-    </dependency>
-    <dependency>
-      <groupId>imagej</groupId>
-      <artifactId>bf-imglib</artifactId>
-      <version>2.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>imagej</groupId>
-      <artifactId>ij-visad</artifactId>
-      <version>2.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>net.java.sezpoz</groupId>
@@ -92,9 +81,9 @@
       <version>1.7</version>
     </dependency>
     <dependency>
-      <groupId>imagej</groupId>
-      <artifactId>ij</artifactId>
-      <version>2.0-SNAPSHOT</version>
+      <groupId>org.swinglabs</groupId>
+      <artifactId>jxlayer</artifactId>
+      <version>3.0.4</version>
     </dependency>
   </dependencies>
 
@@ -142,5 +131,3 @@
   </repositories>
 
 </project>
-
-
