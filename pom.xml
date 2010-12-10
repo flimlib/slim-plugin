@@ -29,12 +29,6 @@
   </licenses>
 
   <dependencies>
-    <!-- TODO: define a real POM for fiji-lib -->
-    <dependency>
-      <groupId>fiji</groupId>
-      <artifactId>fiji-lib</artifactId>
-      <version>20100908</version>
-    </dependency>
     <dependency>
       <groupId>imagej</groupId>
       <artifactId>ij</artifactId>
@@ -42,8 +36,23 @@
     </dependency>
     <dependency>
       <groupId>imagej</groupId>
-      <artifactId>ij-visad</artifactId>
+      <artifactId>ij1-bridge</artifactId>
       <version>2.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>imagej</groupId>
+      <artifactId>ij1-plugin</artifactId>
+      <version>2.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>imagej</groupId>
+      <artifactId>ij2-imglib</artifactId>
+      <version>2.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>jfree</groupId>
+      <artifactId>jcommon</artifactId>
+      <version>1.0.15</version>
     </dependency>
     <dependency>
       <groupId>jfree</groupId>
@@ -61,19 +70,14 @@
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>loci</groupId>
-      <artifactId>loci-common</artifactId>
-      <version>5.0-SNAPSHOT</version>
+      <groupId>mpicbg</groupId>
+      <artifactId>imglib</artifactId>
+      <version>2.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>mpicbg</groupId>
       <artifactId>imglib-io</artifactId>
       <version>2.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>net.java.dev.jna</groupId>
-      <artifactId>jna</artifactId>
-      <version>3.2.2</version>
     </dependency>
     <dependency>
       <groupId>net.java.sezpoz</groupId>

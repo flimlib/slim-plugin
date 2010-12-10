@@ -42,9 +42,7 @@ import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
-import imagej.process.ImageUtils;
-
-import imagej.io.ImageOpener;
+import imagej.imglib.process.ImageUtils;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -80,6 +78,7 @@ import mpicbg.imglib.cursor.Cursor;
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.image.ImageFactory;
+import mpicbg.imglib.io.ImageOpener;
 import mpicbg.imglib.type.numeric.RealType;
 import mpicbg.imglib.type.numeric.real.DoubleType;
 

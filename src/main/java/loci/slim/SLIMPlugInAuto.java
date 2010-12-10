@@ -35,6 +35,7 @@ import ij.ImageStack;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
+import imagej.ij1bridge.ImgLibImageStack;
 import imagej.plugin.Dimensions;
 import imagej.plugin.IAutoDisplayPlugin;
 
@@ -54,8 +55,9 @@ public class SLIMPlugInAuto implements IAutoDisplayPlugin {
     public int setup(String params, ImagePlus ip) {
         System.out.println("SLIMPlugInAuto.setup " + ip);
         ImageStack imageStack = ip.getImageStack();
-        if (null != imageStack) {
-            m_image = imageStack.getStorage();
+        if (imageStack instanceof ImgLibImageStack) {
+            // CTR FIXME: remove dependency on ij1-bridge
+            m_image = ((ImgLibImageStack) imageStack).getStorage();
             System.out.println("imageStack.getStorage is " + m_image);
         }
         return PlugInFilter.DOES_ALL | PlugInFilter.NO_CHANGES;

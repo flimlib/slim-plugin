@@ -8,7 +8,8 @@ package loci.slim.analysis.plugins;
 import ij.IJ;
 import ij.ImagePlus;
 
-import imagej.process.ImageUtils;
+// CTR FIXME: remove dependency on ij1bridge
+import imagej.ij1bridge.process.ImageUtils;
 
 import loci.slim.ui.IUserInterfacePanel.FitFunction;
 import loci.slim.ui.IUserInterfacePanel.FitRegion;

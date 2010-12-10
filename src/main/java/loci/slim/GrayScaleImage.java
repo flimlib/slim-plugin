@@ -77,7 +77,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         }
 
         // building an image stack
-        m_imageStack = new ImageStack(m_width, m_height, ColorModel.getRGBdefault(), null);
+        m_imageStack = new ImageStack(m_width, m_height, ColorModel.getRGBdefault());
         m_saveOutPixels = new byte[channels][];
 
         LocalizableByDimCursor cursor = image.createLocalizableByDimCursor();
