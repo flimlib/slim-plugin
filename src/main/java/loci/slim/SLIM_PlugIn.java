@@ -48,6 +48,6 @@ public class SLIM_PlugIn implements PlugIn {
         new ImageJ();
         SLIM_PlugIn plugIn = new SLIM_PlugIn();
         plugIn.run("");
-        System.exit(0); //TODO just for testing.
+        System.exit(0);
     }
 }
