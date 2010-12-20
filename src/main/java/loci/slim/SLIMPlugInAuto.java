@@ -34,13 +34,10 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-
 import imagej.ij1bridge.ImgLibImageStack;
-import imagej.plugin.Dimensions;
-import imagej.plugin.IAutoDisplayPlugin;
-
+import imagej.plugin.auto.Dimensions;
+import imagej.plugin.auto.IAutoDisplayPlugin;
 import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.RealType;
 
 /**
  * With this class the plugin is invoked automatically when a
