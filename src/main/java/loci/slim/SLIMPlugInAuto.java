@@ -35,8 +35,8 @@ import ij.ImageStack;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import imagej.ij1bridge.ImgLibImageStack;
-import imagej.plugin.auto.Dimensions;
-import imagej.plugin.auto.IAutoDisplayPlugin;
+import imagej.legacy.plugin.auto.Dimensions;
+import imagej.legacy.plugin.auto.IAutoDisplayPlugin;
 import mpicbg.imglib.image.Image;
 
 /**
