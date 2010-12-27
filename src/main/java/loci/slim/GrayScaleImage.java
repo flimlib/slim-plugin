@@ -77,7 +77,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         }
 
         // building an image stack
-        m_imageStack = new ImageStack(m_width, m_height, ColorModel.getRGBdefault());
+        m_imageStack = new ImageStack(m_width, m_height);
         m_saveOutPixels = new byte[channels][];
 
         LocalizableByDimCursor cursor = image.createLocalizableByDimCursor();
@@ -115,13 +115,14 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                     outPixels[y * m_width + x] = (byte) (pixels[x][m_height - y - 1] * 255 / maxPixel);
                 }
             }
-            java.util.Random randomizer = new java.util.Random();
-            for (int i = 0; i < 1000; ++i) {
-                int noise = randomizer.nextInt(255);
-                int x = randomizer.nextInt(m_width);
-                int y = randomizer.nextInt(m_height);
-                outPixels[y * m_width + x] = (byte) noise;
-            }
+            //TODO random noise to ensure different channels do have different images:
+            //java.util.Random randomizer = new java.util.Random();
+            //for (int i = 0; i < 1000; ++i) {
+            //    int noise = randomizer.nextInt(255);
+            //    int x = randomizer.nextInt(m_width);
+            //    int y = randomizer.nextInt(m_height);
+            //    outPixels[y * m_width + x] = (byte) noise;
+            //}
 
             // add a slice
            // m_imageStack.addSlice("" + c, true, outPixels); // stopped working 12/1/10
