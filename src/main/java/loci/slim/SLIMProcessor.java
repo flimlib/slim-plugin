@@ -1031,6 +1031,12 @@ public class SLIMProcessor <T extends RealType<T>> {
             ChunkyPixel pixel = pixels[i];
             double lifetime = data[i].getParams()[1];
 
+            //TODO quick fix
+            if (lifetime < 0.0) {
+                System.out.println("negative lifetime " + lifetime + " at " + pixel.getX() + " " + pixel.getY());
+                return;
+            }
+
             //TODO debugging:
             //if (lifetime > 2 * m_param[1]) {
             //    System.out.println("BAD FIT??? x " + pixel.getX() + " y " + pixel.getY() + " fitted lifetime " + lifetime);

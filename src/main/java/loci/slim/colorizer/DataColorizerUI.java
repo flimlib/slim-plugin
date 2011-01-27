@@ -69,7 +69,8 @@ public class DataColorizerUI implements IColorizeRangeListener {
         m_inputPanel = new InputPanel(this);
 
         m_frame = new JFrame("Colorize");
-        m_frame.setDefaultCloseOperation(m_frame.EXIT_ON_CLOSE);
+        //TODO closes the entire plugin:
+        //m_frame.setDefaultCloseOperation(m_frame.EXIT_ON_CLOSE);
         m_frame.setResizable(false);
         m_frame.getContentPane().add(m_histogram, BorderLayout.NORTH);
         m_frame.getContentPane().add(m_colorBar, BorderLayout.CENTER);

@@ -450,10 +450,17 @@ public class Display implements ISLIMAnalyzer {
         String m_text;
 
         private Converter(boolean min, double value) {
-            MathContext context = new MathContext(2, min ? RoundingMode.FLOOR : RoundingMode.CEILING);
-            BigDecimal bigDecimalValue = BigDecimal.valueOf(value).round(context);
-            m_value = bigDecimalValue.doubleValue();
-            m_text = bigDecimalValue.toEngineeringString();
+            try {
+                MathContext context = new MathContext(2, min ? RoundingMode.FLOOR : RoundingMode.CEILING);
+                BigDecimal bigDecimalValue = BigDecimal.valueOf(value).round(context);
+                m_value = bigDecimalValue.doubleValue();
+                m_text = bigDecimalValue.toEngineeringString();
+            }
+            catch (NumberFormatException e) {
+                System.out.println("NumberFormatException " + e.getMessage());
+                m_value = 0.0;
+                m_text = "0.0";
+            }
         }
 
         /**
