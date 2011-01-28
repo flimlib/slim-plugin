@@ -137,9 +137,6 @@ public class SLIMProcessor <T extends RealType<T>> {
     private Image<T> m_image;
     private LocalizableByDimCursor<T> m_cursor;
 
-    // Actual data values, dimensioned [channel][row][column][bin] //TODO DEPRECATE
-    protected int[][][][] Xm_data;
-
     private ImageProcessor m_grayscaleImageProcessor;
     private Canvas m_grayscaleCanvas;
 
@@ -712,7 +709,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         curveFitData.setParams(params);
         yCount = new double[m_timeBins];
         for (int b = 0; b < m_timeBins; ++b) {
-            yCount[b] = getData(m_cursor, m_channel, x, m_height - y - 1, b);
+            yCount[b] = getData(m_cursor, m_channel, x, y, b);
         }
         curveFitData.setYCount(yCount);
         yFitted = new double[m_timeBins];
@@ -815,7 +812,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                         curveFitDataList.clear();
                         curveFitter.fitData(data, m_startBin, m_stopBin);
                         setFittedParamsFromData(resultsCursor, data);
-                        colorizePixels(dataColorizer, m_height, m_channel, data, pixelList.toArray(new ChunkyPixel[0]));
+                        colorizePixels(dataColorizer, m_channel, data, pixelList.toArray(new ChunkyPixel[0]));
                         pixelList.clear();
                     }
                 }
@@ -827,7 +824,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 curveFitDataList.clear();
                 curveFitter.fitData(data, m_startBin, m_stopBin);
                 setFittedParamsFromData(resultsCursor, data);
-                colorizePixels(dataColorizer, m_height, m_channel, data, pixelList.toArray(new ChunkyPixel[0]));
+                colorizePixels(dataColorizer, m_channel, data, pixelList.toArray(new ChunkyPixel[0]));
             }
         }
         if (m_cancel) {
@@ -1024,12 +1021,13 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param data list of data corresponding to pixels to be fitted
      * @param pixels parallel list of rectangles with which to draw the fitted pixel
      */
-    void colorizePixels(DataColorizer dataColorizer, int height, int channel, ICurveFitData data[], ChunkyPixel pixels[]) {
+    void colorizePixels(DataColorizer dataColorizer, int channel, ICurveFitData data[], ChunkyPixel pixels[]) {
 
         // draw as you go; 'chunky' pixels get smaller as the overall fit progresses
         for (int i = 0; i < pixels.length; ++i) {
             ChunkyPixel pixel = pixels[i];
-            double lifetime = data[i].getParams()[1];
+            //TODO tau is 3, 1 is C double lifetime = data[i].getParams()[1];
+            double lifetime = data[i].getParams()[3];
 
             //TODO quick fix
             if (lifetime < 0.0) {
@@ -1062,8 +1060,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             for (int x = pixel.getX(); x < pixel.getX() + pixel.getWidth(); ++x) {
                 for (int y = pixel.getY(); y < pixel.getY() + pixel.getHeight(); ++y) {
                     if (wantFitted(channel, x, y)) {
-                        // (flip vertically)
-                        dataColorizer.setData(firstTime, x, height - y - 1 , lifetime);
+                        dataColorizer.setData(firstTime, x, y , lifetime);
                         firstTime = false;
                     }
                 }
@@ -1093,7 +1090,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @return whether above threshold
      */
     boolean aboveThreshold(int channel, int x, int y) {
-        return (m_threshold <= m_grayScaleImage.getPixel(channel, x, m_height - y - 1));
+        return (m_threshold <= m_grayScaleImage.getPixel(channel, x, y));
     }
 
     /**
@@ -1245,8 +1242,54 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
         curveFitter.setFitFunction(fitFunction);
         curveFitter.setXInc(m_timeRange);
-        curveFitter.setFree(uiPanel.getFree());
+        curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
         return curveFitter;
+    }
+
+    /*
+     * Handles reordering the array that describes which fit parameters are
+     * free (vs. fixed).
+     */
+    private boolean[] translateFree(FitFunction fitFunction, boolean free[]) {
+        boolean translated[] = new boolean[free.length];
+        switch (fitFunction) {
+            case SINGLE_EXPONENTIAL:
+                // incoming UI order is A, T, C
+                // SLIMCurve wants C, A, T
+                translated[0] = free[2];
+                translated[1] = free[0];
+                translated[2] = free[1];
+                break;
+            case DOUBLE_EXPONENTIAL:
+                // incoming UI order is A1 T1 A2 T2 C
+                // SLIMCurve wants C A1 T1 A2 T2
+                translated[0] = free[4];
+                translated[1] = free[0];
+                translated[2] = free[1];
+                translated[3] = free[2];
+                translated[4] = free[3];
+                break;
+            case TRIPLE_EXPONENTIAL:
+                // incoming UI order is A1 T1 A2 T2 A3 T3 C
+                // SLIMCurve wants C A1 T1 A2 T2 A3 T3
+                translated[0] = free[6];
+                translated[1] = free[0];
+                translated[2] = free[1];
+                translated[3] = free[2];
+                translated[4] = free[3];
+                translated[5] = free[4];
+                translated[6] = free[5];
+                break;
+            case STRETCHED_EXPONENTIAL:
+                // incoming UI order is A T H C
+                // SLIMCurve wants C A T H
+                translated[0] = free[3];
+                translated[1] = free[0];
+                translated[2] = free[1];
+                translated[3] = free[2];
+                break;
+        }
+        return translated;
     }
 
     /*
