@@ -106,7 +106,8 @@ public class DataColorizer implements IColorizeRangeListener {
         m_auto = true;
         m_start = m_min = m_workMin = Double.MAX_VALUE;
         m_stop = m_max = m_workMax = 0.0;
- 
+
+        //TODO just use a 256-color LUT
         m_colorize = new FiveColorColorize(Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED); //ThreeColorColorize(Color.GREEN, Color.YELLOW, Color.RED);
         m_ui = new DataColorizerUI(m_colorize, this);
     }
