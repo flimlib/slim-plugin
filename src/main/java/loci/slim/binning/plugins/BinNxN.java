@@ -39,6 +39,7 @@ import loci.slim.binning.ISLIMBinner;
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.cursor.LocalizableCursor;
 import mpicbg.imglib.image.Image;
+import mpicbg.imglib.outofbounds.OutOfBoundsStrategyMirrorFactory;
 import mpicbg.imglib.type.numeric.RealType;
 
 /**
@@ -72,7 +73,7 @@ public class BinNxN<T extends RealType<T>> implements ISLIMBinner<T> {
         Image<T> destImage = sourceImage.createNewImage();
 
         // create cursors for both images
-        LocalizableByDimCursor<T> sourceCursor = sourceImage.createLocalizableByDimCursor();
+        LocalizableByDimCursor<T> sourceCursor = sourceImage.createLocalizableByDimCursor(new OutOfBoundsStrategyMirrorFactory<T>());
         LocalizableCursor<T> destCursor = destImage.createLocalizableByDimCursor();
 
         double sum;
