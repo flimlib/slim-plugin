@@ -111,8 +111,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
             // convert to grayscale
             for (int x = 0; x < m_width; ++x) {
                 for (int y = 0; y < m_height; ++y) {
-                    // flip y axis to correspond with SLIM Plotter image
-                    outPixels[y * m_width + x] = (byte) (pixels[x][m_height - y - 1] * 255 / maxPixel);
+                    outPixels[y * m_width + x] = (byte) (pixels[x][y] * 255 / maxPixel);
                 }
             }
             //TODO random noise to ensure different channels do have different images:
