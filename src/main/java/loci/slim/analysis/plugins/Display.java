@@ -66,6 +66,13 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  */
 @SLIMAnalyzer(name="Display Fit Results")
 public class Display implements ISLIMAnalyzer {
+    private static final int C_INDEX = 1;
+    private static final int A1_INDEX = 2;
+    private static final int T1_INDEX = 3;
+    private static final int A2_INDEX = 4;
+    private static final int T2_INDEX = 5;
+    private static final int A3_INDEX = 6;
+    private static final int T3_INDEX = 7;
     private static final Character TAU = 'T'; //TODO IJ1 doesn't display Unicode, was: = '\u03c4';
     private static final String T = "" + TAU;
     private static final String T1 = "" + TAU + '1';
@@ -102,31 +109,30 @@ public class Display implements ISLIMAnalyzer {
 
     /**
      * Enum that contains the possible formulas for the values to be displayed.
-     * This table is very specifically tied to the order of parameter indices.
      */
     //TODO need Ta, Ti, Tm
     private static enum Formula {
-        T_FORMULA(T, 3),
-        T1_FORMULA(T1, 3),
-        T2_FORMULA(T2, 5),
-        T3_FORMULA(T3, 7),
-        T1_T2_FORMULA(T1_T2, 3, 5), // specifies T1/T2, parameter index 3 divided by parameter index 5
-        T2_T1_FORMULA(T2_T1 ,5, 3),
-        T1_T3_FORMULA(T1_T3, 3, 7),
-        T3_T1_FORMULA(T3_T1, 7, 3),
-        T2_T3_FORMULA(T2_T3, 5, 7),
-        T3_T2_FORMULA(T3_T2, 7, 5),
-        A_FORMULA(A, 2),
-        A1_FORMULA(A1, 2),
-        A2_FORMULA(A2, 4),
-        A3_FORMULA(A3, 6),
-        A1_A2_FORMULA(A1_A2, 2, 4),
-        A2_A1_FORMULA(A2_A1, 4, 2),
-        A1_A3_FORMULA(A1_A3, 2, 6),
-        A3_A1_FORMULA(A3_A1, 6, 2),
-        A2_A3_FORMULA(A2_A3, 4, 6),
-        A3_A2_FORMULA(A3_A2, 6, 4),
-        C_FORMULA(C, 1);
+        T_FORMULA(T, T1_INDEX),
+        T1_FORMULA(T1, T1_INDEX),
+        T2_FORMULA(T2, T2_INDEX),
+        T3_FORMULA(T3, T3_INDEX),
+        T1_T2_FORMULA(T1_T2, T1_INDEX, T2_INDEX), // specifies T1/T2, parameter index of T1 divided by parameter index of T2
+        T2_T1_FORMULA(T2_T1, T2_INDEX, T1_INDEX),
+        T1_T3_FORMULA(T1_T3, T1_INDEX, T3_INDEX),
+        T3_T1_FORMULA(T3_T1, T3_INDEX, T1_INDEX),
+        T2_T3_FORMULA(T2_T3, T2_INDEX, T3_INDEX),
+        T3_T2_FORMULA(T3_T2, T3_INDEX, T2_INDEX),
+        A_FORMULA(A, A1_INDEX),
+        A1_FORMULA(A1, A1_INDEX),
+        A2_FORMULA(A2, A2_INDEX),
+        A3_FORMULA(A3, A3_INDEX),
+        A1_A2_FORMULA(A1_A2, A1_INDEX, A2_INDEX),
+        A2_A1_FORMULA(A2_A1, A2_INDEX, A1_INDEX),
+        A1_A3_FORMULA(A1_A3, A1_INDEX, A3_INDEX),
+        A3_A1_FORMULA(A3_A1, A3_INDEX, A1_INDEX),
+        A2_A3_FORMULA(A2_A3, A2_INDEX, A3_INDEX),
+        A3_A2_FORMULA(A3_A2, A3_INDEX, A2_INDEX),
+        C_FORMULA(C, C_INDEX);
 
         // This contains the displayable name
         private final String m_name;
@@ -196,7 +202,7 @@ public class Display implements ISLIMAnalyzer {
         // is this plugin appropriate for current data?
         if (FitRegion.EACH != region) {
             // not appropriate
-            MessageDialog dialog = new MessageDialog(null, "Display Fit Results", "Requires each pixel be fitted.");
+           //TODO? just ignoring is okay? MessageDialog dialog = new MessageDialog(null, "Display Fit Results", "A.");
             return;
         }
 
