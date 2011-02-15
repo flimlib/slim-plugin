@@ -9,7 +9,7 @@ import ij.IJ;
 import ij.ImagePlus;
 
 // CTR FIXME: remove dependency on ij1bridge
-import imagej.ij1bridge.process.ImageUtils;
+import imagej.ij1bridge.process.OldLegacyImageUtils;
 
 import loci.slim.ui.IUserInterfacePanel.FitFunction;
 import loci.slim.ui.IUserInterfacePanel.FitRegion;
@@ -29,7 +29,7 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
 @SLIMAnalyzer(name="VisAD")
 public class VisADAnalysisPlugin implements ISLIMAnalyzer {
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
-        ImagePlus imp = ImageUtils.createImagePlus(image, "Fitted results");
+        ImagePlus imp = OldLegacyImageUtils.createImagePlus(image, "Fitted results");
         IJ.runPlugIn(imp, "imagej.visad.VisADPlugin", "");
     }
 }

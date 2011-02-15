@@ -38,17 +38,12 @@
     </dependency>
     <dependency>
       <groupId>${imagej.groupId}</groupId>
-      <artifactId>ij1-bridge</artifactId>
+      <artifactId>ij1-bridge-old</artifactId>
       <version>${imagej.version}</version>
     </dependency>
     <dependency>
       <groupId>${imagej.groupId}</groupId>
-      <artifactId>ij1-plugin</artifactId>
-      <version>${imagej.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${imagej.groupId}</groupId>
-      <artifactId>ij2-imglib</artifactId>
+      <artifactId>ij2-imglib-old</artifactId>
       <version>${imagej.version}</version>
     </dependency>
     <dependency>

@@ -41,8 +41,7 @@ import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-
-import imagej.imglib.process.ImageUtils;
+import imagej.imglib.process.OldImageUtils;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -52,14 +51,6 @@ import java.util.prefs.Preferences;
 
 import javax.swing.JFrame;
 
-import loci.slim.colorizer.DataColorizer;
-import loci.slim.ui.IStartStopListener;
-import loci.slim.ui.IUserInterfacePanel;
-import loci.slim.ui.IUserInterfacePanel.FitAlgorithm;
-import loci.slim.ui.IUserInterfacePanel.FitFunction;
-import loci.slim.ui.IUserInterfacePanel.FitRegion;
-import loci.slim.ui.IUserInterfacePanelListener;
-import loci.slim.ui.UserInterfacePanel;
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.GrayCurveFitter;
 import loci.curvefitter.GrayNRCurveFitter;
@@ -72,7 +63,14 @@ import loci.formats.FormatTools;
 import loci.formats.IFormatReader;
 import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.binning.SLIMBinning;
-
+import loci.slim.colorizer.DataColorizer;
+import loci.slim.ui.IStartStopListener;
+import loci.slim.ui.IUserInterfacePanel;
+import loci.slim.ui.IUserInterfacePanel.FitAlgorithm;
+import loci.slim.ui.IUserInterfacePanel.FitFunction;
+import loci.slim.ui.IUserInterfacePanel.FitRegion;
+import loci.slim.ui.IUserInterfacePanelListener;
+import loci.slim.ui.UserInterfacePanel;
 import mpicbg.imglib.container.planar.PlanarContainerFactory;
 import mpicbg.imglib.cursor.Cursor;
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
@@ -386,9 +384,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         int[] dimensions = image.getDimensions();
         System.out.println("dimensions size is " + dimensions.length);
         Integer xIndex, yIndex, lifetimeIndex, channelIndex;
-        m_width = ImageUtils.getWidth(image);
-        m_height = ImageUtils.getHeight(image);
-        m_channels = ImageUtils.getNChannels(image);
+        m_width = OldImageUtils.getWidth(image);
+        m_height = OldImageUtils.getHeight(image);
+        m_channels = OldImageUtils.getNChannels(image);
         //TODO this is broken; returns 1 when there are 16 channels; corrected below
         System.out.println("ImageUtils.getNChannels returns " + m_channels);
         m_hasChannels = false;
@@ -397,7 +395,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             m_channels = dimensions[3];
         }
         System.out.println("corrected to " + m_channels);
-        m_timeBins = ImageUtils.getDimSize(image, FormatTools.LIFETIME);
+        m_timeBins = OldImageUtils.getDimSize(image, FormatTools.LIFETIME);
         System.out.println("width " + m_width + " height " + m_height + " timeBins " + m_timeBins + " channels " + m_channels);
         m_cursor = image.createLocalizableByDimCursor();
         /*
