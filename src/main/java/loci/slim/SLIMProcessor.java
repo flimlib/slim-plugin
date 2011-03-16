@@ -46,6 +46,8 @@ import imagej.imglib.process.OldImageUtils;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
@@ -617,7 +619,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
 
         // show decay and update UI parameters
-        showDecayGraph(uiPanel, dataArray);
+        showDecayGraph("Summed ", uiPanel, dataArray, 0);
         uiPanel.setParameters(dataArray[0].getParams());
     }
 
@@ -633,9 +635,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         double yCount[];
         double yFitted[];
         
-        int roiNumber = 0;
+        int roiNumber = 1;
         for (Roi roi: getRois()) {
-            ++roiNumber;
             curveFitData = new CurveFitData();
             curveFitData.setParams(params.clone());
             yCount = new double[m_timeBins];
@@ -657,21 +658,41 @@ public class SLIMProcessor <T extends RealType<T>> {
             yFitted = new double[m_timeBins];
             curveFitData.setYFitted(yFitted);
             curveFitDataList.add(curveFitData);
+            ++roiNumber;
         }
         
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
         getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
-        
-        showDecayGraph(uiPanel, dataArray);
+
+        // show the decay graphs
+        double min = Double.MAX_VALUE;
+        double max = Double.MIN_VALUE;
+        roiNumber = 1;
+        for (Roi roi: getRois()) {
+            showDecayGraph("Roi " + roiNumber, uiPanel, dataArray, roiNumber - 1);
+            double lifetime = dataArray[roiNumber - 1].getParams()[3];
+            if (lifetime < min) {
+                min = lifetime;
+            }
+            if (lifetime > max) {
+                max = lifetime;
+            }
+            ++roiNumber;
+        }
         
         // show colorized lifetimes
         ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
         ImagePlus imagePlus = new ImagePlus("Fitted Lifetimes", imageProcessor);
         int i = 0;
         for (Roi roi: getRois()) {
-            double lifetime = dataArray[i++].getParams()[1];
-            imageProcessor.setColor(lifetimeColorMap(MAXIMUM_LIFETIME, lifetime));
+            double lifetime = dataArray[i++].getParams()[3];
+
+            System.out.println("lifetime is " + lifetime);
+            System.out.println("min " + min + " max " + max);
+            System.out.println("color is " + lifetimeColorMap(min,max, lifetime));
+            
+            imageProcessor.setColor(lifetimeColorMap(min, max, lifetime));
 
             Rectangle bounds = roi.getBounds();
             for (int x = 0; x < bounds.width; ++x) {
@@ -718,7 +739,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
         getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
         
-        showDecayGraph(uiPanel, dataArray);
+        showDecayGraph("Pixel " + x + " " + y, uiPanel, dataArray, 0);
 
         // update UI parameters
         uiPanel.setParameters(dataArray[0].getParams());
@@ -1134,12 +1155,18 @@ public class SLIMProcessor <T extends RealType<T>> {
      * Note this is much cruder than the DataColorizer that is
      * used in fitEachPixel.
      *
+     * @param min
      * @param max
      * @param lifetime
      * @return
      */
     //TODO make consistent with fitEachPixel's DataColorizer
-     private Color lifetimeColorMap(double max, double lifetime) {
+    //TODO this needs to use LUTs
+     private Color lifetimeColorMap(double min, double max, double lifetime) {
+        // adjust for minimum
+        max -= min;
+        lifetime -= min;
+
         Color returnColor = Color.BLACK;
         if (lifetime > 0.0) {
             if (lifetime < max/2.0) {
@@ -1149,6 +1176,9 @@ public class SLIMProcessor <T extends RealType<T>> {
                 returnColor = interpolateColor(Color.GREEN, Color.RED, 2.0 * (lifetime - max / 2.0) / max);
             }
             else returnColor = Color.RED;
+        }
+        else if (lifetime == 0.0) {
+            returnColor = Color.BLUE;
         }
         return returnColor;
     }
@@ -1222,6 +1252,9 @@ public class SLIMProcessor <T extends RealType<T>> {
             case SLIMCURVE_LMA:
                 curveFitter = new SLIMCurveFitter(SLIMCurveFitter.AlgorithmType.LMA);
                 break;
+            case SLIMCURVE_RLD_LMA:
+                curveFitter = new SLIMCurveFitter(SLIMCurveFitter.AlgorithmType.RLD_LMA);
+                break;
         }
         ICurveFitter.FitFunction fitFunction = null;
         switch (uiPanel.getFunction()) {
@@ -1252,15 +1285,15 @@ public class SLIMProcessor <T extends RealType<T>> {
         boolean translated[] = new boolean[free.length];
         switch (fitFunction) {
             case SINGLE_EXPONENTIAL:
-                // incoming UI order is A, T, C
-                // SLIMCurve wants C, A, T
+                // incoming UI order is A, T, Z
+                // SLIMCurve wants Z, A, T
                 translated[0] = free[2];
                 translated[1] = free[0];
                 translated[2] = free[1];
                 break;
             case DOUBLE_EXPONENTIAL:
-                // incoming UI order is A1 T1 A2 T2 C
-                // SLIMCurve wants C A1 T1 A2 T2
+                // incoming UI order is A1 T1 A2 T2 Z
+                // SLIMCurve wants Z A1 T1 A2 T2
                 translated[0] = free[4];
                 translated[1] = free[0];
                 translated[2] = free[1];
@@ -1268,8 +1301,8 @@ public class SLIMProcessor <T extends RealType<T>> {
                 translated[4] = free[3];
                 break;
             case TRIPLE_EXPONENTIAL:
-                // incoming UI order is A1 T1 A2 T2 A3 T3 C
-                // SLIMCurve wants C A1 T1 A2 T2 A3 T3
+                // incoming UI order is A1 T1 A2 T2 A3 T3 Z
+                // SLIMCurve wants Z A1 T1 A2 T2 A3 T3
                 translated[0] = free[6];
                 translated[1] = free[0];
                 translated[2] = free[1];
@@ -1279,8 +1312,8 @@ public class SLIMProcessor <T extends RealType<T>> {
                 translated[6] = free[5];
                 break;
             case STRETCHED_EXPONENTIAL:
-                // incoming UI order is A T H C
-                // SLIMCurve wants C A T H
+                // incoming UI order is A T H Z
+                // SLIMCurve wants Z A T H
                 translated[0] = free[3];
                 translated[1] = free[0];
                 translated[2] = free[1];
@@ -1292,13 +1325,15 @@ public class SLIMProcessor <T extends RealType<T>> {
 
     /*
      * Helper function for the fit.  Shows the decay curve.
-     * 
+     *
+     * @param title
+     * @param uiPanel gets updates on dragged/start stop
      * @param dataArray array of fitted data
+     * @param index to show
      */
-    private void showDecayGraph(final IUserInterfacePanel uiPanel, ICurveFitData dataArray[]) {
-        if (0 < dataArray.length) {
-            //TODO need to be able to examine any fitted pixel; for now just show the first.  // was last
-            DecayGraph decayGraph = new DecayGraph(m_startBin, m_stopBin, m_timeBins, m_timeRange, dataArray[0]); //dataArray.length - 1]);
+    private void showDecayGraph(String title, final IUserInterfacePanel uiPanel, ICurveFitData dataArray[], int index) {
+        if (index < dataArray.length) {
+            DecayGraph decayGraph = new DecayGraph(title, m_startBin, m_stopBin, m_timeBins, m_timeRange, dataArray[index]);
             decayGraph.setStartStopListener(
                 new IStartStopListener() {
                     public void setStartStop(int start, int stop) {
@@ -1310,6 +1345,15 @@ public class SLIMProcessor <T extends RealType<T>> {
             JFrame frame = decayGraph.getFrame();
             frame.setLocationRelativeTo(uiPanel.getFrame());
             frame.setVisible(true);
+            frame.addFocusListener(
+                new FocusListener() {
+                    public void focusGained(FocusEvent e) {
+                        System.out.println("focus gained " + e);
+                    }
+                    public void focusLost(FocusEvent e) {
+
+                    }
+            });
         }        
     }
 }
