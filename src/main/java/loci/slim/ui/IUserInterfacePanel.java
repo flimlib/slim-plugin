@@ -47,7 +47,7 @@ public interface IUserInterfacePanel {
     }
 
     public static enum FitAlgorithm { //TODO not really algorithm, usu. LMA
-       JAOLHO, /*AKUTAN,*/ BARBER_RLD, BARBER_LMA, MARKWARDT, BARBER2_RLD, BARBER2_LMA, SLIMCURVE_RLD, SLIMCURVE_LMA
+       JAOLHO, /*AKUTAN,*/ BARBER_RLD, BARBER_LMA, MARKWARDT, BARBER2_RLD, BARBER2_LMA, SLIMCURVE_RLD, SLIMCURVE_LMA, SLIMCURVE_RLD_LMA
     }
 
     public static enum FitFunction {
