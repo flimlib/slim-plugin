@@ -59,6 +59,10 @@ import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import ij.gui.GenericDialog;
+
+import loci.slim.Excitation;
+import loci.slim.ExcitationFileHandler;
 import loci.slim.ui.IUserInterfacePanel.FitAlgorithm;
 import loci.slim.ui.IUserInterfacePanel.FitFunction;
 import loci.slim.ui.IUserInterfacePanel.FitRegion;
@@ -96,11 +100,16 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA";
     private static final String SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD";
     private static final String SLIM_CURVE_LMA_ALGORITHM = "SLIMCurve LMA";
+    private static final String SLIM_CURVE_RLD_LMA_ALGORITHM = "SLIMCurve RLD+LMA";
 
     private static final String SINGLE_EXPONENTIAL = "Single Exponential";
     private static final String DOUBLE_EXPONENTIAL = "Double Exponential";
     private static final String TRIPLE_EXPONENTIAL = "Triple Exponential";
     private static final String STRETCHED_EXPONENTIAL = "Stretched Exponential";
+
+    private static final String EXCITATION_NONE = "None";
+    private static final String EXCITATION_FILE = "File";
+    private static final String EXCITATION_CREATE = "Use current X Y";
     
     private static final String DO_FIT = "Do Fit";
     private static final String CANCEL_FIT = "Cancel Fit";
@@ -109,10 +118,14 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final Border ETCHED_BORDER = BorderFactory.createEtchedBorder();
 
     private static final String REGION_ITEMS[] = { SUM_REGION, ROIS_REGION, PIXEL_REGION, ALL_REGION };
-    private static final String ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, GRAY_RLD_ALGORITHM, GRAY_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM };
+    private static final String ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, GRAY_RLD_ALGORITHM, GRAY_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM };
     private static final String FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL };
+
+    private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
     
     public IUserInterfacePanelListener m_listener;
+
+    private ExcitationPanel m_excitationPanel;
 
     int m_fittedParameterCount = 0;
 
@@ -134,6 +147,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JTextField m_stopField;
     JTextField m_thresholdField;
     JComboBox m_binningComboBox;
+    JComboBox m_excitationComboBox;
 
     // parameter panel
     JPanel m_paramPanel;
@@ -144,8 +158,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JCheckBox m_aFix1;
     JTextField m_tParam1;
     JCheckBox m_tFix1;
-    JTextField m_cParam1;
-    JCheckBox m_cFix1;
+    JTextField m_zParam1;
+    JCheckBox m_zFix1;
     JTextField m_chiSqParam1;
     JCheckBox m_startParam1;
 
@@ -158,8 +172,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JCheckBox m_t1Fix2;
     JTextField m_t2Param2;
     JCheckBox m_t2Fix2;
-    JTextField m_cParam2;
-    JCheckBox m_cFix2;
+    JTextField m_zParam2;
+    JCheckBox m_zFix2;
     JTextField m_chiSqParam2;
     JCheckBox m_startParam2;
 
@@ -176,8 +190,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JCheckBox m_t2Fix3;
     JTextField m_t3Param3;
     JCheckBox m_t3Fix3;
-    JTextField m_cParam3;
-    JCheckBox m_cFix3;
+    JTextField m_zParam3;
+    JCheckBox m_zFix3;
     JTextField m_chiSqParam3;
     JCheckBox m_startParam3;
 
@@ -188,8 +202,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JCheckBox m_tFix4;
     JTextField m_hParam4;
     JCheckBox m_hFix4;
-    JTextField m_cParam4;
-    JCheckBox m_cFix4;
+    JTextField m_zParam4;
+    JCheckBox m_zFix4;
     JTextField m_chiSqParam4;
     JCheckBox m_startParam4;
 
@@ -316,7 +330,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         algorithmLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         fitPanel.add(algorithmLabel);
         m_algorithmComboBox = new JComboBox(ALGORITHM_ITEMS);
-     m_algorithmComboBox.setSelectedItem(SLIM_CURVE_LMA_ALGORITHM);
+     m_algorithmComboBox.setSelectedItem(SLIM_CURVE_RLD_LMA_ALGORITHM);
         fitPanel.add(m_algorithmComboBox);
 
         JLabel functionLabel = new JLabel("Function");
@@ -352,6 +366,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         panel.add("South", m_fitAllChannels);
         return panel;
     }
+
+    float[] m_values = null;
 
     /*
      * Creates a panel that has some settings that control the fit.
@@ -397,8 +413,55 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_binningComboBox = new JComboBox(binningChoices);
         controlPanel.add(m_binningComboBox);
 
+        JLabel excitationLabel = new JLabel("Excitation");
+        excitationLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        controlPanel.add(excitationLabel);
+        m_excitationComboBox = new JComboBox(EXCITATION_ITEMS);
+        m_excitationComboBox.addActionListener(
+            new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Excitation excitation = null;
+
+                    String selectedItem = (String) m_excitationComboBox.getSelectedItem();
+                    System.out.println("selected " + selectedItem);
+                    if (EXCITATION_NONE.equals(selectedItem)) {
+                        if (null != m_excitationPanel) {
+                            m_excitationPanel.quit();
+                            m_excitationPanel = null;
+                        }
+                    }
+                    else if (EXCITATION_FILE.equals(selectedItem)) {
+                        String fileName = getFileName("Load Excitation File", "");
+                        if (null != fileName) {
+                            excitation = ExcitationFileHandler.getInstance().loadExcitation(fileName);
+                        }
+                        if (null != excitation) {
+                            m_values = excitation.getValues();
+                        }
+                    }
+                    else if (EXCITATION_CREATE.equals(selectedItem)) {
+                        String fileName = getFileName("Save Excitation File", "");
+                        if (null != fileName) {
+                            if (null != m_values) {
+                                excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, m_values);
+                            }
+                        }
+                    }
+
+                    if (null == excitation) {
+                        m_excitationComboBox.setSelectedItem(EXCITATION_NONE);
+                    }
+                    else {
+                        m_excitationComboBox.setSelectedItem(EXCITATION_FILE);
+                        m_excitationPanel = new ExcitationPanel(excitation);
+                    }
+                }
+            }
+        );
+        controlPanel.add(m_excitationComboBox);
+
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(controlPanel, 6, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(controlPanel, 7, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", controlPanel);
@@ -434,15 +497,15 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         //m_t1Fix1.addItemListener(this);
         expPanel.add(m_tFix1);
 
-        JLabel cLabel1 = new JLabel("C");
-        cLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
-        expPanel.add(cLabel1);
-        m_cParam1 = new JTextField(9);
-        //m_cParam1.setEditable(false);
-        expPanel.add(m_cParam1);
-        m_cFix1 = new JCheckBox("Fix");
-        //m_cFix1.addItemListener(this);
-        expPanel.add(m_cFix1);
+        JLabel zLabel1 = new JLabel("Z");
+        zLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
+        expPanel.add(zLabel1);
+        m_zParam1 = new JTextField(9);
+        //m_zParam1.setEditable(false);
+        expPanel.add(m_zParam1);
+        m_zFix1 = new JCheckBox("Fix");
+        //m_zFix1.addItemListener(this);
+        expPanel.add(m_zFix1);
 
         JLabel chiSqLabel1 = new JLabel("" + CHI + SQUARE);
         chiSqLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -458,7 +521,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         //Color floatColor = a1Label1.getBackground();
         //m_a1Param1.setBackground(floatColor);
         //m_t1Param1.setBackground(floatColor);
-        //m_cParam1.setBackground(floatColor);
+        //m_zParam1.setBackground(floatColor);
         //m_chiSqParam1.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
@@ -523,15 +586,15 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         //m_t2Fix2.addItemListener(this);
         expPanel.add(m_t2Fix2);
 
-        JLabel cLabel2 = new JLabel("C");
-        cLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
-        expPanel.add(cLabel2);
-        m_cParam2 = new JTextField(9);
-        //m_cParam2.setEditable(false);
-        expPanel.add(m_cParam2);
-        m_cFix2 = new JCheckBox("Fix");
-        //m_cFix2.addItemListener(this);
-        expPanel.add(m_cFix2);
+        JLabel zLabel2 = new JLabel("Z");
+        zLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
+        expPanel.add(zLabel2);
+        m_zParam2 = new JTextField(9);
+        //m_zParam2.setEditable(false);
+        expPanel.add(m_zParam2);
+        m_zFix2 = new JCheckBox("Fix");
+        //m_zFix2.addItemListener(this);
+        expPanel.add(m_zFix2);
 
         JLabel chiSqLabel2 = new JLabel("" + CHI + SQUARE);
         chiSqLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -549,7 +612,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         //m_t1Param2.setBackground(floatColor);
         //m_a2Param2.setBackground(floatColor);
         //m_t2Param2.setBackground(floatColor);
-        //m_cParam2.setBackground(floatColor);
+        //m_zParam2.setBackground(floatColor);
         //m_chiSqParam2.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
@@ -633,15 +696,15 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         //m_t3Fix3.addItemListener(this);
         expPanel.add(m_t3Fix3);
 
-        JLabel cLabel3 = new JLabel("C");
-        cLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
-        expPanel.add(cLabel3);
-        m_cParam3 = new JTextField(9);
-        //m_cParam3.setEditable(false);
-        expPanel.add(m_cParam3);
-        m_cFix3 = new JCheckBox("Fix");
-        //m_cFix3.addItemListener(this);
-        expPanel.add(m_cFix3);
+        JLabel zLabel3 = new JLabel("Z");
+        zLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
+        expPanel.add(zLabel3);
+        m_zParam3 = new JTextField(9);
+        //m_zParam3.setEditable(false);
+        expPanel.add(m_zParam3);
+        m_zFix3 = new JCheckBox("Fix");
+        //m_zFix3.addItemListener(this);
+        expPanel.add(m_zFix3);
 
 
         JLabel chiSqLabel3 = new JLabel("" + CHI + SQUARE);
@@ -662,7 +725,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         //m_t2Param3.setBackground(floatColor);
         //m_a3Param3.setBackground(floatColor);
         //m_t3Param3.setBackground(floatColor);
-        //m_cParam3.setBackground(floatColor);
+        //m_zParam3.setBackground(floatColor);
         //m_chiSqParam3.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
@@ -716,15 +779,15 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         //m_hFix4.addItemListener(this);
         expPanel.add(m_hFix4);
 
-        JLabel cLabel1 = new JLabel("C");
-        cLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
-        expPanel.add(cLabel1);
-        m_cParam4 = new JTextField(9);
-        //m_cParam1.setEditable(false);
-        expPanel.add(m_cParam4);
-        m_cFix4 = new JCheckBox("Fix");
-        //m_cFix1.addItemListener(this);
-        expPanel.add(m_cFix4);
+        JLabel zLabel1 = new JLabel("Z");
+        zLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
+        expPanel.add(zLabel1);
+        m_zParam4 = new JTextField(9);
+        //m_zParam1.setEditable(false);
+        expPanel.add(m_zParam4);
+        m_zFix4 = new JCheckBox("Fix");
+        //m_zFix1.addItemListener(this);
+        expPanel.add(m_zFix4);
 
         JLabel chiSqLabel4 = new JLabel("" + CHI + SQUARE);
         chiSqLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -740,7 +803,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         //Color floatColor = a1Label1.getBackground();
         //m_a1Param1.setBackground(floatColor);
         //m_t1Param1.setBackground(floatColor);
-        //m_cParam1.setBackground(floatColor);
+        //m_zParam1.setBackground(floatColor);
         //m_chiSqParam1.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
@@ -797,8 +860,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_aFix1.setEnabled(enable);
         m_tParam1.setEditable(enable);
         m_tFix1.setEnabled(enable);
-        m_cParam1.setEditable(enable);
-        m_cFix1.setEnabled(enable);
+        m_zParam1.setEditable(enable);
+        m_zFix1.setEnabled(enable);
 
         // double exponent fit
         m_a1Param2.setEditable(enable);
@@ -809,8 +872,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_t1Fix2.setEnabled(enable);
         m_t2Param2.setEditable(enable);
         m_t2Fix2.setEnabled(enable);
-        m_cParam2.setEditable(enable);
-        m_cFix2.setEnabled(enable);
+        m_zParam2.setEditable(enable);
+        m_zFix2.setEnabled(enable);
 
         // triple exponent fit
         m_a1Param3.setEditable(enable);
@@ -825,8 +888,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_t2Fix3.setEnabled(enable);
         m_t3Param3.setEditable(enable);
         m_t3Fix3.setEnabled(enable);
-        m_cParam3.setEditable(enable);
-        m_cFix3.setEnabled(enable);
+        m_zParam3.setEditable(enable);
+        m_zFix3.setEnabled(enable);
 
         // stretched exonent fit
         m_aParam4.setEditable(enable);
@@ -835,8 +898,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_tFix4.setEnabled(enable);
         m_hParam4.setEditable(enable);
         m_hFix4.setEnabled(enable);
-        m_cParam4.setEditable(enable);
-        m_cFix4.setEnabled(enable);
+        m_zParam4.setEditable(enable);
+        m_zFix4.setEnabled(enable);
 
         if (enable) {
             reconcileStartParam();
@@ -878,6 +941,9 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         }
         else if (selected.equals(SLIM_CURVE_LMA_ALGORITHM)) {
             algorithm = FitAlgorithm.SLIMCURVE_LMA;
+        }
+        else if (selected.equals(SLIM_CURVE_RLD_LMA_ALGORITHM)) {
+            algorithm = FitAlgorithm.SLIMCURVE_RLD_LMA;
         }
         return algorithm;
     }
@@ -983,7 +1049,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             parameters = new double[4];
             parameters[2] = Double.valueOf(m_aParam1.getText());
             parameters[3] = Double.valueOf(m_tParam1.getText());
-            parameters[1] = Double.valueOf(m_cParam1.getText());
+            parameters[1] = Double.valueOf(m_zParam1.getText());
         }
         else if (function.equals(DOUBLE_EXPONENTIAL)) {
             parameters = new double[6];
@@ -991,7 +1057,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             parameters[3] = Double.valueOf(m_t1Param2.getText());
             parameters[4] = Double.valueOf(m_a2Param2.getText());
             parameters[5] = Double.valueOf(m_t2Param2.getText());
-            parameters[1] = Double.valueOf(m_cParam2.getText());
+            parameters[1] = Double.valueOf(m_zParam2.getText());
         }
         else if (function.equals(TRIPLE_EXPONENTIAL)) {
             parameters = new double[8];
@@ -1001,14 +1067,14 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             parameters[5] = Double.valueOf(m_t2Param3.getText());
             parameters[6] = Double.valueOf(m_a3Param3.getText());
             parameters[7] = Double.valueOf(m_t3Param3.getText());
-            parameters[1] = Double.valueOf(m_cParam3.getText());
+            parameters[1] = Double.valueOf(m_zParam3.getText());
         }
         else if (function.equals(STRETCHED_EXPONENTIAL)) {
             parameters = new double[5];
             parameters[2] = Double.valueOf(m_aParam4.getText());
             parameters[3] = Double.valueOf(m_tParam4.getText());
             parameters[4] = Double.valueOf(m_hParam4.getText());
-            parameters[1] = Double.valueOf(m_cParam4.getText());
+            parameters[1] = Double.valueOf(m_zParam4.getText());
         }
         parameters[0] = 0.0;
         return parameters;
@@ -1019,7 +1085,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         if (function.equals(SINGLE_EXPONENTIAL)) {
             m_aParam1.setText    ("" + (float) params[2]);
             m_tParam1.setText    ("" + (float) params[3]);
-            m_cParam1.setText    ("" + (float) params[1]);
+            m_zParam1.setText    ("" + (float) params[1]);
             m_chiSqParam1.setText("" + (float) params[0]);
         }
         else if (function.equals(DOUBLE_EXPONENTIAL)) {
@@ -1027,7 +1093,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             m_t1Param2.setText   ("" + (float) params[3]);
             m_a2Param2.setText   ("" + (float) params[4]);
             m_t2Param2.setText   ("" + (float) params[5]);
-            m_cParam2.setText    ("" + (float) params[1]);
+            m_zParam2.setText    ("" + (float) params[1]);
             m_chiSqParam2.setText("" + (float) params[0]);
         }
         else if (function.equals(TRIPLE_EXPONENTIAL)) {
@@ -1037,14 +1103,14 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             m_t2Param3.setText   ("" + (float) params[5]);
             m_a3Param3.setText   ("" + (float) params[6]);
             m_t3Param3.setText   ("" + (float) params[7]);
-            m_cParam3.setText    ("" + (float) params[1]);
+            m_zParam3.setText    ("" + (float) params[1]);
             m_chiSqParam3.setText("" + (float) params[0]);
         }
         else if (function.equals(STRETCHED_EXPONENTIAL)) {
             m_aParam4.setText    ("" + (float) params[2]);
             m_tParam4.setText    ("" + (float) params[3]);
             m_hParam4.setText    ("" + (float) params[4]);
-            m_cParam4.setText    ("" + (float) params[1]);
+            m_zParam4.setText    ("" + (float) params[1]);
             m_chiSqParam4.setText("" + (float) params[0]);
         }
     }
@@ -1054,7 +1120,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             case 0:
                 m_aParam1.setText    ("" + (float) params[2]);
                 m_tParam1.setText    ("" + (float) params[3]);
-                m_cParam1.setText    ("" + (float) params[1]);
+                m_zParam1.setText    ("" + (float) params[1]);
                 m_chiSqParam1.setText("" + (float) params[0]);
                 break;
             case 1:
@@ -1062,7 +1128,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
                 m_t1Param2.setText   ("" + (float) params[3]);
                 m_a2Param2.setText   ("" + (float) params[4]);
                 m_t2Param2.setText   ("" + (float) params[5]);
-                m_cParam2.setText    ("" + (float) params[1]);
+                m_zParam2.setText    ("" + (float) params[1]);
                 m_chiSqParam2.setText("" + (float) params[0]);
                 break;
             case 2:
@@ -1072,14 +1138,14 @@ public class UserInterfacePanel implements IUserInterfacePanel {
                 m_t2Param3.setText   ("" + (float) params[5]);
                 m_a3Param3.setText   ("" + (float) params[6]);
                 m_t3Param3.setText   ("" + (float) params[7]);
-                m_cParam3.setText    ("" + (float) params[1]);
+                m_zParam3.setText    ("" + (float) params[1]);
                 m_chiSqParam3.setText("" + (float) params[0]);
                 break;
             case 3:
                 m_aParam4.setText    ("" + (float) params[0]);
                 m_tParam4.setText    ("" + (float) params[1]);
                 m_hParam4.setText    ("" + (float) params[2]);
-                m_cParam4.setText    ("" + (float) params[1]);
+                m_zParam4.setText    ("" + (float) params[1]);
                 m_chiSqParam4.setText("" + (float) params[0]);
                 break;
         }
@@ -1092,7 +1158,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             free = new boolean[3];
             free[0] = !m_aFix1.isSelected();
             free[1] = !m_tFix1.isSelected();
-            free[2] = !m_cFix1.isSelected();
+            free[2] = !m_zFix1.isSelected();
         }
         else if (function.equals(DOUBLE_EXPONENTIAL)) {
             free = new boolean[5];
@@ -1100,7 +1166,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             free[1] = !m_t1Fix2.isSelected();
             free[2] = !m_a2Fix2.isSelected();
             free[3] = !m_t2Fix2.isSelected();
-            free[4] = !m_cFix2.isSelected();
+            free[4] = !m_zFix2.isSelected();
         }
         else if (function.equals(TRIPLE_EXPONENTIAL)) {
             free = new boolean[7];
@@ -1110,7 +1176,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             free[3] = !m_t2Fix3.isSelected();
             free[4] = !m_a3Fix3.isSelected();
             free[5] = !m_t3Fix3.isSelected();
-            free[6] = !m_cFix3.isSelected();
+            free[6] = !m_zFix3.isSelected();
 
         }
         else if (function.equals(STRETCHED_EXPONENTIAL)) {
@@ -1118,7 +1184,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
             free[0] = !m_aFix4.isSelected();
             free[1] = !m_tFix4.isSelected();
             free[2] = !m_hFix4.isSelected();
-            free[3] = !m_cFix4.isSelected();
+            free[3] = !m_zFix4.isSelected();
         }
         return free;
     }
@@ -1163,5 +1229,17 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_startParam2.setEnabled(enable);
         m_startParam3.setEnabled(enable);
         m_startParam4.setEnabled(enable);
+    }
+    
+    private String getFileName(String title, String defaultFileName) {
+        GenericDialog dialog = new GenericDialog(title);
+        //TODO works with GenericDialogPlus, dialog.addFileField("File:", defaultFile, 24);
+        dialog.addStringField("File", defaultFileName);
+        dialog.showDialog();
+        if (dialog.wasCanceled()) {
+            return null;
+        }
+
+        return dialog.getNextString();
     }
 }
