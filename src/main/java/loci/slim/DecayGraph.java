@@ -75,6 +75,10 @@ public class DecayGraph implements IStartStopProportionListener {
     static final int HORZ_TWEAK = 4;
     static final Color DECAY_COLOR = Color.BLUE;
     static final Color FITTED_COLOR = Color.MAGENTA;
+    static final Color BACK_COLOR = Color.WHITE;
+    static final Color START_COLOR = Color.BLUE.darker();
+    static final Color STOP_COLOR = Color.RED.darker();
+    static final Color BASE_COLOR = Color.GREEN.darker();
     JFrame m_frame;
     int m_start;
     int m_stop;
@@ -100,7 +104,7 @@ public class DecayGraph implements IStartStopProportionListener {
      * @param timeInc time increment per bin
      * @param data fitted data
      */
-    DecayGraph(final int start, final int stop, final int bins, final double timeInc, ICurveFitData data) {
+    DecayGraph(final String title, final int start, final int stop, final int bins, final double timeInc, ICurveFitData data) {
         m_start = start;
         m_stop = stop;
         m_bins = bins;
@@ -118,7 +122,7 @@ public class DecayGraph implements IStartStopProportionListener {
         layer.setUI(m_startStopDraggingUI);
 
         // create a frame for the chart
-        m_frame = new JFrame("Fitted Decay Curve");
+        m_frame = new JFrame(title + " Fitted Decay Curve");
         m_frame.getContentPane().add(layer);
         m_frame.setSize(450, 450);
         m_frame.pack();
@@ -220,7 +224,7 @@ public class DecayGraph implements IStartStopProportionListener {
 
         // create residual sub-plot
         NumberAxis residualAxis = new NumberAxis("Residual");
-        residualAxis.setRange(-100.0, 100.0);
+        //TODO want to autorange it: residualAxis.setRange(-100.0, 100.0);
         XYSplineRenderer residualRenderer = new XYSplineRenderer();
         residualRenderer.setSeriesShapesVisible(0, false);
         residualRenderer.setSeriesPaint(0, Color.black);
@@ -372,9 +376,10 @@ public class DecayGraph implements IStartStopProportionListener {
             m_xStop = (int) Math.round(x + width * m_stopMarkerProportion) + HORZ_TWEAK;
 
             // custom painting is here
-            g2.setXORMode(Color.MAGENTA);
             g2.setStroke(new BasicStroke(2f));
+            g2.setXORMode(XORvalue(START_COLOR));
             g2.drawLine(m_xStart, m_y0, m_xStart, m_y1);
+            g2.setXORMode(XORvalue(STOP_COLOR));
             g2.drawLine(m_xStop, m_y0, m_xStop, m_y1);
         }
 
@@ -403,6 +408,12 @@ public class DecayGraph implements IStartStopProportionListener {
                     setDirty(true);
                 }
             }
+        }
+
+        private Color XORvalue(Color color) {
+            int drawRGB = color.getRGB();
+            int backRGB = BACK_COLOR.getRGB();
+            return new Color(drawRGB ^ backRGB);
         }
 
         /**
