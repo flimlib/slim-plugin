@@ -48,34 +48,41 @@ public class ExportToText implements ISLIMAnalyzer {
             hasRois = true;
             rois = manager.getRoisAsArray();
         }
-        FileWriter fw = null;
+
+        FileWriter fileWriter = null;
         try {
-            fw = new FileWriter(fileName);
+            fileWriter = new FileWriter(fileName);
         } catch (IOException e) {
             IJ.log("exception opening file " + fileName);
             IJ.handleException(e);
         }
 
+        if (null != fileWriter) {
+            try
+            {
 
+                if (hasRois) {
+                    fileWriter.write("x\ty\tROI\t");
+                }
+                fileWriter.write("HELLO WORLD");
+                //Write the header
+                fileWriter.write("x\ty\tROI\tIntensity\n");
 
-        try
-        {
-            //Write the header
-            fw.write("x\ty\tROI\tIntensity\n");
-
-           // for(int x = 0; x < imp.getWidth(); x++)
-          //  {
-           //     for(int y = 0; y < imp.getHeight(); y++)
-          //      {
-                  //  fw.write( x  + "\t" + y + "\t" + lookUpRoi(x, y) + "\t" + getPixel(floatType, ip, x, y)  + "\n" );
-            //    }
-         //   }
-            fw.close();
-        }
-        catch (IOException e)
-        {
-            IJ.log("exception writing file");
-            IJ.handleException(e);
+               // for(int x = 0; x < imp.getWidth(); x++)
+              //  {
+               //     for(int y = 0; y < imp.getHeight(); y++)
+              //      {
+                      //  fw.write( x  + "\t" + y + "\t" + lookUpRoi(x, y) + "\t" + getPixel(floatType, ip, x, y)  + "\n" );
+                //    }
+             //   }
+                fileWriter.close();
+            }
+            catch (IOException e)
+            {
+                System.out.println("IOEXCEPTION " + e);
+                IJ.log("exception writing file");
+                IJ.handleException(e);
+            }
         }
     }
 
