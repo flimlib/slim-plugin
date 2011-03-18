@@ -288,6 +288,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                         synchronized (m_synchFit) {
                             uiPanel.setX(x);
                             uiPanel.setY(y);
+                            getFitSettings(m_grayScaleImage, uiPanel);
                             // fit on the pixel clicked
                             fitPixel(uiPanel, x, y);
                         }
@@ -383,8 +384,15 @@ public class SLIMProcessor <T extends RealType<T>> {
    
     private boolean getImageInfo(Image<T> image) {
         System.out.println("Image is " + image);
-        int[] dimensions = image.getDimensions();
-        System.out.println("dimensions size is " + dimensions.length);
+        int[] dimensions = new int[0];
+        try {
+            dimensions = image.getDimensions();
+            System.out.println("dimensions size is " + dimensions.length);
+        }
+        catch (NullPointerException e) {
+            System.out.println("image.getDimensions throws NullPointerException " + e.getMessage());
+            System.out.println("can't detect channels");
+        }
         Integer xIndex, yIndex, lifetimeIndex, channelIndex;
         m_width = OldImageUtils.getWidth(image);
         m_height = OldImageUtils.getHeight(image);
@@ -536,34 +544,39 @@ public class SLIMProcessor <T extends RealType<T>> {
      * Fits the data as requested by UI.
      */
     private void fitData(IUserInterfacePanel uiPanel) {
+        Image<DoubleType> fittedImage = null;
         // only one fit at a time
         synchronized (m_synchFit) {
             switch (m_region) {
                 case SUMMED:
                     // sum all pixels
-                    fitSummed(uiPanel);
+                    fittedImage = fitSummed(uiPanel);
                     break;
                 case ROI:
                     // fit summed ROIs
-                    fitROIs(uiPanel);
+                    fittedImage = fitROIs(uiPanel);
                     break;
                 case POINT:
                     // fit single pixel
-                    fitPixel(uiPanel, m_x, m_y);
+                    fittedImage = fitPixel(uiPanel, m_x, m_y);
                     break;
                 case EACH:
                     // fit every pixel
-                    fitEachPixel(uiPanel);
+                    fittedImage = fitEachPixel(uiPanel);
                     break;
             }
         }
-        m_analysis.doAnalysis(uiPanel.getAnalysis(), m_fittedImage, uiPanel.getRegion(), uiPanel.getFunction()); //TODO get from uiPanel or get from global?  re-evaluate approach here
+        if (null != fittedImage) {
+            for (String analysis : uiPanel.getAnalysisList()) {
+                m_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction()); //TODO get from uiPanel or get from global?  re-evaluate approach here
+            }
+        }
     }
 
     /*
      * Sums all pixels and fits the result.
      */
-    private void fitSummed(IUserInterfacePanel uiPanel) {
+    private Image<DoubleType> fitSummed(IUserInterfacePanel uiPanel) {
         double params[] = uiPanel.getParameters(); //TODO go cumulative
         
         // build the data
@@ -621,12 +634,13 @@ public class SLIMProcessor <T extends RealType<T>> {
         // show decay and update UI parameters
         showDecayGraph("Summed ", uiPanel, dataArray, 0);
         uiPanel.setParameters(dataArray[0].getParams());
+        return null;
     }
 
     /*
      * Sums and fits each ROI.
      */
-    private void fitROIs(IUserInterfacePanel uiPanel) {
+    private Image<DoubleType> fitROIs(IUserInterfacePanel uiPanel) {
         double params[] = uiPanel.getParameters();
         
         // build the data
@@ -707,6 +721,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         // update UI parameters
         uiPanel.setParameters(dataArray[0].getParams()); //TODO, just picked first ROI here!
+        return null;
     }
 
     /*
@@ -715,34 +730,63 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param x
      * @param y
      */
-    private void fitPixel(IUserInterfacePanel uiPanel, int x, int y) {
-        double params[] = uiPanel.getParameters();
-        
+    private Image<DoubleType> fitPixel(IUserInterfacePanel uiPanel, int x, int y) {
+        Image<DoubleType> fittedPixels = null;
+
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
+        double params[] = uiPanel.getParameters(); //TODO NO NO NO
         ICurveFitData curveFitData;
         double yCount[];
         double yFitted[];
-        
-        curveFitData = new CurveFitData();
-        curveFitData.setParams(params);
-        yCount = new double[m_timeBins];
-        for (int b = 0; b < m_timeBins; ++b) {
-            yCount[b] = getData(m_cursor, m_channel, x, y, b);
+        for (int channel : getChannelIndices(m_channel, m_channels)) {
+            curveFitData = new CurveFitData();
+            curveFitData.setParams(params); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
+            yCount = new double[m_timeBins];
+            for (int b = 0; b < m_timeBins; ++b) {
+                yCount[b] = getData(m_cursor, channel, x, y, b);
+            }
+            curveFitData.setYCount(yCount);
+            yFitted = new double[m_timeBins];
+            curveFitData.setYFitted(yFitted);
+            int nominalChannel = (-1 == m_channel) ? channel : 1;
+            curveFitData.setChannel(nominalChannel);
+            curveFitData.setX(0);
+            curveFitData.setY(0);
+            curveFitDataList.add(curveFitData);
         }
-        curveFitData.setYCount(yCount);
-        yFitted = new double[m_timeBins];
-        curveFitData.setYFitted(yFitted);
-        curveFitDataList.add(curveFitData);
         
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
         getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
-        
+
+        // show decay graph for visible channel //TODO need m_visibleChannel or the like        
         showDecayGraph("Pixel " + x + " " + y, uiPanel, dataArray, 0);
 
         // update UI parameters
         uiPanel.setParameters(dataArray[0].getParams());
+        
+        // get the results
+        int channels = (-1 == m_channel) ? m_channels : 1;
+        //fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
+        fittedPixels = makeImage(channels + 1, 2, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
+
+        LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();               
+        setFittedParamsFromData(resultsCursor, dataArray);
+        return fittedPixels;
+    }
+
+    private void imglibBug() {
+        int dim[] = { 1, 1, 1, 4 };
+        Image<DoubleType> image = new ImageFactory<DoubleType>(new DoubleType(), new PlanarContainerFactory()).createImage(dim, "Test");
+
+        // initialize image
+        Cursor<DoubleType> cursor = image.createCursor();
+        while (cursor.hasNext()) {
+            System.out.println("fwd");
+            cursor.fwd();
+            cursor.getType().set(Double.NaN);
+        }
     }
  
     /*
@@ -752,7 +796,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      *
      * Results of the fit go to VisAD for analysis.
      */
-    private void fitEachPixel(IUserInterfacePanel uiPanel) {
+    private Image<DoubleType> fitEachPixel(IUserInterfacePanel uiPanel) {
         long start = System.nanoTime();
         int pixelCount = 0;
         int totalPixelCount = totalPixelCount(m_width, m_height, m_channels, m_fitAllChannels);
@@ -772,9 +816,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         if (null == m_fittedImage || uiPanel.getParameterCount() != m_fittedParameterCount) {
             // can't use previous results
             useFittedParams = false;
-            int channels = m_channels;
             m_fittedParameterCount = uiPanel.getParameterCount();
-            m_fittedImage = makeImage(channels, m_width, m_height, m_fittedParameterCount);
+            m_fittedImage = makeImage(m_channels, m_width, m_height, m_fittedParameterCount);
         }
         else {
             // ask UI whether to use previous results
@@ -801,7 +844,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     IJ.showProgress(0, 0); //TODO kludgy to have this here and also below; get rid of this but make the dataColorizer go away regardless
                     dataColorizer.quit();
                     cancelImageFit();
-                    return;
+                    return null;
                 }
                 IJ.showProgress(++pixelCount, totalPixelCount);
                 ChunkyPixel pixel = pixelIterator.next();
@@ -850,7 +893,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             IJ.showProgress(0, 0); //TODO the code below s/b showing progress also
            // dataColorizer.quit(); //TODO no longer visible in this code
             cancelImageFit();
-            return;
+            return null;
         }
  
         // any channels still to be fitted?
@@ -883,7 +926,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     
                     if (m_cancel) {
                         cancelImageFit();
-                        return;
+                        return null;
                     }
                 }
                 // every row, process pixels as needed
@@ -908,6 +951,28 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         long elapsed = System.nanoTime() - start;
         System.out.println("nanoseconds " + elapsed);
+
+        return m_fittedImage;
+    }
+
+    /**
+     * Gets an array of channel indices to iterate over.
+     *
+     * @param channel selected channel, or -1 for all channels
+     * @param channels number of channels
+     * @return
+     */
+    private int[] getChannelIndices(int channel, int channels) {
+        if (-1 == channel) {
+            int[] channelIndices = new int[channels];
+            for (int c = 0; c < channels; ++c) {
+                channelIndices[c] = c;
+            }
+            return channelIndices;
+        }
+        else {
+            return new int[] { channel };
+        }
     }
 
     /**
@@ -978,6 +1043,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     private Image<DoubleType> makeImage(int channels, int width, int height, int parameters) {
         Image<DoubleType> image = null;
 
+        System.out.println("channels width height params " + channels + " " + width + " " + height + " " + parameters);
+        
         // create image object
         int dim[] = { width, height, channels, parameters }; //TODO when we keep chi square in image  ++parameters };
         image = new ImageFactory<DoubleType>(new DoubleType(), new PlanarContainerFactory()).createImage(dim, "Fitted");

@@ -43,6 +43,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.border.Border;
 import javax.swing.BorderFactory;
@@ -108,7 +110,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String STRETCHED_EXPONENTIAL = "Stretched Exponential";
 
     private static final String EXCITATION_NONE = "None";
-    private static final String EXCITATION_FILE = "File";
+    private static final String EXCITATION_FILE = "Load from File";
     private static final String EXCITATION_CREATE = "Use current X Y";
     
     private static final String DO_FIT = "Do Fit";
@@ -137,7 +139,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JComboBox m_regionComboBox;
     JComboBox m_algorithmComboBox;
     JComboBox m_functionComboBox;
-    JComboBox m_analysisComboBox;
+    JCheckBox[] m_analysisCheckBoxList;
     JCheckBox m_fitAllChannels;
 
     // fit settings
@@ -348,14 +350,25 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         );
         fitPanel.add(m_functionComboBox);
 
-        JLabel analysisLabel = new JLabel("Analysis");
-        analysisLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        fitPanel.add(analysisLabel);
-        m_analysisComboBox = new JComboBox(analysisChoices);
-        fitPanel.add(m_analysisComboBox);
-
+        int choices = analysisChoices.length;
+        if (choices > 0) {
+            List<JCheckBox> checkBoxList = new ArrayList<JCheckBox>();
+            boolean firstChoice = true;
+            for (String analysisChoice : analysisChoices) {
+                String labelString = firstChoice ? "Analysis" : "";
+                firstChoice = false;
+                JLabel choiceLabel = new JLabel(labelString);
+                choiceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+                fitPanel.add(choiceLabel);
+                JCheckBox checkBox = new JCheckBox(analysisChoice);
+                fitPanel.add(checkBox);
+                checkBoxList.add(checkBox);
+            }
+            m_analysisCheckBoxList = checkBoxList.toArray(new JCheckBox[0]);
+        }
+        
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(fitPanel, 4, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(fitPanel, 3 + choices, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", fitPanel);
@@ -844,7 +857,10 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_regionComboBox.setEnabled(enable);
         m_algorithmComboBox.setEnabled(enable);
         m_functionComboBox.setEnabled(enable);
-        m_analysisComboBox.setEnabled(enable);
+        for (JCheckBox checkBox : m_analysisCheckBoxList) {
+            checkBox.setEnabled(enable);
+        }
+        //m_analysisComboBox.setEnabled(enable);
         m_fitAllChannels.setEnabled(enable);
 
         // fit control settings
@@ -966,9 +982,14 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         return function;
     }
 
-    public String getAnalysis() {
-        String selected = (String) m_analysisComboBox.getSelectedItem();
-        return selected;
+    public String[] getAnalysisList() {
+        List<String> analysisList = new ArrayList<String>();
+        for (JCheckBox checkBox : m_analysisCheckBoxList) {
+            if (checkBox.isSelected()) {
+                analysisList.add(checkBox.getText());
+            }
+        }
+        return analysisList.toArray(new String[0]);
     }
 
     public boolean getFitAllChannels() {

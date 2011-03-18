@@ -66,6 +66,13 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  */
 @SLIMAnalyzer(name="Display Fit Results")
 public class Display implements ISLIMAnalyzer {
+    // for accessing fit data
+    private static final int X_INDEX = 0;
+    private static final int Y_INDEX = 1;
+    private static final int C_INDEX = 2;
+    private static final int P_INDEX = 3;
+
+    // for defining display formulas
     private static final int X2_INDEX = 0;
     private static final int Z_INDEX = 1;
     private static final int A1_INDEX = 2;
@@ -211,18 +218,10 @@ public class Display implements ISLIMAnalyzer {
 
         // look at image dimensions
         int dimensions[] = image.getDimensions();
-        //TODO for debugging only
-        for (int i = 0; i < dimensions.length; ++i) {
-            System.out.println("dim " + i + " " + dimensions[i]);
-        }
-        int xIndex = 0;
-        int yIndex = 1;
-        int cIndex = 2;
-        int pIndex = 3;
-        int width    = dimensions[xIndex];
-        int height   = dimensions[yIndex];
-        int channels = dimensions[cIndex];
-        int params   = dimensions[pIndex];
+        int width    = dimensions[X_INDEX];
+        int height   = dimensions[Y_INDEX];
+        int channels = dimensions[C_INDEX];
+        int params   = dimensions[P_INDEX];
 
         // allow user to select formula to display
         Formula formulas[] = null;
@@ -269,17 +268,17 @@ public class Display implements ISLIMAnalyzer {
 
         // get the parameters for each pixel,
         for (int c = 0; c < channels; ++c) {
-            dimForCursor[cIndex] = c;
+            dimForCursor[C_INDEX] = c;
 
             for (int y = 0; y < height; ++y) {
-                dimForCursor[yIndex] = y;
+                dimForCursor[Y_INDEX] = y;
 
                 for (int x = 0; x < width; ++x) {
-                    dimForCursor[xIndex] = x;
+                    dimForCursor[X_INDEX] = x;
 
                     // get the fitted parameters for c, y, x
                     for (int p = 0; p < params; ++p) {
-                        dimForCursor[pIndex] = p;
+                        dimForCursor[P_INDEX] = p;
 
                         // get the fitted parameter
                         cursor.moveTo(dimForCursor);
@@ -610,6 +609,10 @@ public class Display implements ISLIMAnalyzer {
          * @param parameters data for this pixel
          */
         private void calculate(int x, int y, double[] parameters) {
+            //TODO this only works because m_min value is currently displayed as
+            // black.  It should be displayed as lowest color of color range.
+            // There needs to be another mechanism to signal this pixel s/b
+            // displayed as black (wasn't fit).
             double result = 0.0;
             int indices[] = m_formula.getIndices();
             if (1 == indices.length) {

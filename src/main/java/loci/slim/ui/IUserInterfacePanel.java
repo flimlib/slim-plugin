@@ -94,11 +94,11 @@ public interface IUserInterfacePanel {
     public FitFunction getFunction();
 
     /**
-     * Gets analysis plugin name.
+     * Gets analysis plugin names.
      *
-     * @return analysis plugin name
+     * @return analysis plugin names
      */
-    public String getAnalysis();
+    public String[] getAnalysisList();
 
     /**
      * Gets whether or not to fit all channels.

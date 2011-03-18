@@ -25,7 +25,6 @@ import net.java.sezpoz.IndexItem;
  * @author Aivar Grislis
  */
 public class SLIMAnalysis {
-    public static final String NONE = "None";
     IndexItem<SLIMAnalyzer, ISLIMAnalyzer> m_plugins[];
     String m_names[];
 
@@ -33,8 +32,6 @@ public class SLIMAnalysis {
         // get list of plugins and their names
         List<String> names = new ArrayList<String>();
         List<IndexItem> plugins = new ArrayList<IndexItem>();
-        names.add(NONE);
-        plugins.add(null);
 
         // look for matches
         for (final IndexItem<SLIMAnalyzer, ISLIMAnalyzer> item :
