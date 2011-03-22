@@ -1,3 +1,7 @@
+//
+// SLIM_PlugIn.java
+//
+
 /*
 SLIMPlugin for combined spectral-lifetime image analysis.
 
@@ -32,9 +36,15 @@ package loci.slim;
 
 import ij.ImageJ;
 import ij.plugin.PlugIn;
+
 /**
+ * TODO
  *
- * @author aivar
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/SLIM_PlugIn.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/SLIM_PlugIn.java">SVN</a></dd></dl>
+ *
+ * @author Aivar Grislis
  */
 public class SLIM_PlugIn implements PlugIn {
 

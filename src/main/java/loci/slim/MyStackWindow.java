@@ -45,6 +45,10 @@ import java.awt.event.AdjustmentListener;
 /**
  * A kludge because StackWindow has issues.
  *
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/MyStackWindow.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/MyStackWindow.java">SVN</a></dd></dl>
+ *
  * @author Aivar Grislis
  */
 public class MyStackWindow extends StackWindow {

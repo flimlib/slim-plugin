@@ -53,6 +53,10 @@ import mpicbg.imglib.type.numeric.integer.UnsignedShortType;
  * also allows the user to look at all the channels and pick a channel for the
  * fit.
  *
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/GrayScaleImage.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/GrayScaleImage.java">SVN</a></dd></dl>
+ *
  * @author Aivar Grislis
  */
 public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {

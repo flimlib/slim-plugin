@@ -43,6 +43,10 @@ import javax.swing.JFrame;
  * used to colorize the lifetime data, and an input panel that allows the user
  * to control the colorization.
  *
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/DataColorizerUI.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/DataColorizerUI.java">SVN</a></dd></dl>
+ *
  * @author Aivar Grislis grislis at wisc.edu
  */
 public class DataColorizerUI implements IColorizeRangeListener {

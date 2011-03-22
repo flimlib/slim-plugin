@@ -41,8 +41,8 @@ import java.util.Iterator;
  * TODO
  *
  * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/java/browser/trunk/projects/slim-plugin/src/main/java/loci/ChunkyPixelEffectIterator.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/java/trunk/projects/slim-plugin/src/main/java/loci/ChunkyPixelEffectIterator.java">SVN</a></dd></dl>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixelEffectIterator.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixelEffectIterator.java">SVN</a></dd></dl>
  *
  * @author Aivar Grislis grislis at wisc.edu
  */
@@ -54,7 +54,7 @@ public class ChunkyPixelEffectIterator implements Iterator {
     int m_y;
     IChunkyPixelTable m_table;
     ChunkyPixel m_chunkyPixel;
-    
+
     public ChunkyPixelEffectIterator(IChunkyPixelTable table, int width, int height) {
         m_table = table;
         m_width = width;

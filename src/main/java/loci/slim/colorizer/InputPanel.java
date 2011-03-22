@@ -53,6 +53,10 @@ import javax.swing.JTextField;
  * range selection.  When automatic mode is off it allows the user to enter
  * minimum and maximum values.
  *
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/InputPanel.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/InputPanel.java">SVN</a></dd></dl>
+ *
  * @author Aivar Grislis grislis at wisc.edu
  */
 public class InputPanel extends JPanel implements IColorizeRangeListener {

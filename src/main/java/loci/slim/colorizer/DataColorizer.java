@@ -41,8 +41,12 @@ import ij.process.ImageProcessor;
 import java.awt.Color;
 
 /**
- * Displays a colorized lifetime image and a UI that shows the lifetime histogram
- * and controls the colorization.
+ * Displays a colorized lifetime image and a UI that shows the lifetime
+ * histogram and controls the colorization.
+ *
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/DataColorizer.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/DataColorizer.java">SVN</a></dd></dl>
  *
  * @author Aivar Grislis grislis at wisc.edu
  */

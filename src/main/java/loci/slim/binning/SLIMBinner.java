@@ -48,6 +48,10 @@ import net.java.sezpoz.Indexable;
  * Syntax:
  *  @SLIMBinner("Binner")
  *
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/binning/SLIMBinner.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/binning/SLIMBinner.java">SVN</a></dd></dl>
+ *
  * @author Aivar Grislis
  */
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})

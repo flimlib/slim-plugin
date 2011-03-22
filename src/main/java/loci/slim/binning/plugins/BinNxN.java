@@ -45,6 +45,10 @@ import mpicbg.imglib.type.numeric.RealType;
 /**
  * Helper class, this is used by plugins to bin the fit input data.
  *
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/binning/plugins/BinNxN.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/binning/plugins/BinNxN.java">SVN</a></dd></dl>
+ *
  * @author Aivar Grislis
  */
 public class BinNxN<T extends RealType<T>> implements ISLIMBinner<T> {

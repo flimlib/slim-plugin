@@ -39,6 +39,10 @@ import java.awt.Color;
 /**
  * Colorizes data based on a sequence of three colors.
  *
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/ThreeColorColorize.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/ThreeColorColorize.java">SVN</a></dd></dl>
+ *
  * @author Aivar Grislis
  */
 public class ThreeColorColorize extends MultiColorColorize implements IColorize {

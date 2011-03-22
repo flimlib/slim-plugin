@@ -62,6 +62,10 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
 /**
  * A plugin within a plugin, this is used to display the fit results.
  *
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/plugins/Display.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/plugins/Display.java">SVN</a></dd></dl>
+ *
  * @author Aivar Grislis
  */
 @SLIMAnalyzer(name="Display Fit Results")
