@@ -92,7 +92,7 @@ public class ExportToText implements ISLIMAnalyzer {
                 int params   = dimensions[P_INDEX];
 
                 // write headers
-                if (channels > 1) {
+                if (channels > 2) { //TODO s/b 1; workaround for ImgLib bug -> always get 2 channels
                     writeChannelHeader();
                 }
                 switch (region) {
@@ -137,7 +137,7 @@ public class ExportToText implements ISLIMAnalyzer {
                             // if point has been fitted
                             //TODO distinguish between not fitted and error in fit!
                             if (!Double.isNaN(paramArray[0])) {
-                                if (channels > 1) {
+                                if (channels > 2) { //TODO see above; this is a hacky workaround for a bug; s/b " > 1"
                                     writeChannel(c + 1);
                                 }
 
@@ -149,6 +149,7 @@ public class ExportToText implements ISLIMAnalyzer {
                                     case ROI:
                                         writeROI(x + 1);
                                         writeParams(function, paramArray);
+                                        break;
                                     case EACH:
                                         writeXY(x, y);
                                         writeParams(function, paramArray);
@@ -246,7 +247,7 @@ public class ExportToText implements ISLIMAnalyzer {
     }
 
     private void writeROI(int roi) throws IOException {
-        m_fileWriter.write(roi + '\t');
+        m_fileWriter.write("" + roi + '\t');
     }
 
     private void writeXYHeader() throws IOException {

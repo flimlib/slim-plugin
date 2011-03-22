@@ -577,6 +577,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * Sums all pixels and fits the result.
      */
     private Image<DoubleType> fitSummed(IUserInterfacePanel uiPanel) {
+        Image<DoubleType> fittedPixels = null;
         double params[] = uiPanel.getParameters(); //TODO go cumulative
         
         // build the data
@@ -625,6 +626,10 @@ public class SLIMProcessor <T extends RealType<T>> {
         curveFitData.setYCount(yCount);
         yFitted = new double[m_timeBins];
         curveFitData.setYFitted(yFitted);
+        //int nominalChannel = (-1 == m_channel) ? channel : 0;
+        curveFitData.setChannel(0);
+        curveFitData.setX(0);
+        curveFitData.setY(0);
         curveFitDataList.add(curveFitData);
 
         // do the fit
@@ -634,13 +639,21 @@ public class SLIMProcessor <T extends RealType<T>> {
         // show decay and update UI parameters
         showDecayGraph("Summed ", uiPanel, dataArray, 0);
         uiPanel.setParameters(dataArray[0].getParams());
-        return null;
+
+        // get the results
+        //int channels = (-1 == m_channel) ? m_channels : 1; //TODO s/b summed for each channel, rather than summing all channels together???
+        //fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
+        fittedPixels = makeImage(2, 2, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
+        LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();
+        setFittedParamsFromData(resultsCursor, dataArray);
+        return fittedPixels;
     }
 
     /*
      * Sums and fits each ROI.
      */
     private Image<DoubleType> fitROIs(IUserInterfacePanel uiPanel) {
+        Image<DoubleType> fittedPixels = null;
         double params[] = uiPanel.getParameters();
         
         // build the data
@@ -650,6 +663,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         double yFitted[];
         
         int roiNumber = 1;
+        int channel = (-1 == m_channel) ? 0 : m_channel; //TODO better than crashing; need a better channel strategy
+        int outputX = 0;
         for (Roi roi: getRois()) {
             curveFitData = new CurveFitData();
             curveFitData.setParams(params.clone());
@@ -661,9 +676,8 @@ public class SLIMProcessor <T extends RealType<T>> {
             for (int x = 0; x < bounds.width; ++x) {
                 for (int y = 0; y < bounds.height; ++y) {
                     if (roi.contains(bounds.x + x, bounds.y + y)) {
-                        System.out.println("roi " + roiNumber + " x " + x + " Y " + y);
                         for (int b = 0; b < m_timeBins; ++b) {
-                            yCount[b] += getData(m_cursor, m_channel, x, y, b);
+                            yCount[b] += getData(m_cursor, channel, x, y, b);
                         }
                     }
                 }
@@ -671,6 +685,9 @@ public class SLIMProcessor <T extends RealType<T>> {
             curveFitData.setYCount(yCount);
             yFitted = new double[m_timeBins];
             curveFitData.setYFitted(yFitted);
+            curveFitData.setChannel(0);
+            curveFitData.setX(outputX++);
+            curveFitData.setY(0);
             curveFitDataList.add(curveFitData);
             ++roiNumber;
         }
@@ -721,7 +738,14 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         // update UI parameters
         uiPanel.setParameters(dataArray[0].getParams()); //TODO, just picked first ROI here!
-        return null;
+
+        // get the results
+        //int channels = (-1 == m_channel) ? m_channels : 1; //TODO need a proper channel strategy
+        //fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
+        fittedPixels = makeImage(2, getRois().length + 1, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
+        LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();
+        setFittedParamsFromData(resultsCursor, dataArray);
+        return fittedPixels;
     }
 
     /*
@@ -735,13 +759,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
-        double params[] = uiPanel.getParameters(); //TODO NO NO NO
+        double params[] = uiPanel.getParameters(); //TODO wrong; params should possibly come from already fitted data
         ICurveFitData curveFitData;
         double yCount[];
         double yFitted[];
         for (int channel : getChannelIndices(m_channel, m_channels)) {
             curveFitData = new CurveFitData();
-            curveFitData.setParams(params); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
+            curveFitData.setParams(params.clone()); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
             yCount = new double[m_timeBins];
             for (int b = 0; b < m_timeBins; ++b) {
                 yCount[b] = getData(m_cursor, channel, x, y, b);
@@ -749,7 +773,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             curveFitData.setYCount(yCount);
             yFitted = new double[m_timeBins];
             curveFitData.setYFitted(yFitted);
-            int nominalChannel = (-1 == m_channel) ? channel : 1;
+            int nominalChannel = (-1 == m_channel) ? channel : 0;
             curveFitData.setChannel(nominalChannel);
             curveFitData.setX(0);
             curveFitData.setY(0);
@@ -770,12 +794,15 @@ public class SLIMProcessor <T extends RealType<T>> {
         int channels = (-1 == m_channel) ? m_channels : 1;
         //fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
         fittedPixels = makeImage(channels + 1, 2, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
-
         LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();               
         setFittedParamsFromData(resultsCursor, dataArray);
         return fittedPixels;
     }
 
+    /*
+     * Demonstrates a bug with ImgLib:
+     * //TODO fix it!
+     */
     private void imglibBug() {
         int dim[] = { 1, 1, 1, 4 };
         Image<DoubleType> image = new ImageFactory<DoubleType>(new DoubleType(), new PlanarContainerFactory()).createImage(dim, "Test");
