@@ -213,7 +213,7 @@ public class DecayGraph implements IStartStopProportionListener {
 
         decayRenderer.setSeriesPaint(0, Color.green);
         decayRenderer.setSeriesPaint(1, Color.red);
-        decayRenderer.setSeriesPaint(2, Color.blue);
+        decayRenderer.setSeriesPaint(2, Color.darkGray);
 
         m_decaySubPlot = new XYPlot(m_decayDataset, null, photonAxis, decayRenderer);
         m_decaySubPlot.setDomainCrosshairVisible(true);

@@ -66,6 +66,7 @@ import loci.formats.IFormatReader;
 import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.binning.SLIMBinning;
 import loci.slim.colorizer.DataColorizer;
+import loci.slim.ui.ExcitationPanel;
 import loci.slim.ui.IStartStopListener;
 import loci.slim.ui.IUserInterfacePanel;
 import loci.slim.ui.IUserInterfacePanel.FitAlgorithm;
@@ -130,9 +131,6 @@ public class SLIMProcessor <T extends RealType<T>> {
     private volatile boolean m_fitInProgress;
     private volatile boolean m_fitted;
 
-    //TODO total kludge; just to get started
-    private boolean m_fakeData = false;
-
     private static final String FILE_KEY = "file";
     private String m_file;
 
@@ -172,6 +170,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     private SLIMAnalysis m_analysis;
     private SLIMBinning m_binning;
 
+    private ExcitationPanel m_excitationPanel = null;
     private IGrayScaleImage m_grayScaleImage;
     // user sets these from the grayScalePanel
     private int m_channel;
@@ -221,16 +220,10 @@ public class SLIMProcessor <T extends RealType<T>> {
     public void process(String arg) {
         boolean success = false;
         if (showFileDialog(getFileFromPreferences())) {
-            if (m_fakeData) {
-                fakeData();
+            m_image = loadImage(m_file);
+            if (getImageInfo(m_image)) {
+                saveFileInPreferences(m_file);
                 success = true;
-            }
-            else {
-                m_image = loadImage(m_file);
-                if (getImageInfo(m_image)) {
-                    saveFileInPreferences(m_file);
-                    success = true;
-                }
             }
         }
         
@@ -264,19 +257,67 @@ public class SLIMProcessor <T extends RealType<T>> {
         uiPanel.setFunctionParameters(3, DEFAULT_STRETCH_EXP_PARAMS);
         uiPanel.setListener(
             new IUserInterfacePanelListener() {
+                /**
+                 * Triggers a fit.
+                 */
                 public void doFit() {
                     m_cancel = false;
                     m_fitInProgress = true;
                 }
 
+                /**
+                 * Cancels ongoing fit.
+                 */
                 public void cancelFit() {
                     m_cancel = true;
                 }
-
+                /**
+                 * Quits running plugin.
+                 */
                 public void quit() {
                     m_quit = true;
                 }
 
+                /**
+                 * Loads an excitation curve from file.
+                 *
+                 * @param fileName
+                 * @return whether successful
+                 */
+                public boolean loadExcitation(String fileName) {
+                    Excitation excitation = ExcitationFileHandler.getInstance().loadExcitation(fileName);
+                    return updateExcitation(uiPanel, excitation);
+                }
+
+                /**
+                 * Creates an excitation curve from currrent X, Y and saves to file.
+                 *
+                 * @param fileName
+                 * @return whether successful
+                 */
+                public boolean createExcitation(String fileName) {
+                    int channel = m_grayScaleImage.getChannel();
+                    int x = uiPanel.getX();
+                    int y = uiPanel.getY();
+                    float[] values = new float[m_timeBins];
+                    for (int b = 0; b < m_timeBins; ++b) {
+                        values[b] = (float) getData(m_cursor, channel, x, y, b);
+                    }
+                    Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, values);
+                    return updateExcitation(uiPanel, excitation);
+                }
+
+                /**
+                 * Cancels the current excitation curve, if any.
+                 *
+                 */
+                public void cancelExcitation() {
+                    if (null != m_excitationPanel) {
+                        m_excitationPanel.quit();
+                        m_excitationPanel = null;
+                        //TODO redo stop/start cursors on decay curve?
+                    }
+                }
             }
         );
         uiPanel.getFrame().setLocationRelativeTo(null);
@@ -331,6 +372,41 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
     }
 
+    private boolean updateExcitation(IUserInterfacePanel uiPanel, Excitation excitation) {
+        boolean success = false;
+        if (null != excitation) {
+            if (null != m_excitationPanel) {
+                m_excitationPanel.quit();
+            }
+
+            // sum selected channel
+            double[] decay = new double[m_timeBins];
+            for (int i = 0; i < decay.length; ++i) {
+                decay[i] = 0.0;
+            }
+            for (int y = 0; y < m_height; ++y) {
+                for (int x = 0; x < m_width; ++x) {
+                    for (int b = 0; b < m_timeBins; ++b) {
+                        decay[b] += getData(m_cursor, m_channel, x, y, b);
+                    }
+                }
+            }
+
+            float[] results = CursorHelper.estimateCursors(m_timeRange, excitation.getValues(), decay);
+            excitation.setStart((int) results[0]);
+            excitation.setStop((int) results[1]);
+            excitation.setBase(results[2]);
+
+            uiPanel.setStart(22);
+            uiPanel.setStop(33);
+
+            m_excitationPanel = new ExcitationPanel(excitation);
+
+            success = true;
+        }
+        return success;
+    }
+
     private void getFitSettings(IGrayScaleImage grayScalePanel, IUserInterfacePanel uiPanel) {
         m_channel        = grayScalePanel.getChannel();
 
@@ -362,15 +438,11 @@ public class SLIMProcessor <T extends RealType<T>> {
         GenericDialog dialog = new GenericDialog("Load Data");
         //TODO works with GenericDialogPlus, dialog.addFileField("File:", defaultFile, 24);
         dialog.addStringField("File", defaultFile);
-        dialog.addCheckbox("Fake data", m_fakeData);
         dialog.showDialog();
         if (dialog.wasCanceled()) {
             return false;
         }
-
         m_file = dialog.getNextString();
-        m_fakeData = dialog.getNextBoolean();
-
         return true;
     }
 
@@ -473,9 +545,6 @@ public class SLIMProcessor <T extends RealType<T>> {
         return true;
     }
 
-    private boolean fakeData() {
-        return true;
-    }
     /**
      * This routine creates an artificial set of data that is useful to test fitting.
      *

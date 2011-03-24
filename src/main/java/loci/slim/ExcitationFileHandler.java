@@ -117,14 +117,14 @@ public class ExcitationFileHandler <T extends RealType<T>> {
         ICSReader icsReader = new ICSReader();
         try {
             icsReader.setId(fileName);
-            System.out.println(" is single file " + icsReader.isSingleFile(fileName));
+            //System.out.println(" is single file " + icsReader.isSingleFile(fileName));
             String domains[] = icsReader.getDomains();
             int lengths[] = icsReader.getChannelDimLengths();
-            System.out.print("lengths");
-            for (int i : lengths) {
-                System.out.print(" " + i);
-            }
-            System.out.println();
+            //System.out.print("lengths");
+            //for (int i : lengths) {
+            //    System.out.print(" " + i);
+            //}
+            //System.out.println();
             String types[] = icsReader.getChannelDimTypes();
             int sizeX = icsReader.getSizeX();
             int sizeY = icsReader.getSizeY();
@@ -136,8 +136,8 @@ public class ExcitationFileHandler <T extends RealType<T>> {
             int pixelType = icsReader.getPixelType();
             int effSizeC = icsReader.getEffectiveSizeC();
             boolean littleEndian = icsReader.isLittleEndian();
-            System.out.println("size X Y Z T C " + sizeX + " " + sizeY + " " + sizeZ + " " + sizeT + " " + sizeC + " ");
-            System.out.println("bpp " + bpp + " dim order " + dimOrder + " pixelTYpe + " + pixelType + " effsizec " + effSizeC + " littleendian " + littleEndian);
+            //System.out.println("size X Y Z T C " + sizeX + " " + sizeY + " " + sizeZ + " " + sizeT + " " + sizeC + " ");
+            //System.out.println("bpp " + bpp + " dim order " + dimOrder + " pixelTYpe + " + pixelType + " effsizec " + effSizeC + " littleendian " + littleEndian);
 
             System.out.println(icsReader.getFormat());
             int bins = icsReader.getSizeC();
@@ -145,10 +145,10 @@ public class ExcitationFileHandler <T extends RealType<T>> {
             byte bytes[] = new byte[4];
             for (int bin = 0; bin < bins; ++bin) {
                 bytes = icsReader.openBytes(bin);
-                for (byte b : bytes) {
-                    System.out.print(" " + b);
-                }
-                System.out.println();
+                //for (byte b : bytes) {
+                //    System.out.print(" " + b);
+                //}
+                //System.out.println();
                 results[bin] = convertBytesToFloat(bytes);
             }
             icsReader.close();

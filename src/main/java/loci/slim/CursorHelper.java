@@ -52,14 +52,17 @@ public class CursorHelper {
 
     public static float[] estimateExcitationCursors(float[] excitation) {
         float baseline;
+        float maxval;
+        int index;
         int startp = 0;
         int endp = 0;
+        int i;
         float[] diffed = new float[excitation.length];
         int steepp;
 
         // "Estimate prompt baseline; very rough and ready"
-        int index = findMax(excitation);
-        float maxval = excitation[index];
+        index = findMax(excitation);
+        maxval = excitation[index];
 
         if (index > excitation.length * 3 /4) { // "integer arithmetic"
             baseline = 0.0f;
@@ -67,7 +70,7 @@ public class CursorHelper {
         else {
             baseline = 0.0f;
             int index2 = (index + excitation.length) / 2;
-            for (int i = index2; i < excitation.length; ++i) {
+            for (i = index2; i < excitation.length; ++i) {
                 baseline += excitation[i];
             }
             baseline /= (excitation.length - index2);
@@ -75,23 +78,23 @@ public class CursorHelper {
 
         // "Where does the prompt first drop to (peak amplitude - baseline) / 10?
         // This could be silly if the baseline is silly; caveat emptor!"
-        for (int i = index; i > 0; --i) {
+        for (i = index; i > 0; --i) {
             if ((excitation[i] - baseline) < 0.1 * (maxval - baseline)) {
-                startp = i; // "First estimate"
                 break;
             }
         }
+        startp = i; // "First estimate"
 
         // "And first drop away again?"
-        for (int i = index; i < excitation.length - 1; ++i) {
+        for (i = index; i < excitation.length - 1; ++i) {
             if ((excitation[i] - baseline) < 0.1 * (maxval - baseline)) {
-                endp = i;
                 break;
             }
         }
+        endp = i;
 
         // "Differentiate"
-        for (int i = 0; i < index; ++i) {
+        for (i = 0; i < index; ++i) {
             diffed[i] = excitation[i + 1] - excitation[i];
         }
 
@@ -118,20 +121,31 @@ public class CursorHelper {
         return returnValue;
     }
 
-    public static float[] estimateCursors(float[] prompt, double[] decay) {
+    public static float[] estimateCursors(float xInc, float[] prompt, double[] decay) {
         float[] returnValue = new float[5];
         float baseline;
+        float maxval; // TRCursors.c has "unsigned short maxsval, maxval; float maxfval, *diffed;"
+        int index;
         int startp = 0;
         int startt = 0;
         int endp = 0;
         int endt = 0;
+        int i;
         float[] diffed = new float[prompt.length];
         int steepp;
         int steept;
+        // "For Marquardt fitting"
+        double param[] = new double[4];
+        boolean free[] = new boolean[] { true, true, true };
+        double[] yFitted = new double[decay.length];
+        double[] chiSqTable = new double[2 * ATTEMPTS + 1];
+        int transStartIndex;
+        int transFitStartIndex;
+        int transEndIndex;
 
         // "Estimate prompt baseline; very rough and ready"
-        int index = findMax(prompt);
-        float maxval = prompt[index];
+        index = findMax(prompt);
+        maxval = prompt[index];
 
         if (index > prompt.length * 3 /4) { // "integer arithmetic"
             baseline = 0.0f;
@@ -139,7 +153,7 @@ public class CursorHelper {
         else {
             baseline = 0.0f;
             int index2 = (index + prompt.length) / 2;
-            for (int i = index2; i < prompt.length; ++i) {
+            for (i = index2; i < prompt.length; ++i) {
                 baseline += prompt[i];
             }
             baseline /= (prompt.length - index2);
@@ -147,23 +161,23 @@ public class CursorHelper {
 
         // "Where does the prompt first drop to (peak amplitude - baseline) / 10?
         // This could be silly if the baseline is silly; caveat emptor!"
-        for (int i = index; i > 0; --i) {
+        for (i = index; i > 0; --i) {
             if ((prompt[i] - baseline) < 0.1 * (maxval - baseline)) {
-                startp = i; // "First estimate"
                 break;
             }
         }
+        startp = i; // "First estimate"
 
         // "And first drop away again?"
-        for (int i = index; i < prompt.length - 1; ++i) {
+        for (i = index; i < prompt.length - 1; ++i) {
             if ((prompt[i] - baseline) < 0.1 * (maxval - baseline)) {
-                endp = i;
                 break;
             }
         }
+        endp = i;
 
         // "Differentiate"
-        for (int i = 0; i < index; ++i) {
+        for (i = 0; i < index; ++i) {
             diffed[i] = prompt[i + 1] - prompt[i];
         }
 
@@ -187,8 +201,8 @@ public class CursorHelper {
         index = findMax(decay);
 
         // "Differentiate"
-        double[] diffedd = new double[decay.length];
-        for (int i = 0; i < index; ++i) {
+        double[] diffedd = new double[decay.length]; //TODO double vs float issues
+        for (i = 0; i < index; ++i) {
             diffedd[i] = decay[i + 1] - decay[i];
         }
 
@@ -201,66 +215,83 @@ public class CursorHelper {
             startt = 0;
         }
 
-        // save estimates
-        returnValue[0] = startp;
-        returnValue[1] = endp;
-        returnValue[2] = baseline;
-        returnValue[3] = startt;
-        returnValue[4] = endt; //TODO ITS JUST ZERO HERE!!
+            // save estimates //TODO not in original
+            returnValue[0] = startp;
+            returnValue[1] = endp;
+            returnValue[2] = baseline;
+            returnValue[3] = startt;
+            returnValue[4] = endt; //TODO ITS JUST ZERO HERE!!
 
         // "Now we've got estimates we can do some Marquardt fitting to fine-tune
         // the estimates"
 
-        int gTransStartIndex = startt - ATTEMPTS;
-        if (gTransStartIndex < 0) {
-            gTransStartIndex = 0;
+        transStartIndex = startt - ATTEMPTS;
+        if (transStartIndex < 0) {
+            transStartIndex = 0;
         }
-        int gTransEndIndex = 9 * decay.length / 10; // "90% of transient"
-        if (gTransEndIndex <= gTransStartIndex + 2 * ATTEMPTS) { // "oops"
-            return returnValue;
+        transEndIndex = 9 * decay.length / 10; // "90% of transient"
+        if (transEndIndex <= transStartIndex + 2 * ATTEMPTS) { // "oops"
+            System.out.println("oops return");
+            return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
         }
 
-        double[] param = new double[3];
-        boolean[] free = new boolean[] { true, true, true };
-        double[] yFitted = new double[decay.length];
-        double[] chiSqTable = new double[2 * ATTEMPTS + 1];
-        for (int i = 0; i < 2 * ATTEMPTS + 1; ++i, ++gTransStartIndex) {
-            int fit_start = 0; // gTransFitStartIndex - gTransStartIndex;
-            int fit_end = gTransEndIndex - gTransStartIndex;
+        for (i = 0; i < 2 * ATTEMPTS + 1; ++i, ++transStartIndex) {
 
-            //int gTransFitStartIndex = gTransStartIndex;
+            transFitStartIndex = transStartIndex;
+
+            int fitStart = transFitStartIndex - transStartIndex;
+            int fitStop = transEndIndex - transStartIndex;
+            int nData = transEndIndex - transStartIndex;
+            System.out.println("fitStart " + fitStart + " fitStop " + fitStop + " nData " + nData);
 
             CurveFitData curveFitData = new CurveFitData();
-            curveFitData.setParams(param);
-            curveFitData.setFree(free);
+            curveFitData.setParams(param); //TODO param has random values!!
             curveFitData.setYCount(decay);
             curveFitData.setSig(null);
             curveFitData.setYFitted(yFitted);
             CurveFitData[] data = new CurveFitData[] { curveFitData };
 
             SLIMCurveFitter curveFitter = new SLIMCurveFitter(SLIMCurveFitter.AlgorithmType.RLD_LMA);
-            int ret = 0; //curveFitter.fitData(data, fitStart, fitStop);
+            curveFitter.setXInc(xInc);
+            curveFitter.setFree(free);
+
+            int ret = curveFitter.fitData(data, fitStart, fitStop);
 
             if (ret >= 0) {
-                //System.out.println("for start " + fitStart + " stop " + fitStop + " chiSq is " + data[0].getChiSquare());
+                System.out.println("for start " + fitStart + " stop " + fitStop + " chiSq is " + data[0].getChiSquare());
                 chiSqTable[i] = data[0].getChiSquare();
             }
             else {
+                System.out.println("ret from fitData is " + ret);
                 chiSqTable[i] = 1e10f; // "silly value"
             }
         }
 
         // "Find the minimum chisq in this range"
         index = findMin(chiSqTable, 2 * ATTEMPTS + 1);
-        if (chiSqTable[index] > 9e9f) {
+        if (chiSqTable[index] > 9e9f) {  // "no luck here..."
+            System.out.println("no luck here return");
+            for (double chiSq : chiSqTable) {
+                System.out.println("chiSq is " + chiSq);
+            }
+            System.out.println("index is " + index);
             return null; //TODO do estimate resets/frees???
         }
+
+        // "Then we're rolling!"
+        transStartIndex = startt - ATTEMPTS;
+        if (transStartIndex < 0) {
+            transStartIndex = 0;
+        }
+        transStartIndex += index;
+        transFitStartIndex = transStartIndex + (transEndIndex - transStartIndex) / 20;
 
         returnValue[0] = startp;
         returnValue[1] = endp;
         returnValue[2] = baseline;
-        returnValue[3] = startt;
-        returnValue[4] = endt; //TODO it's still zero!!
+        returnValue[3] = transStartIndex;
+        returnValue[4] = transFitStartIndex;
+        returnValue[5] = transEndIndex;
         return returnValue;
     }
 

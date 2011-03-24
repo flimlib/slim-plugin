@@ -63,20 +63,12 @@ import javax.swing.border.EmptyBorder;
 
 import ij.gui.GenericDialog;
 
-import loci.slim.Excitation;
-import loci.slim.ExcitationFileHandler;
 import loci.slim.ui.IUserInterfacePanel.FitAlgorithm;
 import loci.slim.ui.IUserInterfacePanel.FitFunction;
 import loci.slim.ui.IUserInterfacePanel.FitRegion;
-import loci.slim.analysis.SLIMAnalysis;
-import loci.slim.binning.SLIMBinning;
 
 /**
- * TODO
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/UserInterfacePanel.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/UserInterfacePanel.java">SVN</a></dd></dl>
+ * Main user interface panel for the fit.
  *
  * @author Aivar Grislis grislis at wisc.edu
  */
@@ -126,8 +118,6 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
     
     public IUserInterfacePanelListener m_listener;
-
-    private ExcitationPanel m_excitationPanel;
 
     int m_fittedParameterCount = 0;
 
@@ -380,8 +370,6 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         return panel;
     }
 
-    float[] m_values = null;
-
     /*
      * Creates a panel that has some settings that control the fit.
      */
@@ -433,40 +421,31 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_excitationComboBox.addActionListener(
             new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    Excitation excitation = null;
-
                     String selectedItem = (String) m_excitationComboBox.getSelectedItem();
-                    System.out.println("selected " + selectedItem);
+                    boolean isExcitationLoaded = false;
                     if (EXCITATION_NONE.equals(selectedItem)) {
-                        if (null != m_excitationPanel) {
-                            m_excitationPanel.quit();
-                            m_excitationPanel = null;
+                        if (null != m_listener) {
+                            m_listener.cancelExcitation();
                         }
                     }
                     else if (EXCITATION_FILE.equals(selectedItem)) {
                         String fileName = getFileName("Load Excitation File", "");
-                        if (null != fileName) {
-                            excitation = ExcitationFileHandler.getInstance().loadExcitation(fileName);
-                        }
-                        if (null != excitation) {
-                            m_values = excitation.getValues();
+                        if (null != fileName && null != m_listener) {
+                            isExcitationLoaded = m_listener.loadExcitation(fileName);
                         }
                     }
                     else if (EXCITATION_CREATE.equals(selectedItem)) {
                         String fileName = getFileName("Save Excitation File", "");
-                        if (null != fileName) {
-                            if (null != m_values) {
-                                excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, m_values);
-                            }
+                        if (null != fileName && null != m_listener) {
+                            isExcitationLoaded = m_listener.createExcitation(fileName);
                         }
                     }
 
-                    if (null == excitation) {
-                        m_excitationComboBox.setSelectedItem(EXCITATION_NONE);
+                    if (isExcitationLoaded) {
+                        m_excitationComboBox.setSelectedItem(EXCITATION_FILE);
                     }
                     else {
-                        m_excitationComboBox.setSelectedItem(EXCITATION_FILE);
-                        m_excitationPanel = new ExcitationPanel(excitation);
+                        m_excitationComboBox.setSelectedItem(EXCITATION_NONE);
                     }
                 }
             }

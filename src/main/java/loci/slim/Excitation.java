@@ -35,11 +35,8 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim;
 
 /**
- * TODO
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/Excitation.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/Excitation.java">SVN</a></dd></dl>
+ * This class is a container for values for the instrument response function,
+ * aka excitation, aka prompt, aka lamp function.
  *
  * @author Aivar Grislis
  */
@@ -50,32 +47,85 @@ public class Excitation {
     private int m_stop;
     private float m_base;
 
+    /**
+     * Creates an excitation with given filename and values.
+     *
+     * @param fileName
+     * @param values
+     */
     public Excitation(String fileName, float[] values) {
         m_fileName = fileName;
         m_values = values;
-        float[] cursors = CursorHelper.estimateExcitationCursors(values);
-        System.out.println("start " + cursors[0] + " stop " + cursors[1] + " base " + cursors[2]);
-        m_start = (int) cursors[0];
-        m_stop  = (int) cursors[1];
-        m_base  = cursors[2];
     }
 
+    /**
+     * Gets the file name.
+     *
+     * @return
+     */
     public String getFileName() {
         return m_fileName;
     }
 
+    /**
+     * Gets the values of the excitation curve.
+     *
+     * @return
+     */
     public float[] getValues() {
         return m_values;
     }
 
+    /**
+     * Sets start cursor.
+     *
+     * @param start
+     */
+    public void setStart(int start) {
+        m_start = start;
+    }
+
+    /**
+     * Gets start cursor.
+     *
+     * @return
+     */
     public int getStart() {
         return m_start;
     }
 
+    /**
+     * Sets the stop cursor.
+     * 
+     * @param stop
+     */
+    public void setStop(int stop) {
+        m_stop = stop;
+    }
+
+    /**
+     * Gets the stop cursor.
+     *
+     * @return
+     */
     public int getStop() {
         return m_stop;
     }
 
+    /**
+     * Sets the base cursor.
+     *
+     * @param base
+     */
+    public void setBase(float base) {
+        m_base = base;
+    }
+
+    /**
+     * Gets the base cursor.
+     *
+     * @return
+     */
     public float getBase() {
         return m_base;
     }

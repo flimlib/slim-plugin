@@ -124,7 +124,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
         }
 
         // create the chart
-        JFreeChart chart = createChart(start, stop, bins, timeInc, values);
+        JFreeChart chart = createChart(bins, timeInc, values);
         ChartPanel chartPanel = new ChartPanel(chart, true, true, true, false, true);
         chartPanel.setDomainZoomable(false);
         chartPanel.setRangeZoomable(false);
@@ -189,17 +189,15 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
     /**
      * Creates the chart
      *
-     * @param start time bin
-     * @param stop time bin
      * @param bins number of bins
      * @param timeInc time increment per bin
      * @param data fitted data
      * @return the chart
      */
-    JFreeChart createChart(int start, int stop, int bins, double timeInc, float[] values) {
+    JFreeChart createChart(int bins, double timeInc, float[] values) {
 
         // create chart data
-        createDataset(start, stop, bins, timeInc, values);
+        createDataset(bins, timeInc, values);
 
         // make a horizontal axis
         NumberAxis timeAxis = new NumberAxis("Time");
@@ -234,13 +232,11 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
     /**
      * Creates the data set for the chart
      *
-     * @param start time bin
-     * @param stop time bin
      * @param bins number of time bins
      * @param timeInc time increment per time bin
      * @param data from the fit
      */
-    private void createDataset(int start, int stop, int bins, double timeInc, float[] values) {
+    private void createDataset(int bins, double timeInc, float[] values) {
         XYSeries series = new XYSeries("Data");
         double yData, yFitted;
         double xCurrent = 0;

@@ -35,11 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.ui;
 
 /**
- * TODO
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/IUserInterfacePanelListener.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/IUserInterfacePanelListener.java">SVN</a></dd></dl>
+ * Listens for user input that triggers changes external to the ui panel.
  *
  * @author Aivar Grislis grislis at wisc.edu
  */
@@ -59,4 +55,26 @@ public interface IUserInterfacePanelListener {
      * Quits running plugin.
      */
     public void quit();
+
+    /**
+     * Loads an excitation curve from file.
+     *
+     * @param fileName
+     * @return whether successful
+     */
+    public boolean loadExcitation(String fileName);
+
+    /**
+     * Creates an excitation curve from currrent X, Y and saves to file.
+     *
+     * @param fileName
+     * @return whether successful
+     */
+    public boolean createExcitation(String fileName);
+
+    /**
+     * Cancels the current excitation curve, if any.
+     *
+     */
+    public void cancelExcitation();
 }
