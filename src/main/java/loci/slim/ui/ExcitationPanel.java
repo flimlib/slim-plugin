@@ -127,6 +127,23 @@ public class ExcitationPanel extends JFrame {
         return m_base;
     }
 
+    public double[] getValues() {
+        float floatValues[] = m_excitation.getValues();
+        double[] values = new double[floatValues.length];
+        for (int i = 0; i < values.length; ++i) {
+            if (i < m_start || i >= m_stop) {
+                values[i] = 0.0;
+            }
+            else if (floatValues[i] > m_base) {
+                values[i] = floatValues[i];
+            }
+            else {
+                values[i] = 0.0;
+            }
+        }
+        return values;
+    }
+
     /*
      * Creates a panel with file name.
      */

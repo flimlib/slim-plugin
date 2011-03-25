@@ -121,6 +121,29 @@ public class CursorHelper {
         return returnValue;
     }
 
+    public static int[] estimateDecayCursors(float xInc, double[] decay) {
+        int maxIndex = findMax(decay);
+        double[] diffed = new double[maxIndex];
+        // "Differentiate"
+        for (int i = 0; i < maxIndex - 1; ++i) {
+            diffed[i] = decay[i + 1] - decay[i];
+        }
+        int steepIndex = findMax(diffed);
+
+        int startIndex = 2 * maxIndex - steepIndex;
+        int stopIndex = 9 * decay.length / 10;
+
+        // sanity check
+        if (startIndex > stopIndex) {
+            startIndex = stopIndex - 1;
+        }
+        if (startIndex < 0) {
+            startIndex = 0;
+        }
+
+        return new int[] { startIndex, stopIndex };
+    }
+
     public static float[] estimateCursors(float xInc, float[] prompt, double[] decay) {
         float[] returnValue = new float[5];
         float baseline;
@@ -215,12 +238,9 @@ public class CursorHelper {
             startt = 0;
         }
 
-            // save estimates //TODO not in original
-            returnValue[0] = startp;
-            returnValue[1] = endp;
-            returnValue[2] = baseline;
-            returnValue[3] = startt;
-            returnValue[4] = endt; //TODO ITS JUST ZERO HERE!!
+        System.out.println("steepest prompt " + steepp + " steepest transient " + steept);
+        System.out.println("startt is " + startt);
+        System.out.println("   startp " + startp + " endp " + endp + " baseline " + baseline);
 
         // "Now we've got estimates we can do some Marquardt fitting to fine-tune
         // the estimates"
@@ -231,18 +251,31 @@ public class CursorHelper {
         }
         transEndIndex = 9 * decay.length / 10; // "90% of transient"
         if (transEndIndex <= transStartIndex + 2 * ATTEMPTS) { // "oops"
-            System.out.println("oops return");
+            returnValue[0] = startp;
+            returnValue[1] = endp;
+            returnValue[2] = baseline;
+            returnValue[3] = startt;
+            returnValue[4] = transEndIndex;
             return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
+        }
+
+        System.out.println("prompt " + prompt.length + " decay " + decay.length);
+
+        //TODO convert everything to float, not double
+        double[] response = new double[decay.length];
+        for (int n = 0; n < decay.length; ++n) {
+            response[n] = decay[index];
         }
 
         for (i = 0; i < 2 * ATTEMPTS + 1; ++i, ++transStartIndex) {
 
             transFitStartIndex = transStartIndex;
+            System.out.println("transStartIndex " + transStartIndex + " transFitStartIndex " + transFitStartIndex + " transEndIndex " + transEndIndex);
 
             int fitStart = transFitStartIndex - transStartIndex;
             int fitStop = transEndIndex - transStartIndex;
             int nData = transEndIndex - transStartIndex;
-            System.out.println("fitStart " + fitStart + " fitStop " + fitStop + " nData " + nData);
+            System.out.println("  fitStart " + fitStart + " fitStop " + fitStop + " nData " + nData);
 
             CurveFitData curveFitData = new CurveFitData();
             curveFitData.setParams(param); //TODO param has random values!!
@@ -254,6 +287,7 @@ public class CursorHelper {
             SLIMCurveFitter curveFitter = new SLIMCurveFitter(SLIMCurveFitter.AlgorithmType.RLD_LMA);
             curveFitter.setXInc(xInc);
             curveFitter.setFree(free);
+            curveFitter.setInstrumentResponse(response);
 
             int ret = curveFitter.fitData(data, fitStart, fitStop);
 
@@ -275,7 +309,12 @@ public class CursorHelper {
                 System.out.println("chiSq is " + chiSq);
             }
             System.out.println("index is " + index);
-            return null; //TODO do estimate resets/frees???
+            returnValue[0] = startp;
+            returnValue[1] = endp;
+            returnValue[2] = baseline;
+            returnValue[3] = startt;
+            returnValue[4] = transEndIndex;
+            return returnValue; //TODO do estimate resets/frees???
         }
 
         // "Then we're rolling!"

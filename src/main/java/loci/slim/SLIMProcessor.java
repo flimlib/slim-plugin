@@ -342,6 +342,9 @@ public class SLIMProcessor <T extends RealType<T>> {
             }
         );
 
+        // set start and stop for now; will be updated if we load an excitation curvce
+        updateDecayCursors(uiPanel);
+
         // processing loop; waits for UI panel input
         while (!m_quit) {
             while (!m_fitInProgress) {
@@ -372,6 +375,25 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
     }
 
+    private void updateDecayCursors(IUserInterfacePanel uiPanel) {
+        // sum selected channel
+        double[] decay = new double[m_timeBins];
+        for (int i = 0; i < decay.length; ++i) {
+            decay[i] = 0.0;
+        }
+        for (int y = 0; y < m_height; ++y) {
+            for (int x = 0; x < m_width; ++x) {
+                for (int b = 0; b < m_timeBins; ++b) {
+                    decay[b] += getData(m_cursor, m_channel, x, y, b);
+                }
+            }
+        }
+
+        int[] results = CursorHelper.estimateDecayCursors(m_timeRange, decay);
+        uiPanel.setStart(results[0]);
+        uiPanel.setStop(results[1]);
+    }
+
     private boolean updateExcitation(IUserInterfacePanel uiPanel, Excitation excitation) {
         boolean success = false;
         if (null != excitation) {
@@ -397,8 +419,8 @@ public class SLIMProcessor <T extends RealType<T>> {
             excitation.setStop((int) results[1]);
             excitation.setBase(results[2]);
 
-            uiPanel.setStart(22);
-            uiPanel.setStop(33);
+            uiPanel.setStart((int) results[3]);
+            uiPanel.setStop((int) results[4]);
 
             m_excitationPanel = new ExcitationPanel(excitation);
 
@@ -659,7 +681,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         double yCount[];
         double yFitted[];
         
-        // sum up all the photons
+        // sum up all the photons for all the pixels
         curveFitData = new CurveFitData();
         curveFitData.setParams(params);
         yCount = new double[m_timeBins];
@@ -667,7 +689,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             yCount[b] = 0.0;
         }
         int photons = 0;
-        
+        int pixels = 0;
         if (-1 == m_channel) {
             // sum all of the channels
             for (int channel = 0; channel < m_channels; ++channel) {
@@ -678,6 +700,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                             yCount[b] += count;
                             photons += (int) count;
                         }
+                        ++pixels;
                     }
                 }
             }
@@ -691,10 +714,11 @@ public class SLIMProcessor <T extends RealType<T>> {
                         yCount[b] += count;
                         photons += (int) count;
                     }
+                    ++pixels;
                 }
             }    
         }
-        System.out.println("Summed photons " + photons);
+        System.out.println("Summed photons " + photons + " Summed pixels " + pixels);
 
         curveFitData.setYCount(yCount);
         yFitted = new double[m_timeBins];
@@ -710,7 +734,11 @@ public class SLIMProcessor <T extends RealType<T>> {
         getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
 
         // show decay and update UI parameters
-        showDecayGraph("Summed ", uiPanel, dataArray, 0);
+        double[] irf = null;
+        if (null != m_excitationPanel) {
+            irf = m_excitationPanel.getValues();
+        }
+        showDecayGraph("Summed ", uiPanel, irf, dataArray, 0);
         uiPanel.setParameters(dataArray[0].getParams());
 
         // get the results
@@ -770,11 +798,15 @@ public class SLIMProcessor <T extends RealType<T>> {
         getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
 
         // show the decay graphs
+        double[] irf = null;
+        if (null != m_excitationPanel) {
+            irf = m_excitationPanel.getValues();
+        }
         double min = Double.MAX_VALUE;
         double max = Double.MIN_VALUE;
         roiNumber = 1;
         for (Roi roi: getRois()) {
-            showDecayGraph("Roi " + roiNumber, uiPanel, dataArray, roiNumber - 1);
+            showDecayGraph("Roi " + roiNumber, uiPanel, irf, dataArray, roiNumber - 1);
             double lifetime = dataArray[roiNumber - 1].getParams()[3];
             if (lifetime < min) {
                 min = lifetime;
@@ -857,8 +889,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
         getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
 
-        // show decay graph for visible channel //TODO need m_visibleChannel or the like        
-        showDecayGraph("Pixel " + x + " " + y, uiPanel, dataArray, 0);
+        // show decay graph for visible channel //TODO need m_visibleChannel or the like
+        double irf[] = null;
+        if (null != m_excitationPanel) {
+            irf = m_excitationPanel.getValues();
+        }
+        showDecayGraph("Pixel " + x + " " + y, uiPanel, irf, dataArray, 0);
 
         // update UI parameters
         uiPanel.setParameters(dataArray[0].getParams());
@@ -1441,6 +1477,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         curveFitter.setFitFunction(fitFunction);
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+        if (null != m_excitationPanel) {
+            curveFitter.setInstrumentResponse(m_excitationPanel.getValues());
+        }
         return curveFitter;
     }
 
@@ -1498,9 +1537,9 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param dataArray array of fitted data
      * @param index to show
      */
-    private void showDecayGraph(String title, final IUserInterfacePanel uiPanel, ICurveFitData dataArray[], int index) {
+    private void showDecayGraph(String title, final IUserInterfacePanel uiPanel, double irf[], ICurveFitData dataArray[], int index) {
         if (index < dataArray.length) {
-            DecayGraph decayGraph = new DecayGraph(title, m_startBin, m_stopBin, m_timeBins, m_timeRange, dataArray[index]);
+            DecayGraph decayGraph = new DecayGraph(title, m_startBin, m_stopBin, m_timeBins, m_timeRange, irf, dataArray[index]);
             decayGraph.setStartStopListener(
                 new IStartStopListener() {
                     public void setStartStop(int start, int stop) {

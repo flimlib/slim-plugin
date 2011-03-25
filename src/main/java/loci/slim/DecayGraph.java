@@ -104,13 +104,13 @@ public class DecayGraph implements IStartStopProportionListener {
      * @param timeInc time increment per bin
      * @param data fitted data
      */
-    DecayGraph(final String title, final int start, final int stop, final int bins, final double timeInc, ICurveFitData data) {
+    DecayGraph(final String title, final int start, final int stop, final int bins, final double timeInc, final double[] irf, ICurveFitData data) {
         m_start = start;
         m_stop = stop;
         m_bins = bins;
 
         // create the combined chart
-        JFreeChart chart = createCombinedChart(start, stop, bins, timeInc, data); //TODO got ugly; rethink params, globals etc
+        JFreeChart chart = createCombinedChart(start, stop, bins, timeInc, irf, data); //TODO got ugly; rethink params, globals etc
         m_panel = new ChartPanel(chart, true, true, true, false, true);
         m_panel.setDomainZoomable(false);
         m_panel.setRangeZoomable(false);
@@ -183,10 +183,10 @@ public class DecayGraph implements IStartStopProportionListener {
      * @param data fitted data
      * @return the chart
      */
-    JFreeChart createCombinedChart(int start, int stop, int bins, double timeInc, ICurveFitData data) {
+    JFreeChart createCombinedChart(int start, int stop, int bins, double timeInc, double[] irf, ICurveFitData data) {
 
         // create chart data
-        createDatasets(start, stop, bins, timeInc, data);
+        createDatasets(start, stop, bins, timeInc, irf, data);
 
         // make a common horizontal axis for both sub-plots
         NumberAxis timeAxis = new NumberAxis("Time");
@@ -252,25 +252,25 @@ public class DecayGraph implements IStartStopProportionListener {
      * @param timeInc time increment per time bin
      * @param data from the fit
      */
-    private void createDatasets(int start, int stop, int bins, double timeInc, ICurveFitData data) {
-        //TODO lamp function; comes from where?
+    private void createDatasets(int start, int stop, int bins, double timeInc, double[] irf, ICurveFitData data) {
+
         XYSeries series1 = new XYSeries("IRF");
-   /*     series1.add(1.0, 1.0);
-        series1.add(2.0, 4.0);
-        series1.add(3.0, 3.0);
-        series1.add(4.0, 5.0);
-        series1.add(5.0, 5.0);
-        series1.add(6.0, 7.0);
-        series1.add(7.0, 7.0);
-        series1.add(8.0, 8.0); */
+        double xCurrent = 0;
+        if (null != irf) {
+            for (int i = 0; i < bins; ++i) {
+                if (irf[i] > 0.0) {
+                    series1.add(xCurrent, irf[i]);
+                }
+                xCurrent += timeInc;
+            }
+        }
 
         XYSeries series2 = new XYSeries("Fitted");
         XYSeries series3 = new XYSeries("Data");
         XYSeries series4 = new XYSeries("Residuals");
 
-
         double yData, yFitted;
-        double xCurrent = 0;
+        xCurrent = 0;
         for (int i = 0; i < bins; ++i) {
             yData = data.getYCount()[i];
             // logarithmic plots can't handle <= 0.0
