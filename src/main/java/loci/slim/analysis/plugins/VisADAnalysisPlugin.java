@@ -37,15 +37,13 @@ package loci.slim.analysis.plugins;
 import ij.IJ;
 import ij.ImagePlus;
 
-// CTR FIXME: remove dependency on ij1bridge
-import imagej.ij1bridge.process.OldLegacyImageUtils;
-
 import loci.slim.ui.IUserInterfacePanel.FitFunction;
 import loci.slim.ui.IUserInterfacePanel.FitRegion;
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
 
 import mpicbg.imglib.image.Image;
+import mpicbg.imglib.image.display.imagej.ImageJFunctions;
 import mpicbg.imglib.type.numeric.real.DoubleType;
 
 /**
@@ -61,8 +59,10 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  */
 @SLIMAnalyzer(name="VisAD")
 public class VisADAnalysisPlugin implements ISLIMAnalyzer {
-    public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
-        ImagePlus imp = OldLegacyImageUtils.createImagePlus(image, "Fitted results");
+    @Override
+		public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
+    		ImagePlus imp = ImageJFunctions.displayAsVirtualStack(image);
+    		imp.setTitle("Fitted results");
         IJ.runPlugIn(imp, "imagej.visad.VisADPlugin", "");
     }
 }

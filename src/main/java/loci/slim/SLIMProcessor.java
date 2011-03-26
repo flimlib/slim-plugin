@@ -41,7 +41,6 @@ import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-import imagej.imglib.process.OldImageUtils;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -499,9 +498,9 @@ public class SLIMProcessor <T extends RealType<T>> {
             System.out.println("can't detect channels");
         }
         Integer xIndex, yIndex, lifetimeIndex, channelIndex;
-        m_width = OldImageUtils.getWidth(image);
-        m_height = OldImageUtils.getHeight(image);
-        m_channels = OldImageUtils.getNChannels(image);
+        m_width = ImageUtils.getWidth(image);
+        m_height = ImageUtils.getHeight(image);
+        m_channels = ImageUtils.getNChannels(image);
         //TODO this is broken; returns 1 when there are 16 channels; corrected below
         System.out.println("ImageUtils.getNChannels returns " + m_channels);
         m_hasChannels = false;
@@ -510,7 +509,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             m_channels = dimensions[3];
         }
         System.out.println("corrected to " + m_channels);
-        m_timeBins = OldImageUtils.getDimSize(image, FormatTools.LIFETIME);
+        m_timeBins = ImageUtils.getDimSize(image, FormatTools.LIFETIME);
         System.out.println("width " + m_width + " height " + m_height + " timeBins " + m_timeBins + " channels " + m_channels);
         m_cursor = image.createLocalizableByDimCursor();
         /*
