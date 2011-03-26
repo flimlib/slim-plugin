@@ -285,7 +285,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                  * @return whether successful
                  */
                 public boolean loadExcitation(String fileName) {
-                    Excitation excitation = ExcitationFileHandler.getInstance().loadExcitation(fileName);
+                    Excitation excitation = ExcitationFileHandler.getInstance().loadExcitation(fileName, m_timeRange);
                     return updateExcitation(uiPanel, excitation);
                 }
 
@@ -296,14 +296,17 @@ public class SLIMProcessor <T extends RealType<T>> {
                  * @return whether successful
                  */
                 public boolean createExcitation(String fileName) {
-                    int channel = m_grayScaleImage.getChannel();
+                    int channel = 0;
+                    if (null != m_grayScaleImage) {
+                        channel = m_grayScaleImage.getChannel();
+                    }
                     int x = uiPanel.getX();
                     int y = uiPanel.getY();
                     float[] values = new float[m_timeBins];
                     for (int b = 0; b < m_timeBins; ++b) {
                         values[b] = (float) getData(m_cursor, channel, x, y, b);
                     }
-                    Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, values);
+                    Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, values, m_timeRange);
                     return updateExcitation(uiPanel, excitation);
                 }
 
@@ -324,7 +327,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         uiPanel.getFrame().setVisible(true);
 
         // create a grayscale image from the data
-        m_grayScaleImage = new GrayScaleImage("TITLE", m_image);
+        m_grayScaleImage = new GrayScaleImage(m_image);
         m_grayScaleImage.setListener(
             new ISelectListener() {
                 public void selected(int channel, int x, int y) {
@@ -402,6 +405,10 @@ public class SLIMProcessor <T extends RealType<T>> {
             }
 
             // sum selected channel
+            int channel = 0;
+            if (null != m_grayScaleImage) {
+                channel = m_grayScaleImage.getChannel();
+            }
             double[] decay = new double[m_timeBins];
             for (int i = 0; i < decay.length; ++i) {
                 decay[i] = 0.0;
@@ -409,7 +416,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             for (int y = 0; y < m_height; ++y) {
                 for (int x = 0; x < m_width; ++x) {
                     for (int b = 0; b < m_timeBins; ++b) {
-                        decay[b] += getData(m_cursor, m_channel, x, y, b);
+                        decay[b] += getData(m_cursor, channel, x, y, b);
                     }
                 }
             }
@@ -680,33 +687,21 @@ public class SLIMProcessor <T extends RealType<T>> {
         ICurveFitData curveFitData;
         double yCount[];
         double yFitted[];
-        
-        // sum up all the photons for all the pixels
-        curveFitData = new CurveFitData();
-        curveFitData.setParams(params);
-        yCount = new double[m_timeBins];
-        for (int b = 0; b < m_timeBins; ++b) {
-            yCount[b] = 0.0;
-        }
-        int photons = 0;
-        int pixels = 0;
-        if (-1 == m_channel) {
-            // sum all of the channels
-            for (int channel = 0; channel < m_channels; ++channel) {
-                for (int y = 0; y < m_height; ++y) {
-                    for (int x = 0; x < m_width; ++x) {
-                        for (int b = 0; b < m_timeBins; ++b) {
-                            double count = getData(m_cursor, channel, x, y, b);
-                            yCount[b] += count;
-                            photons += (int) count;
-                        }
-                        ++pixels;
-                    }
-                }
+
+        // loop over all channels or just the current one
+        for (int channel : getChannelIndices(m_fitAllChannels, m_channel, m_channels)) {
+            curveFitData = new CurveFitData();
+            curveFitData.setParams(params.clone()); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
+            yCount = new double[m_timeBins];
+            for (int b = 0; b < m_timeBins; ++b) {
+                yCount[b] = 0.0;
             }
-        }
-        else {
-            // sum selected channel
+
+            // count photons and pixels
+            int photons = 0;
+            int pixels = 0;
+
+            // sum this channel
             for (int y = 0; y < m_height; ++y) {
                 for (int x = 0; x < m_width; ++x) {
                     for (int b = 0; b < m_timeBins; ++b) {
@@ -716,35 +711,42 @@ public class SLIMProcessor <T extends RealType<T>> {
                     }
                     ++pixels;
                 }
-            }    
-        }
-        System.out.println("Summed photons " + photons + " Summed pixels " + pixels);
+            }
+            curveFitData.setYCount(yCount);
+            yFitted = new double[m_timeBins];
+            curveFitData.setYFitted(yFitted);
 
-        curveFitData.setYCount(yCount);
-        yFitted = new double[m_timeBins];
-        curveFitData.setYFitted(yFitted);
-        //int nominalChannel = (-1 == m_channel) ? channel : 0;
-        curveFitData.setChannel(0);
-        curveFitData.setX(0);
-        curveFitData.setY(0);
-        curveFitDataList.add(curveFitData);
+            // use zero for current channel if it's the only one
+            int nominalChannel = m_fitAllChannels ? channel : 0;
+            curveFitData.setChannel(nominalChannel);
+            curveFitData.setX(0);
+            curveFitData.setY(0);
+            curveFitData.setPixels(pixels);
+            curveFitDataList.add(curveFitData);
+        }
 
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
         getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
 
         // show decay and update UI parameters
+        int visibleChannel = m_fitAllChannels ? m_channel : 0;
         double[] irf = null;
         if (null != m_excitationPanel) {
-            irf = m_excitationPanel.getValues();
+            // get the IRF curve scaled for total number of fitted pixels
+            irf = m_excitationPanel.getValues(dataArray[visibleChannel].getPixels());
         }
-        showDecayGraph("Summed ", uiPanel, irf, dataArray, 0);
-        uiPanel.setParameters(dataArray[0].getParams());
+        String title = "Summed";
+        if (1 < m_channels) {
+            title += " Channel " + (m_channel + 1);
+        }
+        showDecayGraph(title, uiPanel, irf, dataArray[visibleChannel]);
+        uiPanel.setParameters(dataArray[visibleChannel].getParams());
 
         // get the results
-        //int channels = (-1 == m_channel) ? m_channels : 1; //TODO s/b summed for each channel, rather than summing all channels together???
+        int channels = m_fitAllChannels ? m_channels : 1;
         //fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
-        fittedPixels = makeImage(2, 2, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
+        fittedPixels = makeImage(channels + 1, 2, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
         LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();
         setFittedParamsFromData(resultsCursor, dataArray);
         return fittedPixels;
@@ -762,52 +764,68 @@ public class SLIMProcessor <T extends RealType<T>> {
         ICurveFitData curveFitData;
         double yCount[];
         double yFitted[];
-        
-        int roiNumber = 1;
-        int channel = (-1 == m_channel) ? 0 : m_channel; //TODO better than crashing; need a better channel strategy
-        int outputX = 0;
-        for (Roi roi: getRois()) {
-            curveFitData = new CurveFitData();
-            curveFitData.setParams(params.clone());
-            yCount = new double[m_timeBins];
-            for (int b = 0; b < m_timeBins; ++b) {
-                yCount[b] = 0.0;
-            }
-            Rectangle bounds = roi.getBounds();
-            for (int x = 0; x < bounds.width; ++x) {
-                for (int y = 0; y < bounds.height; ++y) {
-                    if (roi.contains(bounds.x + x, bounds.y + y)) {
-                        for (int b = 0; b < m_timeBins; ++b) {
-                            yCount[b] += getData(m_cursor, channel, x, y, b);
+
+        // loop over all channels or just the current one
+        for (int channel : getChannelIndices(m_fitAllChannels, m_channel, m_channels)) {
+            int roiNumber = 1;
+            for (Roi roi: getRois()) {
+                curveFitData = new CurveFitData();
+                curveFitData.setParams(params.clone());
+                yCount = new double[m_timeBins];
+                for (int b = 0; b < m_timeBins; ++b) {
+                    yCount[b] = 0.0;
+                }
+                Rectangle bounds = roi.getBounds();
+                int pixels = 0;
+                for (int x = 0; x < bounds.width; ++x) {
+                    for (int y = 0; y < bounds.height; ++y) {
+                        if (roi.contains(bounds.x + x, bounds.y + y)) {
+                            ++pixels;
+                            for (int b = 0; b < m_timeBins; ++b) {
+                                yCount[b] += getData(m_cursor, channel, x, y, b);
+                            }
                         }
                     }
                 }
+                curveFitData.setYCount(yCount);
+                yFitted = new double[m_timeBins];
+                curveFitData.setYFitted(yFitted);
+
+                // use zero for current channel if it's the only one
+                int nominalChannel = m_fitAllChannels ? channel : 0;
+                curveFitData.setChannel(nominalChannel);
+                curveFitData.setX(roiNumber - 1);
+                curveFitData.setY(0);
+                curveFitData.setPixels(pixels);
+                curveFitDataList.add(curveFitData);
+
+                ++roiNumber;
             }
-            curveFitData.setYCount(yCount);
-            yFitted = new double[m_timeBins];
-            curveFitData.setYFitted(yFitted);
-            curveFitData.setChannel(0);
-            curveFitData.setX(outputX++);
-            curveFitData.setY(0);
-            curveFitDataList.add(curveFitData);
-            ++roiNumber;
         }
-        
+
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
         getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
 
         // show the decay graphs
-        double[] irf = null;
-        if (null != m_excitationPanel) {
-            irf = m_excitationPanel.getValues();
-        }
         double min = Double.MAX_VALUE;
         double max = Double.MIN_VALUE;
-        roiNumber = 1;
+        int roiNumber = 1;
         for (Roi roi: getRois()) {
-            showDecayGraph("Roi " + roiNumber, uiPanel, irf, dataArray, roiNumber - 1);
-            double lifetime = dataArray[roiNumber - 1].getParams()[3];
+            int nominalChannel = m_fitAllChannels ? m_channel : 0;
+            int dataIndex = nominalChannel * getRois().length + (roiNumber - 1);
+
+            double[] irf = null;
+            if (null != m_excitationPanel) {
+                // get the IRF curve scaled for number of pixels in this ROI
+                irf = m_excitationPanel.getValues(dataArray[dataIndex].getPixels());
+            }
+            String title = "Roi " + roiNumber;
+            if (1 < m_channels) {
+                title += " Channel " + (m_channel + 1);
+            }
+            showDecayGraph(title, uiPanel, irf, dataArray[dataIndex]);
+            double lifetime = dataArray[dataIndex].getParams()[3];
             if (lifetime < min) {
                 min = lifetime;
             }
@@ -819,10 +837,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         // show colorized lifetimes
         ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
-        ImagePlus imagePlus = new ImagePlus("Fitted Lifetimes", imageProcessor);
-        int i = 0;
+        ImagePlus imagePlus = new ImagePlus("ROIs Fitted Lifetimes", imageProcessor);
+        roiNumber = 1;
         for (Roi roi: getRois()) {
-            double lifetime = dataArray[i++].getParams()[3];
+            int nominalChannel = m_fitAllChannels ? m_channel : 0;
+            int dataIndex = nominalChannel * getRois().length + (roiNumber - 1);
+            double lifetime = dataArray[dataIndex].getParams()[3];
 
             System.out.println("lifetime is " + lifetime);
             System.out.println("min " + min + " max " + max);
@@ -838,6 +858,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     }
                 }
             }
+            ++roiNumber;
         }
         imagePlus.show();  
 
@@ -845,9 +866,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         uiPanel.setParameters(dataArray[0].getParams()); //TODO, just picked first ROI here!
 
         // get the results
-        //int channels = (-1 == m_channel) ? m_channels : 1; //TODO need a proper channel strategy
+        int channels = m_fitAllChannels ? m_channels : 1;
         //fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
-        fittedPixels = makeImage(2, getRois().length + 1, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
+        fittedPixels = makeImage(channels + 1, getRois().length + 1, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
         LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();
         setFittedParamsFromData(resultsCursor, dataArray);
         return fittedPixels;
@@ -868,7 +889,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         ICurveFitData curveFitData;
         double yCount[];
         double yFitted[];
-        for (int channel : getChannelIndices(m_channel, m_channels)) {
+
+        // loop over all channels or just the current one
+        for (int channel : getChannelIndices(m_fitAllChannels, m_channel, m_channels)) {
             curveFitData = new CurveFitData();
             curveFitData.setParams(params.clone()); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
             yCount = new double[m_timeBins];
@@ -878,10 +901,13 @@ public class SLIMProcessor <T extends RealType<T>> {
             curveFitData.setYCount(yCount);
             yFitted = new double[m_timeBins];
             curveFitData.setYFitted(yFitted);
-            int nominalChannel = (-1 == m_channel) ? channel : 0;
+
+            // use zero for current channel if it's the only one
+            int nominalChannel = m_fitAllChannels ? channel : 0;
             curveFitData.setChannel(nominalChannel);
             curveFitData.setX(0);
             curveFitData.setY(0);
+            curveFitData.setPixels(1);
             curveFitDataList.add(curveFitData);
         }
         
@@ -889,18 +915,27 @@ public class SLIMProcessor <T extends RealType<T>> {
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
         getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
 
-        // show decay graph for visible channel //TODO need m_visibleChannel or the like
+        // show decay graph for visible channel
         double irf[] = null;
         if (null != m_excitationPanel) {
-            irf = m_excitationPanel.getValues();
+            // get the IRF curve scaled for a single pixel
+            irf = m_excitationPanel.getValues(1);
         }
-        showDecayGraph("Pixel " + x + " " + y, uiPanel, irf, dataArray, 0);
+        String title = "Pixel " + x + " " + y;
+        if (1 < m_channels) {
+            title += " Channel " + (m_channel + 1);
+        }
+        int visibleChannel = 0;
+        if (m_fitAllChannels) {
+            visibleChannel = m_channel;
+        }
+        showDecayGraph(title, uiPanel, irf, dataArray[visibleChannel]);
 
         // update UI parameters
-        uiPanel.setParameters(dataArray[0].getParams());
+        uiPanel.setParameters(dataArray[visibleChannel].getParams());
         
         // get the results
-        int channels = (-1 == m_channel) ? m_channels : 1;
+        int channels = m_fitAllChannels ? m_channels : 1;
         //fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
         fittedPixels = makeImage(channels + 1, 2, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
         LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();               
@@ -1094,12 +1129,13 @@ public class SLIMProcessor <T extends RealType<T>> {
     /**
      * Gets an array of channel indices to iterate over.
      *
-     * @param channel selected channel, or -1 for all channels
+     * @param fitAllChannels
+     * @param channel current channel
      * @param channels number of channels
      * @return
      */
-    private int[] getChannelIndices(int channel, int channels) {
-        if (-1 == channel) {
+    private int[] getChannelIndices(boolean fitAllChannels, int channel, int channels) {
+        if (fitAllChannels) {
             int[] channelIndices = new int[channels];
             for (int c = 0; c < channels; ++c) {
                 channelIndices[c] = c;
@@ -1478,7 +1514,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
         if (null != m_excitationPanel) {
-            curveFitter.setInstrumentResponse(m_excitationPanel.getValues());
+            // get the raw, unscaled IRF curve (will get scaled for number of pixels later)
+            curveFitter.setInstrumentResponse(m_excitationPanel.getValues(1));
         }
         return curveFitter;
     }
@@ -1534,32 +1571,29 @@ public class SLIMProcessor <T extends RealType<T>> {
      *
      * @param title
      * @param uiPanel gets updates on dragged/start stop
-     * @param dataArray array of fitted data
-     * @param index to show
+     * @param data fitted data
      */
-    private void showDecayGraph(String title, final IUserInterfacePanel uiPanel, double irf[], ICurveFitData dataArray[], int index) {
-        if (index < dataArray.length) {
-            DecayGraph decayGraph = new DecayGraph(title, m_startBin, m_stopBin, m_timeBins, m_timeRange, irf, dataArray[index]);
-            decayGraph.setStartStopListener(
-                new IStartStopListener() {
-                    public void setStartStop(int start, int stop) {
-                        uiPanel.setStart(start);
-                        uiPanel.setStop(stop);
-                    }
+    private void showDecayGraph(String title, final IUserInterfacePanel uiPanel, double irf[], ICurveFitData data) {
+        DecayGraph decayGraph = new DecayGraph(title, m_startBin, m_stopBin, m_timeBins, m_timeRange, irf, data);
+        decayGraph.setStartStopListener(
+            new IStartStopListener() {
+                public void setStartStop(int start, int stop) {
+                    uiPanel.setStart(start);
+                    uiPanel.setStop(stop);
                 }
-            );
-            JFrame frame = decayGraph.getFrame();
-            frame.setLocationRelativeTo(uiPanel.getFrame());
-            frame.setVisible(true);
-            frame.addFocusListener(
-                new FocusListener() {
-                    public void focusGained(FocusEvent e) {
-                        System.out.println("focus gained " + e);
-                    }
-                    public void focusLost(FocusEvent e) {
-
-                    }
-            });
-        }        
+            }
+        );
+        JFrame frame = decayGraph.getFrame();
+        frame.setLocationRelativeTo(uiPanel.getFrame());
+        frame.setVisible(true);
+        //TODO focus listener could show fit parameters in UI as you click on decay graph
+        /*frame.addFocusListener(
+            new FocusListener() {
+                public void focusGained(FocusEvent e) {
+                    //System.out.println("focus gained " + e);
+                }
+                public void focusLost(FocusEvent e) {
+                }
+        });*/
     }
 }

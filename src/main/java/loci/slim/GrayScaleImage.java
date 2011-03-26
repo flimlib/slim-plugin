@@ -67,7 +67,12 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
     private ISelectListener m_listener;
     private byte[] m_saveOutPixels[];
 
-    public GrayScaleImage(String title, Image<T> image) {
+    public GrayScaleImage(Image<T> image) {
+        String title = image.getName();
+        int spaceIndex = title.indexOf(" ");
+        if (0 < spaceIndex) {
+            title = title.substring(0, spaceIndex);
+        }
         int dimensions[] = image.getDimensions();
         //for (int i = 0; i < dimensions.length; ++i) {
         //    System.out.println("dim[" + i + "] " + dimensions[i]);

@@ -76,7 +76,7 @@ public class ExcitationFileHandler <T extends RealType<T>> {
         return s_instance;
     }
 
-    public Excitation loadExcitation(String fileName) {
+    public Excitation loadExcitation(String fileName, float timeInc) {
         Excitation excitation = null;
         float values[] = null;
         if (fileName.toLowerCase().endsWith(ICS)) {
@@ -89,12 +89,12 @@ public class ExcitationFileHandler <T extends RealType<T>> {
             values = loadIRFExcitationFile(fileName);
         }
         if (null != values) {
-            excitation = new Excitation(fileName, values);
+            excitation = new Excitation(fileName, values, timeInc);
         }
         return excitation;
     }
 
-    public Excitation createExcitation(String fileName, float[] values) {
+    public Excitation createExcitation(String fileName, float[] values, float timeInc) {
         Excitation excitation = null;
         boolean success = false;
         if (fileName.endsWith(ICS)) {
@@ -107,7 +107,7 @@ public class ExcitationFileHandler <T extends RealType<T>> {
             success = saveIRFExcitationFile(fileName, values);
         }
         if (success) {
-            excitation = new Excitation(fileName, values);
+            excitation = new Excitation(fileName, values, timeInc);
         }
         return excitation;
     }

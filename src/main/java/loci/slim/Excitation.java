@@ -43,6 +43,7 @@ package loci.slim;
 public class Excitation {
     private final String m_fileName;
     private final float[] m_values;
+    private final float m_timeInc;
     private int m_start;
     private int m_stop;
     private float m_base;
@@ -53,9 +54,10 @@ public class Excitation {
      * @param fileName
      * @param values
      */
-    public Excitation(String fileName, float[] values) {
+    public Excitation(String fileName, float[] values, float timeInc) {
         m_fileName = fileName;
         m_values = values;
+        m_timeInc = timeInc;
     }
 
     /**
@@ -74,6 +76,15 @@ public class Excitation {
      */
     public float[] getValues() {
         return m_values;
+    }
+
+    /**
+     * Gets the horizontal time increment for the excitation curve.
+     *
+     * @return
+     */
+    public float getTimeInc() {
+        return m_timeInc;
     }
 
     /**

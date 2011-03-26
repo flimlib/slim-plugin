@@ -73,12 +73,14 @@ import org.jfree.ui.RectangleEdge;
  */
 public class DecayGraph implements IStartStopProportionListener {
     static final int HORZ_TWEAK = 4;
-    static final Color DECAY_COLOR = Color.BLUE;
-    static final Color FITTED_COLOR = Color.MAGENTA;
+    static final Color IRF_COLOR = Color.GRAY;
+    static final Color DECAY_COLOR = Color.GRAY.darker();
+    static final Color FITTED_COLOR = Color.RED;
     static final Color BACK_COLOR = Color.WHITE;
     static final Color START_COLOR = Color.BLUE.darker();
     static final Color STOP_COLOR = Color.RED.darker();
     static final Color BASE_COLOR = Color.GREEN.darker();
+    static final Color RESIDUAL_COLOR = Color.BLACK;
     JFrame m_frame;
     int m_start;
     int m_stop;
@@ -211,9 +213,9 @@ public class DecayGraph implements IStartStopProportionListener {
         decayRenderer.setSeriesLinesVisible(2, false);
         decayRenderer.setSeriesShape(2, new Ellipse2D.Float(2.0f, 2.0f, 2.0f, 2.0f)); // 1.5, 3.0 look ugly!
 
-        decayRenderer.setSeriesPaint(0, Color.green);
-        decayRenderer.setSeriesPaint(1, Color.red);
-        decayRenderer.setSeriesPaint(2, Color.darkGray);
+        decayRenderer.setSeriesPaint(0, IRF_COLOR);
+        decayRenderer.setSeriesPaint(1, FITTED_COLOR);
+        decayRenderer.setSeriesPaint(2, DECAY_COLOR);
 
         m_decaySubPlot = new XYPlot(m_decayDataset, null, photonAxis, decayRenderer);
         m_decaySubPlot.setDomainCrosshairVisible(true);
@@ -227,7 +229,7 @@ public class DecayGraph implements IStartStopProportionListener {
         //TODO want to autorange it: residualAxis.setRange(-100.0, 100.0);
         XYSplineRenderer residualRenderer = new XYSplineRenderer();
         residualRenderer.setSeriesShapesVisible(0, false);
-        residualRenderer.setSeriesPaint(0, Color.black);
+        residualRenderer.setSeriesPaint(0, RESIDUAL_COLOR);
         XYPlot residualSubPlot = new XYPlot(m_residualDataset, null, residualAxis, residualRenderer);
         residualSubPlot.setDomainCrosshairVisible(true);
         residualSubPlot.setRangeCrosshairVisible(true);
@@ -258,8 +260,12 @@ public class DecayGraph implements IStartStopProportionListener {
         double xCurrent = 0;
         if (null != irf) {
             for (int i = 0; i < bins; ++i) {
+                // logarithmic plots can't handle <= 0
                 if (irf[i] > 0.0) {
                     series1.add(xCurrent, irf[i]);
+                }
+                else {
+                    series1.add(xCurrent, null);
                 }
                 xCurrent += timeInc;
             }
@@ -279,7 +285,7 @@ public class DecayGraph implements IStartStopProportionListener {
             if (start <= i && i <= stop) {
                 // yes, show fitted curve and residuals
                 yFitted = data.getYFitted()[i];
-                // logarithmic plots can't handle <= 0.0
+                // logarithmic plots can't handle <= 0
                 if (yFitted > 0.0) {
                     series2.add(xCurrent, yFitted);
                     series4.add(xCurrent, yData - yFitted);

@@ -74,7 +74,7 @@ import org.jfree.ui.RectangleEdge;
  */
 public class ExcitationGraph implements IStartStopBaseProportionListener {
     static final int HORZ_TWEAK = 0; //TODO this was necessary for the fitted decay graph: 4;
-    static final Color EXCITATION_COLOR = Color.BLACK;
+    static final Color EXCITATION_COLOR = Color.GRAY;
     static final Color BACK_COLOR = Color.WHITE;
     static final Color START_COLOR = Color.BLUE.darker();
     static final Color STOP_COLOR = Color.RED.darker();
@@ -110,7 +110,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
      * @param values
      */
     ExcitationGraph(final int start, final int stop, final float base,
-            final int bins, final double timeInc, float[] values) {
+            final int bins, float[] values, final float timeInc) {
         m_start = start;
         m_stop = stop;
         m_base = base;

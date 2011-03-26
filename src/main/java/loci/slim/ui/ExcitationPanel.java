@@ -73,9 +73,6 @@ import loci.slim.Excitation;
  */
 public class ExcitationPanel extends JFrame {
     private Excitation m_excitation;
-    private int m_start;
-    private int m_stop;
-    private int m_base;
     private JTextField m_fileField;
     private JTextField m_startField;
     private JTextField m_stopField;
@@ -92,8 +89,8 @@ public class ExcitationPanel extends JFrame {
         float base = excitation.getBase();
         float[] values = excitation.getValues();
         int bins = values.length;
-        int timeInc = 1;
-        ExcitationGraph excitationGraph = new ExcitationGraph(start, stop, base, bins, timeInc, values);
+        float timeInc = excitation.getTimeInc();
+        ExcitationGraph excitationGraph = new ExcitationGraph(start, stop, base, bins, values, timeInc);
         
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", createTopPanel());
@@ -114,33 +111,32 @@ public class ExcitationPanel extends JFrame {
     public void quit() {
         this.setVisible(false);
     }
-    
-    public int getStart() {
-        return m_start;
-    }
-    
-    public int getStop() {
-        return m_stop;
-    }
-    
-    public int getBase() {
-        return m_base;
-    }
 
-    public double[] getValues() {
+    public double[] getValues(int pixels) {
         float floatValues[] = m_excitation.getValues();
+        for (float fV : floatValues) {
+            System.out.print(" " + fV);
+        }
+        System.out.println("");
+        System.out.println("start " + m_excitation.getStart() + " stop " + m_excitation.getStop() + " base " + m_excitation.getBase());
+
+        int start = m_excitation.getStart();
+        int stop = m_excitation.getStop();
+        float base = m_excitation.getBase();
         double[] values = new double[floatValues.length];
         for (int i = 0; i < values.length; ++i) {
-            if (i < m_start || i >= m_stop) {
+            if (i < start || i > stop) {
                 values[i] = 0.0;
             }
-            else if (floatValues[i] > m_base) {
-                values[i] = floatValues[i];
+            else if (floatValues[i] > base) {
+                values[i] = pixels * floatValues[i];
+                System.out.println("pixels " + pixels + "  value " + values[i]);
             }
             else {
                 values[i] = 0.0;
             }
         }
+        System.out.println("");
         return values;
     }
 
