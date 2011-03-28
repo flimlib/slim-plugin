@@ -52,9 +52,11 @@ import java.awt.event.AdjustmentListener;
  */
 public class MyStackWindow extends StackWindow {
     private int m_slice = 1;
+    private int m_height;
 
     public MyStackWindow(ImagePlus imp) {
         super(imp);
+        m_height = imp.getHeight();
         if (null != sliceSelector) {
             sliceSelector.addAdjustmentListener(
                 new AdjustmentListener() {
@@ -80,5 +82,9 @@ public class MyStackWindow extends StackWindow {
         //TODO this approach did not work; StackWindow doesn't keep slice up to date.
         //return slice;
         return m_slice;
+    }
+
+    public float getZoomFactor() {
+        return (float) m_height / ic.getHeight();
     }
 }

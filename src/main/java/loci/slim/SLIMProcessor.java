@@ -333,6 +333,9 @@ public class SLIMProcessor <T extends RealType<T>> {
                     // just ignore clicks during a fit
                     if (!m_fitInProgress) {
                         synchronized (m_synchFit) {
+                            float zoomFactor = ((GrayScaleImage)m_grayScaleImage).getZoomFactor();
+                            x *= zoomFactor;
+                            y *= zoomFactor;
                             uiPanel.setX(x);
                             uiPanel.setY(y);
                             getFitSettings(m_grayScaleImage, uiPanel);

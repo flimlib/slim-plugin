@@ -191,6 +191,10 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         m_stackWindow.setEnabled(enable);
     }
 
+    public float getZoomFactor() {
+        return m_stackWindow.getZoomFactor();
+    }
+
     /**
      * Gets a grayscale pixel value, to test against a threshold.
      *

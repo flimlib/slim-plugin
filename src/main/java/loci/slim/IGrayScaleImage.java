@@ -77,4 +77,11 @@ public interface IGrayScaleImage {
      * @return unsigned byte expressed as an integer, 0...255
      */
     public int getPixel(int channel, int x, int y);
+
+    /**
+     * Used to compensate X, Y position when clicking on zoomed image.
+     *
+     * @return
+     */
+    public float getZoomFactor();
 }
