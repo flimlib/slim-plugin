@@ -82,18 +82,23 @@ public class FiveColorColorize extends MultiColorColorize implements IColorize {
         if (value > 0.0) {
             if (value >= start && value <= stop) {
                 double range = stop - start;
-                value -= start;
-                if (value < (range / 4.0 )) {
-                    returnColor = interpolateColor(m_color1, m_color2, 4.0 * value / range );
-                }
-                else if (value < (range / 2.0)) {
-                    returnColor = interpolateColor(m_color2, m_color3, 4.0 * (value - (range / 4.0)) / range);
-                }
-                else if (value < (3.0 * range / 4.0)) {
-                    returnColor = interpolateColor(m_color3, m_color4, 4.0 * (value - (range / 2.0)) / range);
+                if (0.0 == range) {
+                    returnColor = m_color3;
                 }
                 else {
-                    returnColor = interpolateColor(m_color4, m_color5, 4.0 * (value - (3.0 * range / 4.0)) / range);
+                    value -= start;
+                    if (value < (range / 4.0 )) {
+                        returnColor = interpolateColor(m_color1, m_color2, 4.0 * value / range );
+                    }
+                    else if (value < (range / 2.0)) {
+                        returnColor = interpolateColor(m_color2, m_color3, 4.0 * (value - (range / 4.0)) / range);
+                    }
+                    else if (value < (3.0 * range / 4.0)) {
+                        returnColor = interpolateColor(m_color3, m_color4, 4.0 * (value - (range / 2.0)) / range);
+                    }
+                    else {
+                        returnColor = interpolateColor(m_color4, m_color5, 4.0 * (value - (3.0 * range / 4.0)) / range);
+                    }
                 }
             }
 
