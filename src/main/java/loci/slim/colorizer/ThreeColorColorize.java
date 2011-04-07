@@ -76,12 +76,17 @@ public class ThreeColorColorize extends MultiColorColorize implements IColorize 
         if (value > 0.0) {
             if (value >= start && value <= stop) {
                 double range = stop - start;
-                value -= start;
-                if (value < (range / 2.0)) {
-                    returnColor = interpolateColor(m_color1, m_color2, 2.0 * value / range);
+                if (0.0 == range) {
+                    returnColor = m_color2;
                 }
                 else {
-                    returnColor = interpolateColor(m_color2, m_color3, 2.0 * (value - (range / 2.0)) / range);
+                    value -= start;
+                    if (value < (range / 2.0)) {
+                        returnColor = interpolateColor(m_color1, m_color2, 2.0 * value / range);
+                    }
+                    else {
+                        returnColor = interpolateColor(m_color2, m_color3, 2.0 * (value - (range / 2.0)) / range);
+                    }
                 }
             }
 
