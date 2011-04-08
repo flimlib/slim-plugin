@@ -45,6 +45,7 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>slim-curve</artifactId>
       <version>${project.version}</version>
+      <type>nar</type>
     </dependency>
     <dependency>
       <groupId>jfree</groupId>
@@ -85,9 +86,9 @@
 
   <build>
     <plugins>
-      <plugin>
+      <!--plugin>
         <artifactId>maven-nar-plugin</artifactId>
-        <extensions>true</extensions> <!-- what does this do? -->
+        <extensions>true</extensions> what does this do?
         <configuration>
           <ignore>true</ignore>
           <classifiers>
@@ -127,14 +128,29 @@
         </configuration>
         <executions>
           <execution>
-            <id>make-assembly</id> <!-- this is used for inheritance merges -->
-            <phase>package</phase> <!-- bind to the packaging phase -->
+            <id>make-assembly</id> this is used for inheritance merges
+            <phase>package</phase> bind to the packaging phase
             <goals>
               <goal>single</goal>
             </goals>
           </execution>
         </executions>
+      </plugin-->
+
+ <!-- back to building a simple jar -->
+       <plugin>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <packageName>loci.curvefitter</packageName>
+            </manifest>
+          </archive>
+        </configuration>
       </plugin>
+
+
+
     </plugins>
   </build>
 
