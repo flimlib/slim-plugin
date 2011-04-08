@@ -11,7 +11,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>slim-plugin</artifactId>
+  <artifactId>slim_plugin</artifactId>
 
   <name>SLIMPlugin</name>
   <description>An ImageJ plugin for combined spectral-lifetime image analysis.</description>
@@ -39,6 +39,11 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>curve-fitter</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>slim-curve</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -81,14 +86,54 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
+        <artifactId>maven-nar-plugin</artifactId>
+        <extensions>true</extensions> <!-- what does this do? -->
+        <configuration>
+          <ignore>true</ignore>
+          <classifiers>
+            <classifier>x86-Windows-msvc-shared</classifier>
+            <classifier>x86_64-MacOSX-gpp-shared</classifier>
+            <classifier>i386-Linux-g++-shared</classifier>
+          </classifiers>
+          <libraries>
+            <library>
+              <type>shared</type>
+            </library>
+          </libraries>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>nar-download</goal>
+              <goal>nar-unpack</goal>
+              <goal>nar-assembly</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
           <archive>
             <manifest>
-              <mainClass>SLIMPlugIn</mainClass>
+                <mainClass>SLIMPlugIn</mainClass>
             </manifest>
           </archive>
+          <descriptors>
+            <descriptor>
+              assembly-descriptor.xml
+            </descriptor>
+          </descriptors>
         </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+            <phase>package</phase> <!-- bind to the packaging phase -->
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
