@@ -44,6 +44,7 @@ import ij.process.ImageProcessor;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -230,6 +231,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             // show the UI; do fits
             doFits();
         }
+        IJ.log("QUIT");
     }
 
     /**
@@ -360,6 +362,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
                 }
                 if (m_quit) {
+                    hideUIPanel(uiPanel);
                     return;
                 }
             }
@@ -378,6 +381,13 @@ public class SLIMProcessor <T extends RealType<T>> {
             m_grayScaleImage.enable(true);
             uiPanel.reset();
         }
+        hideUIPanel(uiPanel);
+    }
+
+    private void hideUIPanel(IUserInterfacePanel uiPanel) {
+        m_grayScaleImage.setListener(null);
+        //TODO uiPanel is still hooked up as start stop listeners to decay curves!
+        uiPanel.getFrame().setVisible(false);
     }
 
     private void updateDecayCursors(IUserInterfacePanel uiPanel) {
