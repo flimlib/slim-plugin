@@ -243,7 +243,9 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_quitButton.addActionListener(
             new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    m_listener.quit();
+                    if (null != m_listener) {
+                        m_listener.quit();
+                    }
                 }
             }
         );
