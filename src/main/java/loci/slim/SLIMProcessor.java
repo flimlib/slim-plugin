@@ -231,7 +231,6 @@ public class SLIMProcessor <T extends RealType<T>> {
             // show the UI; do fits
             doFits();
         }
-        IJ.log("QUIT");
     }
 
     /**
