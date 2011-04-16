@@ -87,6 +87,7 @@
   <profiles>
     <profile>
       <id>default</id>
+      <!-- TODO for my local test builds, comment out -->
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
@@ -107,6 +108,10 @@
     </profile>
     <profile>
       <id>with-dependencies</id>
+      <!-- TODO for my local test builds, uncomment -->
+      <!-- activation>
+        <activeByDefault>true</activeByDefault>
+      </activation -->
       <build>
         <plugins>
           <plugin>
@@ -115,9 +120,13 @@
             <configuration>
               <ignore>true</ignore>
               <classifiers>
+                <classifier>amd64-Windows-msvc-shared</classifier>
                 <classifier>x86-Windows-msvc-shared</classifier>
                 <classifier>x86_64-MacOSX-gpp-shared</classifier>
-                <classifier>i386-Linux-g++-shared</classifier>
+                <classifier>i386-MacOSX-gpp-shared</classifier>
+                <classifier>ppc-MacOSX-gpp-shared</classifier>
+                <!-- classifier>i386-Linux-g++-shared</classifier -->
+                <!-- classifier>x86_64-Linux-g++-shared</classifier -->
               </classifiers>
               <libraries>
                 <library>
