@@ -15,7 +15,7 @@
       </includes>
     </fileSet>    
     <fileSet>
-      <directory>${project.build.directory}/nar/lib/x86_64-Windows-msvc/shared</directory>
+      <directory>${project.build.directory}/nar/lib/amd64-Windows-msvc/shared</directory>
       <outputDirectory>META-INF/lib/x86_64-Windows-msvc</outputDirectory>
       <includes>
         <include>*.dll</include>
