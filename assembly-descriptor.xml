@@ -8,23 +8,49 @@
   
   <fileSets>
     <fileSet>
-      <directory>${project.build.directory}/nar/lib/x86_64-MacOSX-gpp/shared</directory>
-      <outputDirectory>META-INF/lib/x86_64-MacOSX-gpp</outputDirectory>
-      <!-- jna style: outputDirectory>com/sun/jna/darwin</outputDirectory -->
-      <includes>
-        <include>*.dylib</include>
-      </includes>
-    </fileSet>
-    <fileSet>
       <directory>${project.build.directory}/nar/lib/x86-Windows-msvc/shared</directory>
       <outputDirectory>META-INF/lib/x86-Windows-msvc</outputDirectory>
       <includes>
         <include>*.dll</include>
       </includes>
+    </fileSet>    
+    <fileSet>
+      <directory>${project.build.directory}/nar/lib/x86_64-Windows-msvc/shared</directory>
+      <outputDirectory>META-INF/lib/x86_64-Windows-msvc</outputDirectory>
+      <includes>
+        <include>*.dll</include>
+      </includes>
     </fileSet>
     <fileSet>
+      <directory>${project.build.directory}/nar/lib/i386-MacOSX-gpp/shared</directory>
+      <outputDirectory>META-INF/lib/i386-MacOSX-gpp</outputDirectory>
+      <includes>
+        <include>*.dylib</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/nar/lib/x86_64-MacOSX-gpp/shared</directory>
+      <outputDirectory>META-INF/lib/x86_64-MacOSX-gpp</outputDirectory>
+      <includes>
+        <include>*.dylib</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/nar/lib/ppc-MacOSX-gpp/shared</directory>
+      <outputDirectory>META-INF/lib/ppc-MacOSX-gpp</outputDirectory>
+      <includes>
+        <include>*.dylib</include>
+      </includes>
+    </fileSet>    <fileSet>
       <directory>${project.build.directory}/nar/lib/i386-Linux-g++/shared</directory>
       <outputDirectory>META-INF/lib/i386-Linux-g++</outputDirectory>
+      <includes>
+        <include>*.so</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>${project.build.directory}/nar/lib/x86_64-Linux-g++/shared</directory>
+      <outputDirectory>META-INF/lib/x86_64-Linux-g++</outputDirectory>
       <includes>
         <include>*.so</include>
       </includes>
