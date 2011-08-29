@@ -44,10 +44,7 @@ import ij.process.ImageProcessor;
 
 import java.awt.Canvas;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Rectangle;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
 
@@ -221,6 +218,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         boolean success = false;
         if (showFileDialog(getFileFromPreferences())) {
             m_image = loadImage(m_file);
+            if (null == m_image) {
+                System.out.println("image is null");
+            }
             if (getImageInfo(m_image)) {
                 saveFileInPreferences(m_file);
                 success = true;
@@ -487,19 +487,24 @@ public class SLIMProcessor <T extends RealType<T>> {
     }
 
     private Image<T> loadImage(String file) {
+        boolean threwException = false;
         ImageOpener imageOpener = new ImageOpener();
         Image<T> image = null;
         try {
             image = imageOpener.openImage(file);
         }
-        catch (Exception e) {
-            System.out.println("Error " + e.getMessage());
+        catch (java.io.IOException e) { }
+        catch (loci.formats.FormatException e) {
+            System.out.println("Exception message: " + e.getMessage());
+            threwException = true;
+        }
+        if (null == image && !threwException) {
+            System.out.println("imageOpener returned null image");
         }
         return image;
     }
    
     private boolean getImageInfo(Image<T> image) {
-        System.out.println("Image is " + image);
         int[] dimensions = new int[0];
         try {
             dimensions = image.getDimensions();
@@ -584,54 +589,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         return true;
     }
-
-    /**
-     * This routine creates an artificial set of data that is useful to test fitting.
-     *
-     * @return whether successful
-     */
-   /* private boolean fakeData() {
-        m_width = 50;
-        m_height = 50;
-        m_timeBins = 20;
-        m_channels = 1;
-        m_timeRange = 10.0f;
-        m_minWave = 400;
-        m_waveStep = 10;
-
-        double A;
-        double lambda;
-        double b = 1.0;
-
-        // show colorized lifetimes
-        DataColorizer dataColorizer = new DataColorizer(m_width, m_height, "Fake Data");
-        //ImageProcessor imageProcessor = new ColorProcessor(m_width, m_height);
-        //ImagePlus imagePlus = new ImagePlus("Fake Data", imageProcessor);
-
-        m_data = new int[m_channels][m_height][m_width][m_timeBins];
-        for (int y = 0; y < m_height; ++y) {
-            A = 1000.0 + y  * 10000.0; // was 1000.0; bumped up Tuesday July 27 trying to get Barber LMA to work - didn't help.
-            for (int x = 0; x < m_width; ++x) {
-                double tmpX = x;
-                lambda = 0.05 + x * 0.0005d; //0.0001 + x * .001; //0.5 + x * 0.01; // .002500 + x * .01;
-                //System.out.println("lambda " + lambda + " color " + lambdaColorMap(MAXIMUM_LAMBDA, lambda));
-                dataColorizer.setData(true, x, y, lambda);
-                //imageProcessor.setColor(lifetimeColorMap(MAXIMUM_LIFETIME, lambda));
-                //imageProcessor.drawPixel(x, y);
-                for (int t = 0; t < m_timeBins; ++t) {
-                    m_data[0][y][x][t] = (int)(A * Math.exp(-lambda * m_timeRange * t) + b);
-                }
-                //System.out.print(" " + m_data[0][y][x][0]);
-                if (5 == x && 5 == y) System.out.println("at (5, 5) A is " + A + " lambda " + lambda + " b " + b);
-                if (10 == x && 10 == y) System.out.println("at (10, 10) A is " + A + " lambda " + lambda + " b " + b);
-                if (49 == x && 49 == y) System.out.println("at (49, 49) A is " + A + " lambda " + lambda + " b " + b);
-            }
-            //System.out.println();
-        }
-        dataColorizer.update();
-        return true;
-    }
-    */
 
     /**
      * Restores file name from Java Preferences.
@@ -855,10 +812,6 @@ public class SLIMProcessor <T extends RealType<T>> {
             int dataIndex = nominalChannel * getRois().length + (roiNumber - 1);
             double lifetime = dataArray[dataIndex].getParams()[3];
 
-            System.out.println("lifetime is " + lifetime);
-            System.out.println("min " + min + " max " + max);
-            System.out.println("color is " + lifetimeColorMap(min,max, lifetime));
-            
             imageProcessor.setColor(lifetimeColorMap(min, max, lifetime));
 
             Rectangle bounds = roi.getBounds();
@@ -1133,8 +1086,22 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         long elapsed = System.nanoTime() - start;
         System.out.println("nanoseconds " + elapsed);
+        showRunningAverage(elapsed);
 
         return m_fittedImage;
+    }
+
+    static int s_avgIndex;
+    static ArrayList<Long> s_list = new ArrayList<Long>();
+
+    private void showRunningAverage(long elapsed) {
+        s_list.add(elapsed);
+        long total = 0;
+        for (long time : s_list) {
+            total += time;
+        }
+        total /= s_list.size();
+        System.out.println("average " + total + " after " + s_list.size() + " trials");
     }
 
     /**
@@ -1206,7 +1173,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     private double getData(LocalizableByDimCursor<T> cursor, int channel, int x, int y, int bin) {
         int dim[];
         if (m_hasChannels) {
-            dim = new int[] { x, y, bin, channel };
+            dim = new int[] { x, y, bin, channel }; //TODO ARG is this order guaranteed?
         }
         else {
             dim = new int[] { x, y, bin };
