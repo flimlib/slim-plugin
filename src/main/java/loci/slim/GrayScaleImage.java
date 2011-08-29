@@ -41,12 +41,10 @@ import ij.gui.ImageCanvas;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import java.awt.image.ColorModel;
-
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
+import mpicbg.imglib.type.numeric.ComplexType;
 import mpicbg.imglib.type.numeric.RealType;
-import mpicbg.imglib.type.numeric.integer.UnsignedShortType;
 
 /**
  * The GrayScaleImage shows a grayscale representation of the input data.  It
@@ -108,8 +106,9 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                     pixels[x][y] = 0.0;
                     for (int b = 0; b < bins; ++b) {
                         position[2] = b;
+
                         cursor.setPosition(position);
-                        pixels[x][y] += ((UnsignedShortType) cursor.getType()).getRealDouble();
+                        pixels[x][y] += ((ComplexType) cursor.getType()).getRealDouble();
                     }
                     if (pixels[x][y] > maxPixel) {
                         maxPixel = pixels[x][y];
@@ -149,11 +148,15 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         ImageCanvas canvas = m_stackWindow.getCanvas();
         canvas.addMouseListener(
             new MouseListener() {
+                @Override
                 public void mousePressed(MouseEvent e) {}
+                @Override
                 public void mouseExited(MouseEvent e) {}
+                @Override
                 public void mouseClicked(MouseEvent e) {}
+                @Override
                 public void mouseEntered(MouseEvent e) {}
-
+                @Override
                 public void mouseReleased(MouseEvent e) {
                     if (null != m_listener) {
                         m_listener.selected(getChannel(), e.getX(), e.getY());
@@ -168,6 +171,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
      *
      * @param listener
      */
+    @Override
     public void setListener(ISelectListener listener) {
         m_listener = listener;
     }
@@ -177,6 +181,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
      *
      * @return channel
      */
+    @Override
     public int getChannel(){
         // covert 1...n to 0...n-1
         return m_stackWindow.getSlice() - 1;
@@ -187,10 +192,12 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
      *
      * @param enable
      */
+    @Override
     public void enable(boolean enable) {
         m_stackWindow.setEnabled(enable);
     }
 
+    @Override
     public float getZoomFactor() {
         return m_stackWindow.getZoomFactor();
     }
@@ -203,6 +210,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
      * @param y
      * @return unsigned byte expressed as an integer, 0...255
      */
+    @Override
     public int getPixel(int channel, int x, int y) {
         int returnValue = 0;
         //TODO this consistently results in "OutOfMemoryError: Java heap space"
