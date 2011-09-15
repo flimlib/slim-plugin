@@ -142,7 +142,7 @@
                 </manifest>
               </archive>
               <descriptors>
-                <descriptor>assembly-descriptor.xml</descriptor>
+                <descriptor>src/main/assembly/with-dependencies.xml</descriptor>
               </descriptors>
             </configuration>
             <executions>
