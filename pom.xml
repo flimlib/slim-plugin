@@ -42,12 +42,6 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>slim-curve</artifactId>
-      <version>${project.version}</version>
-      <type>nar</type>
-    </dependency>
-    <dependency>
       <groupId>jfree</groupId>
       <artifactId>jcommon</artifactId>
       <version>1.0.15</version>
