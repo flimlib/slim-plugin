@@ -117,39 +117,30 @@ public class ExcitationFileHandler <T extends RealType<T>> {
         ICSReader icsReader = new ICSReader();
         try {
             icsReader.setId(fileName);
-            //System.out.println(" is single file " + icsReader.isSingleFile(fileName));
-            String domains[] = icsReader.getDomains();
-            int lengths[] = icsReader.getChannelDimLengths();
-            //System.out.print("lengths");
-            //for (int i : lengths) {
-            //    System.out.print(" " + i);
-            //}
-            //System.out.println();
-            String types[] = icsReader.getChannelDimTypes();
-            int sizeX = icsReader.getSizeX();
-            int sizeY = icsReader.getSizeY();
-            int sizeZ = icsReader.getSizeZ();
-            int sizeT = icsReader.getSizeT();
-            int sizeC = icsReader.getSizeC();
-            int bpp = icsReader.getBitsPerPixel();
-            String dimOrder = icsReader.getDimensionOrder();
-            int pixelType = icsReader.getPixelType();
-            int effSizeC = icsReader.getEffectiveSizeC();
+            int bitsPerPixel = icsReader.getBitsPerPixel();
+            int bytesPerPixel = bitsPerPixel / 8;
             boolean littleEndian = icsReader.isLittleEndian();
-            //System.out.println("size X Y Z T C " + sizeX + " " + sizeY + " " + sizeZ + " " + sizeT + " " + sizeC + " ");
-            //System.out.println("bpp " + bpp + " dim order " + dimOrder + " pixelTYpe + " + pixelType + " effsizec " + effSizeC + " littleendian " + littleEndian);
-
-            System.out.println(icsReader.getFormat());
+            boolean interleaved = icsReader.isInterleaved();
             int bins = icsReader.getSizeC();
+            if (1 == bins) {
+                // hack for lifetime ICS that reader doesn't recognize as such
+                bins = icsReader.getSizeZ();
+            }
             results = new float[bins];
-            byte bytes[] = new byte[4];
-            for (int bin = 0; bin < bins; ++bin) {
-                bytes = icsReader.openBytes(bin);
-                //for (byte b : bytes) {
-                //    System.out.print(" " + b);
-                //}
-                //System.out.println();
-                results[bin] = convertBytesToFloat(bytes);
+            byte bytes[];
+            if (false || icsReader.isInterleaved()) { //TODO ARG interleaved does not read the whole thing; was 130K, now 32767
+                // this returns the whole thing
+                bytes = icsReader.openBytes(0);
+                System.out.println("INTERLEAVED reads # bytes: " + bytes.length);
+                for (int bin = 0; bin < bins; ++bin) {
+                    results[bin] = convertBytesToFloat(littleEndian, bitsPerPixel, bytes, bytesPerPixel * bin);
+                }
+            }
+            else {
+                for (int bin = 0; bin < bins; ++bin) {
+                    bytes = icsReader.openBytes(bin);
+                    results[bin] = convertBytesToFloat(littleEndian, bitsPerPixel, bytes, 0);
+                }
             }
             icsReader.close();
         }
@@ -237,18 +228,74 @@ public class ExcitationFileHandler <T extends RealType<T>> {
     /**
      * Converts a little-endian four byte array to a float.
      *
+     * @param littleEndian byte order
+     * @param bitsPerPixel
      * @param bytes
+     * @param index
      * @return
      */
-    private float convertBytesToFloat(byte[] bytes) {
-        int i = 0;
-        i |= bytes[3] & 0xff;
-        i <<= 8;
-        i |= bytes[2] & 0xff;
-        i <<= 8;
-        i |= bytes[1] & 0xff;
-        i <<= 8;
-        i |= bytes[0] & 0xff;
-        return Float.intBitsToFloat(i);
+    private float convertBytesToFloat(boolean littleEndian, int bitsPerPixel, byte[] bytes, int index) {
+        float returnValue = 0.0f;
+        if (32 == bitsPerPixel) {
+            int i = 0;
+            if (littleEndian) {
+                i |= bytes[index + 3] & 0xff;
+                i <<= 8;
+                i |= bytes[index + 2] & 0xff;
+                i <<= 8;
+                i |= bytes[index + 1] & 0xff;
+                i <<= 8;
+                i |= bytes[index + 0] & 0xff;
+            }
+            else {
+                i |= bytes[index + 0] & 0xff;
+                i <<= 8;
+                i |= bytes[index + 1] & 0xff;
+                i <<= 8;
+                i |= bytes[index + 2] & 0xff;
+                i <<= 8;
+                i |= bytes[index + 3] & 0xff;
+            }
+            returnValue = Float.intBitsToFloat(i);
+        }
+        else if (64 == bitsPerPixel) {
+            long l = 0;
+            if (littleEndian) {
+                l |= bytes[index + 7] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 6] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 5] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 4] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 3] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 2] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 1] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 0] & 0xff;
+            }
+            else {
+                l |= bytes[index + 0] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 1] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 2] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 3] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 4] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 5] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 6] & 0xff;
+                l <<= 8;
+                l |= bytes[index + 7] & 0xff;
+            }
+            returnValue = (float) Double.longBitsToDouble(l);
+        }
+        return returnValue;
     }
 }
