@@ -333,15 +333,76 @@ public class CursorHelper {
         returnValue[5] = transEndIndex;
         return returnValue;
     }
+    
+    /**
+     * Calculates the Z background value looking at the prepulse
+     * part of the decay curve.
+     * (Based on calcBgFromPrepulse in TRfitting.c
+     * @param prepulse
+     * @param n
+     * @return
+     */
+    private static float calcBgFromPrepulse(float[] prepulse, int n) {
+        float z = 0.0f;
+
+        if (z > 0) {
+            float val = 0.0f;
+            for (int i = 0; i <n; ++i) {
+                val += prepulse[i];
+            }
+            z = val/n;
+        }
+        return z;
+    }
+
+    /**
+     * "Get initial estimates for the params that go forward to Marquardt".
+     * (Based on expParameterEstimation from TRfitting.c.)
+     *
+     * @return
+     */
+    public static float[] estimateParameters(boolean useRLD,
+            boolean useBackground,
+            float[] trans,
+            int transFitStartIndex,
+            int transStartIndex,
+            int transEndIndex) {
+        float a, t, z;
+
+        // initialize
+        a = 1000.0f;
+        t = 2.0f;
+        z = 0.0f;
+        
+        if (useRLD) {
+            transFitStartIndex = findMax(trans, transFitStartIndex, transEndIndex);
+            //TODO ARG do a RLD fit using trans, transFitStartIndex, transStartIndex, transEndIndex
+            // see wiki entry "expParameterEstimation from TRfitting.c"
+            //   note that the prompt is disregarded here
+            int returnValue = -1;
+            if (returnValue >= 0) {
+                a = t = z = 0.0f;
+            }
+        }
+        else if (useBackground) {
+            z = calcBgFromPrepulse(trans, transStartIndex);
+        }
+
+        return new float[] { z, a, t };
+    }
 
     private static int findMax(float[] values) {
-        return findMax(values, values.length);
+        return findMax(values, 0, values.length);
     }
 
     private static int findMax(float[] values, int endIndex) {
-        int index = 0;
-        float max = 0.0f;
-        for (int i = 0; i < endIndex; ++i) {
+        return findMax(values, 0, endIndex);
+    }
+
+    private static int findMax(float[] values, int startIndex, int endIndex) {
+        int index = startIndex;
+        float max = values[startIndex];
+        for (int i = startIndex; i < endIndex; ++i) {
             if (values[i] > max) {
                 max = values[i];
                 index = i;
@@ -351,9 +412,13 @@ public class CursorHelper {
     }
 
     private static int findMin(float[] values, int endIndex) {
-        int index = 0;
-        float min = Float.MAX_VALUE;
-        for (int i = 0; i < endIndex; ++i) {
+        return findMin(values, 0, endIndex);
+    }
+
+    private static int findMin(float[] values, int startIndex, int endIndex) {
+        int index = startIndex;
+        float min = values[startIndex];
+        for (int i = startIndex; i < endIndex; ++i) {
             if (values[i] < min) {
                 min = values[i];
                 index = i;
