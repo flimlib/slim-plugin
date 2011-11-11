@@ -122,8 +122,9 @@ public interface IUserInterfacePanel {
      * Sets starting bin of fit.
      *
      * @param bin
+     * @param refit
      */
-    public void setStart(int bin);
+    public void setStart(int bin, boolean refit);
 
     /**
      * Gets stopping bin of fit (inclusive).
@@ -136,8 +137,10 @@ public interface IUserInterfacePanel {
      * Sets stopping bin of fit.
      *
      * @param bin
+     * @param refit
      */
-    public void setStop(int bin);
+    public void setStop(int bin, boolean refit); 
+    
 
     /**
      * Gets photon count threshold to fit a pixel.

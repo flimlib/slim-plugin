@@ -1,11 +1,7 @@
-//
-// IUserInterfacePanelListener.java
-//
-
 /*
-SLIMPlugin for combined spectral-lifetime image analysis.
+Combined spectral-lifetime image analysis plugin.
 
-Copyright (c) 2010, UW-Madison LOCI
+Copyright (c) 2011, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,54 +28,50 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.ui;
+package loci.slim.refactor.ui.charts;
+
+import javax.swing.JFrame;
+
+import loci.curvefitter.ICurveFitData;
+import loci.slim.ui.IStartStopListener;
 
 /**
- * Listens for user input that triggers changes external to the ui panel.
- *
- * @author Aivar Grislis grislis at wisc.edu
+ * Interface for a decay chart.
+ * 
+ * @author Aivar Grislis
  */
-public interface IUserInterfacePanelListener {
+public interface IDecayGraph {
+    /**
+     * Sets up a listener to listen for start/stop changes.
+     * 
+     * @param startStopListener
+     */
+    public void setStartStopListener(IStartStopListener startStopListener);
 
     /**
-     * Triggers a fit.
+     * Initialize the graph and returns the containing JFrame.
+     *
+     * @param bins
+     * @param timeInc
+     * @return frame
      */
-    public void doFit();
+    public JFrame init(final JFrame frame, final int bins, final double timeInc);
+    
+    public void setTitle(final String title);
 
     /**
-     * Cancels ongoing fit.
+     * Changes (or initializes) all of the charted data.
+     *
+     * @param irf
+     * @param data
      */
-    public void cancelFit();
+    public void setData(final double[] irf, ICurveFitData data);
     
     /**
-     * Triggers a refit of current pixel.
-     */
-    public void doPixelFit();
-
-    /**
-     * Quits running plugin.
-     */
-    public void quit();
-
-    /**
-     * Loads an excitation curve from file.
+     * Changes (or initializes) the start and stop vertical bars.
      *
-     * @param fileName
-     * @return whether successful
+     * @param start
+     * @param stop
      */
-    public boolean loadExcitation(String fileName);
-
-    /**
-     * Creates an excitation curve from currrent X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean createExcitation(String fileName);
-
-    /**
-     * Cancels the current excitation curve, if any.
-     *
-     */
-    public void cancelExcitation();
+    public void setStartStop(int start, int stop);
 }

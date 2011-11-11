@@ -248,8 +248,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         final IUserInterfacePanel uiPanel = new UserInterfacePanel(USE_TAU, m_analysis.getChoices(), m_binning.getChoices());
         uiPanel.setX(0);
         uiPanel.setY(0);
-        uiPanel.setStart(m_timeBins / 2); //TODO hokey
-        uiPanel.setStop(m_timeBins - 1);
+        uiPanel.setStart(m_timeBins / 2, false); //TODO hokey
+        uiPanel.setStop(m_timeBins - 1, false);
         uiPanel.setThreshold(100);
         uiPanel.setFunctionParameters(0, DEFAULT_SINGLE_EXP_PARAMS);
         uiPanel.setFunctionParameters(1, DEFAULT_DOUBLE_EXP_PARAMS);
@@ -271,6 +271,17 @@ public class SLIMProcessor <T extends RealType<T>> {
                 public void cancelFit() {
                     m_cancel = true;
                 }
+                
+                /**
+                 * Triggers refit of current pixel.
+                 */
+                public void doPixelFit() {
+                    // ordinarily these fits take place in the thread at the end 
+                    // of this method.
+                    // this is a hack until I refactor out a FittingEngine.
+                    fitPixel(uiPanel);
+                }
+                
                 /**
                  * Quits running plugin.
                  */
@@ -341,7 +352,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                             uiPanel.setY(y);
                             getFitSettings(m_grayScaleImage, uiPanel);
                             // fit on the pixel clicked
-                            fitPixel(uiPanel, x, y);
+                            fitPixel(uiPanel);
                         }
                     }
                 }
@@ -404,8 +415,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
 
         int[] results = CursorHelper.estimateDecayCursors(m_timeRange, decay);
-        uiPanel.setStart(results[0]);
-        uiPanel.setStop(results[1]);
+        uiPanel.setStart(results[0], false);
+        uiPanel.setStop(results[1], false);
     }
 
     private boolean updateExcitation(IUserInterfacePanel uiPanel, Excitation excitation) {
@@ -437,8 +448,8 @@ public class SLIMProcessor <T extends RealType<T>> {
             excitation.setStop((int) results[1]);
             excitation.setBase(results[2]);
 
-            uiPanel.setStart((int) results[3]);
-            uiPanel.setStop((int) results[4]);
+            uiPanel.setStart((int) results[3], false);
+            uiPanel.setStop((int) results[4], false);
 
             m_excitationPanel = new ExcitationPanel(excitation);
 
@@ -836,6 +847,15 @@ public class SLIMProcessor <T extends RealType<T>> {
         LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();
         setFittedParamsFromData(resultsCursor, dataArray);
         return fittedPixels;
+    }
+
+    // added kludge to make moving cursors in DecayGraph do a refit.
+    private Image<DoubleType> fitPixel(IUserInterfacePanel uiPanel) {
+        int x = uiPanel.getX();
+        int y = uiPanel.getY();
+        m_startBin = uiPanel.getStart();
+        m_stopBin = uiPanel.getStop();
+        return fitPixel(uiPanel, x, y);
     }
 
     /*
@@ -1551,27 +1571,21 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param uiPanel gets updates on dragged/start stop
      * @param data fitted data
      */
-    private void showDecayGraph(String title, final IUserInterfacePanel uiPanel, double irf[], ICurveFitData data) {
-        DecayGraph decayGraph = new DecayGraph(title, m_startBin, m_stopBin, m_timeBins, m_timeRange, irf, data);
+    private void showDecayGraph(final String title, final IUserInterfacePanel uiPanel, final double irf[], final ICurveFitData data) {
+        loci.slim.refactor.ui.charts.IDecayGraph decayGraph = loci.slim.refactor.ui.charts.DecayGraph.getInstance();
+        JFrame frame = decayGraph.init(uiPanel.getFrame(), m_timeBins, m_timeRange);
+        decayGraph.setTitle(title);
+        int start = uiPanel.getStart();
+        int stop = uiPanel.getStop();
+        decayGraph.setStartStop(start, stop);
+        decayGraph.setData(irf, data);
         decayGraph.setStartStopListener(
             new IStartStopListener() {
                 public void setStartStop(int start, int stop) {
-                    uiPanel.setStart(start);
-                    uiPanel.setStop(stop);
+                    uiPanel.setStart(start, false);
+                    uiPanel.setStop(stop, true); // do a refit
                 }
             }
         );
-        JFrame frame = decayGraph.getFrame();
-        frame.setLocationRelativeTo(uiPanel.getFrame());
-        frame.setVisible(true);
-        //TODO focus listener could show fit parameters in UI as you click on decay graph
-        /*frame.addFocusListener(
-            new FocusListener() {
-                public void focusGained(FocusEvent e) {
-                    //System.out.println("focus gained " + e);
-                }
-                public void focusLost(FocusEvent e) {
-                }
-        });*/
     }
 }

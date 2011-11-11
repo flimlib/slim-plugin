@@ -997,16 +997,22 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         return parseInt(m_startField);
     }
 
-    public void setStart(int start) {
+    public void setStart(int start, boolean refit) {
         m_startField.setText("" + start);
+        if (refit && null != m_listener) {
+            m_listener.doPixelFit();
+        }
     }
 
     public int getStop() {
         return parseInt(m_stopField);
     }
 
-    public void setStop(int stop) {
+    public void setStop(int stop, boolean refit) {
         m_stopField.setText("" + stop);
+        if (refit && null != m_listener) {
+            m_listener.doPixelFit();
+        }
     }
 
     public int getThreshold() {
