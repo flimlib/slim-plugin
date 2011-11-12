@@ -87,7 +87,7 @@ public class ThreadedFittingEngine implements IFittingEngine {
             (final IGlobalFitParams params, final ILocalFitParams data) {
         IFittingEngineCallable callable
                 = Configuration.getInstance().newFittingEngineCallable();
-        callable.setup(params, data);
+        callable.setup(null, params, data); //TODO ARG pass in an ICurveFitter
         return callable.call();
     }
     
@@ -107,7 +107,7 @@ public class ThreadedFittingEngine implements IFittingEngine {
         for (ILocalFitParams data : dataList) {
             IFittingEngineCallable callable
                     = Configuration.getInstance().newFittingEngineCallable();
-            callable.setup(params, data);
+            callable.setup(null, params, data); //TODO ARG pass in an ICurveFitter
             callableList.add(callable);
         }
         

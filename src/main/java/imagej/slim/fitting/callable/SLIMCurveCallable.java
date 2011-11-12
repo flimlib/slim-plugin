@@ -53,16 +53,21 @@ import loci.curvefitter.SLIMCurveFitter;
  * @author Aivar Grislis
  */
 public class SLIMCurveCallable implements IFittingEngineCallable {
+    private ICurveFitter _curveFitter;
     private IGlobalFitParams _globalParams;
     private ILocalFitParams _localParams;
     private ILocalFitResults _result;
-    private ICurveFitter _curveFitter;
-    
-    public void setup(final IGlobalFitParams globalParams, final ILocalFitParams localParams) {
+
+    @Override
+    public void setup(final ICurveFitter curveFitter,
+            final IGlobalFitParams globalParams,
+            final ILocalFitParams localParams) {
+        _curveFitter = curveFitter;
         _globalParams = globalParams;
         _localParams = localParams;
     }
-    
+ 
+    @Override
     public ILocalFitResults call() {
         System.out.println(">>> " + _localParams.getId() + "-" + Thread.currentThread().getName());
         _result = new LocalFitResult();
