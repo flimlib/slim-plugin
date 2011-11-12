@@ -41,13 +41,33 @@ package imagej.slim.fitting.params;
  * @author Aivar Grislis
  */
 public class GlobalFitParams implements IGlobalFitParams {
-    private int _id;
+    private double[] _prompt;
+    int _startPrompt;
+    int _stopPrompt;
+    int _startDecay;
+    int _stopDecay;
     
-    public void setId(int id) {
-        _id = id;
+    public void setPrompt(double[] prompt) {
+        _prompt = prompt;
     }
     
-    public int getId() {
-        return _id;
+    public double[] getPrompt() {
+        return _prompt;
+    }
+    
+    public void setStartPrompt(int startPrompt) {
+        _startPrompt = startPrompt;
+    }
+    
+    public void setStopPrompt(int stopPrompt) {
+        _stopPrompt = stopPrompt;
+    }
+    
+    public void setStartDecay(int startDecay) {
+        _startDecay = startDecay;
+    }
+    
+    public void setStopDecay(int stopDecay) {
+        _stopDecay = stopDecay;
     }
 }

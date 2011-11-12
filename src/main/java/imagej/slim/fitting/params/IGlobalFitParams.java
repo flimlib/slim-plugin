@@ -42,8 +42,7 @@ package imagej.slim.fitting.params;
  */
 public interface IGlobalFitParams {
     
-    public void setId(int id);
+    public void setPrompt(double[] prompt);
     
-    public int getId();
-    
+    public double[] getPrompt();   
 }

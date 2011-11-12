@@ -39,25 +39,34 @@ import imagej.slim.fitting.params.ILocalFitParams;
 import imagej.slim.fitting.params.IGlobalFitParams;
 import imagej.slim.fitting.params.ILocalFitResults;
 import java.util.Random;
+import loci.curvefitter.CurveFitData;
+import loci.curvefitter.GrayCurveFitter;
+import loci.curvefitter.GrayNRCurveFitter;
+import loci.curvefitter.ICurveFitData;
+import loci.curvefitter.ICurveFitter;
+import loci.curvefitter.JaolhoCurveFitter;
+import loci.curvefitter.MarkwardtCurveFitter;
+import loci.curvefitter.SLIMCurveFitter;
 
 /**
  *
  * @author Aivar Grislis
  */
 public class SLIMCurveCallable implements IFittingEngineCallable {
-    private IGlobalFitParams _params;
-    private ILocalFitParams _data;
+    private IGlobalFitParams _globalParams;
+    private ILocalFitParams _localParams;
     private ILocalFitResults _result;
+    private ICurveFitter _curveFitter;
     
-    public void setup(final IGlobalFitParams params, final ILocalFitParams data) {
-        _params = params;
-        _data = data;
+    public void setup(final IGlobalFitParams globalParams, final ILocalFitParams localParams) {
+        _globalParams = globalParams;
+        _localParams = localParams;
     }
     
     public ILocalFitResults call() {
-        System.out.println(">>> " + _data.getId() + "-" + Thread.currentThread().getName());
+        System.out.println(">>> " + _localParams.getId() + "-" + Thread.currentThread().getName());
         _result = new LocalFitResult();
-        _result.setId(_data.getId());
+        _result.setId(_localParams.getId());
  
         if (true) {
             int waitTime = (new Random()).nextInt(10);
@@ -69,7 +78,7 @@ public class SLIMCurveCallable implements IFittingEngineCallable {
             }
         }
         
-        System.out.println("<<< " + _data.getId() + "-" + Thread.currentThread().getName());
+        System.out.println("<<< " + _localParams.getId() + "-" + Thread.currentThread().getName());
         return _result;
     }
 }
