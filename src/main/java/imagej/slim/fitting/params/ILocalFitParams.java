@@ -42,7 +42,27 @@ package imagej.slim.fitting.params;
  */
 public interface ILocalFitParams {
     
-    public void setId(int id);
+    public void setY(double[] y);
     
-    public int getId();    
+    public double[] getY();
+    
+    public void setSig(double[] sig);
+    
+    public double[] getSig();
+    
+    public void setFitStart(int fitStart);
+    
+    public int getFitStart();
+    
+    public void setFitStop(int fitStop);
+    
+    public int getFitStop();
+    
+    public void setParams(double[] params);
+    
+    public double[] getParams();
+    
+    public void setYFitted(double[] yFitted); //TODO ARG not really a fit param
+    
+    public double[] getYFitted(); //TODO ARG not really a fit param
 }

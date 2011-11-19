@@ -41,13 +41,70 @@ package imagej.slim.fitting.params;
  * @author Aivar Grislis
  */
 public class LocalFitParams implements ILocalFitParams {
-    private int _id;
+    private double[] _y;
+    private double[] _sig;
+    private int _fitStart;
+    private int _fitStop;
+    private double[] _params;
+    private double[] _yFitted;
     
-    public void setId(int id) {
-        _id = id;
+    @Override
+    public void setY(double[] y) {
+        _y = y;
     }
     
-    public int getId() {
-        return _id;
+    @Override
+    public double[] getY() {
+        return _y;
+    }
+ 
+    @Override
+    public void setSig(double[] sig) {
+        _sig = sig;
+    }
+
+    @Override
+    public double[] getSig() {
+        return _sig;
+    }
+    
+    @Override
+    public void setFitStart(int fitStart) {
+        _fitStart = fitStart;
+    }
+    
+    @Override
+    public int getFitStart() {
+        return _fitStart;
+    }
+    
+    @Override
+    public void setFitStop(int fitStop) {
+        _fitStop = fitStop;
+    }
+    
+    @Override
+    public int getFitStop() {
+        return _fitStop;
+    }
+    
+    @Override
+    public void setParams(double[] params) {
+        _params = params;
+    }
+    
+    @Override
+    public double[] getParams() {
+        return _params;
+    }
+    
+    @Override
+    public void setYFitted(double[] yFitted) {
+        _yFitted = yFitted;
+    }
+    
+    @Override
+    public double[] getYFitted() {
+        return _yFitted;
     }
 }

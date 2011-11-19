@@ -34,6 +34,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package imagej.slim.fitting.params;
 
+import loci.curvefitter.ICurveFitter.FitAlgorithm;
+import loci.curvefitter.ICurveFitter.FitFunction;
+
 /**
  * Interface for container for the global fitting parameters, i.e. those valid
  * for the whole image.
@@ -42,7 +45,35 @@ package imagej.slim.fitting.params;
  */
 public interface IGlobalFitParams {
     
+    public void setFitAlgorithm(FitAlgorithm fitAlgorithm);
+    
+    public FitAlgorithm getFitAlgorithm();
+    
+    public void setFitFunction(FitFunction fitFunction);
+    
+    public FitFunction getFitFunction();
+    
+    public void setXInc(double xInc);
+    
+    public double getXInc();
+    
     public void setPrompt(double[] prompt);
     
-    public double[] getPrompt();   
+    public double[] getPrompt();
+    
+    public void setChiSquareTarget(double chiSquareTarget);
+    
+    public double getChiSquareTarget();
+    
+    public void setFree(boolean[] free);
+    
+    public boolean[] getFree();
+    
+    public void setStartPrompt(int startPrompt);
+    
+    public void setStopPrompt(int stopPrompt);
+    
+    public void setStartDecay(int startDecay);
+    
+    public void setStopDecay(int stopDecay);
 }

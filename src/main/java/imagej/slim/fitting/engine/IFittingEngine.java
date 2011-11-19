@@ -36,8 +36,11 @@ package imagej.slim.fitting.engine;
 
 import imagej.slim.fitting.params.ILocalFitParams;
 import imagej.slim.fitting.params.IGlobalFitParams;
-import imagej.slim.fitting.params.ILocalFitResults;
+import imagej.slim.fitting.params.IFitResults;
+
 import java.util.List;
+
+import loci.curvefitter.ICurveFitter;
 
 /**
  * Interface for a fitting engine.
@@ -45,8 +48,9 @@ import java.util.List;
  * @author Aivar Grislis
  */
 public interface IFittingEngine {
-    public ILocalFitResults fit(IGlobalFitParams params, ILocalFitParams data);
-    public List<ILocalFitResults> fit(IGlobalFitParams params, List<ILocalFitParams> dataList);
-    public void setThreads(int threads);
     public void shutdown();
+    public void setThreads(int threads);
+    public void setCurveFitter(ICurveFitter curveFitter);
+    public IFitResults fit(IGlobalFitParams params, ILocalFitParams data);
+    public List<IFitResults> fit(IGlobalFitParams params, List<ILocalFitParams> dataList);
 }

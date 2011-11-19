@@ -80,6 +80,16 @@ import mpicbg.imglib.io.ImageOpener;
 import mpicbg.imglib.type.numeric.RealType;
 import mpicbg.imglib.type.numeric.real.DoubleType;
 
+// Kludge in the new stuff:
+import imagej.slim.fitting.params.IGlobalFitParams;
+import imagej.slim.fitting.params.LocalFitParams;
+import imagej.slim.fitting.params.GlobalFitParams;
+import imagej.slim.fitting.engine.IFittingEngine;
+import imagej.slim.fitting.params.ILocalFitParams;
+import imagej.slim.fitting.params.IFitResults;
+import imagej.slim.fitting.config.Configuration;
+
+
 
 //TODO tidy up SLIMProcessor
 /**
@@ -94,6 +104,10 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  * @author Aivar Grislis grislis at wisc.edu
  */
 public class SLIMProcessor <T extends RealType<T>> {
+    private static boolean OLD_STYLE = false; // fully krausened, from God's Country in WI
+    
+    private imagej.slim.fitting.engine.IFittingEngine _fittingEngine;
+    
     private static final String X = "X";
     private static final String Y = "Y";
     private static final String LIFETIME = "Lifetime";
@@ -1024,24 +1038,129 @@ public class SLIMProcessor <T extends RealType<T>> {
 
                     // process the pixels
                     if (++pixelsToProcessCount >= PIXEL_COUNT) {
-                        pixelsToProcessCount = 0;
-                        ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
-                        curveFitDataList.clear();
-                        curveFitter.fitData(data, m_startBin, m_stopBin);
-                        setFittedParamsFromData(resultsCursor, data);
-                        colorizePixels(dataColorizer, m_channel, data, pixelList.toArray(new ChunkyPixel[0]));
-                        pixelList.clear();
+                        if (OLD_STYLE) {
+                            pixelsToProcessCount = 0;
+                            ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
+                            curveFitDataList.clear();
+                            curveFitter.fitData(data, m_startBin, m_stopBin);
+                            setFittedParamsFromData(resultsCursor, data);
+                            colorizePixels(dataColorizer, m_channel, data, pixelList.toArray(new ChunkyPixel[0]));
+                            pixelList.clear();
+                        }
+                        else {
+                            pixelsToProcessCount = 0;
+                            ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
+                            curveFitDataList.clear();
+                            
+                            if (null == _fittingEngine) {
+                                _fittingEngine = Configuration.getInstance().getFittingEngine();
+                                _fittingEngine.setThreads(Configuration.getInstance().getThreads());
+                                _fittingEngine.setCurveFitter(Configuration.getInstance().getCurveFitter());
+                            }
+                                                        
+                            
+                            IGlobalFitParams globalFitParams = new GlobalFitParams();
+                            globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
+                            globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
+                            globalFitParams.setXInc(m_timeRange);
+                            globalFitParams.setPrompt(null);
+                            if (null != m_excitationPanel) {
+                                globalFitParams.setPrompt(m_excitationPanel.getValues(1));
+                            }
+                            globalFitParams.setChiSquareTarget(data[0].getChiSquareTarget());
+                            globalFitParams.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+                            
+                            java.util.List<ILocalFitParams> dataList = new ArrayList<ILocalFitParams>();
+                            
+                            for (ICurveFitData datum : data) {
+                                ILocalFitParams localFitParams = new LocalFitParams();
+                                localFitParams.setY(datum.getYCount());
+                                localFitParams.setSig(datum.getSig());
+                                localFitParams.setParams(datum.getParams());
+                                localFitParams.setFitStart(m_startBin);
+                                localFitParams.setFitStop(m_stopBin);
+                                localFitParams.setYFitted(datum.getYFitted());
+                                dataList.add(localFitParams);
+                            }
+                            
+                            java.util.List<IFitResults> results = _fittingEngine.fit(globalFitParams, dataList);
+                            
+                            double[] lifetimes = new double[pixelList.size()];
+                            for (int i = 0; i < pixelList.size(); ++i) {
+                                lifetimes[i] = results.get(i).getParams()[3];
+                            }
+
+                           //TODO ARG setFittedParamsFromData(resultsCursor, data);
+                            colorizePixelsII(dataColorizer, m_channel, lifetimes, pixelList.toArray(new ChunkyPixel[0]));
+                            pixelList.clear();
+                            
+                            //TODO so the results are not getting saved to an Imglib Image
+                            //TODO this technique of building an array of ICurveFitData, then breaking that down into
+                            // IGlobalFitParams and ILocalFitParams
+
+                        }
+
                     }
                 }
             }
             // handle any leftover pixels
             if (!m_cancel && pixelsToProcessCount > 0) {
-                pixelsToProcessCount = 0;
-                ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
-                curveFitDataList.clear();
-                curveFitter.fitData(data, m_startBin, m_stopBin);
-                setFittedParamsFromData(resultsCursor, data);
-                colorizePixels(dataColorizer, m_channel, data, pixelList.toArray(new ChunkyPixel[0]));
+                if (OLD_STYLE) {
+                    pixelsToProcessCount = 0;
+                    ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
+                    curveFitDataList.clear();
+                    curveFitter.fitData(data, m_startBin, m_stopBin);
+                    setFittedParamsFromData(resultsCursor, data);
+                    colorizePixels(dataColorizer, m_channel, data, pixelList.toArray(new ChunkyPixel[0]));
+ 
+                }
+                else {
+                            pixelsToProcessCount = 0;
+                            ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
+                            curveFitDataList.clear();
+                            
+                            if (null == _fittingEngine) {
+                                _fittingEngine = Configuration.getInstance().getFittingEngine();
+                                _fittingEngine.setThreads(Configuration.getInstance().getThreads());
+                                _fittingEngine.setCurveFitter(Configuration.getInstance().getCurveFitter());
+                            }
+                                                        
+                            
+                            IGlobalFitParams globalFitParams = new GlobalFitParams();
+                            globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
+                            globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
+                            globalFitParams.setXInc(m_timeRange);
+                            globalFitParams.setPrompt(null);
+                            if (null != m_excitationPanel) {
+                                globalFitParams.setPrompt(m_excitationPanel.getValues(1));
+                            }
+                            globalFitParams.setChiSquareTarget(data[0].getChiSquareTarget());
+                            globalFitParams.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+                            
+                            java.util.List<ILocalFitParams> dataList = new ArrayList<ILocalFitParams>();
+                            
+                            for (ICurveFitData datum : data) {
+                                ILocalFitParams localFitParams = new LocalFitParams();
+                                localFitParams.setY(datum.getYCount());
+                                localFitParams.setSig(datum.getSig());
+                                localFitParams.setParams(datum.getParams());
+                                localFitParams.setFitStart(m_startBin);
+                                localFitParams.setFitStop(m_stopBin);
+                                localFitParams.setYFitted(datum.getYFitted());
+                                dataList.add(localFitParams);
+                            }
+                            
+                            java.util.List<IFitResults> results = _fittingEngine.fit(globalFitParams, dataList);
+                            
+                            double[] lifetimes = new double[pixelList.size()];
+                            for (int i = 0; i < pixelList.size(); ++i) {
+                                lifetimes[i] = results.get(i).getParams()[3];
+                            }
+
+                           //TODO ARG setFittedParamsFromData(resultsCursor, data);
+                            colorizePixelsII(dataColorizer, m_channel, lifetimes, pixelList.toArray(new ChunkyPixel[0]));
+
+                }
             }
         }
         if (m_cancel) {
@@ -1250,7 +1369,15 @@ public class SLIMProcessor <T extends RealType<T>> {
             setFittedParams(cursor, data.getChannel(), data.getX(), data.getY(), data.getParams());
         }
     }
-
+    
+    private void setFittedParamsFromDataII(LocalizableByDimCursor<DoubleType> cursor, ICurveFitData dataArray[]) {
+        int x, y;
+        double[] params;
+        for (ICurveFitData data : dataArray) {
+            setFittedParams(cursor, data.getChannel(), data.getX(), data.getY(), data.getParams());
+        }
+    }
+    
     private void setFittedParams(LocalizableByDimCursor<DoubleType> cursor, int channel, int x, int y, double[] params) {
         int position[] = new int[4];
         position[0] = x;
@@ -1324,7 +1451,55 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
         dataColorizer.update();
     }
+    
+    void colorizePixelsII(DataColorizer dataColorizer, int channel, double[] lifetime, ChunkyPixel pixels[]) {
 
+        // draw as you go; 'chunky' pixels get smaller as the overall fit progresses
+        for (int i = 0; i < pixels.length; ++i) {
+            ChunkyPixel pixel = pixels[i];
+            //TODO tau is 3, 1 is C double lifetime = data[i].getParams()[1];
+
+
+            //TODO quick fix
+            if (lifetime[i] < 0.0) {
+                System.out.println("negative lifetime " + lifetime + " at " + pixel.getX() + " " + pixel.getY());
+                return;
+            }
+
+            //TODO debugging:
+            //if (lifetime > 2 * m_param[1]) {
+            //    System.out.println("BAD FIT??? x " + pixel.getX() + " y " + pixel.getY() + " fitted lifetime " + lifetime);
+            //}
+
+            //TODO BUG:
+            // With the table as is, you can get
+            //   x   y   w   h
+            //   12  15  2   1
+            //   14  15  2   1
+            // all within the same drawing cycle.
+            // So it looks like a 4x1 slice gets drawn (it
+            // is composed of two adjacent 2x1 slices with
+            // potentially two different colors).
+            //if (pixel.getWidth() == 2) {
+            //    System.out.println("x " + pixel.getX() + " y " + pixel.getY() + " w " + pixel.getWidth() + " h " + pixel.getHeight());
+            //}
+            //System.out.println("w " + pixel.getWidth() + " h " + pixel.getHeight());
+            //System.out.println("lifetime is " + lifetime);
+            //Color color = lifetimeColorMap(MAXIMUM_LIFETIME, lifetime);
+            //imageProcessor.setColor(color);
+            boolean firstTime = true;
+            for (int x = pixel.getX(); x < pixel.getX() + pixel.getWidth(); ++x) {
+                for (int y = pixel.getY(); y < pixel.getY() + pixel.getHeight(); ++y) {
+                    if (wantFitted(channel, x, y)) {
+                        dataColorizer.setData(firstTime, x, y , lifetime[i]);
+                        firstTime = false;
+                    }
+                }
+            }
+        }
+        dataColorizer.update();
+    }
+    
     /**
      * Checks criterion for whether this pixel needs to get fitted or drawn.
      *
@@ -1469,28 +1644,35 @@ public class SLIMProcessor <T extends RealType<T>> {
                 curveFitter = new AkutanCurveFitter();
                 break; */
             case BARBER_RLD:
-                curveFitter = new GrayCurveFitter(0);
+                curveFitter = new GrayCurveFitter();
+                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD);
                 break;
             case BARBER_LMA:
-                curveFitter = new GrayCurveFitter(1);
+                curveFitter = new GrayCurveFitter();
+                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.LMA);
                 break;
             case MARKWARDT:
                 curveFitter = new MarkwardtCurveFitter();
                 break;
             case BARBER2_RLD:
-                curveFitter = new GrayNRCurveFitter(0);
+                curveFitter = new GrayNRCurveFitter();
+                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD);        
                 break;
             case BARBER2_LMA:
-                curveFitter = new GrayNRCurveFitter(1);
+                curveFitter = new GrayNRCurveFitter();
+                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD);
                 break;
             case SLIMCURVE_RLD:
-                curveFitter = new SLIMCurveFitter(SLIMCurveFitter.AlgorithmType.RLD);
+                curveFitter = new SLIMCurveFitter();
+                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD);
                 break;
             case SLIMCURVE_LMA:
-                curveFitter = new SLIMCurveFitter(SLIMCurveFitter.AlgorithmType.LMA);
+                curveFitter = new SLIMCurveFitter();
+                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.LMA);
                 break;
             case SLIMCURVE_RLD_LMA:
-                curveFitter = new SLIMCurveFitter(SLIMCurveFitter.AlgorithmType.RLD_LMA);
+                curveFitter = new SLIMCurveFitter();
+                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD_LMA);
                 break;
         }
         ICurveFitter.FitFunction fitFunction = null;

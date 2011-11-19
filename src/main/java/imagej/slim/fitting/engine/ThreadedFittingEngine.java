@@ -36,9 +36,12 @@ package imagej.slim.fitting.engine;
 
 import imagej.slim.fitting.params.ILocalFitParams;
 import imagej.slim.fitting.params.IGlobalFitParams;
-import imagej.slim.fitting.params.ILocalFitResults;
+import imagej.slim.fitting.params.IFitResults;
 import imagej.slim.fitting.callable.IFittingEngineCallable;
 import imagej.slim.fitting.config.Configuration;
+
+import loci.curvefitter.ICurveFitter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,10 +55,11 @@ import imagej.thread.ThreadPool;
 public class ThreadedFittingEngine implements IFittingEngine {
     private static int THREADS = 4;
     private int _threads = THREADS;
-    private ThreadPool<ILocalFitResults> _threadPool;
+    private ThreadPool<IFitResults> _threadPool;
+    private ICurveFitter _curveFitter;
     
     public ThreadedFittingEngine() {
-        _threadPool = new ThreadPool<ILocalFitResults>();
+        _threadPool = new ThreadPool<IFitResults>();
     }
  
     /**
@@ -73,7 +77,16 @@ public class ThreadedFittingEngine implements IFittingEngine {
     public synchronized void setThreads(int threads) {
         _threadPool.setThreads(threads);
     }
-
+    
+    /**
+     * Sets curve fitter to use.
+     * 
+     * @param curve fitter 
+     */
+    public synchronized void setCurveFitter(ICurveFitter curveFitter) {
+        _curveFitter = curveFitter;
+    }
+    
     /**
      * Fits a single pixel with given parameters.
      * 
@@ -83,11 +96,11 @@ public class ThreadedFittingEngine implements IFittingEngine {
      * @param data
      * @return results
      */
-    public synchronized ILocalFitResults fit
+    public synchronized IFitResults fit
             (final IGlobalFitParams params, final ILocalFitParams data) {
         IFittingEngineCallable callable
                 = Configuration.getInstance().newFittingEngineCallable();
-        callable.setup(null, params, data); //TODO ARG pass in an ICurveFitter
+        callable.setup(_curveFitter, params, data);
         return callable.call();
     }
     
@@ -98,7 +111,7 @@ public class ThreadedFittingEngine implements IFittingEngine {
      * @param data one or more pixels data
      * @return results one or more pixels results
      */
-    public synchronized List<ILocalFitResults> fit
+    public synchronized List<IFitResults> fit
             (final IGlobalFitParams params, final List<ILocalFitParams> dataList) {
         
         List<IFittingEngineCallable> callableList
@@ -107,11 +120,11 @@ public class ThreadedFittingEngine implements IFittingEngine {
         for (ILocalFitParams data : dataList) {
             IFittingEngineCallable callable
                     = Configuration.getInstance().newFittingEngineCallable();
-            callable.setup(null, params, data); //TODO ARG pass in an ICurveFitter
+            callable.setup(_curveFitter, params, data);
             callableList.add(callable);
         }
         
-        List<ILocalFitResults> resultList = _threadPool.process(callableList);
+        List<IFitResults> resultList = _threadPool.process(callableList);
         return resultList;
     }
 }

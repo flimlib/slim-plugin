@@ -1,5 +1,5 @@
 //
-// SLIMCurveCallable.java
+// FittingEngineCallable.java
 //
 
 /*
@@ -34,29 +34,25 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package imagej.slim.fitting.callable;
 
-import imagej.slim.fitting.params.LocalFitResult;
+import imagej.slim.fitting.params.FitResults;
 import imagej.slim.fitting.params.ILocalFitParams;
 import imagej.slim.fitting.params.IGlobalFitParams;
-import imagej.slim.fitting.params.ILocalFitResults;
-import java.util.Random;
+import imagej.slim.fitting.params.IFitResults;
+
 import loci.curvefitter.CurveFitData;
-import loci.curvefitter.GrayCurveFitter;
-import loci.curvefitter.GrayNRCurveFitter;
 import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
-import loci.curvefitter.JaolhoCurveFitter;
-import loci.curvefitter.MarkwardtCurveFitter;
-import loci.curvefitter.SLIMCurveFitter;
 
 /**
+ * This class brings together everything needed to fit one pixel.
  *
  * @author Aivar Grislis
  */
-public class SLIMCurveCallable implements IFittingEngineCallable {
+public class FittingEngineCallable implements IFittingEngineCallable {
     private ICurveFitter _curveFitter;
     private IGlobalFitParams _globalParams;
     private ILocalFitParams _localParams;
-    private ILocalFitResults _result;
+    private IFitResults _result;
 
     @Override
     public void setup(final ICurveFitter curveFitter,
@@ -68,22 +64,28 @@ public class SLIMCurveCallable implements IFittingEngineCallable {
     }
  
     @Override
-    public ILocalFitResults call() {
-        System.out.println(">>> " + _localParams.getId() + "-" + Thread.currentThread().getName());
-        _result = new LocalFitResult();
-        _result.setId(_localParams.getId());
- 
-        if (true) {
-            int waitTime = (new Random()).nextInt(10);
-            try {
-                Thread.sleep(waitTime);
-            }
-            catch (InterruptedException e) {
+    public IFitResults call() {
+        _curveFitter.setFitAlgorithm(_globalParams.getFitAlgorithm());
+        _curveFitter.setFitFunction(_globalParams.getFitFunction());
+        _curveFitter.setInstrumentResponse(_globalParams.getPrompt());
+        _curveFitter.setXInc(_globalParams.getXInc());
+        _curveFitter.setFree(_globalParams.getFree());
+       
+        ICurveFitData curveFitData = new CurveFitData(); 
+        curveFitData.setChiSquareTarget(_globalParams.getChiSquareTarget());
+        curveFitData.setYCount(_localParams.getY());
+        curveFitData.setSig(_localParams.getSig());
+        curveFitData.setParams(_localParams.getParams());
+        curveFitData.setYFitted(_localParams.getYFitted()); //TODO awkward and kludgey!  How is this a local parameter?  It actually winds up in results.
+        ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData };
 
-            }
-        }
-        
-        System.out.println("<<< " + _localParams.getId() + "-" + Thread.currentThread().getName());
+        _curveFitter.fitData(curveFitDataArray, _localParams.getFitStart(), _localParams.getFitStop());
+
+        _result = new FitResults();
+        _result.setChiSquare(curveFitData.getChiSquare());
+        _result.setParams(curveFitData.getParams());
+        _result.setYFitted(curveFitData.getYFitted());
+
         return _result;
     }
 }

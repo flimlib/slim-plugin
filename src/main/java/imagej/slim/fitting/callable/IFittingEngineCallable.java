@@ -36,7 +36,7 @@ package imagej.slim.fitting.callable;
 
 import imagej.slim.fitting.params.ILocalFitParams;
 import imagej.slim.fitting.params.IGlobalFitParams;
-import imagej.slim.fitting.params.ILocalFitResults;
+import imagej.slim.fitting.params.IFitResults;
 import loci.curvefitter.ICurveFitter;
 
 import java.util.concurrent.Callable;
@@ -45,10 +45,10 @@ import java.util.concurrent.Callable;
  *
  * @author Aivar Grislis
  */
-public interface IFittingEngineCallable extends Callable<ILocalFitResults> {
+public interface IFittingEngineCallable extends Callable<IFitResults> {
     
     public void setup(ICurveFitter curveFitter,
             IGlobalFitParams params, ILocalFitParams data);
     
-    public ILocalFitResults call();
+    public IFitResults call();
 }

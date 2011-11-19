@@ -36,6 +36,7 @@ package loci.slim;
 
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.ICurveFitData;
+import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.SLIMCurveFitter;
 
 /**
@@ -284,7 +285,8 @@ public class CursorHelper {
             curveFitData.setYFitted(yFitted);
             CurveFitData[] data = new CurveFitData[] { curveFitData };
 
-            SLIMCurveFitter curveFitter = new SLIMCurveFitter(SLIMCurveFitter.AlgorithmType.RLD_LMA);
+            SLIMCurveFitter curveFitter = new SLIMCurveFitter();
+            curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD_LMA);
             curveFitter.setXInc(xInc);
             curveFitter.setFree(free);
             curveFitter.setInstrumentResponse(response);

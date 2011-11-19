@@ -35,14 +35,19 @@ POSSIBILITY OF SUCH DAMAGE.
 package imagej.slim.fitting.config;
 
 import imagej.slim.fitting.callable.IFittingEngineCallable;
-import imagej.slim.fitting.callable.SLIMCurveCallable;
+import imagej.slim.fitting.callable.FittingEngineCallable;
 import imagej.slim.fitting.cursor.LameCursorEstimator;
 import imagej.slim.fitting.cursor.ICursorEstimator;
 import imagej.slim.fitting.engine.IFittingEngine;
 import imagej.slim.fitting.engine.ThreadedFittingEngine;
 
+import loci.curvefitter.ICurveFitter;
+import loci.curvefitter.SLIMCurveFitter;
+
 /**
  * Handles configuration specific to the SLIM Plugin.
+ * 
+ * A singleton so only one configuration per SLIM Plugin.
  * 
  * @author Aivar Grislis
  */
@@ -50,10 +55,11 @@ public class Configuration extends ConfigurationHelper {
     private static Configuration _instance = null;
     private int _threads = 8;
     private IFittingEngine _fittingEngine;
+    private ICurveFitter _curveFitter;
     private ICursorEstimator _cursorEstimator;
 
     /**
-     * Private constructor for Singleton pattern.
+     * Private constructor for singleton pattern.
      */
     private Configuration() {
     }
@@ -76,6 +82,13 @@ public class Configuration extends ConfigurationHelper {
         return _fittingEngine;
     }
     
+    public synchronized ICurveFitter getCurveFitter() {
+        if (null == _curveFitter) {
+            _curveFitter = new SLIMCurveFitter();
+        }
+        return _curveFitter;
+    }
+    
     public synchronized ICursorEstimator getCursorEstimator() {
         if (null == _cursorEstimator) {
             _cursorEstimator = new LameCursorEstimator();
@@ -84,7 +97,7 @@ public class Configuration extends ConfigurationHelper {
     }
     
     public IFittingEngineCallable newFittingEngineCallable() {
-        return new SLIMCurveCallable();
+        return new FittingEngineCallable();
     }
     
 }

@@ -39,8 +39,17 @@ package imagej.slim.fitting.params;
  * 
  * @author Aivar Grislis
  */
-public interface ILocalFitResults {
-    public void setId(int id);
+public interface IFitResults {
     
-    public int getId();   
+    public void setChiSquare(double chiSquare);
+    
+    public double getChiSquare();
+    
+    public void setParams(double[] params);
+    
+    public double[] getParams();
+    
+    public void setYFitted(double[] yFitted);
+    
+    public double[] getYFitted();
 }
