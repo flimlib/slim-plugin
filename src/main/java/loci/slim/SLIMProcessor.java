@@ -63,6 +63,8 @@ import loci.formats.IFormatReader;
 import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.binning.SLIMBinning;
 import loci.slim.colorizer.DataColorizer;
+ import loci.slim.colorizer.DataColorizer2;
+
 import loci.slim.ui.ExcitationPanel;
 import loci.slim.ui.IStartStopListener;
 import loci.slim.ui.IUserInterfacePanel;
@@ -1004,7 +1006,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         // special handling for visible channel
         if (m_visibleFit) {
             // show colorized image
-            DataColorizer dataColorizer = new DataColorizer(m_width, m_height, m_algorithm + " Fitted Lifetimes");
+            DataColorizer2 dataColorizer = new DataColorizer2(m_width, m_height, m_algorithm + " Fitted Lifetimes");
 
             ChunkyPixelEffectIterator pixelIterator = new ChunkyPixelEffectIterator(new ChunkyPixelTableImpl(), m_width, m_height);
 
@@ -1404,7 +1406,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param data list of data corresponding to pixels to be fitted
      * @param pixels parallel list of rectangles with which to draw the fitted pixel
      */
-    void colorizePixels(DataColorizer dataColorizer, int channel, ICurveFitData data[], ChunkyPixel pixels[]) {
+    void colorizePixels(DataColorizer2 dataColorizer, int channel, ICurveFitData data[], ChunkyPixel pixels[]) {
 
         // draw as you go; 'chunky' pixels get smaller as the overall fit progresses
         for (int i = 0; i < pixels.length; ++i) {
@@ -1452,7 +1454,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         dataColorizer.update();
     }
     
-    void colorizePixelsII(DataColorizer dataColorizer, int channel, double[] lifetime, ChunkyPixel pixels[]) {
+    void colorizePixelsII(DataColorizer2 dataColorizer, int channel, double[] lifetime, ChunkyPixel pixels[]) {
 
         // draw as you go; 'chunky' pixels get smaller as the overall fit progresses
         for (int i = 0; i < pixels.length; ++i) {
