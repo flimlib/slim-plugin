@@ -36,6 +36,7 @@ package loci.slim.colorizer;
 
 import ij.ImagePlus;
 import ij.plugin.LutLoader;
+import ij.process.LUT;
 import ij.process.ColorProcessor;
 import ij.process.MyFloatProcessor;
 import ij.process.ImageProcessor;
@@ -128,6 +129,10 @@ public class DataColorizer2 implements IColorizeRangeListener {
         //TODO just use a 256-color LUT
         m_colorize = null; //new FiveColorColorize(Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED); //ThreeColorColorize(Color.GREEN, Color.YELLOW, Color.RED);
         m_ui = new DataColorizerUI(m_colorize, this);
+        
+        imagej.slim.histogram.HistogramTool histogram = new imagej.slim.histogram.HistogramTool();
+        
+        
     }
 
     /**
