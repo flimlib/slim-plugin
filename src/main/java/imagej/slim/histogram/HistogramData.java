@@ -11,25 +11,25 @@ package imagej.slim.histogram;
  * @author aivar
  */
 public class HistogramData {
-    private HistogramChannelData[] _channel;
     private String _title;
+    private HistogramDataChannel[] _channel;
     private int _channelIndex;
     private boolean _auto;
     private boolean _combine;
     private boolean _showAll;
-    private float _minView;
-    private float _maxView;
-    private float _minLUT;
-    private float _maxLUT;
+    private double _minView;
+    private double _maxView;
+    private double _minLUT;
+    private double _maxLUT;
 
     /**
      * Constructor, takes an array of HistogramChannels.
      * 
      * @param channel 
      */
-    public HistogramData(HistogramChannelData[] channel, String title) {
-        _channel = channel;
+    public HistogramData(String title, HistogramDataChannel[] channel) {
         _title = title;
+        _channel = channel;
         _channelIndex = 0;
         _minView = _maxView = 0.0f;
         _minLUT = _maxLUT = 0.0f;
@@ -104,8 +104,8 @@ public class HistogramData {
      * 
      * @return 
      */
-    public float[] getMinMaxView() {
-        return new float[] { _minView, _maxView };
+    public double[] getMinMaxView() {
+        return new double[] { _minView, _maxView };
     }
 
     /**
@@ -113,8 +113,8 @@ public class HistogramData {
      * 
      * @return 
      */
-    public float[] getMinMaxLUT() {
-        return new float[] { _minLUT, _maxLUT };
+    public double[] getMinMaxLUT() {
+        return new double[] { _minLUT, _maxLUT };
     }
 
     /**
@@ -124,13 +124,13 @@ public class HistogramData {
      */
     //TODO s/b setting both view and lut min/max if automatic, o'wise no change
     //TODO who is calling this????
-    public float[] getMinMax() {
-        float[] minMax = null;
+    public double[] getMinMax() {
+        double[] minMax = null;
         
         if (_auto) {
             if (_combine) {
-                float min = Float.MAX_VALUE;
-                float max = Float.MIN_VALUE;
+                double min = Double.MAX_VALUE;
+                double max = Double.MIN_VALUE;
                 
                 // calculate actual minimum and maximum for all channels
                 for (int i = 0; i < _channel.length; ++i) {
@@ -142,7 +142,7 @@ public class HistogramData {
                         max = minMax[1];
                     }
                 }
-                minMax = new float[] { min, max };  
+                minMax = new double[] { min, max };  
             }
             else {
                 // calculate actual minimum and maximum for current channel

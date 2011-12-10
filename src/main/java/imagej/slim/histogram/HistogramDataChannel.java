@@ -10,17 +10,17 @@ package imagej.slim.histogram;
  *
  * @author aivar
  */
-public class HistogramChannelData {
-    private float[][] _values;
-    private float _actualMin;
-    private float _actualMax;
+public class HistogramDataChannel {
+    private double[][] _values;
+    private double _actualMin;
+    private double _actualMax;
 
     /**
      * Constructor, takes the array of values.
      * 
      * @param values 
      */
-    public HistogramChannelData(float[][] values) {
+    public HistogramDataChannel(double[][] values) {
         _values = values;
         _actualMin = _actualMax = 0.0f;
     }
@@ -31,12 +31,12 @@ public class HistogramChannelData {
      * 
      * @return array of { min, max }
      */
-    public float[] resetActualMinMax() {
-        _actualMin = Float.MAX_VALUE;
-        _actualMax = Float.MIN_VALUE;
+    public double[] resetActualMinMax() {
+        _actualMin = Double.MAX_VALUE;
+        _actualMax = Double.MIN_VALUE;
         for (int i = 0; i < _values.length; ++i) {
             for (int j = 0; j < _values[0].length; ++j) {
-                if (_values[i][j] != Float.NaN) {
+                if (_values[i][j] != Double.NaN) {
                     if (_values[i][j] < _actualMin) {
                         _actualMin = _values[i][j];
                     }
@@ -49,8 +49,8 @@ public class HistogramChannelData {
         return getActualMinMax();
     }
     
-    public float[] getActualMinMax() {
-        return new float[] { _actualMin, _actualMax };
+    public double[] getActualMinMax() {
+        return new double[] { _actualMin, _actualMax };
     }
     
     /**
@@ -62,15 +62,15 @@ public class HistogramChannelData {
      * @param nominalMax last value assigned to last bin
      * @return histogram array with counts per bin
      */
-    public int[] binValues(int bins, float nominalMin, float nominalMax) {
+    public int[] binValues(int bins, double nominalMin, double nominalMax) {
         int[] results = new int[bins];
         for (int i = 0; i < bins; ++i) {
             results[i] = 0;
         }
-        float binWidth = bins / (nominalMax - nominalMin);
+        double binWidth = bins / (nominalMax - nominalMin);
         for (int i = 0; i < _values.length; ++i) {
             for (int j = 0; j < _values[0].length; ++j) {
-                float value = _values[i][j];
+                double value = _values[i][j];
                 if (value >= nominalMin && value <= nominalMax) {
                     // assign each value to a bin
                     int bin = (int)((value - nominalMin) * binWidth);

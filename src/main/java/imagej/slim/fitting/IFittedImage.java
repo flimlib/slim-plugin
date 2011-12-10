@@ -14,13 +14,6 @@ import imagej.slim.histogram.HistogramData;
 public interface IFittedImage {
 
     /**
-     * Sets the histogram data object associated with this fitted image.
-     *
-     * @param histogramData
-     */
-    public void setHistogramData(HistogramData histogramData);
-
-    /**
      * Gets the associated histogram data object.
      * @return
      */
@@ -59,4 +52,12 @@ public interface IFittedImage {
      * periodically during the fit.
      */
     public void recalcHistogram();
+
+    /**
+     * Given the array of fitted parameters, get the value for this image.
+     * 
+     * @param parameters
+     * @return 
+     */
+    public double getValue(double[] parameters);
 }
