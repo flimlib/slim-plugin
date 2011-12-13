@@ -28,6 +28,11 @@ public interface IFittedImage {
      * Ends a fit.
      */
     public void endFit();
+    
+    /**
+     * Cancels a fit
+     */
+    public void cancelFit();
 
     /**
      * Updates the fitted parameters for a pixel.

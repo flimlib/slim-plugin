@@ -56,9 +56,18 @@ public class FLIMImageFitter {
      */
     public void endFit() {
         for (IFittedImage fittedImage : _fittedImages) {
-            fittedImage.beginFit();
+            fittedImage.endFit();
         }
 
+    }
+
+    /**
+     * Cancels a fit.
+     */
+    public void cancelFit() {
+        for (IFittedImage fittedImage : _fittedImages) {
+            fittedImage.cancelFit();
+        }
     }
 
     /**

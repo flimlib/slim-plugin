@@ -72,6 +72,6 @@ public class FLIMFittedImageFactory {
                 fittedImage = new FractionalContributionImage("f3", dimension, 2, components);
                 break;
         }
-        return null;
+        return fittedImage;
     }
 }

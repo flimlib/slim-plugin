@@ -6,6 +6,7 @@
 package imagej.slim.fitting;
 
 import ij.process.MyFloatProcessor; //TODO IJ hack; update to IJ2 ImgLib
+import ij.ImagePlus;
 
 import imagej.slim.histogram.HistogramData;
 import imagej.slim.histogram.HistogramDataChannel;
@@ -19,6 +20,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
     private double _values[][];
     private HistogramData _histogramData;
     private MyFloatProcessor _image;
+    private ImagePlus _imagePlus;
     
     public AbstractBaseFittedImage(String title, int[] dimension) {
         _title = title;
@@ -29,6 +31,8 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         HistogramDataChannel[] histogramDataChannels = new HistogramDataChannel[] { histogramDataChannel };
         _histogramData = new HistogramData(title, histogramDataChannels);
         _image = new MyFloatProcessor(x, y);
+        _imagePlus = new ImagePlus(title, _image);
+        _imagePlus.show();
     }
 
     /**
@@ -60,7 +64,14 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
      * Ends a fit.
      */
     public void endFit() {
-
+    }
+    
+    /**
+     * Cancels a fit.
+     */
+    public void cancelFit() {
+       _imagePlus.close();
+       _imagePlus.hide();
     }
 
     /**
@@ -68,8 +79,10 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
      * periodically during the fit.
      */
     public void recalcHistogram() {
-        _histogramData.getMinMax(); //TODO how about HistogramData.recalculate?
+        double[] minMax = _histogramData.getMinMax(); //TODO how about HistogramData.recalculate?
+//        System.out.println("min max " + minMax[0] + " " + minMax[1]);
         // etc.
+        _imagePlus.setProcessor(_image.duplicate());
     }
     
     /**
