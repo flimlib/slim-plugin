@@ -5,12 +5,20 @@
 package imagej.slim.fitting;
 
 /**
+ * Simple image that just displays one of the input parameters.
  *
- * @author aivar
+ * @author Aivar Grislis
  */
 public class FittedImage extends AbstractBaseFittedImage {
     private int _parameterIndex;
-    
+
+    /**
+     * Constructor, giving index of input parameter to display
+     *
+     * @param title
+     * @param dimension
+     * @param parameterIndex
+     */
     public FittedImage(String title, int[] dimension, int parameterIndex) {
         super(title, dimension);
         _parameterIndex = parameterIndex;

@@ -47,7 +47,7 @@ import loci.curvefitter.SLIMCurveFitter;
 /**
  * Handles configuration specific to the SLIM Plugin.
  * 
- * A singleton so only one configuration per SLIM Plugin.
+ * A singleton so only one configuration for the SLIMPlugin.//TODO
  * 
  * @author Aivar Grislis
  */

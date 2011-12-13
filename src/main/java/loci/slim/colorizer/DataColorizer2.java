@@ -38,7 +38,7 @@ import ij.ImagePlus;
 import ij.plugin.LutLoader;
 import ij.process.LUT;
 import ij.process.ColorProcessor;
-import ij.process.MyFloatProcessor;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
@@ -68,7 +68,7 @@ public class DataColorizer2 implements IColorizeRangeListener {
     double m_workMax;
     ImagePlus m_imagePlus;
     //////ImageProcessor m_imageProcessor;
-    MyFloatProcessor m_imageProcessor;
+    FloatProcessor m_imageProcessor;
     double m_histogramData[];
     int m_histogramDataIndex;
     double m_imageData[][];
@@ -85,7 +85,7 @@ public class DataColorizer2 implements IColorizeRangeListener {
     public DataColorizer2(int width, int height, String title) {
         m_width = width;
         m_height = height;
-        m_imageProcessor = new MyFloatProcessor(width, height);
+        m_imageProcessor = new FloatProcessor(width, height);
         m_imagePlus = new ImagePlus(title, m_imageProcessor);
         init();
     }
@@ -97,7 +97,7 @@ public class DataColorizer2 implements IColorizeRangeListener {
      */
     public DataColorizer2(ImagePlus imagePlus, int foofle) {
         m_imagePlus = imagePlus;
-        m_imageProcessor = (MyFloatProcessor) imagePlus.getProcessor();
+        m_imageProcessor = (FloatProcessor) imagePlus.getProcessor();
         m_width = imagePlus.getWidth();
         m_height = imagePlus.getHeight();
         init();

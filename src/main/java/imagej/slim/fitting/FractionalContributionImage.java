@@ -7,7 +7,7 @@ package imagej.slim.fitting;
 /**
  * This class builds a fitted image that shows the fractional contribution.
  * 
- * Fractional Intensity fi = Ai*Ti / sum of all Aj*Tj.
+ * Fractional Contribution fi = Ai*Ti / sum of all Aj*Tj.
  *
  * @author Aivar Grislis
  */

@@ -33,7 +33,7 @@ import javax.swing.JTextField;
  * @author aivar
  */
 public class HistogramTool {
-    private final static String HARDCODED_LUT =  "/Applications/ImageJ/luts/smart.lut"; //aivar6.lut"; // aivar6 is my five color blue/cyan/green/yellow/red spectral palette
+    private final static String HARDCODED_LUT =  "/Applications/ImageJ/luts/aivar6.lut"; // aivar6 is my five color blue/cyan/green/yellow/red spectral palette
     JFrame _frame;
     HistogramPanel _histogram;
     ColorBarPanel _colorBar;

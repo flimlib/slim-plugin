@@ -5,8 +5,9 @@
 
 package imagej.slim.fitting;
 
-import ij.process.MyFloatProcessor; //TODO IJ hack; update to IJ2 ImgLib
+//import ij.process.MyFloatProcessor; //TODO IJ hack; update to IJ2 ImgLib
 import ij.ImagePlus;
+import ij.process.FloatProcessor;
 
 import imagej.slim.histogram.HistogramData;
 import imagej.slim.histogram.HistogramDataChannel;
@@ -19,7 +20,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
     private String _title;
     private double _values[][];
     private HistogramData _histogramData;
-    private MyFloatProcessor _image;
+    private FloatProcessor _image;
     private ImagePlus _imagePlus;
     
     public AbstractBaseFittedImage(String title, int[] dimension) {
@@ -27,10 +28,12 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         int x = dimension[0];
         int y = dimension[1];
         _values = new double[x][y];
+        //TODO need to handle multiple channels:
+        // _values c/b slice being drawn only; refer to Image for other slices
         HistogramDataChannel histogramDataChannel = new HistogramDataChannel(_values);
         HistogramDataChannel[] histogramDataChannels = new HistogramDataChannel[] { histogramDataChannel };
         _histogramData = new HistogramData(title, histogramDataChannels);
-        _image = new MyFloatProcessor(x, y);
+        _image = new FloatProcessor(x, y);
         _imagePlus = new ImagePlus(title, _image);
         _imagePlus.show();
     }
@@ -79,7 +82,13 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
      * periodically during the fit.
      */
     public void recalcHistogram() {
-        double[] minMax = _histogramData.getMinMax(); //TODO how about HistogramData.recalculate?
+        _histogramData.setAuto(true); //TODO KLUDGE!!! NOT HERE!!! WHERE DOES AUTO GET SET?
+        double[] minMax = _histogramData.getMinMax();
+
+        if (null != minMax) {
+            // update palette bounds
+            _image.setMinAndMax(minMax[0], minMax[1]);
+        }
 //        System.out.println("min max " + minMax[0] + " " + minMax[1]);
         // etc.
         _imagePlus.setProcessor(_image.duplicate());
