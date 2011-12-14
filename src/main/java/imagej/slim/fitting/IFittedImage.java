@@ -5,6 +5,8 @@
 
 package imagej.slim.fitting;
 
+import java.awt.image.IndexColorModel;
+
 import imagej.slim.histogram.HistogramData;
 
 /**
@@ -12,9 +14,24 @@ import imagej.slim.histogram.HistogramData;
  * @author aivar
  */
 public interface IFittedImage {
+    
+    /**
+     * Gets the title of this image.
+     * 
+     * @return title
+     */
+    public String getTitle();
+    
+    /**
+     * Sets the color model used to display float values.
+     * 
+     * @param colorModel 
+     */
+    public void setColorModel(IndexColorModel colorModel);
 
     /**
      * Gets the associated histogram data object.
+     * 
      * @return
      */
     public HistogramData getHistogramData();

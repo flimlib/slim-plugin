@@ -46,10 +46,6 @@ public class HistogramDataChannel {
                 }
             }
         }
-        return getActualMinMax();
-    }
-    
-    public double[] getActualMinMax() {
         return new double[] { _actualMin, _actualMax };
     }
     
@@ -74,7 +70,7 @@ public class HistogramDataChannel {
                 if (value >= nominalMin && value <= nominalMax) {
                     // assign each value to a bin
                     int bin = (int)((value - nominalMin) * binWidth);
-                    if (bin > bins) {
+                    if (bin >= bins) {
                         --bin;
                     }
                     ++results[bin];

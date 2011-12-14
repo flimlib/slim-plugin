@@ -9,6 +9,7 @@ import java.util.List;
 
 import imagej.slim.fitting.engine.IFittingEngine;
 import imagej.slim.fitting.engine.ThreadedFittingEngine;
+import imagej.slim.histogram.HistogramTool;
 
 /**
  *
@@ -39,7 +40,11 @@ public class FLIMImageFitter {
         for (OutputImage image : images) {
             IFittedImage fittedImage = FLIMFittedImageFactory.getInstance().createImage(image, dimension, components);
             _fittedImages.add(fittedImage);
-        } 
+        }
+        
+        // Show histogram tool for the last image created
+        int lastIndex = images.length - 1;
+        HistogramTool.getInstance().setHistogramData(_fittedImages.get(lastIndex).getHistogramData());
     }
     
     /**
@@ -47,6 +52,7 @@ public class FLIMImageFitter {
      */
     public void beginFit() {
         for (IFittedImage fittedImage : _fittedImages) {
+            //fittedImage.setColorModel(HistogramTool.getLUT()); //TODO getIndexColorModel()); //TODO all the same really as far as I can tell, i.e. broken
             fittedImage.beginFit();
         }
     }

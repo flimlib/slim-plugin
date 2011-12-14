@@ -122,8 +122,6 @@ public class HistogramData {
      * 
      * @return min and max
      */
-    //TODO s/b setting both view and lut min/max if automatic, o'wise no change
-    //TODO who is calling this????
     public double[] getMinMax() {
         double[] minMax = null;
         
@@ -134,7 +132,7 @@ public class HistogramData {
                 
                 // calculate actual minimum and maximum for all channels
                 for (int i = 0; i < _channel.length; ++i) {
-                    minMax = _channel[i].getActualMinMax();
+                    minMax = _channel[i].resetActualMinMax();
                     if (minMax[0] < min) {
                         min = minMax[0];
                     }
@@ -146,8 +144,10 @@ public class HistogramData {
             }
             else {
                 // calculate actual minimum and maximum for current channel
-                minMax = _channel[_channelIndex].getActualMinMax();
+                minMax = _channel[_channelIndex].resetActualMinMax();
             }
+            _minView = _minLUT = minMax[0];
+            _maxView = _maxLUT = minMax[1]; //TODO kludgy
         }
         return minMax; //TODO returns null if not automatically ranging
     }
@@ -155,6 +155,9 @@ public class HistogramData {
     public int[] binValues(int bins) {
         // start new histogram bins           
         int[] bin = new int[bins];
+        System.out.println("bin[3] is " + bin[3] + " bin[33] " + bin[33]);
+        System.out.println("_minView is " + _minView + " max " + _maxView);
+        System.out.println("_minLUT is " + _minLUT + " maxLUT " + _maxLUT);
         
         if (_showAll) {
             // add all channels
