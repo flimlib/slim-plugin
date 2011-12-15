@@ -132,7 +132,7 @@ public class HistogramData {
                 
                 // calculate actual minimum and maximum for all channels
                 for (int i = 0; i < _channel.length; ++i) {
-                    minMax = _channel[i].resetActualMinMax();
+                    minMax = _channel[i].findMinMax();
                     if (minMax[0] < min) {
                         min = minMax[0];
                     }
@@ -144,7 +144,7 @@ public class HistogramData {
             }
             else {
                 // calculate actual minimum and maximum for current channel
-                minMax = _channel[_channelIndex].resetActualMinMax();
+                minMax = _channel[_channelIndex].findMinMax();
             }
             _minView = _minLUT = minMax[0];
             _maxView = _maxLUT = minMax[1]; //TODO kludgy
@@ -155,6 +155,9 @@ public class HistogramData {
     public int[] binValues(int bins) {
         // start new histogram bins           
         int[] bin = new int[bins];
+        for (int i = 0; i < bins; ++i) {
+            bin[i] = 0;
+        }
         System.out.println("bin[3] is " + bin[3] + " bin[33] " + bin[33]);
         System.out.println("_minView is " + _minView + " max " + _maxView);
         System.out.println("_minLUT is " + _minLUT + " maxLUT " + _maxLUT);

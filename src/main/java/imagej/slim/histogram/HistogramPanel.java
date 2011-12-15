@@ -7,6 +7,9 @@ package imagej.slim.histogram;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.JPanel;
 
@@ -14,16 +17,21 @@ import ij.process.LUT;
 
 /**
  *
- * @author aivar
+ * @author Aivar Grislis
  */
 public class HistogramPanel extends JPanel {
     static final int ONE_HEIGHT = 20;
+    static final int FUDGE_FACTOR = 2;
     private final Object _synchObject = new Object();
     private int _width;
     private int _height;
     private int _inset;
     private int[] _bins;
     private int _max;
+    private Integer _minCursor;
+    private Integer _maxCursor;
+    private boolean _draggingMinCursor;
+    private boolean _draggingMaxCursor;
     
     /**
      * Constructor
@@ -39,7 +47,65 @@ public class HistogramPanel extends JPanel {
         _inset = inset;
         _bins = null;
         
+        _minCursor = _maxCursor = null;
+        
+        _draggingMinCursor = _draggingMaxCursor = false;
+        
         setPreferredSize(new Dimension(width, height));
+        addMouseListener(new MouseListener() {
+            public void mousePressed(MouseEvent e) {
+                synchronized (_synchObject) {
+                    if (null != _minCursor && null != _maxCursor) {
+                        if (Math.abs(_minCursor - e.getX()) < FUDGE_FACTOR) {
+                            _draggingMinCursor = true;
+                        }
+                        else if (Math.abs(_maxCursor - e.getX()) < FUDGE_FACTOR) {
+                            _draggingMaxCursor = true;
+                        }
+                    }
+                }
+            }
+            
+            public void mouseReleased(MouseEvent e) {
+                synchronized (_synchObject) {
+                    if (_draggingMinCursor) {
+                        _minCursor = e.getX(); //TODO adjust this and max to go to begin/end of histo
+                        _draggingMinCursor = false;
+                    }
+                    else if (_draggingMaxCursor) { 
+                        _maxCursor = e.getX();
+                        _draggingMaxCursor = false;
+                    }                    
+                }
+            }
+            
+            public void mouseEntered(MouseEvent e) { }
+            
+            public void mouseExited(MouseEvent e) { }
+            
+            public void mouseClicked(MouseEvent e) { }
+            
+        });
+        addMouseMotionListener(new MouseMotionListener() {
+            public void mouseMoved(MouseEvent e) { }
+            
+            public void mouseDragged(MouseEvent e) {
+                synchronized (_synchObject) {
+                    if (_draggingMinCursor) {
+                        if (_maxCursor > e.getX()) {
+                            _minCursor = e.getX();
+                        }
+                        repaint();
+                    }
+                    else if (_draggingMaxCursor) {
+                        if (_minCursor < e.getX()) {
+                            _maxCursor = e.getX();
+                        }
+                        repaint();
+                    }    
+                }
+            }
+        });
     }
 
     /**
@@ -50,10 +116,28 @@ public class HistogramPanel extends JPanel {
     public void setBins(int[] bins) {
         synchronized (_synchObject) {
             _bins = bins;
+            _max = Integer.MIN_VALUE;
             for (int i = 0; i < bins.length; ++i) {
                 if (bins[i] > _max) {
                     _max = bins[i];
                 }
+            }
+        }
+        repaint();
+    }
+
+    /**
+     * Changes cursors and redraws.
+     * 
+     * @param minCursor
+     * @param maxCursor 
+     */
+    public void setCursors(Integer minCursor, Integer maxCursor) {
+        synchronized (_synchObject) {
+            _minCursor = minCursor;
+            _maxCursor = maxCursor;
+            if (null == _minCursor && null == _maxCursor) {
+                _draggingMinCursor = _draggingMaxCursor = false;
             }
         }
         repaint();
@@ -69,6 +153,7 @@ public class HistogramPanel extends JPanel {
                     if (0 == _bins[i]) {
                         height = 0;
                     }
+                    // note that the log of 1 is zero; have to distinguish from 0
                     else if (1 == _bins[i]) {
                         height = ONE_HEIGHT;
                     }
@@ -83,14 +168,12 @@ public class HistogramPanel extends JPanel {
                     g.setColor(Color.DARK_GRAY);
                     g.drawLine(_inset + i, _height - height, _inset + i, _height);
                 }
-                /*
-                int x;
-                g.setXORMode(Color.MAGENTA);
-                x = valueToPixel(_start);
-                g.drawLine(x, 0, x, _height - 1);
-                x = valueToPixel(_stop);
-                g.drawLine(x, 0, x, _height - 1);
-                */
+                
+                if (null != _minCursor && null != _maxCursor) {
+                    g.setXORMode(Color.MAGENTA);
+                    g.drawLine(_minCursor, 0, _minCursor, _height - 1);
+                    g.drawLine(_maxCursor, 0, _maxCursor, _height - 1);
+                }
             }
         }
     }    

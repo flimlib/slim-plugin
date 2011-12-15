@@ -60,6 +60,9 @@ public class HistogramTool {
         //TODO_frame.getContentPane().add(_inputPanel, BorderLayout.SOUTH);
         _frame.pack();
         _frame.setVisible(true);
+        
+       //TODO FOR A TEST:
+        _histogram.setCursors(3, 44);
     }
     
     public static synchronized HistogramTool getInstance() {
