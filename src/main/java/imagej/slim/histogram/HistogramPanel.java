@@ -19,7 +19,7 @@ import javax.swing.JPanel;
  */
 public class HistogramPanel extends JPanel {
     static final int ONE_HEIGHT = 20;
-    static final int FUDGE_FACTOR = 3;
+    static final int FUDGE_FACTOR = 4;
     private IHistogramPanelListener _listener;
     private final Object _synchObject = new Object();
     private int _width;
@@ -73,6 +73,9 @@ public class HistogramPanel extends JPanel {
                         if (_minCursor < _inset) {
                             _minCursor = _inset - 1;
                         }
+                        if (_minCursor >= _maxCursor) {
+                            _minCursor = _maxCursor - 1;
+                        }
                         _draggingMinCursor = false;
                         changed = true;
                     }
@@ -81,6 +84,9 @@ public class HistogramPanel extends JPanel {
                         if (_maxCursor > _width - _inset) {
                             _maxCursor = _width - _inset;
                         }
+                        if (_maxCursor <= _minCursor) {
+                            _maxCursor = _minCursor + 1;
+                        }
                         _draggingMaxCursor = false;
                         changed = true;
                     }                    
@@ -88,8 +94,8 @@ public class HistogramPanel extends JPanel {
                 if (changed) {
                     repaint();
                     if (null != _listener) {
-                        // convert to 0..(_width - 1)
-                        int min = _minCursor - _inset + 1;
+                        // convert to 0..width - 1 range
+                        int min = _minCursor - _inset + 1; //TODO _min/_maxCursor c/b changed by now
                         int max = _maxCursor - _inset - 1;
                         _listener.setMinMax(min, max);
                     }
@@ -107,20 +113,50 @@ public class HistogramPanel extends JPanel {
             public void mouseMoved(MouseEvent e) { }
             
             public void mouseDragged(MouseEvent e) {
+                boolean changed = false;
                 synchronized (_synchObject) {
                     if (_draggingMinCursor) {
+                        // don't drag past max cursor
                         if (_maxCursor > e.getX()) {
                             _minCursor = e.getX();
                         }
-                        repaint();
+                        // don't drag out of this panel
+                        if (_minCursor < 0) {
+                            _minCursor = 0;
+                        }
+                        changed = true;
                     }
                     else if (_draggingMaxCursor) {
+                        // don't drag past min cursor
                         if (_minCursor < e.getX()) {
                             _maxCursor = e.getX();
                         }
-                        repaint();
+                        // don't drag out of this panel
+                        if (_maxCursor >= 2 * _inset + _width) {
+                            _maxCursor = 2 * _inset + _width - 1;
+                        }
+                        changed = true;
                     }    
                 }
+                if (changed) {
+                    repaint();
+                    
+                    boolean expanding = false;
+                    if (_minCursor < _inset) {
+                        expanding = true;
+                    }
+                    else if (_maxCursor > _width - _inset) {
+                        expanding = true;
+                    }
+                    if (expanding) {
+                        if (null != _listener) {
+                            // convert to 0..width - 1 range
+                            int min = _minCursor - _inset + 1;
+                            int max = _maxCursor - _inset - 1;
+                            _listener.setMinMax(min, max);
+                        }
+                    }
+                }  
             }
         });
     }

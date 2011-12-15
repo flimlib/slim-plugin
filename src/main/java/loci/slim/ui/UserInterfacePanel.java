@@ -105,8 +105,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String EXCITATION_FILE = "Load from File";
     private static final String EXCITATION_CREATE = "Use current X Y";
     
-    private static final String DO_FIT = "Do Fit";
-    private static final String CANCEL_FIT = "Cancel Fit";
+    private static final String MAKE_IMAGES = "Make Images";
+    private static final String CANCEL_IMAGES = "Cancel Images";
 
     private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(10, 10, 10, 10);
     private static final Border ETCHED_BORDER = BorderFactory.createEtchedBorder();
@@ -251,12 +251,12 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         );
         buttonPanel.add(m_quitButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        m_fitButton = new JButton("Do Fit");
+        m_fitButton = new JButton(MAKE_IMAGES);
         m_fitButton.addActionListener(
             new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String text = (String)e.getActionCommand();
-                    if (text.equals("Do Fit")){
+                    if (text.equals(MAKE_IMAGES)) {
                         enableAll(false);
                         setFitButtonState(false);
                         if (null != m_listener) {
@@ -821,11 +821,11 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     }
     
     private void setFitButtonState(boolean on) {
-        m_fitButton.setText(on ? DO_FIT : CANCEL_FIT);
+        m_fitButton.setText(on ? MAKE_IMAGES : CANCEL_IMAGES);
     }
     
     private boolean getFitButtonState() {
-        return m_fitButton.getText().equals(DO_FIT);
+        return m_fitButton.getText().equals(MAKE_IMAGES);
     }
 
     /*

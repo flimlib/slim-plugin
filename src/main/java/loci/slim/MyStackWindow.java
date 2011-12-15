@@ -71,7 +71,6 @@ public class MyStackWindow extends StackWindow {
                     }
                 }
             );
-
         }
     }
 
