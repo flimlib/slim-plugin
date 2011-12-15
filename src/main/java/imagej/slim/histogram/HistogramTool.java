@@ -32,11 +32,12 @@ import javax.swing.JTextField;
  *
  * @author aivar
  */
-public class HistogramTool {
+public class HistogramTool implements IHistogramPanelListener {
     private final static int WIDTH = 320;
     private final static int HISTOGRAM_HEIGHT = 160;
     private final static int COLORBAR_HEIGHT = 20;
-    private final static int EXTRA = 2;
+    private final static int EXTRA = 4;
+    //TODO kludged in, user s/b able to select LUTS, somewhere else:
     private final static String HARDCODED_LUT =  "/Applications/ImageJ/luts/aivar6.lut"; // aivar6 is my five color blue/cyan/green/yellow/red spectral palette
     private static HistogramTool INSTANCE = null;
     private HistogramData _histogramData;
@@ -47,6 +48,7 @@ public class HistogramTool {
     private HistogramTool() {
         // create the histogram and color bar display panels
         _histogram = new HistogramPanel(WIDTH, HISTOGRAM_HEIGHT, EXTRA);
+        _histogram.setListener(this);
         _colorBar = new ColorBarPanel(WIDTH, COLORBAR_HEIGHT, EXTRA);
         _colorBar.setLUT(getLUT());
 
@@ -96,5 +98,9 @@ public class HistogramTool {
         }
         _frame.setTitle(histogramData.getTitle());
         _histogram.setBins(histogramData.binValues(WIDTH));
+    }
+
+    public void setMinMax(int min, int max) {
+        System.out.println("setMinMax(" + min + "," + max + ")");
     }
 }

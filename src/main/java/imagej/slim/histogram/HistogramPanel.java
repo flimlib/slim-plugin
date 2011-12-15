@@ -13,15 +13,14 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.JPanel;
 
-import ij.process.LUT;
-
 /**
  *
  * @author Aivar Grislis
  */
 public class HistogramPanel extends JPanel {
     static final int ONE_HEIGHT = 20;
-    static final int FUDGE_FACTOR = 2;
+    static final int FUDGE_FACTOR = 3;
+    private IHistogramPanelListener _listener;
     private final Object _synchObject = new Object();
     private int _width;
     private int _height;
@@ -67,15 +66,33 @@ public class HistogramPanel extends JPanel {
             }
             
             public void mouseReleased(MouseEvent e) {
+                boolean changed = false;
                 synchronized (_synchObject) {
                     if (_draggingMinCursor) {
-                        _minCursor = e.getX(); //TODO adjust this and max to go to begin/end of histo
+                        _minCursor = e.getX();
+                        if (_minCursor < _inset) {
+                            _minCursor = _inset - 1;
+                        }
                         _draggingMinCursor = false;
+                        changed = true;
                     }
                     else if (_draggingMaxCursor) { 
                         _maxCursor = e.getX();
+                        if (_maxCursor > _width - _inset) {
+                            _maxCursor = _width - _inset;
+                        }
                         _draggingMaxCursor = false;
+                        changed = true;
                     }                    
+                }
+                if (changed) {
+                    repaint();
+                    if (null != _listener) {
+                        // convert to 0..(_width - 1)
+                        int min = _minCursor - _inset + 1;
+                        int max = _maxCursor - _inset - 1;
+                        _listener.setMinMax(min, max);
+                    }
                 }
             }
             
@@ -109,11 +126,21 @@ public class HistogramPanel extends JPanel {
     }
 
     /**
+     * Sets a listener for dragging minimum and maximum.
+     *
+     * @param listener
+     */
+    public void setListener(IHistogramPanelListener listener) {
+        _listener = listener;
+    }
+
+    /**
      * Changes settings and redraws.
      * 
      * @param bins 
      */
     public void setBins(int[] bins) {
+        System.out.println("SET BINS");
         synchronized (_synchObject) {
             _bins = bins;
             _max = Integer.MIN_VALUE;
