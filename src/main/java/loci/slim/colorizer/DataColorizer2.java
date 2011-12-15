@@ -130,7 +130,7 @@ public class DataColorizer2 implements IColorizeRangeListener {
         m_colorize = null; //new FiveColorColorize(Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED); //ThreeColorColorize(Color.GREEN, Color.YELLOW, Color.RED);
         m_ui = new DataColorizerUI(m_colorize, this);
         
-        imagej.slim.histogram.HistogramTool histogram = new imagej.slim.histogram.HistogramTool();
+//TODO compile error here 12/14 when I made HistogramTool a singleton.        imagej.slim.histogram.HistogramTool histogram = new imagej.slim.histogram.HistogramTool();
         
         
     }
