@@ -58,31 +58,28 @@ public class ColorBarPanel extends JPanel {
     private int _height;
     private int _inset;
     private Color[] _color;
-    float _start;
-    float _stop;
-    float _startLUT;
-    float _stopLUT;
+    double _min;
+    double _max;
+    double _minLUT;
+    double _maxLUT;
 
     /**
      * Constructor
      *
      * @param width
+     * @param inset
      * @param height
      */
-    public ColorBarPanel(int width, int height, int inset) {
+    public ColorBarPanel(int width, int inset, int height) {
         super();
         
         _width = width;
-        _height = height;
         _inset = inset;
+        _height = height;
         
-        setPreferredSize(new Dimension(width, height));
+        setPreferredSize(new Dimension(width + 2 * inset, height));
 
-        _start = _stop = _startLUT = _stopLUT = 0.0f;
-        _start  = 0.0f;
-        _stop = 100.0f;
-        _startLUT = 25.0f;
-        _stopLUT = 75.0f;
+        _min = _max = _minLUT = _maxLUT = 0.0f;
     }
 
     /**
@@ -100,18 +97,31 @@ public class ColorBarPanel extends JPanel {
     /**
      * Changes the values and redraws.
      * 
-     * @param start
-     * @param stop
-     * @param startLUT
-     * @param stopLUT 
+     * @param min
+     * @param max
+     * @param minLUT
+     * @param maxLUT
      */
-    public void setStartStop(float start, float stop,
-            float startLUT, float stopLUT) {
+    public void setMinMax(double min, double max, double minLUT, double maxLUT) {
         synchronized (_synchObject) {
-            _start = start;
-            _stop = stop;
-            _startLUT = startLUT;
-            _stopLUT = stopLUT;
+            _min = min;
+            _max = max;
+            _minLUT = minLUT;
+            _maxLUT = maxLUT;
+        }
+        repaint();
+    }
+
+    /**
+     * Changes the LUT ranges and redraws.
+     * 
+     * @param minLUT
+     * @param maxLUT
+     */
+    public void setMinMaxLUT(double minLUT, double maxLUT) {
+        synchronized (_synchObject) {
+            _minLUT = minLUT;
+            _maxLUT = maxLUT;
         }
         repaint();
     }
@@ -121,8 +131,7 @@ public class ColorBarPanel extends JPanel {
         super.paintComponent(g);
         if (null != _color) {
             synchronized (_synchObject) {
-                for (int i = 0; i < _width - 2 * _inset; ++i) {
-                    System.out.println("colorize " + i);
+                for (int i = 0; i < _width; ++i) {
                     g.setColor(colorize(i));
                     g.drawLine(_inset + i, 0, _inset + i, _height-1);
                 }
@@ -133,28 +142,29 @@ public class ColorBarPanel extends JPanel {
     private Color[] colorsFromLUT(LUT lut) {
         byte[] bytes = lut.getBytes();
         int numberColors = bytes.length / 3;
-        System.out.println("numberColors " + numberColors + " = bytes " + bytes.length + " / 3");
         //TODO make sure numberColors is 256!
         Color[] color = new Color[numberColors];
         for (int n = 0; n < numberColors; ++n) {
             int red   = 0xff & (int) bytes[n];
             int green = 0xff & (int) bytes[256 + n];
             int blue  = 0xff & (int) bytes[512 + n];
-            System.out.println("R " + red + " G " + green + " B " + blue);
             color[n] = new Color(red, green, blue);
         }
         return color;
     }
-    
+
     private Color colorize(int i) {
         Color color = Color.BLACK;
-        float value = _start + (_stop - _start) * i / _width;
-        if (value >= _startLUT && value <= _stopLUT) {
-            int index = (int)((value - _startLUT)
-                    * _color.length / (_stopLUT - _startLUT));
-            index = Math.max(index, 0);
-            index = Math.min(index, _color.length - 1);
-            color = _color[index];
+        // wait till we have initial range
+        if (_min < _max) {
+            double value = _min + (_max - _min) * i / _width;
+            if (value >= _minLUT && value <= _maxLUT) {
+                int index = (int)((value - _minLUT)
+                        * _color.length / (_maxLUT - _minLUT));
+                index = Math.max(index, 0);
+                index = Math.min(index, _color.length - 1);
+                color = _color[index];
+            }
         }
         return color;
     }

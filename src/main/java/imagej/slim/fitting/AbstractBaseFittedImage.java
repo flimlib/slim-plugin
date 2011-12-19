@@ -106,13 +106,12 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
      * periodically during the fit.
      */
     public void recalcHistogram() {
-        _histogramData.setAuto(true); //TODO KLUDGE!!! NOT HERE!!! WHERE DOES AUTO GET SET?
-        double[] minMax = _histogramData.getMinMax();
+        double[] minMaxLUT = _histogramData.recalcHistogram();
 
-        if (null != minMax) {
+        if (null != minMaxLUT) {
             // update palette bounds
-            _image.setMinAndMax(minMax[0], minMax[1]);
-            System.out.println("min max " + minMax[0] + " " +  minMax[1]);
+            _image.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
+            System.out.println("min max " + minMaxLUT[0] + " " +  minMaxLUT[1]);
         }
         else System.out.println("min max null");
 //        System.out.println("min max " + minMax[0] + " " + minMax[1]);

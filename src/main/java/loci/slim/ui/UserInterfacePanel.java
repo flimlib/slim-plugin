@@ -101,6 +101,20 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String TRIPLE_EXPONENTIAL = "Triple Exponential";
     private static final String STRETCHED_EXPONENTIAL = "Stretched Exponential";
 
+    private static final String GAUSSIAN = "Gaussian";
+    private static final String POISSON = "Poisson";
+    private static final String MAXIMUM_LIKELIHOOD = "Maximum Likelihood";
+
+    private static final String A_T_Z_X2 = "A " + TAU + " Z " + CHI + SQUARE;
+    private static final String A_T_X2 = "A " + TAU + " " + CHI +  SQUARE;
+    private static final String A_T = "A " + TAU;
+    private static final String T_X2 = TAU + " " + CHI + SQUARE;
+    private static final String T = TAU + "";
+    private static final String F_UPPER = "F";
+    private static final String F_LOWER = "f";
+
+    private static final String CHI_SQ_TARGET = "" + CHI + SQUARE + " Target";
+
     private static final String EXCITATION_NONE = "None";
     private static final String EXCITATION_FILE = "Load from File";
     private static final String EXCITATION_CREATE = "Use current X Y";
@@ -114,6 +128,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String REGION_ITEMS[] = { SUM_REGION, ROIS_REGION, PIXEL_REGION, ALL_REGION };
     private static final String ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, GRAY_RLD_ALGORITHM, GRAY_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM };
     private static final String FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL };
+    private static final String NOISE_MODEL_ITEMS[] = { GAUSSIAN, POISSON, MAXIMUM_LIKELIHOOD };
+    private static final String FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER };
 
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
     
@@ -129,6 +145,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JComboBox m_regionComboBox;
     JComboBox m_algorithmComboBox;
     JComboBox m_functionComboBox;
+    JComboBox m_noiseModelComboBox;
+    JComboBox m_fittedImagesComboBox;
     JCheckBox[] m_analysisCheckBoxList;
     JCheckBox m_fitAllChannels;
 
@@ -138,6 +156,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     JTextField m_startField;
     JTextField m_stopField;
     JTextField m_thresholdField;
+    JTextField m_chiSqTargetField;
     JComboBox m_binningComboBox;
     JComboBox m_excitationComboBox;
 
@@ -342,6 +361,18 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         );
         fitPanel.add(m_functionComboBox);
 
+        JLabel noiseModelLabel = new JLabel("Noise Model");
+        noiseModelLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        fitPanel.add(noiseModelLabel);
+        m_noiseModelComboBox = new JComboBox(NOISE_MODEL_ITEMS);
+        fitPanel.add(m_noiseModelComboBox);
+
+        JLabel fittedImagesLabel = new JLabel("Fitted Images");
+        fittedImagesLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        fitPanel.add(fittedImagesLabel);
+        m_fittedImagesComboBox = new JComboBox(FITTED_IMAGE_ITEMS);
+        fitPanel.add(m_fittedImagesComboBox);
+
         int choices = analysisChoices.length;
         if (choices > 0) {
             List<JCheckBox> checkBoxList = new ArrayList<JCheckBox>();
@@ -360,7 +391,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         }
         
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(fitPanel, 3 + choices, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(fitPanel, 5 + choices, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", fitPanel);
@@ -410,6 +441,12 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_thresholdField = new JTextField(9);
         controlPanel.add(m_thresholdField);
 
+        JLabel chiSqTargetLabel = new JLabel(CHI_SQ_TARGET);
+        chiSqTargetLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        controlPanel.add(chiSqTargetLabel);
+        m_chiSqTargetField = new JTextField(9);
+        controlPanel.add(m_chiSqTargetField);
+
         JLabel binningLabel = new JLabel("Bin");
         binningLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(binningLabel);
@@ -455,7 +492,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         controlPanel.add(m_excitationComboBox);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(controlPanel, 7, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(controlPanel, 8, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", controlPanel);
@@ -973,6 +1010,24 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         return analysisList.toArray(new String[0]);
     }
 
+    /**
+     * Get noise model for fit.
+     *
+     * @return
+     */
+    public NoiseModel getNoiseModel() {
+        return NoiseModel.POISSON;
+    }
+
+    /**
+     * Returns list of fitted images to display.
+     *
+     * @return
+     */
+    public String[] getImages() {
+        return new String[0];
+    }
+
     public boolean getFitAllChannels() {
         return m_fitAllChannels.isSelected();
     }
@@ -1026,6 +1081,10 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     public String getBinning() {
         String selected = (String) m_binningComboBox.getSelectedItem();
         return selected;
+    }
+
+    public double getChiSquareTarget() {
+        return 1.0;
     }
 
     public int getParameterCount() {

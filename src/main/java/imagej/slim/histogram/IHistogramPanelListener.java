@@ -12,7 +12,6 @@ package imagej.slim.histogram;
  * @author Aivar Grislis
  */
 public interface IHistogramPanelListener {
-    public enum Direction { LEFT, RIGHT };
     
     /**
      * Sets a new minimum and maximum cursor on the histogram panel.
@@ -22,6 +21,17 @@ public interface IHistogramPanelListener {
      * @param max 
      */
     public void setMinMax(int min, int max);
-    
-    public void expand(); //TODO direction
+
+    /**
+     * Called during a mouse drag.  Values in pixels.
+     *
+     * @param min
+     * @param max
+     */
+    public void dragMinMax(int min, int max);
+
+    /**
+     * Mouse has exited the HistogramPanel.
+     */
+    public void exited();
 }

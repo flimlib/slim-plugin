@@ -14,13 +14,14 @@ public class HistogramData {
     private String _title;
     private HistogramDataChannel[] _channel;
     private int _channelIndex;
-    private boolean _auto;
-    private boolean _combine;
-    private boolean _showAll;
+    private boolean _autoScale;
+    private boolean _combineChannels;
+    private boolean _displayChannels;
     private double _minView;
     private double _maxView;
     private double _minLUT;
     private double _maxLUT;
+    private IHistogramDataListener _listener;
 
     /**
      * Constructor, takes an array of HistogramChannels.
@@ -30,9 +31,17 @@ public class HistogramData {
     public HistogramData(String title, HistogramDataChannel[] channel) {
         _title = title;
         _channel = channel;
+        _autoScale = true;
+        _combineChannels = true;
+        _displayChannels = true;
         _channelIndex = 0;
         _minView = _maxView = 0.0f;
         _minLUT = _maxLUT = 0.0f;
+        _listener = null;
+    }
+
+    public void setListener(IHistogramDataListener listener) {
+        _listener = listener;
     }
     
     /**
@@ -63,22 +72,30 @@ public class HistogramData {
         _channelIndex = channelIndex;
     }
 
+    public boolean getDisplayChannels() {
+        return _displayChannels;
+    }
+
+    public void setDisplayChannels(boolean displayChannels) {
+
+    }
+
     /**
      * Gets whether or not histogram should combine all the channels.
      * 
      * @return whether to combine all the channels
      */
-    public boolean getCombine() {
-        return _combine;
+    public boolean getCombineChannels() {
+        return _combineChannels;
     }
 
     /**
      * Sets whether or not histogram should combine all the channels.
      * 
-     * @param combine 
+     * @param combineChannels
      */
-    public void setCombine(boolean combine) {
-        _combine = combine;
+    public void setCombineChannels(boolean combineChannels) {
+        _combineChannels = combineChannels;
     }
 
     /**
@@ -86,8 +103,8 @@ public class HistogramData {
      * 
      * @return whether automatically scales
      */
-    public boolean getAuto() {
-        return _auto;
+    public boolean getAutoScale() {
+        return _autoScale;
     }
     
     /**
@@ -95,8 +112,8 @@ public class HistogramData {
      * 
      * @param auto whether automatically scales
      */
-    public void setAuto(boolean auto) {
-        _auto = auto;
+    public void setAutoScale(boolean autoScale) {
+        _autoScale = autoScale;
     }
     
     /**
@@ -109,6 +126,17 @@ public class HistogramData {
     }
 
     /**
+     * Sets minimum and maximum extents of the view.
+     *
+     * @param min
+     * @param max
+     */
+    public void setMinMaxView(double min, double max) {
+        _minView = min;
+        _maxView = max;
+    }
+
+    /**
      * Gets minimum and maximum extents of the LUT.
      * 
      * @return 
@@ -118,38 +146,87 @@ public class HistogramData {
     }
 
     /**
-     * Sets the current min and max automatically if need be.
-     * 
-     * @return min and max
+     * Sets minimum and maximum extents of the LUT.
+     *
+     * @param min
+     * @param max
      */
-    public double[] getMinMax() {
-        double[] minMax = null;
-        
-        if (_auto) {
-            if (_combine) {
-                double min = Double.MAX_VALUE;
-                double max = Double.MIN_VALUE;
+    public void setMinMaxLUT(double min, double max) {
+        _minLUT = min;
+        _maxLUT = max;
+    }
+
+    /**
+     * Sets the current min and max automatically if need be.
+     *
+     * Called periodically during the fit process.
+     *
+     * Updates listener as a side effect.
+     * 
+     * @return min and max of the LUT
+     */
+    public double[] recalcHistogram() {
+        double minData;
+        double maxData;
+        double minDataCurrent;
+        double maxDataCurrent;
+        double minLUT;
+        double maxLUT;
+        double minView;
+        double maxView;
+        double[] minMaxData;
+
+        minData = maxData = 0.0;
+        minDataCurrent = maxDataCurrent = 0.0;
+        minLUT = maxLUT = 0.0;
+        minView = maxView = 0.0;
+        if (_displayChannels || _combineChannels) {
+            minData = Double.MAX_VALUE;
+            maxData = Double.MIN_VALUE;
                 
-                // calculate actual minimum and maximum for all channels
-                for (int i = 0; i < _channel.length; ++i) {
-                    minMax = _channel[i].findMinMax();
-                    if (minMax[0] < min) {
-                        min = minMax[0];
-                    }
-                    if (minMax[1] > max) {
-                        max = minMax[1];
-                    }
+            // calculate actual minimum and maximum for all channels
+            for (int i = 0; i < _channel.length; ++i) {
+                minMaxData = _channel[i].findMinMax();
+                if (minMaxData[0] < minData) {
+                    minData = minMaxData[0];
                 }
-                minMax = new double[] { min, max };  
+                if (minMaxData[1] > maxData) {
+                    maxData = minMaxData[1];
+                }
+                if (i == _channelIndex) {
+                    minDataCurrent = minMaxData[0];
+                    maxDataCurrent = minMaxData[1];
+                }
+            }
+        }
+        else {
+            // calculate actual minimum and maximum for current channel
+            minMaxData = _channel[_channelIndex].findMinMax();
+            minData = minDataCurrent = minMaxData[0];
+            maxData = minDataCurrent = minMaxData[1];
+        }
+
+        if (_autoScale) {
+            if (_combineChannels) {
+                // LUT and view bounded by data for all channels
+                _minLUT = minData;
+                _maxLUT = maxData;
             }
             else {
-                // calculate actual minimum and maximum for current channel
-                minMax = _channel[_channelIndex].findMinMax();
+                // LUT is bounded by data for current channel
+                _minLUT = minDataCurrent;
+                _maxLUT = maxDataCurrent;
             }
-            _minView = _minLUT = minMax[0];
-            _maxView = _maxLUT = minMax[1]; //TODO kludgy
         }
-        return minMax; //TODO returns null if not automatically ranging
+
+        _minView = minData;
+        _maxView = maxData;
+
+        if (null != _listener) {
+            _listener.minMaxChanged(_minView, _maxView, _minLUT, _maxLUT);
+        }
+
+        return new double[] { minLUT, maxLUT };
     }
     
     public int[] binValues(int bins) {
@@ -162,7 +239,7 @@ public class HistogramData {
         System.out.println("_minView is " + _minView + " max " + _maxView);
         System.out.println("_minLUT is " + _minLUT + " maxLUT " + _maxLUT);
         
-        if (_showAll) {
+        if (_displayChannels) {
             // add all channels
             for (int i = 0; i < _channel.length; ++i) {
                 int[] channelBin = _channel[i].binValues(bins, _minView, _maxView);

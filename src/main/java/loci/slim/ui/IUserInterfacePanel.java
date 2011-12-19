@@ -58,6 +58,10 @@ public interface IUserInterfacePanel {
         SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL
     }
 
+    public static enum NoiseModel {
+        POISSON
+    }
+
 
     /**
      * Gets the UI JFrame.
@@ -96,6 +100,20 @@ public interface IUserInterfacePanel {
      * @return fit function
      */
     public FitFunction getFunction();
+
+    /**
+     * Gets noise model for fit.
+     *
+     * @return
+     */
+    public NoiseModel getNoiseModel();
+
+    /**
+     * Returns list of fitted images to display.
+     *
+     * @return
+     */
+    public String[] getImages();
 
     /**
      * Gets analysis plugin names.
@@ -162,6 +180,8 @@ public interface IUserInterfacePanel {
      * @return binning plugin name
      */
     public String getBinning();
+
+    public double getChiSquareTarget();
 
     /**
      * Gets pixel x.
