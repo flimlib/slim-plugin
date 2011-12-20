@@ -84,6 +84,7 @@ import mpicbg.imglib.type.numeric.RealType;
 import mpicbg.imglib.type.numeric.real.DoubleType;
 
 // Kludge in the new stuff:
+import imagej.slim.fitting.OutputImageParser;
 import imagej.slim.fitting.params.IGlobalFitParams;
 import imagej.slim.fitting.params.LocalFitParams;
 import imagej.slim.fitting.params.GlobalFitParams;
@@ -1008,7 +1009,25 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         //TODO new style code starts only here:
         FLIMImageFitter imageFitter = new FLIMImageFitter();
-        OutputImage[] outputImages = { OutputImage.A1, OutputImage.T1, OutputImage.CHISQ };
+        int components = 1;
+        boolean stretched = false;
+        switch (uiPanel.getFunction()) {
+            case SINGLE_EXPONENTIAL:
+                break;
+            case DOUBLE_EXPONENTIAL:
+                components = 2;
+                break;
+            case TRIPLE_EXPONENTIAL:
+                components = 3;
+                break;
+            case STRETCHED_EXPONENTIAL:
+                stretched = true;
+                break;
+        }
+        String outputs = uiPanel.getImages();
+        OutputImageParser parser = new OutputImageParser(outputs, components, stretched);
+        
+        OutputImage[] outputImages = parser.getOutputImages();
         imageFitter.setUpFit(outputImages, new int[] { m_width, m_height }, 1);
         imageFitter.beginFit();       
 
@@ -1797,28 +1816,6 @@ public class SLIMProcessor <T extends RealType<T>> {
         switch (uiPanel.getAlgorithm()) {
             case JAOLHO:
                 curveFitter = new JaolhoCurveFitter();
-                break;
-           /* case AKUTAN:
-                curveFitter = new AkutanCurveFitter();
-                break; */
-            case BARBER_RLD:
-                curveFitter = new GrayCurveFitter();
-                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD);
-                break;
-            case BARBER_LMA:
-                curveFitter = new GrayCurveFitter();
-                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.LMA);
-                break;
-            case MARKWARDT:
-                curveFitter = new MarkwardtCurveFitter();
-                break;
-            case BARBER2_RLD:
-                curveFitter = new GrayNRCurveFitter();
-                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD);        
-                break;
-            case BARBER2_LMA:
-                curveFitter = new GrayNRCurveFitter();
-                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD);
                 break;
             case SLIMCURVE_RLD:
                 curveFitter = new SLIMCurveFitter();

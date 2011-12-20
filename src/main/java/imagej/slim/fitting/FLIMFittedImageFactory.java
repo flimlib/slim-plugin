@@ -25,12 +25,15 @@ public class FLIMFittedImageFactory {
     
     public IFittedImage createImage(OutputImage outputImage, int[] dimension, int components) {
         IFittedImage fittedImage = null;
+        String title;
         switch (outputImage) {
             case A1:
-                fittedImage = new FittedImage("A1", dimension, FLIMImageFitter.A1_INDEX);
+                title = (1 == components) ? "A" : "A1";
+                fittedImage = new FittedImage(title, dimension, FLIMImageFitter.A1_INDEX);
                 break;
             case T1:
-                fittedImage = new FittedImage("T1", dimension, FLIMImageFitter.T1_INDEX);
+                title = (1 == components) ? "T" : "T1";
+                fittedImage = new FittedImage(title, dimension, FLIMImageFitter.T1_INDEX);
                 break;
             case A2:
                 fittedImage = new FittedImage("A2", dimension, FLIMImageFitter.A2_INDEX);

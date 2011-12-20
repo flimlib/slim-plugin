@@ -89,8 +89,6 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String PIXEL_REGION = "Single Pixel";
     private static final String ALL_REGION = "Each Pixel";
     
-    private static final String GRAY_RLD_ALGORITHM = "Gray NR RLD";
-    private static final String GRAY_LMA_ALGORITHM = "Gray NR LMA";
     private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA";
     private static final String SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD";
     private static final String SLIM_CURVE_LMA_ALGORITHM = "SLIMCurve LMA";
@@ -101,15 +99,17 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String TRIPLE_EXPONENTIAL = "Triple Exponential";
     private static final String STRETCHED_EXPONENTIAL = "Stretched Exponential";
 
-    private static final String GAUSSIAN = "Gaussian";
-    private static final String POISSON = "Poisson";
+    private static final String GAUSSIAN_FIT = "Gaussian Fit";
+    private static final String POISSON_FIT = "Poisson Fit";
+    private static final String POISSON_DATA = "Poisson Data";
     private static final String MAXIMUM_LIKELIHOOD = "Maximum Likelihood";
 
-    private static final String A_T_Z_X2 = "A " + TAU + " Z " + CHI + SQUARE;
-    private static final String A_T_X2 = "A " + TAU + " " + CHI +  SQUARE;
-    private static final String A_T = "A " + TAU;
-    private static final String T_X2 = TAU + " " + CHI + SQUARE;
-    private static final String T = TAU + "";
+    private static final String A_T_H_Z_X2 = "A " + TAU + " H Z " + CHI + SQUARE;
+    private static final String A_T_H_X2 = "A " + TAU + " H " + CHI +  SQUARE;
+    private static final String A_T_H = "A " + TAU + " H";
+    private static final String T_H_X2 = TAU + " H " + CHI + SQUARE;
+    private static final String T_H = TAU + " H";
+    private static final String T = "" + TAU;
     private static final String F_UPPER = "F";
     private static final String F_LOWER = "f";
 
@@ -126,10 +126,10 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final Border ETCHED_BORDER = BorderFactory.createEtchedBorder();
 
     private static final String REGION_ITEMS[] = { SUM_REGION, ROIS_REGION, PIXEL_REGION, ALL_REGION };
-    private static final String ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, GRAY_RLD_ALGORITHM, GRAY_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM };
+    private static final String ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM };
     private static final String FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL };
-    private static final String NOISE_MODEL_ITEMS[] = { GAUSSIAN, POISSON, MAXIMUM_LIKELIHOOD };
-    private static final String FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER };
+    private static final String NOISE_MODEL_ITEMS[] = { GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA, MAXIMUM_LIKELIHOOD };
+    private static final String FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, F_UPPER, F_LOWER };
 
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
     
@@ -875,6 +875,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_regionComboBox.setEnabled(enable);
         m_algorithmComboBox.setEnabled(enable);
         m_functionComboBox.setEnabled(enable);
+        m_noiseModelComboBox.setEnabled(enable);
+        m_fittedImagesComboBox.setEnabled(enable);
         for (JCheckBox checkBox : m_analysisCheckBoxList) {
             checkBox.setEnabled(enable);
         }
@@ -887,6 +889,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_startField.setEditable(enable);
         m_stopField.setEditable(enable);
         m_thresholdField.setEditable(enable);
+        m_chiSqTargetField.setEditable(enable);
         m_binningComboBox.setEnabled(enable);
 
         // single exponent fit
@@ -964,12 +967,6 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         if (selected.equals(JAOLHO_LMA_ALGORITHM)) {
             algorithm = FitAlgorithm.JAOLHO;
         }
-        else if (selected.equals(GRAY_RLD_ALGORITHM)) {
-            algorithm = FitAlgorithm.BARBER2_RLD;
-        }
-        else if (selected.equals(GRAY_LMA_ALGORITHM)) {
-            algorithm = FitAlgorithm.BARBER2_LMA;
-        }
         else if (selected.equals(SLIM_CURVE_RLD_ALGORITHM)) {
             algorithm = FitAlgorithm.SLIMCURVE_RLD;
         }
@@ -1016,7 +1013,21 @@ public class UserInterfacePanel implements IUserInterfacePanel {
      * @return
      */
     public NoiseModel getNoiseModel() {
-        return NoiseModel.POISSON;
+        NoiseModel noiseModel = null;
+        String selected = (String) m_noiseModelComboBox.getSelectedItem();
+        if (selected.equals(GAUSSIAN_FIT)) {
+            noiseModel = NoiseModel.GAUSSIAN_FIT;
+        }
+        else if (selected.equals(POISSON_FIT)) {
+            noiseModel = NoiseModel.POISSON_FIT;
+        }
+        else if (selected.equals(POISSON_DATA)) {
+            noiseModel = NoiseModel.POISSON_DATA;
+        }
+        else if (selected.equals(MAXIMUM_LIKELIHOOD)) {
+            noiseModel = NoiseModel.MAXIMUM_LIKELIHOOD;
+        }
+        return noiseModel;
     }
 
     /**
@@ -1024,8 +1035,9 @@ public class UserInterfacePanel implements IUserInterfacePanel {
      *
      * @return
      */
-    public String[] getImages() {
-        return new String[0];
+    public String getImages() {
+        String selected = (String) m_fittedImagesComboBox.getSelectedItem();
+        return selected;
     }
 
     public boolean getFitAllChannels() {

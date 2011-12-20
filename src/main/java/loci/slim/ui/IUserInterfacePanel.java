@@ -50,8 +50,8 @@ public interface IUserInterfacePanel {
         SUMMED, ROI, POINT, EACH
     }
 
-    public static enum FitAlgorithm { //TODO not really algorithm, usu. LMA
-       JAOLHO, /*AKUTAN,*/ BARBER_RLD, BARBER_LMA, MARKWARDT, BARBER2_RLD, BARBER2_LMA, SLIMCURVE_RLD, SLIMCURVE_LMA, SLIMCURVE_RLD_LMA
+    public static enum FitAlgorithm {
+       JAOLHO, SLIMCURVE_RLD, SLIMCURVE_LMA, SLIMCURVE_RLD_LMA
     }
 
     public static enum FitFunction {
@@ -59,7 +59,7 @@ public interface IUserInterfacePanel {
     }
 
     public static enum NoiseModel {
-        POISSON
+        GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA, MAXIMUM_LIKELIHOOD
     }
 
 
@@ -113,7 +113,7 @@ public interface IUserInterfacePanel {
      *
      * @return
      */
-    public String[] getImages();
+    public String getImages();
 
     /**
      * Gets analysis plugin names.

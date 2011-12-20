@@ -16,7 +16,7 @@ import imagej.slim.histogram.HistogramTool;
  * @author aivar
  */
 public class FLIMImageFitter {
-    public enum OutputImage { A1, T1, A2, T2, A3, T3, H, Z, CHISQ, F1, F2, F3, f1, f2, f3 };
+    public enum OutputImage { A1, T1, A2, T2, A3, T3, Z, H, CHISQ, F1, F2, F3, f1, f2, f3 };
     public static final int A1_INDEX    = 2;
     public static final int T1_INDEX    = 3;
     public static final int A2_INDEX    = 4;
@@ -44,7 +44,9 @@ public class FLIMImageFitter {
         
         // Show histogram tool for the last image created
         int lastIndex = images.length - 1;
-        HistogramTool.getInstance().setHistogramData(_fittedImages.get(lastIndex).getHistogramData());
+        if (lastIndex >= 0) {
+            HistogramTool.getInstance().setHistogramData(_fittedImages.get(lastIndex).getHistogramData());
+        }
     }
     
     /**
