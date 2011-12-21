@@ -13,6 +13,7 @@ import ij.process.ByteProcessor;
 import ij.ImagePlus;
 import ij.process.LUT;
 
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -103,6 +104,32 @@ public class HistogramTool {
         catch (IOException e) {
             System.out.println("Error opening LUT " + e.getMessage());
         }
+
+        //TODO ARG Kludge:
+        // IJ converts the FloatProcessor to 8-bits and then uses this palette
+        // for display.  Unfortunately values less than or greater than the LUT
+        // range still get displayed with LUT colors.  To work around this, use
+        // only 254 of the LUT colors.
+        
+        // get the RGB colors for this color model
+        byte[] reds = new byte[256];
+        byte[] greens = new byte[256];
+        byte[] blues = new byte[256];
+        colorModel.getReds(reds);
+        colorModel.getBlues(blues);
+        colorModel.getGreens(greens);
+
+        // make the first entry black and the last white
+        reds  [0] = (byte) Color.BLACK.getRed();
+        greens[0] = (byte) Color.BLACK.getGreen();
+        blues [0] = (byte) Color.BLACK.getBlue();
+        reds  [255] = (byte) Color.WHITE.getRed();
+        greens[255] = (byte) Color.WHITE.getGreen();
+        blues [255] = (byte) Color.WHITE.getBlue();
+
+        // make a new color model
+        colorModel = new IndexColorModel(8, 256, reds, greens, blues);        
+        
         return colorModel;
     }
 
