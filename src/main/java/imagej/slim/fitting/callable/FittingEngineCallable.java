@@ -67,6 +67,7 @@ public class FittingEngineCallable implements IFittingEngineCallable {
     public IFitResults call() {
         _curveFitter.setFitAlgorithm(_globalParams.getFitAlgorithm());
         _curveFitter.setFitFunction(_globalParams.getFitFunction());
+        _curveFitter.setNoiseModel(_globalParams.getNoiseModel());
         _curveFitter.setInstrumentResponse(_globalParams.getPrompt());
         _curveFitter.setXInc(_globalParams.getXInc());
         _curveFitter.setFree(_globalParams.getFree());

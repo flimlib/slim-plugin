@@ -11,7 +11,7 @@ import imagej.slim.histogram.HistogramData;
 
 /**
  *
- * @author aivar
+ * @author Sivar Grislis
  */
 public interface IFittedImage {
     

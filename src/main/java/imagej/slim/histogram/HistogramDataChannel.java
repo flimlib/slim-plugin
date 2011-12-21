@@ -4,6 +4,8 @@
  */
 package imagej.slim.histogram;
 
+import imagej.slim.fitting.InvalidDouble;
+
 /**
  * This class shadows a channel in a stack for a displayed image.  If the image
  * has only two dimensions there would be only one of these per HistogramData.
@@ -67,7 +69,7 @@ public class HistogramDataChannel {
         _max = Double.MIN_VALUE;
         for (int i = 0; i < _values.length; ++i) {
             for (int j = 0; j < _values[0].length; ++j) {
-                if (_values[i][j] != Double.NaN) {
+                if (InvalidDouble.isValue(_values[i][j])) {
                     if (_values[i][j] < _min) {
                         _min = _values[i][j];
                     }

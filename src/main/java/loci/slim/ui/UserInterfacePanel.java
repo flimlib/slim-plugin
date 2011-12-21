@@ -102,16 +102,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String GAUSSIAN_FIT = "Gaussian Fit";
     private static final String POISSON_FIT = "Poisson Fit";
     private static final String POISSON_DATA = "Poisson Data";
-    private static final String MAXIMUM_LIKELIHOOD = "Maximum Likelihood";
-
-    private static final String A_T_H_Z_X2 = "A " + TAU + " H Z " + CHI + SQUARE;
-    private static final String A_T_H_X2 = "A " + TAU + " H " + CHI +  SQUARE;
-    private static final String A_T_H = "A " + TAU + " H";
-    private static final String T_H_X2 = TAU + " H " + CHI + SQUARE;
-    private static final String T_H = TAU + " H";
-    private static final String T = "" + TAU;
-    private static final String F_UPPER = "F";
-    private static final String F_LOWER = "f";
+    private static final String MAXIMUM_LIKELIHOOD = "Max. Likelihood Est.";
 
     private static final String CHI_SQ_TARGET = "" + CHI + SQUARE + " Target";
 
@@ -129,8 +120,25 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM };
     private static final String FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL };
     private static final String NOISE_MODEL_ITEMS[] = { GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA, MAXIMUM_LIKELIHOOD };
-    private static final String FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, F_UPPER, F_LOWER };
-
+    
+    private static final String A_T_Z_X2 = "A " + TAU + " Z " + CHI + SQUARE;
+    private static final String A_T_X2 = "A " + TAU + " " + CHI + SQUARE;
+    private static final String A_T = "A " + TAU;
+    private static final String T_X2 = TAU + " " + CHI + SQUARE;
+    private static final String T = "" + TAU;
+    private static final String A_T_H_Z_X2 = "A " + TAU + " H Z " + CHI + SQUARE;
+    private static final String A_T_H_X2 = "A " + TAU + " H " + CHI + SQUARE;
+    private static final String A_T_H = "A " + TAU + " H";
+    private static final String T_H_X2 = TAU + " H " + CHI + SQUARE;
+    private static final String T_H = TAU + " H";
+    private static final String F_UPPER = "F";
+    private static final String F_LOWER = "f";
+    
+    private static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T };
+    private static final String DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER };
+    private static final String TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER };    
+    private static final String STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T };    
+    
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
     
     public IUserInterfacePanelListener m_listener;
@@ -336,14 +344,14 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         regionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         fitPanel.add(regionLabel);
         m_regionComboBox = new JComboBox(REGION_ITEMS);
-     m_regionComboBox.setSelectedItem(ALL_REGION); // for demo
+        m_regionComboBox.setSelectedItem(ALL_REGION);
         fitPanel.add(m_regionComboBox);
 
         JLabel algorithmLabel = new JLabel("Algorithm");
         algorithmLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         fitPanel.add(algorithmLabel);
         m_algorithmComboBox = new JComboBox(ALGORITHM_ITEMS);
-     m_algorithmComboBox.setSelectedItem(SLIM_CURVE_RLD_LMA_ALGORITHM);
+        m_algorithmComboBox.setSelectedItem(SLIM_CURVE_RLD_LMA_ALGORITHM);
         fitPanel.add(m_algorithmComboBox);
 
         JLabel functionLabel = new JLabel("Function");
@@ -353,9 +361,13 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_functionComboBox.addItemListener(
             new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
-                    CardLayout cl = (CardLayout)(m_cardPanel.getLayout());
-                    cl.show(m_cardPanel, (String)e.getItem());
-                    reconcileStartParam();
+                    if (e.getStateChange() == ItemEvent.SELECTED) {
+                        String item = (String) e.getItem();
+                        CardLayout cl = (CardLayout)(m_cardPanel.getLayout());
+                        cl.show(m_cardPanel, item);
+                        reconcileStartParam();
+                        updateFittedImagesComboBox(FUNCTION_ITEMS, item);
+                    }
                 }
             }
         );
@@ -365,12 +377,13 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         noiseModelLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         fitPanel.add(noiseModelLabel);
         m_noiseModelComboBox = new JComboBox(NOISE_MODEL_ITEMS);
+        m_noiseModelComboBox.setSelectedItem(MAXIMUM_LIKELIHOOD);
         fitPanel.add(m_noiseModelComboBox);
 
         JLabel fittedImagesLabel = new JLabel("Fitted Images");
         fittedImagesLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         fitPanel.add(fittedImagesLabel);
-        m_fittedImagesComboBox = new JComboBox(FITTED_IMAGE_ITEMS);
+        m_fittedImagesComboBox = new JComboBox(SINGLE_FITTED_IMAGE_ITEMS);
         fitPanel.add(m_fittedImagesComboBox);
 
         int choices = analysisChoices.length;
@@ -401,6 +414,42 @@ public class UserInterfacePanel implements IUserInterfacePanel {
 
         panel.add("South", m_fitAllChannels);
         return panel;
+    }
+
+    /**
+     * Used to build an appropriate list of fitted images, according to the
+     * fit function selected.
+     * 
+     * @param items
+     * @param selectedItem 
+     */
+    private void updateFittedImagesComboBox(String[] items, String selectedItem) {
+        if (SINGLE_EXPONENTIAL.equals(selectedItem)) {
+            updateComboBox(m_fittedImagesComboBox, SINGLE_FITTED_IMAGE_ITEMS);
+        }
+        else if (DOUBLE_EXPONENTIAL.equals(selectedItem)) {
+            updateComboBox(m_fittedImagesComboBox, DOUBLE_FITTED_IMAGE_ITEMS);            
+        }
+        else if (TRIPLE_EXPONENTIAL.equals(selectedItem)) {
+            updateComboBox(m_fittedImagesComboBox, TRIPLE_FITTED_IMAGE_ITEMS);           
+        }
+        else if (STRETCHED_EXPONENTIAL.equals(selectedItem)) {
+            updateComboBox(m_fittedImagesComboBox, STRETCHED_FITTED_IMAGE_ITEMS);  
+        }
+    }
+ 
+    /*
+     * Updates a combo box with a new list of items.
+     */
+    private void updateComboBox(JComboBox comboBox, String[] items) {
+        // Had problems with "comboBox.removeAll()":
+        for (int i = comboBox.getItemCount() - 1; i >= 0; --i) {
+            comboBox.removeItemAt(i);
+        }
+        for (String item : items) {
+            comboBox.addItem(item);
+        }
+        comboBox.setSelectedIndex(0);
     }
 
     /*
@@ -547,6 +596,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         JLabel nullLabel1 = new JLabel("");
         expPanel.add(nullLabel1);
 
+        //TODO:
         // SLIMPlotter look & feel:
         //Color fixColor = m_a1Param1.getBackground();
         //Color floatColor = a1Label1.getBackground();
@@ -636,6 +686,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         JLabel nullLabel2 = new JLabel("");
         expPanel.add(nullLabel2);
 
+        //TODO:
         // From SLIMPlotter
         //Color fixColor = m_a1Param2.getBackground();
         //Color floatColor = a1Label2.getBackground();
@@ -747,6 +798,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         JLabel nullLabel3 = new JLabel("");
         expPanel.add(nullLabel3);
 
+        //TODO:
         // SLIMPlotter look & feel:
         //Color fixColor = m_a1Param3.getBackground();
         //Color floatColor = a1Label3.getBackground();
@@ -829,6 +881,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         JLabel nullLabel1 = new JLabel("");
         expPanel.add(nullLabel1);
 
+        //TODO:
         // SLIMPlotter look & feel:
         //Color fixColor = m_a1Param1.getBackground();
         //Color floatColor = a1Label1.getBackground();
@@ -1035,7 +1088,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
      *
      * @return
      */
-    public String getImages() {
+    public String getFittedImages() {
         String selected = (String) m_fittedImagesComboBox.getSelectedItem();
         return selected;
     }
@@ -1096,7 +1149,11 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     }
 
     public double getChiSquareTarget() {
-        return 1.0;
+        return Double.valueOf(m_chiSqTargetField.getText());
+    }
+    
+    public void setChiSquareTarget(double chiSqTarget) {
+        m_chiSqTargetField.setText("" + chiSqTarget);
     }
 
     public int getParameterCount() {

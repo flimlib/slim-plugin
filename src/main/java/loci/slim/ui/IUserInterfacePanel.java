@@ -113,7 +113,7 @@ public interface IUserInterfacePanel {
      *
      * @return
      */
-    public String getImages();
+    public String getFittedImages();
 
     /**
      * Gets analysis plugin names.
@@ -173,6 +173,20 @@ public interface IUserInterfacePanel {
      * @param threshold
      */
     public void setThreshold(int threshold);
+ 
+    /**
+     * Gets chi square target for fit.
+     * 
+     * @return 
+     */
+    public double getChiSquareTarget();
+
+    /**
+     * Sets chi square target for fit.
+     * 
+     * @param chiSqTarget 
+     */
+    public void setChiSquareTarget(double chiSqTarget);   
 
     /**
      * Gets binning plugin name.
@@ -180,8 +194,6 @@ public interface IUserInterfacePanel {
      * @return binning plugin name
      */
     public String getBinning();
-
-    public double getChiSquareTarget();
 
     /**
      * Gets pixel x.

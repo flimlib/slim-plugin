@@ -121,9 +121,6 @@ public class SLIMProcessor <T extends RealType<T>> {
     private static final boolean USE_TAU = true;
     private static final boolean USE_LAMBDA = false;
 
-    // this affects how lifetimes are colorized: //TODO get rid of this
-    private static final double MAXIMUM_LIFETIME = 0.075; // for fitting fake with Jaolho // for fitting brian with barber triple integral 100.0f X tau vs lambda issue here
-
     // this affects how many pixels we process at once
     private static final int PIXEL_COUNT = 128; //32;//16;
 
@@ -271,6 +268,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         uiPanel.setStart(m_timeBins / 2, false); //TODO hokey
         uiPanel.setStop(m_timeBins - 1, false);
         uiPanel.setThreshold(100);
+        uiPanel.setChiSquareTarget(1.5);
         uiPanel.setFunctionParameters(0, DEFAULT_SINGLE_EXP_PARAMS);
         uiPanel.setFunctionParameters(1, DEFAULT_DOUBLE_EXP_PARAMS);
         uiPanel.setFunctionParameters(2, DEFAULT_TRIPLE_EXP_PARAMS);
@@ -1009,10 +1007,11 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         //TODO new style code starts only here:
         FLIMImageFitter imageFitter = new FLIMImageFitter();
-        int components = 1;
+        int components = 0;
         boolean stretched = false;
         switch (uiPanel.getFunction()) {
             case SINGLE_EXPONENTIAL:
+                components = 1;
                 break;
             case DOUBLE_EXPONENTIAL:
                 components = 2;
@@ -1024,11 +1023,11 @@ public class SLIMProcessor <T extends RealType<T>> {
                 stretched = true;
                 break;
         }
-        String outputs = uiPanel.getImages();
+        String outputs = uiPanel.getFittedImages();
         OutputImageParser parser = new OutputImageParser(outputs, components, stretched);
         
         OutputImage[] outputImages = parser.getOutputImages();
-        imageFitter.setUpFit(outputImages, new int[] { m_width, m_height }, 1);
+        imageFitter.setUpFit(outputImages, new int[] { m_width, m_height }, components);
         imageFitter.beginFit();       
 
         while (!m_cancel && pixelIterator.hasNext()) {
@@ -1088,6 +1087,10 @@ public class SLIMProcessor <T extends RealType<T>> {
         return null;
     }
 
+    /*
+     * Helper function that processes an array of pixels.  Histogram and images
+     * are updated at the end of this function.
+     */
     private void processPixels(ICurveFitData[] data, ChunkyPixel[] pixels, FLIMImageFitter imageFitter) {
         if (null == _fittingEngine) {
             _fittingEngine = Configuration.getInstance().getFittingEngine();
@@ -1098,6 +1101,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         IGlobalFitParams globalFitParams = new GlobalFitParams();
         globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
         globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
+        globalFitParams.setNoiseModel(loci.curvefitter.ICurveFitter.NoiseModel.MAXIMUM_LIKELIHOOD);
         globalFitParams.setXInc(m_timeRange);
         globalFitParams.setPrompt(null);
         if (null != m_excitationPanel) {
@@ -1107,7 +1111,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 
         boolean[] free = { true, true, true };
-        globalFitParams.setFree(free); //TODO BAD!
+        globalFitParams.setFree(free); //TODO BAD! s/n/b hardcoded here
       //TODO KLUDGE  globalFitParams.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
 
         List<ILocalFitParams> dataList = new ArrayList<ILocalFitParams>();
@@ -1142,6 +1146,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      *
      * Results of the fit go to VisAD for analysis.
      */
+    //TODO this is the old version
     private Image<DoubleType> fitEachPixelX(IUserInterfacePanel uiPanel) {
         long start = System.nanoTime();
         int pixelCount = 0;

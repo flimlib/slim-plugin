@@ -34,12 +34,15 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         int y = dimension[1];
         _values = new double[x][y];
         //TODO need to handle multiple channels:
-        // _values c/b slice being drawn only; refer to Image for other slices
+        // _values c/b slice being drawn only; refer to Image for other slices; this scheme would fall apart if Image is colorized grayscale like SPCImage
         HistogramDataChannel histogramDataChannel = new HistogramDataChannel(_values);
         HistogramDataChannel[] histogramDataChannels = new HistogramDataChannel[] { histogramDataChannel };
         _histogramData = new HistogramData(title, histogramDataChannels);
         _image = new FloatProcessor(x, y);
         _image.setColorModel(imagej.slim.histogram.HistogramTool.getIndexColorModel());
+        //TODO fill the image with a color that will be out of LUT range and paint black!:
+        _image.setValue(Float.NaN); //TODO
+        _image.fill(); //TODO
         _imagePlus = new ImagePlus(title, _image);
         _imagePlus.show();
         _imagePlus.getWindow().addFocusListener(new FocusListener() {
@@ -47,9 +50,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
                 HistogramTool.getInstance().setHistogramData(_histogramData);
             }
             
-            public void focusLost(FocusEvent e) {
-                
-            }
+            public void focusLost(FocusEvent e) { }
         });  
     }
 
@@ -85,7 +86,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
     public void beginFit() {
         // clear the 2D slice
         clear(_values);
-
     }
     /**
      * Ends a fit.
@@ -117,7 +117,29 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 //        System.out.println("min max " + minMax[0] + " " + minMax[1]);
         // etc.
         _imagePlus.setProcessor(_image.duplicate());
+        
+        
+        System.out.println("RECALC " + numInvalid(_values));
     }
+    
+    
+    private int numInvalid(double[][] values) {
+        int count = 0;
+        int num = 0;
+        for (int y = 0; y < values[0].length; ++y) {
+            for (int x = 0; x < values.length; ++x) {
+                if (InvalidDouble.isValue(values[x][y])) {
+                    ++num;
+                }
+                ++count;
+            }
+        }
+        System.out.println("checked " + count + " pixels,  found invalid " + num);
+        return num;
+    }   
+    
+    
+    
     
     /**
      * Updates the fitted parameters for a pixel.
@@ -157,10 +179,15 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
      */
     abstract public double getValue(double[] parameters); 
 
+    /*
+     * Clears the values for this slice.
+     * 
+     * @param values 
+     */
     private void clear(double[][] values) {
         for (int y = 0; y < values[0].length; ++y) {
             for (int x = 0; x < values.length; ++x) {
-                values[x][y] = Double.NaN;
+                values[x][y] = InvalidDouble.value();
             }
         }
     }

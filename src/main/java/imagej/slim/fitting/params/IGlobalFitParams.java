@@ -36,6 +36,7 @@ package imagej.slim.fitting.params;
 
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.NoiseModel;
 
 /**
  * Interface for container for the global fitting parameters, i.e. those valid
@@ -52,6 +53,10 @@ public interface IGlobalFitParams {
     public void setFitFunction(FitFunction fitFunction);
     
     public FitFunction getFitFunction();
+    
+    public void setNoiseModel(NoiseModel noiseModel);
+    
+    public NoiseModel getNoiseModel();
     
     public void setXInc(double xInc);
     
