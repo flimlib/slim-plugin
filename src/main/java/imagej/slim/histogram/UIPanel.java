@@ -48,8 +48,36 @@ public class UIPanel extends JPanel {
         m_auto = true;
         m_start = m_stop = m_min = m_max = 0.0; //TODO gotta be a better way
 
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
+        JPanel readOutPanel = new JPanel();
+        readOutPanel.setLayout(new BoxLayout(readOutPanel, BoxLayout.X_AXIS));
+
+        m_startTextField = new JTextField();
+        m_startTextField.setText("" + m_start);
+        m_startTextField.addActionListener(
+            new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    m_start = Double.parseDouble(m_startTextField.getText());
+                //    m_listener.setRange(m_auto, m_start, m_stop, m_min, m_max);
+                }
+            }
+        );
+        readOutPanel.add(m_startTextField);
+
+        m_stopTextField = new JTextField();
+        m_startTextField.setText("" + m_stop);
+        m_stopTextField.addActionListener(
+            new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    m_stop = Double.parseDouble(m_stopTextField.getText());
+                 //   m_listener.setRange(m_auto, m_start, m_stop, m_min, m_max);
+                }
+            }
+        );
+        readOutPanel.add(m_stopTextField);
+        add(readOutPanel);
+ 
         m_autoCheckBox = new JCheckBox("Auto", m_auto);
         m_autoCheckBox.addItemListener(
             new ItemListener() {
@@ -69,29 +97,6 @@ public class UIPanel extends JPanel {
         );
         add(m_autoCheckBox);
 
-        m_startTextField = new JTextField();
-        m_startTextField.setText("" + m_start);
-        m_startTextField.addActionListener(
-            new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    m_start = Double.parseDouble(m_startTextField.getText());
-                //    m_listener.setRange(m_auto, m_start, m_stop, m_min, m_max);
-                }
-            }
-        );
-        add(m_startTextField);
-
-        m_stopTextField = new JTextField();
-        m_startTextField.setText("" + m_stop);
-        m_stopTextField.addActionListener(
-            new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    m_stop = Double.parseDouble(m_stopTextField.getText());
-                 //   m_listener.setRange(m_auto, m_start, m_stop, m_min, m_max);
-                }
-            }
-        );
-        add(m_stopTextField);
 
         enableAppropriately();
     }

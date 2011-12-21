@@ -42,7 +42,7 @@ public class HistogramTool {
     private final static int INSET = 5;
     private final static int HISTOGRAM_HEIGHT = 140;
     private final static int COLORBAR_HEIGHT = 20;
-    private final static int TASK_PERIOD = 1000;
+    private final static int TASK_PERIOD = 100;
     //TODO kludged in, user s/b able to select LUTS, somewhere else:
     //TODO note that most IJ LUTs are unsuitable here, so having one standard lifetime LUT is not so bad
     private final static String HARDCODED_LUT =  "/Applications/ImageJ/luts/aivar6.lut"; // aivar6 is my five color blue/cyan/green/yellow/red spectral palette
