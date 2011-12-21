@@ -18,18 +18,18 @@ import javax.swing.JPanel;
  * can be drawn and manipulated, representing the range of the LUT inside the
  * bounds of the view.  Dragging the cursor off the edge stretches those bounds.
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class HistogramPanel extends JPanel {
-    static final int ONE_HEIGHT = 20;
-    static final int FUDGE_FACTOR = 4;
+    private static final int ONE_HEIGHT = 20;
+    private static final int FUDGE_FACTOR = 4;
     private IHistogramPanelListener _listener;
     private final Object _synchObject = new Object();
     private int _width;
     private int _height;
     private int _inset;
     private int[] _bins;
-    private int _max;
+    private int _maxBinCount;
     private Integer _minCursor;
     private Integer _maxCursor;
     private boolean _draggingMinCursor;
@@ -74,6 +74,8 @@ public class HistogramPanel extends JPanel {
             @Override
             public void mouseReleased(MouseEvent e) {
                 boolean changed = false;
+                int min = 0; // makes the compiler happy
+                int max = 0;
                 synchronized (_synchObject) {
                     if (_draggingMinCursor) {
                         _minCursor = e.getX();
@@ -100,16 +102,18 @@ public class HistogramPanel extends JPanel {
                         }
                         _draggingMaxCursor = false;
                         changed = true;
-                    }                    
+                    }
+                    if (changed) {
+                        // convert to 0..width-1 range
+                        min = _minCursor - _inset + 1;
+                        max = _maxCursor - _inset - 1;
+                    }
                 }
                 if (changed) {
-                    repaint();
                     if (null != _listener) {
-                        // convert to 0..width - 1 range
-                        int min = _minCursor - _inset + 1; //TODO _min/_maxCursor c/b changed by now
-                        int max = _maxCursor - _inset - 1;
-                        _listener.setMinMax(min, max);
+                        _listener.setMinMaxLUTPixels(min, max);
                     }
+                    repaint();
                 }
             }
             
@@ -132,6 +136,8 @@ public class HistogramPanel extends JPanel {
             @Override
             public void mouseDragged(MouseEvent e) {
                 boolean changed = false;
+                int min = 0; // makes the compiler happy
+                int max = 0;
                 synchronized (_synchObject) {
                     if (_draggingMinCursor) {
                         // don't drag past max cursor
@@ -154,18 +160,20 @@ public class HistogramPanel extends JPanel {
                             _maxCursor = 2 * _inset + _width - 1;
                         }
                         changed = true;
-                    }    
+                    }
+                    if (changed) {
+                        // convert to 0..width-1 range
+                        min = _minCursor - _inset + 1;
+                        max = _maxCursor - _inset - 1;
+                    }
+
                 }
                 if (changed) {
-                    repaint();
-
                     if (null != _listener) {
-                        // convert to 0..width - 1 range
-                        int min = _minCursor - _inset + 1;
-                        int max = _maxCursor - _inset - 1;
                         // report dragged cursor position
-                        _listener.dragMinMax(min, max);
+                        _listener.dragMinMaxPixels(min, max);
                     }
+                    repaint();
                 }  
             }
         });
@@ -186,13 +194,12 @@ public class HistogramPanel extends JPanel {
      * @param bins 
      */
     public void setBins(int[] bins) {
-        System.out.println("SET BINS");
         synchronized (_synchObject) {
             _bins = bins;
-            _max = Integer.MIN_VALUE;
+            _maxBinCount = Integer.MIN_VALUE;
             for (int i = 0; i < bins.length; ++i) {
-                if (bins[i] > _max) {
-                    _max = bins[i];
+                if (bins[i] > _maxBinCount) {
+                    _maxBinCount = bins[i];
                 }
             }
         }
@@ -200,7 +207,8 @@ public class HistogramPanel extends JPanel {
     }
 
     /**
-     * Changes cursors and redraws.
+     * Changes cursors and redraws.  Note that when they are both null no
+     * cursor is diaplayed.
      * 
      * @param minCursor
      * @param maxCursor 
@@ -212,9 +220,15 @@ public class HistogramPanel extends JPanel {
             if (null == _minCursor && null == _maxCursor) {
                 _draggingMinCursor = _draggingMaxCursor = false;
             }
+            else {
+                // the cursors actually bracket the specified pixels
+                --_minCursor;
+                ++_maxCursor;
+            }
         }
         repaint();
     }
+    
 
     @Override
     public void paintComponent(Graphics g) {
@@ -231,7 +245,7 @@ public class HistogramPanel extends JPanel {
                         height = ONE_HEIGHT;
                     }
                     else {
-                        height = (int) ((_height - ONE_HEIGHT) * Math.log(_bins[i]) / Math.log(_max)) + ONE_HEIGHT;
+                        height = (int) ((_height - ONE_HEIGHT) * Math.log(_bins[i]) / Math.log(_maxBinCount)) + ONE_HEIGHT;
                     }
                     if (height > _height) {
                         height = _height;

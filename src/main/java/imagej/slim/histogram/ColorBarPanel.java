@@ -58,13 +58,14 @@ public class ColorBarPanel extends JPanel {
     private int _height;
     private int _inset;
     private Color[] _color;
-    double _min;
-    double _max;
+    double _minView;
+    double _maxView;
     double _minLUT;
     double _maxLUT;
 
     /**
-     * Constructor
+     * Constructor.  Note that for best results width should be 254, so that
+     * there is a 1:1 relationship between colors and pixels.
      *
      * @param width
      * @param inset
@@ -79,7 +80,7 @@ public class ColorBarPanel extends JPanel {
         
         setPreferredSize(new Dimension(width + 2 * inset, height));
 
-        _min = _max = _minLUT = _maxLUT = 0.0f;
+        _minView = _maxView = _minLUT = _maxLUT = 0.0f;
     }
 
     /**
@@ -97,15 +98,16 @@ public class ColorBarPanel extends JPanel {
     /**
      * Changes the values and redraws.
      * 
-     * @param min
-     * @param max
+     * @param minView
+     * @param maxView
      * @param minLUT
      * @param maxLUT
      */
-    public void setMinMax(double min, double max, double minLUT, double maxLUT) {
+    public void setMinMax(double minView, double maxView,
+            double minLUT, double maxLUT) {
         synchronized (_synchObject) {
-            _min = min;
-            _max = max;
+            _minView = minView;
+            _maxView = maxView;
             _minLUT = minLUT;
             _maxLUT = maxLUT;
         }
@@ -160,21 +162,33 @@ public class ColorBarPanel extends JPanel {
     }
 
     /*
-     * Given a pixel value 0...253
+     * Given a pixel value 0..253 show appropriate color.
+     * 
      * @param i
      * @return
      */
-    //TODO this is WRONGO!!!!! 256 color version
     private Color colorize(int i) {
+        // default color
         Color color = _color[0];
-        // wait till we have initial range
-        if (_min < _max) {
-            double value = _min + (_max - _min) * i / _width;
+        
+        // wait till we have initial range before any colorization
+        if (_minView < _maxView) {
+            
+            // what is the value for this pixel?
+            double value = _minView + (_maxView - _minView) * i / _width;
+            
+            // if value within palette range
             if (value >= _minLUT && value <= _maxLUT) {
-                int index = (int)((value - _minLUT)
+                
+                // compute color index
+                int index = 1 + (int)((value - _minLUT)
                         * _color.length / (_maxLUT - _minLUT));
-                index = Math.max(index, 0);
-                index = Math.min(index, _color.length - 1);
+                
+                // constrain to 1..253
+                index = Math.max(index, 1);
+                index = Math.min(index, _color.length - 3);
+                
+                // get the color
                 color = _color[index];
             }
         }

@@ -32,7 +32,7 @@ import javax.swing.JTextField;
 
 
 /**
- * This is the main class for this histogram tool.  It handles layout and wiring
+ * This is the main class for the histogram tool.  It handles layout and wiring
  * of UI components and the logic of updating the histogram.
  *
  * @author Aivar Grislis
@@ -48,8 +48,8 @@ public class HistogramTool {
     private final static String HARDCODED_LUT =  "/Applications/ImageJ/luts/aivar6.lut"; // aivar6 is my five color blue/cyan/green/yellow/red spectral palette
     private static HistogramTool INSTANCE = null;
     private final Object _synchObject = new Object();
-    private HistogramData _histogramData;
     private JFrame _frame;
+    private HistogramData _histogramData;
     private HistogramPanel _histogramPanel;
     private ColorBarPanel _colorBarPanel;
     private UIPanel _uiPanel;
@@ -63,7 +63,7 @@ public class HistogramTool {
         _histogramPanel.setListener(new HistogramPanelListener());
         _colorBarPanel = new ColorBarPanel(WIDTH, INSET, COLORBAR_HEIGHT);
         _colorBarPanel.setLUT(getLUT());
-        _uiPanel = new UIPanel();
+        _uiPanel = new UIPanel(true);
         _uiPanel.setListener(new UIPanelListener());
 
         _frame = new JFrame("Histogram");
@@ -74,9 +74,6 @@ public class HistogramTool {
         _frame.getContentPane().add(_uiPanel, BorderLayout.SOUTH);
         _frame.pack();
         _frame.setVisible(true);
-        
-       //TODO FOR A TEST:
-        _histogramPanel.setCursors(3, 44);
     }
 
     /**
@@ -106,18 +103,18 @@ public class HistogramTool {
             System.out.println("Error opening LUT " + e.getMessage());
         }
 
-        //TODO ARG Kludge:
         // IJ converts the FloatProcessor to 8-bits and then uses this palette
         // for display.  Unfortunately values less than or greater than the LUT
         // range still get displayed with LUT colors.  To work around this, use
-        // only 254 of the LUT colors.
+        // only 254 of the LUT colors.  The first and last colors will represent
+        // values less than and greater than the LUT range respectively.
 
         colorModel = PaletteFix.fixIndexColorModel(colorModel, Color.BLACK, Color.WHITE);
         return colorModel;
     }
 
     /**
-     * Gets a LUT.
+     * Gets a LUT.  Temporary expedient, belongs elsewhere.
      * 
      * @return 
      */
@@ -128,21 +125,36 @@ public class HistogramTool {
     }
 
     /**
+     * This method should be called whenever a new set of histogram values is
+     * to be displayed (i.e. when a different image gets focus).
+     * 
      * @param histogramData 
      */
-    //TODO this method is called from the focus listener only???
-    //  what about changes during the fit?
-    // How is initial histogramData aassigned?
     public void setHistogramData(HistogramData histogramData) {
+        double[] minMaxView;
+        double[] minMaxLUT;
         synchronized (_synchObject) {
             _histogramData = histogramData;
+            _histogramData.setListener(new HistogramDataListener());
+            minMaxView = _histogramData.getMinMaxView();
+            minMaxLUT  = _histogramData.getMinMaxLUT();
         }
+        
         if (_frame.isVisible()) {
             _frame.setVisible(true);
         }
         _frame.setTitle(histogramData.getTitle());
+        
         _histogramPanel.setBins(histogramData.binValues(WIDTH));
-        _histogramData.setListener(new HistogramDataListener()); //TODO a new one, or reuse existing?
+        //_histogramPanel.setCursors(0.0, 0.0); set cursors if not autoranging
+
+        _uiPanel.setAutoRange(histogramData.getAutoRange());
+        _uiPanel.setCombineChannels(histogramData.getCombineChannels());
+        _uiPanel.setDisplayChannels(histogramData.getDisplayChannels());
+        _uiPanel.setMinMaxLUT(minMaxLUT[0], minMaxLUT[1]);
+        
+        _colorBarPanel.setMinMax(minMaxView[0], minMaxView[1],
+                minMaxLUT[0], minMaxLUT[1]);
     }
 
     /*
@@ -179,7 +191,6 @@ public class HistogramTool {
         synchronized (_synchObject) {
             int[] bins = _histogramData.binValues(WIDTH);
             _histogramPanel.setBins(bins);
-            //TODO does this need to be fixed 256->254???
             _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
         }
     }
@@ -188,6 +199,8 @@ public class HistogramTool {
      * Inner class listens for changes during the fit.
      */
     private class HistogramDataListener implements IHistogramDataListener {
+        
+        @Override
         public void minMaxChanged(double minView, double maxView,
                 double minLUT, double maxLUT) {
             changed(minView, maxView, minLUT, maxLUT);
@@ -200,8 +213,6 @@ public class HistogramTool {
     private class HistogramPanelListener implements IHistogramPanelListener {
         private Timer _timer = null;
         private volatile int _dragPixels;
-        
-        private HistogramPanelListener() { }
  
         /**
          * Listens to the HistogramPanel, gets minimum and maximum cursor bar
@@ -211,21 +222,23 @@ public class HistogramTool {
          * @param min
          * @param max 
          */
-        public void setMinMax(int min, int max) {
+        public void setMinMaxLUTPixels(int min, int max) {
             killTimer();
 
             // get new minimum and maximum values for LUT
             double minLUT = pixelToValue(min);
             double maxLUT = pixelToValue(max);
-
+            
             // set min and max on UI panel
             _uiPanel.setMinMaxLUT(minLUT, maxLUT);
 
-            // redraw image and save
-            _histogramData.setMinMaxLUT(minLUT, maxLUT);
-
             // redraw color bar
             _colorBarPanel.setMinMaxLUT(minLUT, maxLUT);
+            
+            // save and redraw image
+            synchronized (_synchObject) {
+                _histogramData.setMinMaxLUT(minLUT, maxLUT);
+            }
         }
 
         /**
@@ -236,7 +249,7 @@ public class HistogramTool {
          * @param max
          */
         @Override
-        public void dragMinMax(int min, int max) {
+        public void dragMinMaxPixels(int min, int max) {
             System.out.println("dragMinMax(" + min + "," + max + ")");
             if (min < 0 || max >= PaletteFix.ADJUSTED_SIZE) {
                 // cursor is out of bounds, set up a periodic task to stretch
@@ -254,8 +267,9 @@ public class HistogramTool {
                 }
             }
             else {
-                // dragging within bounds now, kill the periodic task
+                // dragging within bounds now, kill the periodic task, if any
                 killTimer();
+                _uiPanel.dragMinMaxLUT(pixelToValue(min), pixelToValue(max));
             }
         }
 
@@ -309,16 +323,18 @@ public class HistogramTool {
                     _histogramPanel.setBins(bins);
                     _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
                     System.out.println("set to " + minView + " " + maxView);
-                 //   _colorBarPanel. update color bar also
                 }
             }
         }
     }
 
     private class UIPanelListener implements IUIPanelListener {
-        //tOEOprivate UIPanelListener() { }
         @Override
-        public void setAuto(boolean auto) {
+        public void setAutoRange(boolean autoRange) {
+            System.out.println("HistogramTool.UIPanelListener.setAutoRange(" + autoRange + ")");
+            synchronized (_synchObject) {
+                 _histogramData.setAutoRange(autoRange);
+            }
              // turn on/off the cursors
             // they are usually at -1 & 255
             // but if you are autoranging & showing all channels
@@ -326,12 +342,52 @@ public class HistogramTool {
             // autorange off, stuff shouldn't change right away
             // autorange on, should calculate new bounds
         }
+        
+        @Override
+        public void setCombineChannels(boolean combineChannels) {
+            synchronized (_synchObject) {
+                _histogramData.setCombineChannels(combineChannels);
+            }
+            //TODO
+            System.out.println("HistogramTool.UIPanelListener.setCombineChannels(" + combineChannels + ")");
+        }
+        
+        @Override
+        public void setDisplayChannels(boolean displayChannels) {
+            synchronized (_synchObject) {
+                _histogramData.setDisplayChannels(displayChannels);
+            }
+            //TODO
+            System.out.println("HistogramTool.UIPanelListener.setDisplayChannels(" + displayChannels + ")");
+        }
 
         @Override
-        public void setMinMaxLUT(double min, double max) {
-            // user has typed in some new values
-            // can't be autoranging
-            // adjust cursors and color bar and possibly histogram
+        public void setMinMaxLUT(double minLUT, double maxLUT) {
+            boolean changed = false;
+            double minView = 0;
+            double maxView = 0;
+            
+            // silently ignores errors; c/b temporary condition such as setting
+            // maximum before minimum
+            if (minLUT < maxLUT) {
+                changed = true;
+                
+                synchronized (_synchObject) {
+                    // expand the view to fit the LUT
+                    double[] minMaxView = _histogramData.getMinMaxView();
+                    minView = Math.min(minLUT, minMaxView[0]);
+                    maxView = Math.max(maxLUT, minMaxView[1]);
+                    _histogramData.setMinMaxView(minView, maxView);
+                    _histogramData.setMinMaxLUT(minLUT, maxLUT);
+                }
+            }
+
+            if (changed) {
+                System.out.println("CHANGED:" + minView + " " + maxView);
+                // update histogram and color bar
+                changed(minView, maxView, minLUT, maxLUT);
+            }
+            System.out.println("new min LUT is " + minLUT + "new max LUT is " + maxLUT);   
         }
     }
 }

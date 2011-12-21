@@ -14,7 +14,7 @@ public class HistogramData {
     private String _title;
     private HistogramDataChannel[] _channel;
     private int _channelIndex;
-    private boolean _autoScale;
+    private boolean _autoRange;
     private boolean _combineChannels;
     private boolean _displayChannels;
     private double _minView;
@@ -31,7 +31,7 @@ public class HistogramData {
     public HistogramData(String title, HistogramDataChannel[] channel) {
         _title = title;
         _channel = channel;
-        _autoScale = true;
+        _autoRange = true;
         _combineChannels = true;
         _displayChannels = true;
         _channelIndex = 0;
@@ -40,6 +40,11 @@ public class HistogramData {
         _listener = null;
     }
 
+    /**
+     * Sets a listener for histogram data changes.  Listener is unique.
+     * 
+     * @param listener 
+     */
     public void setListener(IHistogramDataListener listener) {
         _listener = listener;
     }
@@ -62,7 +67,6 @@ public class HistogramData {
         return _channelIndex;
     }
 
-    
     /**
      * Sets current channel index.
      * 
@@ -72,12 +76,22 @@ public class HistogramData {
         _channelIndex = channelIndex;
     }
 
-    public boolean getDisplayChannels() {
-        return _displayChannels;
+    /**
+     * Gets whether or not histogram should automatically scale to values.
+     * 
+     * @return whether automatically scales
+     */
+    public boolean getAutoRange() {
+        return _autoRange;
     }
-
-    public void setDisplayChannels(boolean displayChannels) {
-
+    
+    /**
+     * Sets whether or not histogram should automatically scale to values.
+     * 
+     * @param auto whether automatically scales
+     */
+    public void setAutoRange(boolean autoRange) {
+        _autoRange = autoRange;
     }
 
     /**
@@ -97,25 +111,25 @@ public class HistogramData {
     public void setCombineChannels(boolean combineChannels) {
         _combineChannels = combineChannels;
     }
+    
+    /**
+     * Gets whether or not histogram should display all channels.
+     * 
+     * @return 
+     */
+    public boolean getDisplayChannels() {
+        return _displayChannels;
+    }
 
     /**
-     * Gets whether or not histogram should automatically scale to values.
+     * Sets whether or not histogram should display all channels.
      * 
-     * @return whether automatically scales
+     * @param displayChannels 
      */
-    public boolean getAutoScale() {
-        return _autoScale;
+    public void setDisplayChannels(boolean displayChannels) {
+        _displayChannels = displayChannels;
     }
-    
-    /**
-     * Sets whether or not histogram should automatically scale to values.
-     * 
-     * @param auto whether automatically scales
-     */
-    public void setAutoScale(boolean autoScale) {
-        _autoScale = autoScale;
-    }
-    
+
     /**
      * Gets minimum and maximum extents of the view.
      * 
@@ -206,7 +220,7 @@ public class HistogramData {
             maxData = minDataCurrent = minMaxData[1];
         }
 
-        if (_autoScale) {
+        if (_autoRange) {
             if (_combineChannels) {
                 // LUT and view bounded by data for all channels
                 _minLUT = minData;

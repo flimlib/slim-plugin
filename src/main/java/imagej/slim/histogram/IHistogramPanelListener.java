@@ -20,7 +20,7 @@ public interface IHistogramPanelListener {
      * @param min
      * @param max 
      */
-    public void setMinMax(int min, int max);
+    public void setMinMaxLUTPixels(int min, int max);
 
     /**
      * Called during a mouse drag.  Values in pixels.
@@ -28,7 +28,7 @@ public interface IHistogramPanelListener {
      * @param min
      * @param max
      */
-    public void dragMinMax(int min, int max);
+    public void dragMinMaxPixels(int min, int max);
 
     /**
      * Mouse has exited the HistogramPanel.
