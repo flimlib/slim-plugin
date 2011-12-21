@@ -223,6 +223,7 @@ public class HistogramData {
         _maxView = maxData;
 
         if (null != _listener) {
+            System.out.println("tell listener " + _minView + " " + _maxView + "," + _minLUT + " " + _maxLUT);
             _listener.minMaxChanged(_minView, _maxView, _minLUT, _maxLUT);
         }
 

@@ -64,6 +64,7 @@ public class HistogramTool {
         _colorBarPanel = new ColorBarPanel(WIDTH, INSET, COLORBAR_HEIGHT);
         _colorBarPanel.setLUT(getLUT());
         _uiPanel = new UIPanel();
+        _uiPanel.setListener(new UIPanelListener());
 
         _frame = new JFrame("Histogram");
         _frame.setResizable(false);
@@ -217,6 +218,9 @@ public class HistogramTool {
             double minLUT = pixelToValue(min);
             double maxLUT = pixelToValue(max);
 
+            // set min and max on UI panel
+            _uiPanel.setMinMaxLUT(minLUT, maxLUT);
+
             // redraw image and save
             _histogramData.setMinMaxLUT(minLUT, maxLUT);
 
@@ -308,6 +312,26 @@ public class HistogramTool {
                  //   _colorBarPanel. update color bar also
                 }
             }
+        }
+    }
+
+    private class UIPanelListener implements IUIPanelListener {
+        //tOEOprivate UIPanelListener() { }
+        @Override
+        public void setAuto(boolean auto) {
+             // turn on/off the cursors
+            // they are usually at -1 & 255
+            // but if you are autoranging & showing all channels
+            // they need to be calculated
+            // autorange off, stuff shouldn't change right away
+            // autorange on, should calculate new bounds
+        }
+
+        @Override
+        public void setMinMaxLUT(double min, double max) {
+            // user has typed in some new values
+            // can't be autoranging
+            // adjust cursors and color bar and possibly histogram
         }
     }
 }

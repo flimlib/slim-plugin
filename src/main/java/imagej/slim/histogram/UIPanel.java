@@ -23,6 +23,7 @@ import javax.swing.JTextField;
  * @author aivar
  */
 public class UIPanel extends JPanel {
+    IUIPanelListener _listener;
     JCheckBox m_autoCheckBox;
     JTextField m_startTextField;
     JTextField m_stopTextField;
@@ -45,7 +46,7 @@ public class UIPanel extends JPanel {
         //m_listener = listener;
 
         m_auto = true;
-        m_start = m_stop = m_min = m_max = 0.0;
+        m_start = m_stop = m_min = m_max = 0.0; //TODO gotta be a better way
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
@@ -95,6 +96,21 @@ public class UIPanel extends JPanel {
         enableAppropriately();
     }
 
+    public void setListener(IUIPanelListener listener) {
+        _listener = listener;
+    }
+
+    public void setAuto(boolean auto) {
+
+    }
+
+    public void setMinMaxLUT(double min, double max) {
+        System.out.println("SetMinMaxLUT " + min + " " + max);
+        m_startTextField.setText("" + min);
+        m_stopTextField.setText("" + max);
+    }
+
+    // not
     /**
      * IColorizeRangeListener method.  Gets external changes to settings.
      *

@@ -9,7 +9,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.image.IndexColorModel;
 
-//import ij.process.MyFloatProcessor; //TODO IJ hack; update to IJ2 ImgLib
 import ij.ImagePlus;
 import ij.process.FloatProcessor;
 
@@ -40,9 +39,9 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         _histogramData = new HistogramData(title, histogramDataChannels);
         _image = new FloatProcessor(x, y);
         _image.setColorModel(imagej.slim.histogram.HistogramTool.getIndexColorModel());
-        //TODO fill the image with a color that will be out of LUT range and paint black!:
-        _image.setValue(Float.NaN); //TODO
-        _image.fill(); //TODO
+        // fill the image with a value that will be out of LUT range and paint black.
+        _image.setValue(Float.NaN);
+        _image.fill();
         _imagePlus = new ImagePlus(title, _image);
         _imagePlus.show();
         _imagePlus.getWindow().addFocusListener(new FocusListener() {
@@ -128,7 +127,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         int num = 0;
         for (int y = 0; y < values[0].length; ++y) {
             for (int x = 0; x < values.length; ++x) {
-                if (InvalidDouble.isValue(values[x][y])) {
+                if (Double.isNaN(values[x][y])) {
                     ++num;
                 }
                 ++count;
@@ -137,9 +136,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         System.out.println("checked " + count + " pixels,  found invalid " + num);
         return num;
     }   
-    
-    
-    
     
     /**
      * Updates the fitted parameters for a pixel.
@@ -187,7 +183,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
     private void clear(double[][] values) {
         for (int y = 0; y < values[0].length; ++y) {
             for (int x = 0; x < values.length; ++x) {
-                values[x][y] = InvalidDouble.value();
+                values[x][y] = Double.NaN;
             }
         }
     }

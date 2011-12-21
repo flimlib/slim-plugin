@@ -4,8 +4,6 @@
  */
 package imagej.slim.histogram;
 
-import imagej.slim.fitting.InvalidDouble;
-
 /**
  * This class shadows a channel in a stack for a displayed image.  If the image
  * has only two dimensions there would be only one of these per HistogramData.
@@ -14,8 +12,6 @@ import imagej.slim.fitting.InvalidDouble;
  */
 public class HistogramDataChannel {
     private double[][] _values;
-    private double _min;
-    private double _max;
     private double _minLUT;
     private double _maxLUT;
 
@@ -33,7 +29,6 @@ public class HistogramDataChannel {
      */
     public HistogramDataChannel(double[][] values) {
         _values = values;
-        _min = _max = 0.0f;
     }
 
     /**
@@ -65,21 +60,21 @@ public class HistogramDataChannel {
      * @return array of { min, max }
      */
     public double[] findMinMax() {
-        _min = Double.MAX_VALUE;
-        _max = Double.MIN_VALUE;
+        double min = Double.MAX_VALUE;
+        double max = Double.MIN_VALUE;
         for (int i = 0; i < _values.length; ++i) {
             for (int j = 0; j < _values[0].length; ++j) {
-                if (InvalidDouble.isValue(_values[i][j])) {
-                    if (_values[i][j] < _min) {
-                        _min = _values[i][j];
+                if (!Double.isNaN(_values[i][j])) {
+                    if (_values[i][j] < min) {
+                        min = _values[i][j];
                     }
-                    if (_values[i][j] > _max) {
-                        _max = _values[i][j];
+                    if (_values[i][j] > max) {
+                        max = _values[i][j];
                     }
                 }
             }
         }
-        return new double[] { _min, _max };
+        return new double[] { min, max };
     }
     
     /**
