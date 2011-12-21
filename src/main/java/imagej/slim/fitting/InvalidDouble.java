@@ -9,6 +9,8 @@ package imagej.slim.fitting;
  * 
  * Note that "double crap = Double.NaN; if (Double.NaN == crap) System.out.println("OK");"
  * won't print!
+ *
+ * Just a temporary experimental class that will go away.
  * 
  * @author aivar
  */

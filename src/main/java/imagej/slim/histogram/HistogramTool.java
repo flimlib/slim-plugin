@@ -38,7 +38,7 @@ import javax.swing.JTextField;
  * @author Aivar Grislis
  */
 public class HistogramTool {
-    private final static int WIDTH = 256;
+    private final static int WIDTH = PaletteFix.getSize();
     private final static int INSET = 5;
     private final static int HISTOGRAM_HEIGHT = 140;
     private final static int COLORBAR_HEIGHT = 20;
@@ -110,26 +110,8 @@ public class HistogramTool {
         // for display.  Unfortunately values less than or greater than the LUT
         // range still get displayed with LUT colors.  To work around this, use
         // only 254 of the LUT colors.
-        
-        // get the RGB colors for this color model
-        byte[] reds = new byte[256];
-        byte[] greens = new byte[256];
-        byte[] blues = new byte[256];
-        colorModel.getReds(reds);
-        colorModel.getBlues(blues);
-        colorModel.getGreens(greens);
 
-        // make the first entry black and the last white
-        reds  [0] = (byte) Color.BLACK.getRed();
-        greens[0] = (byte) Color.BLACK.getGreen();
-        blues [0] = (byte) Color.BLACK.getBlue();
-        reds  [255] = (byte) Color.WHITE.getRed();
-        greens[255] = (byte) Color.WHITE.getGreen();
-        blues [255] = (byte) Color.WHITE.getBlue();
-
-        // make a new color model
-        colorModel = new IndexColorModel(8, 256, reds, greens, blues);        
-        
+        colorModel = PaletteFix.fixIndexColorModel(colorModel, Color.BLACK, Color.WHITE);
         return colorModel;
     }
 
@@ -159,7 +141,7 @@ public class HistogramTool {
         }
         _frame.setTitle(histogramData.getTitle());
         _histogramPanel.setBins(histogramData.binValues(WIDTH));
-        _histogramData.setListener(new HistogramDataListener()); //TODO a new one?
+        _histogramData.setListener(new HistogramDataListener()); //TODO a new one, or reuse existing?
     }
 
     /*
@@ -170,7 +152,7 @@ public class HistogramTool {
             double[] minMaxView = _histogramData.getMinMaxView();
             double min = minMaxView[0];
             double max = minMaxView[1];
-            double value = (max - min) / 256;
+            double value = (max - min) / PaletteFix.getSize();
             return (pixel - INSET) * value;
         }
     }
@@ -183,7 +165,7 @@ public class HistogramTool {
             double[] minMaxView = _histogramData.getMinMaxView();
             double min = minMaxView[0];
             double max = minMaxView[1];
-            int pixel = (int)(256 * (value - min) / (max - min));
+            int pixel = (int)(PaletteFix.getSize() * (value - min) / (max - min));
             return pixel;
         }
     }
@@ -196,6 +178,7 @@ public class HistogramTool {
         synchronized (_synchObject) {
             int[] bins = _histogramData.binValues(WIDTH);
             _histogramPanel.setBins(bins);
+            //TODO does this need to be fixed 256->254???
             _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
         }
     }
@@ -251,14 +234,14 @@ public class HistogramTool {
         @Override
         public void dragMinMax(int min, int max) {
             System.out.println("dragMinMax(" + min + "," + max + ")");
-            if (min < 0 || max > 255) { //TODO express  0/255in a variable or constants
+            if (min < 0 || max >= PaletteFix.ADJUSTED_SIZE) {
                 // cursor is out of bounds, set up a periodic task to stretch
                 // the bounds, if not already running
                 if (min < 0) {
                     _dragPixels = min;
                 }
                 else {
-                    _dragPixels = max - 255;
+                    _dragPixels = max - PaletteFix.ADJUSTED_SIZE + 1;
                 }
                 if (null == _timer) {
                     System.out.println("Schedule");
@@ -318,7 +301,7 @@ public class HistogramTool {
 
                     // get updated histogram data & show it
                     _histogramData.setMinMaxView(minView, maxView);
-                    int[] bins = _histogramData.binValues(256);
+                    int[] bins = _histogramData.binValues(PaletteFix.ADJUSTED_SIZE);
                     _histogramPanel.setBins(bins);
                     _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
                     System.out.println("set to " + minView + " " + maxView);

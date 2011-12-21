@@ -138,7 +138,13 @@ public class ColorBarPanel extends JPanel {
             }
         }
     }
-    
+
+    /*
+     * Builds a full 256 color array of Colors from a LUT.
+     *
+     * @param lut
+     * @return
+     */
     private Color[] colorsFromLUT(LUT lut) {
         byte[] bytes = lut.getBytes();
         int numberColors = bytes.length / 3;
@@ -153,8 +159,14 @@ public class ColorBarPanel extends JPanel {
         return color;
     }
 
+    /*
+     * Given a pixel value 0...253
+     * @param i
+     * @return
+     */
+    //TODO this is WRONGO!!!!! 256 color version
     private Color colorize(int i) {
-        Color color = Color.BLACK;
+        Color color = _color[0];
         // wait till we have initial range
         if (_min < _max) {
             double value = _min + (_max - _min) * i / _width;
