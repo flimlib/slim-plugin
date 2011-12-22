@@ -4,6 +4,8 @@
  */
 package imagej.slim.histogram;
 
+import imagej.slim.fitting.IFittedImage;
+
 /**
  * Keeps an array of HistogramChannels for a given image.  Builds the 
  * histogram data as appropriate.
@@ -11,6 +13,7 @@ package imagej.slim.histogram;
  * @author aivar
  */
 public class HistogramData {
+    private IFittedImage _image;
     private String _title;
     private HistogramDataChannel[] _channel;
     private int _channelIndex;
@@ -28,7 +31,9 @@ public class HistogramData {
      * 
      * @param channel 
      */
-    public HistogramData(String title, HistogramDataChannel[] channel) {
+    public HistogramData(IFittedImage image, String title,
+            HistogramDataChannel[] channel) {
+        _image = image;
         _title = title;
         _channel = channel;
         _autoRange = true;
@@ -242,6 +247,10 @@ public class HistogramData {
         }
 
         return new double[] { minLUT, maxLUT };
+    }
+
+    public void redisplay() {
+        _image.redisplay();
     }
     
     public int[] binValues(int bins) {

@@ -15,6 +15,7 @@ import ij.process.FloatProcessor;
 import imagej.slim.histogram.HistogramData;
 import imagej.slim.histogram.HistogramDataChannel;
 import imagej.slim.histogram.HistogramTool;
+import imagej.slim.histogram.PaletteFix;
 
 /**
  *
@@ -36,7 +37,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         // _values c/b slice being drawn only; refer to Image for other slices; this scheme would fall apart if Image is colorized grayscale like SPCImage
         HistogramDataChannel histogramDataChannel = new HistogramDataChannel(_values);
         HistogramDataChannel[] histogramDataChannels = new HistogramDataChannel[] { histogramDataChannel };
-        _histogramData = new HistogramData(title, histogramDataChannels);
+        _histogramData = new HistogramData(this, title, histogramDataChannels);
         _image = new FloatProcessor(x, y);
         _image.setColorModel(imagej.slim.histogram.HistogramTool.getIndexColorModel());
         // fill the image with a value that will be out of LUT range and paint black.
@@ -102,25 +103,43 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 
     /**
      * Recalculates the image histogram and resets the palette.  Called
-     * periodically during the fit.
+     * periodically during the fit.  Redisplays the image.
      */
     public void recalcHistogram() {
         double[] minMaxLUT = _histogramData.recalcHistogram();
 
         if (null != minMaxLUT) {
-            // update palette bounds
-            _image.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
-            System.out.println("min max " + minMaxLUT[0] + " " +  minMaxLUT[1]);
+            System.out.println("Internal redisplay " + minMaxLUT[0] + " " + minMaxLUT[1]);
+            //TODO horrible kludge here!!!  But why on earth would these be zero?
+            //TODO #2 wound up enabling this again, otherwise you don't get any images except current image
+            if (true) { // 0 != minMaxLUT[0] && 0 != minMaxLUT[1]) {
+                redisplay(minMaxLUT);
+            }
         }
         else System.out.println("min max null");
-//        System.out.println("min max " + minMax[0] + " " + minMax[1]);
-        // etc.
-        _imagePlus.setProcessor(_image.duplicate());
-        
         
         System.out.println("RECALC " + numInvalid(_values));
     }
-    
+
+    /**
+     * Called from the histogram tool.  Redisplays the image after LUT ranges
+     * have changed.
+     */
+    public void redisplay() {
+        System.out.println("public redisplay");
+        double[] minMaxLUT = _histogramData.getMinMaxLUT();
+        redisplay(minMaxLUT);
+    }
+
+    /*
+     * Redisplay the image with new LUT range.
+     */
+    private void redisplay(double[] minMaxLUT) {
+        minMaxLUT = PaletteFix.adjustMinMax(minMaxLUT[0], minMaxLUT[1]);
+        _image.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
+        System.out.println("SETTING MIN AND MAX LUT TO " + minMaxLUT[0] + " " + minMaxLUT[1]);
+        _imagePlus.setProcessor(_image.duplicate());
+    }
     
     private int numInvalid(double[][] values) {
         int count = 0;

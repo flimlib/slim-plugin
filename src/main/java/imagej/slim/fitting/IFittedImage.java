@@ -11,7 +11,7 @@ import imagej.slim.histogram.HistogramData;
 
 /**
  *
- * @author Sivar Grislis
+ * @author Aivar Grislis
  */
 public interface IFittedImage {
     
@@ -74,6 +74,11 @@ public interface IFittedImage {
      * periodically during the fit.
      */
     public void recalcHistogram();
+
+    /**
+     * Redisplays the image.
+     */
+    public void redisplay();
 
     /**
      * Given the array of fitted parameters, get the value for this image.

@@ -192,6 +192,13 @@ public class HistogramTool {
             int[] bins = _histogramData.binValues(WIDTH);
             _histogramPanel.setBins(bins);
             _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
+            //TODO changed is currently called from two places:
+            // i) the HistogramData listener will call it periodically during the
+            // fit.
+            // ii) if the user types in a new LUT range this gets called.
+            // iii) in the future more UI interactions will wind up here
+            //
+            _histogramData.redisplay();
         }
     }
 
@@ -203,6 +210,7 @@ public class HistogramTool {
         @Override
         public void minMaxChanged(double minView, double maxView,
                 double minLUT, double maxLUT) {
+            System.out.println("CHANGED " + minView + " " + maxView + ", " + minLUT + " " + maxLUT);
             changed(minView, maxView, minLUT, maxLUT);
         }
     }
@@ -335,12 +343,16 @@ public class HistogramTool {
             synchronized (_synchObject) {
                  _histogramData.setAutoRange(autoRange);
             }
-             // turn on/off the cursors
-            // they are usually at -1 & 255
-            // but if you are autoranging & showing all channels
-            // they need to be calculated
-            // autorange off, stuff shouldn't change right away
-            // autorange on, should calculate new bounds
+
+            if (autoRange) {
+                _histogramPanel.setCursors(null, null);
+                //TODO calculate new bounds
+            }
+            else {
+                //TODO if you are autoranging, not combining channels, but showing
+                // all channels, these cursors would need to be calculated
+                _histogramPanel.setCursors(INSET, INSET + WIDTH - 1); //TODO I was expecting INSET-1 here??
+            }
         }
         
         @Override
