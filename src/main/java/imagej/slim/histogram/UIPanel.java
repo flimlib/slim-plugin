@@ -104,33 +104,35 @@ public class UIPanel extends JPanel {
         );
         add(_autoRangeCheckBox);
         
+        _combineChannelsCheckBox =
+            new JCheckBox("Combine Channels", _combineChannels);
+        _combineChannelsCheckBox.addItemListener(
+            new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    _combineChannels = _combineChannelsCheckBox.isSelected();
+                    if (null != _listener) {
+                        _listener.setCombineChannels(_combineChannels);
+                    }
+                }
+            }
+        );
         if (hasChannels) {
-            _combineChannelsCheckBox =
-                    new JCheckBox("Combine Channels", _combineChannels);
-            _combineChannelsCheckBox.addItemListener(
-                new ItemListener() {
-                    public void itemStateChanged(ItemEvent e) {
-                        _combineChannels = _combineChannelsCheckBox.isSelected();
-                        if (null != _listener) {
-                            _listener.setCombineChannels(_combineChannels);
-                        }
-                    }
-                }
-            );
             add(_combineChannelsCheckBox);
+        }
 
-            _displayChannelsCheckBox =
-                    new JCheckBox("Display Channels", _displayChannels);
-            _displayChannelsCheckBox.addItemListener(
-                new ItemListener() {
-                    public void itemStateChanged(ItemEvent e) {
-                        _displayChannels = _displayChannelsCheckBox.isSelected();
-                        if (null != _listener) {
-                            _listener.setDisplayChannels(_displayChannels);
-                        }
-                    }
+        _displayChannelsCheckBox =
+            new JCheckBox("Display Channels", _displayChannels);
+        _displayChannelsCheckBox.addItemListener(
+            new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    _displayChannels = _displayChannelsCheckBox.isSelected();
+                    if (null != _listener) {
+                        _listener.setDisplayChannels(_displayChannels);
+                    }   
                 }
-            );
+            }
+        );
+        if (hasChannels) {
             add(_displayChannelsCheckBox);
         }
 
