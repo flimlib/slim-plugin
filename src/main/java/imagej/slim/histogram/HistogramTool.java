@@ -8,6 +8,7 @@ import java.awt.BorderLayout;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
 
+import ij.IJ;
 import ij.plugin.LutLoader;
 import ij.process.ByteProcessor;
 import ij.ImagePlus;
@@ -18,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -43,9 +45,7 @@ public class HistogramTool {
     private final static int HISTOGRAM_HEIGHT = 140;
     private final static int COLORBAR_HEIGHT = 20;
     private final static int TASK_PERIOD = 100;
-    //TODO kludged in, user s/b able to select LUTS, somewhere else:
-    //TODO note that most IJ LUTs are unsuitable here, so having one standard lifetime LUT is not so bad
-    private final static String HARDCODED_LUT =  "/Applications/ImageJ/luts/aivar6.lut"; // aivar6 is my five color blue/cyan/green/yellow/red spectral palette
+    private final static String LUT = "lifetime.lut";
     private static HistogramTool INSTANCE = null;
     private final Object _synchObject = new Object();
     private JFrame _frame;
@@ -63,12 +63,12 @@ public class HistogramTool {
         _histogramPanel.setListener(new HistogramPanelListener());
         _colorBarPanel = new ColorBarPanel(WIDTH, INSET, COLORBAR_HEIGHT);
         _colorBarPanel.setLUT(getLUT());
-        _uiPanel = new UIPanel(true);
+        _uiPanel = new UIPanel(false); // true);
         _uiPanel.setListener(new UIPanelListener());
 
         _frame = new JFrame("Histogram");
         _frame.setResizable(false);
-        _frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); //TODO kind of lame, for now
+        //_frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); //TODO kind of lame, for now
         _frame.getContentPane().add(_histogramPanel, BorderLayout.NORTH);
         _frame.getContentPane().add(_colorBarPanel, BorderLayout.CENTER);
         _frame.getContentPane().add(_uiPanel, BorderLayout.SOUTH);
@@ -96,11 +96,14 @@ public class HistogramTool {
      */
     public static IndexColorModel getIndexColorModel() {
         IndexColorModel colorModel = null;
+        // 'getDirectory("luts")' works in IJ but not during NetBeans development
+        String startupPath = IJ.getDirectory("startup");
+        String lutPath = startupPath + "luts" + File.separatorChar + LUT;
         try {
-            colorModel = LutLoader.open(HARDCODED_LUT);
+            colorModel = LutLoader.open(lutPath);
         }
         catch (IOException e) {
-            System.out.println("Error opening LUT " + e.getMessage());
+            System.out.println("Problem loading LUT " + lutPath);
         }
 
         // IJ converts the FloatProcessor to 8-bits and then uses this palette
