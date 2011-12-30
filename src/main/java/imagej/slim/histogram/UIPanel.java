@@ -14,6 +14,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import ij.IJ;
+
 /**
  * This class holds the text fields that show the current minimum and maximum
  * LUT range.  It also has checkboxes to control how the ranges are derived
@@ -202,9 +204,19 @@ public class UIPanel extends JPanel {
     private void showMinMaxLUT(double min, double max) {
         DoubleFormatter minFormatter = new DoubleFormatter(true, DIGITS, min);
         _minTextField.setText(minFormatter.getText());
-        _minLUT = Double.parseDouble(_minTextField.getText());
+        try {
+            _minLUT = Double.parseDouble(_minTextField.getText());
+        }
+        catch (NumberFormatException e) {
+            IJ.log("Error parsing min '" + minFormatter.getText() + "' " + e);
+        }
         DoubleFormatter maxFormatter = new DoubleFormatter(false, DIGITS, max);
         _maxTextField.setText(maxFormatter.getText());
-        _maxLUT = Double.parseDouble(_maxTextField.getText());
+        try {
+            _maxLUT = Double.parseDouble(_maxTextField.getText());
+        }
+        catch (NumberFormatException e) {
+            IJ.log("Error parsing max '" + maxFormatter.getText() + "' " + e);
+        }
     }    
 }

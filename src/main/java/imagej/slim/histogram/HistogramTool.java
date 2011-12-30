@@ -97,15 +97,16 @@ public class HistogramTool {
     public static IndexColorModel getIndexColorModel() {
         IndexColorModel colorModel = null;
         // 'getDirectory("luts")' works in IJ but not during NetBeans development
+        //TODO On Linux with a link to Fiji on the desktop this startup directory is the desktop!
         String startupPath = IJ.getDirectory("startup");
         String lutPath = startupPath + "luts" + File.separatorChar + LUT;
         try {
             colorModel = LutLoader.open(lutPath);
         }
         catch (IOException e) {
+            IJ.log("Problem loading LUT " + lutPath);
             System.out.println("Problem loading LUT " + lutPath);
         }
-
         // IJ converts the FloatProcessor to 8-bits and then uses this palette
         // for display.  Unfortunately values less than or greater than the LUT
         // range still get displayed with LUT colors.  To work around this, use
