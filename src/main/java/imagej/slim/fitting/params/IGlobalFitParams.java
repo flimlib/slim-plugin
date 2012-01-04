@@ -76,9 +76,17 @@ public interface IGlobalFitParams {
     
     public void setStartPrompt(int startPrompt);
     
+    public int getStartPrompt();
+    
     public void setStopPrompt(int stopPrompt);
+    
+    public int getStopPrompt();
     
     public void setStartDecay(int startDecay);
     
+    public int getStartDecay();
+    
     public void setStopDecay(int stopDecay);
+    
+    public int getStopDecay();
 }

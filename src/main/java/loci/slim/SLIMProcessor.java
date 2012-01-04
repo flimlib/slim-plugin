@@ -661,7 +661,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     break;
                 case EACH:
                     // fit every pixel
-                    fittedImage = fitEachPixel(uiPanel);
+                    fittedImage = fitEachPixelXYZ(uiPanel);
                     break;
             }
         }
@@ -962,12 +962,231 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
     }
     
-    //TODO This is the new version and "fitEachPixelX" is the old:
+    //TODO This fitImages is the new version and "fitEachPixelXYZ" is the old:
     //TODO need to fit all channels
     //TODO need to be a selfcontained function call
     //  = gives you fitted images and a histogram tool
 
-    private Image<DoubleType> fitEachPixel(IUserInterfacePanel uiPanel) {
+    private Image<DoubleType> fitImages(IUserInterfacePanel uiPanel) {
+        
+        
+        
+        // loop over all channels
+        int startChannel;
+        int stopChannel;
+        if (m_fitAllChannels) {
+            startChannel = 0;
+            stopChannel = m_channels;
+        }
+        else {
+            startChannel = m_channel;
+            stopChannel = m_channel + 1;
+        }
+        for (int channel = startChannel; channel < stopChannel; ++channel) {
+            
+        }
+        
+        long start = System.nanoTime();
+        int pixelCount = 0;
+        int totalPixelCount = totalPixelCount(m_width, m_height, m_channels, m_fitAllChannels);
+        int pixelsToProcessCount = 0;
+
+        Image<T> workImage = m_image;
+        if (!SLIMBinning.NONE.equals(uiPanel.getBinning())) {
+            workImage = m_binning.doBinning(uiPanel.getBinning(), m_image);
+        }
+        LocalizableByDimCursor<T> pixelCursor = workImage.createLocalizableByDimCursor();
+
+        ICurveFitter curveFitter = getCurveFitter(uiPanel); //TODO where is this used?
+        double params[] = uiPanel.getParameters();
+
+        boolean useFittedParams;
+        LocalizableByDimCursor<DoubleType> resultsCursor = null;
+        if (null == m_fittedImage || uiPanel.getParameterCount() != m_fittedParameterCount) {
+            // can't use previous results
+            useFittedParams = false;
+            m_fittedParameterCount = uiPanel.getParameterCount();
+            m_fittedImage = makeImage(m_channels, m_width, m_height, m_fittedParameterCount);
+        }
+        else {
+            // ask UI whether to use previous results
+            useFittedParams = uiPanel.refineFit();
+        }
+        resultsCursor = m_fittedImage.createLocalizableByDimCursor();
+        
+        // build the data
+        ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
+        ArrayList<ChunkyPixel> pixelList = new ArrayList<ChunkyPixel>();
+        ICurveFitData curveFitData;
+        double yCount[];
+        double yFitted[];
+
+        ChunkyPixelEffectIterator pixelIterator = new ChunkyPixelEffectIterator(new ChunkyPixelTableImpl(), m_width, m_height);
+        
+        //TODO new style code starts only here:
+        FLIMImageFitter imageFitter = new FLIMImageFitter();
+        int components = 0;
+        boolean stretched = false;
+        switch (uiPanel.getFunction()) {
+            case SINGLE_EXPONENTIAL:
+                components = 1;
+                break;
+            case DOUBLE_EXPONENTIAL:
+                components = 2;
+                break;
+            case TRIPLE_EXPONENTIAL:
+                components = 3;
+                break;
+            case STRETCHED_EXPONENTIAL:
+                stretched = true;
+                break;
+        }
+        String outputs = uiPanel.getFittedImages();
+        OutputImageParser parser = new OutputImageParser(outputs, components, stretched);
+        
+        OutputImage[] outputImages = parser.getOutputImages();
+        imageFitter.setUpFit(outputImages, new int[] { m_width, m_height }, components);
+        imageFitter.beginFit();
+        
+        IGlobalFitParams globalFitParams = new GlobalFitParams();
+        globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA); ///uiPanel.getAlgorithm()); //loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
+        globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL); //uiPanel.getFunction());
+        globalFitParams.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+        globalFitParams.setNoiseModel(loci.curvefitter.ICurveFitter.NoiseModel.MAXIMUM_LIKELIHOOD); //uiPanel.getNoiseModel());
+        globalFitParams.setChiSquareTarget(uiPanel.getChiSquareTarget());
+        ///globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
+        ///globalFitParams.setNoiseModel(loci.curvefitter.ICurveFitter.NoiseModel.MAXIMUM_LIKELIHOOD);
+        globalFitParams.setXInc(m_timeRange);
+        globalFitParams.setPrompt(null);
+        if (null != m_excitationPanel) {
+            globalFitParams.setPrompt(m_excitationPanel.getValues(1));
+        }
+        ////globalFitParams.setChiSquareTarget(data[0].getChiSquareTarget());
+
+
+        boolean[] free = { true, true, true };
+        globalFitParams.setFree(free); //TODO BAD! s/n/b hardcoded here
+      //TODO KLUDGE  globalFitParams.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+        
+        
+        
+
+        while (!m_cancel && pixelIterator.hasNext()) {
+            IJ.showProgress(++pixelCount, totalPixelCount);
+            ChunkyPixel pixel = pixelIterator.next();
+            if (wantFitted(m_channel, pixel.getX(), pixel.getY())) {
+                curveFitData = new CurveFitData();
+                curveFitData.setChannel(m_channel);
+                curveFitData.setX(pixel.getX());
+                curveFitData.setY(pixel.getY());
+                curveFitData.setParams(
+                    useFittedParams ?
+                        getFittedParams(resultsCursor, m_channel, pixel.getX(), pixel.getY(), m_fittedParameterCount) :
+                            params.clone());
+                yCount = new double[m_timeBins];
+                for (int b = 0; b < m_timeBins; ++b) {
+                    yCount[b] = getData(pixelCursor, m_channel, pixel.getX(), pixel.getY(), b); //binnedData[m_channel][pixel.getY()][pixel.getX()][b];
+                }
+                curveFitData.setYCount(yCount);
+                yFitted = new double[m_timeBins];
+                curveFitData.setYFitted(yFitted);
+                curveFitDataList.add(curveFitData);
+                pixelList.add(pixel);
+
+                // process the pixels
+                if (++pixelsToProcessCount >= PIXEL_COUNT) {
+                    ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
+                    ChunkyPixel[] pixels = pixelList.toArray(new ChunkyPixel[0]);
+                    processPixelsXYZ(data, pixels, imageFitter);
+                    curveFitDataList.clear();
+                    pixelList.clear();
+                    pixelsToProcessCount = 0;
+                }
+            }
+        }
+        
+        if (m_cancel) {
+            IJ.showProgress(0, 0);
+            cancelImageFit();
+            imageFitter.cancelFit();
+            return null;
+        }
+        else {
+            if (pixelsToProcessCount > 0) {
+                ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
+                ChunkyPixel[] pixels = pixelList.toArray(new ChunkyPixel[0]);
+                processPixelsXYZ(data, pixels, imageFitter);
+            }
+            imageFitter.endFit();
+        }
+
+        
+        //TODO so the results are not getting saved to an Imglib Image
+        //TODO this technique of building an array of ICurveFitData, then breaking that down into
+        // IGlobalFitParams and ILocalFitParams seems over-complicated
+        
+        return null;
+    }
+    
+    
+    /*
+     * Helper function that processes an array of pixels.  Histogram and images
+     * are updated at the end of this function.
+     */
+    private void processPixels(ICurveFitData[] data, ChunkyPixel[] pixels, FLIMImageFitter imageFitter) {
+        if (null == _fittingEngine) {
+            _fittingEngine = Configuration.getInstance().getFittingEngine();
+            _fittingEngine.setThreads(Configuration.getInstance().getThreads());
+            _fittingEngine.setCurveFitter(Configuration.getInstance().getCurveFitter());
+        }
+
+        IGlobalFitParams globalFitParams = new GlobalFitParams();
+        globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
+        globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
+        globalFitParams.setNoiseModel(loci.curvefitter.ICurveFitter.NoiseModel.MAXIMUM_LIKELIHOOD);
+        globalFitParams.setXInc(m_timeRange);
+        globalFitParams.setPrompt(null);
+        if (null != m_excitationPanel) {
+            globalFitParams.setPrompt(m_excitationPanel.getValues(1));
+        }
+        globalFitParams.setChiSquareTarget(data[0].getChiSquareTarget());
+
+
+        boolean[] free = { true, true, true };
+        globalFitParams.setFree(free); //TODO BAD! s/n/b hardcoded here
+      //TODO KLUDGE  globalFitParams.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+
+        List<ILocalFitParams> dataList = new ArrayList<ILocalFitParams>();
+
+        for (ICurveFitData datum : data) {
+            ILocalFitParams localFitParams = new LocalFitParams();
+            localFitParams.setY(datum.getYCount());
+            localFitParams.setSig(datum.getSig());
+            localFitParams.setParams(datum.getParams());
+            localFitParams.setFitStart(m_startBin);
+            localFitParams.setFitStop(m_stopBin);
+            localFitParams.setYFitted(datum.getYFitted());
+            dataList.add(localFitParams);
+        }
+
+        List<IFitResults> results = _fittingEngine.fit(globalFitParams, dataList);
+
+        for (int i = 0; i < results.size(); ++i) {
+            IFitResults result = results.get(i);
+            ChunkyPixel p = pixels[i];
+            int[] location = { p.getX(), p.getY() };
+            imageFitter.updatePixel(location, result.getParams());
+        }
+
+        imageFitter.recalcHistogram();
+    }
+    
+    //TODO This XYZ is the new version and "fitEachPixelX" is the old:
+    //TODO need to fit all channels
+    //TODO need to be a selfcontained function call
+    //  = gives you fitted images and a histogram tool
+
+    private Image<DoubleType> fitEachPixelXYZ(IUserInterfacePanel uiPanel) {
         long start = System.nanoTime();
         int pixelCount = 0;
         int totalPixelCount = totalPixelCount(m_width, m_height, m_channels, m_fitAllChannels);
@@ -1056,7 +1275,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 if (++pixelsToProcessCount >= PIXEL_COUNT) {
                     ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
                     ChunkyPixel[] pixels = pixelList.toArray(new ChunkyPixel[0]);
-                    processPixels(data, pixels, imageFitter);
+                    processPixelsXYZ(data, pixels, imageFitter);
                     curveFitDataList.clear();
                     pixelList.clear();
                     pixelsToProcessCount = 0;
@@ -1074,7 +1293,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             if (pixelsToProcessCount > 0) {
                 ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
                 ChunkyPixel[] pixels = pixelList.toArray(new ChunkyPixel[0]);
-                processPixels(data, pixels, imageFitter);
+                processPixelsXYZ(data, pixels, imageFitter);
             }
             imageFitter.endFit();
         }
@@ -1091,7 +1310,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * Helper function that processes an array of pixels.  Histogram and images
      * are updated at the end of this function.
      */
-    private void processPixels(ICurveFitData[] data, ChunkyPixel[] pixels, FLIMImageFitter imageFitter) {
+    private void processPixelsXYZ(ICurveFitData[] data, ChunkyPixel[] pixels, FLIMImageFitter imageFitter) {
         if (null == _fittingEngine) {
             _fittingEngine = Configuration.getInstance().getFittingEngine();
             _fittingEngine.setThreads(Configuration.getInstance().getThreads());

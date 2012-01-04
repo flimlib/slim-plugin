@@ -133,8 +133,18 @@ public class GlobalFitParams implements IGlobalFitParams {
     }
     
     @Override
+    public int getStartPrompt() {
+        return _startPrompt;
+    }
+    
+    @Override
     public void setStopPrompt(int stopPrompt) {
         _stopPrompt = stopPrompt;
+    }
+    
+    @Override
+    public int getStopPrompt() {
+        return _stopPrompt;
     }
     
     @Override
@@ -143,7 +153,17 @@ public class GlobalFitParams implements IGlobalFitParams {
     }
     
     @Override
+    public int getStartDecay() {
+        return _startDecay;
+    }
+    
+    @Override
     public void setStopDecay(int stopDecay) {
         _stopDecay = stopDecay;
+    }
+    
+    @Override
+    public int getStopDecay() {
+        return _stopDecay;
     }
 }
