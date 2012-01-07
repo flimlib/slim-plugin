@@ -34,8 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.analysis;
 
-import loci.slim.ui.IUserInterfacePanel.FitFunction;
-import loci.slim.ui.IUserInterfacePanel.FitRegion;
+import imagej.slim.fitting.FitInfo.FitFunction;
+import imagej.slim.fitting.FitInfo.FitRegion;
 
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.real.DoubleType;

@@ -63,9 +63,10 @@ import javax.swing.border.EmptyBorder;
 
 import ij.gui.GenericDialog;
 
-import loci.slim.ui.IUserInterfacePanel.FitAlgorithm;
-import loci.slim.ui.IUserInterfacePanel.FitFunction;
-import loci.slim.ui.IUserInterfacePanel.FitRegion;
+import imagej.slim.fitting.FitInfo.FitAlgorithm;
+import imagej.slim.fitting.FitInfo.FitFunction;
+import imagej.slim.fitting.FitInfo.FitRegion;
+import imagej.slim.fitting.FitInfo.NoiseModel;
 
 /**
  * Main user interface panel for the fit.
@@ -1325,7 +1326,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         return free;
     }
 
-    public boolean refineFit() {
+    public boolean getRefineFit() {
         JCheckBox checkBox = null;
         String function = (String) m_functionComboBox.getSelectedItem();
         if (function.equals(SINGLE_EXPONENTIAL)) {

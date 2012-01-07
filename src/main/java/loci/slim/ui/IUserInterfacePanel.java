@@ -36,6 +36,11 @@ package loci.slim.ui;
 
 import javax.swing.JFrame;
 
+import imagej.slim.fitting.FitInfo.FitAlgorithm;
+import imagej.slim.fitting.FitInfo.FitFunction;
+import imagej.slim.fitting.FitInfo.FitRegion;
+import imagej.slim.fitting.FitInfo.NoiseModel;
+
 /**
  * Interface to the User Interface Panel
  *
@@ -46,22 +51,6 @@ import javax.swing.JFrame;
  * @author Aivar Grislis
  */
 public interface IUserInterfacePanel {
-    public static enum FitRegion {
-        SUMMED, ROI, POINT, EACH
-    }
-
-    public static enum FitAlgorithm {
-       JAOLHO, SLIMCURVE_RLD, SLIMCURVE_LMA, SLIMCURVE_RLD_LMA
-    }
-
-    public static enum FitFunction {
-        SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL
-    }
-
-    public static enum NoiseModel {
-        GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA, MAXIMUM_LIKELIHOOD
-    }
-
 
     /**
      * Gets the UI JFrame.
@@ -271,5 +260,5 @@ public interface IUserInterfacePanel {
      *
      * @return
      */
-    public boolean refineFit();
+    public boolean getRefineFit();
 }
