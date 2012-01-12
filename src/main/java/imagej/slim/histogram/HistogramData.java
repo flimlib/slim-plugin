@@ -4,7 +4,7 @@
  */
 package imagej.slim.histogram;
 
-import imagej.slim.fitting.IFittedImage;
+import imagej.slim.fitting.images.IColorizedImage;
 
 /**
  * Keeps an array of HistogramChannels for a given image.  Builds the 
@@ -13,7 +13,7 @@ import imagej.slim.fitting.IFittedImage;
  * @author aivar
  */
 public class HistogramData {
-    private IFittedImage _image;
+    private IColorizedImage _image;
     private String _title;
     private HistogramDataChannel[] _channel;
     private int _channelIndex;
@@ -31,7 +31,7 @@ public class HistogramData {
      * 
      * @param channel 
      */
-    public HistogramData(IFittedImage image, String title,
+    public HistogramData(IColorizedImage image, String title,
             HistogramDataChannel[] channel) {
         _image = image;
         _title = title;

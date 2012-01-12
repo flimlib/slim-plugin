@@ -2,7 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package imagej.slim.fitting;
+package imagej.slim.fitting.images;
+
+import imagej.slim.fitting.images.AbstractBaseColorizedImage;
 
 /**
  * This class builds a fitted image that shows the fractional intensity.
@@ -11,7 +13,7 @@ package imagej.slim.fitting;
  *
  * @author Aivar Grislis
  */
-public class FractionalIntensityImage extends AbstractBaseFittedImage {
+public class FractionalIntensityImage extends AbstractBaseColorizedImage {
     private int _component;
     private int _components;
 
@@ -36,30 +38,30 @@ public class FractionalIntensityImage extends AbstractBaseFittedImage {
         double sum = 0.0;
         switch (_components) {
             case 2:
-                sum = parameters[FLIMImageFitter.A1_INDEX]
-                        + parameters[FLIMImageFitter.A2_INDEX];
+                sum = parameters[ColorizedImageFitter.A1_INDEX]
+                        + parameters[ColorizedImageFitter.A2_INDEX];
                 switch (_component) {
                     case 0:
-                        value = parameters[FLIMImageFitter.A1_INDEX];
+                        value = parameters[ColorizedImageFitter.A1_INDEX];
                         break;
                     case 1:
-                        value = parameters[FLIMImageFitter.A2_INDEX];;
+                        value = parameters[ColorizedImageFitter.A2_INDEX];;
                         break;
                 }
                 break;
             case 3:
-                sum = parameters[FLIMImageFitter.A1_INDEX]
-                        + parameters[FLIMImageFitter.A2_INDEX]
-                        + parameters[FLIMImageFitter.A3_INDEX];
+                sum = parameters[ColorizedImageFitter.A1_INDEX]
+                        + parameters[ColorizedImageFitter.A2_INDEX]
+                        + parameters[ColorizedImageFitter.A3_INDEX];
                 switch (_component) {
                     case 0:
-                        value = parameters[FLIMImageFitter.A1_INDEX];
+                        value = parameters[ColorizedImageFitter.A1_INDEX];
                         break;
                     case 1:
-                        value = parameters[FLIMImageFitter.A2_INDEX];
+                        value = parameters[ColorizedImageFitter.A2_INDEX];
                         break;
                     case 2:
-                        value = parameters[FLIMImageFitter.A3_INDEX];
+                        value = parameters[ColorizedImageFitter.A3_INDEX];
                         break;
                 }
                 break;

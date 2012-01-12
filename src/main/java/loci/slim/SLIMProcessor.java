@@ -81,7 +81,10 @@ import mpicbg.imglib.type.numeric.RealType;
 import mpicbg.imglib.type.numeric.real.DoubleType;
 
 // Kludge in the new stuff:
-import imagej.slim.fitting.OutputImageParser;
+import imagej.slim.fitting.FitInfo;
+import imagej.slim.fitting.IInputImage;
+import imagej.slim.fitting.IOutputImage;
+import imagej.slim.fitting.images.ColorizedImageParser;
 import imagej.slim.fitting.params.IGlobalFitParams;
 import imagej.slim.fitting.params.LocalFitParams;
 import imagej.slim.fitting.params.GlobalFitParams;
@@ -90,8 +93,8 @@ import imagej.slim.fitting.params.ILocalFitParams;
 import imagej.slim.fitting.params.IFitResults;
 import imagej.slim.fitting.config.Configuration;
 import imagej.slim.fitting.FitInfo;
-import imagej.slim.fitting.FLIMImageFitter;
-import imagej.slim.fitting.FLIMImageFitter.OutputImage;
+import imagej.slim.fitting.images.ColorizedImageFitter;
+import imagej.slim.fitting.images.ColorizedImageFitter.ColorizedImageType;
 import imagej.slim.fitting.FitInfo.FitAlgorithm;
 import imagej.slim.fitting.FitInfo.FitFunction;
 import imagej.slim.fitting.FitInfo.FitRegion;
@@ -660,7 +663,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     break;
                 case EACH:
                     // fit every pixel
-                    fittedImage = fitEachPixelXYZ(uiPanel);
+                    fittedImage = fitAllPixels(uiPanel);
                     break;
             }
         }
@@ -681,47 +684,30 @@ public class SLIMProcessor <T extends RealType<T>> {
         fitInfo.setFittedImages(uiPanel.getFittedImages());
         fitInfo.setAnalysisList(uiPanel.getAnalysisList());
         fitInfo.setFitAllChannels(uiPanel.getFitAllChannels());
-        fitInfo.setStart(uiPanel.getStart());
-        fitInfo.setStop(uiPanel.getStop());
+        fitInfo.setStartDecay(uiPanel.getStart());
+        fitInfo.setStopDecay(uiPanel.getStop());
         fitInfo.setThreshold(uiPanel.getThreshold());
         fitInfo.setChiSquareTarget(uiPanel.getChiSquareTarget());
-        fitInfo.setBinning(uiPanel.getBinning());
-        
+        fitInfo.setBinning(uiPanel.getBinning());   
         fitInfo.setX(uiPanel.getX());
         fitInfo.setY(uiPanel.getY());
         fitInfo.setParameterCount(uiPanel.getParameterCount());
-        
-        
         fitInfo.setParameters(uiPanel.getParameters());
         fitInfo.setFree(uiPanel.getFree());
         fitInfo.setRefineFit(uiPanel.getRefineFit());
         return fitInfo;
     }
     
-    private void newFitData(IGrayScaleImage grayScalePanel, IUserInterfacePanel uiPanel) {
-        Image<DoubleType> fittedImage = null;
-        FitInfo fitInfo = new FitInfo();
-  
-        // only one fit at a time
-        synchronized (m_synchFit) {
-            
-        }
-        m_channel        = grayScalePanel.getChannel();
-
-        m_region         = uiPanel.getRegion(); // this is either SUMMED/ROI/POINT/EACH -- which type of fit
-        m_algorithm      = uiPanel.getAlgorithm();
-        m_function       = uiPanel.getFunction();
-        m_fitAllChannels = uiPanel.getFitAllChannels();
-
-        m_x              = uiPanel.getX();
-        m_y              = uiPanel.getY();
-        m_startBin       = uiPanel.getStart();
-        m_stopBin        = uiPanel.getStop();
-        m_threshold      = uiPanel.getThreshold();
-
-        m_param          = uiPanel.getParameters();
-        m_free           = uiPanel.getFree();
+    private IInputImage wrapInputImage() {
+        IInputImage returnValue = null;
+        return returnValue;
     }
+    
+    private IOutputImage wrapOutputImage() {
+        IOutputImage returnValue = null;
+        return returnValue;
+    }
+
 
     /*
      * Sums all pixels and fits the result.
@@ -1075,7 +1061,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         ChunkyPixelEffectIterator pixelIterator = new ChunkyPixelEffectIterator(new ChunkyPixelTableImpl(), m_width, m_height);
         
         //TODO new style code starts only here:
-        FLIMImageFitter imageFitter = new FLIMImageFitter();
+        ColorizedImageFitter imageFitter = new ColorizedImageFitter();
         int components = 0;
         boolean stretched = false;
         switch (uiPanel.getFunction()) {
@@ -1093,9 +1079,9 @@ public class SLIMProcessor <T extends RealType<T>> {
                 break;
         }
         String outputs = uiPanel.getFittedImages();
-        OutputImageParser parser = new OutputImageParser(outputs, components, stretched);
+        ColorizedImageParser parser = new ColorizedImageParser(outputs, components, stretched);
         
-        OutputImage[] outputImages = parser.getOutputImages();
+        ColorizedImageType[] outputImages = parser.getColorizedImages();
         imageFitter.setUpFit(outputImages, new int[] { m_width, m_height }, components);
         imageFitter.beginFit();
         
@@ -1184,7 +1170,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * Helper function that processes an array of pixels.  Histogram and images
      * are updated at the end of this function.
      */
-    private void processPixels(ICurveFitData[] data, ChunkyPixel[] pixels, FLIMImageFitter imageFitter) {
+    private void processPixels(ICurveFitData[] data, ChunkyPixel[] pixels, ColorizedImageFitter imageFitter) {
         if (null == _fittingEngine) {
             _fittingEngine = Configuration.getInstance().getFittingEngine();
             _fittingEngine.setThreads(Configuration.getInstance().getThreads());
@@ -1249,12 +1235,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         ChunkyPixel[] pixels; 
         IGlobalFitParams globalFitParams;
         List<ILocalFitParams> localFitParams = new ArrayList<ILocalFitParams>();
-        FLIMImageFitter imageFitter; //it's confusing to have both an imageFitter and a fittingEngine
+        ColorizedImageFitter imageFitter; //it's confusing to have both an imageFitter and a fittingEngine
       
         return null;
     }
 
-    private Image<DoubleType> fitEachPixelXYZ(IUserInterfacePanel uiPanel) {
+    private Image<DoubleType> fitAllPixels(IUserInterfacePanel uiPanel) {
         long start = System.nanoTime();
         int pixelCount = 0;
         int totalPixelCount = totalPixelCount(m_width, m_height, m_channels, m_fitAllChannels);
@@ -1293,7 +1279,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         ChunkyPixelEffectIterator pixelIterator = new ChunkyPixelEffectIterator(new ChunkyPixelTableImpl(), m_width, m_height);
         
         //TODO new style code starts only here:
-        FLIMImageFitter imageFitter = new FLIMImageFitter();
+        ColorizedImageFitter imageFitter = new ColorizedImageFitter();
         int components = 0;
         boolean stretched = false;
         switch (uiPanel.getFunction()) {
@@ -1311,10 +1297,10 @@ public class SLIMProcessor <T extends RealType<T>> {
                 break;
         }
         String outputs = uiPanel.getFittedImages();
-        OutputImageParser parser = new OutputImageParser(outputs, components, stretched);
+        ColorizedImageParser parser = new ColorizedImageParser(outputs, components, stretched);
         
-        OutputImage[] outputImages = parser.getOutputImages();
-        imageFitter.setUpFit(outputImages, new int[] { m_width, m_height }, components);
+        ColorizedImageType[] colorizedImages = parser.getColorizedImages();
+        imageFitter.setUpFit(colorizedImages, new int[] { m_width, m_height }, components);
         imageFitter.beginFit();       
 
         while (!m_cancel && pixelIterator.hasNext()) {
@@ -1389,7 +1375,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param localFitParams
      * @param imageFitter 
      */
-    private void processPixels(IFittingEngine fittingEngine, ChunkyPixel[] pixels, IGlobalFitParams globalFitParams, List<ILocalFitParams> localFitParams, FLIMImageFitter imageFitter) {
+    private void processPixels(IFittingEngine fittingEngine, ChunkyPixel[] pixels, IGlobalFitParams globalFitParams, List<ILocalFitParams> localFitParams, ColorizedImageFitter imageFitter) {
         List<IFitResults> results = fittingEngine.fit(globalFitParams, localFitParams);
 
         for (int i = 0; i < results.size(); ++i) {
@@ -1403,7 +1389,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     }
   
     // copied 1/12 to modify into "processPixels" above:
-    private void processPixelsXYZhuhuh(ICurveFitData[] data, ChunkyPixel[] pixels, FLIMImageFitter imageFitter) {
+    private void processPixelsXYZhuhuh(ICurveFitData[] data, ChunkyPixel[] pixels, ColorizedImageFitter imageFitter) {
         if (null == _fittingEngine) {
             _fittingEngine = Configuration.getInstance().getFittingEngine();
             _fittingEngine.setThreads(Configuration.getInstance().getThreads());
@@ -1455,7 +1441,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * Helper function that processes an array of pixels.  Histogram and images
      * are updated at the end of this function.
      */
-    private void processPixelsXYZ(ICurveFitData[] data, ChunkyPixel[] pixels, FLIMImageFitter imageFitter) {
+    private void processPixelsXYZ(ICurveFitData[] data, ChunkyPixel[] pixels, ColorizedImageFitter imageFitter) {
         if (null == _fittingEngine) {
             _fittingEngine = Configuration.getInstance().getFittingEngine();
             _fittingEngine.setThreads(Configuration.getInstance().getThreads());

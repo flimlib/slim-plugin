@@ -2,14 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package imagej.slim.fitting;
+package imagej.slim.fitting.images;
+
+import imagej.slim.fitting.images.AbstractBaseColorizedImage;
 
 /**
  * Simple image that just displays one of the input parameters.
  *
  * @author Aivar Grislis
  */
-public class FittedImage extends AbstractBaseFittedImage {
+public class ColorizedImage extends AbstractBaseColorizedImage {
     private int _parameterIndex;
 
     /**
@@ -19,7 +21,7 @@ public class FittedImage extends AbstractBaseFittedImage {
      * @param dimension
      * @param parameterIndex
      */
-    public FittedImage(String title, int[] dimension, int parameterIndex) {
+    public ColorizedImage(String title, int[] dimension, int parameterIndex) {
         super(title, dimension);
         _parameterIndex = parameterIndex;
     }

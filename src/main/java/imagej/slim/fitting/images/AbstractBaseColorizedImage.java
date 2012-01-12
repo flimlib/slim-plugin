@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package imagej.slim.fitting;
+package imagej.slim.fitting.images;
 
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -21,20 +21,21 @@ import imagej.slim.histogram.PaletteFix;
  *
  * @author aivar
  */
-abstract public class AbstractBaseFittedImage implements IFittedImage {
+abstract public class AbstractBaseColorizedImage implements IColorizedImage {
     private String _title;
     private double _values[][];
     private HistogramData _histogramData;
     private FloatProcessor _image;
     private ImagePlus _imagePlus;
     
-    public AbstractBaseFittedImage(String title, int[] dimension) {
+    public AbstractBaseColorizedImage(String title, int[] dimension) {
         _title = title;
         int x = dimension[0];
         int y = dimension[1];
         _values = new double[x][y];
         //TODO need to handle multiple channels:
-        // _values c/b slice being drawn only; refer to Image for other slices; this scheme would fall apart if Image is colorized grayscale like SPCImage
+        // _values c/b slice being drawn only; refer to Image for other slices; this scheme would fall apart if Image is colorized grayscale like SPCImage,
+        // so better to keep _values around for each channel
         HistogramDataChannel histogramDataChannel = new HistogramDataChannel(_values);
         HistogramDataChannel[] histogramDataChannels = new HistogramDataChannel[] { histogramDataChannel };
         _histogramData = new HistogramData(this, title, histogramDataChannels);

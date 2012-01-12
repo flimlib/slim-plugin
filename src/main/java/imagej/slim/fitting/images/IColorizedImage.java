@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package imagej.slim.fitting;
+package imagej.slim.fitting.images;
 
 import java.awt.image.IndexColorModel;
 
@@ -13,7 +13,7 @@ import imagej.slim.histogram.HistogramData;
  *
  * @author Aivar Grislis
  */
-public interface IFittedImage {
+public interface IColorizedImage {
     
     /**
      * Gets the title of this image.

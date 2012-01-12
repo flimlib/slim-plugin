@@ -34,9 +34,9 @@ public class FitInfo {
     private String _fittedImages;
     private String[] _analysisList;
     private boolean _fitAllChannels;
-    private int _startBin;
-    private int _stopBin;
-    private int _threshold;
+    private int _startDecay;
+    private int _stopDecay;
+    private int _threshold; //TODO this s/b accounted for by IInputImage
     private double _chiSquareTarget;
     private String _binning;
     private int _x;
@@ -45,7 +45,22 @@ public class FitInfo {
     private double[] _parameters;
     private boolean[] _free;
     private boolean _refineFit;
-        
+    
+    private double[] _prompt;
+    private int _startPrompt;
+    private int _stopPrompt;
+    private int _lowerPrompt;
+    
+    private double[] _sig; //TODO sig s/b specified for each pixel!!
+    
+    private IInputImage _inputImage; // takes care of width/height/threshold/ROI
+    private IOutputImage _outputImage;
+    
+    //TODO private IBob _cursorMunger;
+
+    //HANDLE SOME OTHER WAY?:
+    // analysisList/fittedImages (especially analysis c/b totally post fit)
+
     public FitInfo() {}
 
     /**
@@ -197,8 +212,8 @@ public class FitInfo {
      *
      * @return start
      */
-    public int getStart() {
-        return _startBin;
+    public int getStartDecay() {
+        return _startDecay;
     }
 
     /**
@@ -206,8 +221,8 @@ public class FitInfo {
      *
      * @param bin
      */
-    public void setStart(int bin) {
-        _startBin = bin;
+    public void setStartDecay(int bin) {
+        _startDecay = bin;
     }
 
     /**
@@ -215,8 +230,8 @@ public class FitInfo {
      *
      * @return stop
      */
-    public int getStop() {
-        return _stopBin;
+    public int getStopDecay() {
+        return _stopDecay;
     }
 
     /**
@@ -224,8 +239,8 @@ public class FitInfo {
      *
      * @param bin
      */
-    public void setStop(int bin) {
-        _stopBin = bin;
+    public void setStopDecay(int bin) {
+        _stopDecay = bin;
     }
 
     /**

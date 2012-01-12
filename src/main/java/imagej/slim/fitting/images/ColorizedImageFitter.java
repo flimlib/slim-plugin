@@ -2,21 +2,19 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package imagej.slim.fitting;
+package imagej.slim.fitting.images;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import imagej.slim.fitting.engine.IFittingEngine;
-import imagej.slim.fitting.engine.ThreadedFittingEngine;
 import imagej.slim.histogram.HistogramTool;
 
 /**
- *
- * @author aivar
+ * This class
+ * @author Aivar Grislis
  */
-public class FLIMImageFitter {
-    public enum OutputImage { A1, T1, A2, T2, A3, T3, Z, H, CHISQ, F1, F2, F3, f1, f2, f3 };
+public class ColorizedImageFitter {
+    public enum ColorizedImageType { A1, T1, A2, T2, A3, T3, Z, H, CHISQ, F1, F2, F3, f1, f2, f3 };
     public static final int A1_INDEX    = 2;
     public static final int T1_INDEX    = 3;
     public static final int A2_INDEX    = 4;
@@ -26,19 +24,16 @@ public class FLIMImageFitter {
     public static final int H_INDEX     = 4;
     public static final int Z_INDEX     = 1;
     public static final int CHISQ_INDEX = 0;
-    private List<IFittedImage> _fittedImages;
-    private IFittingEngine _fittingEngine;
+    private List<IColorizedImage> _fittedImages;
     
-    public FLIMImageFitter() {
-        _fittedImages = new ArrayList<IFittedImage>();
-        //TODO s/b configurable which fitting engine to use:
-        _fittingEngine = new ThreadedFittingEngine();
+    public ColorizedImageFitter() {
+        _fittedImages = new ArrayList<IColorizedImage>();
     }
     
-    public void setUpFit(OutputImage[] images, int[] dimension, int components) {
+    public void setUpFit(ColorizedImageType[] images, int[] dimension, int components) {
         _fittedImages.clear();
-        for (OutputImage image : images) {
-            IFittedImage fittedImage = FLIMFittedImageFactory.getInstance().createImage(image, dimension, components);
+        for (ColorizedImageType image : images) {
+            IColorizedImage fittedImage = ColorizedImageFactory.getInstance().createImage(image, dimension, components);
             _fittedImages.add(fittedImage);
         }
         
@@ -53,7 +48,7 @@ public class FLIMImageFitter {
      * Begins a fit.
      */
     public void beginFit() {
-        for (IFittedImage fittedImage : _fittedImages) {
+        for (IColorizedImage fittedImage : _fittedImages) {
             //fittedImage.setColorModel(HistogramTool.getLUT()); //TODO getIndexColorModel()); //TODO all the same really as far as I can tell, i.e. broken
             fittedImage.beginFit();
         }
@@ -63,7 +58,7 @@ public class FLIMImageFitter {
      * Ends a fit.
      */
     public void endFit() {
-        for (IFittedImage fittedImage : _fittedImages) {
+        for (IColorizedImage fittedImage : _fittedImages) {
             fittedImage.endFit();
         }
 
@@ -73,7 +68,7 @@ public class FLIMImageFitter {
      * Cancels a fit.
      */
     public void cancelFit() {
-        for (IFittedImage fittedImage : _fittedImages) {
+        for (IColorizedImage fittedImage : _fittedImages) {
             fittedImage.cancelFit();
         }
     }
@@ -85,7 +80,7 @@ public class FLIMImageFitter {
      * @param parameters
      */
     public void updatePixel(int[] location, double[] parameters) {
-        for (IFittedImage fittedImage : _fittedImages) {
+        for (IColorizedImage fittedImage : _fittedImages) {
             fittedImage.updatePixel(location, parameters);
         }
     }
@@ -99,7 +94,7 @@ public class FLIMImageFitter {
      * @param parameters
      */
     public void updateChunkyPixel(int[] location, int[] dimension, double[] parameters) {
-        for (IFittedImage fittedImage : _fittedImages) {
+        for (IColorizedImage fittedImage : _fittedImages) {
             fittedImage.updateChunkyPixel(location, dimension, parameters);
         }
     }
@@ -108,7 +103,7 @@ public class FLIMImageFitter {
      * periodically during the fit.
      */
     public void recalcHistogram() {    
-        for (IFittedImage fittedImage : _fittedImages) {
+        for (IColorizedImage fittedImage : _fittedImages) {
             fittedImage.recalcHistogram();
         }
     }    
