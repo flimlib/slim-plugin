@@ -5,8 +5,11 @@
 
 package imagej.charts.cursors;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -22,9 +25,13 @@ public class Cursor {
     public enum Orientation { HORZ, VERT };
     int _ids;
     Orientation _orientation;
-    List<ICursorMoveListener> _moveListeners = new ArrayList<ICursorMoveListener>();
-    List<ICursorDragListener> _dragListeners = new ArrayList<ICursorDragListener>();
-    List<ICursorStretchListener> _stretchListeners = new ArrayList<ICursorStretchListener>();
+    private volatile boolean _dragListening;
+    private volatile boolean _moveListening;
+    private volatile boolean _stretchListening;
+    private Set<ICursorDragListener> _dragListener;
+    private Set<ICursorMoveListener> _moveListener;
+    private Set<ICursorStretchListener> _stretchListener;
+    private Rectangle _rectangle;
 
     public Cursor() {
         init(1, Orientation.HORZ);
@@ -40,41 +47,53 @@ public class Cursor {
 
     private void init(int ids, Orientation orientation) {
         _ids = ids;
+        _dragListening = _moveListening = _stretchListening = false;
+        _dragListener = new HashSet<ICursorDragListener>();
+        _moveListener = new HashSet<ICursorMoveListener>();
+        _stretchListener = new HashSet<ICursorStretchListener>();
+        _rectangle = null;
     }
 
-    public void addMoveListener(ICursorMoveListener listener) {
-        synchronized (_moveListeners) {
-            _moveListeners.add(listener);
-        }
+    public void addCursorDragListener(ICursorDragListener dragListener) {
+        _dragListener.add(dragListener);
+        _dragListening = true;
     }
 
-    public void addDragListener(ICursorDragListener listener) {
-        synchronized (_dragListeners) {
-            _dragListeners.add(listener);
-        }
+    public void removeCursorDragListener(ICursorDragListener dragListener) {
+        _dragListener.remove(dragListener);
+        _dragListening = _dragListener.size() > 0;
     }
 
-    public void addStretchListener(ICursorStretchListener listener) {
-        synchronized (_stretchListeners) {
-            _stretchListeners.add(listener);
-        }
+    public void addCursorMoveListener(ICursorMoveListener moveListener) {
+        _moveListener.add(moveListener);
+        _moveListening = true;
     }
 
-    public void removeMoveListener(ICursorMoveListener listener) {
-        synchronized (_moveListeners) {
-            _moveListeners.remove(listener);
-        }
+    public void removeCursorMoveListener(ICursorMoveListener moveListener) {
+        _moveListener.remove(moveListener);
+        _moveListening = _moveListener.size() > 0;
     }
 
-    public void removeDragListener(ICursorDragListener listener) {
-        synchronized (_dragListeners) {
-            _dragListeners.remove(listener);
-        }
+    public void addCursorStretchListener(ICursorStretchListener stretchListener) {
+        _stretchListener.add(stretchListener);
+        _stretchListening = true;
     }
 
-    public void removeStretchListener(ICursorMoveListener listener) {
-        synchronized (_stretchListeners) {
-            _stretchListeners.remove(listener);
-        }
+    public void removeCursorStretchListener(ICursorStretchListener stretchListener) {
+        _stretchListener.remove(stretchListener);
+        _stretchListening = _stretchListener.size() > 0;
     }
+
+    public void setRectangle(Rectangle rectangle) {
+        _rectangle = rectangle;
+    }
+
+    public boolean mouseDragged(int x, int y) {
+        return false;
+    }
+
+    public boolean mouseMoved(int x, int y) {
+        return false;
+    }
+
 }

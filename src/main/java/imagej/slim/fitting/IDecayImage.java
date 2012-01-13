@@ -6,12 +6,13 @@ package imagej.slim.fitting;
 
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.real.DoubleType;
+
 /**
  *
  * @author Aivar Grislis
  */
-public interface IOutputImage {
-
+public interface IDecayImage {
+    
     /**
      * Gets width of image.
      * 
@@ -21,7 +22,6 @@ public interface IOutputImage {
     
     /**
      * Gets height of image.
-     * 
      * @return 
      */
     public int getHeight();
@@ -32,29 +32,28 @@ public interface IOutputImage {
      * @return 
      */
     public int getChannels();
-
+    
     /**
      * Gets number of parameters of image.
      * 
      * @return 
      */
-    public int getParameters();
-
+    public int getBins();
+   
     /**
-     * Puts output pixel value.
+     * Gets input pixel value.
      * 
      * @param x
      * @param y
      * @param channel
-     * @param pixel 
+     * @return 
      */
-    public void putPixel(int x, int y, int channel, double[] pixel);
-    
+    public double[] getPixel(int x, int y, int channel);
 
     /**
      * Gets associated image.
      * 
      * @return 
      */
-    public Image<DoubleType> getImage();   
+    public Image<DoubleType> getImage();
 }

@@ -6,13 +6,12 @@ package imagej.slim.fitting;
 
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.real.DoubleType;
-
 /**
  *
  * @author Aivar Grislis
  */
-public interface IInputImage {
-    
+public interface IFittedImage {
+
     /**
      * Gets width of image.
      * 
@@ -22,6 +21,7 @@ public interface IInputImage {
     
     /**
      * Gets height of image.
+     * 
      * @return 
      */
     public int getHeight();
@@ -32,28 +32,62 @@ public interface IInputImage {
      * @return 
      */
     public int getChannels();
-    
+
     /**
      * Gets number of parameters of image.
      * 
      * @return 
      */
     public int getParameters();
-   
+
     /**
-     * Gets input pixel value.
+     * Gets dimensions.
+     *
+     * @return
+     */
+    public int[] getDimension();
+
+    /**
+     * Gets pixel values at location.
+     *
+     * @param location
+     * @return
+     */
+    public double[] getPixel(int[] location);
+
+    /**
+     * Sets pixel value at location.
+     *
+     * @param location
+     * @param value
+     */
+    public void setPixel(int[] location, double[] value);
+
+    /**
+     * Gets fitted pixel value.
+     *
+     * @param x
+     * @param y
+     * @param channel
+     * @return
+     */
+    public double[] getPixel(int x, int y, int channel);
+
+    /**
+     * Puts fitted pixel value.
      * 
      * @param x
      * @param y
      * @param channel
-     * @return 
+     * @param value
      */
-    public double[] getPixel(int x, int y, int channel);
+    public void setPixel(int x, int y, int channel, double[] value);
+    
 
     /**
      * Gets associated image.
      * 
      * @return 
      */
-    public Image<DoubleType> getImage();
+    public Image<DoubleType> getImage();   
 }

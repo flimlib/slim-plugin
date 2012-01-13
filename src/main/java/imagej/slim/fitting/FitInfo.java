@@ -53,8 +53,8 @@ public class FitInfo {
     
     private double[] _sig; //TODO sig s/b specified for each pixel!!
     
-    private IInputImage _inputImage; // takes care of width/height/threshold/ROI
-    private IOutputImage _outputImage;
+    private IDecayImage _inputImage; // takes care of width/height/threshold/ROI
+    private IFittedImage _outputImage;
     
     //TODO private IBob _cursorMunger;
 

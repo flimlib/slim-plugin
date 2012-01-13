@@ -7,7 +7,9 @@ package imagej.charts.cursors;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JPanel;
 
 import imagej.charts.IChartRectangleListener;
@@ -19,21 +21,28 @@ import imagej.charts.IChartRectangleListener;
 public class CursorLayer {
     private volatile Rectangle _rectangle = null;
     private JPanel _panel;
-    private List<Cursor> _cursorList;
+    private Set<Cursor> _cursorSet;
 
     public CursorLayer(JPanel panel) {
         _panel = panel;
-        _cursorList = new ArrayList<Cursor>();
+        _cursorSet = new HashSet<Cursor>();
     }
 
     public void addCursor(Cursor cursor) {
-        _cursorList.add(cursor);
+        _cursorSet.add(cursor);
+    }
+
+    public void removeCursor(Cursor cursor) {
+        _cursorSet.remove(cursor);
     }
 
     public IChartRectangleListener getChartRectangleListener() {
         return new IChartRectangleListener () {
             public void setRectangle(Rectangle rectangle) {
                 _rectangle = rectangle;
+                for (Cursor cursor : _cursorSet) {
+                    cursor.setRectangle(rectangle);
+                }
                 repaint();
             }
         };

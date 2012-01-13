@@ -44,31 +44,49 @@ package loci.slim;
  * @author Aivar Grislis grislis at wisc.edu
  */
 public class ChunkyPixel {
-    final int m_x;
-    final int m_y;
-    final int m_width;
-    final int m_height;
+    final int _x;
+    final int _y;
+    final int _width;
+    final int _height;
+    final int[] _location;
 
+    @Deprecated
     public ChunkyPixel(int x, int y, int width, int height) {
-        m_x = x;
-        m_y = y;
-        m_width = width;
-        m_height = height;
+        _x = x;
+        _y = y;
+        _width = width;
+        _height = height;
+        _location = null;
+    }
+
+    public ChunkyPixel(int[] location, int width, int height) {
+        _location = location;
+        _width = width;
+        _height = height;
+        _x = _location[0];
+        _y = _location[1]; //TODO just transitioning from x,y to location[]
     }
 
     public int getX() {
-        return m_x;
+        return _x;
     }
 
     public int getY() {
-        return m_y;
+        return _y;
     }
 
     public int getWidth() {
-        return m_width;
+        return _width;
     }
 
     public int getHeight() {
-        return m_height;
+        return _height;
+    }
+
+    public int[] getLocation() {
+        if (null == _location) {
+            return new int[] { _x, _y };
+        }
+        return _location;
     }
 }

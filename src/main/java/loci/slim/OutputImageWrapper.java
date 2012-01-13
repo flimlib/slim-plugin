@@ -4,7 +4,7 @@
  */
 package loci.slim;
 
-import imagej.slim.fitting.IOutputImage;
+import imagej.slim.fitting.IFittedImage;
 
 import mpicbg.imglib.container.planar.PlanarContainerFactory;
 import mpicbg.imglib.cursor.Cursor;
@@ -18,7 +18,7 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  * 
  * @author Aivar Grislis
  */
-public class OutputImageWrapper implements IOutputImage {
+public class OutputImageWrapper implements IFittedImage {
     private Image<DoubleType> _image;
     private int _width;
     private int _height;
@@ -105,8 +105,60 @@ public class OutputImageWrapper implements IOutputImage {
         return _parameters;
     }
 
+    @Override
+    public int[] getDimension() {
+        int[] dimension = null;
+        if (_channels > 1) {
+            dimension = new int[] { _width, _height, _channels, _parameters };
+        }
+        else {
+            dimension = new int[] { _width, _height, _parameters };
+        }
+        return dimension;
+    }
+
+    public double[] getPixel(int[] location) {
+        double[] parameters = new double[_parameters];
+        int parameterIndex = location.length - 1;
+        for (int i = 0; i < _parameters; ++i) {
+            location[parameterIndex] = i;
+            _cursor.moveTo(location);
+            parameters[i] = _cursor.getType().getRealFloat();
+        }
+        return parameters;
+    }
+
+    public void setPixel(int[] location, double[] value) {
+        int parameterIndex = location.length - 1;
+        for (int i = 0; i < _parameters; ++i) {
+            location[parameterIndex] = i;
+            _cursor.moveTo(location);
+            _cursor.getType().set(value[i]);
+        }
+    }
+
     /**
-     * Puts output pixel value.
+     * Gets fitted pixel value.
+     * 
+     * @param x
+     * @param y
+     * @param channel
+     * @return
+     */
+    @Override
+    public double[] getPixel(int x, int y, int channel) {
+        double[] parameters = new double[_parameters];
+        int[] location = new int[] { x, y, channel, 0 };
+        for (int i = 0; i < _parameters; ++i) {
+            location[3] = i;
+            _cursor.moveTo(location);
+            parameters[i] = _cursor.getType().getRealFloat();
+        }
+        return parameters;
+    }
+
+    /**
+     * Puts fitted pixel value.
      * 
      * @param x
      * @param y
@@ -114,12 +166,12 @@ public class OutputImageWrapper implements IOutputImage {
      * @param pixel 
      */
     @Override
-    public void putPixel(int x, int y, int channel, double[] pixel) {
+    public void setPixel(int x, int y, int channel, double[] parameters) {
         int[] location = new int[] { x, y, channel, 0 };
         for (int i = 0; i < _parameters; ++i) {
             location[3] = i;
             _cursor.moveTo(location);
-            _cursor.getType().set(pixel[i]);
+            _cursor.getType().set(parameters[i]);
         }
     }
 

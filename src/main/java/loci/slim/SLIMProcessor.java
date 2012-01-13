@@ -82,8 +82,8 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
 
 // Kludge in the new stuff:
 import imagej.slim.fitting.FitInfo;
-import imagej.slim.fitting.IInputImage;
-import imagej.slim.fitting.IOutputImage;
+import imagej.slim.fitting.IDecayImage;
+import imagej.slim.fitting.IFittedImage;
 import imagej.slim.fitting.images.ColorizedImageParser;
 import imagej.slim.fitting.params.IGlobalFitParams;
 import imagej.slim.fitting.params.LocalFitParams;
@@ -698,16 +698,66 @@ public class SLIMProcessor <T extends RealType<T>> {
         return fitInfo;
     }
     
-    private IInputImage wrapInputImage() {
-        IInputImage returnValue = null;
+    private IDecayImage wrapInputImage() {
+        IDecayImage returnValue = null;
         return returnValue;
     }
     
-    private IOutputImage wrapOutputImage() {
-        IOutputImage returnValue = null;
+    private IFittedImage wrapOutputImage() {
+        IFittedImage returnValue = null;
         return returnValue;
     }
 
+    private Image<DoubleType> fitImage(IUserInterfacePanel uiPanel) {
+        FitInfo fitInfo = getFitInfo(m_grayScaleImage, uiPanel);
+        IDecayImage decayImage = wrapInputImage();
+        IFittedImage previousImage = wrapOutputImage();
+        IFittedImage newImage = wrapOutputImage();
+        return fitImage(fitInfo, decayImage, previousImage, newImage);
+
+    }
+
+    private Image<DoubleType> fitImage(FitInfo fitInfo, IDecayImage decayImage,
+            IFittedImage previousImage, IFittedImage newImage) {
+        return null;
+    }
+
+    /**
+     * Helper function that processes an array of pixels.  When creating
+     * colorized images from fit parameters, the histogram and images are
+     * updated at the end of this function.
+     *
+     * @param fittingEngine
+     * @param pixels
+     * @param globalFitParams
+     * @param localFitParams
+     * @param imageColorizer
+     * @param fittedImage
+     */
+    private void processPixels(
+            IFittingEngine fittingEngine,
+            ChunkyPixel[] pixels,
+            IGlobalFitParams globalFitParams,
+            List<ILocalFitParams> localFitParamsList,
+            ColorizedImageFitter imageColorizer,
+            IFittedImage fittedImage) {
+
+        List<IFitResults> resultsList =
+                fittingEngine.fit(globalFitParams, localFitParamsList);
+
+        for (int i = 0; i < resultsList.size(); ++i) {
+            IFitResults result = resultsList.get(i);
+            ChunkyPixel p = pixels[i];
+            if (null != imageColorizer) {
+                imageColorizer.updatePixel(p.getLocation(), result.getParams());
+            }
+            fittedImage.setPixel(p.getLocation(), result.getParams());
+        }
+
+        if (null != imageColorizer) {
+            imageColorizer.recalcHistogram();
+        }
+    }
 
     /*
      * Sums all pixels and fits the result.
@@ -1365,28 +1415,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      */
     
     
-    /**
-     * Helper function that processes an array of pixels.  Histogram and imagess
-     * are updated at the end of this function.
-     * 
-     * @param fittingEngine
-     * @param pixels
-     * @param globalFitParams
-     * @param localFitParams
-     * @param imageFitter 
-     */
-    private void processPixels(IFittingEngine fittingEngine, ChunkyPixel[] pixels, IGlobalFitParams globalFitParams, List<ILocalFitParams> localFitParams, ColorizedImageFitter imageFitter) {
-        List<IFitResults> results = fittingEngine.fit(globalFitParams, localFitParams);
 
-        for (int i = 0; i < results.size(); ++i) {
-            IFitResults result = results.get(i);
-            ChunkyPixel p = pixels[i];
-            int[] location = { p.getX(), p.getY() };
-            imageFitter.updatePixel(location, result.getParams());
-        }
-
-        imageFitter.recalcHistogram();
-    }
   
     // copied 1/12 to modify into "processPixels" above:
     private void processPixelsXYZhuhuh(ICurveFitData[] data, ChunkyPixel[] pixels, ColorizedImageFitter imageFitter) {
