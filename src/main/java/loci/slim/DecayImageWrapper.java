@@ -20,24 +20,32 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  * 
  * @author Aivar Grislis
  */
-public class InputImageWrapper implements IDecayImage {
-    private Image<DoubleType> _image;
+public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
+    private Image<T> _image;
     private int _width;
     private int _height;
     private int _channels;
     private int _bins;
-    private LocalizableByDimCursor<DoubleType> _cursor;
+    private LocalizableByDimCursor<T> _cursor;
     
-    public InputImageWrapper(Image<DoubleType> image) {
+    public DecayImageWrapper(Image<T> image) {
         _image = image;
         int[] dimensions = image.getDimensions();
-        if (dimensions.length >= 4) {
-            _width = dimensions[0];
-            _height = dimensions[1];
-            _channels = dimensions[2];
-            _bins = dimensions[3];
-            _cursor = _image.createLocalizableByDimCursor();
+        //TODO this is a hack to handle IJ1 images
+        if (3 == dimensions.length) {
+            _width    = dimensions[0];
+            _height   = dimensions[1];
+            _channels = 1;
+            _bins     = dimensions[2];
         }
+        else if (4 == dimensions.length) {
+            _width    = dimensions[0];
+            _height   = dimensions[1];
+            _channels = dimensions[2];
+            _bins     = dimensions[3];
+        }
+        else throw new UnsupportedOperationException
+                ("Image dimensions " + dimensions.length + " not supported.");
     }
     
     /**
@@ -79,6 +87,11 @@ public class InputImageWrapper implements IDecayImage {
         return _bins;
     }
     
+    @Override
+    public boolean fitThisPixel(int x, int y, int channel) {
+        return true; //TODO FOR NOW ONLY!!
+    }
+    
     /**
      * Gets input pixel decay curve.
      * 
@@ -100,7 +113,7 @@ public class InputImageWrapper implements IDecayImage {
     }
 
     @Override
-    public Image<DoubleType> getImage() {
+    public Image<T> getImage() {
         return _image;
     }
 }

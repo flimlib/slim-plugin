@@ -663,7 +663,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     break;
                 case EACH:
                     // fit every pixel
-                    fittedImage = fitAllPixels(uiPanel);
+                    fittedImage = fitImage(uiPanel); ///TODO WAS OLD VERSION: fitAllPixels(uiPanel);
                     break;
             }
         }
@@ -698,27 +698,172 @@ public class SLIMProcessor <T extends RealType<T>> {
         return fitInfo;
     }
     
-    private IDecayImage wrapInputImage() {
-        IDecayImage returnValue = null;
-        return returnValue;
-    }
-    
     private IFittedImage wrapOutputImage() {
-        IFittedImage returnValue = null;
+        IFittedImage returnValue = null; //TODO
         return returnValue;
     }
 
     private Image<DoubleType> fitImage(IUserInterfacePanel uiPanel) {
+        // get fit settings from the UI panel
         FitInfo fitInfo = getFitInfo(m_grayScaleImage, uiPanel);
-        IDecayImage decayImage = wrapInputImage();
-        IFittedImage previousImage = wrapOutputImage();
+        
+        // set up images
+        IDecayImage decayImage = new DecayImageWrapper(m_image);
+        IFittedImage previousImage = null;
         IFittedImage newImage = wrapOutputImage();
-        return fitImage(fitInfo, decayImage, previousImage, newImage);
+        
+        // get the fitting engine to use
+        IFittingEngine fittingEngine = Configuration.getInstance().getFittingEngine();
+        return fitImage(fittingEngine, fitInfo, decayImage, previousImage, newImage);
 
     }
 
-    private Image<DoubleType> fitImage(FitInfo fitInfo, IDecayImage decayImage,
-            IFittedImage previousImage, IFittedImage newImage) {
+    /**
+     * Fits all the pixels in the image.
+     * 
+     * @param fittingEngine fitting code to use
+     * @param fitInfo fit settings
+     * @param decayImage contains the decay data
+     * @param previousImage previous fit results, may be null
+     * @param newImage results of this fit
+     * @return 
+     */
+    private Image<DoubleType> fitImage(
+            IFittingEngine fittingEngine,
+            FitInfo fitInfo,
+            IDecayImage decayImage,
+            IFittedImage previousImage,
+            IFittedImage newImage) {
+ 
+        // get commonly-used items in local variables
+        int width = /*new*/decayImage.getWidth();
+        int height = /*new*/decayImage.getHeight();
+        int channels = /*new*/decayImage.getChannels();
+        int[] dimension = new int[] { width, height, channels };
+        int channel = fitInfo.getChannel();
+        boolean fitAllChannels = fitInfo.getFitAllChannels();
+
+        // needed to display progress bar
+        int pixelCount = 0;
+        int totalPixelCount = totalPixelCount(width, height, channels, fitAllChannels);
+        int pixelsToProcessCount = 0;
+ 
+        // handle optionally producing colorized images during the fit
+        ColorizedImageFitter imageColorizer = null;
+        String outputs = null; //TODO fitInfo.getFittedImages();
+        if (null != outputs) {
+            int components = fitInfo.getComponents();
+            boolean stretched = fitInfo.getStretched();
+            ColorizedImageParser parser = new ColorizedImageParser(outputs, components, stretched);
+            ColorizedImageType[] outputImages = parser.getColorizedImages();
+            imageColorizer.setUpFit(outputImages, dimension, components);
+            imageColorizer.beginFit();
+        }
+  
+        // initialize class used for 'chunky pixel' effect
+        IChunkyPixelTable chunkyPixelTable = new ChunkyPixelTableImpl();
+        
+        // set up global, image-wide fit parameters
+        IGlobalFitParams globalFitParams = new GlobalFitParams();
+       ///TODO globalFitParams.setFitAlgorithm(fitInfo.getAlgorithm());
+       ///TODO  globalFitParams.setFitFunction(fitInfo.getFunction());
+        globalFitParams.setFree(fitInfo.getFree()); //TODO translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+       ///TODO globalFitParams.setNoiseModel(fitInfo.getNoiseModel());
+        globalFitParams.setChiSquareTarget(fitInfo.getChiSquareTarget());
+        globalFitParams.setXInc(m_timeRange); //TODO NO NO NO
+        globalFitParams.setPrompt(null);
+        if (null != m_excitationPanel) {
+            globalFitParams.setPrompt(m_excitationPanel.getValues(1)); //TODO NO NO AGAIN no globals in this method!
+        }
+     
+        List<ChunkyPixel> pixelList = new ArrayList<ChunkyPixel>();       
+        List<ILocalFitParams> localFitParamsList = new ArrayList<ILocalFitParams>();
+       
+        // loop over all channels or just the current one
+        for (int c : getChannelIndices(fitAllChannels, channel, channels)) {
+            // 'chunky pixel' effect: draw staggered pixels, not sequential
+            ChunkyPixelEffectIterator pixelIterator =
+                    new ChunkyPixelEffectIterator(chunkyPixelTable, width, height);
+            
+            while (!m_cancel && pixelIterator.hasNext()) { //TODO pass in a class that does the cancel notification
+                IJ.showProgress(++pixelCount, totalPixelCount);
+                ChunkyPixel pixel = pixelIterator.next();
+                
+                int x = pixel.getX();
+                int y = pixel.getY();
+                if (decayImage.fitThisPixel(x, y, c)) {
+                    // set up local, pixel fit parameters
+                    ILocalFitParams localFitParams = new LocalFitParams();
+                    
+                    pixelList.add(pixel);
+                    localFitParamsList.add(localFitParams);
+                    
+                    if (++pixelsToProcessCount >= PIXEL_COUNT) {
+                        pixelsToProcessCount = 0;
+                        
+                        ChunkyPixel[] pixelArray = pixelList.toArray(new ChunkyPixel[0]);
+                        pixelList.clear();
+                        ILocalFitParams[] localFitParamsArray = localFitParamsList.toArray(new ILocalFitParams[0]);
+                        localFitParamsList.clear();
+                        
+                        processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, imageColorizer, newImage);
+                    }
+                }
+                
+
+
+                /*
+                
+                if (wantFitted(m_channel, pixel.getX(), pixel.getY())) {
+                    curveFitData = new CurveFitData();
+                    curveFitData.setChannel(m_channel);
+                    curveFitData.setX(pixel.getX());
+                    curveFitData.setY(pixel.getY());
+                    curveFitData.setParams(
+                        useFittedParams ?
+                            getFittedParams(resultsCursor, m_channel, pixel.getX(), pixel.getY(), m_fittedParameterCount) :
+                                params.clone());
+                    yCount = new double[m_timeBins];
+                    for (int b = 0; b < m_timeBins; ++b) {
+                        yCount[b] = getData(pixelCursor, m_channel, pixel.getX(), pixel.getY(), b); //binnedData[m_channel][pixel.getY()][pixel.getX()][b];
+                    }
+                    curveFitData.setYCount(yCount);
+                    yFitted = new double[m_timeBins];
+                    curveFitData.setYFitted(yFitted);
+                    curveFitDataList.add(curveFitData);
+                    pixelList.add(pixel);
+
+                    // process the pixels
+                    if (++pixelsToProcessCount >= PIXEL_COUNT) {
+                        ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
+                        ChunkyPixel[] pixels = pixelList.toArray(new ChunkyPixel[0]);
+                        processPixelsXYZ(data, pixels, imageFitter);
+                        curveFitDataList.clear();
+                        pixelList.clear();
+                        pixelsToProcessCount = 0;
+                    }
+                }
+                 */
+            }
+        }
+        
+        //TODO REENABLE THIS BECAUSE YOU"RE LOSING SOME PIXELS HERE:
+        
+ /*       if (m_cancel) {
+            IJ.showProgress(0, 0);
+            cancelImageFit();
+            imageFitter.cancelFit();
+            return null;
+        }
+        else {
+            if (pixelsToProcessCount > 0) {
+                ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
+                ChunkyPixel[] pixels = pixelList.toArray(new ChunkyPixel[0]);
+                processPixelsXYZ(data, pixels, imageFitter);
+            }
+            imageFitter.endFit();
+        }   */
+        
         return null;
     }
 
@@ -738,9 +883,15 @@ public class SLIMProcessor <T extends RealType<T>> {
             IFittingEngine fittingEngine,
             ChunkyPixel[] pixels,
             IGlobalFitParams globalFitParams,
-            List<ILocalFitParams> localFitParamsList,
+            ILocalFitParams[] localFitParams,
             ColorizedImageFitter imageColorizer,
             IFittedImage fittedImage) {
+
+        //TODO use Lists or just arrays?
+        List<ILocalFitParams> localFitParamsList = new ArrayList<ILocalFitParams>();
+        for (ILocalFitParams lFP : localFitParams) {
+            localFitParamsList.add(lFP);
+        }
 
         List<IFitResults> resultsList =
                 fittingEngine.fit(globalFitParams, localFitParamsList);

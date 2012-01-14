@@ -5,13 +5,14 @@
 package imagej.slim.fitting;
 
 import mpicbg.imglib.image.Image;
+import mpicbg.imglib.type.numeric.RealType;
 import mpicbg.imglib.type.numeric.real.DoubleType;
 
 /**
  *
  * @author Aivar Grislis
  */
-public interface IDecayImage {
+public interface IDecayImage<T extends RealType<T>> {
     
     /**
      * Gets width of image.
@@ -39,6 +40,16 @@ public interface IDecayImage {
      * @return 
      */
     public int getBins();
+
+    /**
+     * Gets whether or not to fit this pixel.
+     * 
+     * @param x
+     * @param y
+     * @param channel
+     * @return 
+     */
+    public boolean fitThisPixel(int x, int y, int channel);
    
     /**
      * Gets input pixel value.

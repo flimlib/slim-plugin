@@ -403,4 +403,32 @@ public class FitInfo {
     public void setRefineFit(boolean refineFit) {
         _refineFit = refineFit;
     }
+
+    /**
+     * Gets number of exponential components.
+     * 
+     * @return 
+     */
+    public int getComponents() {
+        int components = 0;
+        switch (_function) {
+            case SINGLE_EXPONENTIAL:
+            case STRETCHED_EXPONENTIAL:
+                components = 1;
+            case DOUBLE_EXPONENTIAL:
+                components = 2;
+            case TRIPLE_EXPONENTIAL:
+                components = 3;
+        }
+        return components;
+    }
+    
+    /**
+     * Gets whether or not this is a stretched exponential fit.
+     * 
+     * @return 
+     */
+    public boolean getStretched() {
+        return FitFunction.STRETCHED_EXPONENTIAL == _function;
+    }
 }
