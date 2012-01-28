@@ -40,8 +40,8 @@ import ij.ImagePlus;
 import java.util.ArrayList;
 import java.util.List;
 
-import imagej.slim.fitting.FitInfo.FitFunction;
-import imagej.slim.fitting.FitInfo.FitRegion;
+import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.FitRegion;
 
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.real.DoubleType;
@@ -50,7 +50,7 @@ import net.java.sezpoz.Index;
 import net.java.sezpoz.IndexItem;
 
 /**
- * TODO
+ * This class runs post-fit analysis on the fitted image.
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/SLIMAnalysis.java">Trac</a>,
@@ -59,9 +59,13 @@ import net.java.sezpoz.IndexItem;
  * @author Aivar Grislis
  */
 public class SLIMAnalysis {
-    IndexItem<SLIMAnalyzer, ISLIMAnalyzer> m_plugins[];
-    String m_names[];
+    IndexItem<SLIMAnalyzer, ISLIMAnalyzer> _plugins[];
+    String _names[];
 
+    /**
+     * Constructor, gets list of potential analysis plugins.
+     * 
+     */
     public SLIMAnalysis() {
         // get list of plugins and their names
         List<String> names = new ArrayList<String>();
@@ -73,19 +77,34 @@ public class SLIMAnalysis {
             plugins.add(item);
             names.add(item.annotation().name());
         }
-        m_plugins = plugins.toArray(new IndexItem[0]);
-        m_names = names.toArray(new String[0]);
+        _plugins = plugins.toArray(new IndexItem[0]);
+        _names = names.toArray(new String[0]);
     }
 
+    /**
+     * Returns list of potential analysis plugin names.
+     * 
+     * @return 
+     */
     public String[] getChoices() {
-        return m_names;
+        return _names;
     }
 
+    /**
+     * Does image analysis.
+     * 
+     * @param name
+     * @param image
+     * @param region
+     * @param function 
+     */
     public void doAnalysis(String name, Image<DoubleType> image, FitRegion region, FitFunction function) {
+        
+        // find selected plugin
         IndexItem<SLIMAnalyzer, ISLIMAnalyzer> selectedPlugin = null;
-        for (int i = 0; i < m_names.length; ++i) {
-            if (name.equals(m_names[i])) {
-                selectedPlugin = m_plugins[i];
+        for (int i = 0; i < _names.length; ++i) {
+            if (name.equals(_names[i])) {
+                selectedPlugin = _plugins[i];
             }
         }
 
@@ -103,10 +122,6 @@ public class SLIMAnalysis {
             if (null != instance) {
                 instance.analyze(image, region, function);
             }
-        }
-        else {
-            // default behavior
-            System.out.println("Default behavior");
         }
     }
 }

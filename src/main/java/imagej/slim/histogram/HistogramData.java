@@ -199,7 +199,7 @@ public class HistogramData {
         minDataCurrent = maxDataCurrent = 0.0;
         minLUT = maxLUT = 0.0;
         minView = maxView = 0.0;
-        if (_displayChannels || _combineChannels) {
+        if (1 < _channel.length && (_displayChannels || _combineChannels)) {
             minData = Double.MAX_VALUE;
             maxData = Double.MIN_VALUE;
                 
@@ -242,7 +242,6 @@ public class HistogramData {
         _maxView = maxData;
 
         if (null != _listener) {
-            System.out.println("tell listener " + _minView + " " + _maxView + "," + _minLUT + " " + _maxLUT);
             _listener.minMaxChanged(_minView, _maxView, _minLUT, _maxLUT);
         }
 
@@ -259,9 +258,6 @@ public class HistogramData {
         for (int i = 0; i < bins; ++i) {
             bin[i] = 0;
         }
-        System.out.println("bin[3] is " + bin[3] + " bin[33] " + bin[33]);
-        System.out.println("_minView is " + _minView + " max " + _maxView);
-        System.out.println("_minLUT is " + _minLUT + " maxLUT " + _maxLUT);
         
         if (_displayChannels) {
             // add all channels

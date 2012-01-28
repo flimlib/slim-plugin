@@ -44,7 +44,8 @@ import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
 
 /**
- * This class brings together everything needed to fit one pixel.
+ * This class brings together everything needed to fit one pixel.  It is a 
+ * Callable, meant to be called from multiple threads.
  *
  * @author Aivar Grislis
  */
@@ -53,7 +54,7 @@ public class FittingEngineCallable implements IFittingEngineCallable {
     private IGlobalFitParams _globalParams;
     private ILocalFitParams _localParams;
     private IFitResults _result;
-
+    
     @Override
     public void setup(final ICurveFitter curveFitter,
             final IGlobalFitParams globalParams,
@@ -76,8 +77,8 @@ public class FittingEngineCallable implements IFittingEngineCallable {
         curveFitData.setChiSquareTarget(_globalParams.getChiSquareTarget());
         curveFitData.setYCount(_localParams.getY());
         curveFitData.setSig(_localParams.getSig());
-        curveFitData.setParams(_localParams.getParams());
-        curveFitData.setYFitted(_localParams.getYFitted()); //TODO awkward and kludgey!  How is this a local parameter?  It actually winds up in results.
+        curveFitData.setParams(_localParams.getParams().clone()); // params is overwritten
+        curveFitData.setYFitted(_localParams.getYFitted());
         ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData };
 
         _curveFitter.fitData(curveFitDataArray, _localParams.getFitStart(), _localParams.getFitStop());
@@ -86,7 +87,7 @@ public class FittingEngineCallable implements IFittingEngineCallable {
         _result.setChiSquare(curveFitData.getChiSquare());
         _result.setParams(curveFitData.getParams());
         _result.setYFitted(curveFitData.getYFitted());
-
+ 
         return _result;
-    }
+    }   
 }

@@ -214,7 +214,6 @@ public class HistogramTool {
         @Override
         public void minMaxChanged(double minView, double maxView,
                 double minLUT, double maxLUT) {
-            System.out.println("CHANGED " + minView + " " + maxView + ", " + minLUT + " " + maxLUT);
             changed(minView, maxView, minLUT, maxLUT);
         }
     }

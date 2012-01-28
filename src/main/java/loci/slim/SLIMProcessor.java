@@ -38,6 +38,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
+import ij.io.OpenDialog;
 import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
@@ -95,10 +96,10 @@ import imagej.slim.fitting.config.Configuration;
 import imagej.slim.fitting.FitInfo;
 import imagej.slim.fitting.images.ColorizedImageFitter;
 import imagej.slim.fitting.images.ColorizedImageFitter.ColorizedImageType;
-import imagej.slim.fitting.FitInfo.FitAlgorithm;
-import imagej.slim.fitting.FitInfo.FitFunction;
-import imagej.slim.fitting.FitInfo.FitRegion;
-import imagej.slim.fitting.FitInfo.NoiseModel;
+import loci.curvefitter.ICurveFitter.FitAlgorithm;
+import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.FitRegion;
+import loci.curvefitter.ICurveFitter.NoiseModel;
 
 
 //TODO tidy up SLIMProcessor
@@ -126,7 +127,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     private static final boolean USE_LAMBDA = false;
 
     // this affects how many pixels we process at once
-    private static final int PIXEL_COUNT = 128; //32;//16;
+    private static final int PIXEL_COUNT = 128;
 
     // Unicode special characters
     private static final Character CHI    = '\u03c7';
@@ -150,7 +151,9 @@ public class SLIMProcessor <T extends RealType<T>> {
     private volatile boolean m_fitted;
 
     private static final String FILE_KEY = "file";
+    private static final String PATH_KEY = "path";
     private String m_file;
+    private String m_path;
 
     IFormatReader m_reader;
 
@@ -164,12 +167,12 @@ public class SLIMProcessor <T extends RealType<T>> {
     // data parameters
     private boolean m_hasChannels;
     private int m_channels;
+    private int m_channelIndex;
     private int m_width;
     private int m_height;
     private int[] m_cLengths;
-    private int m_timeBins;
-    private int m_lifetimeIndex;
-    private int m_spectraIndex;
+    private int m_bins;
+    private int m_binIndex;
 
     private boolean m_little;
     private int m_pixelType;
@@ -205,6 +208,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     private int m_startX;
     private int m_threshold;
     private float m_chiSqTarget;
+    
+    private FitInfo m_fitInfo;
 
     private int m_debug = 0;
 
@@ -235,12 +240,12 @@ public class SLIMProcessor <T extends RealType<T>> {
     public void process(String arg) {
         boolean success = false;
         if (showFileDialog(getFileFromPreferences())) {
-            m_image = loadImage(m_file);
+            m_image = loadImage(m_path, m_file);
             if (null == m_image) {
                 System.out.println("image is null");
             }
             if (getImageInfo(m_image)) {
-                saveFileInPreferences(m_file);
+                savePathAndFileInPreferences(m_path, m_file);
                 success = true;
             }
         }
@@ -266,8 +271,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         final IUserInterfacePanel uiPanel = new UserInterfacePanel(USE_TAU, m_analysis.getChoices(), m_binning.getChoices());
         uiPanel.setX(0);
         uiPanel.setY(0);
-        uiPanel.setStart(m_timeBins / 2, false); //TODO hokey
-        uiPanel.setStop(m_timeBins - 1, false);
+        uiPanel.setStart(m_bins / 2, false); //TODO hokey
+        uiPanel.setStop(m_bins - 1, false);
         uiPanel.setThreshold(100);
         uiPanel.setChiSquareTarget(1.5);
         uiPanel.setFunctionParameters(0, DEFAULT_SINGLE_EXP_PARAMS);
@@ -289,6 +294,9 @@ public class SLIMProcessor <T extends RealType<T>> {
                  */
                 public void cancelFit() {
                     m_cancel = true;
+                    if (null != m_fitInfo) {
+                        m_fitInfo.setCancel(true);
+                    }
                 }
                 
                 /**
@@ -332,8 +340,8 @@ public class SLIMProcessor <T extends RealType<T>> {
                     }
                     int x = uiPanel.getX();
                     int y = uiPanel.getY();
-                    float[] values = new float[m_timeBins];
-                    for (int b = 0; b < m_timeBins; ++b) {
+                    float[] values = new float[m_bins];
+                    for (int b = 0; b < m_bins; ++b) {
                         values[b] = (float) getData(m_cursor, channel, x, y, b);
                     }
                     Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, values, m_timeRange);
@@ -421,13 +429,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 
     private void updateDecayCursors(IUserInterfacePanel uiPanel) {
         // sum selected channel
-        double[] decay = new double[m_timeBins];
+        double[] decay = new double[m_bins];
         for (int i = 0; i < decay.length; ++i) {
             decay[i] = 0.0;
         }
         for (int y = 0; y < m_height; ++y) {
             for (int x = 0; x < m_width; ++x) {
-                for (int b = 0; b < m_timeBins; ++b) {
+                for (int b = 0; b < m_bins; ++b) {
                     decay[b] += getData(m_cursor, m_channel, x, y, b);
                 }
             }
@@ -450,13 +458,13 @@ public class SLIMProcessor <T extends RealType<T>> {
             if (null != m_grayScaleImage) {
                 channel = m_grayScaleImage.getChannel();
             }
-            double[] decay = new double[m_timeBins];
+            double[] decay = new double[m_bins];
             for (int i = 0; i < decay.length; ++i) {
                 decay[i] = 0.0;
             }
             for (int y = 0; y < m_height; ++y) {
                 for (int x = 0; x < m_width; ++x) {
-                    for (int b = 0; b < m_timeBins; ++b) {
+                    for (int b = 0; b < m_bins; ++b) {
                         decay[b] += getData(m_cursor, channel, x, y, b);
                     }
                 }
@@ -501,30 +509,26 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param defaultFile
      * @return
      */
-    private boolean showFileDialog(String defaultFile) {
-        //TODO shouldn't UI be in separate class?
-        //TODO need to include fiji-lib.jar in repository:
-        //GenericDialogPlus dialog = new GenericDialogPlus("Load Data");
-        GenericDialog dialog = new GenericDialog("Load Data");
-        //TODO works with GenericDialogPlus, dialog.addFileField("File:", defaultFile, 24);
-        dialog.addStringField("File", defaultFile);
-        dialog.showDialog();
-        if (dialog.wasCanceled()) {
-            return false;
-        }
-        m_file = dialog.getNextString();
+    private boolean showFileDialog(String[] defaultPathAndFile) {
+        OpenDialog dialog = new OpenDialog("Load Data", m_path, m_file);
+        //if (dialog.wasCanceled()) return false;
+        m_path = dialog.getDirectory();
+        m_file = dialog.getFileName();
+        System.out.println("directory is " + dialog.getDirectory());
+        System.out.println("file is " + dialog.getFileName());
         return true;
     }
 
-    private Image<T> loadImage(String file) {
+    private Image<T> loadImage(String path, String file) {
         boolean threwException = false;
         ImageOpener imageOpener = new ImageOpener();
         Image<T> image = null;
         try {
-            image = imageOpener.openImage(file);
+            image = imageOpener.openImage(path + file);
         }
-        catch (java.io.IOException e) { }
-        catch (loci.formats.FormatException e) {
+        //catch (java.io.IOException e) { }
+        //catch (loci.formats.FormatException e) {
+        catch (Exception e) {
             System.out.println("Exception message: " + e.getMessage());
             threwException = true;
         }
@@ -539,6 +543,10 @@ public class SLIMProcessor <T extends RealType<T>> {
         try {
             dimensions = image.getDimensions();
             System.out.println("dimensions size is " + dimensions.length);
+            for (int i : dimensions) {
+                System.out.print("" + i + " ");
+            }
+            System.out.println();
         }
         catch (NullPointerException e) {
             System.out.println("image.getDimensions throws NullPointerException " + e.getMessage());
@@ -553,11 +561,13 @@ public class SLIMProcessor <T extends RealType<T>> {
         m_hasChannels = false;
         if (dimensions.length > 3) {
             m_hasChannels = true;
-            m_channels = dimensions[3];
+            m_channelIndex = 3;
+            m_channels = dimensions[m_channelIndex];
         }
         System.out.println("corrected to " + m_channels);
-        m_timeBins = ImageUtils.getDimSize(image, FormatTools.LIFETIME);
-        System.out.println("width " + m_width + " height " + m_height + " timeBins " + m_timeBins + " channels " + m_channels);
+        m_bins = ImageUtils.getDimSize(image, FormatTools.LIFETIME);
+        m_binIndex = 2;
+        System.out.println("width " + m_width + " height " + m_height + " timeBins " + m_bins + " channels " + m_channels);
         m_cursor = image.createLocalizableByDimCursor();
         /*
         int index = 0;
@@ -621,22 +631,28 @@ public class SLIMProcessor <T extends RealType<T>> {
     }
 
     /**
-     * Restores file name from Java Preferences.
+     * Restores path and file name from Java Preferences.
      *
-     * @return file name String
+     * @return String array with path and file name
      */
-    private String getFileFromPreferences() {
+    private String[] getFileFromPreferences() {
        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-       return prefs.get(FILE_KEY, "");
+       String path = prefs.get(PATH_KEY, "");
+       String file = prefs.get(FILE_KEY, "");
+       
+       System.out.println("path " + path + " file " + file);
+       return new String[] { prefs.get(PATH_KEY, ""), prefs.get(FILE_KEY, "") };
     }
 
     /**
-     * Saves the file name to Java Preferences.
+     * Saves the path and file names to Java Preferences.
      *
+     * @param path
      * @param file
      */
-    private void saveFileInPreferences(String file) {
+    private void savePathAndFileInPreferences(String path, String file) {
         Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+        prefs.put(PATH_KEY, path);
         prefs.put(FILE_KEY, file);
     }
 
@@ -667,8 +683,11 @@ public class SLIMProcessor <T extends RealType<T>> {
                     break;
             }
         }
+        System.out.println("fitted iage is " + fittedImage);
         if (null != fittedImage) {
+            System.out.println("not null");
             for (String analysis : uiPanel.getAnalysisList()) {
+                System.out.println("analsysis " + analysis);
                 m_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction()); //TODO get from uiPanel or get from global?  re-evaluate approach here
             }
         }
@@ -697,23 +716,42 @@ public class SLIMProcessor <T extends RealType<T>> {
         fitInfo.setRefineFit(uiPanel.getRefineFit());
         return fitInfo;
     }
-    
-    private IFittedImage wrapOutputImage() {
-        IFittedImage returnValue = null; //TODO
-        return returnValue;
-    }
 
+    /**
+     * Fits all the pixels in the image.  Gets fit settings from the UI panel
+     * and various globals.
+     * 
+     * @param uiPanel
+     * @return 
+     */
     private Image<DoubleType> fitImage(IUserInterfacePanel uiPanel) {
         // get fit settings from the UI panel
         FitInfo fitInfo = getFitInfo(m_grayScaleImage, uiPanel);
+        fitInfo.setXInc(m_timeRange);
+        if (null != m_excitationPanel) {
+            fitInfo.setPrompt(m_excitationPanel.getValues(1));
+            fitInfo.setStartPrompt(0);
+            fitInfo.setStopPrompt(100);
+        }
+        m_fitInfo = fitInfo;
         
         // set up images
-        IDecayImage decayImage = new DecayImageWrapper(m_image);
+        IDecayImage decayImage = new DecayImageWrapper(m_image, m_width, m_height, m_channels, m_channelIndex, m_bins, m_binIndex);
         IFittedImage previousImage = null;
-        IFittedImage newImage = wrapOutputImage();
+        int width = decayImage.getWidth();
+        int height = decayImage.getHeight();
+        int channels = 1;
+        if (fitInfo.getFitAllChannels()) {
+            channels = decayImage.getChannels();
+        }
+        int parameters = fitInfo.getParameterCount();
+        IFittedImage newImage = new OutputImageWrapper(width, height, channels, parameters);
         
-        // get the fitting engine to use
+        // create a fitting engine to use
         IFittingEngine fittingEngine = Configuration.getInstance().getFittingEngine();
+        ICurveFitter curveFitter = getCurveFitter(uiPanel); //TODO ARG shouldn't all UI panel info go into FitInfo???
+        fittingEngine.setCurveFitter(curveFitter);
+        
         return fitImage(fittingEngine, fitInfo, decayImage, previousImage, newImage);
 
     }
@@ -750,32 +788,35 @@ public class SLIMProcessor <T extends RealType<T>> {
  
         // handle optionally producing colorized images during the fit
         ColorizedImageFitter imageColorizer = null;
-        String outputs = null; //TODO fitInfo.getFittedImages();
+        String outputs = fitInfo.getFittedImages();
         if (null != outputs) {
             int components = fitInfo.getComponents();
             boolean stretched = fitInfo.getStretched();
             ColorizedImageParser parser = new ColorizedImageParser(outputs, components, stretched);
             ColorizedImageType[] outputImages = parser.getColorizedImages();
+            imageColorizer = new ColorizedImageFitter();
             imageColorizer.setUpFit(outputImages, dimension, components);
             imageColorizer.beginFit();
         }
   
+        // set up global, image-wide fit parameters
+        //TODO revisit all of these
+        IGlobalFitParams globalFitParams = new GlobalFitParams();
+        globalFitParams.setFitAlgorithm(fitInfo.getAlgorithm());
+        globalFitParams.setFitFunction(fitInfo.getFunction());
+        globalFitParams.setNoiseModel(fitInfo.getNoiseModel());
+        globalFitParams.setStartDecay(fitInfo.getStartDecay());
+        globalFitParams.setStopDecay(fitInfo.getStopDecay());
+        globalFitParams.setXInc(fitInfo.getXInc());
+        globalFitParams.setPrompt(fitInfo.getPrompt());
+        globalFitParams.setStartPrompt(fitInfo.getStartPrompt());
+        globalFitParams.setStopPrompt(fitInfo.getStopPrompt());
+        globalFitParams.setChiSquareTarget(fitInfo.getChiSquareTarget());
+        globalFitParams.setFree(fitInfo.getFree()); //TODO translateFree(uiPanel.getFunction(), uiPanel.getFree()));;
+     
         // initialize class used for 'chunky pixel' effect
         IChunkyPixelTable chunkyPixelTable = new ChunkyPixelTableImpl();
         
-        // set up global, image-wide fit parameters
-        IGlobalFitParams globalFitParams = new GlobalFitParams();
-       ///TODO globalFitParams.setFitAlgorithm(fitInfo.getAlgorithm());
-       ///TODO  globalFitParams.setFitFunction(fitInfo.getFunction());
-        globalFitParams.setFree(fitInfo.getFree()); //TODO translateFree(uiPanel.getFunction(), uiPanel.getFree()));
-       ///TODO globalFitParams.setNoiseModel(fitInfo.getNoiseModel());
-        globalFitParams.setChiSquareTarget(fitInfo.getChiSquareTarget());
-        globalFitParams.setXInc(m_timeRange); //TODO NO NO NO
-        globalFitParams.setPrompt(null);
-        if (null != m_excitationPanel) {
-            globalFitParams.setPrompt(m_excitationPanel.getValues(1)); //TODO NO NO AGAIN no globals in this method!
-        }
-     
         List<ChunkyPixel> pixelList = new ArrayList<ChunkyPixel>();       
         List<ILocalFitParams> localFitParamsList = new ArrayList<ILocalFitParams>();
        
@@ -785,7 +826,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             ChunkyPixelEffectIterator pixelIterator =
                     new ChunkyPixelEffectIterator(chunkyPixelTable, width, height);
             
-            while (!m_cancel && pixelIterator.hasNext()) { //TODO pass in a class that does the cancel notification
+            while (!fitInfo.getCancel() && pixelIterator.hasNext()) {
                 IJ.showProgress(++pixelCount, totalPixelCount);
                 ChunkyPixel pixel = pixelIterator.next();
                 
@@ -794,7 +835,16 @@ public class SLIMProcessor <T extends RealType<T>> {
                 if (decayImage.fitThisPixel(x, y, c)) {
                     // set up local, pixel fit parameters
                     ILocalFitParams localFitParams = new LocalFitParams();
+                    localFitParams.setY(decayImage.getPixel(x, y, c));
+                    double[] decay = decayImage.getPixel(x, y, c);
+                    localFitParams.setSig(null);
+                    localFitParams.setFitStart(fitInfo.getStartDecay());
+                    localFitParams.setFitStop(fitInfo.getStopDecay());
+                    localFitParams.setParams(fitInfo.getParameters());
+                    double[] yFitted = new double[1024]; //TODO ARG s/b based on bins
+                    localFitParams.setYFitted(yFitted);
                     
+                    pixel.setLocation(new int[] { x, y, c });                   
                     pixelList.add(pixel);
                     localFitParamsList.add(localFitParams);
                     
@@ -809,62 +859,30 @@ public class SLIMProcessor <T extends RealType<T>> {
                         processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, imageColorizer, newImage);
                     }
                 }
-                
-
-
-                /*
-                
-                if (wantFitted(m_channel, pixel.getX(), pixel.getY())) {
-                    curveFitData = new CurveFitData();
-                    curveFitData.setChannel(m_channel);
-                    curveFitData.setX(pixel.getX());
-                    curveFitData.setY(pixel.getY());
-                    curveFitData.setParams(
-                        useFittedParams ?
-                            getFittedParams(resultsCursor, m_channel, pixel.getX(), pixel.getY(), m_fittedParameterCount) :
-                                params.clone());
-                    yCount = new double[m_timeBins];
-                    for (int b = 0; b < m_timeBins; ++b) {
-                        yCount[b] = getData(pixelCursor, m_channel, pixel.getX(), pixel.getY(), b); //binnedData[m_channel][pixel.getY()][pixel.getX()][b];
-                    }
-                    curveFitData.setYCount(yCount);
-                    yFitted = new double[m_timeBins];
-                    curveFitData.setYFitted(yFitted);
-                    curveFitDataList.add(curveFitData);
-                    pixelList.add(pixel);
-
-                    // process the pixels
-                    if (++pixelsToProcessCount >= PIXEL_COUNT) {
-                        ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
-                        ChunkyPixel[] pixels = pixelList.toArray(new ChunkyPixel[0]);
-                        processPixelsXYZ(data, pixels, imageFitter);
-                        curveFitDataList.clear();
-                        pixelList.clear();
-                        pixelsToProcessCount = 0;
-                    }
-                }
-                 */
             }
         }
         
-        //TODO REENABLE THIS BECAUSE YOU"RE LOSING SOME PIXELS HERE:
-        
- /*       if (m_cancel) {
+        if (fitInfo.getCancel()) {
             IJ.showProgress(0, 0);
             cancelImageFit();
-            imageFitter.cancelFit();
+            if (null != imageColorizer) {
+                imageColorizer.cancelFit();
+            }
             return null;
         }
         else {
             if (pixelsToProcessCount > 0) {
-                ICurveFitData[] data = curveFitDataList.toArray(new ICurveFitData[0]);
-                ChunkyPixel[] pixels = pixelList.toArray(new ChunkyPixel[0]);
-                processPixelsXYZ(data, pixels, imageFitter);
+                System.out.println("finishing up " + pixelsToProcessCount + " pixels");
+                ChunkyPixel[] pixelArray = pixelList.toArray(new ChunkyPixel[0]);
+                ILocalFitParams[] localFitParamsArray = localFitParamsList.toArray(new ILocalFitParams[0]);
+                processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, imageColorizer, newImage);
             }
-            imageFitter.endFit();
-        }   */
-        
-        return null;
+            if (null != imageColorizer) {
+                imageColorizer.endFit();
+            }
+        }
+
+        return newImage.getImage();
     }
 
     /**
@@ -887,12 +905,12 @@ public class SLIMProcessor <T extends RealType<T>> {
             ColorizedImageFitter imageColorizer,
             IFittedImage fittedImage) {
 
-        //TODO use Lists or just arrays?
+        //TODO use Lists or just arrays? This just converts from array to List.
         List<ILocalFitParams> localFitParamsList = new ArrayList<ILocalFitParams>();
         for (ILocalFitParams lFP : localFitParams) {
             localFitParamsList.add(lFP);
         }
-
+        
         List<IFitResults> resultsList =
                 fittingEngine.fit(globalFitParams, localFitParamsList);
 
@@ -900,9 +918,11 @@ public class SLIMProcessor <T extends RealType<T>> {
             IFitResults result = resultsList.get(i);
             ChunkyPixel p = pixels[i];
             if (null != imageColorizer) {
-                imageColorizer.updatePixel(p.getLocation(), result.getParams());
+                int[] location = p.getLocation();
+                double[] results = result.getParams();
+                imageColorizer.updatePixel(location, results);
             }
-            fittedImage.setPixel(p.getLocation(), result.getParams());
+            fittedImage.setPixel(p.getLocation(), result.getParams()); //TODO ARG for a multichannel fit, location needs channel also; should ChunkyPixel keep track?
         }
 
         if (null != imageColorizer) {
@@ -927,8 +947,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         for (int channel : getChannelIndices(m_fitAllChannels, m_channel, m_channels)) {
             curveFitData = new CurveFitData();
             curveFitData.setParams(params.clone()); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
-            yCount = new double[m_timeBins];
-            for (int b = 0; b < m_timeBins; ++b) {
+            yCount = new double[m_bins];
+            for (int b = 0; b < m_bins; ++b) {
                 yCount[b] = 0.0;
             }
 
@@ -939,7 +959,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             // sum this channel
             for (int y = 0; y < m_height; ++y) {
                 for (int x = 0; x < m_width; ++x) {
-                    for (int b = 0; b < m_timeBins; ++b) {
+                    for (int b = 0; b < m_bins; ++b) {
                         double count = getData(m_cursor, m_channel, x, y, b);
                         yCount[b] += count;
                         photons += (int) count;
@@ -948,7 +968,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 }
             }
             curveFitData.setYCount(yCount);
-            yFitted = new double[m_timeBins];
+            yFitted = new double[m_bins];
             curveFitData.setYFitted(yFitted);
 
             // use zero for current channel if it's the only one
@@ -1006,8 +1026,8 @@ public class SLIMProcessor <T extends RealType<T>> {
             for (Roi roi: getRois()) {
                 curveFitData = new CurveFitData();
                 curveFitData.setParams(params.clone());
-                yCount = new double[m_timeBins];
-                for (int b = 0; b < m_timeBins; ++b) {
+                yCount = new double[m_bins];
+                for (int b = 0; b < m_bins; ++b) {
                     yCount[b] = 0.0;
                 }
                 Rectangle bounds = roi.getBounds();
@@ -1016,14 +1036,14 @@ public class SLIMProcessor <T extends RealType<T>> {
                     for (int y = 0; y < bounds.height; ++y) {
                         if (roi.contains(bounds.x + x, bounds.y + y)) {
                             ++pixels;
-                            for (int b = 0; b < m_timeBins; ++b) {
+                            for (int b = 0; b < m_bins; ++b) {
                                 yCount[b] += getData(m_cursor, channel, x, y, b);
                             }
                         }
                     }
                 }
                 curveFitData.setYCount(yCount);
-                yFitted = new double[m_timeBins];
+                yFitted = new double[m_bins];
                 curveFitData.setYFitted(yFitted);
 
                 // use zero for current channel if it's the only one
@@ -1134,12 +1154,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         for (int channel : getChannelIndices(m_fitAllChannels, m_channel, m_channels)) {
             curveFitData = new CurveFitData();
             curveFitData.setParams(params.clone()); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
-            yCount = new double[m_timeBins];
-            for (int b = 0; b < m_timeBins; ++b) {
+            yCount = new double[m_bins];
+            for (int b = 0; b < m_bins; ++b) {
                 yCount[b] = getData(m_cursor, channel, x, y, b);
             }
             curveFitData.setYCount(yCount);
-            yFitted = new double[m_timeBins];
+            yFitted = new double[m_bins];
             curveFitData.setYFitted(yFitted);
 
             // use zero for current channel if it's the only one
@@ -1205,7 +1225,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     //TODO need to be a selfcontained function call
     //  = gives you fitted images and a histogram tool
 
-    private Image<DoubleType> fitImages(IUserInterfacePanel uiPanel) {
+    private Image<DoubleType> fitImagesDEFUNCT(IUserInterfacePanel uiPanel) {
         
         
         
@@ -1287,10 +1307,10 @@ public class SLIMProcessor <T extends RealType<T>> {
         imageFitter.beginFit();
         
         IGlobalFitParams globalFitParams = new GlobalFitParams();
-        globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA); ///uiPanel.getAlgorithm()); //loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
-        globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL); //uiPanel.getFunction());
+        globalFitParams.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD_LMA); ///uiPanel.getAlgorithm()); //loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
+        globalFitParams.setFitFunction(FitFunction.SINGLE_EXPONENTIAL); //uiPanel.getFunction());
         globalFitParams.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
-        globalFitParams.setNoiseModel(loci.curvefitter.ICurveFitter.NoiseModel.MAXIMUM_LIKELIHOOD); //uiPanel.getNoiseModel());
+        globalFitParams.setNoiseModel(NoiseModel.MAXIMUM_LIKELIHOOD); //uiPanel.getNoiseModel());
         globalFitParams.setChiSquareTarget(uiPanel.getChiSquareTarget());
         ///globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
         ///globalFitParams.setNoiseModel(loci.curvefitter.ICurveFitter.NoiseModel.MAXIMUM_LIKELIHOOD);
@@ -1321,12 +1341,12 @@ public class SLIMProcessor <T extends RealType<T>> {
                     useFittedParams ?
                         getFittedParams(resultsCursor, m_channel, pixel.getX(), pixel.getY(), m_fittedParameterCount) :
                             params.clone());
-                yCount = new double[m_timeBins];
-                for (int b = 0; b < m_timeBins; ++b) {
+                yCount = new double[m_bins];
+                for (int b = 0; b < m_bins; ++b) {
                     yCount[b] = getData(pixelCursor, m_channel, pixel.getX(), pixel.getY(), b); //binnedData[m_channel][pixel.getY()][pixel.getX()][b];
                 }
                 curveFitData.setYCount(yCount);
-                yFitted = new double[m_timeBins];
+                yFitted = new double[m_bins];
                 curveFitData.setYFitted(yFitted);
                 curveFitDataList.add(curveFitData);
                 pixelList.add(pixel);
@@ -1371,7 +1391,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * Helper function that processes an array of pixels.  Histogram and images
      * are updated at the end of this function.
      */
-    private void processPixels(ICurveFitData[] data, ChunkyPixel[] pixels, ColorizedImageFitter imageFitter) {
+    private void processPixelsDEFUNCT(ICurveFitData[] data, ChunkyPixel[] pixels, ColorizedImageFitter imageFitter) {
         if (null == _fittingEngine) {
             _fittingEngine = Configuration.getInstance().getFittingEngine();
             _fittingEngine.setThreads(Configuration.getInstance().getThreads());
@@ -1379,9 +1399,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
 
         IGlobalFitParams globalFitParams = new GlobalFitParams();
-        globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
-        globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
-        globalFitParams.setNoiseModel(loci.curvefitter.ICurveFitter.NoiseModel.MAXIMUM_LIKELIHOOD);
+        globalFitParams.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD_LMA);
+        globalFitParams.setFitFunction(FitFunction.SINGLE_EXPONENTIAL);
+        globalFitParams.setNoiseModel(NoiseModel.MAXIMUM_LIKELIHOOD);
         globalFitParams.setXInc(m_timeRange);
         globalFitParams.setPrompt(null);
         if (null != m_excitationPanel) {
@@ -1424,7 +1444,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     //TODO need to be a selfcontained function call
     //  = gives you fitted images and a histogram tool
     
-    private Image<DoubleType> fitEachPixelLatest(IUserInterfacePanel uiPanel) {
+    private Image<DoubleType> fitEachPixelLatestDEFUNCT(IUserInterfacePanel uiPanel) {
         
         // we need to generate the following for fitEachPixel nowadays:
         
@@ -1441,7 +1461,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         return null;
     }
 
-    private Image<DoubleType> fitAllPixels(IUserInterfacePanel uiPanel) {
+    private Image<DoubleType> fitAllPixelsDEFUNCT(IUserInterfacePanel uiPanel) {
         long start = System.nanoTime();
         int pixelCount = 0;
         int totalPixelCount = totalPixelCount(m_width, m_height, m_channels, m_fitAllChannels);
@@ -1516,12 +1536,12 @@ public class SLIMProcessor <T extends RealType<T>> {
                     useFittedParams ?
                         getFittedParams(resultsCursor, m_channel, pixel.getX(), pixel.getY(), m_fittedParameterCount) :
                             params.clone());
-                yCount = new double[m_timeBins];
-                for (int b = 0; b < m_timeBins; ++b) {
+                yCount = new double[m_bins];
+                for (int b = 0; b < m_bins; ++b) {
                     yCount[b] = getData(pixelCursor, m_channel, pixel.getX(), pixel.getY(), b); //binnedData[m_channel][pixel.getY()][pixel.getX()][b];
                 }
                 curveFitData.setYCount(yCount);
-                yFitted = new double[m_timeBins];
+                yFitted = new double[m_bins];
                 curveFitData.setYFitted(yFitted);
                 curveFitDataList.add(curveFitData);
                 pixelList.add(pixel);
@@ -1569,7 +1589,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
   
     // copied 1/12 to modify into "processPixels" above:
-    private void processPixelsXYZhuhuh(ICurveFitData[] data, ChunkyPixel[] pixels, ColorizedImageFitter imageFitter) {
+    private void processPixelsXYZhuhuhDEFUNCT(ICurveFitData[] data, ChunkyPixel[] pixels, ColorizedImageFitter imageFitter) {
         if (null == _fittingEngine) {
             _fittingEngine = Configuration.getInstance().getFittingEngine();
             _fittingEngine.setThreads(Configuration.getInstance().getThreads());
@@ -1577,9 +1597,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
 
         IGlobalFitParams globalFitParams = new GlobalFitParams();
-        globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
-        globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
-        globalFitParams.setNoiseModel(loci.curvefitter.ICurveFitter.NoiseModel.MAXIMUM_LIKELIHOOD);
+        globalFitParams.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD_LMA);
+        globalFitParams.setFitFunction(FitFunction.SINGLE_EXPONENTIAL);
+        globalFitParams.setNoiseModel(NoiseModel.MAXIMUM_LIKELIHOOD);
         globalFitParams.setXInc(m_timeRange);
         globalFitParams.setPrompt(null);
         if (null != m_excitationPanel) {
@@ -1621,6 +1641,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * Helper function that processes an array of pixels.  Histogram and images
      * are updated at the end of this function.
      */
+    // THis is only called from defunct image fitters.
     private void processPixelsXYZ(ICurveFitData[] data, ChunkyPixel[] pixels, ColorizedImageFitter imageFitter) {
         if (null == _fittingEngine) {
             _fittingEngine = Configuration.getInstance().getFittingEngine();
@@ -1629,9 +1650,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
 
         IGlobalFitParams globalFitParams = new GlobalFitParams();
-        globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
-        globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
-        globalFitParams.setNoiseModel(loci.curvefitter.ICurveFitter.NoiseModel.MAXIMUM_LIKELIHOOD);
+        globalFitParams.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD_LMA);
+        globalFitParams.setFitFunction(FitFunction.SINGLE_EXPONENTIAL);
+        globalFitParams.setNoiseModel(NoiseModel.MAXIMUM_LIKELIHOOD);
         globalFitParams.setXInc(m_timeRange);
         globalFitParams.setPrompt(null);
         if (null != m_excitationPanel) {
@@ -1677,7 +1698,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * Results of the fit go to VisAD for analysis.
      */
     //TODO this is the old version
-    private Image<DoubleType> fitEachPixelX(IUserInterfacePanel uiPanel) {
+    private Image<DoubleType> fitEachPixelXDEFUNCT(IUserInterfacePanel uiPanel) {
         long start = System.nanoTime();
         int pixelCount = 0;
         int totalPixelCount = totalPixelCount(m_width, m_height, m_channels, m_fitAllChannels);
@@ -1738,12 +1759,12 @@ public class SLIMProcessor <T extends RealType<T>> {
                             useFittedParams ?
                                 getFittedParams(resultsCursor, m_channel, pixel.getX(), pixel.getY(), m_fittedParameterCount) :
                                 params.clone());
-                    yCount = new double[m_timeBins];
-                    for (int b = 0; b < m_timeBins; ++b) {
+                    yCount = new double[m_bins];
+                    for (int b = 0; b < m_bins; ++b) {
                         yCount[b] = getData(pixelCursor, m_channel, pixel.getX(), pixel.getY(), b); //binnedData[m_channel][pixel.getY()][pixel.getX()][b];
                     }
                     curveFitData.setYCount(yCount);
-                    yFitted = new double[m_timeBins];
+                    yFitted = new double[m_bins];
                     curveFitData.setYFitted(yFitted);
                     curveFitDataList.add(curveFitData);
                     pixelList.add(pixel);
@@ -1772,8 +1793,8 @@ public class SLIMProcessor <T extends RealType<T>> {
                                                         
                             
                             IGlobalFitParams globalFitParams = new GlobalFitParams();
-                            globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
-                            globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
+                            globalFitParams.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD_LMA);
+                            globalFitParams.setFitFunction(FitFunction.SINGLE_EXPONENTIAL);
                             globalFitParams.setXInc(m_timeRange);
                             globalFitParams.setPrompt(null);
                             if (null != m_excitationPanel) {
@@ -1839,8 +1860,8 @@ public class SLIMProcessor <T extends RealType<T>> {
                                                         
                             
                             IGlobalFitParams globalFitParams = new GlobalFitParams();
-                            globalFitParams.setFitAlgorithm(loci.curvefitter.ICurveFitter.FitAlgorithm.RLD_LMA);
-                            globalFitParams.setFitFunction(loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL);
+                            globalFitParams.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD_LMA);
+                            globalFitParams.setFitFunction(FitFunction.SINGLE_EXPONENTIAL);
                             globalFitParams.setXInc(m_timeRange);
                             globalFitParams.setPrompt(null);
                             if (null != m_excitationPanel) {
@@ -1900,12 +1921,12 @@ public class SLIMProcessor <T extends RealType<T>> {
                              useFittedParams ?
                                  getFittedParams(resultsCursor, channel, x, y, m_fittedParameterCount) :
                                  params.clone());
-                         yCount = new double[m_timeBins];
-                         for (int b = 0; b < m_timeBins; ++b) {
+                         yCount = new double[m_bins];
+                         for (int b = 0; b < m_bins; ++b) {
                              yCount[b] = getData(pixelCursor, channel, x, y, b); //binnedData[channel][y][x][b];
                          }
                          curveFitData.setYCount(yCount);
-                         yFitted = new double[m_timeBins];
+                         yFitted = new double[m_bins];
                          curveFitData.setYFitted(yFitted);
                          curveFitDataList.add(curveFitData);
                     }
@@ -2354,33 +2375,34 @@ public class SLIMProcessor <T extends RealType<T>> {
                 break;
             case SLIMCURVE_RLD:
                 curveFitter = new SLIMCurveFitter();
-                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD);
+                curveFitter.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD);
                 break;
             case SLIMCURVE_LMA:
                 curveFitter = new SLIMCurveFitter();
-                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.LMA);
+                curveFitter.setFitAlgorithm(FitAlgorithm.SLIMCURVE_LMA);
                 break;
             case SLIMCURVE_RLD_LMA:
                 curveFitter = new SLIMCurveFitter();
-                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.RLD_LMA);
+                curveFitter.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD_LMA);
                 break;
         }
         ICurveFitter.FitFunction fitFunction = null;
         switch (uiPanel.getFunction()) {
             case SINGLE_EXPONENTIAL:
-                fitFunction = ICurveFitter.FitFunction.SINGLE_EXPONENTIAL;
+                fitFunction = FitFunction.SINGLE_EXPONENTIAL;
                 break;
             case DOUBLE_EXPONENTIAL:
-                fitFunction = ICurveFitter.FitFunction.DOUBLE_EXPONENTIAL;
+                fitFunction = FitFunction.DOUBLE_EXPONENTIAL;
                 break;
             case TRIPLE_EXPONENTIAL:
-                fitFunction = ICurveFitter.FitFunction.TRIPLE_EXPONENTIAL;
+                fitFunction = FitFunction.TRIPLE_EXPONENTIAL;
                 break;
             case STRETCHED_EXPONENTIAL:
-                fitFunction = ICurveFitter.FitFunction.STRETCHED_EXPONENTIAL;
+                fitFunction = FitFunction.STRETCHED_EXPONENTIAL;
                 break;
         }
         curveFitter.setFitFunction(fitFunction);
+        curveFitter.setNoiseModel(uiPanel.getNoiseModel());
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
         if (null != m_excitationPanel) {
@@ -2445,7 +2467,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      */
     private void showDecayGraph(final String title, final IUserInterfacePanel uiPanel, final double irf[], final ICurveFitData data) {
         loci.slim.refactor.ui.charts.IDecayGraph decayGraph = loci.slim.refactor.ui.charts.DecayGraph.getInstance();
-        JFrame frame = decayGraph.init(uiPanel.getFrame(), m_timeBins, m_timeRange);
+        JFrame frame = decayGraph.init(uiPanel.getFrame(), m_bins, m_timeRange);
         decayGraph.setTitle(title);
         int start = uiPanel.getStart();
         int stop = uiPanel.getStop();

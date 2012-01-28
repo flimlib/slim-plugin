@@ -37,8 +37,8 @@ package loci.slim.analysis.plugins;
 import ij.IJ;
 import ij.ImagePlus;
 
-import imagej.slim.fitting.FitInfo.FitFunction;
-import imagej.slim.fitting.FitInfo.FitRegion;
+import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
 

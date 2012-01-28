@@ -25,27 +25,22 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
     private int _width;
     private int _height;
     private int _channels;
+    private int _channelIndex;
     private int _bins;
+    private int _binIndex;
     private LocalizableByDimCursor<T> _cursor;
     
-    public DecayImageWrapper(Image<T> image) {
+    public DecayImageWrapper(Image<T> image, int width, int height,
+            int channels, int channelIndex, int bins, int binIndex) {
         _image = image;
-        int[] dimensions = image.getDimensions();
-        //TODO this is a hack to handle IJ1 images
-        if (3 == dimensions.length) {
-            _width    = dimensions[0];
-            _height   = dimensions[1];
-            _channels = 1;
-            _bins     = dimensions[2];
-        }
-        else if (4 == dimensions.length) {
-            _width    = dimensions[0];
-            _height   = dimensions[1];
-            _channels = dimensions[2];
-            _bins     = dimensions[3];
-        }
-        else throw new UnsupportedOperationException
-                ("Image dimensions " + dimensions.length + " not supported.");
+        _width = width;
+        _height = height;
+        _channels = channels;
+        _channelIndex = channelIndex;
+        _bins = bins;
+        _binIndex = binIndex;
+
+        _cursor = image.createLocalizableByDimCursor();
     }
     
     /**
@@ -103,9 +98,18 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
     @Override
     public double[] getPixel(int x, int y, int channel) {
         double[] decay = new double[_bins];
-        int[] location = new int[] { x, y, channel, 0 };
+        int[] location;
+        
+        if (_channels > 1) {
+            location = new int[] { x, y, 0, 0 };
+            location[_channelIndex] = channel;
+        }
+        else {
+            location = new int[] { x, y, 0 };
+        }
+
         for (int i = 0; i < _bins; ++i) {
-            location[3] = i;
+            location[_binIndex] = i;
             _cursor.moveTo(location);
             decay[i] = _cursor.getType().getRealFloat();
         }

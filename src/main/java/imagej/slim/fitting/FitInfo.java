@@ -4,28 +4,17 @@
  */
 package imagej.slim.fitting;
 
+import loci.curvefitter.ICurveFitter.FitAlgorithm;
+import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.FitRegion;
+import loci.curvefitter.ICurveFitter.NoiseModel;
+
 /**
  *
  * @author aivar
  */
 public class FitInfo {
-    
-    public static enum FitRegion {
-        SUMMED, ROI, POINT, EACH
-    }
-
-    public static enum FitAlgorithm {
-       JAOLHO, SLIMCURVE_RLD, SLIMCURVE_LMA, SLIMCURVE_RLD_LMA
-    }
-
-    public static enum FitFunction {
-        SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL
-    }
-
-    public static enum NoiseModel {
-        GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA, MAXIMUM_LIKELIHOOD
-    }
-    
+    private volatile boolean _cancel = false;
     private int _channel;
     private FitRegion _region;
     private FitAlgorithm _algorithm;
@@ -36,6 +25,7 @@ public class FitInfo {
     private boolean _fitAllChannels;
     private int _startDecay;
     private int _stopDecay;
+    private double _xInc;
     private int _threshold; //TODO this s/b accounted for by IInputImage
     private double _chiSquareTarget;
     private String _binning;
@@ -62,6 +52,24 @@ public class FitInfo {
     // analysisList/fittedImages (especially analysis c/b totally post fit)
 
     public FitInfo() {}
+
+    /**
+     * Gets whether to cancel current fit.
+     * 
+     * @return 
+     */
+    public boolean getCancel() {
+        return _cancel;
+    }
+
+    /**
+     * Sets whether to cancel current fit.
+     * 
+     * @param cancel 
+     */
+    public void setCancel(boolean cancel) {
+        _cancel = cancel;
+    }
 
     /**
      * Gets current channel
@@ -244,6 +252,77 @@ public class FitInfo {
     }
 
     /**
+     * Gets x increment for each bin.
+     * 
+     * @return 
+     */
+    public double getXInc() {
+        return _xInc;
+    }
+
+    /**
+     * Gets prompt or instrument response function.
+     * @return 
+     */
+    public double[] getPrompt() {
+        return _prompt;
+    }
+    
+    /**
+     * Sets prompt or instrument response function.
+     * 
+     * @param prompt 
+     */
+    public void setPrompt(double[] prompt) {
+        _prompt = prompt;
+    }
+
+    /**
+     * Gets start of prompt.
+     * 
+     * @return 
+     */
+    public int getStartPrompt() {
+        return _startPrompt;
+    }
+    
+    /**
+     * Sets start of prompt.
+     * 
+     * @param startPrompt 
+     */
+    public void setStartPrompt(int startPrompt) {
+        _startPrompt = startPrompt;
+    }
+    
+    /**
+     * Gets end of prompt.
+     * 
+     * @return 
+     */
+    public int getStopPrompt() {
+        return _stopPrompt;
+    }
+
+    /**
+     * Sets start of prompt.
+     * 
+     * @param stopPrompt 
+     */
+    public void setStopPrompt(int stopPrompt) {
+        _stopPrompt = stopPrompt;
+    }
+
+    /**
+     * Sets x increment for each bin.
+     * 
+     * @param xInc 
+     */
+    public void setXInc(double xInc) {
+        _xInc = xInc;
+    }
+
+    /**
      * Gets photon count threshold to fit a pixel.
      *
      * @return threshold
@@ -415,10 +494,13 @@ public class FitInfo {
             case SINGLE_EXPONENTIAL:
             case STRETCHED_EXPONENTIAL:
                 components = 1;
+                break;
             case DOUBLE_EXPONENTIAL:
                 components = 2;
+                break;
             case TRIPLE_EXPONENTIAL:
                 components = 3;
+                break;
         }
         return components;
     }

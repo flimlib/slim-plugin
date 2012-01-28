@@ -48,7 +48,7 @@ public class ChunkyPixel {
     final int _y;
     final int _width;
     final int _height;
-    final int[] _location;
+    int[] _location;
 
     @Deprecated
     public ChunkyPixel(int x, int y, int width, int height) {
@@ -57,14 +57,6 @@ public class ChunkyPixel {
         _width = width;
         _height = height;
         _location = null;
-    }
-
-    public ChunkyPixel(int[] location, int width, int height) {
-        _location = location;
-        _width = width;
-        _height = height;
-        _x = _location[0];
-        _y = _location[1]; //TODO just transitioning from x,y to location[]
     }
 
     public int getX() {
@@ -82,11 +74,14 @@ public class ChunkyPixel {
     public int getHeight() {
         return _height;
     }
+    
+    public void setLocation(int[] location) {
+        location[0] = _x;
+        location[1] = _y;
+        _location = location;
+    }
 
     public int[] getLocation() {
-        if (null == _location) {
-            return new int[] { _x, _y };
-        }
         return _location;
     }
 }

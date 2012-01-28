@@ -63,10 +63,10 @@ import javax.swing.border.EmptyBorder;
 
 import ij.gui.GenericDialog;
 
-import imagej.slim.fitting.FitInfo.FitAlgorithm;
-import imagej.slim.fitting.FitInfo.FitFunction;
-import imagej.slim.fitting.FitInfo.FitRegion;
-import imagej.slim.fitting.FitInfo.NoiseModel;
+import loci.curvefitter.ICurveFitter.FitAlgorithm;
+import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.FitRegion;
+import loci.curvefitter.ICurveFitter.NoiseModel;
 
 /**
  * Main user interface panel for the fit.

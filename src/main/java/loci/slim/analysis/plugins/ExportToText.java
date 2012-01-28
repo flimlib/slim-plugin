@@ -48,8 +48,8 @@ import java.util.prefs.*;
 
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
-import imagej.slim.fitting.FitInfo.FitFunction;
-import imagej.slim.fitting.FitInfo.FitRegion;
+import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.FitRegion;
 
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;

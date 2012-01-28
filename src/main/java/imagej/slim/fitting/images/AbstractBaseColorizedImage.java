@@ -110,16 +110,12 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
         double[] minMaxLUT = _histogramData.recalcHistogram();
 
         if (null != minMaxLUT) {
-            System.out.println("Internal redisplay " + minMaxLUT[0] + " " + minMaxLUT[1]);
             //TODO horrible kludge here!!!  But why on earth would these be zero?
             //TODO #2 wound up enabling this again, otherwise you don't get any images except current image
             if (true) { // 0 != minMaxLUT[0] && 0 != minMaxLUT[1]) {
                 redisplay(minMaxLUT);
             }
         }
-        else System.out.println("min max null");
-        
-        System.out.println("RECALC " + numInvalid(_values));
     }
 
     /**
@@ -127,7 +123,6 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
      * have changed.
      */
     public void redisplay() {
-        System.out.println("public redisplay");
         double[] minMaxLUT = _histogramData.getMinMaxLUT();
         redisplay(minMaxLUT);
     }
@@ -138,24 +133,9 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
     private void redisplay(double[] minMaxLUT) {
         minMaxLUT = PaletteFix.adjustMinMax(minMaxLUT[0], minMaxLUT[1]);
         _image.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
-        System.out.println("SETTING MIN AND MAX LUT TO " + minMaxLUT[0] + " " + minMaxLUT[1]);
         _imagePlus.setProcessor(_image.duplicate());
     }
-    
-    private int numInvalid(double[][] values) {
-        int count = 0;
-        int num = 0;
-        for (int y = 0; y < values[0].length; ++y) {
-            for (int x = 0; x < values.length; ++x) {
-                if (Double.isNaN(values[x][y])) {
-                    ++num;
-                }
-                ++count;
-            }
-        }
-        System.out.println("checked " + count + " pixels,  found invalid " + num);
-        return num;
-    }   
+
     
     /**
      * Updates the fitted parameters for a pixel.

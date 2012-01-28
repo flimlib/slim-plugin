@@ -24,22 +24,16 @@ public class OutputImageWrapper implements IFittedImage {
     private int _height;
     private int _channels;
     private int _parameters;
+    private int _parameterIndex;
     private LocalizableByDimCursor<DoubleType> _cursor;
-    
-    public OutputImageWrapper(Image<DoubleType> image) {
-        _image = image;
-        int[] dimensions = image.getDimensions();
-        if (dimensions.length >= 4) {
-            _width = dimensions[0];
-            _height = dimensions[1];
-            _channels = dimensions[2];
-            _parameters = dimensions[3];
-            _cursor = _image.createLocalizableByDimCursor();
-        }
-    }
-    
+
+    //TODO s/b OutputImageWrapper(int[] dimensions)
+    //TODO is this a wrapper any more, if it creates the wrapped thing
     public OutputImageWrapper(int width, int height, int channels, int parameters) {
-        Image<DoubleType> _image = null;
+        
+        System.out.println("creating output width height channels params " + width + " " + height + " " + channels + " " + parameters);
+        
+        
         _width = width;
         _height = height;
         _channels = channels;
@@ -48,14 +42,21 @@ public class OutputImageWrapper implements IFittedImage {
         // avoid a problem with ImgLib:
         if (1 == width) ++width;
         if (1 == height) ++height;
-        if (1 == channels) ++channels;
         
-        int[] dimensions = { width, height, channels, parameters };
+        int[] dimensions;
+        if (1 == channels) {
+            dimensions = new int[] { width, height, parameters };
+            _parameterIndex = 2;
+        }
+        else {
+            dimensions = new int[] { width, height, channels, parameters };
+            _parameterIndex = 3;
+        }
         _image = new ImageFactory<DoubleType>
                 (new DoubleType(),
                  new PlanarContainerFactory()).createImage(dimensions, "Fitted");
         
-        // initialize image
+        // fill image with NaNs
         Cursor<DoubleType> cursor = _image.createCursor();
         while (cursor.hasNext()) {
             cursor.fwd();
@@ -119,9 +120,8 @@ public class OutputImageWrapper implements IFittedImage {
 
     public double[] getPixel(int[] location) {
         double[] parameters = new double[_parameters];
-        int parameterIndex = location.length - 1;
         for (int i = 0; i < _parameters; ++i) {
-            location[parameterIndex] = i;
+            location[_parameterIndex] = i;
             _cursor.moveTo(location);
             parameters[i] = _cursor.getType().getRealFloat();
         }
@@ -129,9 +129,8 @@ public class OutputImageWrapper implements IFittedImage {
     }
 
     public void setPixel(int[] location, double[] value) {
-        int parameterIndex = location.length - 1;
         for (int i = 0; i < _parameters; ++i) {
-            location[parameterIndex] = i;
+            location[_parameterIndex] = i;
             _cursor.moveTo(location);
             _cursor.getType().set(value[i]);
         }
@@ -148,9 +147,15 @@ public class OutputImageWrapper implements IFittedImage {
     @Override
     public double[] getPixel(int x, int y, int channel) {
         double[] parameters = new double[_parameters];
-        int[] location = new int[] { x, y, channel, 0 };
+        int[] location;
+        if (_channels > 1) {
+            location = new int[] { x, y, channel, 0 };
+        }
+        else {
+            location = new int[] { x, y, 0 };
+        }
         for (int i = 0; i < _parameters; ++i) {
-            location[3] = i;
+            location[_parameterIndex] = i;
             _cursor.moveTo(location);
             parameters[i] = _cursor.getType().getRealFloat();
         }
@@ -167,9 +172,15 @@ public class OutputImageWrapper implements IFittedImage {
      */
     @Override
     public void setPixel(int x, int y, int channel, double[] parameters) {
-        int[] location = new int[] { x, y, channel, 0 };
+        int[] location;
+        if (_channels > 1) {
+            location = new int[] { x, y, channel, 0 };
+        }
+        else {
+            location = new int[] { x, y, 0 };
+        }
         for (int i = 0; i < _parameters; ++i) {
-            location[3] = i;
+            location[_parameterIndex] = i;
             _cursor.moveTo(location);
             _cursor.getType().set(parameters[i]);
         }

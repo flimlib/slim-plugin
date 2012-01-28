@@ -51,8 +51,8 @@ import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.colorizer.FiveColorColorize;
 import loci.slim.colorizer.IColorize;
-import imagej.slim.fitting.FitInfo.FitFunction;
-import imagej.slim.fitting.FitInfo.FitRegion;
+import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.FitRegion;
 
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
@@ -222,6 +222,10 @@ public class Display implements ISLIMAnalyzer {
 
         // look at image dimensions
         int dimensions[] = image.getDimensions();
+        if (4 != dimensions.length) {
+            System.out.println("Display.analyze can't handle " + dimensions.length + "-dimensional image.");
+            return;
+        }
         int width    = dimensions[X_INDEX];
         int height   = dimensions[Y_INDEX];
         int channels = dimensions[C_INDEX];

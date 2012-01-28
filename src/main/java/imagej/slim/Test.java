@@ -46,7 +46,7 @@ public class Test {
         double[] params = new double[] { 0.0, 0.5, 100.0, 0.5 };
         
         IGlobalFitParams globalFitParams = new GlobalFitParams();
-        globalFitParams.setFitAlgorithm(FitAlgorithm.RLD_LMA);
+        globalFitParams.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD_LMA);
         globalFitParams.setFitFunction(FitFunction.SINGLE_EXPONENTIAL);
         globalFitParams.setXInc(xInc);
         globalFitParams.setPrompt(null);

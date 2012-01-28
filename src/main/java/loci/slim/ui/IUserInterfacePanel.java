@@ -36,10 +36,10 @@ package loci.slim.ui;
 
 import javax.swing.JFrame;
 
-import imagej.slim.fitting.FitInfo.FitAlgorithm;
-import imagej.slim.fitting.FitInfo.FitFunction;
-import imagej.slim.fitting.FitInfo.FitRegion;
-import imagej.slim.fitting.FitInfo.NoiseModel;
+import loci.curvefitter.ICurveFitter.FitAlgorithm;
+import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.FitRegion;
+import loci.curvefitter.ICurveFitter.NoiseModel;
 
 /**
  * Interface to the User Interface Panel
