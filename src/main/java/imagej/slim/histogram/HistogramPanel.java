@@ -208,19 +208,34 @@ public class HistogramPanel extends JPanel {
 
     /**
      * Changes cursors and redraws.  Note that when they are both null no
-     * cursor is diaplayed.
+     * cursor is diaplayed.  Otherwise if one is null only the other value
+     * changes.
      * 
-     * @param minCursor
-     * @param maxCursor 
+     * @param minCursor null or minimum cursor position in pixels
+     * @param maxCursor null or maximum cursor position in pixels
      */
     public void setCursors(Integer minCursor, Integer maxCursor) {
         synchronized (_synchObject) {
-            _minCursor = minCursor;
-            _maxCursor = maxCursor;
-            if (null == _minCursor && null == _maxCursor) {
-                _draggingMinCursor = _draggingMaxCursor = false;
+            if (null == minCursor) {
+                if (null == maxCursor) {
+                    // both null; turn off cursors
+                    _draggingMinCursor = _draggingMaxCursor = false;
+                    _minCursor = _maxCursor = null;
+                }
+                else {
+                    // setting just max cursor
+                    _maxCursor = maxCursor;
+                }
+            }
+            else if (null == maxCursor) {
+                // setting just min cursor
+                _minCursor = minCursor;
             }
             else {
+                // setting both cursors
+                _minCursor = minCursor;
+                _maxCursor = maxCursor;
+                
                 // the cursors actually bracket the specified pixels
                 --_minCursor;
                 ++_maxCursor;

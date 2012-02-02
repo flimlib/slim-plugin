@@ -24,7 +24,7 @@ import ij.IJ;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class UIPanel extends JPanel {
-    private static final int DIGITS = 4;
+    private static final int DIGITS = 5;
     IUIPanelListener _listener;
     JCheckBox _autoRangeCheckBox;
     JCheckBox _combineChannelsCheckBox;
@@ -66,6 +66,7 @@ public class UIPanel extends JPanel {
                         }
                     }
                     catch (NumberFormatException exception) {
+                        // in the event of an error, just revert
                         _minTextField.setText("" + _minLUT);
                     }
                 }
@@ -84,6 +85,7 @@ public class UIPanel extends JPanel {
                         }
                     }
                     catch (NumberFormatException exception) {
+                        // in the event of an error, just revert
                         _maxTextField.setText("" + _maxLUT);
                     }
                 }
@@ -173,7 +175,7 @@ public class UIPanel extends JPanel {
      * @param max 
      */
     public void dragMinMaxLUT(double min, double max) {
-        System.out.println("UIPanel.dragMinMaxLUT");
+        System.out.println("UIPanel.dragMinMaxLUT " + min + " " + max);
         showMinMaxLUT(min, max);
     }
 
@@ -184,7 +186,7 @@ public class UIPanel extends JPanel {
      * @param max 
      */
     public void setMinMaxLUT(double min, double max) {
-        System.out.println("UIPanel.setMinMaxLUT");
+        System.out.println("UIPanel.setMinMaxLUT " + min + " " + max);
         showMinMaxLUT(min, max);
         //TODO anything else?  if not combine these two methods
     }

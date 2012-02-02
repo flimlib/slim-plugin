@@ -8,9 +8,10 @@ import imagej.slim.fitting.images.IColorizedImage;
 
 /**
  * Keeps an array of HistogramChannels for a given image.  Builds the 
- * histogram data as appropriate.
+ * histogram data as appropriate.  Handles updates as the fitted results are
+ * available.  Handles optional autoranging.
  * 
- * @author aivar
+ * @author Aivar Grislis
  */
 public class HistogramData {
     private IColorizedImage _image;
@@ -24,6 +25,10 @@ public class HistogramData {
     private double _maxView;
     private double _minLUT;
     private double _maxLUT;
+    private double _minData;
+    private double _maxData;
+    private double _minDataCurrent;
+    private double _maxDataCurrent;
     private IHistogramDataListener _listener;
 
     /**
@@ -42,6 +47,8 @@ public class HistogramData {
         _channelIndex = 0;
         _minView = _maxView = 0.0f;
         _minLUT = _maxLUT = 0.0f;
+        _minData = _maxData = 0.0f;
+        _minDataCurrent = _maxDataCurrent = 0.0;
         _listener = null;
     }
 
@@ -96,9 +103,9 @@ public class HistogramData {
      * @param auto whether automatically scales
      */
     public void setAutoRange(boolean autoRange) {
-        _autoRange = autoRange;
+        update(autoRange, _combineChannels);
     }
-
+    
     /**
      * Gets whether or not histogram should combine all the channels.
      * 
@@ -114,7 +121,7 @@ public class HistogramData {
      * @param combineChannels
      */
     public void setCombineChannels(boolean combineChannels) {
-        _combineChannels = combineChannels;
+        update(_autoRange, combineChannels);
     }
     
     /**
@@ -133,6 +140,60 @@ public class HistogramData {
      */
     public void setDisplayChannels(boolean displayChannels) {
         _displayChannels = displayChannels;
+    }
+
+    /*
+     * Helper function to update autoranging or channel combination.
+     */
+    private void update(boolean autoRange, boolean combineChannels) {
+        if (_autoRange != autoRange || _combineChannels != combineChannels) {
+            double minView;
+            double maxView;
+            double minLUT;
+            double maxLUT;
+            
+            _autoRange       = autoRange;
+            _combineChannels = combineChannels;
+            
+            if (_autoRange) {
+                if (_combineChannels) {
+                    // LUT and view bounded by data for all channels
+                    minLUT = _minData;
+                    maxLUT = _maxData;
+                    
+                    minView = minLUT;
+                    maxView = maxLUT;
+                }
+                else {
+                    // LUT is bounded by data for current channel
+                    minLUT = _minDataCurrent;
+                    maxLUT = _maxDataCurrent;
+                    
+                    if (_displayChannels) {
+                        minView = _minData;
+                        maxView = _maxData;
+                    }
+                    else {
+                        minView = minLUT;
+                        maxView = maxLUT;
+                    }
+                }
+                
+                // did anything really change?
+                if (_minView != minView || _maxView != maxView
+                        || _minLUT != minLUT || _maxLUT != maxLUT) {
+                    _minView = minView;
+                    _maxView = maxView;
+                    _minLUT = minLUT;
+                    _maxLUT = maxLUT;
+
+                    // update listener, if any
+                    if (null != _listener) {
+                        _listener.minMaxChanged(minView, maxView, minLUT, maxLUT);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -173,6 +234,7 @@ public class HistogramData {
     public void setMinMaxLUT(double min, double max) {
         _minLUT = min;
         _maxLUT = max;
+        redisplay();
     }
 
     /**
@@ -184,6 +246,9 @@ public class HistogramData {
      * 
      * @return min and max of the LUT
      */
+    //TODO these recalcHistogram events need to be synchronized so that they
+    // don't step on other ways to change min/maxLUT/View
+    // Perhaps this class should have a synch object that also has a getter.
     public double[] recalcHistogram() {
         double minData;
         double maxData;
@@ -240,12 +305,18 @@ public class HistogramData {
 
         _minView = minData;
         _maxView = maxData;
+        
+        _minData = minData;
+        _maxData = maxData;
+        
+        _minDataCurrent = minDataCurrent;
+        _maxDataCurrent = maxDataCurrent;
 
         if (null != _listener) {
             _listener.minMaxChanged(_minView, _maxView, _minLUT, _maxLUT);
         }
 
-        return new double[] { minLUT, maxLUT };
+        return new double[] { _minLUT, _maxLUT };
     }
 
     public void redisplay() {

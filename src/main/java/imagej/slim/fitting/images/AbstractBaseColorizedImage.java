@@ -110,11 +110,7 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
         double[] minMaxLUT = _histogramData.recalcHistogram();
 
         if (null != minMaxLUT) {
-            //TODO horrible kludge here!!!  But why on earth would these be zero?
-            //TODO #2 wound up enabling this again, otherwise you don't get any images except current image
-            if (true) { // 0 != minMaxLUT[0] && 0 != minMaxLUT[1]) {
-                redisplay(minMaxLUT);
-            }
+            redisplay(minMaxLUT);
         }
     }
 
@@ -132,6 +128,7 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
      */
     private void redisplay(double[] minMaxLUT) {
         minMaxLUT = PaletteFix.adjustMinMax(minMaxLUT[0], minMaxLUT[1]);
+        System.out.println("***** REDISPLAY 256-COLOR SPECS ***** " + minMaxLUT[0] + " " + minMaxLUT[1]);
         _image.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
         _imagePlus.setProcessor(_image.duplicate());
     }

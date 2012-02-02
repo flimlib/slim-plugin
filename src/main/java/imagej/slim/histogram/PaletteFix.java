@@ -61,7 +61,9 @@ public class PaletteFix {
 
     /**
      * Given a min and max specification for a 254-color palette, turns it into
-     * a 256-color palette min and max.
+     * a 256-color palette min and max.  Values below 254-color min are colored
+     * with below color and values above 254-color max are colored with above
+     * color.
      * 
      * @param min
      * @param max
@@ -69,6 +71,10 @@ public class PaletteFix {
      */
     public static double[] adjustMinMax(double min, double max) {
         double adjust = (max - min) / ADJUSTED_SIZE;
+        
+        //TODO ARG ueed ADJUSTED_SIZE + 1 as a kludge: it made more black dots
+        //TODO ARG having - 1 appears to have the same result!
+        //TODO ARG tried + or - 0.5
         return new double[] { min - adjust, max + adjust };
     }
 

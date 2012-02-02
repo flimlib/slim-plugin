@@ -57,13 +57,17 @@ public class HistogramTool {
     /**
      * Constructor, handles layout and wiring.
      */
-    private HistogramTool() {
+    private HistogramTool() { //TODO ARG how do you pass this in if it is a singleton?  (cf getInstance() below)
+        //TODO ARG how is this a singleton if there are two flavors of it?
+        //TODO ARG need to be able to close this window and have it pop back up as needed
+        // boolean hasChannels) {
         // create the histogram and color bar display panels
         _histogramPanel = new HistogramPanel(WIDTH, INSET, HISTOGRAM_HEIGHT);
         _histogramPanel.setListener(new HistogramPanelListener());
         _colorBarPanel = new ColorBarPanel(WIDTH, INSET, COLORBAR_HEIGHT);
         _colorBarPanel.setLUT(getLUT());
-        _uiPanel = new UIPanel(false); // true);
+        boolean hasChannels = false;
+        _uiPanel = new UIPanel(hasChannels);
         _uiPanel.setListener(new UIPanelListener());
 
         _frame = new JFrame("Histogram");
@@ -90,7 +94,7 @@ public class HistogramTool {
 
     /**
      * Gets an IndexColorModel by loading a hardcoded LUT file.
-     * Temporary expedient, belongs elsewhere.
+     * This is just a temporary expedient, really belongs elsewhere.
      * 
      * @return 
      */
@@ -168,9 +172,17 @@ public class HistogramTool {
         synchronized (_synchObject) {
             double[] minMaxView = _histogramData.getMinMaxView();
             double min = minMaxView[0];
+            return min + pixelToValueRelative(pixel);
+        }
+    }
+    
+    private double pixelToValueRelative(int pixel) {
+        synchronized (_synchObject) {
+            double[] minMaxView = _histogramData.getMinMaxView();
+            double min = minMaxView[0];
             double max = minMaxView[1];
-            double value = (max - min) / PaletteFix.getSize();
-            return (pixel - INSET) * value;
+            double valuePerPixel = (max - min) / PaletteFix.getSize();
+            return pixel * valuePerPixel;
         }
     }
 
@@ -183,6 +195,7 @@ public class HistogramTool {
             double min = minMaxView[0];
             double max = minMaxView[1];
             int pixel = (int)(PaletteFix.getSize() * (value - min) / (max - min));
+            System.out.println("valueToPixel(" + value + ") -> " + pixel);
             return pixel;
         }
     }
@@ -206,6 +219,21 @@ public class HistogramTool {
         }
     }
 
+    /*
+     * Given a value representing the minimum or maximum cursor bound,
+     * calculates a pixel location for the cursor.
+     * 
+     * @param max whether this is the maximum cursor or not
+     */
+    private int cursorPixelFromValue(boolean max, double value) {
+        int pixel = INSET + valueToPixel(value);
+        if (max) {
+            // cursor brackets the value
+            ++pixel;
+        }
+        return pixel;
+    }
+
     /**
      * Inner class listens for changes during the fit.
      */
@@ -215,6 +243,7 @@ public class HistogramTool {
         public void minMaxChanged(double minView, double maxView,
                 double minLUT, double maxLUT) {
             changed(minView, maxView, minLUT, maxLUT);
+            _uiPanel.setMinMaxLUT(minLUT, maxLUT);
         }
     }
 
@@ -235,10 +264,15 @@ public class HistogramTool {
          */
         public void setMinMaxLUTPixels(int min, int max) {
             killTimer();
-
+ System.out.println("setMinMaxLUTPixels(" + min + "," + max + ")");
             // get new minimum and maximum values for LUT
             double minLUT = pixelToValue(min);
-            double maxLUT = pixelToValue(max);
+            double maxLUT = pixelToValue(max + 1);
+            
+ System.out.println("setMinMaxLUTPixels values are " + minLUT + " " + maxLUT);
+ 
+ System.out.println("maxLut for max + 1 would be " + pixelToValue(max + 1));
+ System.out.println("minLUT for min = 0 would be " + pixelToValue(0));
             
             // set min and max on UI panel
             _uiPanel.setMinMaxLUT(minLUT, maxLUT);
@@ -261,18 +295,16 @@ public class HistogramTool {
          */
         @Override
         public void dragMinMaxPixels(int min, int max) {
-            System.out.println("dragMinMax(" + min + "," + max + ")");
-            if (min < 0 || max >= PaletteFix.ADJUSTED_SIZE) {
+            if (min < 0 || max >= PaletteFix.getSize()) {
                 // cursor is out of bounds, set up a periodic task to stretch
                 // the bounds, if not already running
                 if (min < 0) {
                     _dragPixels = min;
                 }
                 else {
-                    _dragPixels = max - PaletteFix.ADJUSTED_SIZE + 1;
+                    _dragPixels = max - PaletteFix.getSize() + 1;
                 }
                 if (null == _timer) {
-                    System.out.println("Schedule");
                     _timer = new Timer();
                     _timer.schedule(new PeriodicTask(), 0, TASK_PERIOD);
                 }
@@ -280,7 +312,9 @@ public class HistogramTool {
             else {
                 // dragging within bounds now, kill the periodic task, if any
                 killTimer();
-                _uiPanel.dragMinMaxLUT(pixelToValue(min), pixelToValue(max));
+                double minLUT = pixelToValue(min);
+                double maxLUT = pixelToValue(max + 1);
+                _uiPanel.dragMinMaxLUT(minLUT, maxLUT);
             }
         }
 
@@ -307,8 +341,7 @@ public class HistogramTool {
             @Override
             public void run() {
                 // how much are we dragging, converted to our value
-                double value = pixelToValue(_dragPixels);
-                System.out.println("value " + value + " dp " + _dragPixels);
+                double value = pixelToValueRelative(_dragPixels);
                 synchronized (_synchObject) {
                     // get current LUT bounds
                     double[] minMaxLUT = _histogramData.getMinMaxLUT();
@@ -328,12 +361,38 @@ public class HistogramTool {
                         maxLUT = maxView;
                     }
 
-                    // get updated histogram data & show it
+                    // update histogram data min and max view
                     _histogramData.setMinMaxView(minView, maxView);
+                    
+                    // keep other cursor fixed
+                    int pixel;
+                    if (value < 0) {
+                        if (maxView != maxLUT) {
+                            pixel = cursorPixelFromValue(true, maxLUT);
+                            //pixel = valueToPixel(maxLUT);
+                            //System.out.println("PeriodicTask.run maxLUT is " + maxLUT + " cursor is at " + pixel);
+                            //_histogramPanel.setCursors(null, INSET + pixel + 1); //TODO ARG this is still a little bit off
+                            _histogramPanel.setCursors(null, pixel); //TODO ARG this is still a little off
+                        }
+                    }
+                    else {
+                        if (minView != minLUT) {
+                            pixel = cursorPixelFromValue(false, minLUT);
+                            //pixel = valueToPixel(minLUT);
+                            //System.out.println("PeriodicTask.run minLUT is " + minLUT + " cursor is at " + pixel);
+                            //_histogramPanel.setCursors(INSET + pixel, null); //TODO ARG this is still a little bit off
+                            _histogramPanel.setCursors(pixel, null); //TODO ARG this is still a little off
+  
+                        }
+                    }
+                    
+                    // get updated histogram data and show it                 
                     int[] bins = _histogramData.binValues(PaletteFix.ADJUSTED_SIZE);
                     _histogramPanel.setBins(bins);
                     _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
-                    System.out.println("set to " + minView + " " + maxView);
+                    
+                    // update numbers in UI panel
+                    _uiPanel.dragMinMaxLUT(minLUT, maxLUT);
                 }
             }
         }
@@ -342,19 +401,24 @@ public class HistogramTool {
     private class UIPanelListener implements IUIPanelListener {
         @Override
         public void setAutoRange(boolean autoRange) {
-            System.out.println("HistogramTool.UIPanelListener.setAutoRange(" + autoRange + ")");
             synchronized (_synchObject) {
                  _histogramData.setAutoRange(autoRange);
-            }
+                 
+                 if (autoRange) {
+                     //TODO ARG:
+                    // It is not always true that the cursors will be (null, null)
+                    // [same as (0, 254)], th3 exception happens if you are showing
+                    // all channels but only autoranging your channel.
+                    _histogramPanel.setCursors(null, null);
+                    
+                  ///  _histogramData.recalcHistogram(); //TODO histogramData should just keep minData/maxData same as the others
+                 }
+                 else {
+                    //TODO if you are autoranging, not combining channels, but showing
+                    // all channels, these cursors would need to be calculated
+                    _histogramPanel.setCursors(INSET, INSET + WIDTH - 1); //TODO I was expecting INSET-1 here??
 
-            if (autoRange) {
-                _histogramPanel.setCursors(null, null);
-                //TODO calculate new bounds
-            }
-            else {
-                //TODO if you are autoranging, not combining channels, but showing
-                // all channels, these cursors would need to be calculated
-                _histogramPanel.setCursors(INSET, INSET + WIDTH - 1); //TODO I was expecting INSET-1 here??
+                 }
             }
         }
         
@@ -388,12 +452,17 @@ public class HistogramTool {
                 changed = true;
                 
                 synchronized (_synchObject) {
-                    // expand the view to fit the LUT
+                    // if necessary, expand the view to fit the LUT
                     double[] minMaxView = _histogramData.getMinMaxView();
                     minView = Math.min(minLUT, minMaxView[0]);
                     maxView = Math.max(maxLUT, minMaxView[1]);
                     _histogramData.setMinMaxView(minView, maxView);
                     _histogramData.setMinMaxLUT(minLUT, maxLUT);
+
+                    //TODO ARG this is quite a bit off:
+                    // note that if you stretch the bounds on one side you need
+                    // to adjust the position of the other side.
+                    _histogramPanel.setCursors(cursorPixelFromValue(false, minLUT), cursorPixelFromValue(true, maxLUT));
                 }
             }
 
