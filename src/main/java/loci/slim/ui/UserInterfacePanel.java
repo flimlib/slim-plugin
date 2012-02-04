@@ -85,10 +85,10 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final Character SUB_2  = '\u2082';
     private static final Character SUB_3  = '\u2083';
     
-    private static final String SUM_REGION = "Sum All";
+    private static final String SUM_REGION = "Sum All Pixels";
     private static final String ROIS_REGION = "Sum Each ROI";
     private static final String PIXEL_REGION = "Single Pixel";
-    private static final String ALL_REGION = "Each Pixel";
+    private static final String ALL_REGION = "Image";
     
     private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA";
     private static final String SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD";
@@ -110,8 +110,11 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     private static final String EXCITATION_NONE = "None";
     private static final String EXCITATION_FILE = "Load from File";
     private static final String EXCITATION_CREATE = "Use current X Y";
-    
-    private static final String MAKE_IMAGES = "Make Images";
+
+    private static final String FIT_IMAGE = "Fit Image";
+    private static final String FIT_PIXEL = "Fit Pixel";
+    private static final String FIT_SUMMED_PIXELS = "Fit Summed Pixels";
+    private static final String FIT_SUMMED_ROIS = "Fit Summed ROIs";
     private static final String CANCEL_IMAGES = "Cancel Images";
 
     private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(10, 10, 10, 10);
@@ -229,6 +232,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
 
     JButton m_quitButton;
     JButton m_fitButton;
+    String m_fitButtonText = FIT_IMAGE;
 
     public UserInterfacePanel(boolean showTau, String[] analysisChoices, String[] binningChoices) {
         String lifetimeLabel = "" + (showTau ? TAU : LAMBDA);
@@ -279,12 +283,12 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         );
         buttonPanel.add(m_quitButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        m_fitButton = new JButton(MAKE_IMAGES);
+        m_fitButton = new JButton(m_fitButtonText);
         m_fitButton.addActionListener(
             new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String text = (String)e.getActionCommand();
-                    if (text.equals(MAKE_IMAGES)) {
+                    if (text.equals(m_fitButtonText)) {
                         enableAll(false);
                         setFitButtonState(false);
                         if (null != m_listener) {
@@ -346,6 +350,28 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         fitPanel.add(regionLabel);
         m_regionComboBox = new JComboBox(REGION_ITEMS);
         m_regionComboBox.setSelectedItem(ALL_REGION);
+        m_regionComboBox.addItemListener(
+            new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    if (e.getStateChange() == ItemEvent.SELECTED) {
+                        String item = (String) e.getItem();
+                        if (SUM_REGION == item) {
+                            m_fitButtonText = FIT_SUMMED_PIXELS;
+                        }
+                        else if (ROIS_REGION == item) {
+                            m_fitButtonText = FIT_SUMMED_ROIS;
+                        }
+                        else if (PIXEL_REGION == item) {
+                            m_fitButtonText = FIT_PIXEL;
+                        }
+                        else if (ALL_REGION == item) {
+                            m_fitButtonText = FIT_IMAGE;
+                        }
+                        m_fitButton.setText(m_fitButtonText);
+                    }
+                }
+            }
+        );
         fitPanel.add(m_regionComboBox);
 
         JLabel algorithmLabel = new JLabel("Algorithm");
@@ -912,11 +938,11 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     }
     
     private void setFitButtonState(boolean on) {
-        m_fitButton.setText(on ? MAKE_IMAGES : CANCEL_IMAGES);
+        m_fitButton.setText(on ? m_fitButtonText : CANCEL_IMAGES);
     }
     
     private boolean getFitButtonState() {
-        return m_fitButton.getText().equals(MAKE_IMAGES);
+        return m_fitButton.getText().equals(m_fitButtonText);
     }
 
     /*

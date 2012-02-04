@@ -275,7 +275,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         decayRenderer.setSeriesShapesVisible(1, false);
         decayRenderer.setSeriesLinesVisible(2, false);
         decayRenderer.setSeriesShape
-                (2, new Ellipse2D.Float(2.0f, 2.0f, 2.0f, 2.0f));
+                (2, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f, 2.0f));
 
         decayRenderer.setSeriesPaint(0, IRF_COLOR);
         decayRenderer.setSeriesPaint(1, FITTED_COLOR);

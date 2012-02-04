@@ -154,8 +154,10 @@ public class HistogramTool {
         _frame.setTitle(histogramData.getTitle());
         
         _histogramPanel.setBins(histogramData.binValues(WIDTH));
-        //_histogramPanel.setCursors(0.0, 0.0); set cursors if not autoranging
-
+        System.out.println("minMaxLUT is " + minMaxLUT[0] + " " + minMaxLUT[1]);
+        System.out.println("so cursosr are " + cursorPixelFromValue(false, minMaxLUT[0]) + " " + cursorPixelFromValue(false, minMaxLUT[1]));
+        _histogramPanel.setCursors(cursorPixelFromValue(false, minMaxLUT[0]), cursorPixelFromValue(false, minMaxLUT[1])); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
+ 
         _uiPanel.setAutoRange(histogramData.getAutoRange());
         _uiPanel.setCombineChannels(histogramData.getCombineChannels());
         _uiPanel.setDisplayChannels(histogramData.getDisplayChannels());
@@ -462,7 +464,7 @@ public class HistogramTool {
                     //TODO ARG this is quite a bit off:
                     // note that if you stretch the bounds on one side you need
                     // to adjust the position of the other side.
-                    _histogramPanel.setCursors(cursorPixelFromValue(false, minLUT), cursorPixelFromValue(true, maxLUT));
+                    _histogramPanel.setCursors(cursorPixelFromValue(false, minLUT), cursorPixelFromValue(false, maxLUT)); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
                 }
             }
 
