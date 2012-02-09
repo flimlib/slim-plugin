@@ -49,7 +49,7 @@ public interface IDecayImage<T extends RealType<T>> {
      * @param channel
      * @return 
      */
-    public boolean fitThisPixel(int x, int y, int channel);
+    public boolean fitThisPixel(int[] location);
    
     /**
      * Gets input pixel value.
@@ -59,7 +59,7 @@ public interface IDecayImage<T extends RealType<T>> {
      * @param channel
      * @return 
      */
-    public double[] getPixel(int x, int y, int channel);
+    public double[] getPixel(int[] location);
 
     /**
      * Gets associated image.

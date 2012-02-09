@@ -89,13 +89,13 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 
         LocalizableByDimCursor cursor = image.createLocalizableByDimCursor();
         double[][] pixels = new double[m_width][m_height];
-        byte[] outPixels = new byte[m_width * m_height];
         int[] position = (channels > 1) ? new int[4] : new int[3];
 
         for (int c = 0; c < channels; ++c) {
             if (channels > 1) {
                 position[3] = c;
             }
+            byte[] outPixels = new byte[m_width * m_height];
 
             // sum photon counts
             double maxPixel = 0.0;
@@ -110,6 +110,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                         cursor.setPosition(position);
                         pixels[x][y] += ((ComplexType) cursor.getType()).getRealDouble();
                     }
+                    // keep track of maximum
                     if (pixels[x][y] > maxPixel) {
                         maxPixel = pixels[x][y];
                     }
@@ -122,14 +123,6 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                     outPixels[y * m_width + x] = (byte) (pixels[x][y] * 255 / maxPixel);
                 }
             }
-            //TODO random noise to ensure different channels do have different images:
-            //java.util.Random randomizer = new java.util.Random();
-            //for (int i = 0; i < 1000; ++i) {
-            //    int noise = randomizer.nextInt(255);
-            //    int x = randomizer.nextInt(m_width);
-            //    int y = randomizer.nextInt(m_height);
-            //    outPixels[y * m_width + x] = (byte) noise;
-            //}
 
             // add a slice
            // m_imageStack.addSlice("" + c, true, outPixels); // stopped working 12/1/10

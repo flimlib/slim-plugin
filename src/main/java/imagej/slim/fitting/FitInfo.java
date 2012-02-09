@@ -4,6 +4,8 @@
  */
 package imagej.slim.fitting;
 
+import java.awt.image.IndexColorModel;
+
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
@@ -21,6 +23,7 @@ public class FitInfo {
     private FitFunction _function;
     private NoiseModel _noiseModel;
     private String _fittedImages;
+    private IndexColorModel _indexColorModel;
     private String[] _analysisList;
     private boolean _fitAllChannels;
     private int _startDecay;
@@ -177,6 +180,24 @@ public class FitInfo {
      */
     public void setFittedImages(String fittedImages) {
         _fittedImages = fittedImages;
+    }
+    
+    /**
+     * Returns color model for fitted images.
+     * 
+     * @return
+     */
+    public IndexColorModel getIndexColorModel() {
+        return _indexColorModel;
+    }
+
+    /**
+     * Sets color model for fitted images.
+     * 
+     * @param indexColorModel 
+     */
+    public void setIndexColorModel(IndexColorModel indexColorModel) {
+        _indexColorModel = indexColorModel;
     }
 
     /**

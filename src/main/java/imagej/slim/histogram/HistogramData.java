@@ -60,7 +60,7 @@ public class HistogramData {
     public void setListener(IHistogramDataListener listener) {
         _listener = listener;
     }
-    
+     
     /**
      * Gets a descriptive title to display on histogram UI for this data.
      * 

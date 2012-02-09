@@ -25,19 +25,17 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
     private int _width;
     private int _height;
     private int _channels;
-    private int _channelIndex;
     private int _bins;
     private int _binIndex;
     private LocalizableByDimCursor<T> _cursor;
     
     public DecayImageWrapper(Image<T> image, int width, int height,
-            int channels, int channelIndex, int bins, int binIndex) {
-        _image = image;
-        _width = width;
-        _height = height;
+            int channels, int bins, int binIndex) {
+        _image    = image;
+        _width    = width;
+        _height   = height;
         _channels = channels;
-        _channelIndex = channelIndex;
-        _bins = bins;
+        _bins     = bins;
         _binIndex = binIndex;
 
         _cursor = image.createLocalizableByDimCursor();
@@ -83,34 +81,32 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
     }
     
     @Override
-    public boolean fitThisPixel(int x, int y, int channel) {
+    public boolean fitThisPixel(int[] location) {
         return true; //TODO FOR NOW ONLY!!
     }
     
     /**
      * Gets input pixel decay curve.
      * 
-     * @param x
-     * @param y
-     * @param channel
+     * @param location
      * @return 
      */
     @Override
-    public double[] getPixel(int x, int y, int channel) {
+    public double[] getPixel(int[] location) {
         double[] decay = new double[_bins];
-        int[] location;
         
-        if (_channels > 1) {
-            location = new int[] { x, y, 0, 0 };
-            location[_channelIndex] = channel;
+        // add bins to location
+        int[] innerLocation = new int[location.length + 1];
+        for (int i = 0; i < _binIndex; ++i) {
+            innerLocation[i] = location[i];
         }
-        else {
-            location = new int[] { x, y, 0 };
+        for (int i = _binIndex; i < location.length; ++i) {
+            innerLocation[i + 1] = location[i];
         }
 
         for (int i = 0; i < _bins; ++i) {
-            location[_binIndex] = i;
-            _cursor.moveTo(location);
+            innerLocation[_binIndex] = i;
+            _cursor.moveTo(innerLocation);
             decay[i] = _cursor.getType().getRealFloat();
         }
         return decay;

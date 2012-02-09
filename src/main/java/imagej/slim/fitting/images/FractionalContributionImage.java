@@ -4,6 +4,8 @@
  */
 package imagej.slim.fitting.images;
 
+import java.awt.image.IndexColorModel;
+
 import imagej.slim.fitting.images.AbstractBaseColorizedImage;
 
 /**
@@ -27,8 +29,9 @@ public class FractionalContributionImage extends AbstractBaseColorizedImage {
      * @param component
      * @param components 
      */
-    public FractionalContributionImage(String title, int[] dimension, int component, int components) {
-        super(title, dimension);
+    public FractionalContributionImage(String title, int[] dimension,
+            IndexColorModel indexColorModel, int component, int components) {
+        super(title, dimension, indexColorModel);
         _component = component;
         _components = components;
     }

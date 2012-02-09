@@ -120,7 +120,17 @@ public class UIPanel extends JPanel {
                 }
             }
         );
-        if (hasChannels) {
+        /**
+         * IJ1 uses the same LUT for the entire stack.  It might be possible for
+         * the histogram tool to set the appropriate LUT for the current channel
+         * but there is no listener or event for the histogram tool to know when
+         * the channel changes.
+         * 
+         * Perhaps this can change with IJ2.
+         * 
+         * ARG 2/8/12
+         */
+        if (false && hasChannels) {
             add(_combineChannelsCheckBox);
         }
 
@@ -136,7 +146,13 @@ public class UIPanel extends JPanel {
                 }
             }
         );
-        if (hasChannels) {
+        /**
+         * Now that we're down to one extra checkbox for channels, lets always
+         * display it.  (See above.)
+         * 
+         * ARG 2/8/12
+         */
+        if (true || hasChannels) {
             add(_displayChannelsCheckBox);
         }
 
@@ -175,7 +191,7 @@ public class UIPanel extends JPanel {
      * @param max 
      */
     public void dragMinMaxLUT(double min, double max) {
-        System.out.println("UIPanel.dragMinMaxLUT " + min + " " + max);
+//        System.out.println("UIPanel.dragMinMaxLUT " + min + " " + max);
         showMinMaxLUT(min, max);
     }
 
@@ -186,7 +202,7 @@ public class UIPanel extends JPanel {
      * @param max 
      */
     public void setMinMaxLUT(double min, double max) {
-        System.out.println("UIPanel.setMinMaxLUT " + min + " " + max);
+//        System.out.println("UIPanel.setMinMaxLUT " + min + " " + max);
         showMinMaxLUT(min, max);
         //TODO anything else?  if not combine these two methods
     }

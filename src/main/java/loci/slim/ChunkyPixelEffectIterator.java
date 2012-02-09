@@ -47,35 +47,35 @@ import java.util.Iterator;
  * @author Aivar Grislis grislis at wisc.edu
  */
 public class ChunkyPixelEffectIterator implements Iterator {
-    int m_width;
-    int m_height;
-    int m_index;
-    int m_x;
-    int m_y;
-    IChunkyPixelTable m_table;
-    ChunkyPixel m_chunkyPixel;
+    IChunkyPixelTable _table;
+    int _width;
+    int _height;
+    int _index;
+    int _x;
+    int _y;
+    ChunkyPixel _chunkyPixel;
 
     public ChunkyPixelEffectIterator(IChunkyPixelTable table, int width, int height) {
-        m_table = table;
-        m_width = width;
-        m_height = height;
+        _table = table;
+        _width = width;
+        _height = height;
 
         // initialize
-        m_index = 0;
-        m_x = 0;
-        m_y = 0;
+        _index = 0;
+        _x = 0;
+        _y = 0;
 
         // get first chunky pixel
-        m_chunkyPixel = getNextChunkyPixel();
+        _chunkyPixel = getNextChunkyPixel();
     }
 
     public boolean hasNext() {
-        return m_chunkyPixel != null;
+        return _chunkyPixel != null;
     }
 
     public ChunkyPixel next() {
-        ChunkyPixel chunkyPixel = m_chunkyPixel;
-        m_chunkyPixel = getNextChunkyPixel();
+        ChunkyPixel chunkyPixel = _chunkyPixel;
+        _chunkyPixel = getNextChunkyPixel();
         return chunkyPixel;
     }
 
@@ -85,36 +85,36 @@ public class ChunkyPixelEffectIterator implements Iterator {
 
     ChunkyPixel getNextChunkyPixel() {
         // get the relative chunky pixel from the table
-        ChunkyPixel relChunkyPixel = m_table.getChunkyPixel(m_index);
+        ChunkyPixel relChunkyPixel = _table.getChunkyPixel(_index);
 
-        if (m_x + relChunkyPixel.getX() >= m_width) {
+        if (_x + relChunkyPixel.getX() >= _width) {
             // start next row
-            m_x = 0;
-            m_y += m_table.getHeight();
+            _x = 0;
+            _y += _table.getHeight();
 
-            if (m_y + relChunkyPixel.getY() >= m_height) {
+            if (_y + relChunkyPixel.getY() >= _height) {
                 // use next table entry, are we done?
-                if (++m_index >= m_table.size()) {
+                if (++_index >= _table.size()) {
                     return null;
                 }
 
                 // start from the top
-                m_y = 0;
+                _y = 0;
 
                 // update relative chunky pixel
-                relChunkyPixel = m_table.getChunkyPixel(m_index);
+                relChunkyPixel = _table.getChunkyPixel(_index);
             }
         }
         
         // convert relative to absolute
-        int x = m_x + relChunkyPixel.getX();
-        int y = m_y + relChunkyPixel.getY();
+        int x = _x + relChunkyPixel.getX();
+        int y = _y + relChunkyPixel.getY();
         ChunkyPixel absChunkyPixel = new ChunkyPixel(x, y,
-                Math.min(relChunkyPixel.getWidth(), m_width - x),
-                Math.min(relChunkyPixel.getHeight(), m_height - y));
+                Math.min(relChunkyPixel.getWidth(), _width - x),
+                Math.min(relChunkyPixel.getHeight(), _height - y));
 
         // set up for next call
-        m_x += m_table.getWidth();
+        _x += _table.getWidth();
 
         return absChunkyPixel;
     }

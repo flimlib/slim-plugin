@@ -61,28 +61,7 @@ public interface IFittedImage {
      * @param location
      * @param value
      */
-    public void setPixel(int[] location, double[] value);
-
-    /**
-     * Gets fitted pixel value.
-     *
-     * @param x
-     * @param y
-     * @param channel
-     * @return
-     */
-    public double[] getPixel(int x, int y, int channel);
-
-    /**
-     * Puts fitted pixel value.
-     * 
-     * @param x
-     * @param y
-     * @param channel
-     * @param value
-     */
-    public void setPixel(int x, int y, int channel, double[] value);
-    
+    public void setPixel(int[] location, double[] value);   
 
     /**
      * Gets associated image.

@@ -4,6 +4,7 @@
  */
 package imagej.slim.fitting.images;
 
+import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,17 +31,21 @@ public class ColorizedImageFitter {
         _fittedImages = new ArrayList<IColorizedImage>();
     }
     
-    public void setUpFit(ColorizedImageType[] images, int[] dimension, int components) {
+    public void setUpFit(ColorizedImageType[] images, int[] dimension,
+            IndexColorModel indexColorModel, int components) {
         _fittedImages.clear();
         for (ColorizedImageType image : images) {
-            IColorizedImage fittedImage = ColorizedImageFactory.getInstance().createImage(image, dimension, components);
+            IColorizedImage fittedImage =
+                    ColorizedImageFactory.getInstance().createImage
+                            (image, dimension, indexColorModel, components);
             _fittedImages.add(fittedImage);
         }
         
         // Show histogram tool for the last image created
         int lastIndex = images.length - 1;
         if (lastIndex >= 0) {
-            HistogramTool.getInstance().setHistogramData(_fittedImages.get(lastIndex).getHistogramData());
+            HistogramTool.getInstance().setHistogramData
+                    (_fittedImages.get(lastIndex).getHistogramData());
         }
     }
     
@@ -49,7 +54,6 @@ public class ColorizedImageFitter {
      */
     public void beginFit() {
         for (IColorizedImage fittedImage : _fittedImages) {
-            //fittedImage.setColorModel(HistogramTool.getLUT()); //TODO getIndexColorModel()); //TODO all the same really as far as I can tell, i.e. broken
             fittedImage.beginFit();
         }
     }

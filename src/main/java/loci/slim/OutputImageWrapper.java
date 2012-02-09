@@ -26,32 +26,26 @@ public class OutputImageWrapper implements IFittedImage {
     private int _parameters;
     private int _parameterIndex;
     private LocalizableByDimCursor<DoubleType> _cursor;
+    private int[] _location;
 
-    //TODO s/b OutputImageWrapper(int[] dimensions)
-    //TODO is this a wrapper any more, if it creates the wrapped thing
-    public OutputImageWrapper(int width, int height, int channels, int parameters) {
-        
-        System.out.println("creating output width height channels params " + width + " " + height + " " + channels + " " + parameters);
-        
-        
+    /**
+     * Creates a wrapper for an output image (and the image itself).
+     * 
+     * @param width
+     * @param height
+     * @param channels
+     * @param parameters 
+     */
+    public OutputImageWrapper(int width, int height, int channels, int parameters) {  
         _width = width;
         _height = height;
         _channels = channels;
         _parameters = parameters;
-
-        // avoid a problem with ImgLib:
-        if (1 == width) ++width;
-        if (1 == height) ++height;
         
-        int[] dimensions;
-        if (1 == channels) {
-            dimensions = new int[] { width, height, parameters };
-            _parameterIndex = 2;
-        }
-        else {
-            dimensions = new int[] { width, height, channels, parameters };
-            _parameterIndex = 3;
-        }
+        int[] dimensions = new int[] { width, height, channels, parameters };
+        _parameterIndex = 3;
+        _location = new int[dimensions.length];
+
         _image = new ImageFactory<DoubleType>
                 (new DoubleType(),
                  new PlanarContainerFactory()).createImage(dimensions, "Fitted");
@@ -108,81 +102,33 @@ public class OutputImageWrapper implements IFittedImage {
 
     @Override
     public int[] getDimension() {
-        int[] dimension = null;
-        if (_channels > 1) {
-            dimension = new int[] { _width, _height, _channels, _parameters };
-        }
-        else {
-            dimension = new int[] { _width, _height, _parameters };
-        }
+        int[] dimension = new int[] { _width, _height, _channels, _parameters };
         return dimension;
     }
 
+    @Override
     public double[] getPixel(int[] location) {
+        for (int i = 0; i < location.length; ++i) {
+            _location[i] = location[i];
+        }
         double[] parameters = new double[_parameters];
         for (int i = 0; i < _parameters; ++i) {
-            location[_parameterIndex] = i;
-            _cursor.moveTo(location);
+            _location[_parameterIndex] = i;
+            _cursor.moveTo(_location);
             parameters[i] = _cursor.getType().getRealFloat();
         }
         return parameters;
     }
 
+    @Override
     public void setPixel(int[] location, double[] value) {
+        for (int i = 0; i < location.length; ++i) {
+            _location[i] = location[i];
+        }
         for (int i = 0; i < _parameters; ++i) {
-            location[_parameterIndex] = i;
-            _cursor.moveTo(location);
+            _location[_parameterIndex] = i;
+            _cursor.moveTo(_location);
             _cursor.getType().set(value[i]);
-        }
-    }
-
-    /**
-     * Gets fitted pixel value.
-     * 
-     * @param x
-     * @param y
-     * @param channel
-     * @return
-     */
-    @Override
-    public double[] getPixel(int x, int y, int channel) {
-        double[] parameters = new double[_parameters];
-        int[] location;
-        if (_channels > 1) {
-            location = new int[] { x, y, channel, 0 };
-        }
-        else {
-            location = new int[] { x, y, 0 };
-        }
-        for (int i = 0; i < _parameters; ++i) {
-            location[_parameterIndex] = i;
-            _cursor.moveTo(location);
-            parameters[i] = _cursor.getType().getRealFloat();
-        }
-        return parameters;
-    }
-
-    /**
-     * Puts fitted pixel value.
-     * 
-     * @param x
-     * @param y
-     * @param channel
-     * @param pixel 
-     */
-    @Override
-    public void setPixel(int x, int y, int channel, double[] parameters) {
-        int[] location;
-        if (_channels > 1) {
-            location = new int[] { x, y, channel, 0 };
-        }
-        else {
-            location = new int[] { x, y, 0 };
-        }
-        for (int i = 0; i < _parameters; ++i) {
-            location[_parameterIndex] = i;
-            _cursor.moveTo(location);
-            _cursor.getType().set(parameters[i]);
         }
     }
 

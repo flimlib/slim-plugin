@@ -32,6 +32,15 @@ public class HistogramDataChannel {
     }
 
     /**
+     * Gets the values array.
+     * 
+     * @return 
+     */
+    public double[][] getValues() {
+        return _values;
+    }
+
+    /**
      * This class is also a container for minimum and maximum LUT values.  These
      * only apply when the LUT is not autoranging and each channel has its own
      * values.

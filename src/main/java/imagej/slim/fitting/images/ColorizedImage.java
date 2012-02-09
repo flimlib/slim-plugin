@@ -4,6 +4,8 @@
  */
 package imagej.slim.fitting.images;
 
+import java.awt.image.IndexColorModel;
+
 import imagej.slim.fitting.images.AbstractBaseColorizedImage;
 
 /**
@@ -21,8 +23,9 @@ public class ColorizedImage extends AbstractBaseColorizedImage {
      * @param dimension
      * @param parameterIndex
      */
-    public ColorizedImage(String title, int[] dimension, int parameterIndex) {
-        super(title, dimension);
+    public ColorizedImage(String title, int[] dimension,
+            IndexColorModel indexColorModel, int parameterIndex) {
+        super(title, dimension, indexColorModel);
         _parameterIndex = parameterIndex;
     }
     

@@ -96,6 +96,8 @@ import imagej.slim.fitting.config.Configuration;
 import imagej.slim.fitting.FitInfo;
 import imagej.slim.fitting.images.ColorizedImageFitter;
 import imagej.slim.fitting.images.ColorizedImageFitter.ColorizedImageType;
+import imagej.slim.histogram.HistogramTool;
+
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
@@ -733,10 +735,11 @@ public class SLIMProcessor <T extends RealType<T>> {
             fitInfo.setStartPrompt(0);
             fitInfo.setStopPrompt(100);
         }
+        fitInfo.setIndexColorModel(HistogramTool.getIndexColorModel());
         m_fitInfo = fitInfo;
         
         // set up images
-        IDecayImage decayImage = new DecayImageWrapper(m_image, m_width, m_height, m_channels, m_channelIndex, m_bins, m_binIndex);
+        IDecayImage decayImage = new DecayImageWrapper(m_image, m_width, m_height, m_channels, m_bins, m_binIndex);
         IFittedImage previousImage = null;
         int width = decayImage.getWidth();
         int height = decayImage.getHeight();
@@ -774,10 +777,10 @@ public class SLIMProcessor <T extends RealType<T>> {
             IFittedImage newImage) {
  
         // get commonly-used items in local variables
-        int width = /*new*/decayImage.getWidth();
-        int height = /*new*/decayImage.getHeight();
-        int channels = /*new*/decayImage.getChannels();
-        int[] dimension = new int[] { width, height, channels };
+        int width = decayImage.getWidth();
+        int height = decayImage.getHeight();
+        int channels = decayImage.getChannels();
+        int bins = decayImage.getBins();
         int channel = fitInfo.getChannel();
         boolean fitAllChannels = fitInfo.getFitAllChannels();
 
@@ -787,6 +790,11 @@ public class SLIMProcessor <T extends RealType<T>> {
         int pixelsToProcessCount = 0;
  
         // handle optionally producing colorized images during the fit
+        int colorizedChannels = 1;
+        if (fitAllChannels) {
+            colorizedChannels = channels;
+        }
+        int[] dimension = new int[] { width, height, colorizedChannels };
         ColorizedImageFitter imageColorizer = null;
         String outputs = fitInfo.getFittedImages();
         if (null != outputs) {
@@ -795,7 +803,8 @@ public class SLIMProcessor <T extends RealType<T>> {
             ColorizedImageParser parser = new ColorizedImageParser(outputs, components, stretched);
             ColorizedImageType[] outputImages = parser.getColorizedImages();
             imageColorizer = new ColorizedImageFitter();
-            imageColorizer.setUpFit(outputImages, dimension, components);
+            imageColorizer.setUpFit(outputImages, dimension,
+                    fitInfo.getIndexColorModel(), components);
             imageColorizer.beginFit();
         }
   
@@ -829,22 +838,28 @@ public class SLIMProcessor <T extends RealType<T>> {
             while (!fitInfo.getCancel() && pixelIterator.hasNext()) {
                 IJ.showProgress(++pixelCount, totalPixelCount);
                 ChunkyPixel pixel = pixelIterator.next();
-                
+
+                // compute full location information
                 int x = pixel.getX();
                 int y = pixel.getY();
-                if (decayImage.fitThisPixel(x, y, c)) {
+                int[] inputLocation = new int[] { x, y, c };
+                int[] outputLocation = new int[] { x, y, fitAllChannels ? c : 0 };
+
+                double[] decay = decayImage.getPixel(inputLocation);
+                // fit this pixel?
+                if (null != decay) {
                     // set up local, pixel fit parameters
                     ILocalFitParams localFitParams = new LocalFitParams();
-                    localFitParams.setY(decayImage.getPixel(x, y, c));
-                    double[] decay = decayImage.getPixel(x, y, c);
+                    localFitParams.setY(decay);
                     localFitParams.setSig(null);
                     localFitParams.setFitStart(fitInfo.getStartDecay());
                     localFitParams.setFitStop(fitInfo.getStopDecay());
                     localFitParams.setParams(fitInfo.getParameters());
-                    double[] yFitted = new double[1024]; //TODO ARG s/b based on bins
+                    double[] yFitted = new double[bins];
                     localFitParams.setYFitted(yFitted);
                     
-                    pixel.setLocation(new int[] { x, y, c });                   
+                    pixel.setInputLocation(inputLocation);
+                    pixel.setOutputLocation(outputLocation);
                     pixelList.add(pixel);
                     localFitParamsList.add(localFitParams);
                     
@@ -917,12 +932,13 @@ public class SLIMProcessor <T extends RealType<T>> {
         for (int i = 0; i < resultsList.size(); ++i) {
             IFitResults result = resultsList.get(i);
             ChunkyPixel p = pixels[i];
+            int[] location = p.getOutputLocation();
+            double[] results = result.getParams();
+            // if producing colorized images, feed this pixel to colorizer
             if (null != imageColorizer) {
-                int[] location = p.getLocation();
-                double[] results = result.getParams();
                 imageColorizer.updatePixel(location, results);
             }
-            fittedImage.setPixel(p.getLocation(), result.getParams()); //TODO ARG for a multichannel fit, location needs channel also; should ChunkyPixel keep track?
+            fittedImage.setPixel(location, results);
         }
 
         if (null != imageColorizer) {
@@ -1303,7 +1319,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         ColorizedImageParser parser = new ColorizedImageParser(outputs, components, stretched);
         
         ColorizedImageType[] outputImages = parser.getColorizedImages();
-        imageFitter.setUpFit(outputImages, new int[] { m_width, m_height }, components);
+        imageFitter.setUpFit(outputImages, new int[] { m_width, m_height }, null, components);
         imageFitter.beginFit();
         
         IGlobalFitParams globalFitParams = new GlobalFitParams();
@@ -1521,7 +1537,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         ColorizedImageParser parser = new ColorizedImageParser(outputs, components, stretched);
         
         ColorizedImageType[] colorizedImages = parser.getColorizedImages();
-        imageFitter.setUpFit(colorizedImages, new int[] { m_width, m_height }, components);
+        imageFitter.setUpFit(colorizedImages, new int[] { m_width, m_height }, null, components);
         imageFitter.beginFit();       
 
         while (!m_cancel && pixelIterator.hasNext()) {
