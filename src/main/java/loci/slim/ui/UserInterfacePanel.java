@@ -1116,8 +1116,28 @@ public class UserInterfacePanel implements IUserInterfacePanel {
      * @return
      */
     public String getFittedImages() {
+        StringBuffer returnValue = new StringBuffer();
         String selected = (String) m_fittedImagesComboBox.getSelectedItem();
-        return selected;
+        System.out.println("selected is " + selected);
+        String[] fittedImages = selected.split(" ");
+        for (String fittedImage : fittedImages) {
+            boolean fit = true;
+            if ("A".equals(fittedImage)) {
+                
+            }
+            else if ("T".equals(fittedImage)) {
+                
+            }
+            else if ("Z".equals(fittedImage)) {
+                
+            }
+            if (fit) {
+                returnValue.append(fittedImage);
+                returnValue.append(' ');
+            }
+        }
+        System.out.println("changes to " + returnValue);
+        return returnValue.toString();
     }
 
     public boolean getFitAllChannels() {

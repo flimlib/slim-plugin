@@ -4,7 +4,7 @@
  */
 package loci.slim;
 
-import imagej.slim.fitting.IFittedImage;
+import loci.slim.fitting.IFittedImage;
 
 import mpicbg.imglib.container.planar.PlanarContainerFactory;
 import mpicbg.imglib.cursor.Cursor;

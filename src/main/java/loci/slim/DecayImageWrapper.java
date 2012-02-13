@@ -4,7 +4,8 @@
  */
 package loci.slim;
 
-import imagej.slim.fitting.IDecayImage;
+import loci.slim.fitting.IDecayImage;
+import loci.slim.process.IProcessor;
 
 import mpicbg.imglib.container.planar.PlanarContainerFactory;
 import mpicbg.imglib.cursor.Cursor;
@@ -80,9 +81,14 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
         return _bins;
     }
     
+    /**
+     * Specifies a source IProcessor to be chained to this one.
+     * 
+     * @param processor 
+     */
     @Override
-    public boolean fitThisPixel(int[] location) {
-        return true; //TODO FOR NOW ONLY!!
+    public void chain(IProcessor processor) {
+        throw new UnsupportedOperationException("Can't chain to DecayImageWrapper");
     }
     
     /**

@@ -243,7 +243,9 @@ public class Display implements ISLIMAnalyzer {
             dialog.addCheckbox("Use common range for all channels", true);
         }
         dialog.showDialog();
-        formulas = formulasMap.get(dialog.getNextChoice());
+        String nextChoice = dialog.getNextChoice();
+        System.out.println("nextChoice is " + nextChoice);
+        formulas = formulasMap.get(nextChoice); //dialog.getNextChoice());
         if (channels > 1) {
             combineMinMax = dialog.getNextBoolean();
         }
