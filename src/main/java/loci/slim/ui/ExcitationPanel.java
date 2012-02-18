@@ -86,10 +86,10 @@ public class ExcitationPanel extends JFrame {
 
         int start = excitation.getStart();
         int stop = excitation.getStop();
-        float base = excitation.getBase();
-        float[] values = excitation.getValues();
+        double base = excitation.getBase();
+        double[] values = excitation.getValues();
         int bins = values.length;
-        float timeInc = excitation.getTimeInc();
+        double timeInc = excitation.getTimeInc();
         ExcitationGraph excitationGraph = new ExcitationGraph(start, stop, base, bins, values, timeInc);
         
         JPanel panel = new JPanel(new BorderLayout());
@@ -113,8 +113,8 @@ public class ExcitationPanel extends JFrame {
     }
 
     public double[] getValues(int pixels) {
-        float floatValues[] = m_excitation.getValues();
-        for (float fV : floatValues) {
+        double inValues[] = m_excitation.getValues();
+        for (double fV : inValues) {
             System.out.print(" " + fV);
         }
         System.out.println("");
@@ -122,14 +122,14 @@ public class ExcitationPanel extends JFrame {
 
         int start = m_excitation.getStart();
         int stop = m_excitation.getStop();
-        float base = m_excitation.getBase();
-        double[] values = new double[floatValues.length];
+        double base = m_excitation.getBase();
+        double[] values = new double[inValues.length];
         for (int i = 0; i < values.length; ++i) {
             if (i < start || i > stop) {
                 values[i] = 0.0;
             }
-            else if (floatValues[i] > base) {
-                values[i] = pixels * floatValues[i];
+            else if (inValues[i] > base) {
+                values[i] = pixels * inValues[i];
                 System.out.println("pixels " + pixels + "  value " + values[i]);
             }
             else {

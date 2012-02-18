@@ -82,9 +82,9 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
     JFrame m_frame;
     int m_start;
     int m_stop;
-    float m_base;
+    double m_base;
     int m_bins;
-    float m_count;
+    double m_count;
     StartStopBaseDraggingUI<JComponent> m_startStopBaseDraggingUI;
     IStartStopBaseListener m_startStopBaseListener;
     boolean m_headless = false;
@@ -109,15 +109,15 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
      * @param timeInc time increment per bin
      * @param values
      */
-    ExcitationGraph(final int start, final int stop, final float base,
-            final int bins, float[] values, final float timeInc) {
+    ExcitationGraph(final int start, final int stop, final double base,
+            final int bins, double[] values, final double timeInc) {
         m_start = start;
         m_stop = stop;
         m_base = base;
         m_bins = bins;
         m_count = 0.0f;
         // find maximum count
-        for (float value : values) {
+        for (double value : values) {
             if (value > m_count) {
                 m_count = value;
             }
@@ -194,7 +194,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
      * @param data fitted data
      * @return the chart
      */
-    JFreeChart createChart(int bins, double timeInc, float[] values) {
+    JFreeChart createChart(int bins, double timeInc, double[] values) {
 
         // create chart data
         createDataset(bins, timeInc, values);
@@ -236,7 +236,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
      * @param timeInc time increment per time bin
      * @param data from the fit
      */
-    private void createDataset(int bins, double timeInc, float[] values) {
+    private void createDataset(int bins, double timeInc, double[] values) {
         XYSeries series = new XYSeries("Data");
         double yData, yFitted;
         double xCurrent = 0;

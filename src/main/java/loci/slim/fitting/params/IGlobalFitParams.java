@@ -46,6 +46,10 @@ import loci.curvefitter.ICurveFitter.NoiseModel;
  */
 public interface IGlobalFitParams {
     
+    public void setTRI2Compatible(boolean compatible);
+    
+    public boolean getTRI2Compatible();
+    
     public void setFitAlgorithm(FitAlgorithm fitAlgorithm);
     
     public FitAlgorithm getFitAlgorithm();

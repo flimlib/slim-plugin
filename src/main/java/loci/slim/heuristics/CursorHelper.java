@@ -32,12 +32,13 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim;
+package loci.slim.heuristics;
 
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
+import loci.curvefitter.ICurveFitter.NoiseModel;
 import loci.curvefitter.SLIMCurveFitter;
 
 /**
@@ -52,14 +53,14 @@ import loci.curvefitter.SLIMCurveFitter;
 public class CursorHelper {
     private static final int ATTEMPTS = 10;
 
-    public static float[] estimateExcitationCursors(float[] excitation) {
-        float baseline;
-        float maxval;
+    public static double[] estimateExcitationCursors(double[] excitation) {
+        double baseline;
+        double maxval;
         int index;
         int startp = 0;
         int endp = 0;
         int i;
-        float[] diffed = new float[excitation.length];
+        double[] diffed = new double[excitation.length];
         int steepp;
 
         // "Estimate prompt baseline; very rough and ready"
@@ -116,14 +117,14 @@ public class CursorHelper {
             }
         }
 
-        float[] returnValue = new float[3];
+        double[] returnValue = new double[3];
         returnValue[0] = startp;
         returnValue[1] = endp;
         returnValue[2] = baseline;
         return returnValue;
     }
 
-    public static int[] estimateDecayCursors(float xInc, double[] decay) {
+    public static int[] estimateDecayCursors(double xInc, double[] decay) {
         int maxIndex = findMax(decay);
         double[] diffed = new double[maxIndex];
         // "Differentiate"
@@ -146,17 +147,17 @@ public class CursorHelper {
         return new int[] { startIndex, stopIndex };
     }
 
-    public static float[] estimateCursors(float xInc, float[] prompt, double[] decay) {
-        float[] returnValue = new float[5];
-        float baseline;
-        float maxval; // TRCursors.c has "unsigned short maxsval, maxval; float maxfval, *diffed;"
+    public static double[] estimateCursors(double xInc, double[] prompt, double[] decay) {
+        double[] returnValue = new double[5];
+        double baseline;
+        double maxval; // TRCursors.c has "unsigned short maxsval, maxval; double maxfval, *diffed;"
         int index;
         int startp = 0;
         int startt = 0;
         int endp = 0;
         int endt = 0;
         int i;
-        float[] diffed = new float[prompt.length];
+        double[] diffed = new double[prompt.length];
         int steepp;
         int steept;
         // "For Marquardt fitting"
@@ -226,7 +227,7 @@ public class CursorHelper {
         index = findMax(decay);
 
         // "Differentiate"
-        double[] diffedd = new double[decay.length]; //TODO double vs float issues
+        double[] diffedd = new double[decay.length];
         for (i = 0; i < index; ++i) {
             diffedd[i] = decay[i + 1] - decay[i];
         }
@@ -263,12 +264,6 @@ public class CursorHelper {
 
         System.out.println("prompt " + prompt.length + " decay " + decay.length);
 
-        //TODO convert everything to float, not double
-        double[] response = new double[decay.length];
-        for (int n = 0; n < decay.length; ++n) {
-            response[n] = decay[index];
-        }
-
         for (i = 0; i < 2 * ATTEMPTS + 1; ++i, ++transStartIndex) {
 
             transFitStartIndex = transStartIndex;
@@ -282,6 +277,11 @@ public class CursorHelper {
             CurveFitData curveFitData = new CurveFitData();
             curveFitData.setParams(param); //TODO param has random values!!
             curveFitData.setYCount(decay);
+            curveFitData.setTransStartIndex(0);
+            curveFitData.setTransFitStartIndex(fitStart);
+            curveFitData.setTransEstimateStartIndex(fitStart);
+            curveFitData.setTransEndIndex(fitStop);            
+  
             curveFitData.setSig(null);
             curveFitData.setYFitted(yFitted);
             CurveFitData[] data = new CurveFitData[] { curveFitData };
@@ -290,9 +290,10 @@ public class CursorHelper {
             curveFitter.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD_LMA);
             curveFitter.setXInc(xInc);
             curveFitter.setFree(free);
-            curveFitter.setInstrumentResponse(response);
+            curveFitter.setInstrumentResponse(decay);
+            curveFitter.setNoiseModel(NoiseModel.POISSON_DATA);
 
-            int ret = curveFitter.fitData(data, fitStart, fitStop);
+            int ret = curveFitter.fitData(data);
 
             if (ret >= 0) {
                 System.out.println("for start " + fitStart + " stop " + fitStop + " chiSq is " + data[0].getChiSquare());
@@ -345,11 +346,11 @@ public class CursorHelper {
      * @param n
      * @return
      */
-    private static float calcBgFromPrepulse(float[] prepulse, int n) {
-        float z = 0.0f;
+    private static double calcBgFromPrepulse(double[] prepulse, int n) {
+        double z = 0.0f;
 
         if (z > 0) {
-            float val = 0.0f;
+            double val = 0.0f;
             for (int i = 0; i <n; ++i) {
                 val += prepulse[i];
             }
@@ -359,20 +360,36 @@ public class CursorHelper {
     }
 
     /**
+     * Calculates the start index to use for a triple integral/RLD estimate
+     * fit before a LMA fit.
+     * 
+     * Based on expParameterEstimation from TRFitting.c.
+     * 
+     * @param trans
+     * @param transFitStartIndex
+     * @param transEndIndex
+     * @return 
+     */
+    public static int getEstimateStartIndex(double[] trans, int transFitStartIndex, int transEndIndex) {
+        int transEstimateStartIndex = transFitStartIndex + findMax(trans, transFitStartIndex, transEndIndex);
+        return transEstimateStartIndex;
+    }
+
+    /**
      * "Get initial estimates for the params that go forward to Marquardt".
      * (Based on expParameterEstimation from TRfitting.c.)
      *
      * @return
      */
-    public static float[] estimateParameters(boolean useRLD,
+    public static double[] estimateParameters(boolean useRLD,
             boolean useBackground,
-            float[] trans,
+            double[] trans,
             int transFitStartIndex,
             int transStartIndex,
             int transEndIndex) {
-        float a, t, z;
+        double a, t, z;
 
-        // initialize
+        // initial guess
         a = 1000.0f;
         t = 2.0f;
         z = 0.0f;
@@ -391,53 +408,21 @@ public class CursorHelper {
             z = calcBgFromPrepulse(trans, transStartIndex);
         }
 
-        return new float[] { z, a, t };
-    }
-
-    private static int findMax(float[] values) {
-        return findMax(values, 0, values.length);
-    }
-
-    private static int findMax(float[] values, int endIndex) {
-        return findMax(values, 0, endIndex);
-    }
-
-    private static int findMax(float[] values, int startIndex, int endIndex) {
-        int index = startIndex;
-        float max = values[startIndex];
-        for (int i = startIndex; i < endIndex; ++i) {
-            if (values[i] > max) {
-                max = values[i];
-                index = i;
-            }
-        }
-        return index;
-    }
-
-    private static int findMin(float[] values, int endIndex) {
-        return findMin(values, 0, endIndex);
-    }
-
-    private static int findMin(float[] values, int startIndex, int endIndex) {
-        int index = startIndex;
-        float min = values[startIndex];
-        for (int i = startIndex; i < endIndex; ++i) {
-            if (values[i] < min) {
-                min = values[i];
-                index = i;
-            }
-        }
-        return index;
+        return new double[] { z, a, t };
     }
 
     private static int findMax(double[] values) {
-        return findMax(values, values.length);
+        return findMax(values, 0, values.length);
     }
 
     private static int findMax(double[] values, int endIndex) {
-        int index = 0;
-        double max = 0.0f;
-        for (int i = 0; i < endIndex; ++i) {
+        return findMax(values, 0, endIndex);
+    }
+
+    private static int findMax(double[] values, int startIndex, int endIndex) {
+        int index = startIndex;
+        double max = values[startIndex];
+        for (int i = startIndex; i < endIndex; ++i) {
             if (values[i] > max) {
                 max = values[i];
                 index = i;
@@ -447,9 +432,13 @@ public class CursorHelper {
     }
 
     private static int findMin(double[] values, int endIndex) {
-        int index = 0;
-        double min = Double.MAX_VALUE;
-        for (int i = 0; i < endIndex; ++i) {
+        return findMin(values, 0, endIndex);
+    }
+
+    private static int findMin(double[] values, int startIndex, int endIndex) {
+        int index = startIndex;
+        double min = values[startIndex];
+        for (int i = startIndex; i < endIndex; ++i) {
             if (values[i] < min) {
                 min = values[i];
                 index = i;

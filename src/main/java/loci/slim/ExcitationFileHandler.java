@@ -76,9 +76,9 @@ public class ExcitationFileHandler <T extends RealType<T>> {
         return s_instance;
     }
 
-    public Excitation loadExcitation(String fileName, float timeInc) {
+    public Excitation loadExcitation(String fileName, double timeInc) {
         Excitation excitation = null;
-        float values[] = null;
+        double values[] = null;
         if (fileName.toLowerCase().endsWith(ICS)) {
             values = loadICSExcitationFile(fileName);
         }
@@ -94,7 +94,7 @@ public class ExcitationFileHandler <T extends RealType<T>> {
         return excitation;
     }
 
-    public Excitation createExcitation(String fileName, float[] values, float timeInc) {
+    public Excitation createExcitation(String fileName, double[] values, double timeInc) {
         Excitation excitation = null;
         boolean success = false;
         if (fileName.endsWith(ICS)) {
@@ -112,8 +112,8 @@ public class ExcitationFileHandler <T extends RealType<T>> {
         return excitation;
     }
 
-    private float[] loadICSExcitationFile(String fileName) {
-        float[] results = null;
+    private double[] loadICSExcitationFile(String fileName) {
+        double[] results = null;
         ICSReader icsReader = new ICSReader();
         try {
             icsReader.setId(fileName);
@@ -126,20 +126,20 @@ public class ExcitationFileHandler <T extends RealType<T>> {
                 // hack for lifetime ICS that reader doesn't recognize as such
                 bins = icsReader.getSizeZ();
             }
-            results = new float[bins];
+            results = new double[bins];
             byte bytes[];
             if (false || icsReader.isInterleaved()) { //TODO ARG interleaved does not read the whole thing; was 130K, now 32767
                 // this returns the whole thing
                 bytes = icsReader.openBytes(0);
                 System.out.println("INTERLEAVED reads # bytes: " + bytes.length);
                 for (int bin = 0; bin < bins; ++bin) {
-                    results[bin] = convertBytesToFloat(littleEndian, bitsPerPixel, bytes, bytesPerPixel * bin);
+                    results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, bytesPerPixel * bin);
                 }
             }
             else {
                 for (int bin = 0; bin < bins; ++bin) {
                     bytes = icsReader.openBytes(bin);
-                    results[bin] = convertBytesToFloat(littleEndian, bitsPerPixel, bytes, 0);
+                    results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, 0);
                 }
             }
             icsReader.close();
@@ -154,14 +154,14 @@ public class ExcitationFileHandler <T extends RealType<T>> {
     }
 
     //TODO doesn't work; needed to interoperate with TRI2
-    private boolean saveICSExcitationFile(String fileName, float[] values) {
+    private boolean saveICSExcitationFile(String fileName, double[] values) {
         boolean success = false;
         ICSWriter icsWriter = new ICSWriter();
         MetadataRetrieve meta = null;
 //        icsWriter.setMetadataRetrieve(meta);
         try {
             for (int bin = 0; bin < values.length; ++bin) {
-                icsWriter.saveBytes(bin, convertFloatToBytes(values[bin]));
+                icsWriter.saveBytes(bin, convertDoubleToBytes(values[bin]));
             }
             success = true;
         }
@@ -174,8 +174,8 @@ public class ExcitationFileHandler <T extends RealType<T>> {
         return success;
     }
 
-    private float[] loadIRFExcitationFile(String fileName) {
-        float[] values = null;
+    private double[] loadIRFExcitationFile(String fileName) {
+        double[] values = null;
         try {
             ArrayList<Float> valuesArrayList = new ArrayList<Float>();
             Scanner scanner = new Scanner(new FileReader(fileName));
@@ -184,7 +184,7 @@ public class ExcitationFileHandler <T extends RealType<T>> {
                 line = scanner.nextLine();
                 valuesArrayList.add(Float.parseFloat(line));
             }
-            values = new float[valuesArrayList.size()];
+            values = new double[valuesArrayList.size()];
             for (int i = 0; i < valuesArrayList.size(); ++i) {
                 values[i] = valuesArrayList.get(i);
             }
@@ -195,7 +195,7 @@ public class ExcitationFileHandler <T extends RealType<T>> {
         return values;
     }
 
-    private boolean saveIRFExcitationFile(String fileName, float[] values) {
+    private boolean saveIRFExcitationFile(String fileName, double[] values) {
         boolean success = false;
         try {
             FileWriter writer = new FileWriter(fileName);
@@ -203,7 +203,7 @@ public class ExcitationFileHandler <T extends RealType<T>> {
                 if (i > 0) {
                     writer.append('\n');
                 }
-                writer.append(Float.toString(values[i]));
+                writer.append(Double.toString(values[i]));
             }
             writer.flush();
             writer.close();
@@ -215,7 +215,8 @@ public class ExcitationFileHandler <T extends RealType<T>> {
         return success;
     }
 
-    private byte[] convertFloatToBytes(float f) {
+    private byte[] convertDoubleToBytes(double d) {
+        float f = (float) d;
         int rawIntBits = Float.floatToRawIntBits(f);
         byte[] result = new byte[4];
         for (int i = 0; i < 4; ++i) {
@@ -226,7 +227,7 @@ public class ExcitationFileHandler <T extends RealType<T>> {
     }
 
     /**
-     * Converts a little-endian four byte array to a float.
+     * Converts a little-endian four byte array to a double.
      *
      * @param littleEndian byte order
      * @param bitsPerPixel
@@ -234,8 +235,8 @@ public class ExcitationFileHandler <T extends RealType<T>> {
      * @param index
      * @return
      */
-    private float convertBytesToFloat(boolean littleEndian, int bitsPerPixel, byte[] bytes, int index) {
-        float returnValue = 0.0f;
+    private double convertBytesToDouble(boolean littleEndian, int bitsPerPixel, byte[] bytes, int index) {
+        double returnValue = 0.0f;
         if (32 == bitsPerPixel) {
             int i = 0;
             if (littleEndian) {
@@ -294,7 +295,7 @@ public class ExcitationFileHandler <T extends RealType<T>> {
                 l <<= 8;
                 l |= bytes[index + 7] & 0xff;
             }
-            returnValue = (float) Double.longBitsToDouble(l);
+            returnValue = (double) Double.longBitsToDouble(l);
         }
         return returnValue;
     }

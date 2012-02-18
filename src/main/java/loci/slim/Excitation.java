@@ -42,11 +42,11 @@ package loci.slim;
  */
 public class Excitation {
     private final String m_fileName;
-    private final float[] m_values;
-    private final float m_timeInc;
+    private final double[] m_values;
+    private final double m_timeInc;
     private int m_start;
     private int m_stop;
-    private float m_base;
+    private double m_base;
 
     /**
      * Creates an excitation with given filename and values.
@@ -54,7 +54,7 @@ public class Excitation {
      * @param fileName
      * @param values
      */
-    public Excitation(String fileName, float[] values, float timeInc) {
+    public Excitation(String fileName, double[] values, double timeInc) {
         m_fileName = fileName;
         m_values = values;
         m_timeInc = timeInc;
@@ -74,7 +74,7 @@ public class Excitation {
      *
      * @return
      */
-    public float[] getValues() {
+    public double[] getValues() {
         return m_values;
     }
 
@@ -83,7 +83,7 @@ public class Excitation {
      *
      * @return
      */
-    public float getTimeInc() {
+    public double getTimeInc() {
         return m_timeInc;
     }
 
@@ -128,7 +128,7 @@ public class Excitation {
      *
      * @param base
      */
-    public void setBase(float base) {
+    public void setBase(double base) {
         m_base = base;
     }
 
@@ -137,7 +137,7 @@ public class Excitation {
      *
      * @return
      */
-    public float getBase() {
+    public double getBase() {
         return m_base;
     }
 

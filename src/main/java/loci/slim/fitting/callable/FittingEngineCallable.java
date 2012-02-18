@@ -38,10 +38,12 @@ import loci.slim.fitting.params.FitResults;
 import loci.slim.fitting.params.ILocalFitParams;
 import loci.slim.fitting.params.IGlobalFitParams;
 import loci.slim.fitting.params.IFitResults;
+import loci.slim.heuristics.CursorHelper;
 
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
+import loci.curvefitter.ICurveFitter.FitAlgorithm;
 
 /**
  * This class brings together everything needed to fit one pixel.  It is a 
@@ -76,12 +78,25 @@ public class FittingEngineCallable implements IFittingEngineCallable {
         ICurveFitData curveFitData = new CurveFitData(); 
         curveFitData.setChiSquareTarget(_globalParams.getChiSquareTarget());
         curveFitData.setYCount(_localParams.getY());
+        curveFitData.setTransStartIndex(0);
+        curveFitData.setTransFitStartIndex(_localParams.getFitStart());
+        curveFitData.setTransEndIndex(_localParams.getFitStop());        
         curveFitData.setSig(_localParams.getSig());
         curveFitData.setParams(_localParams.getParams().clone()); // params is overwritten
         curveFitData.setYFitted(_localParams.getYFitted());
+        if (_globalParams.getTRI2Compatible()) {
+            if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(_globalParams.getFitFunction())) {
+                // these lines give TRI2 compatible fit results
+                int estimateStartIndex =
+                        CursorHelper.getEstimateStartIndex
+                            (_localParams.getY(), _localParams.getFitStart(), _localParams.getFitStop());
+                curveFitData.setTransEstimateStartIndex(estimateStartIndex);
+                curveFitData.setIgnorePromptForIntegralEstimate(true);
+            }
+        }
+        
         ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData };
-
-        _curveFitter.fitData(curveFitDataArray, _localParams.getFitStart(), _localParams.getFitStop());
+        _curveFitter.fitData(curveFitDataArray);
 
         _result = new FitResults();
         _result.setChiSquare(curveFitData.getChiSquare());

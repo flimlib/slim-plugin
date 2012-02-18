@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
+import loci.slim.heuristics.CursorHelper;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -343,9 +344,9 @@ public class SLIMProcessor <T extends RealType<T>> {
                     }
                     int x = uiPanel.getX();
                     int y = uiPanel.getY();
-                    float[] values = new float[m_bins];
+                    double[] values = new double[m_bins];
                     for (int b = 0; b < m_bins; ++b) {
-                        values[b] = (float) getData(m_cursor, channel, x, y, b);
+                        values[b] = getData(m_cursor, channel, x, y, b);
                     }
                     Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, values, m_timeRange);
                     return updateExcitation(uiPanel, excitation);
@@ -473,7 +474,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 }
             }
 
-            float[] results = CursorHelper.estimateCursors(m_timeRange, excitation.getValues(), decay);
+            double[] results = CursorHelper.estimateCursors(m_timeRange, excitation.getValues(), decay);
             excitation.setStart((int) results[0]);
             excitation.setStop((int) results[1]);
             excitation.setBase(results[2]);
@@ -625,7 +626,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 
         // patch things up
-        m_timeRange = 10.0f / 64.0f; //TODO ARG this patches things up in accord with TRI2 for brian/gpl1.sdt; very odd value here NOTE this was with photon counts all divided by 10.0f above! might have cancelled out.
+        m_timeRange = 10.0f / 64.0f; //TODO ARG 2/13/12 was: 10.0f / 64.0f; //TODO ARG this patches things up in accord with TRI2 for brian/gpl1.sdt; very odd value here NOTE this was with photon counts all divided by 10.0f above! might have cancelled out.
                    //TODO the patch above worked when I was also dividing the photon count by 10.0f!!  should be 1/64?
         m_minWave = 400;
         m_waveStep = 10;
@@ -994,8 +995,21 @@ public class SLIMProcessor <T extends RealType<T>> {
                 }
             }
             curveFitData.setYCount(yCount);
+            curveFitData.setTransStartIndex(0);
+            curveFitData.setTransFitStartIndex(m_startBin);
+            curveFitData.setTransEndIndex(m_stopBin);
             yFitted = new double[m_bins];
             curveFitData.setYFitted(yFitted);
+            
+            // for TRI2 compatibility:
+            if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getFunction())) {
+                // these lines give TRI2 compatible fit results
+                int estimateStartIndex =
+                        CursorHelper.getEstimateStartIndex
+                            (yCount, m_startBin, m_stopBin);
+                curveFitData.setTransEstimateStartIndex(estimateStartIndex);
+                curveFitData.setIgnorePromptForIntegralEstimate(true);
+            }         
 
             // use zero for current channel if it's the only one
             int nominalChannel = m_fitAllChannels ? channel : 0;
@@ -1008,7 +1022,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-        getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
+        getCurveFitter(uiPanel).fitData(dataArray);
 
         // show decay and update UI parameters
         int visibleChannel = m_fitAllChannels ? m_channel : 0;
@@ -1069,6 +1083,19 @@ public class SLIMProcessor <T extends RealType<T>> {
                     }
                 }
                 curveFitData.setYCount(yCount);
+                curveFitData.setTransStartIndex(0);
+                curveFitData.setTransFitStartIndex(m_startBin);
+                curveFitData.setTransEndIndex(m_stopBin);
+                if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getFunction())) {
+                    // these lines give TRI2 compatible fit results
+                    int estimateStartIndex =
+                            CursorHelper.getEstimateStartIndex
+                                (yCount, m_startBin, m_stopBin);
+                    curveFitData.setTransEstimateStartIndex(estimateStartIndex);
+                    curveFitData.setIgnorePromptForIntegralEstimate(true);
+                }
+                
+                
                 yFitted = new double[m_bins];
                 curveFitData.setYFitted(yFitted);
 
@@ -1086,7 +1113,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-        getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
+        getCurveFitter(uiPanel).fitData(dataArray);
 
         // show the decay graphs
         double min = Double.MAX_VALUE;
@@ -1182,9 +1209,26 @@ public class SLIMProcessor <T extends RealType<T>> {
             curveFitData.setParams(params.clone()); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
             yCount = new double[m_bins];
             for (int b = 0; b < m_bins; ++b) {
-                yCount[b] = getData(m_cursor, channel, x, y, b);
+                yCount[b] = getData(m_cursor, channel, x, y, b) / 10.0; //TODO ARG 2/13/12 lowest value was 10.0, s/b 1.0
             }
+            int photons = 0;
+            for (int c = 0; c < m_bins; ++c) {
+                photons += yCount[c];
+            }
+            System.out.println("PHOTONS " + photons);
             curveFitData.setYCount(yCount);
+            curveFitData.setTransStartIndex(0);
+            curveFitData.setTransFitStartIndex(m_startBin);
+            curveFitData.setTransEndIndex(m_stopBin);
+            if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getFunction())) {
+                // these lines give TRI2 compatible fit results
+                int estimateStartIndex =
+                        CursorHelper.getEstimateStartIndex
+                            (yCount, m_startBin, m_stopBin);
+                curveFitData.setTransEstimateStartIndex(estimateStartIndex);
+                curveFitData.setIgnorePromptForIntegralEstimate(true);
+            }
+           
             yFitted = new double[m_bins];
             curveFitData.setYFitted(yFitted);
 
@@ -1199,7 +1243,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-        getCurveFitter(uiPanel).fitData(dataArray, m_startBin, m_stopBin);
+        getCurveFitter(uiPanel).fitData(dataArray);
 
         // show decay graph for visible channel
         double irf[] = null;

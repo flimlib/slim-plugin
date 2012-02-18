@@ -45,6 +45,7 @@ import loci.curvefitter.ICurveFitter.NoiseModel;
  * @author Aivar Grislis
  */
 public class GlobalFitParams implements IGlobalFitParams {
+    private boolean _compatible;
     private FitAlgorithm _fitAlgorithm;
     private FitFunction _fitFunction;
     private NoiseModel _noiseModel;
@@ -56,6 +57,16 @@ public class GlobalFitParams implements IGlobalFitParams {
     private int _stopPrompt;
     private int _startDecay;
     private int _stopDecay;
+
+    @Override
+    public void setTRI2Compatible(boolean compatible) {
+        _compatible = compatible;
+    }
+
+    @Override
+    public boolean getTRI2Compatible() {
+        return _compatible;
+    }
  
     @Override
     public void setFitAlgorithm(FitAlgorithm fitAlgorithm) {
