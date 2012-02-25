@@ -40,8 +40,8 @@ package loci.slim.fitting.cursor;
  */
 public interface ICursorEstimator {
     
-    public ICursor globalCursor(double[] prompt, double[] decay);
+    public IFittingCursorListener globalCursor(double[] prompt, double[] decay);
     
-    public ICursor localCursor(ICursor global, double[] prompt, double[] decay);
+    public IFittingCursorListener localCursor(FittingCursor global, double[] prompt, double[] decay);
     
 }

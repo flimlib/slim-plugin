@@ -28,7 +28,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.refactor.ui.charts;
+package loci.slim.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -43,7 +43,8 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import loci.curvefitter.ICurveFitData;
-import loci.slim.ui.IStartStopListener;
+import loci.slim.fitting.cursor.FittingCursor;
+import loci.slim.fitting.cursor.IFittingCursorListener;
 
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
@@ -80,20 +81,23 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     static final Color DECAY_COLOR = Color.GRAY.darker();
     static final Color FITTED_COLOR = Color.RED;
     static final Color BACK_COLOR = Color.WHITE;
-    static final Color START_COLOR = Color.BLUE.darker();
-    static final Color STOP_COLOR = Color.RED.darker();
+    static final Color TRANS_START_COLOR = Color.BLUE.darker();
+    static final Color DATA_START_COLOR = Color.GREEN.darker();
+    static final Color TRANS_STOP_COLOR = Color.RED.darker();
     static final Color BASE_COLOR = Color.GREEN.darker();
     static final Color RESIDUAL_COLOR = Color.BLACK;
 
     private static DecayGraph _instance;
     private JFrame _frame;
-    IStartStopListener _startStopListener;
+    FittingCursor _fittingCursor;
+    IFittingCursorListener _fittingCursorListener;
 
     private StartStopDraggingUI<JComponent> _startStopDraggingUI;
     private double _timeInc;
     private int _bins;
-    private Integer _start;
-    private Integer _stop;
+    private Integer _transStart;
+    private Integer _dataStart;
+    private Integer _transStop;
     private boolean _logarithmic = true;
 
     XYPlot _decaySubPlot;
@@ -120,15 +124,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             _instance = new DecayGraph();
         }
         return _instance;
-    }
-    
-    /**
-     * Sets up a listener to listen for start/stop changes.
-     * 
-     * @param startStopListener
-     */
-    public void setStartStopListener(IStartStopListener startStopListener) {
-        _startStopListener = startStopListener;
     }
 
     /**
@@ -164,7 +159,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             panel.setPreferredSize(SIZE);
 
             // add start/stop vertical bar handling
-            _start = _stop = null;
+            _dataStart = _transStop = null;
             JXLayer<JComponent> layer = new JXLayer<JComponent>(panel);
             _startStopDraggingUI =
                     new StartStopDraggingUI<JComponent>
@@ -180,6 +175,17 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             _frame.setVisible(true);            
         }
         return _frame;
+    }
+    
+    public void setFittingCursor(FittingCursor fittingCursor) {
+        if (null == _fittingCursor) {
+            _fittingCursorListener = new FittingCursorListener();
+        }
+        else {
+            _fittingCursor.removeListener(_fittingCursorListener);
+        }
+        _fittingCursor = fittingCursor;
+        _fittingCursor.addListener(_fittingCursorListener);
     }
     
     public void setTitle(final String title) {
@@ -200,21 +206,24 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     /**
      * Changes (or initializes) the start and stop vertical bars.
      *
-     * @param start
-     * @param stop
+     * @param transStart
+     * @param dataStart
+     * @param transStop
      */
-    public void setStartStop(int start, int stop) {
-        if (null == _start) {
+    public void setStartStop(int transStart, int dataStart, int transStop) {
+        if (null == _dataStart) {
             // initialize the vertical bars
-            double startValue = start * _timeInc;
-            double stopValue = stop * _timeInc;
-            double maxValue = _bins * _timeInc;
+            double transStartValue = transStart * _timeInc;
+            double dataStartValue  = dataStart  * _timeInc;
+            double transStopValue  = transStop  * _timeInc;
+            double maxValue        = _bins      * _timeInc;
             _startStopDraggingUI.setStartStopValues
-                    (startValue, stopValue, maxValue);
+                    (transStartValue, dataStartValue, transStopValue, maxValue);
         }
 
-        _start = start;
-        _stop = stop;
+        _transStart = transStart;
+        _dataStart  = dataStart;
+        _transStop  = transStop;
 
     }
 
@@ -223,20 +232,28 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
      * the UI layer that lets user drag the start and stop vertical bars.  Validates
      * and passes changes on to external listener.
      *
-     * @param startProportion
-     * @param stopProportion
+     * @param transStartProportion
+     * @param dataStartProportion
+     * @param transStopProportion
      */
-    public void setStartStopProportion
-            (double startProportion, double stopProportion)
+    public void setStartStopProportion(
+            double transStartProportion,
+            double dataStartProportion,
+            double transStopProportion)
     {
         // calculate new start and stop
-        int start = (int) (startProportion * _bins + 0.5);
-        int stop = (int) (stopProportion * _bins + 0.5);
+        int transStart = (int) (transStartProportion * _bins + 0.5);
+        int dataStart  = (int) (dataStartProportion  * _bins + 0.5);
+        int transStop  = (int) (transStopProportion  * _bins + 0.5);
 
         // if changed, notify listener
-        if (start != _start || stop != _stop) {
-            if (null != _startStopListener) {
-                _startStopListener.setStartStop(start, stop);
+        if (transStart != _transStart || dataStart != _dataStart ||
+                transStop != _transStop)
+        {
+            if (null != _fittingCursor) {
+                _fittingCursor.setTransientStartBin(transStart);
+                _fittingCursor.setDataStartBin(dataStart);
+                _fittingCursor.setTransientStopBin(transStop);
             }
         }
     }
@@ -349,7 +366,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             // logarithmic plots can't handle <= 0.0
             series3.add(xCurrent, (yData > 0.0 ? yData : null));
             // are we in fitted region?
-            if (_start <= i && i <= _stop) {
+            if (_dataStart <= i && i <= _transStop) {
                 // yes, show fitted curve and residuals
                 yFitted = data.getYFitted()[i];
                 // logarithmic plots can't handle <= 0
@@ -391,14 +408,17 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         private ChartPanel _panel;
         private XYPlot _plot;
         private IStartStopProportionListener _listener;
-        boolean _draggingStartMarker = false;
-        boolean _draggingStopMarker = false;
-        private Double _startMarkerProportion;
-        private Double _stopMarkerProportion;
+        boolean _dragTransStartMarker = false;
+        boolean _dragDataStartMarker  = false;
+        boolean _dragTransStopMarker  = false;
+        private volatile Double _transStartMarkerProportion;
+        private volatile Double _dataStartMarkerProportion;
+        private volatile Double _transStopMarkerProportion;
         private int _y0;
         private int _y1;
-        private int _xStart;
-        private int _xStop;
+        private int _xTransStart;
+        private int _xDataStart;
+        private int _xTransStop;
 
         /**
          * Creates the UI.
@@ -413,28 +433,34 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             _panel    = panel;
             _plot     = plot;
             _listener = listener;
-            _startMarkerProportion = null;
-            _stopMarkerProportion = null;
+            _transStartMarkerProportion = null;
+            _dataStartMarkerProportion  = null;
+            _transStopMarkerProportion  = null;
         }
 
         void setStartStopValues
-                (double startValue, double stopValue, double maxValue)
+                (double transStartValue, double dataStartValue,
+                double transStopValue, double maxValue)
         {
             Rectangle2D area = getDataArea();
             double x = area.getX();
             double width = area.getWidth();
             if (0.1 > width) {
-                _startMarkerProportion = startValue / maxValue;
-                _stopMarkerProportion = stopValue / maxValue;
+                _transStartMarkerProportion = transStartValue / maxValue;
+                _dataStartMarkerProportion  = dataStartValue  / maxValue;
+                _transStopMarkerProportion  = transStopValue  / maxValue;
             }
             else {
                 double minRepresentedValue = screenToValue((int) x);
                 double maxRepresentedValue = screenToValue((int) (x + width));
-                _startMarkerProportion =
-                        (float) (startValue - minRepresentedValue) /
+                _transStartMarkerProportion =
+                        (float) (transStartValue - minRepresentedValue) /
                             (maxRepresentedValue - minRepresentedValue);
-                _stopMarkerProportion =
-                        (float) (stopValue - minRepresentedValue) /
+                _dataStartMarkerProportion =
+                        (float) (dataStartValue - minRepresentedValue) /
+                            (maxRepresentedValue - minRepresentedValue);
+                _transStopMarkerProportion =
+                        (float) (transStopValue - minRepresentedValue) /
                             (maxRepresentedValue - minRepresentedValue);
             }
         }
@@ -452,24 +478,30 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             // this paints layer as is
             super.paintLayer(g2D, layer);
             
-            if (null != _startMarkerProportion && null != _stopMarkerProportion) {
+            if (null != _transStartMarkerProportion &&
+                    null != _dataStartMarkerProportion &&
+                    null != _transStopMarkerProportion) {
                 // adjust to current size
                 Rectangle2D area = getDataArea();
                 double x = area.getX();
                 _y0 = (int) area.getY();
                 _y1 = (int) (area.getY() + area.getHeight());
                 double width = area.getWidth();
-                _xStart = (int) Math.round(x + width * _startMarkerProportion)
+                _xTransStart = (int) Math.round(x + width * _transStartMarkerProportion)
                         + HORZ_TWEAK;
-                _xStop = (int) Math.round(x + width * _stopMarkerProportion)
+                _xDataStart = (int) Math.round(x + width * _dataStartMarkerProportion)
+                        + HORZ_TWEAK;
+                _xTransStop = (int) Math.round(x + width * _transStopMarkerProportion)
                         + HORZ_TWEAK;
 
                 // custom painting is here
                 g2D.setStroke(new BasicStroke(2f));
-                g2D.setXORMode(XORvalue(START_COLOR));
-                g2D.drawLine(_xStart, _y0, _xStart, _y1);
-                g2D.setXORMode(XORvalue(STOP_COLOR));
-                g2D.drawLine(_xStop, _y0, _xStop, _y1);    
+                g2D.setXORMode(XORvalue(TRANS_START_COLOR));
+                g2D.drawLine(_xTransStart, _y0, _xTransStart, _y1);
+                g2D.setXORMode(XORvalue(DATA_START_COLOR));
+                g2D.drawLine(_xDataStart, _y0, _xDataStart, _y1);
+                g2D.setXORMode(XORvalue(TRANS_STOP_COLOR));
+                g2D.drawLine(_xTransStop, _y0, _xTransStop, _y1);    
             }
         }
 
@@ -484,16 +516,36 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         {
             super.processMouseMotionEvent(event, layer);
             if (event.getID() == MouseEvent.MOUSE_DRAGGED) {
-                if (_draggingStartMarker || _draggingStopMarker) {
+                if (_dragTransStartMarker || _dragDataStartMarker
+                        || _dragTransStopMarker) {
                     double newProportion = getDraggedProportion(event);
-                    if (_draggingStartMarker) {
-                        if (newProportion <= _stopMarkerProportion) {
-                            _startMarkerProportion = newProportion;
+                    if (_dragTransStartMarker) {
+                        if (newProportion <= _dataStartMarkerProportion) {
+                            _transStartMarkerProportion = newProportion;
+                        }
+                        else {
+                            _transStartMarkerProportion = _dataStartMarkerProportion;
+                        }
+                    }
+                    else if (_dragDataStartMarker) {
+                        if (newProportion >= _transStartMarkerProportion) {
+                            if (newProportion <= _transStopMarkerProportion) {
+                                _dataStartMarkerProportion = newProportion;
+                            }
+                            else {
+                                _dataStartMarkerProportion = _transStopMarkerProportion;
+                            };
+                        }
+                        else {
+                            _transStopMarkerProportion = _transStartMarkerProportion;
                         }
                     }
                     else {
-                        if (newProportion >= _startMarkerProportion) {
-                            _stopMarkerProportion = newProportion;
+                        if (newProportion >= _dataStartMarkerProportion) {
+                            _transStopMarkerProportion = newProportion;
+                        }
+                        else {
+                            _transStopMarkerProportion = _dataStartMarkerProportion;
                         }
                     }
                     // mark the ui as dirty and needing to be repainted
@@ -536,31 +588,75 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
          */
         protected void processMouseEvent(MouseEvent e, JXLayer<? extends V> l) {
             super.processMouseEvent(e, l);
-            if (null != _startMarkerProportion && null != _stopMarkerProportion) {
+            if (null != _transStartMarkerProportion && null != _transStopMarkerProportion) {
                 if (e.getID() == MouseEvent.MOUSE_PRESSED) {
                     int x = e.getX();
                     int y = e.getY();
                     if (y > _y0 - CLOSE_ENOUGH && y < _y1 + CLOSE_ENOUGH) {
-                        if (Math.abs(x - _xStart) < CLOSE_ENOUGH) {
+                        if (Math.abs(x - _xTransStart) < CLOSE_ENOUGH) {
+                            // check for superimposition
+                            if (_xTransStart == _xDataStart) {
+                                if (_xTransStart == _xTransStop) {
+                                    // all three superimposed
+                                    if (x - _xTransStart < 0) {
+                                        // start dragging trans start line
+                                        _dragTransStartMarker = true;
+                                    }
+                                    else {
+                                        // start dragging trans stop line
+                                        _dragTransStopMarker = true;
+                                    }
+                                }
+                                else {
+                                    // trans and data start superimposed
+                                    if (x - _xTransStart < 0) {
+                                        // start dragging trans start line
+                                        _dragTransStartMarker = true;
+                                    }
+                                    else {
+                                        // start dragging data start line
+                                        _dragDataStartMarker = true;
+                                    }
+                                }
+                            }
                             // start dragging start line
-                            _draggingStartMarker = true;
+                            _dragTransStartMarker = true;
 
                         }
-                        else if (Math.abs(x - _xStop) < CLOSE_ENOUGH) {
-                            // start dragging stop line
-                            _draggingStopMarker = true;
+                        else if (Math.abs(x - _xDataStart) < CLOSE_ENOUGH) {
+                            // check for superimposition
+                            if (_xDataStart == _xTransStop) {
+                                // data start and trans stop superimposed
+                                if (x - _xDataStart < 0) {
+                                    // start dragging data start line
+                                    _dragDataStartMarker = true;
+                                }
+                                else {
+                                    // start dragging trans stop line
+                                    _dragTransStopMarker = true;
+                                }
+                            }
+                            // start dragging data start line
+                            _dragDataStartMarker = true;
+                        }
+                        else if (Math.abs(x - _xTransStop) < CLOSE_ENOUGH) {
+                            // possible superimpositions already checked
+                            
+                            // start dragging trans stop line
+                            _dragTransStopMarker = true;
                         }
                     }
                 }
                 if (e.getID() == MouseEvent.MOUSE_RELEASED) {
-                    _draggingStartMarker = _draggingStopMarker = false;
+                    _dragTransStartMarker = _dragDataStartMarker = _dragTransStopMarker = false;
                     SwingUtilities.invokeLater(
                             new Runnable() {
                                 public void run() {
                                     if (null != _listener) {
                                         _listener.setStartStopProportion
-                                                (_startMarkerProportion,
-                                                 _stopMarkerProportion);
+                                                (_transStartMarkerProportion,
+                                                 _dataStartMarkerProportion,
+                                                 _transStopMarkerProportion);
                                     }
                                 }
                     });
@@ -590,7 +686,16 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             return _plot.getDomainAxis().java2DToValue(
                     (double) x, getDataArea(), RectangleEdge.TOP);
         }
-    }
+    }  
+    
+    private class FittingCursorListener implements IFittingCursorListener {
+        public void cursorChanged(FittingCursor cursor) {
+            int transientStart = cursor.getTransientStartBin();
+            int dataStart      = cursor.getDataStartBin();
+            int transientStop  = cursor.getTransientStopBin();
+            System.out.println("CHANGED " + transientStart + " " + dataStart + " " + transientStop);
+        }
+    }    
 }
 
 /**
@@ -600,5 +705,5 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
  */
 interface IStartStopProportionListener {
     public void setStartStopProportion
-            (double startProportion, double stopProportion);
+            (double transStartProportion, double dataStartProportion, double transStopProportion);
 }

@@ -67,6 +67,9 @@ import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.ICurveFitter.NoiseModel;
+import loci.slim.fitting.cursor.FittingCursor;
+import loci.slim.fitting.cursor.IFittingCursorListener;
+import loci.slim.fitting.cursor.ITransientCursorUI;
 
 /**
  * Main user interface panel for the fit.
@@ -74,7 +77,7 @@ import loci.curvefitter.ICurveFitter.NoiseModel;
  * @author Aivar Grislis grislis at wisc.edu
  */
 
-public class UserInterfacePanel implements IUserInterfacePanel {
+public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursorUI {
     // Unicode special characters
     private static final Character CHI    = '\u03c7';
     private static final Character SQUARE = '\u00b2';
@@ -145,8 +148,11 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
     
+    private FittingCursor _fittingCursor;
+    private IFittingCursorListener _fittingCursorListener;
+    
     public IUserInterfacePanelListener m_listener;
-
+    private boolean m_showBins = true;
     int m_fittedParameterCount = 0;
 
     // UI panel
@@ -165,8 +171,9 @@ public class UserInterfacePanel implements IUserInterfacePanel {
     // fit settings
     JTextField m_xField;
     JTextField m_yField;
-    JTextField m_startField;
-    JTextField m_stopField;
+    JTextField m_transStartField;
+    JTextField m_dataStartField;
+    JTextField m_transStopField;
     JTextField m_thresholdField;
     JTextField m_chiSqTargetField;
     JComboBox m_binningComboBox;
@@ -325,6 +332,18 @@ public class UserInterfacePanel implements IUserInterfacePanel {
                     }
 
         });
+    }
+    
+    public void setFittingCursor(FittingCursor fittingCursor) {
+        if (null == _fittingCursor) {
+            
+            _fittingCursorListener = new FittingCursorListener();
+        }
+        else {
+            _fittingCursor.removeListener(_fittingCursorListener);
+        }
+        _fittingCursor = fittingCursor;
+        _fittingCursor.addListener(_fittingCursorListener);
     }
 
     public JFrame getFrame() {
@@ -499,17 +518,23 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_yField = new JTextField(9);
         controlPanel.add(m_yField);
 
-        JLabel startLabel = new JLabel("Start");
-        startLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        controlPanel.add(startLabel);
-        m_startField = new JTextField(9);
-        controlPanel.add(m_startField);
+        JLabel transStartLabel = new JLabel("Transient Start");
+        transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        controlPanel.add(transStartLabel);
+        m_transStartField = new JTextField(9);
+        controlPanel.add(m_transStartField);
+        
+        JLabel dataStartLabel = new JLabel("Data Start");
+        dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        controlPanel.add(dataStartLabel);
+        m_dataStartField = new JTextField(9);
+        controlPanel.add(m_dataStartField);
 
-        JLabel stopLabel = new JLabel("Stop");
-        stopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        controlPanel.add(stopLabel);
-        m_stopField = new JTextField(9);
-        controlPanel.add(m_stopField);
+        JLabel transStopLabel = new JLabel("Transient Stop");
+        transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        controlPanel.add(transStopLabel);
+        m_transStopField = new JTextField(9);
+        controlPanel.add(m_transStopField);
 
         JLabel thresholdLabel = new JLabel("Threshold");
         thresholdLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -568,7 +593,7 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         controlPanel.add(m_excitationComboBox);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(controlPanel, 8, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(controlPanel, 9, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", controlPanel);
@@ -966,8 +991,8 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         // fit control settings
         m_xField.setEditable(enable);
         m_yField.setEditable(enable);
-        m_startField.setEditable(enable);
-        m_stopField.setEditable(enable);
+        m_transStartField.setEditable(enable);
+        m_transStopField.setEditable(enable);
         m_thresholdField.setEditable(enable);
         m_chiSqTargetField.setEditable(enable);
         m_binningComboBox.setEnabled(enable);
@@ -1160,26 +1185,16 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         m_yField.setText("" + y);
     }
 
-    public int getStart() {
-        return parseInt(m_startField);
-    }
-
-    public void setStart(int start, boolean refit) {
-        m_startField.setText("" + start);
-        if (refit && null != m_listener) {
-            m_listener.doPixelFit();
-        }
+    public void setStart(int start) {
+        m_transStartField.setText("" + start);
     }
 
     public int getStop() {
-        return parseInt(m_stopField);
+        return parseInt(m_transStopField);
     }
 
-    public void setStop(int stop, boolean refit) {
-        m_stopField.setText("" + stop);
-        if (refit && null != m_listener) {
-            m_listener.doPixelFit();
-        }
+    public void setStop(int stop) {
+        m_transStopField.setText("" + stop);
     }
 
     public int getThreshold() {
@@ -1389,6 +1404,58 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         }
         return !checkBox.isSelected();
     }
+    
+    /**
+     * Gets the transient start cursor.
+     * 
+     * @return 
+     */
+    public String getTransientStart() {
+        return m_transStartField.getText();  
+    }
+  
+    /**
+     * Sets the transient start cursor.
+     * 
+     * @param transientStart 
+     */
+    public void setTransientStart(String transientStart) {
+        m_transStartField.setText(transientStart);
+    }
+    
+    /**
+     * Gets the data start cursor.
+     * @return 
+     */ 
+    public String getDataStart() {
+        return m_dataStartField.getText();
+    }
+    
+    /**
+     * Sets the data start cursor.
+     * @return 
+     */
+    public void setDataStart(String dataStart) {
+        m_dataStartField.setText(dataStart);
+    }
+
+    /**
+     * Gets the transient end cursor.
+     * 
+     * @return 
+     */
+    public String getTransientStop() {
+        return m_transStopField.getText();
+    }
+
+    /**
+     * Sets the transient end cursor.
+     * 
+     * @param transientStop 
+     */
+    public void setTransientStop(String transientStop) {
+        m_transStopField.setText(transientStop);
+    }
 
     private int parseInt(JTextField field) {
         int value = 0;
@@ -1424,5 +1491,26 @@ public class UserInterfacePanel implements IUserInterfacePanel {
         }
 
         return dialog.getNextString();
+    }
+    
+    private class FittingCursorListener implements IFittingCursorListener {
+        public void cursorChanged(FittingCursor cursor) {
+            if (cursor.getShowBins()) {
+                int transStart = cursor.getTransientStartBin();
+                int dataStart  = cursor.getDataStartBin();
+                int transStop  = cursor.getTransientStopBin();
+                setTransientStart("" + transStart);
+                setDataStart     ("" + dataStart);
+                setTransientStop ("" + transStop);
+            }
+            else {
+                double transStart = cursor.getTransientStartValue();
+                double dataStart  = cursor.getDataStartValue();
+                double transStop  = cursor.getTransientStopValue();
+                setTransientStart("" + transStart);
+                setDataStart     ("" + dataStart);
+                setTransientStop ("" + transStop);
+            }
+        }
     }
 }

@@ -1,11 +1,7 @@
-//
-// Cursor.java
-//
-
 /*
-ImageJ software for multidimensional image processing and analysis.
+Combined spectral-lifetime image analysis plugin.
 
-Copyright (c) 2011, ImageJDev.org.
+Copyright (c) 2011, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -15,7 +11,7 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the names of the ImageJDev.org developers nor the
+    * Neither the name of the UW-Madison LOCI nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -32,56 +28,57 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.fitting.cursor;
+package loci.slim.ui;
+
+import javax.swing.JFrame;
+
+import loci.curvefitter.ICurveFitData;
+import loci.slim.fitting.cursor.FittingCursor;
 
 /**
- * Container for cursor information.
+ * Interface for a decay chart.
  * 
  * @author Aivar Grislis
  */
-public class Cursor implements ICursor {
-    private int _promptStart;
-    private int _promptStop;
-    private int _decayStart;
-    private int _decayStop;
-
-    @Override
-    public void setPromptStart(int bin) {
-        _promptStart = bin;
-    }
-
-    @Override
-    public int getPromptStart() {
-        return _promptStart;
-    }
+public interface IDecayGraph {
     
-    @Override
-    public void setPromptStop(int bin) {
-        _promptStop = bin;
-    }
+    /**
+     * Initialize the graph and returns the containing JFrame.
+     *
+     * @param bins
+     * @param timeInc
+     * @return frame
+     */
+    public JFrame init(final JFrame frame, final int bins, final double timeInc);
 
-    @Override
-    public int getPromptStop() {
-        return _promptStop;
-    }
+    /**
+     * Changes (or initializes) the cursor (start/stop bins/values) for the fit.
+     * 
+     * @param fittingCursor 
+     */
+    public void setFittingCursor(FittingCursor fittingCursor);
 
-    @Override
-    public void setDecayStart(int bin) {
-        _decayStart = bin;
-    }
+    /**
+     * Changes (or initializes) the title of the graph.
+     * 
+     * @param title 
+     */
+    public void setTitle(final String title);
 
-    @Override
-    public int getDecayStart() {
-        return _decayStart;
-    }
-
-    @Override
-    public void setDecayStop(int bin) {
-        _decayStop = bin;
-    }
-
-    @Override
-    public int getDecayStop() {
-        return _decayStop;
-    }   
+    /**
+     * Changes (or initializes) all of the charted data.
+     *
+     * @param irf
+     * @param data
+     */
+    public void setData(final double[] irf, ICurveFitData data);
+    
+    /**
+     * Changes (or initializes) the start and stop vertical bars.
+     *
+     * @param transientStart
+     * @param dataStart
+     * @param transientStop
+     */
+    public void setStartStop(int transientStart, int dataStart, int transientStop);
 }

@@ -51,6 +51,14 @@ import loci.curvefitter.SLIMCurveFitter;
  * @author aivar
  */
 public class CursorHelper {
+    public static final int PROMPT_START        = 0;
+    public static final int PROMPT_STOP         = 1;
+    public static final int PROMPT_BASELINE     = 2;
+    public static final int TRANSIENT_START     = 3;
+    public static final int TRANSIENT_FIT_START = 4;
+    public static final int TRANSIENT_STOP      = 5;
+    public static final int DECAY_START = 0; // use for 'estimateDecayCursors' results
+    public static final int DECAY_STOP  = 1;
     private static final int ATTEMPTS = 10;
 
     public static double[] estimateExcitationCursors(double[] excitation) {
@@ -118,9 +126,9 @@ public class CursorHelper {
         }
 
         double[] returnValue = new double[3];
-        returnValue[0] = startp;
-        returnValue[1] = endp;
-        returnValue[2] = baseline;
+        returnValue[PROMPT_START]    = startp;
+        returnValue[PROMPT_STOP]     = endp;
+        returnValue[PROMPT_BASELINE] = baseline;
         return returnValue;
     }
 
@@ -148,7 +156,7 @@ public class CursorHelper {
     }
 
     public static double[] estimateCursors(double xInc, double[] prompt, double[] decay) {
-        double[] returnValue = new double[5];
+        double[] returnValue = new double[6];
         double baseline;
         double maxval; // TRCursors.c has "unsigned short maxsval, maxval; double maxfval, *diffed;"
         int index;
@@ -254,11 +262,13 @@ public class CursorHelper {
         }
         transEndIndex = 9 * decay.length / 10; // "90% of transient"
         if (transEndIndex <= transStartIndex + 2 * ATTEMPTS) { // "oops"
-            returnValue[0] = startp;
-            returnValue[1] = endp;
-            returnValue[2] = baseline;
-            returnValue[3] = startt;
-            returnValue[4] = transEndIndex;
+            returnValue[PROMPT_START]        = startp;
+            returnValue[PROMPT_STOP]         = endp;
+            returnValue[PROMPT_BASELINE]     = baseline;
+            returnValue[TRANSIENT_START]     = transStartIndex;
+            returnValue[TRANSIENT_FIT_START] = startt;
+            returnValue[TRANSIENT_STOP]      = transEndIndex;
+            
             return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
         }
 
@@ -313,11 +323,13 @@ public class CursorHelper {
                 System.out.println("chiSq is " + chiSq);
             }
             System.out.println("index is " + index);
-            returnValue[0] = startp;
-            returnValue[1] = endp;
-            returnValue[2] = baseline;
-            returnValue[3] = startt;
-            returnValue[4] = transEndIndex;
+
+            returnValue[PROMPT_START]        = startp;
+            returnValue[PROMPT_STOP]         = endp;
+            returnValue[PROMPT_BASELINE]     = baseline;
+            returnValue[TRANSIENT_START]     = transStartIndex;
+            returnValue[TRANSIENT_FIT_START] = startt;
+            returnValue[TRANSIENT_STOP]      = transEndIndex;
             return returnValue; //TODO do estimate resets/frees???
         }
 
@@ -328,13 +340,13 @@ public class CursorHelper {
         }
         transStartIndex += index;
         transFitStartIndex = transStartIndex + (transEndIndex - transStartIndex) / 20;
-
-        returnValue[0] = startp;
-        returnValue[1] = endp;
-        returnValue[2] = baseline;
-        returnValue[3] = transStartIndex;
-        returnValue[4] = transFitStartIndex;
-        returnValue[5] = transEndIndex;
+        
+        returnValue[PROMPT_START]        = startp;
+        returnValue[PROMPT_STOP]         = endp;
+        returnValue[PROMPT_BASELINE]     = baseline;
+        returnValue[TRANSIENT_START]     = transStartIndex;
+        returnValue[TRANSIENT_FIT_START] = transFitStartIndex;
+        returnValue[TRANSIENT_STOP]      = transEndIndex;
         return returnValue;
     }
     
@@ -371,7 +383,9 @@ public class CursorHelper {
      * @return 
      */
     public static int getEstimateStartIndex(double[] trans, int transFitStartIndex, int transEndIndex) {
-        int transEstimateStartIndex = transFitStartIndex + findMax(trans, transFitStartIndex, transEndIndex);
+        System.out.println("transFitStartIndex is " + transFitStartIndex + " transEndIndex is " + transEndIndex);
+        System.out.println("finMax is " + findMax(trans, transFitStartIndex, transEndIndex));
+        int transEstimateStartIndex = /*transFitStartIndex +*/ findMax(trans, transFitStartIndex, transEndIndex);
         return transEstimateStartIndex;
     }
 

@@ -44,22 +44,22 @@ package loci.slim.fitting.cursor;
 public class LameCursorEstimator implements ICursorEstimator {
 
     @Override
-    public ICursor globalCursor(double[] prompt, double[] decay) {
-        ICursor cursor = new Cursor();
-        cursor.setPromptStart(getMostSteep(prompt));
-        cursor.setPromptStop(getLeastSteep(prompt));
-        cursor.setDecayStart(getMostSteep(decay));
-        cursor.setDecayStop(7 * decay.length / 8);
+    public IFittingCursorListener globalCursor(double[] prompt, double[] decay) {
+        FittingCursor cursor = new FittingCursor(0.01);
+        cursor.setPromptStartBin(getMostSteep(prompt));
+        cursor.setPromptStopBin(getLeastSteep(prompt));
+        cursor.setTransientStartBin(getMostSteep(decay));
+        cursor.setTransientStopBin(7 * decay.length / 8);
         return null;
     }
 
     @Override
-    public ICursor localCursor(ICursor global, double[] prompt, double[] decay) {
-        ICursor cursor = new Cursor();
-        cursor.setPromptStart(global.getPromptStart());
-        cursor.setPromptStop(global.getPromptStop());
-        cursor.setDecayStart(global.getDecayStart());
-        cursor.setDecayStop(global.getDecayStop());
+    public IFittingCursorListener localCursor(FittingCursor global, double[] prompt, double[] decay) {
+        FittingCursor cursor = new FittingCursor(0.01);
+        cursor.setPromptStartBin(global.getPromptStartBin());
+        cursor.setPromptStopBin(global.getPromptStopBin());
+        cursor.setTransientStartBin(global.getTransientStartBin());
+        cursor.setTransientStopBin(global.getTransientStopBin());
         return null;
     }
     

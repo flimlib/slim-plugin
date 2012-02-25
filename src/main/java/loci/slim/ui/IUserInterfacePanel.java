@@ -40,6 +40,8 @@ import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.ICurveFitter.NoiseModel;
+import loci.slim.fitting.cursor.FittingCursor;
+import loci.slim.fitting.cursor.IFittingCursorListener;
 
 /**
  * Interface to the User Interface Panel
@@ -51,6 +53,8 @@ import loci.curvefitter.ICurveFitter.NoiseModel;
  * @author Aivar Grislis
  */
 public interface IUserInterfacePanel {
+    
+    public void setFittingCursor(FittingCursor fittingCursor);
 
     /**
      * Gets the UI JFrame.
@@ -117,38 +121,7 @@ public interface IUserInterfacePanel {
      * @return fit all channels
      */
     public boolean getFitAllChannels();
-
-    /**
-     * Gets starting bin of fit.
-     *
-     * @return start
-     */
-    public int getStart();
-
-    /**
-     * Sets starting bin of fit.
-     *
-     * @param bin
-     * @param refit
-     */
-    public void setStart(int bin, boolean refit);
-
-    /**
-     * Gets stopping bin of fit (inclusive).
-     *
-     * @return stop
-     */
-    public int getStop();
-
-    /**
-     * Sets stopping bin of fit.
-     *
-     * @param bin
-     * @param refit
-     */
-    public void setStop(int bin, boolean refit); 
     
-
     /**
      * Gets photon count threshold to fit a pixel.
      *

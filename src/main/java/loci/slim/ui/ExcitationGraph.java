@@ -46,9 +46,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import loci.curvefitter.ICurveFitData;
-import loci.slim.ui.IStartStopListener;
-
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
 

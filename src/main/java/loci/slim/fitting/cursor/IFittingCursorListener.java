@@ -1,7 +1,11 @@
-/*
-Combined spectral-lifetime image analysis plugin.
+//
+// ICursor.java
+//
 
-Copyright (c) 2011, UW-Madison LOCI
+/*
+ImageJ software for multidimensional image processing and analysis.
+
+Copyright (c) 2011, ImageJDev.org.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -11,7 +15,7 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the UW-Madison LOCI nor the
+    * Neither the names of the ImageJDev.org developers nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -28,50 +32,13 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.refactor.ui.charts;
-
-import javax.swing.JFrame;
-
-import loci.curvefitter.ICurveFitData;
-import loci.slim.ui.IStartStopListener;
+package loci.slim.fitting.cursor;
 
 /**
- * Interface for a decay chart.
- * 
+ *
  * @author Aivar Grislis
  */
-public interface IDecayGraph {
-    /**
-     * Sets up a listener to listen for start/stop changes.
-     * 
-     * @param startStopListener
-     */
-    public void setStartStopListener(IStartStopListener startStopListener);
-
-    /**
-     * Initialize the graph and returns the containing JFrame.
-     *
-     * @param bins
-     * @param timeInc
-     * @return frame
-     */
-    public JFrame init(final JFrame frame, final int bins, final double timeInc);
+public interface IFittingCursorListener {
     
-    public void setTitle(final String title);
-
-    /**
-     * Changes (or initializes) all of the charted data.
-     *
-     * @param irf
-     * @param data
-     */
-    public void setData(final double[] irf, ICurveFitData data);
-    
-    /**
-     * Changes (or initializes) the start and stop vertical bars.
-     *
-     * @param start
-     * @param stop
-     */
-    public void setStartStop(int start, int stop);
+    public void cursorChanged(FittingCursor cursor);
 }
