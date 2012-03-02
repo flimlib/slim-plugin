@@ -45,7 +45,7 @@ public class LameCursorEstimator implements ICursorEstimator {
 
     @Override
     public IFittingCursorListener globalCursor(double[] prompt, double[] decay) {
-        FittingCursor cursor = new FittingCursor(0.01);
+        FittingCursor cursor = new FittingCursor(0.01, 64);
         cursor.setPromptStartBin(getMostSteep(prompt));
         cursor.setPromptStopBin(getLeastSteep(prompt));
         cursor.setTransientStartBin(getMostSteep(decay));
@@ -55,7 +55,7 @@ public class LameCursorEstimator implements ICursorEstimator {
 
     @Override
     public IFittingCursorListener localCursor(FittingCursor global, double[] prompt, double[] decay) {
-        FittingCursor cursor = new FittingCursor(0.01);
+        FittingCursor cursor = new FittingCursor(0.01, 64);
         cursor.setPromptStartBin(global.getPromptStartBin());
         cursor.setPromptStopBin(global.getPromptStopBin());
         cursor.setTransientStartBin(global.getTransientStartBin());

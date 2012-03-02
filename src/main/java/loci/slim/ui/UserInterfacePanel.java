@@ -41,6 +41,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
@@ -56,10 +59,13 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import ij.gui.GenericDialog;
 
@@ -67,9 +73,8 @@ import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.ICurveFitter.NoiseModel;
-import loci.slim.fitting.cursor.FittingCursor;
-import loci.slim.fitting.cursor.IFittingCursorListener;
-import loci.slim.fitting.cursor.ITransientCursorUI;
+import loci.slim.fitting.cursor.FittingCursorHelper;
+import loci.slim.fitting.cursor.IFittingCursorUI;
 
 /**
  * Main user interface panel for the fit.
@@ -77,7 +82,7 @@ import loci.slim.fitting.cursor.ITransientCursorUI;
  * @author Aivar Grislis grislis at wisc.edu
  */
 
-public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursorUI {
+public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI {
     // Unicode special characters
     private static final Character CHI    = '\u03c7';
     private static final Character SQUARE = '\u00b2';
@@ -148,8 +153,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
     
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
     
-    private FittingCursor _fittingCursor;
-    private IFittingCursorListener _fittingCursorListener;
+    private FittingCursorHelper _fittingCursorHelper;
     
     public IUserInterfacePanelListener m_listener;
     private boolean m_showBins = true;
@@ -167,17 +171,23 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
     JComboBox m_fittedImagesComboBox;
     JCheckBox[] m_analysisCheckBoxList;
     JCheckBox m_fitAllChannels;
-
+    
+    // cursor settings
+    JTextField m_transientStartField;
+    JTextField m_dataStartField;
+    JTextField m_transientStopField;
+    JTextField m_promptStartField;
+    JTextField m_promptStopField;
+    JTextField m_promptBaselineField;
+    JComboBox m_promptComboBox;
+    JButton m_estimateCursorsButton;
+    
     // fit settings
     JTextField m_xField;
     JTextField m_yField;
-    JTextField m_transStartField;
-    JTextField m_dataStartField;
-    JTextField m_transStopField;
     JTextField m_thresholdField;
     JTextField m_chiSqTargetField;
     JComboBox m_binningComboBox;
-    JComboBox m_excitationComboBox;
 
     // parameter panel
     JPanel m_paramPanel;
@@ -241,7 +251,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
     JButton m_fitButton;
     String m_fitButtonText = FIT_IMAGE;
 
-    public UserInterfacePanel(boolean showTau, String[] analysisChoices, String[] binningChoices) {
+    public UserInterfacePanel(boolean tabbed, boolean showTau,
+            String[] analysisChoices, String[] binningChoices)
+    {
         String lifetimeLabel = "" + (showTau ? TAU : LAMBDA);
 
         m_frame = new JFrame("SLIM Plugin");
@@ -249,29 +261,57 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
         // create outer panel
         JPanel outerPanel = new JPanel();
         outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.Y_AXIS));
+        
+        if (tabbed) {
+            JTabbedPane tabbedPane = new JTabbedPane();
 
-        // create inner panel
-        JPanel innerPanel = new JPanel();
-        innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.X_AXIS));
+            JPanel fitPanel = createFitPanel(analysisChoices);
+            tabbedPane.addTab("Fit", fitPanel);
 
-        JPanel fitPanel = createFitPanel(analysisChoices);
-        fitPanel.setBorder(border("Fit"));
-        innerPanel.add(fitPanel);
+            JPanel cursorPanel = createCursorPanel();
+            tabbedPane.addTab("Cursors", cursorPanel); 
 
-        JPanel controlPanel = createControlPanel(binningChoices);
-        controlPanel.setBorder(border("Control"));
-        innerPanel.add(controlPanel);
+            JPanel controlPanel = createControlPanel(binningChoices);
+            tabbedPane.addTab("Control", controlPanel);   
 
-        // Create cards and the panel that contains the cards
-        m_cardPanel = new JPanel(new CardLayout());
-        m_cardPanel.add(createSingleExponentialPanel(lifetimeLabel), SINGLE_EXPONENTIAL);
-        m_cardPanel.add(createDoubleExponentialPanel(lifetimeLabel), DOUBLE_EXPONENTIAL);
-        m_cardPanel.add(createTripleExponentialPanel(lifetimeLabel), TRIPLE_EXPONENTIAL);
-        m_cardPanel.add(createStretchedExponentialPanel(lifetimeLabel), STRETCHED_EXPONENTIAL);
-        m_cardPanel.setBorder(border("Params"));
-        innerPanel.add(m_cardPanel);
+            // Create cards and the panel that contains the cards
+            m_cardPanel = new JPanel(new CardLayout());
+            m_cardPanel.add(createSingleExponentialPanel(lifetimeLabel), SINGLE_EXPONENTIAL);
+            m_cardPanel.add(createDoubleExponentialPanel(lifetimeLabel), DOUBLE_EXPONENTIAL);
+            m_cardPanel.add(createTripleExponentialPanel(lifetimeLabel), TRIPLE_EXPONENTIAL);
+            m_cardPanel.add(createStretchedExponentialPanel(lifetimeLabel), STRETCHED_EXPONENTIAL);
+            tabbedPane.addTab("Params", m_cardPanel);
 
-        outerPanel.add(innerPanel);
+            outerPanel.add(tabbedPane);
+        }
+        else {
+            // create inner panel
+            JPanel innerPanel = new JPanel();
+            innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.X_AXIS));
+
+            JPanel fitPanel = createFitPanel(analysisChoices);
+            fitPanel.setBorder(border("Fit"));
+            innerPanel.add(fitPanel);
+
+            JPanel cursorPanel = createCursorPanel();
+            cursorPanel.setBorder(border("Cursors"));
+            innerPanel.add(cursorPanel); 
+
+            JPanel controlPanel = createControlPanel(binningChoices);
+            controlPanel.setBorder(border("Control"));
+            innerPanel.add(controlPanel);
+
+            // Create cards and the panel that contains the cards
+            m_cardPanel = new JPanel(new CardLayout());
+            m_cardPanel.add(createSingleExponentialPanel(lifetimeLabel), SINGLE_EXPONENTIAL);
+            m_cardPanel.add(createDoubleExponentialPanel(lifetimeLabel), DOUBLE_EXPONENTIAL);
+            m_cardPanel.add(createTripleExponentialPanel(lifetimeLabel), TRIPLE_EXPONENTIAL);
+            m_cardPanel.add(createStretchedExponentialPanel(lifetimeLabel), STRETCHED_EXPONENTIAL);
+            m_cardPanel.setBorder(border("Params"));
+            innerPanel.add(m_cardPanel);
+
+            outerPanel.add(innerPanel);
+        }
 
         //Lay out the buttons from left to right.
         JPanel buttonPanel = new JPanel();
@@ -332,28 +372,28 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
                     }
 
         });
-    }
-    
-    public void setFittingCursor(FittingCursor fittingCursor) {
-        if (null == _fittingCursor) {
-            
-            _fittingCursorListener = new FittingCursorListener();
-        }
-        else {
-            _fittingCursor.removeListener(_fittingCursorListener);
-        }
-        _fittingCursor = fittingCursor;
-        _fittingCursor.addListener(_fittingCursorListener);
+
+        // no prompt initially
+        enablePromptCursors(false);
     }
 
+    @Override
+    public void setFittingCursorHelper(FittingCursorHelper fittingCursorHelper) {
+        _fittingCursorHelper = fittingCursorHelper;
+        _fittingCursorHelper.setFittingCursorUI(this);
+    }
+
+    @Override
     public JFrame getFrame() {
         return m_frame;
     }
-    
+
+    @Override
     public void setListener(IUserInterfacePanelListener listener) {
         m_listener = listener;
     }
 
+    @Override
     public void reset() {
         enableAll(true);
         setFitButtonState(true);
@@ -371,19 +411,20 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
         m_regionComboBox.setSelectedItem(ALL_REGION);
         m_regionComboBox.addItemListener(
             new ItemListener() {
+                @Override
                 public void itemStateChanged(ItemEvent e) {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
                         String item = (String) e.getItem();
-                        if (SUM_REGION == item) {
+                        if (SUM_REGION.equals(item)) {
                             m_fitButtonText = FIT_SUMMED_PIXELS;
                         }
-                        else if (ROIS_REGION == item) {
+                        else if (ROIS_REGION.equals(item)) {
                             m_fitButtonText = FIT_SUMMED_ROIS;
                         }
-                        else if (PIXEL_REGION == item) {
+                        else if (PIXEL_REGION.equals(item)) {
                             m_fitButtonText = FIT_PIXEL;
                         }
-                        else if (ALL_REGION == item) {
+                        else if (ALL_REGION.equals(item)) {
                             m_fitButtonText = FIT_IMAGE;
                         }
                         m_fitButton.setText(m_fitButtonText);
@@ -497,6 +538,166 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
         }
         comboBox.setSelectedIndex(0);
     }
+    
+    private JPanel createCursorPanel() {
+        JPanel cursorPanel = new JPanel();
+        cursorPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
+        cursorPanel.setLayout(new SpringLayout());
+
+        JLabel transStartLabel = new JLabel("Transient Start");
+        transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(transStartLabel);
+        m_transientStartField = new JTextField(9);
+        m_transientStartField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                _fittingCursorHelper.setTransientStart(m_transientStartField.getText());
+            }
+        });
+        m_transientStartField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                _fittingCursorHelper.setTransientStart(m_transientStartField.getText());
+            }
+        });
+        cursorPanel.add(m_transientStartField);
+        
+        JLabel dataStartLabel = new JLabel("Data Start");
+        dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(dataStartLabel);
+        m_dataStartField = new JTextField(9);
+        m_dataStartField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                _fittingCursorHelper.setDataStart(m_dataStartField.getText());
+            }
+        });
+        m_dataStartField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                _fittingCursorHelper.setDataStart(m_dataStartField.getText());
+            }
+        });
+        cursorPanel.add(m_dataStartField);
+
+        JLabel transStopLabel = new JLabel("Transient End");
+        transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(transStopLabel);
+        m_transientStopField = new JTextField(9);
+        m_transientStopField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                _fittingCursorHelper.setTransientStop(m_transientStopField.getText());
+            }
+        });
+        m_transientStopField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                _fittingCursorHelper.setTransientStop(m_transientStopField.getText());
+            }
+        });
+        cursorPanel.add(m_transientStopField);
+
+        JLabel excitationStartLabel = new JLabel("Excitation Delay");
+        excitationStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(excitationStartLabel);
+        m_promptStartField = new JTextField(9);
+        m_promptStartField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                _fittingCursorHelper.setPromptStart(m_promptStartField.getText());
+            }
+        });
+        m_promptStartField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                _fittingCursorHelper.setPromptStart(m_promptStartField.getText());
+            }
+        });
+        cursorPanel.add(m_promptStartField);       
+        
+        JLabel excitationStopLabel = new JLabel("Excitation Width");
+        excitationStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(excitationStopLabel);
+        m_promptStopField = new JTextField(9);
+        m_promptStopField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                _fittingCursorHelper.setPromptStop(m_promptStopField.getText());
+            }
+        });
+        m_promptStopField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                _fittingCursorHelper.setPromptStop(m_promptStopField.getText());
+            }
+        });
+        cursorPanel.add(m_promptStopField);           
+        
+        JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
+        excitationBaselineLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(excitationBaselineLabel);
+        m_promptBaselineField = new JTextField(9);
+        m_promptBaselineField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                _fittingCursorHelper.setPromptBaseline(m_promptBaselineField.getText());
+            }
+        });
+        m_promptBaselineField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                _fittingCursorHelper.setPromptBaseline(m_promptBaselineField.getText());
+            }
+        });
+        cursorPanel.add(m_promptBaselineField); 
+        
+        JLabel excitationLabel = new JLabel("Excitation");
+        excitationLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(excitationLabel);
+        m_promptComboBox = new JComboBox(EXCITATION_ITEMS);
+        m_promptComboBox.addActionListener(
+            new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    String selectedItem = (String) m_promptComboBox.getSelectedItem();
+                    boolean isExcitationLoaded = false;
+                    if (EXCITATION_NONE.equals(selectedItem)) {
+                        if (null != m_listener) {
+                            m_listener.cancelExcitation();
+                        }
+                    }
+                    else if (EXCITATION_FILE.equals(selectedItem)) {
+                        String fileName = getFileName("Load Excitation File", "");
+                        if (null != fileName && null != m_listener) {
+                            isExcitationLoaded = m_listener.loadExcitation(fileName);
+                        }
+                    }
+                    else if (EXCITATION_CREATE.equals(selectedItem)) {
+                        String fileName = getFileName("Save Excitation File", "");
+                        if (null != fileName && null != m_listener) {
+                            isExcitationLoaded = m_listener.createExcitation(fileName);
+                        }
+                    }
+
+                    if (isExcitationLoaded) {
+                        m_promptComboBox.setSelectedItem(EXCITATION_FILE);
+                        enablePromptCursors(true);
+                    }
+                    else {
+                        m_promptComboBox.setSelectedItem(EXCITATION_NONE);
+                        String text = _fittingCursorHelper.getShowBins() ? "0" : "0.0";
+                        m_promptStartField.setText(text);
+                        m_promptStopField.setText(text);
+                        m_promptBaselineField.setText("0.0");
+                        enablePromptCursors(false);
+                    }
+                }
+            }
+        );
+        cursorPanel.add(m_promptComboBox);
+        
+        JLabel dummyLabel = new JLabel("");
+        dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(dummyLabel);
+        m_estimateCursorsButton = new JButton("Estimate Cursors");
+        cursorPanel.add(m_estimateCursorsButton);
+
+        // rows, cols, initX, initY, xPad, yPad
+        SpringUtilities.makeCompactGrid(cursorPanel, 8, 2, 4, 4, 4, 4);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add("North", cursorPanel);
+
+        return panel;
+    }
 
     /*
      * Creates a panel that has some settings that control the fit.
@@ -518,23 +719,53 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
         m_yField = new JTextField(9);
         controlPanel.add(m_yField);
 
-        JLabel transStartLabel = new JLabel("Transient Start");
+  /*      JLabel transStartLabel = new JLabel("Transient Start");
         transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(transStartLabel);
-        m_transStartField = new JTextField(9);
-        controlPanel.add(m_transStartField);
+        m_transientStartField = new JTextField(9);
+        m_transientStartField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                _fittingCursor.setTransientStart(m_transientStartField.getText());
+            }
+        });
+        m_transientStartField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                _fittingCursor.setTransientStart(m_transientStartField.getText());
+            }
+        });
+        controlPanel.add(m_transientStartField);
         
         JLabel dataStartLabel = new JLabel("Data Start");
         dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(dataStartLabel);
         m_dataStartField = new JTextField(9);
+        m_dataStartField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                _fittingCursor.setDataStart(m_dataStartField.getText());
+            }
+        });
+        m_dataStartField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                _fittingCursor.setDataStart(m_dataStartField.getText());
+            }
+        });
         controlPanel.add(m_dataStartField);
 
         JLabel transStopLabel = new JLabel("Transient Stop");
         transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(transStopLabel);
-        m_transStopField = new JTextField(9);
-        controlPanel.add(m_transStopField);
+        m_transientStopField = new JTextField(9);
+        m_transientStopField.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                _fittingCursor.setTransientStop(m_transientStopField.getText());
+            }
+        });
+        m_transientStopField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                _fittingCursor.setTransientStop(m_transientStopField.getText());
+            }
+        });
+        controlPanel.add(m_transientStopField);*/
 
         JLabel thresholdLabel = new JLabel("Threshold");
         thresholdLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -554,7 +785,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
         m_binningComboBox = new JComboBox(binningChoices);
         controlPanel.add(m_binningComboBox);
 
-        JLabel excitationLabel = new JLabel("Excitation");
+     /*   JLabel excitationLabel = new JLabel("Excitation");
         excitationLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(excitationLabel);
         m_excitationComboBox = new JComboBox(EXCITATION_ITEMS);
@@ -590,10 +821,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
                 }
             }
         );
-        controlPanel.add(m_excitationComboBox);
+        controlPanel.add(m_excitationComboBox); */
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(controlPanel, 9, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(controlPanel, 5, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", controlPanel);
@@ -985,14 +1216,22 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
         for (JCheckBox checkBox : m_analysisCheckBoxList) {
             checkBox.setEnabled(enable);
         }
-        //m_analysisComboBox.setEnabled(enable);
         m_fitAllChannels.setEnabled(enable);
+        
+        // cursors settings
+        m_transientStartField.setEditable(enable);
+        m_dataStartField.setEditable(enable);
+        m_transientStopField.setEditable(enable);
+        boolean promptEnable = enable;
+        if (enable) {
+            promptEnable = m_promptComboBox.getSelectedIndex() == 0;
+        }
+        enablePromptCursors(promptEnable);
+        m_promptComboBox.setEnabled(enable);
 
         // fit control settings
         m_xField.setEditable(enable);
         m_yField.setEditable(enable);
-        m_transStartField.setEditable(enable);
-        m_transStopField.setEditable(enable);
         m_thresholdField.setEditable(enable);
         m_chiSqTargetField.setEditable(enable);
         m_binningComboBox.setEnabled(enable);
@@ -1183,18 +1422,6 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
 
     public void setY(int y) {
         m_yField.setText("" + y);
-    }
-
-    public void setStart(int start) {
-        m_transStartField.setText("" + start);
-    }
-
-    public int getStop() {
-        return parseInt(m_transStopField);
-    }
-
-    public void setStop(int stop) {
-        m_transStopField.setText("" + stop);
     }
 
     public int getThreshold() {
@@ -1411,7 +1638,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
      * @return 
      */
     public String getTransientStart() {
-        return m_transStartField.getText();  
+        return m_transientStartField.getText();  
     }
   
     /**
@@ -1420,7 +1647,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
      * @param transientStart 
      */
     public void setTransientStart(String transientStart) {
-        m_transStartField.setText(transientStart);
+        m_transientStartField.setText(transientStart);
     }
     
     /**
@@ -1445,7 +1672,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
      * @return 
      */
     public String getTransientStop() {
-        return m_transStopField.getText();
+        return m_transientStopField.getText();
     }
 
     /**
@@ -1454,7 +1681,60 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
      * @param transientStop 
      */
     public void setTransientStop(String transientStop) {
-        m_transStopField.setText(transientStop);
+        m_transientStopField.setText(transientStop);
+    }
+
+    /**
+     * Gets the excitation start cursor.
+     * 
+     * @return 
+     */
+    public String getPromptStart() {
+        return m_promptStartField.getText();
+    }
+
+    /**
+     * Sets the excitation start cursor.
+     * 
+     * @param promptStart 
+     */
+    public void setPromptStart(String promptStart) {
+        m_promptStartField.setText(promptStart);
+    }
+
+    /**
+     * Gets the excitation end cursor.
+     * @return 
+     */
+    public String getPromptStop() {
+        return m_promptStopField.getText();
+    }
+
+    /**
+     * Sets the excitation end cursor.
+     * 
+     * @param promptStop 
+     */
+    public void setPromptStop(String promptStop) {
+        m_promptStopField.setText(promptStop);
+    }
+
+    /**
+     * Gets the excitation baseline.
+     * 
+     * @return 
+     */
+    public String getPromptBaseline() {
+        return m_promptBaselineField.getText();
+    }
+
+    /**
+     * Sets the excitation baseline.
+     * 
+     * @param promptBaseline 
+     */
+    public void setPromptBaseline(String promptBaseline) {
+        m_promptBaselineField.setText(promptBaseline);
     }
 
     private int parseInt(JTextField field) {
@@ -1468,6 +1748,17 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
         return value;
     }
 
+    /**
+     * Gray out the prompt cursors if no prompt is loaded.
+     * 
+     * @param enable 
+     */
+    private void enablePromptCursors(boolean enable) {
+        m_promptStartField.setEditable(enable);
+        m_promptStopField.setEditable(enable);
+        m_promptBaselineField.setEditable(enable);
+    }
+    
     /**
      * This decides whether the existing parameters could be used as the
      * initial values for another fit.
@@ -1491,26 +1782,5 @@ public class UserInterfacePanel implements IUserInterfacePanel, ITransientCursor
         }
 
         return dialog.getNextString();
-    }
-    
-    private class FittingCursorListener implements IFittingCursorListener {
-        public void cursorChanged(FittingCursor cursor) {
-            if (cursor.getShowBins()) {
-                int transStart = cursor.getTransientStartBin();
-                int dataStart  = cursor.getDataStartBin();
-                int transStop  = cursor.getTransientStopBin();
-                setTransientStart("" + transStart);
-                setDataStart     ("" + dataStart);
-                setTransientStop ("" + transStop);
-            }
-            else {
-                double transStart = cursor.getTransientStartValue();
-                double dataStart  = cursor.getDataStartValue();
-                double transStop  = cursor.getTransientStopValue();
-                setTransientStart("" + transStart);
-                setDataStart     ("" + dataStart);
-                setTransientStop ("" + transStop);
-            }
-        }
     }
 }

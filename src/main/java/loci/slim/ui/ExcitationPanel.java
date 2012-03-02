@@ -59,8 +59,8 @@ import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
-
 import loci.slim.Excitation;
+import loci.slim.fitting.cursor.FittingCursor;
 
 /**
  * TODO
@@ -78,7 +78,7 @@ public class ExcitationPanel extends JFrame {
     private JTextField m_stopField;
     private JTextField m_baseField;
 
-    public ExcitationPanel(Excitation excitation) {
+    public ExcitationPanel(Excitation excitation, FittingCursor fittingCursor) {
 
         m_excitation = excitation;
 
@@ -91,15 +91,15 @@ public class ExcitationPanel extends JFrame {
         int bins = values.length;
         double timeInc = excitation.getTimeInc();
         ExcitationGraph excitationGraph = new ExcitationGraph(start, stop, base, bins, values, timeInc);
+        excitationGraph.setFittingCursor(fittingCursor);
         
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", createTopPanel());
         panel.add("Center", excitationGraph.getComponent());
-        panel.add("South", createBottomPanel());
 
         this.getContentPane().add(panel);
 
-        this.setSize(450, 450);
+        this.setSize(450, 225);
         this.pack();
         this.setVisible(true);
         // load the excitation curve
@@ -158,40 +158,5 @@ public class ExcitationPanel extends JFrame {
         //SpringUtilities.makeCompactGrid(panel, 1, 2, 4, 4, 4, 4);
 
         return panel;
-    }
-
-    /*
-     * Creates a panel with excitation parameters.
-     */
-    private JPanel createBottomPanel() {
-        JPanel panel = new JPanel();
-        panel.setBorder(new EmptyBorder(0, 0, 8, 8));
-        panel.setLayout(new SpringLayout());
-
-        JLabel startLabel = new JLabel("Start");
-        startLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        panel.add(startLabel);
-        m_startField = new JTextField(9);
-        panel.add(m_startField);
-
-        JLabel stopLabel = new JLabel("Stop");
-        stopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        panel.add(stopLabel);
-        m_stopField = new JTextField(9);
-        panel.add(m_stopField);
-
-        JLabel baseLabel = new JLabel("Base");
-        baseLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        panel.add(baseLabel);
-        m_baseField = new JTextField(9);
-        panel.add(m_baseField);
-
-        // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(panel, 3, 2, 4, 4, 4, 4);
-
-        JPanel enclosingPanel = new JPanel();
-        enclosingPanel.add(panel);
-
-        return enclosingPanel;
     }
 }

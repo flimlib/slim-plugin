@@ -90,6 +90,7 @@ import loci.slim.fitting.IDecayImage;
 import loci.slim.fitting.IFittedImage;
 import loci.slim.fitting.config.Configuration;
 import loci.slim.fitting.cursor.FittingCursor;
+import loci.slim.fitting.cursor.FittingCursorHelper;
 import loci.slim.fitting.cursor.IFittingCursorListener;
 import loci.slim.fitting.engine.IFittingEngine;
 import loci.slim.fitting.images.ColorizedImageParser;
@@ -134,6 +135,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     private static final String Y = "Y";
     private static final String LIFETIME = "Lifetime";
     private static final String CHANNELS = "Channels";
+    private static final boolean TABBED = true;
     private static final boolean USE_TAU = true;
     private static final boolean USE_LAMBDA = false;
 
@@ -277,11 +279,15 @@ public class SLIMProcessor <T extends RealType<T>> {
         IEstimator estimator = new Estimator();
         
         // cursor support
-        _fittingCursor = new FittingCursor(m_timeRange);
+        _fittingCursor = new FittingCursor(m_timeRange, m_bins);
+        _fittingCursor.addListener(new FittingCursorListener());
         
         // show the UI; do fits
-        final IUserInterfacePanel uiPanel = new UserInterfacePanel(USE_TAU, m_analysis.getChoices(), m_binning.getChoices());
-        uiPanel.setFittingCursor(_fittingCursor);
+        final IUserInterfacePanel uiPanel = new UserInterfacePanel(TABBED,
+                USE_TAU, m_analysis.getChoices(), m_binning.getChoices());
+        FittingCursorHelper fittingCursorHelper = new FittingCursorHelper();
+        fittingCursorHelper.setFittingCursor(_fittingCursor);
+        uiPanel.setFittingCursorHelper(fittingCursorHelper);
         uiPanel.setX(0);
         uiPanel.setY(0);
         //TODO ARG these estimates s/n/b necessary; use the EstimateCursors class
@@ -449,8 +455,16 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param uiPanel 
      */
     private void updateDecayCursors(IUserInterfacePanel uiPanel) {
-        //TODO ARG the way this is working now, each channel has it's own
-        // start/stop cursors.
+        double[] decay = getSummedDecay();
+        int[] results = CursorHelper.estimateDecayCursors(m_timeRange, decay);
+        int dataStart = results[CursorHelper.DECAY_START];
+        int transientStop = results[CursorHelper.DECAY_STOP];
+        
+        _fittingCursor.setDataStartBin(dataStart);
+        _fittingCursor.setTransientStopBin(transientStop);
+    }
+    
+    private double[] getSummedDecay() {
         double[] decay = new double[m_bins];
         for (int i = 0; i < decay.length; ++i) {
             decay[i] = 0.0;
@@ -464,18 +478,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 }
             }
         }
-
-        int[] results = CursorHelper.estimateDecayCursors(m_timeRange, decay);
-        int start = results[CursorHelper.DECAY_START];
-        int stop = results[CursorHelper.DECAY_STOP];
-        
-        System.out.println("updateDecayCursors gets start " + start + " stop " + stop);
-        _fittingCursor.setDataStartBin(start);
-        _fittingCursor.setTransientStopBin(stop);
-        //TODO ARGuiPanel.setStart(start);
-       // uiPanel.setStop(stop);
-//TODO ARG I bet not here:        DecayGraph.getInstance().setStartStop(start, stop);
-        // uiPanel and DecayGraph will get changes from the FittingCursor listener
+        return decay;
     }
 
     private boolean updateExcitation(IUserInterfacePanel uiPanel, Excitation excitation) {
@@ -510,7 +513,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             _fittingCursor.setDataStartBin     ((int) results[CursorHelper.TRANSIENT_STOP]);
             _fittingCursor.setTransientStopBin ((int) results[CursorHelper.TRANSIENT_STOP]);
 
-            m_excitationPanel = new ExcitationPanel(excitation);
+            m_excitationPanel = new ExcitationPanel(excitation, _fittingCursor);
 
             success = true;
         }
@@ -1840,4 +1843,63 @@ public class SLIMProcessor <T extends RealType<T>> {
         decayGraph.setStartStop(transientStart, dataStart, transientStop);
         decayGraph.setData(irf, data);
     }
+    
+    /**
+     * Inner class that listens for changes in the cursor that should trigger
+     * a refit.
+     */   
+    private class FittingCursorListener implements IFittingCursorListener {
+        private Integer _transStart    = null;
+        private Integer _dataStart     = null;
+        private Integer _transStop     = null;
+        private Integer _promptStart   = null;
+        private Integer _promptStop    = null;
+        private Double _promptBaseline = null;
+        
+        public void cursorChanged(FittingCursor cursor) {
+            boolean refit = false;
+            
+            // get current cursor values
+            int transStart  = cursor.getTransientStartBin();
+            int dataStart   = cursor.getDataStartBin();
+            int transStop   = cursor.getTransientStopBin();
+            int promptStart = cursor.getPromptStartBin();
+            int promptStop  = cursor.getPromptStopBin();
+            double promptBaseline = cursor.getPromptBaselineValue();
+            
+            // look for changes vs. saved cursor values
+            if (null != _transStart && transStart != _transStart) {
+                refit = true;
+            }
+            if (null != _dataStart && dataStart != _dataStart) {
+                refit = true;
+            }
+            if (null != _transStop && transStop != _transStop) {
+                refit = true;
+            }
+            if (null != _promptStart && promptStart != _promptStart) {
+                refit = true;
+            }
+            if (null != _promptStop && promptStop != _promptStop) {
+                refit = true;
+            }
+            if (null != _promptBaseline && promptBaseline != _promptBaseline) {
+                refit = true;
+            }
+            
+            // update saved cursor values
+            _transStart = transStart;
+            _dataStart = dataStart;
+            _transStop = transStop;
+            _promptStart = promptStart;
+            _promptStop = promptStop;
+            _promptBaseline = promptBaseline;
+            
+            // trigger refit
+            if (refit) {
+                System.out.println("REFIT");
+            }
+        }
+    }
+
 }

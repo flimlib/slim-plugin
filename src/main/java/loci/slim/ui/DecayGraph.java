@@ -85,7 +85,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     static final Color DATA_START_COLOR = Color.GREEN.darker();
     static final Color TRANS_STOP_COLOR = Color.RED.darker();
     static final Color BASE_COLOR = Color.GREEN.darker();
-    static final Color RESIDUAL_COLOR = Color.BLACK;
+    static final Color RESIDUAL_COLOR = Color.GRAY.brighter(); //Color.BLACK;
 
     private static DecayGraph _instance;
     private JFrame _frame;
@@ -211,7 +211,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
      * @param transStop
      */
     public void setStartStop(int transStart, int dataStart, int transStop) {
-        if (null == _dataStart) {
+        if (true || null == _dataStart) {
             // initialize the vertical bars
             double transStartValue = transStart * _timeInc;
             double dataStartValue  = dataStart  * _timeInc;
@@ -309,8 +309,16 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         // create residual sub-plot
         NumberAxis residualAxis = new NumberAxis(RESIDUAL_AXIS_LABEL);
         XYSplineRenderer residualRenderer = new XYSplineRenderer();
-        residualRenderer.setSeriesShapesVisible(0, false);
+        //residualRenderer.setSeriesShapesVisible(0, false);
         residualRenderer.setSeriesPaint(0, RESIDUAL_COLOR);
+        //residualRenderer.setSeriesLinesVisible(0, false);
+        residualRenderer.setSeriesShape
+                (0, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f, 2.0f));
+        
+        
+        
+        
+        
         XYPlot residualSubPlot = new XYPlot
                 (_residualDataset, null, residualAxis, residualRenderer);
         residualSubPlot.setDomainCrosshairVisible(true);
@@ -598,7 +606,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                             if (_xTransStart == _xDataStart) {
                                 if (_xTransStart == _xTransStop) {
                                     // all three superimposed
-                                    if (x - _xTransStart < 0) {
+                                    if (x < _xTransStart) {
                                         // start dragging trans start line
                                         _dragTransStartMarker = true;
                                     }
@@ -609,7 +617,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                                 }
                                 else {
                                     // trans and data start superimposed
-                                    if (x - _xTransStart < 0) {
+                                    if (x < _xTransStart) {
                                         // start dragging trans start line
                                         _dragTransStartMarker = true;
                                     }
@@ -627,7 +635,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                             // check for superimposition
                             if (_xDataStart == _xTransStop) {
                                 // data start and trans stop superimposed
-                                if (x - _xDataStart < 0) {
+                                if (x < _xDataStart) {
                                     // start dragging data start line
                                     _dragDataStartMarker = true;
                                 }
@@ -693,6 +701,8 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             int transientStart = cursor.getTransientStartBin();
             int dataStart      = cursor.getDataStartBin();
             int transientStop  = cursor.getTransientStopBin();
+            setStartStop(transientStart, dataStart, transientStop);
+            _frame.repaint();
             System.out.println("CHANGED " + transientStart + " " + dataStart + " " + transientStop);
         }
     }    

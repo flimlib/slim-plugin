@@ -40,8 +40,7 @@ import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.ICurveFitter.NoiseModel;
-import loci.slim.fitting.cursor.FittingCursor;
-import loci.slim.fitting.cursor.IFittingCursorListener;
+import loci.slim.fitting.cursor.FittingCursorHelper;
 
 /**
  * Interface to the User Interface Panel
@@ -54,7 +53,13 @@ import loci.slim.fitting.cursor.IFittingCursorListener;
  */
 public interface IUserInterfacePanel {
     
-    public void setFittingCursor(FittingCursor fittingCursor);
+    /**
+     * Sets the fitting cursor helper, which keeps track of prompt and transient
+     * start and stop cursors.
+     * 
+     * @param fittingCursorUIHelper 
+     */
+    public void setFittingCursorHelper(FittingCursorHelper fittingCursorUIHelper);
 
     /**
      * Gets the UI JFrame.
