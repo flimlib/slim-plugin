@@ -113,43 +113,43 @@ public class FittingCursorHelper implements IFittingCursorUI {
     }
     
     /**
-     * Gets the prompt start cursor.
+     * Gets the prompt delay cursor.
      * 
      * @return 
      */
     @Override
-    public String getPromptStart() {
-        return _fittingCursorUI.getPromptStart();
+    public String getPromptDelay() {
+        return _fittingCursorUI.getPromptDelay();
     }
   
     /**
-     * Sets the prompt start cursor.
+     * Sets the prompt delay cursor.
      * 
      * @param promptStart 
      */
     @Override
-    public void setPromptStart(String promptStart) {
-        _fittingCursor.setPromptStart(promptStart);
+    public void setPromptDelay(String promptDelay) {
+        _fittingCursor.setPromptDelay(promptDelay);
     }
 
     /**
-     * Gets the prompt end cursor.
+     * Gets the prompt width cursor.
      * 
      * @return 
      */
     @Override
-    public String getPromptStop() {
-        return _fittingCursorUI.getPromptStop();
+    public String getPromptWidth() {
+        return _fittingCursorUI.getPromptWidth();
     }
 
     /**
-     * Sets the prompt end cursor.
+     * Sets the prompt width cursor.
      * 
-     * @param promptStop 
+     * @param promptWidth
      */
     @Override
-    public void setPromptStop(String promptStop) {
-        _fittingCursor.setPromptStart(promptStop); 
+    public void setPromptWidth(String promptWidth) {
+        _fittingCursor.setPromptWidth(promptWidth); 
     }
     
     /**
@@ -168,7 +168,7 @@ public class FittingCursorHelper implements IFittingCursorUI {
      */
     @Override
     public void setPromptBaseline(String promptBaseline) {
-        _fittingCursor.setPromptStart(promptBaseline);
+        _fittingCursor.setPromptBaseline(promptBaseline);
     }
 
     /**
@@ -179,8 +179,8 @@ public class FittingCursorHelper implements IFittingCursorUI {
             _fittingCursorUI.setTransientStart(_fittingCursor.getTransientStart());
             _fittingCursorUI.setDataStart(_fittingCursor.getDataStart());
             _fittingCursorUI.setTransientStop(_fittingCursor.getTransientStop());
-            _fittingCursorUI.setPromptStart(_fittingCursor.getPromptStart());
-            _fittingCursorUI.setPromptStop(_fittingCursor.getPromptStop());
+            _fittingCursorUI.setPromptDelay(_fittingCursor.getPromptDelay());
+            _fittingCursorUI.setPromptWidth(_fittingCursor.getPromptWidth());
             _fittingCursorUI.setPromptBaseline(_fittingCursor.getPromptBaseline()); 
         }
     }

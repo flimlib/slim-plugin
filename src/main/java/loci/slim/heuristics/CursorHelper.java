@@ -55,10 +55,8 @@ public class CursorHelper {
     public static final int PROMPT_STOP         = 1;
     public static final int PROMPT_BASELINE     = 2;
     public static final int TRANSIENT_START     = 3;
-    public static final int TRANSIENT_FIT_START = 4;
+    public static final int DATA_START          = 4;
     public static final int TRANSIENT_STOP      = 5;
-    public static final int DECAY_START = 0; // use for 'estimateDecayCursors' results
-    public static final int DECAY_STOP  = 1;
     private static final int ATTEMPTS = 10;
 
     public static double[] estimateExcitationCursors(double[] excitation) {
@@ -152,7 +150,11 @@ public class CursorHelper {
             startIndex = 0;
         }
 
-        return new int[] { startIndex, stopIndex };
+        int[] returnValue = new int[6];
+        returnValue[TRANSIENT_START] = 0;
+        returnValue[DATA_START]      = startIndex;
+        returnValue[TRANSIENT_STOP]  = stopIndex;
+        return returnValue;
     }
 
     public static double[] estimateCursors(double xInc, double[] prompt, double[] decay) {
@@ -262,12 +264,12 @@ public class CursorHelper {
         }
         transEndIndex = 9 * decay.length / 10; // "90% of transient"
         if (transEndIndex <= transStartIndex + 2 * ATTEMPTS) { // "oops"
-            returnValue[PROMPT_START]        = startp;
-            returnValue[PROMPT_STOP]         = endp;
-            returnValue[PROMPT_BASELINE]     = baseline;
-            returnValue[TRANSIENT_START]     = transStartIndex;
-            returnValue[TRANSIENT_FIT_START] = startt;
-            returnValue[TRANSIENT_STOP]      = transEndIndex;
+            returnValue[PROMPT_START]    = startp;
+            returnValue[PROMPT_STOP]     = endp;
+            returnValue[PROMPT_BASELINE] = baseline;
+            returnValue[TRANSIENT_START] = transStartIndex;
+            returnValue[DATA_START]      = startt;
+            returnValue[TRANSIENT_STOP]  = transEndIndex;
             
             return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
         }
@@ -324,12 +326,12 @@ public class CursorHelper {
             }
             System.out.println("index is " + index);
 
-            returnValue[PROMPT_START]        = startp;
-            returnValue[PROMPT_STOP]         = endp;
-            returnValue[PROMPT_BASELINE]     = baseline;
-            returnValue[TRANSIENT_START]     = transStartIndex;
-            returnValue[TRANSIENT_FIT_START] = startt;
-            returnValue[TRANSIENT_STOP]      = transEndIndex;
+            returnValue[PROMPT_START]    = startp;
+            returnValue[PROMPT_STOP]     = endp;
+            returnValue[PROMPT_BASELINE] = baseline;
+            returnValue[TRANSIENT_START] = transStartIndex;
+            returnValue[DATA_START]      = startt;
+            returnValue[TRANSIENT_STOP]  = transEndIndex;
             return returnValue; //TODO do estimate resets/frees???
         }
 
@@ -341,12 +343,12 @@ public class CursorHelper {
         transStartIndex += index;
         transFitStartIndex = transStartIndex + (transEndIndex - transStartIndex) / 20;
         
-        returnValue[PROMPT_START]        = startp;
-        returnValue[PROMPT_STOP]         = endp;
-        returnValue[PROMPT_BASELINE]     = baseline;
-        returnValue[TRANSIENT_START]     = transStartIndex;
-        returnValue[TRANSIENT_FIT_START] = transFitStartIndex;
-        returnValue[TRANSIENT_STOP]      = transEndIndex;
+        returnValue[PROMPT_START]    = startp;
+        returnValue[PROMPT_STOP]     = endp;
+        returnValue[PROMPT_BASELINE] = baseline;
+        returnValue[TRANSIENT_START] = transStartIndex;
+        returnValue[DATA_START]      = transFitStartIndex;
+        returnValue[TRANSIENT_STOP]  = transEndIndex;
         return returnValue;
     }
     

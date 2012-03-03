@@ -50,6 +50,7 @@ public class FittingCursor {
     private int _bins;
     private Set<IFittingCursorListener> _listeners;
     private boolean _showBins;
+    private volatile boolean _suspend;
     private double _promptStartValue;
     private double _promptStopValue;
     private double _promptBaselineValue;
@@ -105,28 +106,36 @@ public class FittingCursor {
     public boolean getShowBins() {
         return _showBins;
     }
+    
+    public void suspendNotifications(boolean suspend) {
+        _suspend = suspend;
+    }
 
     /**
-     * Sets the start of the prompt based on a string.  Handles bins or time
-     * values.
+     * Sets the start of the prompt based on a prompt delay string.  Handles
+     * bins or time values.
      * 
-     * @param promptStart 
+     * @param promptDelay 
      */
-    public void setPromptStart(String promptStart) {
-        Double promptStartValue = null;
+    public void setPromptDelay(String promptDelay) {
+        Double promptDelayValue = null;
         if (_showBins) {
-            Integer parsedInteger = getIntegerValue(promptStart);
+            Integer parsedInteger = getIntegerValue(promptDelay);
             if (null != parsedInteger) {
-                promptStartValue = _inc * parsedInteger;
+                promptDelayValue = _inc * parsedInteger;
             }
         }
         else {
-            promptStartValue = getDoubleValue(promptStart);
+            promptDelayValue = getDoubleValue(promptDelay);
         }
-        if (null != promptStartValue) {
+        if (null != promptDelayValue) {
+            // convert delay to start
+            double promptStartValue = promptDelayValue + _transientStartValue;
             if (promptStartValue <= _promptStopValue &&
                     promptStartValue >= 0.0) {
-                _promptStartValue = promptStartValue;
+                double diff = _promptStartValue - promptStartValue;
+                _promptStartValue += diff;
+                _promptStopValue  += diff;
             }
         }
         // either update others with new valid value or undo our invalid value
@@ -134,17 +143,20 @@ public class FittingCursor {
     }
  
     /**
-     * Gets the start of the prompt as a string.  Handles bins or time values.
+     * Gets the start of the prompt as a string showing prompt delay.  Handles
+     * bins or time values.
      * 
      * @return 
      */
-    public String getPromptStart() {
+    public String getPromptDelay() {
         StringBuffer returnValue = new StringBuffer();
         if (_showBins) {
-            returnValue.append(getPromptStartBin());
+            int delay = getPromptStartBin() - getTransientStartBin();
+            returnValue.append(delay);
         }
         else {
-            returnValue.append(getPromptStartValue());
+            double delay = getPromptStartValue() - getTransientStartValue();
+            returnValue.append(delay);
         }
         return returnValue.toString();
     }
@@ -189,23 +201,24 @@ public class FittingCursor {
     }
  
     /**
-     * Sets the end of the prompt based on a string.  Handles bins or time
-     * values.
+     * Sets the end of the prompt based on a prompt width string.  Handles bins
+     * or time values.
      * 
-     * @param promptStop 
+     * @param promptWidth 
      */
-    public void setPromptStop(String promptStop) {
-        Double promptStopValue = null;
+    public void setPromptWidth(String promptWidth) {
+        Double promptWidthValue = null;
         if (_showBins) {
-            Integer parsedInteger = getIntegerValue(promptStop);
+            Integer parsedInteger = getIntegerValue(promptWidth);
             if (null != parsedInteger) {
-                promptStopValue = _inc * parsedInteger;
+                promptWidthValue = _inc * parsedInteger;
             }
         }
         else {
-            promptStopValue = getDoubleValue(promptStop);
+            promptWidthValue = getDoubleValue(promptWidth);
         }
-        if (null != promptStopValue) {
+        if (null != promptWidthValue) {
+            double promptStopValue = getPromptStartValue() + promptWidthValue;
             if (promptStopValue >= _promptStartValue &&
                     promptStopValue <= _bins * _inc) {
                 _promptStopValue = promptStopValue;
@@ -216,17 +229,20 @@ public class FittingCursor {
     }
 
     /**
-     * Gets the end of the prompt as a string.  Handles bins or time values.
+     * Gets the end of the prompt as a string showing prompt width.  Handles
+     * bins or time values.
      * 
      * @return 
      */
-    public String getPromptStop() {
+    public String getPromptWidth() {
         StringBuffer returnValue = new StringBuffer();
         if (_showBins) {
-            returnValue.append(getPromptStopBin());
+            int width = getPromptStopBin() - getPromptStartBin();
+            returnValue.append(width);
         }
         else {
-            returnValue.append(getPromptStopValue());
+            double width = getPromptStopValue() - getPromptStartValue();
+            returnValue.append(width);
         }
         return returnValue.toString();
     }
@@ -595,8 +611,10 @@ public class FittingCursor {
      * Notifies all listeners of a change.
      */
     private void notifyListeners() {
-        for (IFittingCursorListener listener : _listeners) {
-            listener.cursorChanged(this);
+        if (!_suspend) {
+            for (IFittingCursorListener listener : _listeners) {
+                listener.cursorChanged(this);
+            }
         }
     }
 }

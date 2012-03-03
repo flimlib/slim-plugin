@@ -510,8 +510,9 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
             int promptStart       = cursor.getPromptStartBin();
             int promptStop        = cursor.getPromptStopBin();
             double promptBaseline = cursor.getPromptBaselineValue();
-            //setStartStop(transientStart, dataStart, transientStop);
-            _frame.repaint();
+            if (null != _frame) {
+                _frame.repaint();
+            }
             System.out.println("PROMPT CHANGED " + promptStart + " " + promptStop + " " + promptBaseline);
         }
     }  

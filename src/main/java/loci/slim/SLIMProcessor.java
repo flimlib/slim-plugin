@@ -457,10 +457,15 @@ public class SLIMProcessor <T extends RealType<T>> {
     private void updateDecayCursors(IUserInterfacePanel uiPanel) {
         double[] decay = getSummedDecay();
         int[] results = CursorHelper.estimateDecayCursors(m_timeRange, decay);
-        int dataStart = results[CursorHelper.DECAY_START];
-        int transientStop = results[CursorHelper.DECAY_STOP];
-        
+        int transientStart = results[CursorHelper.TRANSIENT_START];
+        int dataStart = results[CursorHelper.DATA_START];
+        int transientStop = results[CursorHelper.TRANSIENT_STOP];
+
+        // want to batch all of the fitting cursor notifications to listeners
+        _fittingCursor.suspendNotifications(true);
+        _fittingCursor.setTransientStartBin(transientStart);
         _fittingCursor.setDataStartBin(dataStart);
+        _fittingCursor.suspendNotifications(false);
         _fittingCursor.setTransientStopBin(transientStop);
     }
     
@@ -506,11 +511,14 @@ public class SLIMProcessor <T extends RealType<T>> {
             }
 
             double[] results = CursorHelper.estimateCursors(m_timeRange, excitation.getValues(), decay);
+            // want all the fitting cursor listeners to get everything at once
+            _fittingCursor.suspendNotifications(true);
             _fittingCursor.setPromptStartBin   ((int) results[CursorHelper.PROMPT_START]);
             _fittingCursor.setPromptStopBin    ((int) results[CursorHelper.PROMPT_STOP]);
             _fittingCursor.setPromptBaselineValue    (results[CursorHelper.PROMPT_BASELINE]);
-            _fittingCursor.setTransientStartBin((int) results[CursorHelper.TRANSIENT_STOP]);
-            _fittingCursor.setDataStartBin     ((int) results[CursorHelper.TRANSIENT_STOP]);
+            _fittingCursor.setTransientStartBin((int) results[CursorHelper.TRANSIENT_START]);
+            _fittingCursor.setDataStartBin     ((int) results[CursorHelper.DATA_START]);
+            _fittingCursor.suspendNotifications(false);
             _fittingCursor.setTransientStopBin ((int) results[CursorHelper.TRANSIENT_STOP]);
 
             m_excitationPanel = new ExcitationPanel(excitation, _fittingCursor);

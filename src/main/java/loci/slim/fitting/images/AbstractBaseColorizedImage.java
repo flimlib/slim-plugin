@@ -81,7 +81,6 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
             public void focusGained(FocusEvent e) {
                 int channelIndex = _stackWindow.getSlice() - 1;
                 _histogramData.setChannelIndex(channelIndex);
-                System.out.println("focusGained channel " + channelIndex);
                 HistogramTool.getInstance().setHistogramData(_histogramData);
             }
             
@@ -145,8 +144,6 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
      */
     public void recalcHistogram() {
         double[] minMaxLUT = _histogramData.recalcHistogram();
-        
-        System.out.println("RecalcHistogram to " + minMaxLUT[0] + " " + minMaxLUT[1]);
 
         if (null != minMaxLUT) {
             redisplay(minMaxLUT);
@@ -185,17 +182,12 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
         int x       = location[0];
         int y       = location[1];
         int channel = location[2];
-        //System.out.println("updatePixel(" + x + " " + y + " " + channel + " prev channel is " + _channel);
         
         if (_channel != channel) {
             _channel = channel;
             _stackWindow.showSlice(channel + 1);
-            _values = _histogramDataChannels[channel].getValues();
-            
-            //System.out.println("values is " + _values + " " + _values.hashCode());
-            
+            _values = _histogramDataChannels[channel].getValues();            
             _imageProcessor = (FloatProcessor) _imageStack.getProcessor(channel + 1);
-            //System.out.println("ImageProc for " + channel + " is " + _imageProcessor.toString() + " hash " + _imageProcessor.hashCode());
         }
         
         _values[x][y] = value;

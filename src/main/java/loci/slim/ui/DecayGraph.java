@@ -176,7 +176,13 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         }
         return _frame;
     }
-    
+
+    /**
+     * Sets the fitting cursor, which keeps track of prompt and transient
+     * start and stop cursors.
+     * 
+     * @param fittingCursor 
+     */
     public void setFittingCursor(FittingCursor fittingCursor) {
         if (null == _fittingCursor) {
             _fittingCursorListener = new FittingCursorListener();
@@ -187,7 +193,12 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         _fittingCursor = fittingCursor;
         _fittingCursor.addListener(_fittingCursorListener);
     }
-    
+
+    /**
+     * Set or change the title.
+     * 
+     * @param title 
+     */
     public void setTitle(final String title) {
         _frame.setTitle(title);
     }
@@ -211,7 +222,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
      * @param transStop
      */
     public void setStartStop(int transStart, int dataStart, int transStop) {
-        if (true || null == _dataStart) {
+        if (null == _dataStart) {
             // initialize the vertical bars
             double transStartValue = transStart * _timeInc;
             double dataStartValue  = dataStart  * _timeInc;
@@ -246,7 +257,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         int dataStart  = (int) (dataStartProportion  * _bins + 0.5);
         int transStop  = (int) (transStopProportion  * _bins + 0.5);
 
-        // if changed, notify listener
+        // if changed, notify cursor listeners
         if (transStart != _transStart || dataStart != _dataStart ||
                 transStop != _transStop)
         {
@@ -545,7 +556,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                             };
                         }
                         else {
-                            _transStopMarkerProportion = _transStartMarkerProportion;
+                            _dataStartMarkerProportion = _transStartMarkerProportion;
                         }
                     }
                     else {
@@ -627,8 +638,10 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                                     }
                                 }
                             }
-                            // start dragging start line
-                            _dragTransStartMarker = true;
+                            else {
+                                // no superimposition; start dragging start line
+                                _dragTransStartMarker = true;
+                            }
 
                         }
                         else if (Math.abs(x - _xDataStart) < CLOSE_ENOUGH) {
@@ -644,8 +657,10 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                                     _dragTransStopMarker = true;
                                 }
                             }
-                            // start dragging data start line
-                            _dragDataStartMarker = true;
+                            else {
+                                // no superimposition; start dragging data start line
+                                _dragDataStartMarker = true;
+                            }
                         }
                         else if (Math.abs(x - _xTransStop) < CLOSE_ENOUGH) {
                             // possible superimpositions already checked

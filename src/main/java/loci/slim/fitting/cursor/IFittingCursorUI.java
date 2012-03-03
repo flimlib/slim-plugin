@@ -52,32 +52,32 @@ public interface IFittingCursorUI {
     public void setTransientStop(String transientStop);
     
     /**
-     * Gets the prompt start cursor.
+     * Gets the prompt delay cursor.
      * 
      * @return 
      */
-    public String getPromptStart();
+    public String getPromptDelay();
   
     /**
-     * Sets the prompt start cursor.
+     * Sets the prompt delay cursor.
      * 
-     * @param promptStart 
+     * @param promptDelay 
      */
-    public void setPromptStart(String promptStart);
+    public void setPromptDelay(String promptDelay);
 
     /**
-     * Gets the prompt end cursor.
+     * Gets the prompt width cursor.
      * 
      * @return 
      */
-    public String getPromptStop();
+    public String getPromptWidth();
 
     /**
-     * Sets the prompt end cursor.
+     * Sets the prompt width cursor.
      * 
-     * @param promptStop 
+     * @param promptWidth 
      */
-    public void setPromptStop(String promptStop);
+    public void setPromptWidth(String promptWidth);
     
     /**
      * Gets the prompt baseline cursor.

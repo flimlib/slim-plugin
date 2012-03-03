@@ -73,20 +73,20 @@ import loci.slim.fitting.cursor.FittingCursor;
  */
 public class ExcitationPanel extends JFrame {
     private Excitation m_excitation;
-    private JTextField m_fileField;
-    private JTextField m_startField;
-    private JTextField m_stopField;
-    private JTextField m_baseField;
 
     public ExcitationPanel(Excitation excitation, FittingCursor fittingCursor) {
 
         m_excitation = excitation;
 
         this.setTitle("Instrument Response Function");
+        
+        int start = fittingCursor.getPromptStartBin();
+        int stop  = fittingCursor.getPromptStopBin();
+        double base = fittingCursor.getPromptBaselineValue();
 
-        int start = excitation.getStart();
-        int stop = excitation.getStop();
-        double base = excitation.getBase();
+        //int start = excitation.getStart();
+        //int stop = excitation.getStop();
+        //double base = excitation.getBase();
         double[] values = excitation.getValues();
         int bins = values.length;
         double timeInc = excitation.getTimeInc();
