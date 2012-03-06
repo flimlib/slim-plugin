@@ -72,11 +72,13 @@ import loci.slim.fitting.cursor.FittingCursor;
  * @author Aivar Grislis
  */
 public class ExcitationPanel extends JFrame {
-    private Excitation m_excitation;
+    private Excitation _excitation;
+    private int _bins;
+    private double _timeInc;
 
     public ExcitationPanel(Excitation excitation, FittingCursor fittingCursor) {
 
-        m_excitation = excitation;
+        _excitation = excitation;
 
         this.setTitle("Instrument Response Function");
         
@@ -84,13 +86,11 @@ public class ExcitationPanel extends JFrame {
         int stop  = fittingCursor.getPromptStopBin();
         double base = fittingCursor.getPromptBaselineValue();
 
-        //int start = excitation.getStart();
-        //int stop = excitation.getStop();
-        //double base = excitation.getBase();
         double[] values = excitation.getValues();
-        int bins = values.length;
-        double timeInc = excitation.getTimeInc();
-        ExcitationGraph excitationGraph = new ExcitationGraph(start, stop, base, bins, values, timeInc);
+        _bins = values.length;
+        _timeInc = excitation.getTimeInc();
+        ExcitationGraph excitationGraph = new ExcitationGraph(start, stop, base,
+                _bins, values, _timeInc);
         excitationGraph.setFittingCursor(fittingCursor);
         
         JPanel panel = new JPanel(new BorderLayout());
@@ -102,41 +102,48 @@ public class ExcitationPanel extends JFrame {
         this.setSize(450, 225);
         this.pack();
         this.setVisible(true);
-        // load the excitation curve
-        // fit default cursors
-        // show excitation graph
-        // show additional UI
     }
     
     public void quit() {
         this.setVisible(false);
     }
 
-    public double[] getValues(int pixels) {
-        double inValues[] = m_excitation.getValues();
-        for (double fV : inValues) {
-            System.out.print(" " + fV);
+    /**
+     * This is based on TRCursors.c UpdatePrompt in TRI2.
+     * 
+     * @param start
+     * @param stop
+     * @return 
+     */
+    public double[] getValues(double start, double stop, double base) {
+        int startIndex = (int) Math.ceil(start / _timeInc);
+        if (startIndex < 0) {
+            startIndex = 0;
         }
-        System.out.println("");
-        System.out.println("start " + m_excitation.getStart() + " stop " + m_excitation.getStop() + " base " + m_excitation.getBase());
-
-        int start = m_excitation.getStart();
-        int stop = m_excitation.getStop();
-        double base = m_excitation.getBase();
-        double[] values = new double[inValues.length];
-        for (int i = 0; i < values.length; ++i) {
-            if (i < start || i > stop) {
-                values[i] = 0.0;
-            }
-            else if (inValues[i] > base) {
-                values[i] = pixels * inValues[i];
-                System.out.println("pixels " + pixels + "  value " + values[i]);
-            }
-            else {
-                values[i] = 0.0;
-            }
+        int stopIndex = (int) Math.floor(stop / _timeInc) + 1;
+        if (stopIndex > _bins) {
+            stopIndex = _bins;
         }
-        System.out.println("");
+        
+        if (stopIndex <= startIndex) {
+            return null;
+        }
+        
+        double inValues[] = _excitation.getValues();
+        double scaling = 0.0;
+        for (int i = startIndex; i < stopIndex; ++i) {
+            scaling += inValues[i];
+        }
+        
+        if (0.0 == scaling) {
+            return null;
+        }
+ 
+        double[] values = new double[stopIndex - startIndex];
+        int j = 0;
+        for (int i = startIndex; i < stopIndex; ++i) {
+            values[j++] = (inValues[i] - base) / scaling;
+        }    
         return values;
     }
 
@@ -152,7 +159,7 @@ public class ExcitationPanel extends JFrame {
         //fileLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         //panel.add(fileLabel);
 
-        panel.add(new JLabel(m_excitation.getFileName()));
+        panel.add(new JLabel(_excitation.getFileName()));
 
         // rows, cols, initX, initY, xPad, yPad
         //SpringUtilities.makeCompactGrid(panel, 1, 2, 4, 4, 4, 4);

@@ -283,11 +283,11 @@ public class SLIMProcessor <T extends RealType<T>> {
         _fittingCursor.addListener(new FittingCursorListener());
         
         // show the UI; do fits
-        final IUserInterfacePanel uiPanel = new UserInterfacePanel(TABBED,
-                USE_TAU, m_analysis.getChoices(), m_binning.getChoices());
         FittingCursorHelper fittingCursorHelper = new FittingCursorHelper();
         fittingCursorHelper.setFittingCursor(_fittingCursor);
-        uiPanel.setFittingCursorHelper(fittingCursorHelper);
+        final IUserInterfacePanel uiPanel = new UserInterfacePanel(TABBED,
+                USE_TAU, m_analysis.getChoices(), m_binning.getChoices(),
+                fittingCursorHelper);
         uiPanel.setX(0);
         uiPanel.setY(0);
         //TODO ARG these estimates s/n/b necessary; use the EstimateCursors class
@@ -511,6 +511,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             }
 
             double[] results = CursorHelper.estimateCursors(m_timeRange, excitation.getValues(), decay);
+            
             // want all the fitting cursor listeners to get everything at once
             _fittingCursor.suspendNotifications(true);
             _fittingCursor.setPromptStartBin   ((int) results[CursorHelper.PROMPT_START]);
@@ -772,10 +773,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         // get fit settings from the UI panel
         FitInfo fitInfo = getFitInfo(m_grayScaleImage, uiPanel, _fittingCursor);
         fitInfo.setXInc(m_timeRange);
-        if (null != m_excitationPanel) {
-            fitInfo.setPrompt(m_excitationPanel.getValues(1));
-            fitInfo.setStartPrompt(0);
-            fitInfo.setStopPrompt(100);
+        if (_fittingCursor.getHasPrompt() && null != m_excitationPanel) {
+            double start = _fittingCursor.getPromptStartValue();
+            double stop  = _fittingCursor.getPromptStopValue();
+            double base  = _fittingCursor.getPromptBaselineValue();
+            double[] values = m_excitationPanel.getValues(start, stop, base);
+            fitInfo.setPrompt(values);
         }
         fitInfo.setIndexColorModel(HistogramTool.getIndexColorModel());
         m_fitInfo = fitInfo;
@@ -1045,7 +1048,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             curveFitData.setYFitted(yFitted);
             
             // for TRI2 compatibility:
-            if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getFunction())) {
+            if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getFunction())) { //TODO ARG UGLY
                 // these lines give TRI2 compatible fit results
                 int estimateStartIndex =
                         CursorHelper.getEstimateStartIndex
@@ -1069,16 +1072,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         // show decay and update UI parameters
         int visibleChannel = m_fitAllChannels ? m_channel : 0;
-        double[] irf = null;
-        if (null != m_excitationPanel) {
-            // get the IRF curve scaled for total number of fitted pixels
-            irf = m_excitationPanel.getValues(dataArray[visibleChannel].getPixels());
-        }
         String title = "Summed";
         if (1 < m_channels) {
             title += " Channel " + (m_channel + 1);
         }
-        showDecayGraph(title, uiPanel, _fittingCursor, irf, dataArray[visibleChannel]);
+        showDecayGraph(title, uiPanel, _fittingCursor, dataArray[visibleChannel]);
         uiPanel.setParameters(dataArray[visibleChannel].getParams());
 
         // get the results
@@ -1166,16 +1164,11 @@ public class SLIMProcessor <T extends RealType<T>> {
             int nominalChannel = m_fitAllChannels ? m_channel : 0;
             int dataIndex = nominalChannel * getRois().length + (roiNumber - 1);
 
-            double[] irf = null;
-            if (null != m_excitationPanel) {
-                // get the IRF curve scaled for number of pixels in this ROI
-                irf = m_excitationPanel.getValues(dataArray[dataIndex].getPixels());
-            }
             String title = "Roi " + roiNumber;
             if (1 < m_channels) {
                 title += " Channel " + (m_channel + 1);
             }
-            showDecayGraph(title, uiPanel, _fittingCursor, irf, dataArray[dataIndex]);
+            showDecayGraph(title, uiPanel, _fittingCursor, dataArray[dataIndex]);
             double lifetime = dataArray[dataIndex].getParams()[3];
             if (lifetime < min) {
                 min = lifetime;
@@ -1297,11 +1290,6 @@ public class SLIMProcessor <T extends RealType<T>> {
         getCurveFitter(uiPanel).fitData(dataArray);
 
         // show decay graph for visible channel
-        double irf[] = null;
-        if (null != m_excitationPanel) {
-            // get the IRF curve scaled for a single pixel
-            irf = m_excitationPanel.getValues(1);
-        }
         String title = "Pixel " + x + " " + y;
         if (1 < m_channels) {
             title += " Channel " + (m_channel + 1);
@@ -1310,7 +1298,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         if (m_fitAllChannels) {
             visibleChannel = m_channel;
         }
-        showDecayGraph(title, uiPanel, _fittingCursor, irf, dataArray[visibleChannel]);
+        showDecayGraph(title, uiPanel, _fittingCursor, dataArray[visibleChannel]);
 
         // update UI parameters
         uiPanel.setParameters(dataArray[visibleChannel].getParams());
@@ -1776,8 +1764,14 @@ public class SLIMProcessor <T extends RealType<T>> {
         curveFitter.setXInc(m_timeRange);
         curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
         if (null != m_excitationPanel) {
-            // get the raw, unscaled IRF curve (will get scaled for number of pixels later)
-            curveFitter.setInstrumentResponse(m_excitationPanel.getValues(1));
+            double[] excitation = null;
+            if (null != m_excitationPanel) {
+                double start = _fittingCursor.getPromptStartValue();
+                double stop  = _fittingCursor.getPromptStopValue();
+                double base  = _fittingCursor.getPromptBaselineValue();
+                excitation = m_excitationPanel.getValues(start, stop, base);
+            }            
+            curveFitter.setInstrumentResponse(excitation);
         }
         return curveFitter;
     }
@@ -1838,7 +1832,6 @@ public class SLIMProcessor <T extends RealType<T>> {
     private void showDecayGraph(final String title,
             final IUserInterfacePanel uiPanel,
             final FittingCursor fittingCursor,
-            final double irf[],
             final ICurveFitData data)
     {
         loci.slim.ui.IDecayGraph decayGraph = loci.slim.ui.DecayGraph.getInstance();
@@ -1849,7 +1842,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         int dataStart      = fittingCursor.getDataStartBin();
         int transientStop  = fittingCursor.getTransientStopBin();
         decayGraph.setStartStop(transientStart, dataStart, transientStop);
-        decayGraph.setData(irf, data);
+        decayGraph.setData(data);
     }
     
     /**

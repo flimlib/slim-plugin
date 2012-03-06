@@ -252,10 +252,13 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     String m_fitButtonText = FIT_IMAGE;
 
     public UserInterfacePanel(boolean tabbed, boolean showTau,
-            String[] analysisChoices, String[] binningChoices)
+            String[] analysisChoices, String[] binningChoices,
+            FittingCursorHelper fittingCursorHelper)
     {
         String lifetimeLabel = "" + (showTau ? TAU : LAMBDA);
-
+        
+        _fittingCursorHelper = fittingCursorHelper;
+        
         m_frame = new JFrame("SLIM Plugin");
 
         // create outer panel
@@ -375,11 +378,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
         // no prompt initially
         enablePromptCursors(false);
-    }
 
-    @Override
-    public void setFittingCursorHelper(FittingCursorHelper fittingCursorHelper) {
-        _fittingCursorHelper = fittingCursorHelper;
+        // show initial cursors
         _fittingCursorHelper.setFittingCursorUI(this);
     }
 
@@ -1755,6 +1755,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @param enable 
      */
     private void enablePromptCursors(boolean enable) {
+        _fittingCursorHelper.enablePrompt(enable);
+        
         m_promptDelayField.setEditable(enable);
         m_promptWidthField.setEditable(enable);
         m_promptBaselineField.setEditable(enable);

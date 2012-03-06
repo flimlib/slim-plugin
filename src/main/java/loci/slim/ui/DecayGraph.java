@@ -76,8 +76,9 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     static final String TIME_AXIS_LABEL = "Time";
     static final String UNITS_LABEL = "nanoseconds";
     static final String RESIDUAL_AXIS_LABEL = "Residual";
+    static final int DECAY_WEIGHT = 4;
+    static final int RESIDUAL_WEIGHT = 1;
     static final int HORZ_TWEAK = 4;
-    static final Color IRF_COLOR = Color.GRAY;
     static final Color DECAY_COLOR = Color.GRAY.darker();
     static final Color FITTED_COLOR = Color.RED;
     static final Color BACK_COLOR = Color.WHITE;
@@ -209,8 +210,8 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
      * @param irf
      * @param data
      */
-    public void setData(final double[] irf, ICurveFitData data) {
-        createDatasets(10, 200, _bins, _timeInc, irf, data);
+    public void setData(ICurveFitData data) {
+        createDatasets(10, 200, _bins, _timeInc, data);
 
     }
 
@@ -300,14 +301,12 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         }
         XYSplineRenderer decayRenderer = new XYSplineRenderer();
         decayRenderer.setSeriesShapesVisible(0, false);
-        decayRenderer.setSeriesShapesVisible(1, false);
-        decayRenderer.setSeriesLinesVisible(2, false);
+        decayRenderer.setSeriesLinesVisible(1, false);
         decayRenderer.setSeriesShape
-                (2, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f, 2.0f));
+                (1, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f, 2.0f));
 
-        decayRenderer.setSeriesPaint(0, IRF_COLOR);
-        decayRenderer.setSeriesPaint(1, FITTED_COLOR);
-        decayRenderer.setSeriesPaint(2, DECAY_COLOR);
+        decayRenderer.setSeriesPaint(0, FITTED_COLOR);
+        decayRenderer.setSeriesPaint(1, DECAY_COLOR);
 
         _decaySubPlot = new XYPlot
                 (_decayDataset, null, photonAxis, decayRenderer);
@@ -315,20 +314,14 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         _decaySubPlot.setRangeCrosshairVisible(true);
 
         // add decay sub-plot to parent
-        parent.add(_decaySubPlot, 4);
+        parent.add(_decaySubPlot, DECAY_WEIGHT);
 
         // create residual sub-plot
         NumberAxis residualAxis = new NumberAxis(RESIDUAL_AXIS_LABEL);
         XYSplineRenderer residualRenderer = new XYSplineRenderer();
-        //residualRenderer.setSeriesShapesVisible(0, false);
         residualRenderer.setSeriesPaint(0, RESIDUAL_COLOR);
-        //residualRenderer.setSeriesLinesVisible(0, false);
         residualRenderer.setSeriesShape
                 (0, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f, 2.0f));
-        
-        
-        
-        
         
         XYPlot residualSubPlot = new XYPlot
                 (_residualDataset, null, residualAxis, residualRenderer);
@@ -337,7 +330,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         residualSubPlot.setFixedLegendItems(null);
 
         // add residual sub-plot to parent
-        parent.add(residualSubPlot, 1);
+        parent.add(residualSubPlot, RESIDUAL_WEIGHT);
 
         // now make the top level JFreeChart
         JFreeChart chart = new JFreeChart
@@ -357,29 +350,14 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
      * @param data from the fit
      */
     private void createDatasets(int start, int stop, int bins, double timeInc,
-            double[] irf, ICurveFitData data)
+            ICurveFitData data)
     {
-        XYSeries series1 = new XYSeries("IRF");
-        double xCurrent = 0;
-        if (null != irf) {
-            for (int i = 0; i < bins; ++i) {
-                // logarithmic plots can't handle <= 0
-                if (irf[i] > 0.0) {
-                    series1.add(xCurrent, irf[i]);
-                }
-                else {
-                    series1.add(xCurrent, null);
-                }
-                xCurrent += timeInc;
-            }
-        }
-
         XYSeries series2 = new XYSeries("Fitted");
         XYSeries series3 = new XYSeries("Data");
         XYSeries series4 = new XYSeries("Residuals");
 
         double yData, yFitted;
-        xCurrent = 0;
+        double xCurrent = 0;
         for (int i = 0; i < bins; ++i) {
             yData = data.getYCount()[i];
             // logarithmic plots can't handle <= 0.0
@@ -406,7 +384,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         }
 
         _decayDataset.removeAllSeries();
-        _decayDataset.addSeries(series1);
         _decayDataset.addSeries(series2);
         _decayDataset.addSeries(series3);
 

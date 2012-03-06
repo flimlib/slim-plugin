@@ -71,7 +71,7 @@ public interface IDecayGraph {
      * @param irf
      * @param data
      */
-    public void setData(final double[] irf, ICurveFitData data);
+    public void setData(ICurveFitData data);
     
     /**
      * Changes (or initializes) the start and stop vertical bars.

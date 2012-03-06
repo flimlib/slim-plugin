@@ -52,14 +52,6 @@ import loci.slim.fitting.cursor.FittingCursorHelper;
  * @author Aivar Grislis
  */
 public interface IUserInterfacePanel {
-    
-    /**
-     * Sets the fitting cursor helper, which keeps track of prompt and transient
-     * start and stop cursors.
-     * 
-     * @param fittingCursorUIHelper 
-     */
-    public void setFittingCursorHelper(FittingCursorHelper fittingCursorUIHelper);
 
     /**
      * Gets the UI JFrame.

@@ -46,11 +46,14 @@ import java.util.Set;
  * @author Aivar Grislis
  */
 public class FittingCursor {
+    private static final String DOUBLE_ZERO_STRING = "0.0";
+    private static final String INTEGER_ZERO_STRING = "0";
     private double _inc;
     private int _bins;
     private Set<IFittingCursorListener> _listeners;
     private boolean _showBins;
     private volatile boolean _suspend;
+    private boolean _hasPrompt;
     private double _promptStartValue;
     private double _promptStopValue;
     private double _promptBaselineValue;
@@ -69,6 +72,8 @@ public class FittingCursor {
         _bins = bins;
         _listeners = Collections.synchronizedSet(new HashSet<IFittingCursorListener>());
         _showBins = false;
+        _suspend = false;
+        _hasPrompt = false;
     }
 
     /**
@@ -106,9 +111,35 @@ public class FittingCursor {
     public boolean getShowBins() {
         return _showBins;
     }
-    
+
+    /**
+     * Used to turn on/off listener notifications.  Mainly if several cursor
+     * settings need to be changed in one batch, turn off listener notifications,
+     * make all but one cursor settings change, then turn on listener 
+     * notifications and make the last cursor settings change.
+     * 
+     * @param suspend 
+     */
     public void suspendNotifications(boolean suspend) {
         _suspend = suspend;
+    }
+
+    /**
+     * Returns whether or not a prompt has been loaded.
+     * 
+     * @param hasPrompt 
+     */
+    public void setHasPrompt(boolean hasPrompt) {
+        _hasPrompt = hasPrompt;
+    }
+
+    /**
+     * Sets whether or not a prompt has been loaded.
+     * 
+     * @return 
+     */
+    public boolean getHasPrompt() {
+        return _hasPrompt;
     }
 
     /**
@@ -151,12 +182,22 @@ public class FittingCursor {
     public String getPromptDelay() {
         StringBuffer returnValue = new StringBuffer();
         if (_showBins) {
-            int delay = getPromptStartBin() - getTransientStartBin();
-            returnValue.append(delay);
+            if (_hasPrompt) {
+                int delay = getPromptStartBin() - getTransientStartBin();
+                returnValue.append(delay);
+            }
+            else {
+                returnValue.append(INTEGER_ZERO_STRING);
+            }
         }
         else {
-            double delay = getPromptStartValue() - getTransientStartValue();
-            returnValue.append(delay);
+            if (_hasPrompt) {
+                double delay = getPromptStartValue() - getTransientStartValue();
+                returnValue.append(delay);
+            }
+            else {
+                returnValue.append(DOUBLE_ZERO_STRING);
+            }
         }
         return returnValue.toString();
     }
@@ -237,12 +278,22 @@ public class FittingCursor {
     public String getPromptWidth() {
         StringBuffer returnValue = new StringBuffer();
         if (_showBins) {
-            int width = getPromptStopBin() - getPromptStartBin();
-            returnValue.append(width);
+            if (_hasPrompt) {
+                int width = getPromptStopBin() - getPromptStartBin();
+                returnValue.append(width);
+            }
+            else {
+                returnValue.append(INTEGER_ZERO_STRING);
+            }
         }
         else {
-            double width = getPromptStopValue() - getPromptStartValue();
-            returnValue.append(width);
+            if (_hasPrompt) {
+                double width = getPromptStopValue() - getPromptStartValue();
+                returnValue.append(width);
+            }
+            else {
+                returnValue.append(DOUBLE_ZERO_STRING);
+            }
         }
         return returnValue.toString();
     }
@@ -306,7 +357,12 @@ public class FittingCursor {
      */
     public String getPromptBaseline() {
         StringBuffer returnValue = new StringBuffer();
-        returnValue.append(getPromptBaselineValue());
+        if (_hasPrompt) {
+            returnValue.append(getPromptBaselineValue());
+        }
+        else {
+            returnValue.append(DOUBLE_ZERO_STRING);
+        }
         return returnValue.toString();
     }
  
@@ -617,4 +673,70 @@ public class FittingCursor {
             }
         }
     }
+    
+ 
+    //TODO ARG
+    // These two methods support round-tripping from int -> double ->int and
+    // double -> int -> double.
+    //
+    private static int doubleToInt(boolean low, double inc, double value) {
+        int returnValue = 0;
+        if (low) {
+            returnValue = (int) Math.floor(value / inc);
+        }
+        else {
+            returnValue = (int) Math.ceil(value / inc) + 1;
+        }
+        return returnValue;
+    }
+    
+    private static double intToDouble(boolean low, double inc, int value) {
+        double returnValue = 0.0;
+        if (low) {
+            returnValue = inc * value + inc / 8192;
+        }
+        else {
+            returnValue = inc * (value - 1) - inc / 8192;
+        }
+        return returnValue;
+    }
+    
+    private static double randomDouble(java.util.Random random, int range) {
+        return random.nextDouble() * range;
+    }
+    
+    public static void main(String [] args)
+    {
+        int lowProbs = 0, highProbs = 0;
+        java.util.Random random = new java.util.Random();
+        for (int i = 0; i < 300000; ++i) {
+            double d = randomDouble(random, 10); // random 0.0...10.0
+            int fred = doubleToInt(true, 0.01, d);
+            double wilma = intToDouble(true, 0.01, fred);
+            int barney = doubleToInt(true, 0.01, wilma);
+            if (fred != barney) {
+                System.out.println("random is " + d + " to int low is " + fred + " back to double " + wilma + " to int " + barney);
+                ++lowProbs;
+            }
+            if (d / wilma > 1.05 || d / wilma < 0.95) {
+                System.out.println("d is " + d + " and wilma " + wilma);
+                ++lowProbs;
+            }
+            fred = doubleToInt(false, 0.01, d);
+            wilma = intToDouble(false, 0.01, fred);
+            barney = doubleToInt(false, 0.01, wilma);
+            if (fred != barney) {
+                System.out.println("random is " + d + " to int high is " + fred + " back to double " + wilma + " to int " + barney);
+                ++highProbs;
+            }
+            if (d / wilma > 1.05 || d / wilma < 0.95) {
+                System.out.println("d is " + d + " and wilma is " + wilma);
+                ++highProbs;
+            }
+           // System.out.println("random " + d + " to int high " + fred + " back to double " + wilma + " to int low " + barney);
+        }
+        System.out.println(" " + lowProbs + " low, " + highProbs + " high oout of 30000");
+        System.exit(0);
+    }
+    
 }

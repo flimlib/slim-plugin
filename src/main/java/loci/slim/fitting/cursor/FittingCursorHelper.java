@@ -51,6 +51,15 @@ public class FittingCursorHelper implements IFittingCursorUI {
     public boolean getShowBins() {
         return _fittingCursor.getShowBins();
     }
+
+    /**
+     * Turns on/off prompt cursors.
+     * 
+     * @param enable 
+     */
+    public void enablePrompt(boolean enable) {
+        _fittingCursor.setHasPrompt(enable);
+    }
     
     /**
      * Gets the transient start cursor.
@@ -191,6 +200,7 @@ public class FittingCursorHelper implements IFittingCursorUI {
     private class FittingCursorListener implements IFittingCursorListener {
         @Override
         public void cursorChanged(FittingCursor cursor) {
+            System.out.println("FittingCursorHelper.cursorChanged");
             showFittingCursor();
         }
     }  
