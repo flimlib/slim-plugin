@@ -34,7 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
-import loci.slim.heuristics.CursorHelper;
+import loci.slim.heuristics.CursorEstimator;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -47,7 +47,9 @@ import ij.process.ImageProcessor;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -61,13 +63,15 @@ import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.JaolhoCurveFitter;
 import loci.curvefitter.MarkwardtCurveFitter;
 import loci.curvefitter.SLIMCurveFitter;
+import loci.formats.FormatException;
 import loci.formats.FormatTools;
 import loci.formats.IFormatReader;
+import loci.formats.ImageReader;
 import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.binning.SLIMBinning;
 import loci.slim.colorizer.DataColorizer;
 import loci.slim.colorizer.DataColorizer2;
-import loci.slim.heuristics.CursorHelper;
+import loci.slim.heuristics.CursorEstimator;
 import loci.slim.process.IProcessor;
 import loci.slim.process.Threshold;
 import loci.slim.ui.DecayGraph;
@@ -151,6 +155,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     private static final Character SUB_1  = '\u2081';
     private static final Character SUB_2  = '\u2082';
     private static final Character SUB_3  = '\u2083';
+    
+    private IUserInterfacePanel m_uiPanel;
 
     private Object m_synchFit = new Object();
     private volatile boolean m_quit;
@@ -162,8 +168,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     private static final String PATH_KEY = "path";
     private String m_file;
     private String m_path;
-
-    IFormatReader m_reader;
+    private Hashtable<String, Object> m_globalMetadata;
 
     private Image<T> m_image;
     private LocalizableByDimCursor<T> m_cursor;
@@ -182,12 +187,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     private int m_bins;
     private int m_binIndex;
 
-    private boolean m_little;
-    private int m_pixelType;
-    private int m_bpp;
-    private boolean m_floating;
-    private float m_timeRange;
-    private int m_minWave, m_waveStep; //, m_maxWave;
+    private double m_timeRange;
+    private double m_minNonZeroPhotonCount;
 
     private FitRegion m_region;
     private FitAlgorithm m_algorithm;
@@ -198,15 +199,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 
     private ExcitationPanel m_excitationPanel = null;
     private IGrayScaleImage m_grayScaleImage;
-    // user sets these from the grayScalePanel
+    // user sets this from the grayScalePanel control
     private int m_channel;
     private boolean m_fitAllChannels;
 
-    // current channel, x, y
-    private int m_xchannel; // channel to fit; -1 means fit all channels
+    // current x, y
     private int m_x;
     private int m_y;
-    private int m_xvisibleChannel; // channel being displayed; -1 means none
 
     private double[] m_param = new double[7];
     private boolean[] m_free = { true, true, true, true, true, true, true };
@@ -288,6 +287,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         final IUserInterfacePanel uiPanel = new UserInterfacePanel(TABBED,
                 USE_TAU, m_analysis.getChoices(), m_binning.getChoices(),
                 fittingCursorHelper);
+        m_uiPanel = uiPanel; //TODO almost got by having it just be a local variable
         uiPanel.setX(0);
         uiPanel.setY(0);
         //TODO ARG these estimates s/n/b necessary; use the EstimateCursors class
@@ -380,6 +380,47 @@ public class SLIMProcessor <T extends RealType<T>> {
                         //TODO redo stop/start cursors on decay curve?
                     }
                 }
+
+                /**
+                 * Estimates prompt and decay cursors.
+                 */
+                public void estimateCursors() {
+                    double xInc = m_timeRange;
+                    double[] prompt = null;
+                    double[] decay = null;
+                    double chiSqTarget = m_uiPanel.getChiSquareTarget();
+                    if (_fittingCursor.getHasPrompt()) {
+                        double[] results = CursorEstimator.estimateCursors
+                                (xInc, prompt, decay, chiSqTarget);
+                        double promptBaseline = results[CursorEstimator.PROMPT_BASELINE];
+                        double promptStart    = results[CursorEstimator.PROMPT_START];
+                        double promptStop     = results[CursorEstimator.PROMPT_STOP];
+                        double transientStart = results[CursorEstimator.TRANSIENT_START];
+                        double dataStart      = results[CursorEstimator.DATA_START];
+                        double transientStop  = results[CursorEstimator.TRANSIENT_STOP];
+                        _fittingCursor.suspendNotifications(true);
+                        _fittingCursor.setPromptBaselineValue(promptBaseline);
+                        _fittingCursor.setPromptStartValue   (promptStart);
+                        _fittingCursor.setPromptStopValue    (promptStop);
+                        _fittingCursor.setTransientStartValue(transientStart);
+                        _fittingCursor.setDataStartValue     (dataStart);
+                        _fittingCursor.suspendNotifications(false);
+                        _fittingCursor.setTransientStopValue (transientStop);
+                    }
+                    else {
+                        //TODO ARG cursors still has that confusion between double and int!
+                        /*
+                        double[] results = CursorEstimator.estimateDecayCursors
+                                (xInc, decay);
+                        double transientStart = results[CursorEstimator.TRANSIENT_START];
+                        double dataStart      = results[CursorEstimator.DATA_START];
+                        double transientStop  = results[CursorEstimator.TRANSIENT_STOP];
+                        _fittingCursor.setTransientStartValue(transientStart);
+                        _fittingCursor.setDataStartValue     (dataStart);
+                        _fittingCursor.suspendNotifications(false);
+                        _fittingCursor.setTransientStopValue (transientStop);*/
+                    }
+                }
             }
         );
         uiPanel.getFrame().setLocationRelativeTo(null);
@@ -406,9 +447,22 @@ public class SLIMProcessor <T extends RealType<T>> {
                 }
             }
         );
+        // get a correction factor for photon counts
+        m_minNonZeroPhotonCount = m_grayScaleImage.getMinNonZeroPhotonCount();
+
+        // what is the brightest point in the image?
+        int[] brightestPoint = m_grayScaleImage.getBrightestPoint();
+        m_x = brightestPoint[0];
+        m_y = brightestPoint[1];
+        uiPanel.setX(m_x);
+        uiPanel.setY(m_y);
 
         // set start and stop for now; will be updated if we load an excitation curvce
         updateDecayCursors(uiPanel);
+        
+        // fit on the brightest pixel
+        getFitSettings(m_grayScaleImage, uiPanel, _fittingCursor);
+        fitPixel(uiPanel, _fittingCursor); 
 
         // processing loop; waits for UI panel input
         while (!m_quit) {
@@ -455,11 +509,19 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param uiPanel 
      */
     private void updateDecayCursors(IUserInterfacePanel uiPanel) {
-        double[] decay = getSummedDecay();
-        int[] results = CursorHelper.estimateDecayCursors(m_timeRange, decay);
-        int transientStart = results[CursorHelper.TRANSIENT_START];
-        int dataStart = results[CursorHelper.DATA_START];
-        int transientStop = results[CursorHelper.TRANSIENT_STOP];
+        // get selected channel
+        int channel = 0;
+        if (null != m_grayScaleImage) {
+            channel = m_grayScaleImage.getChannel();
+        }
+        double[] decay = new double[m_bins];
+        for (int b = 0; b < m_bins; ++b) {
+            decay[b] = getData(m_cursor, channel, m_x, m_y, b);
+        }
+        int[] results = CursorEstimator.estimateDecayCursors(m_timeRange, decay);
+        int transientStart = results[CursorEstimator.TRANSIENT_START];
+        int dataStart = results[CursorEstimator.DATA_START];
+        int transientStop = results[CursorEstimator.TRANSIENT_STOP];
 
         // want to batch all of the fitting cursor notifications to listeners
         _fittingCursor.suspendNotifications(true);
@@ -468,7 +530,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         _fittingCursor.suspendNotifications(false);
         _fittingCursor.setTransientStopBin(transientStop);
     }
-    
+
+    /**
+     * This method sums the decay for all channels of all pixels.
+     * 
+     * @return 
+     */
     private double[] getSummedDecay() {
         double[] decay = new double[m_bins];
         for (int i = 0; i < decay.length; ++i) {
@@ -493,36 +560,31 @@ public class SLIMProcessor <T extends RealType<T>> {
                 m_excitationPanel.quit();
             }
 
-            // sum selected channel
+            // get selected channel
             int channel = 0;
             if (null != m_grayScaleImage) {
                 channel = m_grayScaleImage.getChannel();
             }
             double[] decay = new double[m_bins];
-            for (int i = 0; i < decay.length; ++i) {
-                decay[i] = 0.0;
-            }
-            for (int y = 0; y < m_height; ++y) {
-                for (int x = 0; x < m_width; ++x) {
-                    for (int b = 0; b < m_bins; ++b) {
-                        decay[b] += getData(m_cursor, channel, x, y, b);
-                    }
-                }
+            for (int b = 0; b < m_bins; ++b) {
+                decay[b] = getData(m_cursor, channel, m_x, m_y, b);
             }
 
-            double[] results = CursorHelper.estimateCursors(m_timeRange, excitation.getValues(), decay);
+            double chiSqTarget = uiPanel.getChiSquareTarget();
+            double[] results = CursorEstimator.estimateCursors
+                    (m_timeRange, excitation.getValues(), decay, chiSqTarget);
             
             // want all the fitting cursor listeners to get everything at once
             _fittingCursor.suspendNotifications(true);
-            _fittingCursor.setPromptStartBin   ((int) results[CursorHelper.PROMPT_START]);
-            _fittingCursor.setPromptStopBin    ((int) results[CursorHelper.PROMPT_STOP]);
-            _fittingCursor.setPromptBaselineValue    (results[CursorHelper.PROMPT_BASELINE]);
-            _fittingCursor.setTransientStartBin((int) results[CursorHelper.TRANSIENT_START]);
-            _fittingCursor.setDataStartBin     ((int) results[CursorHelper.DATA_START]);
+            _fittingCursor.setPromptStartBin   ((int) results[CursorEstimator.PROMPT_START]);
+            _fittingCursor.setPromptStopBin    ((int) results[CursorEstimator.PROMPT_STOP]);
+            _fittingCursor.setPromptBaselineValue    (results[CursorEstimator.PROMPT_BASELINE]);
+            _fittingCursor.setTransientStartBin((int) results[CursorEstimator.TRANSIENT_START]);
+            _fittingCursor.setDataStartBin     ((int) results[CursorEstimator.DATA_START]);
             _fittingCursor.suspendNotifications(false);
-            _fittingCursor.setTransientStopBin ((int) results[CursorHelper.TRANSIENT_STOP]);
+            _fittingCursor.setTransientStopBin ((int) results[CursorEstimator.TRANSIENT_STOP]);
 
-            m_excitationPanel = new ExcitationPanel(excitation, _fittingCursor);
+            m_excitationPanel = new ExcitationPanel(excitation, _fittingCursor); //TODO ARG excitation cursor change refit problem here; get new values before excitation ready for refit
 
             success = true;
         }
@@ -549,14 +611,13 @@ public class SLIMProcessor <T extends RealType<T>> {
     }
 
     /**
-     * Prompts for a .sdt file.
+     * Prompts for a FLIM file.
      *
      * @param defaultFile
      * @return
      */
     private boolean showFileDialog(String[] defaultPathAndFile) {
         OpenDialog dialog = new OpenDialog("Load Data", m_path, m_file);
-        //if (dialog.wasCanceled()) return false;
         m_path = dialog.getDirectory();
         m_file = dialog.getFileName();
         System.out.println("directory is " + dialog.getDirectory());
@@ -580,6 +641,19 @@ public class SLIMProcessor <T extends RealType<T>> {
         if (null == image && !threwException) {
             System.out.println("imageOpener returned null image");
         }
+
+        // Open the file again, just to get metadata
+        ImageReader imageReader = new ImageReader();
+        try {
+            imageReader.setId(path + file);
+            m_globalMetadata = imageReader.getGlobalMetadata();
+            imageReader.close();
+        }
+        catch (IOException e) {       
+        }
+        catch (FormatException e) { 
+        }
+        
         return image;
     }
    
@@ -614,64 +688,23 @@ public class SLIMProcessor <T extends RealType<T>> {
         m_binIndex = 2;
         System.out.println("width " + m_width + " height " + m_height + " timeBins " + m_bins + " channels " + m_channels);
         m_cursor = image.createLocalizableByDimCursor();
-        /*
-        int index = 0;
-        xIndex = index++;
-        yIndex = index++;
-        lifetimeIndex = index++;
-        if (m_channels > 1) {
-            channelIndex = index;
-        }
-        else {
-            channelIndex = null;
-        }
-
-
-        m_data = new int[m_channels][m_height][m_width][m_timeBins];
-        final LocalizableByDimCursor<T> cursor = image.createLocalizableByDimCursor();
-        int x, y, bin, channel;
-        for (channel = 0; channel < m_channels; ++channel) {
-            if (null != channelIndex) {
-                dimensions[channelIndex] = channel;
-            }
-            for (y = 0; y < m_height; ++y) {
-                dimensions[yIndex] = y;
-                for (x = 0; x < m_width; ++x) {
-                    dimensions[xIndex] = x;
-                    for (bin = 0; bin < m_timeBins; ++bin) {
-                        dimensions[lifetimeIndex] = bin;
-                        cursor.moveTo(dimensions);
-                        m_data[channel][y][x][bin] = (int) cursor.getType().getRealFloat();
-                        //TODO don't do this, screws up low photon count images...  m_data[channel][y][x][bin] /= 10.0f; //TODO in accordance with TRI2; HOLY COW!!!  ALSO int vs float??? why?
-                    }
-                }
+        
+        m_timeRange = 10.0f;
+        if (null != m_globalMetadata) {
+            Number timeBase = (Number) m_globalMetadata.get("time base");
+            if (null != timeBase) {
+                m_timeRange = timeBase.floatValue();
             }
         }
-        cursor.close();*/
-        // print out some useful information about the image
-        //System.out.println(image);
-        //final Cursor<T> cursor = image.createCursor();
-        //cursor.fwd();
-        //System.out.println("\tType = " + cursor.getType().getClass().getName());
-        //cursor.close();
+        m_timeRange /= m_bins;
 
-        //TODO from a former version:
-     //TODO won't compile with my version of the jar: Number timeBase = (Number) m_reader.getGlobalMetadata().get("time base");
-     //TODO fix:
-         //   Number timeBase = null;
-         //   m_timeRange = timeBase == null ? Float.NaN : timeBase.floatValue();
-         ////   if (m_timeRange != m_timeRange) m_timeRange = 10.0f;
-         //   m_minWave = 400;
-         //   m_waveStep = 10;
-            //m_binRadius = 3;
-
-
-        // patch things up
-        m_timeRange = 10.0f / 64.0f; //TODO ARG 2/13/12 was: 10.0f / 64.0f; //TODO ARG this patches things up in accord with TRI2 for brian/gpl1.sdt; very odd value here NOTE this was with photon counts all divided by 10.0f above! might have cancelled out.
-                   //TODO the patch above worked when I was also dividing the photon count by 10.0f!!  should be 1/64?
-        m_minWave = 400;
-        m_waveStep = 10;
-
+        //TODO ARG debugging
+        if (null != m_globalMetadata) {
+            java.util.Set<String> keySet = m_globalMetadata.keySet();
+            for (String key : keySet) {
+                System.out.println("key: " + key + " value:" + m_globalMetadata.get(key));
+            } 
+        }
         return true;
     }
 
@@ -1051,7 +1084,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getFunction())) { //TODO ARG UGLY
                 // these lines give TRI2 compatible fit results
                 int estimateStartIndex =
-                        CursorHelper.getEstimateStartIndex
+                        CursorEstimator.getEstimateStartIndex
                             (yCount, m_startBin, m_stopBin);
                 curveFitData.setTransEstimateStartIndex(estimateStartIndex);
                 curveFitData.setIgnorePromptForIntegralEstimate(true);
@@ -1130,7 +1163,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getFunction())) {
                     // these lines give TRI2 compatible fit results
                     int estimateStartIndex =
-                            CursorHelper.getEstimateStartIndex
+                            CursorEstimator.getEstimateStartIndex
                                 (yCount, m_startBin, m_stopBin);
                     curveFitData.setTransEstimateStartIndex(estimateStartIndex);
                     curveFitData.setIgnorePromptForIntegralEstimate(true);
@@ -1250,22 +1283,34 @@ public class SLIMProcessor <T extends RealType<T>> {
             curveFitData.setParams(params.clone()); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
             yCount = new double[m_bins];
             for (int b = 0; b < m_bins; ++b) {
-                yCount[b] = getData(m_cursor, channel, x, y, b) / 10.0; //TODO ARG 2/13/12 lowest value was 10.0, s/b 1.0
+                yCount[b] = getData(m_cursor, channel, x, y, b);
             }
             int photons = 0;
             for (int c = 0; c < m_bins; ++c) {
                 photons += yCount[c];
             }
             System.out.println("PHOTONS " + photons);
+
+//TODO ARG 3/12            
+int transStartIndex = _fittingCursor.getTransientStartBin();
+int dataStartIndex = _fittingCursor.getDataStartBin();
+int transStopIndex = _fittingCursor.getTransientStopBin();
+            
+          
+            
+            
+            
+            
+            
             curveFitData.setYCount(yCount);
-            curveFitData.setTransStartIndex(0);
-            curveFitData.setTransFitStartIndex(m_startBin);
-            curveFitData.setTransEndIndex(m_stopBin);
+            curveFitData.setTransStartIndex(transStartIndex); //TODO ARG 0);
+            curveFitData.setTransFitStartIndex(dataStartIndex); //TODO ARG m_startBin);
+            curveFitData.setTransEndIndex(transStopIndex); //TODO ARG m_stopBin);
             System.out.println("uiPanel.getFunction is " + uiPanel.getAlgorithm() + " SLIMCURVE_RLD_LMA is " + FitAlgorithm.SLIMCURVE_RLD_LMA);
             if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getAlgorithm())) {
                 // these lines give TRI2 compatible fit results
                 int estimateStartIndex =
-                        CursorHelper.getEstimateStartIndex
+                        CursorEstimator.getEstimateStartIndex
                             (yCount, m_startBin, m_stopBin);
                 System.out.append("m_startBin was " + m_startBin + " now estimageStartIndex is " + estimateStartIndex);
                 curveFitData.setTransEstimateStartIndex(estimateStartIndex);
@@ -1327,19 +1372,6 @@ public class SLIMProcessor <T extends RealType<T>> {
             cursor.fwd();
             cursor.getType().set(Double.NaN);
         }
-    }
-
-    static int s_avgIndex;
-    static ArrayList<Long> s_list = new ArrayList<Long>();
-
-    private void showRunningAverage(long elapsed) {
-        s_list.add(elapsed);
-        long total = 0;
-        for (long time : s_list) {
-            total += time;
-        }
-        total /= s_list.size();
-        System.out.println("average " + total + " after " + s_list.size() + " trials");
     }
 
     /**
@@ -1417,7 +1449,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             dim = new int[] { x, y, bin };
         }
         cursor.moveTo(dim);
-        return cursor.getType().getRealFloat();
+        return cursor.getType().getRealFloat() / m_minNonZeroPhotonCount;
     }
 
     /**
@@ -1484,135 +1516,6 @@ public class SLIMProcessor <T extends RealType<T>> {
     private void cancelImageFit() {
         m_fittedImage = null;
         m_fittedParameterCount = 0;
-    }
-
-    /**
-     * Visibly processes a batch of pixels.
-     *
-     * @param dataColorizer automatically sets colorization range and updates colorized image
-     * @param height passed in to fix a vertical orientation problem
-     * @channel current channel
-     * @param data list of data corresponding to pixels to be fitted
-     * @param pixels parallel list of rectangles with which to draw the fitted pixel
-     */
-    void colorizePixels(DataColorizer2 dataColorizer, int channel, ICurveFitData data[], ChunkyPixel pixels[]) {
-
-        // draw as you go; 'chunky' pixels get smaller as the overall fit progresses
-        for (int i = 0; i < pixels.length; ++i) {
-            ChunkyPixel pixel = pixels[i];
-            //TODO tau is 3, 1 is C double lifetime = data[i].getParams()[1];
-            double lifetime = data[i].getParams()[3];
-
-            //TODO quick fix
-            if (lifetime < 0.0) {
-                System.out.println("negative lifetime " + lifetime + " at " + pixel.getX() + " " + pixel.getY());
-                return;
-            }
-
-            //TODO debugging:
-            //if (lifetime > 2 * m_param[1]) {
-            //    System.out.println("BAD FIT??? x " + pixel.getX() + " y " + pixel.getY() + " fitted lifetime " + lifetime);
-            //}
-
-            //TODO BUG:
-            // With the table as is, you can get
-            //   x   y   w   h
-            //   12  15  2   1
-            //   14  15  2   1
-            // all within the same drawing cycle.
-            // So it looks like a 4x1 slice gets drawn (it
-            // is composed of two adjacent 2x1 slices with
-            // potentially two different colors).
-            //if (pixel.getWidth() == 2) {
-            //    System.out.println("x " + pixel.getX() + " y " + pixel.getY() + " w " + pixel.getWidth() + " h " + pixel.getHeight());
-            //}
-            //System.out.println("w " + pixel.getWidth() + " h " + pixel.getHeight());
-            //System.out.println("lifetime is " + lifetime);
-            //Color color = lifetimeColorMap(MAXIMUM_LIFETIME, lifetime);
-            //imageProcessor.setColor(color);
-            boolean firstTime = true;
-            for (int x = pixel.getX(); x < pixel.getX() + pixel.getWidth(); ++x) {
-                for (int y = pixel.getY(); y < pixel.getY() + pixel.getHeight(); ++y) {
-                    if (wantFitted(channel, x, y)) {
-                        dataColorizer.setData(firstTime, x, y , lifetime);
-                        firstTime = false;
-                    }
-                }
-            }
-        }
-        dataColorizer.update();
-    }
-    
-    void colorizePixelsII(DataColorizer2 dataColorizer, int channel, double[] lifetime, ChunkyPixel pixels[]) {
-
-        // draw as you go; 'chunky' pixels get smaller as the overall fit progresses
-        for (int i = 0; i < pixels.length; ++i) {
-            ChunkyPixel pixel = pixels[i];
-            //TODO tau is 3, 1 is C double lifetime = data[i].getParams()[1];
-
-
-            //TODO quick fix
-            if (lifetime[i] < 0.0) {
-                System.out.println("negative lifetime " + lifetime + " at " + pixel.getX() + " " + pixel.getY());
-                return;
-            }
-
-            //TODO debugging:
-            //if (lifetime > 2 * m_param[1]) {
-            //    System.out.println("BAD FIT??? x " + pixel.getX() + " y " + pixel.getY() + " fitted lifetime " + lifetime);
-            //}
-
-            //TODO BUG:
-            // With the table as is, you can get
-            //   x   y   w   h
-            //   12  15  2   1
-            //   14  15  2   1
-            // all within the same drawing cycle.
-            // So it looks like a 4x1 slice gets drawn (it
-            // is composed of two adjacent 2x1 slices with
-            // potentially two different colors).
-            //if (pixel.getWidth() == 2) {
-            //    System.out.println("x " + pixel.getX() + " y " + pixel.getY() + " w " + pixel.getWidth() + " h " + pixel.getHeight());
-            //}
-            //System.out.println("w " + pixel.getWidth() + " h " + pixel.getHeight());
-            //System.out.println("lifetime is " + lifetime);
-            //Color color = lifetimeColorMap(MAXIMUM_LIFETIME, lifetime);
-            //imageProcessor.setColor(color);
-            boolean firstTime = true;
-            for (int x = pixel.getX(); x < pixel.getX() + pixel.getWidth(); ++x) {
-                for (int y = pixel.getY(); y < pixel.getY() + pixel.getHeight(); ++y) {
-                    if (wantFitted(channel, x, y)) {
-                        dataColorizer.setData(firstTime, x, y , lifetime[i]);
-                        firstTime = false;
-                    }
-                }
-            }
-        }
-        dataColorizer.update();
-    }
-    
-    /**
-     * Checks criterion for whether this pixel needs to get fitted or drawn.
-     *
-     * @param channel
-     * @param x
-     * @param y
-     * @return whether to include or ignore this pixel
-     */
-    boolean wantFitted(int channel, int x, int y) {
-        return (aboveThreshold(channel, x, y) & isInROIs(x, y));
-    }
-
-    /**
-     * Checks whether a given pixel is above threshold photon count value.
-     *
-     * @param channel
-     * @param x
-     * @param y
-     * @return whether above threshold
-     */
-    boolean aboveThreshold(int channel, int x, int y) {
-        return (m_threshold <= m_grayScaleImage.getPixel(channel, x, y));
     }
 
     /**
@@ -1899,6 +1802,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             // trigger refit
             if (refit) {
                 System.out.println("REFIT");
+                fitPixel(m_uiPanel, _fittingCursor);
             }
         }
     }

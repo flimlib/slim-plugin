@@ -50,7 +50,7 @@ import loci.curvefitter.SLIMCurveFitter;
  *
  * @author aivar
  */
-public class CursorHelper {
+public class CursorEstimator {
     public static final int PROMPT_START        = 0;
     public static final int PROMPT_STOP         = 1;
     public static final int PROMPT_BASELINE     = 2;
@@ -58,6 +58,9 @@ public class CursorHelper {
     public static final int DATA_START          = 4;
     public static final int TRANSIENT_STOP      = 5;
     private static final int ATTEMPTS = 10;
+    // This is the value I get for unitialized floats in Visual Studio 2008;
+    // used to debug & compare SLIM Plugin and TRI2 in marginal situations.
+    private static final double C_UNITIALIZED = -1.0737418E8;
 
     public static double[] estimateExcitationCursors(double[] excitation) {
         double baseline;
@@ -130,6 +133,17 @@ public class CursorHelper {
         return returnValue;
     }
 
+    /**
+     * Provides estimation of decay cursors.
+     * 
+     * Note that TRI2 does not support this.  There is no "Estimate Cursors"
+     * button if you don't have a prompt.  TRI2 saves and restores the decay
+     * cursor values even if you switch to a new image.
+     * 
+     * @param xInc
+     * @param decay
+     * @return 
+     */
     public static int[] estimateDecayCursors(double xInc, double[] decay) {
         int maxIndex = findMax(decay);
         double[] diffed = new double[maxIndex];
@@ -157,7 +171,8 @@ public class CursorHelper {
         return returnValue;
     }
 
-    public static double[] estimateCursors(double xInc, double[] prompt, double[] decay) {
+    public static double[] estimateCursors(double xInc, double[] prompt,
+            double[] decay, double chiSqTarget) {
         double[] returnValue = new double[6];
         double baseline;
         double maxval; // TRCursors.c has "unsigned short maxsval, maxval; double maxfval, *diffed;"
@@ -275,41 +290,59 @@ public class CursorHelper {
         }
 
         System.out.println("prompt " + prompt.length + " decay " + decay.length);
+        
+        double[] adjustedPrompt = adjustPrompt(prompt, startp*xInc, endp*xInc, baseline, xInc);
 
         for (i = 0; i < 2 * ATTEMPTS + 1; ++i, ++transStartIndex) {
 
             transFitStartIndex = transStartIndex;
             System.out.println("transStartIndex " + transStartIndex + " transFitStartIndex " + transFitStartIndex + " transEndIndex " + transEndIndex);
 
-            int fitStart = transFitStartIndex - transStartIndex;
+            int fitStart = transFitStartIndex - transStartIndex; // e.g. always zero
             int fitStop = transEndIndex - transStartIndex;
             int nData = transEndIndex - transStartIndex;
             System.out.println("  fitStart " + fitStart + " fitStop " + fitStop + " nData " + nData);
 
             CurveFitData curveFitData = new CurveFitData();
+            param[1] = param[2] = param[3] = C_UNITIALIZED;              
             curveFitData.setParams(param); //TODO param has random values!!
-            curveFitData.setYCount(decay);
+                        
+            double[] adjustedDecay = adjustDecay(decay, transStartIndex);
+            curveFitData.setYCount(adjustedDecay);
             curveFitData.setTransStartIndex(0);
             curveFitData.setTransFitStartIndex(fitStart);
-            curveFitData.setTransEstimateStartIndex(fitStart);
+            curveFitData.setTransEstimateStartIndex(fitStart); //TODO ARG this shit has to go; was an early way to handle TRI2 quirkiness; w/b better to call quirky estimator routines from SLIMCurveFitter rather than having these oddball variables to kludge in quirkiness
             curveFitData.setTransEndIndex(fitStop);            
-  
+            curveFitData.setChiSquareTarget(chiSqTarget);
             curveFitData.setSig(null);
             curveFitData.setYFitted(yFitted);
             CurveFitData[] data = new CurveFitData[] { curveFitData };
-
+            
             SLIMCurveFitter curveFitter = new SLIMCurveFitter();
-            curveFitter.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD_LMA);
+            curveFitter.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD);
             curveFitter.setXInc(xInc);
             curveFitter.setFree(free);
-            curveFitter.setInstrumentResponse(decay);
-            curveFitter.setNoiseModel(NoiseModel.POISSON_DATA);
-
+            curveFitter.setInstrumentResponse(adjustedPrompt);
+            curveFitter.setNoiseModel(NoiseModel.POISSON_FIT); 
+            
             int ret = curveFitter.fitData(data);
+            
+            if (ret < 0) {
+                param[1] = 0.0;
+                int j = findMax(decay, transFitStartIndex, transEndIndex);
+                param[2] = decay[j];
+                param[3] = 2.0;
+            }
+            
+            System.out.println("i " + i + " Z " + param[1] + " A " + param[2] + " T " + param[3]);
+            
+            curveFitter.setFitAlgorithm(FitAlgorithm.SLIMCURVE_LMA);
+
+            ret = curveFitter.fitData(data);
 
             if (ret >= 0) {
                 System.out.println("for start " + fitStart + " stop " + fitStop + " chiSq is " + data[0].getChiSquare());
-                chiSqTable[i] = data[0].getChiSquare();
+                chiSqTable[i] = data[0].getParams()[0]; //TODO ARG s/b same or better yet not kept in two places: data[0].getChiSquare();
             }
             else {
                 System.out.println("ret from fitData is " + ret);
@@ -319,6 +352,8 @@ public class CursorHelper {
 
         // "Find the minimum chisq in this range"
         index = findMin(chiSqTable, 2 * ATTEMPTS + 1);
+        System.out.println("min chisq index is " + index + " value " + chiSqTable[index]);
+        
         if (chiSqTable[index] > 9e9f) {  // "no luck here..."
             System.out.println("no luck here return");
             for (double chiSq : chiSqTable) {
@@ -350,6 +385,53 @@ public class CursorHelper {
         returnValue[DATA_START]      = transFitStartIndex;
         returnValue[TRANSIENT_STOP]  = transEndIndex;
         return returnValue;
+    }
+
+    /**
+     * Based on TRI2 TRCursor.c UpdatePrompt
+     * 
+     * @param prompt
+     * @param start
+     * @param stop
+     * @param baseline
+     * @param inc
+     * @return 
+     */
+    private static double[] adjustPrompt(double[] prompt, double start, double stop,
+            double baseline, double inc)
+    {
+        double[] adjusted = null;
+        int startIndex = (int) Math.ceil(start / inc);
+        int stopIndex = (int) Math.floor(stop / inc) + 1;
+        System.out.println("stop is " + stop + " stopIndex " + stopIndex);
+        int length = stopIndex - startIndex;
+        if (length <= 0) {
+            return adjusted;
+        }
+        double scaling = 0.0;
+        for (int i = startIndex; i < stopIndex; ++i) {
+            if (i < prompt.length) {
+                scaling += prompt[i];
+            }
+        }
+        if (0.0 == scaling) {
+            return adjusted;
+        }
+        adjusted = new double[length];
+        for (int i = startIndex; i < stopIndex; ++i) {
+            adjusted[i - startIndex] = (prompt[i] - baseline) / scaling;
+        }
+        System.out.println("adjusted " + adjusted[0] + " " + adjusted[1] + " " + adjusted[2]);
+        return adjusted;
+    }
+    
+    private static double[] adjustDecay(double[] decay, int startIndex) {
+        int size = decay.length - startIndex;
+        double[] adjusted = new double[size];
+        for (int i = 0; i < size; ++i) {
+            adjusted[i] = decay[i + startIndex];
+        }
+        return adjusted;
     }
     
     /**
@@ -425,6 +507,55 @@ public class CursorHelper {
         }
 
         return new double[] { z, a, t };
+    }
+ 
+    /**
+     * Convert time-based value to a bin number.
+     *
+     * Based on TRI2.  Note that 'valueToBin' and 'binToValue' won't round-trip.
+     *
+     * @param upper
+     * @param value
+     * @param inc
+     * @param max
+     * @return 
+     */
+    public static int valueToBin(boolean upper, double value, double inc,
+            int max)
+    {
+        int intValue = 0;
+        if (upper) {
+            intValue = (int) Math.ceil(value / inc) + 1;
+        }
+        else {
+            intValue = (int) Math.floor(value / inc);
+        }
+        // constrain within limits
+        if (intValue < 0) {
+            intValue = 0;
+        }
+        if (intValue > max) {
+            intValue = max;
+        }
+        return intValue;
+    }
+
+    /**
+     * Convert bin number to time-based value.
+     * 
+     * Based on TRI2.  Note that 'binToValue' and 'valueToBin' won't round-trip.
+     * 
+     * The 'upper' and 'max' parameters are not utilized in this implementation.
+     * 
+     * @param upper
+     * @param bin
+     * @param inc
+     * @param max
+     * @return 
+     */
+    public static double binToValue(boolean upper, int bin, double inc,
+            double max) {
+        return bin * inc;
     }
 
     private static int findMax(double[] values) {

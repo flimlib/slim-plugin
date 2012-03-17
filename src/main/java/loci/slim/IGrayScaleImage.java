@@ -84,4 +84,21 @@ public interface IGrayScaleImage {
      * @return
      */
     public float getZoomFactor();
+    
+    /**
+     * Gets the minimum, non-zero photon count encountered in the image.
+     * 
+     * Usually 1.0, but sometimes its 10.0 and all photon counts are multiples
+     * of 10.0.
+     * 
+     * @return 
+     */
+    public double getMinNonZeroPhotonCount();
+
+    /**
+     * Gets the coordinates of the brightest point in the image.
+     * 
+     * @return { x, y }
+     */
+    public int[] getBrightestPoint();
 }

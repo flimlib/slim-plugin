@@ -68,6 +68,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import ij.gui.GenericDialog;
+import ij.io.OpenDialog;
+import ij.io.SaveDialog;
 
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
@@ -656,14 +658,18 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                         }
                     }
                     else if (EXCITATION_FILE.equals(selectedItem)) {
-                        String fileName = getFileName("Load Excitation File", "");
-                        if (null != fileName && null != m_listener) {
+                        OpenDialog dialog = new OpenDialog("Load Excitation File", "");
+                        String fileName = dialog.getDirectory() + dialog.getFileName();
+                        System.out.println("filename is >" + fileName + "<");
+                        if (null != fileName && !fileName.equals("") && null != m_listener) {
                             isExcitationLoaded = m_listener.loadExcitation(fileName);
                         }
                     }
                     else if (EXCITATION_CREATE.equals(selectedItem)) {
-                        String fileName = getFileName("Save Excitation File", "");
-                        if (null != fileName && null != m_listener) {
+                        SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+                        String fileName = dialog.getDirectory() + dialog.getFileName();
+                        System.out.println("filename is >" + fileName + "<");
+                        if (null != fileName && !fileName.equals("") && null != m_listener) {
                             isExcitationLoaded = m_listener.createExcitation(fileName);
                         }
                     }
@@ -689,6 +695,15 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         cursorPanel.add(dummyLabel);
         m_estimateCursorsButton = new JButton("Estimate Cursors");
+        m_estimateCursorsButton.addActionListener(
+            new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    if (null != m_listener) {
+                        m_listener.estimateCursors();
+                    }
+                }
+            }
+        );
         cursorPanel.add(m_estimateCursorsButton);
 
         // rows, cols, initX, initY, xPad, yPad
@@ -1774,16 +1789,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         m_startParam3.setEnabled(enable);
         m_startParam4.setEnabled(enable);
     }
-    
-    private String getFileName(String title, String defaultFileName) {
-        GenericDialog dialog = new GenericDialog(title);
-        //TODO works with GenericDialogPlus, dialog.addFileField("File:", defaultFile, 24);
-        dialog.addStringField("File", defaultFileName);
-        dialog.showDialog();
-        if (dialog.wasCanceled()) {
-            return null;
-        }
-
-        return dialog.getNextString();
+//        OpenDialog dialog = new OpenDialog("Load Data", m_path, m_file);    
+    private String getFileName(String title) {
+        OpenDialog dialog = new OpenDialog(title, "");
+        return dialog.getDirectory() + dialog.getFileName();
     }
 }

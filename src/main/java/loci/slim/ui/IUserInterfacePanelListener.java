@@ -70,7 +70,7 @@ public interface IUserInterfacePanelListener {
     public boolean loadExcitation(String fileName);
 
     /**
-     * Creates an excitation curve from currrent X, Y and saves to file.
+     * Creates an excitation curve from current X, Y and saves to file.
      *
      * @param fileName
      * @return whether successful
@@ -79,7 +79,11 @@ public interface IUserInterfacePanelListener {
 
     /**
      * Cancels the current excitation curve, if any.
-     *
      */
     public void cancelExcitation();
+
+    /**
+     * Estimates the prompt and decay cursors.
+     */
+    public void estimateCursors();
 }

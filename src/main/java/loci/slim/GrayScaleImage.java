@@ -64,6 +64,8 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
     private MyStackWindow m_stackWindow;
     private ISelectListener m_listener;
     private byte[] m_saveOutPixels[];
+    private double m_minNonZeroPhotonCount;
+    private int[] m_brightestPoint;
 
     public GrayScaleImage(Image<T> image) {
         String title = image.getName();
@@ -91,6 +93,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         double[][] pixels = new double[m_width][m_height];
         int[] position = (channels > 1) ? new int[4] : new int[3];
 
+        m_minNonZeroPhotonCount = Double.MAX_VALUE;
         for (int c = 0; c < channels; ++c) {
             if (channels > 1) {
                 position[3] = c;
@@ -108,11 +111,18 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                         position[2] = b;
 
                         cursor.setPosition(position);
-                        pixels[x][y] += ((ComplexType) cursor.getType()).getRealDouble();
+                        double photonCount = ((ComplexType) cursor.getType()).getRealDouble();
+                        pixels[x][y] += photonCount;
+                        
+                        // keep track of minimum
+                        if (0.0 < photonCount && photonCount < m_minNonZeroPhotonCount) {
+                            m_minNonZeroPhotonCount = photonCount;
+                        }
                     }
-                    // keep track of maximum
+                    // keep track of maximum value and its coordinates
                     if (pixels[x][y] > maxPixel) {
                         maxPixel = pixels[x][y];
+                        m_brightestPoint = new int[] { x , y };
                     }
                 }
             }
@@ -132,6 +142,8 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         ImagePlus imagePlus = new ImagePlus(title, m_imageStack);
         m_stackWindow = new MyStackWindow(imagePlus);
         m_stackWindow.setVisible(true);
+        
+        System.out.println("minNonZeroPhotonCount is " + m_minNonZeroPhotonCount);
 
         //System.out.println("Channel selector " + m_stackWindow.getChannelSelector());
         //System.out.println("Slice selector " + m_stackWindow.getSliceSelector());
@@ -212,5 +224,15 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         byte pixels[] = m_saveOutPixels[channel];
         returnValue |= pixels[y * m_width + x] & 0xff;
         return returnValue;
+    }
+    
+    @Override
+    public double getMinNonZeroPhotonCount() {
+        return m_minNonZeroPhotonCount;
+    }
+    
+    @Override
+    public int[] getBrightestPoint() {
+        return m_brightestPoint;
     }
 }

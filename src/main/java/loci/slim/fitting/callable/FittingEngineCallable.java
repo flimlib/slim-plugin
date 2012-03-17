@@ -38,7 +38,7 @@ import loci.slim.fitting.params.FitResults;
 import loci.slim.fitting.params.ILocalFitParams;
 import loci.slim.fitting.params.IGlobalFitParams;
 import loci.slim.fitting.params.IFitResults;
-import loci.slim.heuristics.CursorHelper;
+import loci.slim.heuristics.CursorEstimator;
 
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.ICurveFitData;
@@ -88,7 +88,7 @@ public class FittingEngineCallable implements IFittingEngineCallable {
             if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(_globalParams.getFitFunction())) {
                 // these lines give TRI2 compatible fit results
                 int estimateStartIndex =
-                        CursorHelper.getEstimateStartIndex
+                        CursorEstimator.getEstimateStartIndex
                             (_localParams.getY(), _localParams.getFitStart(), _localParams.getFitStop());
                 curveFitData.setTransEstimateStartIndex(estimateStartIndex);
                 curveFitData.setIgnorePromptForIntegralEstimate(true);
