@@ -108,6 +108,7 @@ public class HistogramTool {
             colorModel = LutLoader.open(lutPath);
         }
         catch (IOException e) {
+            IJ.showMessage("Missing LUT", "Install lifetime.lut from LOCI FIJI update site.");
             IJ.log("Problem loading LUT " + lutPath);
             System.out.println("Problem loading LUT " + lutPath);
         }
