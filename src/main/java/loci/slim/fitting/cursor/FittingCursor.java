@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.fitting.cursor;
 
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -70,7 +71,7 @@ public class FittingCursor {
     public FittingCursor(double inc, int bins) {
         _inc = inc;
         _bins = bins;
-        _listeners = Collections.synchronizedSet(new HashSet<IFittingCursorListener>());
+        _listeners = new HashSet<IFittingCursorListener>();
         _showBins = false;
         _suspend = false;
         _hasPrompt = false;
@@ -81,8 +82,13 @@ public class FittingCursor {
      * 
      * @param listener 
      */
-    public void addListener(IFittingCursorListener listener) { 
-        _listeners.add(listener);
+    public void addListener(IFittingCursorListener listener) {
+        System.out.println("add listener " + listener);
+        synchronized (_listeners) {
+            if (!_listeners.contains(listener)) {
+                _listeners.add(listener);
+            }
+        }
     }
 
     /**
@@ -91,7 +97,10 @@ public class FittingCursor {
      * @param listener 
      */
     public void removeListener(IFittingCursorListener listener) {
-        _listeners.remove(listener);
+        System.out.println("remove listener " + listener);
+        synchronized (_listeners) {
+            _listeners.remove(listener);
+        }
     }
 
     /**
@@ -113,15 +122,20 @@ public class FittingCursor {
     }
 
     /**
-     * Used to turn on/off listener notifications.  Mainly if several cursor
-     * settings need to be changed in one batch, turn off listener notifications,
-     * make all but one cursor settings change, then turn on listener 
-     * notifications and make the last cursor settings change.
-     * 
-     * @param suspend 
+     * Temporarily suspends listener notifications.  Used when several cursors
+     * change at the same time.  Call suspendNotifications followed by cursor
+     * changes followed by sendNotifications.
      */
-    public void suspendNotifications(boolean suspend) {
-        _suspend = suspend;
+    public void suspendNotifications() {
+        _suspend = true;
+    }
+
+    /**
+     * Used to send listener notifications after a batched change.
+     */
+    public void sendNotifications() {
+        _suspend = false;
+        notifyListeners();
     }
 
     /**
@@ -667,76 +681,21 @@ public class FittingCursor {
      * Notifies all listeners of a change.
      */
     private void notifyListeners() {
+        boolean success = false;
         if (!_suspend) {
-            for (IFittingCursorListener listener : _listeners) {
-                listener.cursorChanged(this);
+            while (!success) {
+                try {
+                    synchronized (_listeners) {
+                        for (IFittingCursorListener listener : _listeners) {
+                            listener.cursorChanged(this);
+                        }
+                    }
+                    success = true;
+                }
+                catch (ConcurrentModificationException e) {
+                    // avoid timing issues
+                }
             }
         }
     }
-    
- 
-    //TODO ARG
-    // These two methods support round-tripping from int -> double ->int and
-    // double -> int -> double.
-    //
-    private static int doubleToInt(boolean low, double inc, double value) {
-        int returnValue = 0;
-        if (low) {
-            returnValue = (int) Math.floor(value / inc);
-        }
-        else {
-            returnValue = (int) Math.ceil(value / inc) + 1;
-        }
-        return returnValue;
-    }
-    
-    private static double intToDouble(boolean low, double inc, int value) {
-        double returnValue = 0.0;
-        if (low) {
-            returnValue = inc * value + inc / 8192;
-        }
-        else {
-            returnValue = inc * (value - 1) - inc / 8192;
-        }
-        return returnValue;
-    }
-    
-    private static double randomDouble(java.util.Random random, int range) {
-        return random.nextDouble() * range;
-    }
-    
-    public static void main(String [] args)
-    {
-        int lowProbs = 0, highProbs = 0;
-        java.util.Random random = new java.util.Random();
-        for (int i = 0; i < 300000; ++i) {
-            double d = randomDouble(random, 10); // random 0.0...10.0
-            int fred = doubleToInt(true, 0.01, d);
-            double wilma = intToDouble(true, 0.01, fred);
-            int barney = doubleToInt(true, 0.01, wilma);
-            if (fred != barney) {
-                System.out.println("random is " + d + " to int low is " + fred + " back to double " + wilma + " to int " + barney);
-                ++lowProbs;
-            }
-            if (d / wilma > 1.05 || d / wilma < 0.95) {
-                System.out.println("d is " + d + " and wilma " + wilma);
-                ++lowProbs;
-            }
-            fred = doubleToInt(false, 0.01, d);
-            wilma = intToDouble(false, 0.01, fred);
-            barney = doubleToInt(false, 0.01, wilma);
-            if (fred != barney) {
-                System.out.println("random is " + d + " to int high is " + fred + " back to double " + wilma + " to int " + barney);
-                ++highProbs;
-            }
-            if (d / wilma > 1.05 || d / wilma < 0.95) {
-                System.out.println("d is " + d + " and wilma is " + wilma);
-                ++highProbs;
-            }
-           // System.out.println("random " + d + " to int high " + fred + " back to double " + wilma + " to int low " + barney);
-        }
-        System.out.println(" " + lowProbs + " low, " + highProbs + " high oout of 30000");
-        System.exit(0);
-    }
-    
 }

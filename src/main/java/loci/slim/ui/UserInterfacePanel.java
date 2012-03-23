@@ -381,7 +381,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         // no prompt initially
         enablePromptCursors(false);
 
-        // show initial cursors
+        // set up and show initial cursors
         _fittingCursorHelper.setFittingCursorUI(this);
     }
 

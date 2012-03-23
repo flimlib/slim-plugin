@@ -36,7 +36,7 @@ public class FittingCursorHelper implements IFittingCursorUI {
         if (null == _fittingCursor) {
             _fittingCursorListener = new FittingCursorListener();
         }
-        else {
+        else if (_fittingCursor != fittingCursor) {
             _fittingCursor.removeListener(_fittingCursorListener);
         }
         _fittingCursor = fittingCursor;
@@ -185,6 +185,7 @@ public class FittingCursorHelper implements IFittingCursorUI {
      */
     private void showFittingCursor() {
         if (null != _fittingCursorUI) {
+            System.out.println("In FittingCursorHelper.showFittingCursor");
             _fittingCursorUI.setTransientStart(_fittingCursor.getTransientStart());
             _fittingCursorUI.setDataStart(_fittingCursor.getDataStart());
             _fittingCursorUI.setTransientStop(_fittingCursor.getTransientStop());

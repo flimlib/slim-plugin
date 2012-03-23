@@ -80,5 +80,5 @@ public interface IDecayGraph {
      * @param dataStart
      * @param transientStop
      */
-    public void setStartStop(int transientStart, int dataStart, int transientStop);
+    public void setStartStop(double transientStart, double dataStart, double transientStop);
 }

@@ -79,7 +79,7 @@ public class FittingEngineCallable implements IFittingEngineCallable {
         curveFitData.setChiSquareTarget(_globalParams.getChiSquareTarget());
         curveFitData.setYCount(_localParams.getY());
         curveFitData.setTransStartIndex(0);
-        curveFitData.setTransFitStartIndex(_localParams.getFitStart());
+        curveFitData.setDataStartIndex(_localParams.getFitStart());
         curveFitData.setTransEndIndex(_localParams.getFitStop());        
         curveFitData.setSig(_localParams.getSig());
         curveFitData.setParams(_localParams.getParams().clone()); // params is overwritten

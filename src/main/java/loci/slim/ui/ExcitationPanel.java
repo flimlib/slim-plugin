@@ -82,8 +82,8 @@ public class ExcitationPanel extends JFrame {
 
         this.setTitle("Instrument Response Function");
         
-        int start = fittingCursor.getPromptStartBin();
-        int stop  = fittingCursor.getPromptStopBin();
+        double start = fittingCursor.getPromptStartValue();
+        double stop  = fittingCursor.getPromptStopValue();
         double base = fittingCursor.getPromptBaselineValue();
 
         double[] values = excitation.getValues();

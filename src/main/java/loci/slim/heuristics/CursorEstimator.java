@@ -173,6 +173,7 @@ public class CursorEstimator {
 
     public static double[] estimateCursors(double xInc, double[] prompt,
             double[] decay, double chiSqTarget) {
+        System.out.println("xInc " + xInc + " prompt " + prompt + " decay " + decay + " chiSqTarget " + chiSqTarget);
         double[] returnValue = new double[6];
         double baseline;
         double maxval; // TRCursors.c has "unsigned short maxsval, maxval; double maxfval, *diffed;"
@@ -310,7 +311,7 @@ public class CursorEstimator {
             double[] adjustedDecay = adjustDecay(decay, transStartIndex);
             curveFitData.setYCount(adjustedDecay);
             curveFitData.setTransStartIndex(0);
-            curveFitData.setTransFitStartIndex(fitStart);
+            curveFitData.setDataStartIndex(fitStart);
             curveFitData.setTransEstimateStartIndex(fitStart); //TODO ARG this shit has to go; was an early way to handle TRI2 quirkiness; w/b better to call quirky estimator routines from SLIMCurveFitter rather than having these oddball variables to kludge in quirkiness
             curveFitData.setTransEndIndex(fitStop);            
             curveFitData.setChiSquareTarget(chiSqTarget);

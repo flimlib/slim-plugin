@@ -398,14 +398,15 @@ public class SLIMProcessor <T extends RealType<T>> {
                         double transientStart = results[CursorEstimator.TRANSIENT_START];
                         double dataStart      = results[CursorEstimator.DATA_START];
                         double transientStop  = results[CursorEstimator.TRANSIENT_STOP];
-                        _fittingCursor.suspendNotifications(true);
+                        _fittingCursor.suspendNotifications();
+                        _fittingCursor.setHasPrompt(true);
                         _fittingCursor.setPromptBaselineValue(promptBaseline);
                         _fittingCursor.setPromptStartValue   (promptStart);
                         _fittingCursor.setPromptStopValue    (promptStop);
                         _fittingCursor.setTransientStartValue(transientStart);
                         _fittingCursor.setDataStartValue     (dataStart);
-                        _fittingCursor.suspendNotifications(false);
                         _fittingCursor.setTransientStopValue (transientStop);
+                        _fittingCursor.sendNotifications();
                     }
                     else {
                         //TODO ARG cursors still has that confusion between double and int!
@@ -524,11 +525,11 @@ public class SLIMProcessor <T extends RealType<T>> {
         int transientStop = results[CursorEstimator.TRANSIENT_STOP];
 
         // want to batch all of the fitting cursor notifications to listeners
-        _fittingCursor.suspendNotifications(true);
+        _fittingCursor.suspendNotifications();
         _fittingCursor.setTransientStartBin(transientStart);
         _fittingCursor.setDataStartBin(dataStart);
-        _fittingCursor.suspendNotifications(false);
         _fittingCursor.setTransientStopBin(transientStop);
+        _fittingCursor.sendNotifications();
     }
 
     /**
@@ -555,6 +556,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
     private boolean updateExcitation(IUserInterfacePanel uiPanel, Excitation excitation) {
         boolean success = false;
+        System.out.println("###update excitation " + excitation);
         if (null != excitation) {
             if (null != m_excitationPanel) {
                 m_excitationPanel.quit();
@@ -575,14 +577,15 @@ public class SLIMProcessor <T extends RealType<T>> {
                     (m_timeRange, excitation.getValues(), decay, chiSqTarget);
             
             // want all the fitting cursor listeners to get everything at once
-            _fittingCursor.suspendNotifications(true);
+            _fittingCursor.suspendNotifications();
+            _fittingCursor.setHasPrompt(true);
             _fittingCursor.setPromptStartBin   ((int) results[CursorEstimator.PROMPT_START]);
             _fittingCursor.setPromptStopBin    ((int) results[CursorEstimator.PROMPT_STOP]);
             _fittingCursor.setPromptBaselineValue    (results[CursorEstimator.PROMPT_BASELINE]);
             _fittingCursor.setTransientStartBin((int) results[CursorEstimator.TRANSIENT_START]);
             _fittingCursor.setDataStartBin     ((int) results[CursorEstimator.DATA_START]);
-            _fittingCursor.suspendNotifications(false);
             _fittingCursor.setTransientStopBin ((int) results[CursorEstimator.TRANSIENT_STOP]);
+            _fittingCursor.sendNotifications();
 
             m_excitationPanel = new ExcitationPanel(excitation, _fittingCursor); //TODO ARG excitation cursor change refit problem here; get new values before excitation ready for refit
 
@@ -1075,7 +1078,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             }
             curveFitData.setYCount(yCount);
             curveFitData.setTransStartIndex(0);
-            curveFitData.setTransFitStartIndex(m_startBin);
+            curveFitData.setDataStartIndex(m_startBin);
             curveFitData.setTransEndIndex(m_stopBin);
             yFitted = new double[m_bins];
             curveFitData.setYFitted(yFitted);
@@ -1158,7 +1161,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 }
                 curveFitData.setYCount(yCount);
                 curveFitData.setTransStartIndex(0);
-                curveFitData.setTransFitStartIndex(m_startBin);
+                curveFitData.setDataStartIndex(m_startBin);
                 curveFitData.setTransEndIndex(m_stopBin);
                 if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getFunction())) {
                     // these lines give TRI2 compatible fit results
@@ -1304,7 +1307,7 @@ int transStopIndex = _fittingCursor.getTransientStopBin();
             
             curveFitData.setYCount(yCount);
             curveFitData.setTransStartIndex(transStartIndex); //TODO ARG 0);
-            curveFitData.setTransFitStartIndex(dataStartIndex); //TODO ARG m_startBin);
+            curveFitData.setDataStartIndex(dataStartIndex); //TODO ARG m_startBin);
             curveFitData.setTransEndIndex(transStopIndex); //TODO ARG m_stopBin);
             System.out.println("uiPanel.getFunction is " + uiPanel.getAlgorithm() + " SLIMCURVE_RLD_LMA is " + FitAlgorithm.SLIMCURVE_RLD_LMA);
             if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getAlgorithm())) {
@@ -1741,10 +1744,10 @@ int transStopIndex = _fittingCursor.getTransientStopBin();
         JFrame frame = decayGraph.init(uiPanel.getFrame(), m_bins, m_timeRange);
         decayGraph.setTitle(title);
         decayGraph.setFittingCursor(fittingCursor);
-        int transientStart = fittingCursor.getTransientStartBin();
-        int dataStart      = fittingCursor.getDataStartBin();
-        int transientStop  = fittingCursor.getTransientStopBin();
-        decayGraph.setStartStop(transientStart, dataStart, transientStop);
+        double transStart = fittingCursor.getTransientStartValue();
+        double dataStart  = fittingCursor.getDataStartValue();
+        double transStop  = fittingCursor.getTransientStopValue();
+        decayGraph.setStartStop(transStart, dataStart, transStop);
         decayGraph.setData(data);
     }
     
@@ -1761,47 +1764,41 @@ int transStopIndex = _fittingCursor.getTransientStopBin();
         private Double _promptBaseline = null;
         
         public void cursorChanged(FittingCursor cursor) {
-            boolean refit = false;
-            
             // get current cursor values
-            int transStart  = cursor.getTransientStartBin();
-            int dataStart   = cursor.getDataStartBin();
-            int transStop   = cursor.getTransientStopBin();
-            int promptStart = cursor.getPromptStartBin();
-            int promptStop  = cursor.getPromptStopBin();
+            int transStart        = cursor.getTransientStartBin();
+            int dataStart         = cursor.getDataStartBin();
+            int transStop         = cursor.getTransientStopBin();
+            int promptStart       = cursor.getPromptStartBin();
+            int promptStop        = cursor.getPromptStopBin();
             double promptBaseline = cursor.getPromptBaselineValue();
             
-            // look for changes vs. saved cursor values
-            if (null != _transStart && transStart != _transStart) {
+            // look for changes, current vs. saved cursor values
+            boolean refit = false;
+            if (null == _transStart
+                    || null == _dataStart
+                    || null == _transStop
+                    || null == _promptStart
+                    || null == _promptStop
+                    || null == _promptBaseline
+                    || transStart     != _transStart
+                    || dataStart      != _dataStart
+                    || transStop      != _transStop
+                    || promptStart    != _promptStart
+                    || promptStop     != _promptStop
+                    || promptBaseline != _promptBaseline) {
                 refit = true;
             }
-            if (null != _dataStart && dataStart != _dataStart) {
-                refit = true;
-            }
-            if (null != _transStop && transStop != _transStop) {
-                refit = true;
-            }
-            if (null != _promptStart && promptStart != _promptStart) {
-                refit = true;
-            }
-            if (null != _promptStop && promptStop != _promptStop) {
-                refit = true;
-            }
-            if (null != _promptBaseline && promptBaseline != _promptBaseline) {
-                refit = true;
-            }
-            
-            // update saved cursor values
-            _transStart = transStart;
-            _dataStart = dataStart;
-            _transStop = transStop;
-            _promptStart = promptStart;
-            _promptStop = promptStop;
-            _promptBaseline = promptBaseline;
             
             // trigger refit
-            if (refit) {
-                System.out.println("REFIT");
+            if (refit) {   
+                // update saved cursor values for next time
+                _transStart     = transStart;
+                _dataStart      = dataStart;
+                _transStop      = transStop;
+                _promptStart    = promptStart;
+                _promptStop     = promptStop;
+                _promptBaseline = promptBaseline;
+
                 fitPixel(m_uiPanel, _fittingCursor);
             }
         }
