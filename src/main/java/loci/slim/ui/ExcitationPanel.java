@@ -107,6 +107,10 @@ public class ExcitationPanel extends JFrame {
     public void quit() {
         this.setVisible(false);
     }
+    
+    public double[] getRawValues() {
+        return _excitation.getValues();
+    }
 
     /**
      * This is based on TRCursors.c UpdatePrompt in TRI2.

@@ -386,40 +386,50 @@ public class SLIMProcessor <T extends RealType<T>> {
                  */
                 public void estimateCursors() {
                     double xInc = m_timeRange;
+                    
                     double[] prompt = null;
-                    double[] decay = null;
+                    if (null != m_excitationPanel) {
+                        prompt = m_excitationPanel.getRawValues();
+                    }
+                    double[] decay = new double[m_bins];
+                    for (int b = 0; b < m_bins; ++b) {
+                        decay[b] = getData(m_cursor, m_channel, m_x, m_y, b);
+                    }
+                    
                     double chiSqTarget = m_uiPanel.getChiSquareTarget();
-                    if (_fittingCursor.getHasPrompt()) {
+                    if (null != prompt && _fittingCursor.getHasPrompt()) {
                         double[] results = CursorEstimator.estimateCursors
                                 (xInc, prompt, decay, chiSqTarget);
-                        double promptBaseline = results[CursorEstimator.PROMPT_BASELINE];
-                        double promptStart    = results[CursorEstimator.PROMPT_START];
-                        double promptStop     = results[CursorEstimator.PROMPT_STOP];
-                        double transientStart = results[CursorEstimator.TRANSIENT_START];
-                        double dataStart      = results[CursorEstimator.DATA_START];
-                        double transientStop  = results[CursorEstimator.TRANSIENT_STOP];
+                        
+                        // want all the fitting cursor listeners to get everything at once
                         _fittingCursor.suspendNotifications();
                         _fittingCursor.setHasPrompt(true);
-                        _fittingCursor.setPromptBaselineValue(promptBaseline);
-                        _fittingCursor.setPromptStartValue   (promptStart);
-                        _fittingCursor.setPromptStopValue    (promptStop);
-                        _fittingCursor.setTransientStartValue(transientStart);
-                        _fittingCursor.setDataStartValue     (dataStart);
-                        _fittingCursor.setTransientStopValue (transientStop);
+                        _fittingCursor.setPromptStartBin
+                                ((int) results[CursorEstimator.PROMPT_START]);
+                        _fittingCursor.setPromptStopBin
+                                ((int) results[CursorEstimator.PROMPT_STOP]);
+                        _fittingCursor.setPromptBaselineValue
+                                (results[CursorEstimator.PROMPT_BASELINE]);
+                        _fittingCursor.setTransientStartBin
+                                ((int) results[CursorEstimator.TRANSIENT_START]);
+                        _fittingCursor.setDataStartBin
+                                ((int) results[CursorEstimator.DATA_START]);
+                        _fittingCursor.setTransientStopBin
+                                ((int) results[CursorEstimator.TRANSIENT_STOP]);
                         _fittingCursor.sendNotifications();
                     }
-                    else {
-                        //TODO ARG cursors still has that confusion between double and int!
-                        /*
-                        double[] results = CursorEstimator.estimateDecayCursors
+                    else
+                    {
+                        int[] results = CursorEstimator.estimateDecayCursors
                                 (xInc, decay);
-                        double transientStart = results[CursorEstimator.TRANSIENT_START];
-                        double dataStart      = results[CursorEstimator.DATA_START];
-                        double transientStop  = results[CursorEstimator.TRANSIENT_STOP];
-                        _fittingCursor.setTransientStartValue(transientStart);
-                        _fittingCursor.setDataStartValue     (dataStart);
-                        _fittingCursor.suspendNotifications(false);
-                        _fittingCursor.setTransientStopValue (transientStop);*/
+                        
+                        // want all the fitting cursor listeners to get everything at once
+                        _fittingCursor.suspendNotifications();
+                        _fittingCursor.setHasPrompt(false);
+                        _fittingCursor.setTransientStartBin(results[CursorEstimator.TRANSIENT_START]);
+                        _fittingCursor.setDataStartBin(results[CursorEstimator.DATA_START]);
+                        _fittingCursor.setTransientStopBin(results[CursorEstimator.TRANSIENT_STOP]);
+                        _fittingCursor.sendNotifications();
                     }
                 }
             }
@@ -1081,17 +1091,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             curveFitData.setDataStartIndex(m_startBin);
             curveFitData.setTransEndIndex(m_stopBin);
             yFitted = new double[m_bins];
-            curveFitData.setYFitted(yFitted);
-            
-            // for TRI2 compatibility:
-            if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getFunction())) { //TODO ARG UGLY
-                // these lines give TRI2 compatible fit results
-                int estimateStartIndex =
-                        CursorEstimator.getEstimateStartIndex
-                            (yCount, m_startBin, m_stopBin);
-                curveFitData.setTransEstimateStartIndex(estimateStartIndex);
-                curveFitData.setIgnorePromptForIntegralEstimate(true);
-            }         
+            curveFitData.setYFitted(yFitted);      
 
             // use zero for current channel if it's the only one
             int nominalChannel = m_fitAllChannels ? channel : 0;
@@ -1163,15 +1163,6 @@ public class SLIMProcessor <T extends RealType<T>> {
                 curveFitData.setTransStartIndex(0);
                 curveFitData.setDataStartIndex(m_startBin);
                 curveFitData.setTransEndIndex(m_stopBin);
-                if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getFunction())) {
-                    // these lines give TRI2 compatible fit results
-                    int estimateStartIndex =
-                            CursorEstimator.getEstimateStartIndex
-                                (yCount, m_startBin, m_stopBin);
-                    curveFitData.setTransEstimateStartIndex(estimateStartIndex);
-                    curveFitData.setIgnorePromptForIntegralEstimate(true);
-                }
-                
                 
                 yFitted = new double[m_bins];
                 curveFitData.setYFitted(yFitted);
@@ -1293,32 +1284,15 @@ public class SLIMProcessor <T extends RealType<T>> {
                 photons += yCount[c];
             }
             System.out.println("PHOTONS " + photons);
-
-//TODO ARG 3/12            
-int transStartIndex = _fittingCursor.getTransientStartBin();
-int dataStartIndex = _fittingCursor.getDataStartBin();
-int transStopIndex = _fittingCursor.getTransientStopBin();
-            
-          
-            
-            
-            
-            
             
             curveFitData.setYCount(yCount);
-            curveFitData.setTransStartIndex(transStartIndex); //TODO ARG 0);
-            curveFitData.setDataStartIndex(dataStartIndex); //TODO ARG m_startBin);
-            curveFitData.setTransEndIndex(transStopIndex); //TODO ARG m_stopBin);
+            int transStartIndex = _fittingCursor.getTransientStartBin();
+            int dataStartIndex = _fittingCursor.getDataStartBin();
+            int transStopIndex = _fittingCursor.getTransientStopBin();
+            curveFitData.setTransStartIndex(transStartIndex);
+            curveFitData.setDataStartIndex(dataStartIndex);
+            curveFitData.setTransEndIndex(transStopIndex);
             System.out.println("uiPanel.getFunction is " + uiPanel.getAlgorithm() + " SLIMCURVE_RLD_LMA is " + FitAlgorithm.SLIMCURVE_RLD_LMA);
-            if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(uiPanel.getAlgorithm())) {
-                // these lines give TRI2 compatible fit results
-                int estimateStartIndex =
-                        CursorEstimator.getEstimateStartIndex
-                            (yCount, m_startBin, m_stopBin);
-                System.out.append("m_startBin was " + m_startBin + " now estimageStartIndex is " + estimateStartIndex);
-                curveFitData.setTransEstimateStartIndex(estimateStartIndex);
-                curveFitData.setIgnorePromptForIntegralEstimate(true);
-            }
            
             yFitted = new double[m_bins];
             curveFitData.setYFitted(yFitted);

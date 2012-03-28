@@ -39,6 +39,7 @@ import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.NoiseModel;
+import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.SLIMCurveFitter;
 
 /**
@@ -312,7 +313,6 @@ public class CursorEstimator {
             curveFitData.setYCount(adjustedDecay);
             curveFitData.setTransStartIndex(0);
             curveFitData.setDataStartIndex(fitStart);
-            curveFitData.setTransEstimateStartIndex(fitStart); //TODO ARG this shit has to go; was an early way to handle TRI2 quirkiness; w/b better to call quirky estimator routines from SLIMCurveFitter rather than having these oddball variables to kludge in quirkiness
             curveFitData.setTransEndIndex(fitStop);            
             curveFitData.setChiSquareTarget(chiSqTarget);
             curveFitData.setSig(null);
@@ -454,24 +454,6 @@ public class CursorEstimator {
             z = val/n;
         }
         return z;
-    }
-
-    /**
-     * Calculates the start index to use for a triple integral/RLD estimate
-     * fit before a LMA fit.
-     * 
-     * Based on expParameterEstimation from TRFitting.c.
-     * 
-     * @param trans
-     * @param transFitStartIndex
-     * @param transEndIndex
-     * @return 
-     */
-    public static int getEstimateStartIndex(double[] trans, int transFitStartIndex, int transEndIndex) {
-        System.out.println("transFitStartIndex is " + transFitStartIndex + " transEndIndex is " + transEndIndex);
-        System.out.println("finMax is " + findMax(trans, transFitStartIndex, transEndIndex));
-        int transEstimateStartIndex = /*transFitStartIndex +*/ findMax(trans, transFitStartIndex, transEndIndex);
-        return transEstimateStartIndex;
     }
 
     /**

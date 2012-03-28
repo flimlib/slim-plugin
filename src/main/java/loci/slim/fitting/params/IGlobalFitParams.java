@@ -37,6 +37,7 @@ package loci.slim.fitting.params;
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.NoiseModel;
+import loci.curvefitter.IFitterEstimator;
 
 /**
  * Interface for container for the global fitting parameters, i.e. those valid
@@ -46,9 +47,9 @@ import loci.curvefitter.ICurveFitter.NoiseModel;
  */
 public interface IGlobalFitParams {
     
-    public void setTRI2Compatible(boolean compatible);
+    public void setEstimator(IFitterEstimator estimator);
     
-    public boolean getTRI2Compatible();
+    public IFitterEstimator getEstimator();
     
     public void setFitAlgorithm(FitAlgorithm fitAlgorithm);
     

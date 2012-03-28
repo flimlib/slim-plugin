@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.fitting.callable;
 
+import loci.slim.fitting.cursor.FitterEstimator;
 import loci.slim.fitting.params.FitResults;
 import loci.slim.fitting.params.ILocalFitParams;
 import loci.slim.fitting.params.IGlobalFitParams;
@@ -68,6 +69,7 @@ public class FittingEngineCallable implements IFittingEngineCallable {
  
     @Override
     public IFitResults call() {
+        _curveFitter.setEstimator(_globalParams.getEstimator());
         _curveFitter.setFitAlgorithm(_globalParams.getFitAlgorithm());
         _curveFitter.setFitFunction(_globalParams.getFitFunction());
         _curveFitter.setNoiseModel(_globalParams.getNoiseModel());
@@ -84,16 +86,6 @@ public class FittingEngineCallable implements IFittingEngineCallable {
         curveFitData.setSig(_localParams.getSig());
         curveFitData.setParams(_localParams.getParams().clone()); // params is overwritten
         curveFitData.setYFitted(_localParams.getYFitted());
-        if (_globalParams.getTRI2Compatible()) {
-            if (FitAlgorithm.SLIMCURVE_RLD_LMA.equals(_globalParams.getFitFunction())) {
-                // these lines give TRI2 compatible fit results
-                int estimateStartIndex =
-                        CursorEstimator.getEstimateStartIndex
-                            (_localParams.getY(), _localParams.getFitStart(), _localParams.getFitStop());
-                curveFitData.setTransEstimateStartIndex(estimateStartIndex);
-                curveFitData.setIgnorePromptForIntegralEstimate(true);
-            }
-        }
         
         ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData };
         _curveFitter.fitData(curveFitDataArray);

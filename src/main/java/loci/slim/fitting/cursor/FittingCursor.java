@@ -232,7 +232,7 @@ public class FittingCursor {
      * @return 
      */
     public int getPromptStartBin() {
-        return (int) Math.floor(_promptStartValue / _inc);
+        return (int) Math.ceil(_promptStartValue / _inc);
     }
 
     /**
@@ -328,7 +328,7 @@ public class FittingCursor {
      * @return 
      */
     public int getPromptStopBin() {
-        return (int) Math.ceil(_promptStopValue / _inc);
+        return (int) Math.floor(_promptStopValue / _inc) + 1;
     }
 
     /**
@@ -462,7 +462,7 @@ public class FittingCursor {
      * @return 
      */
     public int getTransientStartBin() {
-        return (int) Math.floor(_transientStartValue / _inc);
+        return (int) Math.ceil(_transientStartValue / _inc);
     }
 
     /**
@@ -542,7 +542,7 @@ public class FittingCursor {
      * @return 
      */
     public int getDataStartBin() {
-        return (int) Math.floor(_dataStartValue / _inc);
+        return (int) Math.ceil(_dataStartValue / _inc);
     }
 
     /**
@@ -623,7 +623,7 @@ public class FittingCursor {
      * @return 
      */
     public int getTransientStopBin() {
-        return (int) Math.ceil(_transientStopValue / _inc);
+        return (int) Math.floor(_transientStopValue / _inc) + 1;
     }
 
     /**
