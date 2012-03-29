@@ -71,6 +71,7 @@ import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.binning.SLIMBinning;
 import loci.slim.colorizer.DataColorizer;
 import loci.slim.colorizer.DataColorizer2;
+import loci.slim.fitting.cursor.FitterEstimator;
 import loci.slim.heuristics.CursorEstimator;
 import loci.slim.process.IProcessor;
 import loci.slim.process.Threshold;
@@ -913,6 +914,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         // set up global, image-wide fit parameters
         //TODO revisit all of these
         IGlobalFitParams globalFitParams = new GlobalFitParams();
+        globalFitParams.setEstimator(new FitterEstimator());
         globalFitParams.setFitAlgorithm(fitInfo.getAlgorithm());
         globalFitParams.setFitFunction(fitInfo.getFunction());
         globalFitParams.setNoiseModel(fitInfo.getNoiseModel());
@@ -1310,7 +1312,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
         getCurveFitter(uiPanel).fitData(dataArray);
-
+        
         // show decay graph for visible channel
         String title = "Pixel " + x + " " + y;
         if (1 < m_channels) {
@@ -1639,6 +1641,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 fitFunction = FitFunction.STRETCHED_EXPONENTIAL;
                 break;
         }
+        curveFitter.setEstimator(new FitterEstimator());
         curveFitter.setFitFunction(fitFunction);
         curveFitter.setNoiseModel(uiPanel.getNoiseModel());
         curveFitter.setXInc(m_timeRange);

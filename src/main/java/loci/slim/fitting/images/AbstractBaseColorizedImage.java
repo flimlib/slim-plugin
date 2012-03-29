@@ -164,8 +164,10 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
      */
     private void redisplay(double[] minMaxLUT) {
         minMaxLUT = PaletteFix.adjustMinMax(minMaxLUT[0], minMaxLUT[1]);
-        _imageProcessor.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
-        _imagePlus.setProcessor(_imageProcessor.duplicate()); //TODO ARG OUCH!  This ImagePlus holds an ImageStack - maybe update(ImageProcessor ip) Updates this stack so its attributes such as min max calibration table and color model, are the same as 'ip'
+        if (null != _imageProcessor) {
+            _imageProcessor.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
+            _imagePlus.setProcessor(_imageProcessor.duplicate()); //TODO ARG OUCH!  This ImagePlus holds an ImageStack - maybe update(ImageProcessor ip) Updates this stack so its attributes such as min max calibration table and color model, are the same as 'ip'
+        }
     }
 
     
