@@ -100,10 +100,16 @@ public class HistogramTool {
      */
     public static IndexColorModel getIndexColorModel() {
         IndexColorModel colorModel = null;
-        // 'getDirectory("luts")' works in IJ but not during NetBeans development
-        //TODO On Linux with a link to Fiji on the desktop this startup directory is the desktop!
-        String startupPath = IJ.getDirectory("startup");
-        String lutPath = startupPath + "luts" + File.separatorChar + LUT;
+ 
+        // 'getDirectory("luts")' works in IJ but not in NetBeans development
+        String lutPath = IJ.getDirectory("luts");
+        if (null == lutPath) {
+            // when you run from a shortcut in Linux 'getDirectory("startup")'
+            //   gives you the directory of the link!
+            String startupPath = IJ.getDirectory("startup");
+            lutPath = addSeparator(startupPath) + "luts";
+        }
+        lutPath = addSeparator(lutPath) + LUT;
         try {
             colorModel = LutLoader.open(lutPath);
         }
@@ -120,6 +126,13 @@ public class HistogramTool {
 
         colorModel = PaletteFix.fixIndexColorModel(colorModel, Color.BLACK, Color.WHITE);
         return colorModel;
+    }
+    
+    private static String addSeparator(String path) {
+        if (!path.endsWith(File.separator)) {
+            path += File.separatorChar;
+        }
+        return path;
     }
 
     /**
