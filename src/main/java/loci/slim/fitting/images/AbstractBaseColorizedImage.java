@@ -7,6 +7,8 @@ package loci.slim.fitting.images;
 
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +80,7 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
         _stackWindow = new MyStackWindow(_imagePlus);
         _stackWindow.setVisible(true);
         _stackWindow.addFocusListener(new FocusListener() {
+            @Override
             public void focusGained(FocusEvent e) {
                 int channelIndex = _stackWindow.getSlice() - 1;
                 _histogramData.setChannelIndex(channelIndex);
@@ -85,7 +88,13 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
             }
             
             public void focusLost(FocusEvent e) { }
-        });  
+        });
+        _stackWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.out.println("Closing fitted image " + _title);
+            }
+        });
         
         _histogramDataChannels
                 = list.toArray(new HistogramDataChannel[0]);
