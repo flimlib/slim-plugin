@@ -29,7 +29,7 @@ public class OutputImageWrapper implements IFittedImage {
     private int[] _location;
 
     /**
-     * Creates a wrapper for an output image (and the image itself).
+     * Creates a wrapper for an output image and initial image.
      * 
      * @param width
      * @param height
