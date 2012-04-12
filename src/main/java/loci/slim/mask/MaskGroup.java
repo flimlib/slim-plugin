@@ -38,14 +38,12 @@ public class MaskGroup {
         // update map with given mask
         _maskMap.put(node, mask);
 
-        //TODO 2 things:
-        // don't notify the caller
-        // don't combine the recipient's mask
-
-
+        // combine maska and notify other nodes
         for (IMaskNode otherNode : _nodeList) {
+            // don't notify the caller
             if (otherNode != node) {
-                Mask combinedMask = Mask.combineOtherMasks(mask, _maskMap.values());
+                // don't combine the recipients mask
+                Mask combinedMask = Mask.addOtherMasks(mask, _maskMap.values());
                 otherNode.applyMask(combinedMask);
             }
         }
