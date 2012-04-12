@@ -14,6 +14,9 @@ import loci.slim.histogram.HistogramTool;
  * This class
  * @author Aivar Grislis
  */
+//TODO ARG FIX this class handles the process of building up a fit.  However it
+//  needs to work with post-fit pixel masking
+//TODO ARG FIX this class needs to work with colorized images also
 public class ColorizedImageFitter {
     public enum ColorizedImageType { A1, T1, A2, T2, A3, T3, Z, H, CHISQ, F1, F2, F3, f1, f2, f3 };
     public static final int A1_INDEX    = 2;

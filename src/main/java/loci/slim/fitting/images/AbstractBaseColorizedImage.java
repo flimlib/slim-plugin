@@ -39,9 +39,10 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
     private ImagePlus _imagePlus;
     private MyStackWindow _stackWindow;
     private double _values[][];
-    private HistogramDataChannel[] _histogramDataChannels;
+    private IColorizedFittedImage[] _fittedImages;
+    private HistogramDataChannel[] _dataChannels;
     private HistogramData _histogramData;
-    private FloatProcessor _imageProcessor;
+    private IColorizedFittedImage _fittedImage;
     
     public AbstractBaseColorizedImage(String title, int[] dimension,
             IndexColorModel indexColorModel) {
@@ -54,26 +55,36 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
         // building an image stack
         _imageStack = new ImageStack(_width, _height);
         
+        // building a list of displayed images
+        List<IColorizedFittedImage> fittedImageList
+                = new ArrayList<IColorizedFittedImage>();
+        
         // building a list of HistogramDataChannels
-        List<HistogramDataChannel> list = new ArrayList<HistogramDataChannel>();
+        List<HistogramDataChannel> dataChannelList
+                = new ArrayList<HistogramDataChannel>();
         
         for (int c = 0; c < _channels; ++c) {
             // build the actual displayed image
-            FloatProcessor imageProcessor = new FloatProcessor(_width, _height);
-            imageProcessor.setColorModel(indexColorModel);
+            IColorizedFittedImage fittedImage = null;
+            if (true) {
+                fittedImage = new FloatFittedImage();
+            }
+            else {
+                fittedImage = new ColorFittedImage();
+            }
             
-            // fill the image with a value that will be out of LUT range and
-            // paint black
-            imageProcessor.setValue(Float.NaN);
-            imageProcessor.fill();
-            
-            _imageStack.addSlice("" + c, imageProcessor);
+            fittedImage.init(_width, _height, indexColorModel);
+
+            // add to stack
+            _imageStack.addSlice("" + c, fittedImage.getImageProcessor());
             
             // build the histogram data
             _values = new double[_width][_height];
             clear(_values);
             HistogramDataChannel histogramDataChannel = new HistogramDataChannel(_values);
-            list.add(histogramDataChannel);           
+            
+            fittedImageList.add(fittedImage);
+            dataChannelList.add(histogramDataChannel);           
         }
         
         _imagePlus = new ImagePlus(title, _imageStack);
@@ -96,9 +107,12 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
             }
         });
         
-        _histogramDataChannels
-                = list.toArray(new HistogramDataChannel[0]);
-        _histogramData = new HistogramData(this, title, _histogramDataChannels); 
+        _fittedImages
+                = fittedImageList.toArray(new IColorizedFittedImage[0]);
+        _dataChannels
+                = dataChannelList.toArray(new HistogramDataChannel[0]);
+        
+        _histogramData = new HistogramData(this, title, _dataChannels); 
     }
 
     /**
@@ -110,13 +124,15 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
         return _title;
     }
     
-     /**
-     * Sets the color model used to display float values.
+    /**
+     * Sets the color model used to display values.
      * 
      * @param colorModel 
-     */   
+     */
     public void setColorModel(IndexColorModel colorModel) {
-        _imageProcessor.setColorModel(colorModel);
+        for (IColorizedFittedImage fittedImage : _fittedImages) {
+            fittedImage.setColorModel(colorModel);
+        }
     }    
     
     /**
@@ -173,12 +189,19 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
      */
     private void redisplay(double[] minMaxLUT) {
         minMaxLUT = PaletteFix.adjustMinMax(minMaxLUT[0], minMaxLUT[1]);
-        if (null != _imageProcessor) {
-            _imageProcessor.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
-            _imagePlus.setProcessor(_imageProcessor.duplicate()); //TODO ARG OUCH!  This ImagePlus holds an ImageStack - maybe update(ImageProcessor ip) Updates this stack so its attributes such as min max calibration table and color model, are the same as 'ip'
+        if (null != _fittedImage) {
+            _fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
+            
+            //TODO ARG KLUDGE
+            //  This is a workaround to redisplay after the LUT range changes.
+            //  Hopefully it will go away in IJ2.
+            //  Maybe update(ImageProcessor ip)
+            //  "Updates this stack so its attributes such as min max calibration table and color model, are the same as 'ip'"
+            if (_fittedImage instanceof FloatFittedImage) {
+                _imagePlus.setProcessor(_fittedImage.getImageProcessor().duplicate());
+            }     
         }
     }
-
     
     /**
      * Updates the fitted parameters for a pixel.
@@ -193,17 +216,20 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
         int x       = location[0];
         int y       = location[1];
         int channel = location[2];
-        
+
+        // check for channel change
         if (_channel != channel) {
             _channel = channel;
             _stackWindow.showSlice(channel + 1);
-            _values = _histogramDataChannels[channel].getValues();            
-            _imageProcessor = (FloatProcessor) _imageStack.getProcessor(channel + 1);
+            _values = _dataChannels[channel].getValues();
+            _fittedImage = _fittedImages[channel];
         }
-        
+ 
+        // save our local copy
         _values[x][y] = value;
-        _imageProcessor.setValue(value);
-        _imageProcessor.drawPixel(x, y);
+        
+        // draw pixel in fitted image
+        _fittedImage.draw(x, y, value);
     }
 
     /**
