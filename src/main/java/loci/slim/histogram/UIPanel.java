@@ -24,14 +24,21 @@ import ij.IJ;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class UIPanel extends JPanel {
+    private static final String AUTO_RANGING = "Adjust range to min/max values";
+    private static final String EXCLUDE_PIXELS = "Hide pixels outside range";
+    private static final String DISPLAY_CHANNELS = "Display all channels";
+    private static final String COMBINE_CHANNELS = "Combine all channels";
+    
     private static final int DIGITS = 5;
     IUIPanelListener _listener;
     JCheckBox _autoRangeCheckBox;
+    JCheckBox _excludePixelsCheckBox;
     JCheckBox _combineChannelsCheckBox;
     JCheckBox _displayChannelsCheckBox;
     JTextField _minTextField;
     JTextField _maxTextField;
     boolean _autoRange;
+    boolean _excludePixels;
     boolean _combineChannels;
     boolean _displayChannels;
     double _minLUT;
@@ -46,7 +53,10 @@ public class UIPanel extends JPanel {
         super();
 
         // initial state
-        _autoRange = true;
+        _autoRange        = true;
+        _excludePixels    = false;
+        _combineChannels  = false;
+        _displayChannels  = false;
         _minLUT = _maxLUT = 0.0;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -94,12 +104,12 @@ public class UIPanel extends JPanel {
         readOutPanel.add(_maxTextField);
         add(readOutPanel);
  
-        _autoRangeCheckBox = new JCheckBox("Automatic Ranging", _autoRange);
+        _autoRangeCheckBox = new JCheckBox(AUTO_RANGING, _autoRange);
         _autoRangeCheckBox.addItemListener(
             new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     _autoRange = _autoRangeCheckBox.isSelected();
-                    enableTextFields(_autoRange);
+                    enableUI(_autoRange);
                     if (null != _listener) {
                         _listener.setAutoRange(_autoRange);
                     }
@@ -108,8 +118,21 @@ public class UIPanel extends JPanel {
         );
         add(_autoRangeCheckBox);
         
+        _excludePixelsCheckBox = new JCheckBox(EXCLUDE_PIXELS, _excludePixels);
+        _excludePixelsCheckBox.addItemListener(
+            new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    _excludePixels = _excludePixelsCheckBox.isSelected();
+                    if (null != _listener) {
+                        _listener.setExcludePixels(_excludePixels);
+                    }
+                }
+            }
+        );
+        add(_excludePixelsCheckBox);
+        
         _combineChannelsCheckBox =
-            new JCheckBox("Combine Channels", _combineChannels);
+            new JCheckBox(COMBINE_CHANNELS, _combineChannels);
         _combineChannelsCheckBox.addItemListener(
             new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
@@ -120,6 +143,7 @@ public class UIPanel extends JPanel {
                 }
             }
         );
+        
         /**
          * IJ1 uses the same LUT for the entire stack.  It might be possible for
          * the histogram tool to set the appropriate LUT for the current channel
@@ -135,7 +159,7 @@ public class UIPanel extends JPanel {
         }
 
         _displayChannelsCheckBox =
-            new JCheckBox("Display All Channels", _displayChannels);
+            new JCheckBox(DISPLAY_CHANNELS, _displayChannels);
         _displayChannelsCheckBox.addItemListener(
             new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
@@ -156,7 +180,7 @@ public class UIPanel extends JPanel {
             add(_displayChannelsCheckBox);
         }
 
-        enableTextFields(_autoRange);
+        enableUI(_autoRange);
     }
 
     /**
@@ -171,7 +195,7 @@ public class UIPanel extends JPanel {
     public void setAutoRange(boolean autoRange) {
         _autoRange = autoRange;
         _autoRangeCheckBox.setSelected(autoRange);
-        enableTextFields(autoRange);
+        enableUI(autoRange);
     }
     
     public void setCombineChannels(boolean combineChannels) {
@@ -213,11 +237,12 @@ public class UIPanel extends JPanel {
     }
 
     /**
-     * Enable/disable min/max text fields as appropriate.
+     * Enable/disable UI elements as appropriate.
      */
-    private void enableTextFields(boolean auto) {
+    private void enableUI(boolean auto) {
         _minTextField.setEnabled(!auto);
         _maxTextField.setEnabled(!auto);
+        _excludePixelsCheckBox.setEnabled(!auto);
     }
 
     /*

@@ -19,6 +19,13 @@ public interface IUIPanelListener {
     public void setAutoRange(boolean autoRange);
     
     /**
+     * User has clicked the exclude pixels checkbox.
+     * 
+     * @param excludePixels
+     */
+    public void setExcludePixels(boolean excludePixels);
+    
+    /**
      * User has clicked the combine channels checkbox.
      */
     public void setCombineChannels(boolean combineChannels);

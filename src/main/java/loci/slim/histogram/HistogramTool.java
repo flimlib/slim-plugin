@@ -432,6 +432,14 @@ public class HistogramTool {
         }
         
         @Override
+        public void setExcludePixels(boolean excludePixels) {
+            synchronized (_synchObject) {
+                //TODO ARG
+                System.out.println("set exclude pixels " + excludePixels);
+            }
+        }
+        
+        @Override
         public void setCombineChannels(boolean combineChannels) {
             synchronized (_synchObject) {
                 _histogramData.setCombineChannels(combineChannels);
