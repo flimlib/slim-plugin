@@ -12,9 +12,9 @@ import java.util.Map;
 
 /**
  *
- * @author aivar
+ * @author Aivar Grislis
  */
-public class MaskGroup {
+public class MaskGroup implements IMaskGroup {
     List<IMaskNode> _nodeList;
     Map<IMaskNode, Mask> _maskMap;
     IMaskNode[] _nodes;
@@ -24,16 +24,18 @@ public class MaskGroup {
         _maskMap = new HashMap<IMaskNode, Mask>();
     }
 
-
+    @Override
     public void addNode(MaskNode node) {
         _nodeList.add(node);
     }
 
+    @Override
     public void removeNode(MaskNode node) {
         _nodeList.remove(node);
         _maskMap.put(node, null);
     }
 
+    @Override
     public void updateMask(IMaskNode node, Mask mask) {
         // update map with given mask
         _maskMap.put(node, mask);
@@ -44,7 +46,7 @@ public class MaskGroup {
             if (otherNode != node) {
                 // don't combine the recipients mask
                 Mask combinedMask = Mask.addOtherMasks(mask, _maskMap.values());
-                otherNode.applyMask(combinedMask);
+                otherNode.updateOtherMask(combinedMask);
             }
         }
 

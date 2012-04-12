@@ -17,10 +17,6 @@ import java.util.Collection;
 public class Mask {
     private boolean[][] _bits;
     
-    public Mask() {
-        _bits = null;
-    }
-    
     public Mask(boolean[][] bits) {
         _bits = bits;
     }
