@@ -1789,7 +1789,13 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         m_startParam3.setEnabled(enable);
         m_startParam4.setEnabled(enable);
     }
-//        OpenDialog dialog = new OpenDialog("Load Data", m_path, m_file);    
+
+    /**
+     * Gets the path and name for a prompt file.
+     * 
+     * @param title
+     * @return 
+     */
     private String getFileName(String title) {
         OpenDialog dialog = new OpenDialog(title, "");
         return dialog.getDirectory() + dialog.getFileName();
