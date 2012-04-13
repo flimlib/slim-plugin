@@ -49,7 +49,7 @@ import loci.curvefitter.SLIMCurveFitter;
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/CursorHelper.java">Trac</a>,
  * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/CursorHelper.java">SVN</a></dd></dl>
  *
- * @author aivar
+ * @author Aivar Grislis
  */
 public class CursorEstimator {
     public static final int PROMPT_START        = 0;
@@ -281,6 +281,8 @@ public class CursorEstimator {
         }
         transEndIndex = 9 * decay.length / 10; // "90% of transient"
         if (transEndIndex <= transStartIndex + 2 * ATTEMPTS) { // "oops"
+            //TODO ARG transStartIndex etc. are unitialized
+            //  do_estimate_resets restores values to previous, not this!
             returnValue[PROMPT_START]    = startp;
             returnValue[PROMPT_STOP]     = endp;
             returnValue[PROMPT_BASELINE] = baseline;
@@ -368,6 +370,8 @@ public class CursorEstimator {
             returnValue[TRANSIENT_START] = transStartIndex;
             returnValue[DATA_START]      = startt;
             returnValue[TRANSIENT_STOP]  = transEndIndex;
+            System.out.print("1 ");
+            dump(returnValue);
             return returnValue; //TODO do estimate resets/frees???
         }
 
@@ -379,13 +383,27 @@ public class CursorEstimator {
         transStartIndex += index;
         transFitStartIndex = transStartIndex + (transEndIndex - transStartIndex) / 20;
         
+        System.out.println("made it all the way to the end of estimateCursors");
+        
         returnValue[PROMPT_START]    = startp;
         returnValue[PROMPT_STOP]     = endp;
         returnValue[PROMPT_BASELINE] = baseline;
         returnValue[TRANSIENT_START] = transStartIndex;
         returnValue[DATA_START]      = transFitStartIndex;
         returnValue[TRANSIENT_STOP]  = transEndIndex;
+        System.out.print("2 ");
+        dump(returnValue);
         return returnValue;
+    }
+    
+    private static void dump(double[] value) {
+        System.out.print("prompt ");
+        System.out.print("start " + value[PROMPT_START]);
+        System.out.print("end " + value[PROMPT_STOP]);
+        System.out.print("transient ");
+        System.out.print("start " + value[TRANSIENT_START]);
+        System.out.print("data start " + value[DATA_START]);
+        System.out.println("end " + value[TRANSIENT_STOP]);
     }
 
     /**
@@ -550,6 +568,18 @@ public class CursorEstimator {
     }
 
     private static int findMax(double[] values, int startIndex, int endIndex) {
+        if (endIndex > values.length) {
+            System.out.println("CursorEstimator.findMax endIndex is " + endIndex + " values.length is " + values.length);
+            endIndex = values.length;
+        }
+        if (startIndex > values.length) {
+            System.out.println("CursorEstimator.findMax startIndex is " + startIndex + " values.length is " + values.length);
+            startIndex = values.length;
+        }
+        if (values.length == 0) {
+            System.out.println("CursorEstimator.findMax but values is length zero");
+            return startIndex;
+        }
         int index = startIndex;
         double max = values[startIndex];
         for (int i = startIndex; i < endIndex; ++i) {

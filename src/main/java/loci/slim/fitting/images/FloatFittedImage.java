@@ -16,11 +16,14 @@ import ij.process.ImageProcessor;
 public class FloatFittedImage implements IColorizedFittedImage {
     int _width;
     int _height;
+    int _channel;
     FloatProcessor _imageProcessor;
     
-    public void init(int width, int height, IndexColorModel indexColorModel) {
+    public void init(int width, int height, int channel,
+            IndexColorModel indexColorModel) {
         _width = width;
         _height = height;
+        _channel = channel;
         
         _imageProcessor = new FloatProcessor(width, height);
         _imageProcessor.setColorModel(indexColorModel);
@@ -32,7 +35,7 @@ public class FloatFittedImage implements IColorizedFittedImage {
     }
     
     public void setColorModel(IndexColorModel indexColorModel) {
-        
+        _imageProcessor.setColorModel(indexColorModel);
     }
     
     public ImageProcessor getImageProcessor() {

@@ -17,6 +17,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.FloatProcessor;
 
+import loci.slim.IGrayScalePixelValue;
 import loci.slim.histogram.HistogramData;
 import loci.slim.histogram.HistogramDataChannel;
 import loci.slim.histogram.HistogramTool;
@@ -35,6 +36,7 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
     private int _height;
     private int _channels;
     private int _channel;
+    private boolean _colorizeGrayScale;
     private ImageStack _imageStack;
     private ImagePlus _imagePlus;
     private MyStackWindow _stackWindow;
@@ -44,13 +46,18 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
     private HistogramData _histogramData;
     private IColorizedFittedImage _fittedImage;
     
-    public AbstractBaseColorizedImage(String title, int[] dimension,
-            IndexColorModel indexColorModel) {
+    public AbstractBaseColorizedImage(
+            String title,
+            int[] dimension,
+            IndexColorModel indexColorModel,
+            boolean colorizeGrayScale,
+            IGrayScalePixelValue grayScalePixelValue) {
         _title = title;
         _width = dimension[0];
         _height = dimension[1];
         _channels = dimension[2];
         _channel = UNKNOWN_CHANNEL;
+        _colorizeGrayScale = colorizeGrayScale;
         
         // building an image stack
         _imageStack = new ImageStack(_width, _height);
@@ -63,28 +70,28 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
         List<HistogramDataChannel> dataChannelList
                 = new ArrayList<HistogramDataChannel>();
         
-        for (int c = 0; c < _channels; ++c) {
-            // build the actual displayed image
-            IColorizedFittedImage fittedImage = null;
-            if (true) {
-                fittedImage = new FloatFittedImage();
-            }
-            else {
-                fittedImage = new ColorFittedImage();
-            }
-            
-            fittedImage.init(_width, _height, indexColorModel);
-
-            // add to stack
-            _imageStack.addSlice("" + c, fittedImage.getImageProcessor());
-            
+        for (int c = 0; c < _channels; ++c) {       
             // build the histogram data
             _values = new double[_width][_height];
             clear(_values);
-            HistogramDataChannel histogramDataChannel = new HistogramDataChannel(_values);
+            HistogramDataChannel histogramDataChannel
+                    = new HistogramDataChannel(_values);
+            dataChannelList.add(histogramDataChannel);
             
+            // build the actual displayed image
+            IColorizedFittedImage fittedImage = null;
+            if (colorizeGrayScale) {
+                fittedImage
+                        = new ColorizedFittedImage(grayScalePixelValue, _values); 
+            }
+            else {
+                fittedImage = new FloatFittedImage();
+            }
+            fittedImage.init(_width, _height, c, indexColorModel);
             fittedImageList.add(fittedImage);
-            dataChannelList.add(histogramDataChannel);           
+
+            // add to stack
+            _imageStack.addSlice("" + c, fittedImage.getImageProcessor());
         }
         
         _imagePlus = new ImagePlus(title, _imageStack);
@@ -190,16 +197,23 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
     private void redisplay(double[] minMaxLUT) {
         minMaxLUT = PaletteFix.adjustMinMax(minMaxLUT[0], minMaxLUT[1]);
         if (null != _fittedImage) {
-            _fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
+            if (_colorizeGrayScale) {
+                // redraw all images with new LUT
+                for (IColorizedFittedImage fittedImage : _fittedImages) {
+                    fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
+                }
+            }
+            else {
+                // when using a FloatProcessor the LUT belongs to entire stack
+                _fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
+            }
             
             //TODO ARG KLUDGE
             //  This is a workaround to redisplay after the LUT range changes.
             //  Hopefully it will go away in IJ2.
-            //  Maybe update(ImageProcessor ip)
+            //  Maybe update(ImageProcessor ip) would work.
             //  "Updates this stack so its attributes such as min max calibration table and color model, are the same as 'ip'"
-            if (_fittedImage instanceof FloatFittedImage) {
-                _imagePlus.setProcessor(_fittedImage.getImageProcessor().duplicate());
-            }     
+            _imagePlus.setProcessor(_fittedImage.getImageProcessor().duplicate());   
         }
     }
     

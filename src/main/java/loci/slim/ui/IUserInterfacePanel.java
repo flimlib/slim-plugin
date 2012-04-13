@@ -106,6 +106,13 @@ public interface IUserInterfacePanel {
     public String getFittedImages();
 
     /**
+     * Returns whether to create colorized grayscale fitted images.
+     * 
+     * @return 
+     */
+    public boolean getColorizeGrayScale();
+
+    /**
      * Gets analysis plugin names.
      *
      * @return analysis plugin names

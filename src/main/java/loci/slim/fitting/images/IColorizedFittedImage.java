@@ -14,7 +14,8 @@ import ij.process.ImageProcessor;
  */
 public interface IColorizedFittedImage {
     
-    public void init(int width, int height, IndexColorModel indexColorModel);
+    public void init(int width, int height, int channel,
+            IndexColorModel indexColorModel);
     
     public void setColorModel(IndexColorModel indexColorModel);
     

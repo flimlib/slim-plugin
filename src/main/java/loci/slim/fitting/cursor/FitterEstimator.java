@@ -22,13 +22,15 @@ public class FitterEstimator implements IFitterEstimator {
 
     @Override
     public int getEstimateStartIndex(double[] yCount, int start, int stop) {
+        System.out.println("FitterEstimator.getEstimateStartIndex " + yCount.length + " " + start + " " + stop);
         // start index changes for RLD estimate fit
         int transEstimateStartIndex = findMax(yCount, start, stop);
         return transEstimateStartIndex;
     }
 
     @Override
-    public double getEstimateA(double A, double[] yCount, int start, int stop) {
+    public double getEstimateAValue(double A, double[] yCount, int start, int stop) {
+        System.out.println("FitterEstimator.getEstimateA " + yCount.length + " " + start + " " + stop);
         // A parameter estimate changes for RLD estimate fit
         int transEstimateStartIndex = findMax(yCount, start, stop);
         return yCount[transEstimateStartIndex];

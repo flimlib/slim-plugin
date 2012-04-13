@@ -8,6 +8,7 @@ import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 import java.util.List;
 
+import loci.slim.IGrayScalePixelValue;
 import loci.slim.histogram.HistogramTool;
 
 /**
@@ -34,13 +35,24 @@ public class ColorizedImageFitter {
         _fittedImages = new ArrayList<IColorizedImage>();
     }
     
-    public void setUpFit(ColorizedImageType[] images, int[] dimension,
-            IndexColorModel indexColorModel, int components) {
+    public void setUpFit(
+            ColorizedImageType[] images,
+            int[] dimension,
+            IndexColorModel indexColorModel,
+            int components,
+            boolean colorizeGrayScale,
+            IGrayScalePixelValue grayScalePixelValue)
+    {
         _fittedImages.clear();
         for (ColorizedImageType image : images) {
             IColorizedImage fittedImage =
                     ColorizedImageFactory.getInstance().createImage
-                            (image, dimension, indexColorModel, components);
+                            (image,
+                            dimension,
+                            indexColorModel,
+                            components,
+                            colorizeGrayScale,
+                            grayScalePixelValue);
             _fittedImages.add(fittedImage);
         }
         

@@ -378,6 +378,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     if (null != m_excitationPanel) {
                         m_excitationPanel.quit();
                         m_excitationPanel = null;
+                        updateExcitation(null, null);
                         //TODO redo stop/start cursors on decay curve?
                     }
                 }
@@ -449,6 +450,10 @@ public class SLIMProcessor <T extends RealType<T>> {
                             float zoomFactor = ((GrayScaleImage)m_grayScaleImage).getZoomFactor();
                             x *= zoomFactor;
                             y *= zoomFactor;
+                            
+                            m_x = x;
+                            m_y = y; //TODO ARG 4/6/12 trying to fix my flakey bug
+                            
                             uiPanel.setX(x);
                             uiPanel.setY(y);
                             getFitSettings(m_grayScaleImage, uiPanel, _fittingCursor);
@@ -601,6 +606,9 @@ public class SLIMProcessor <T extends RealType<T>> {
             m_excitationPanel = new ExcitationPanel(excitation, _fittingCursor); //TODO ARG excitation cursor change refit problem here; get new values before excitation ready for refit
 
             success = true;
+        }
+        else {
+            _fittingCursor.setHasPrompt(false);
         }
         return success;
     }
@@ -793,6 +801,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         fitInfo.setFunction(uiPanel.getFunction());
         fitInfo.setNoiseModel(uiPanel.getNoiseModel());
         fitInfo.setFittedImages(uiPanel.getFittedImages());
+        fitInfo.setColorizeGrayScale(uiPanel.getColorizeGrayScale());
         fitInfo.setAnalysisList(uiPanel.getAnalysisList());
         fitInfo.setFitAllChannels(uiPanel.getFitAllChannels());
         fitInfo.setStartDecay(fittingCursor.getDataStartBin());
@@ -906,8 +915,13 @@ public class SLIMProcessor <T extends RealType<T>> {
                             fitInfo.getFree());
             ColorizedImageType[] outputImages = parser.getColorizedImages();
             imageColorizer = new ColorizedImageFitter();
-            imageColorizer.setUpFit(outputImages, dimension,
-                    fitInfo.getIndexColorModel(), components);
+            imageColorizer.setUpFit(
+                    outputImages,
+                    dimension,
+                    fitInfo.getIndexColorModel(),
+                    components,
+                    fitInfo.getColorizeGrayScale(),
+                    m_grayScaleImage);
             imageColorizer.beginFit();
         }
   

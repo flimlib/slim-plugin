@@ -171,6 +171,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JComboBox m_functionComboBox;
     JComboBox m_noiseModelComboBox;
     JComboBox m_fittedImagesComboBox;
+    JCheckBox m_colorizeGrayScale;
     JCheckBox[] m_analysisCheckBoxList;
     JCheckBox m_fitAllChannels;
     
@@ -475,6 +476,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         m_fittedImagesComboBox = new JComboBox(SINGLE_FITTED_IMAGE_ITEMS);
         fitPanel.add(m_fittedImagesComboBox);
 
+        JLabel dummyLabel = new JLabel("");
+        dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        fitPanel.add(dummyLabel);
+        m_colorizeGrayScale = new JCheckBox("Colorize grayscale");
+        fitPanel.add(m_colorizeGrayScale);
+
         int choices = analysisChoices.length;
         if (choices > 0) {
             List<JCheckBox> checkBoxList = new ArrayList<JCheckBox>();
@@ -493,7 +500,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         }
         
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(fitPanel, 5 + choices, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(fitPanel, 6 + choices, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", fitPanel);
@@ -1229,6 +1236,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         m_functionComboBox.setEnabled(enable);
         m_noiseModelComboBox.setEnabled(enable);
         m_fittedImagesComboBox.setEnabled(enable);
+        m_colorizeGrayScale.setEnabled(enable);
         for (JCheckBox checkBox : m_analysisCheckBoxList) {
             checkBox.setEnabled(enable);
         }
@@ -1418,6 +1426,15 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         }
         System.out.println("changes to " + returnValue);
         return returnValue.toString();
+    }
+
+    /**
+     * Returns whether to create colorized grayscale fitted images.
+     * 
+     * @return 
+     */
+    public boolean getColorizeGrayScale() {
+        return m_colorizeGrayScale.isSelected();
     }
 
     public boolean getFitAllChannels() {

@@ -24,6 +24,7 @@ public class FitInfo {
     private NoiseModel _noiseModel;
     private String _fittedImages;
     private IndexColorModel _indexColorModel;
+    private boolean _colorizeGrayScale;
     private String[] _analysisList;
     private boolean _fitAllChannels;
     private int _startDecay;
@@ -198,6 +199,24 @@ public class FitInfo {
      */
     public void setIndexColorModel(IndexColorModel indexColorModel) {
         _indexColorModel = indexColorModel;
+    }
+    
+    /**
+     * Returns whether to create colorized grayscale images.
+     * 
+     * @return 
+     */
+    public boolean getColorizeGrayScale() {
+        return _colorizeGrayScale;
+    }
+
+    /**
+     * Sets whether to create colorized grayscale images.
+     * 
+     * @param colorizeGrayScale 
+     */
+    public void setColorizeGrayScale(boolean colorizeGrayScale) {
+        _colorizeGrayScale = colorizeGrayScale;
     }
 
     /**

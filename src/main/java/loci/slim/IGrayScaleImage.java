@@ -45,7 +45,7 @@ package loci.slim;
  *
  * @author Aivar Grislis
  */
-public interface IGrayScaleImage {
+public interface IGrayScaleImage extends IGrayScalePixelValue {
 
     /**
      * Sets a listener for when the user clicks on the image.
@@ -67,16 +67,6 @@ public interface IGrayScaleImage {
      * @param enable
      */
     public void enable(boolean enable);
-
-    /**
-     * Gets a grayscale pixel value, to test against a threshold.
-     *
-     * @param channel
-     * @param x
-     * @param y
-     * @return unsigned byte expressed as an integer, 0...255
-     */
-    public int getPixel(int channel, int x, int y);
 
     /**
      * Used to compensate X, Y position when clicking on zoomed image.

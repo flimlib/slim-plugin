@@ -6,7 +6,7 @@ package loci.slim.fitting.images;
 
 import java.awt.image.IndexColorModel;
 
-import loci.slim.fitting.images.AbstractBaseColorizedImage;
+import loci.slim.IGrayScalePixelValue;
 
 /**
  * Simple image that just displays one of the input parameters.
@@ -24,8 +24,9 @@ public class ColorizedImage extends AbstractBaseColorizedImage {
      * @param parameterIndex
      */
     public ColorizedImage(String title, int[] dimension,
-            IndexColorModel indexColorModel, int parameterIndex) {
-        super(title, dimension, indexColorModel);
+            IndexColorModel indexColorModel, int parameterIndex,
+            boolean colorizeGrayScale, IGrayScalePixelValue grayScalePixelValue) {
+        super(title, dimension, indexColorModel, colorizeGrayScale, grayScalePixelValue);
         _parameterIndex = parameterIndex;
     }
     
@@ -39,5 +40,4 @@ public class ColorizedImage extends AbstractBaseColorizedImage {
     public double getValue(double[] parameters) {
         return parameters[_parameterIndex];
     }
-    
 }
