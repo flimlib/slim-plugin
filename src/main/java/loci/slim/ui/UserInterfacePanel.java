@@ -666,18 +666,18 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                     }
                     else if (EXCITATION_FILE.equals(selectedItem)) {
                         OpenDialog dialog = new OpenDialog("Load Excitation File", "");
-                        String fileName = dialog.getDirectory() + dialog.getFileName();
-                        System.out.println("filename is >" + fileName + "<");
+                        String directory = dialog.getDirectory();
+                        String fileName = dialog.getFileName();
                         if (null != fileName && !fileName.equals("") && null != m_listener) {
-                            isExcitationLoaded = m_listener.loadExcitation(fileName);
+                            isExcitationLoaded = m_listener.loadExcitation(directory + fileName);
                         }
                     }
                     else if (EXCITATION_CREATE.equals(selectedItem)) {
                         SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
-                        String fileName = dialog.getDirectory() + dialog.getFileName();
-                        System.out.println("filename is >" + fileName + "<");
+                        String directory = dialog.getDirectory();
+                        String fileName = dialog.getFileName();
                         if (null != fileName && !fileName.equals("") && null != m_listener) {
-                            isExcitationLoaded = m_listener.createExcitation(fileName);
+                            isExcitationLoaded = m_listener.createExcitation(directory + fileName);
                         }
                     }
 
