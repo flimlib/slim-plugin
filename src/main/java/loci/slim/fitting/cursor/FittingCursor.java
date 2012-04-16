@@ -232,7 +232,11 @@ public class FittingCursor {
      * @return 
      */
     public int getPromptStartBin() {
-        return (int) Math.ceil(_promptStartValue / _inc);
+        int returnValue  = 0;
+        if (_hasPrompt) {
+            returnValue = (int) Math.ceil(_promptStartValue / _inc);
+        }
+        return returnValue;
     }
 
     /**
@@ -328,7 +332,11 @@ public class FittingCursor {
      * @return 
      */
     public int getPromptStopBin() {
-        return (int) Math.floor(_promptStopValue / _inc) + 1;
+        int returnValue = 0;
+        if (_hasPrompt) {
+            returnValue = (int) Math.floor(_promptStopValue / _inc) + 1;
+        }
+        return returnValue;
     }
 
     /**
@@ -347,7 +355,11 @@ public class FittingCursor {
      * @return 
      */
     public double getPromptStopValue() {
-        return _promptStopValue;
+        double returnValue = 0.0;
+        if (_hasPrompt) {
+            returnValue = _promptStopValue;
+        }
+        return returnValue;
     }
 
     /**
@@ -370,14 +382,11 @@ public class FittingCursor {
      * @return 
      */
     public String getPromptBaseline() {
-        StringBuffer returnValue = new StringBuffer();
+        String returnValue = DOUBLE_ZERO_STRING;
         if (_hasPrompt) {
-            returnValue.append(getPromptBaselineValue());
+            returnValue = "" + getPromptBaselineValue();
         }
-        else {
-            returnValue.append(DOUBLE_ZERO_STRING);
-        }
-        return returnValue.toString();
+        return returnValue;
     }
  
     /**
@@ -399,7 +408,11 @@ public class FittingCursor {
      * @return
      */
     public double getPromptBaselineValue() {
-        return _promptBaselineValue;
+        double returnValue = 0.0;
+        if (_hasPrompt) {
+            returnValue = _promptBaselineValue;
+        }
+        return returnValue;
     }
  
     /**
