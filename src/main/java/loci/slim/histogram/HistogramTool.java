@@ -433,7 +433,14 @@ public class HistogramTool {
         
         @Override
         public void setExcludePixels(boolean excludePixels) {
+            //TODO ARG Mask selfMask = null;
             synchronized (_synchObject) {
+                if (excludePixels) {
+
+                }
+                else {
+
+                }
                 //TODO ARG
                 System.out.println("set exclude pixels " + excludePixels);
             }

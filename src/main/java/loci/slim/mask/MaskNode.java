@@ -11,22 +11,22 @@ package loci.slim.mask;
  */
 public class MaskNode implements IMaskNode {
     IMaskGroup _maskGroup;
+    IMaskNodeListener _listener;
     Mask _selfMask;
-    Mask _otherMask;
+    volatile Mask _otherMask;
     
-    public MaskNode(IMaskGroup maskGroup) {
+    public MaskNode(IMaskGroup maskGroup, IMaskNodeListener listener) {
         _maskGroup = maskGroup;
+        _listener = listener;
     }
 
     /**
-     * This method notifies other nodes that this node has changed the mask.
+     * This method notifies other nodes that this node has changed its mask.
      * 
      * @param mask 
      */
     public void updateSelfMask(Mask mask) {
         _maskGroup.updateMask(this, mask);
-        //TODO ARG promulgate changes
-        //  this should change the image and not the histogram
     }
 
     /**
@@ -39,14 +39,13 @@ public class MaskNode implements IMaskNode {
     }
 
     /**
-     * This method notifies a node that other nodes have changed the mask.
+     * This method notifies this node that other nodes have changed the mask.
      * 
      * @param mask 
      */
     public void updateOtherMask(Mask mask) {
         _otherMask = mask;
-        //TODO ARG promulgate changes; need a listener
-        //  this should change the image and the histogram
+        _listener.updateMask(mask);
     }
 
     /**
