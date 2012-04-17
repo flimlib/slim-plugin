@@ -6,6 +6,9 @@ package loci.slim.histogram;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -69,38 +72,30 @@ public class UIPanel extends JPanel {
         _minTextField.addActionListener(
             new ActionListener() {
                 public void actionPerformed(ActionEvent event) {
-                    try {
-                        _minLUT = Double.parseDouble(_minTextField.getText());
-                        if (null != _listener) {
-                            _listener.setMinMaxLUT(_minLUT, _maxLUT);
-                        }
-                    }
-                    catch (NumberFormatException exception) {
-                        // in the event of an error, just revert
-                        _minTextField.setText("" + _minLUT);
-                    }
+                    updateMin();
                 }
             }
         );
+        _minTextField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                updateMin();
+            }
+        });
         readOutPanel.add(_minTextField);
 
         _maxTextField = new JTextField();
         _maxTextField.addActionListener(
             new ActionListener() {
                 public void actionPerformed(ActionEvent event) {
-                    try {
-                        _maxLUT = Double.parseDouble(_maxTextField.getText());
-                        if (null != _listener) {
-                            _listener.setMinMaxLUT(_minLUT, _maxLUT);
-                        }
-                    }
-                    catch (NumberFormatException exception) {
-                        // in the event of an error, just revert
-                        _maxTextField.setText("" + _maxLUT);
-                    }
+                    updateMax();
                 }
             }
         );
+        _maxTextField.addFocusListener(new FocusAdapter() {
+            public void focusLost(FocusEvent e) {
+                updateMax();
+            }
+        });
         readOutPanel.add(_maxTextField);
         add(readOutPanel);
  
@@ -181,6 +176,32 @@ public class UIPanel extends JPanel {
         }
 
         enableUI(_autoRange);
+    }
+    
+    private void updateMin() {
+        try {
+            _minLUT = Double.parseDouble(_minTextField.getText());
+            if (null != _listener) {
+                _listener.setMinMaxLUT(_minLUT, _maxLUT);
+            }
+        }
+        catch (NumberFormatException exception) {
+            // in the event of an error, just revert
+            _minTextField.setText("" + _minLUT);
+        }
+    }
+    
+    private void updateMax() {
+        try {
+            _maxLUT = Double.parseDouble(_maxTextField.getText());
+            if (null != _listener) {
+                _listener.setMinMaxLUT(_minLUT, _maxLUT);
+            }
+        }
+        catch (NumberFormatException exception) {
+            // in the event of an error, just revert
+            _maxTextField.setText("" + _maxLUT);
+        }
     }
 
     /**
