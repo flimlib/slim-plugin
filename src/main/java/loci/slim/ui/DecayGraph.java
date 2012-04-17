@@ -86,7 +86,9 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     static final Color DATA_START_COLOR = Color.GREEN.darker();
     static final Color TRANS_STOP_COLOR = Color.RED.darker();
     static final Color BASE_COLOR = Color.GREEN.darker();
-    static final Color RESIDUAL_COLOR = Color.GRAY.brighter(); //Color.BLACK;
+    static final Color RESIDUAL_COLOR = Color.GRAY.brighter();
+    
+    private static final Object _synchObject = new Object();
 
     private static DecayGraph _instance;
     private JFrame _frame;
@@ -342,7 +344,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
      * @param data from the fit
      */
     private void createDatasets(int bins, double timeInc, ICurveFitData data)
-    {       
+    {
         XYSeries series2 = new XYSeries("Fitted");
         XYSeries series3 = new XYSeries("Data");
         XYSeries series4 = new XYSeries("Residuals");
@@ -402,12 +404,14 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             xCurrent += timeInc;
         }
 
-        _decayDataset.removeAllSeries();
-        _decayDataset.addSeries(series2);
-        _decayDataset.addSeries(series3);
+        synchronized (_synchObject) {
+            _decayDataset.removeAllSeries();
+            _decayDataset.addSeries(series2);
+            _decayDataset.addSeries(series3);
 
-        _residualDataset.removeAllSeries();
-        _residualDataset.addSeries(series4);
+            _residualDataset.removeAllSeries();
+            _residualDataset.addSeries(series4); 
+        }
     }
 
     /**
@@ -473,8 +477,11 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
          */
         @Override
         protected void paintLayer(Graphics2D g2D, JXLayer<? extends V> layer) {
-            // this paints layer as is
-            super.paintLayer(g2D, layer);
+            // synchronized with chart data update
+            synchronized (_synchObject) {
+                // this paints chart layer as is
+                super.paintLayer(g2D, layer);
+            }
             
             if (null != _transStartMarkerProportion &&
                     null != _dataStartMarkerProportion &&
