@@ -194,7 +194,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
      */
     private void showFittingCursor() {
         if (null != _fittingCursorUI) {
-            System.out.println("In FittingCursorHelper.showFittingCursor");
             _fittingCursorUI.setTransientStart(_fittingCursor.getTransientStart());
             _fittingCursorUI.setDataStart(_fittingCursor.getDataStart());
             _fittingCursorUI.setTransientStop(_fittingCursor.getTransientStop());
@@ -210,7 +209,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
     private class FittingCursorListener implements IFittingCursorListener {
         @Override
         public void cursorChanged(FittingCursor cursor) {
-            System.out.println("FittingCursorHelper.cursorChanged");
             showFittingCursor();
         }
     }  
