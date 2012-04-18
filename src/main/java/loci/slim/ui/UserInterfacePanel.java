@@ -742,54 +742,6 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         m_yField = new JTextField(9);
         controlPanel.add(m_yField);
 
-  /*      JLabel transStartLabel = new JLabel("Transient Start");
-        transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        controlPanel.add(transStartLabel);
-        m_transientStartField = new JTextField(9);
-        m_transientStartField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _fittingCursor.setTransientStart(m_transientStartField.getText());
-            }
-        });
-        m_transientStartField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                _fittingCursor.setTransientStart(m_transientStartField.getText());
-            }
-        });
-        controlPanel.add(m_transientStartField);
-        
-        JLabel dataStartLabel = new JLabel("Data Start");
-        dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        controlPanel.add(dataStartLabel);
-        m_dataStartField = new JTextField(9);
-        m_dataStartField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _fittingCursor.setDataStart(m_dataStartField.getText());
-            }
-        });
-        m_dataStartField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                _fittingCursor.setDataStart(m_dataStartField.getText());
-            }
-        });
-        controlPanel.add(m_dataStartField);
-
-        JLabel transStopLabel = new JLabel("Transient Stop");
-        transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        controlPanel.add(transStopLabel);
-        m_transientStopField = new JTextField(9);
-        m_transientStopField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _fittingCursor.setTransientStop(m_transientStopField.getText());
-            }
-        });
-        m_transientStopField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                _fittingCursor.setTransientStop(m_transientStopField.getText());
-            }
-        });
-        controlPanel.add(m_transientStopField);*/
-
         JLabel thresholdLabel = new JLabel("Threshold");
         thresholdLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(thresholdLabel);
@@ -807,44 +759,6 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         controlPanel.add(binningLabel);
         m_binningComboBox = new JComboBox(binningChoices);
         controlPanel.add(m_binningComboBox);
-
-     /*   JLabel excitationLabel = new JLabel("Excitation");
-        excitationLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        controlPanel.add(excitationLabel);
-        m_excitationComboBox = new JComboBox(EXCITATION_ITEMS);
-        m_excitationComboBox.addActionListener(
-            new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    String selectedItem = (String) m_excitationComboBox.getSelectedItem();
-                    boolean isExcitationLoaded = false;
-                    if (EXCITATION_NONE.equals(selectedItem)) {
-                        if (null != m_listener) {
-                            m_listener.cancelExcitation();
-                        }
-                    }
-                    else if (EXCITATION_FILE.equals(selectedItem)) {
-                        String fileName = getFileName("Load Excitation File", "");
-                        if (null != fileName && null != m_listener) {
-                            isExcitationLoaded = m_listener.loadExcitation(fileName);
-                        }
-                    }
-                    else if (EXCITATION_CREATE.equals(selectedItem)) {
-                        String fileName = getFileName("Save Excitation File", "");
-                        if (null != fileName && null != m_listener) {
-                            isExcitationLoaded = m_listener.createExcitation(fileName);
-                        }
-                    }
-
-                    if (isExcitationLoaded) {
-                        m_excitationComboBox.setSelectedItem(EXCITATION_FILE);
-                    }
-                    else {
-                        m_excitationComboBox.setSelectedItem(EXCITATION_NONE);
-                    }
-                }
-            }
-        );
-        controlPanel.add(m_excitationComboBox); */
 
         // rows, cols, initX, initY, xPad, yPad
         SpringUtilities.makeCompactGrid(controlPanel, 5, 2, 4, 4, 4, 4);
@@ -1248,7 +1162,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         m_transientStopField.setEditable(enable);
         boolean promptEnable = enable;
         if (enable) {
-            promptEnable = m_promptComboBox.getSelectedIndex() == 0;
+            // do we have a prompt?
+            promptEnable = _fittingCursorHelper.getPrompt();
         }
         enablePromptCursors(promptEnable);
         m_promptComboBox.setEnabled(enable);
@@ -1787,8 +1702,6 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @param enable 
      */
     private void enablePromptCursors(boolean enable) {
-        _fittingCursorHelper.enablePrompt(enable);
-        
         m_promptDelayField.setEditable(enable);
         m_promptWidthField.setEditable(enable);
         m_promptBaselineField.setEditable(enable);
