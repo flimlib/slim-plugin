@@ -34,7 +34,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.fitting.cursor;
 
-import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Set;
@@ -83,7 +82,6 @@ public class FittingCursor {
      * @param listener 
      */
     public void addListener(IFittingCursorListener listener) {
-        System.out.println("add listener " + listener);
         synchronized (_listeners) {
             if (!_listeners.contains(listener)) {
                 _listeners.add(listener);
@@ -97,7 +95,6 @@ public class FittingCursor {
      * @param listener 
      */
     public void removeListener(IFittingCursorListener listener) {
-        System.out.println("remove listener " + listener);
         synchronized (_listeners) {
             _listeners.remove(listener);
         }
@@ -176,9 +173,10 @@ public class FittingCursor {
         if (null != promptDelayValue) {
             // convert delay to start
             double promptStartValue = promptDelayValue + _transientStartValue;
-            if (promptStartValue <= _promptStopValue &&
-                    promptStartValue >= 0.0) {
-                double diff = _promptStartValue - promptStartValue;
+            
+            // some very rudimentary error-checking
+            if (0.0 < promptStartValue && promptStartValue < _transientStopValue) {
+                double diff = promptStartValue - _promptStartValue;
                 _promptStartValue += diff;
                 _promptStopValue  += diff;
             }
@@ -255,8 +253,11 @@ public class FittingCursor {
      * @return 
      */
     public double getPromptStartValue() {
-        int bin = getPromptStartBin();
-        return bin * _inc;
+        double returnValue = 0.0;
+        if (_hasPrompt) {
+            returnValue = _promptStartValue;
+        }
+        return returnValue;
     }
  
     /**
