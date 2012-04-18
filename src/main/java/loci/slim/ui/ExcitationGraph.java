@@ -99,7 +99,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
     XYPlot _excitationPlot;
     XYSeriesCollection _excitationDataset;
     XYSeriesCollection _residualDataset;
-    JFrame _frame;
     static ChartPanel _panel;
     JXLayer<JComponent> _layer;
 
@@ -557,9 +556,8 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
             double promptStart    = cursor.getPromptStartValue();
             double promptStop     = cursor.getPromptStopValue();
             double promptBaseline = cursor.getPromptBaselineValue();
-            if (null != _frame) {
-                _frame.repaint();
-            }
+            _startStopBaseDraggingUI.setStartStopBaseValues(promptStart, promptStop, promptBaseline);
+            _layer.repaint();
         }
     }  
 }
