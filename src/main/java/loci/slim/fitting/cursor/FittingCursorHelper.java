@@ -62,6 +62,15 @@ public class FittingCursorHelper implements IFittingCursorUI {
     }
     
     /**
+     * Gets whether there is a prompt.
+     * 
+     * @return 
+     */
+    public boolean getPrompt() {
+        return _fittingCursor.getHasPrompt();
+    }
+    
+    /**
      * Gets the transient start cursor.
      * 
      * @return 
