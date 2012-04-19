@@ -146,6 +146,7 @@ public class CursorEstimator {
      * @return 
      */
     public static int[] estimateDecayCursors(double xInc, double[] decay) {
+//        System.out.println("estimateDecayCursors");
         int maxIndex = findMax(decay);
         double[] diffed = new double[maxIndex];
         // "Differentiate"
@@ -174,7 +175,7 @@ public class CursorEstimator {
 
     public static double[] estimateCursors(double xInc, double[] prompt,
             double[] decay, double chiSqTarget) {
-        System.out.println("xInc " + xInc + " prompt " + prompt + " decay " + decay + " chiSqTarget " + chiSqTarget);
+//        System.out.println("xInc " + xInc + " prompt " + prompt + " decay " + decay + " chiSqTarget " + chiSqTarget);
         double[] returnValue = new double[6];
         double baseline;
         double maxval; // TRCursors.c has "unsigned short maxsval, maxval; double maxfval, *diffed;"
@@ -268,9 +269,9 @@ public class CursorEstimator {
             startt = 0;
         }
 
-        System.out.println("steepest prompt " + steepp + " steepest transient " + steept);
-        System.out.println("startt is " + startt);
-        System.out.println("   startp " + startp + " endp " + endp + " baseline " + baseline);
+ //       System.out.println("steepest prompt " + steepp + " steepest transient " + steept);
+ //       System.out.println("startt is " + startt);
+ //       System.out.println("   startp " + startp + " endp " + endp + " baseline " + baseline);
 
         // "Now we've got estimates we can do some Marquardt fitting to fine-tune
         // the estimates"
@@ -289,23 +290,23 @@ public class CursorEstimator {
             returnValue[TRANSIENT_START] = transStartIndex;
             returnValue[DATA_START]      = startt;
             returnValue[TRANSIENT_STOP]  = transEndIndex;
-            
+            dump(returnValue);
             return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
         }
 
-        System.out.println("prompt " + prompt.length + " decay " + decay.length);
+//        System.out.println("prompt " + prompt.length + " decay " + decay.length);
         
         double[] adjustedPrompt = adjustPrompt(prompt, startp*xInc, endp*xInc, baseline, xInc);
 
         for (i = 0; i < 2 * ATTEMPTS + 1; ++i, ++transStartIndex) {
 
             transFitStartIndex = transStartIndex;
-            System.out.println("transStartIndex " + transStartIndex + " transFitStartIndex " + transFitStartIndex + " transEndIndex " + transEndIndex);
+//            System.out.println("transStartIndex " + transStartIndex + " transFitStartIndex " + transFitStartIndex + " transEndIndex " + transEndIndex);
 
             int fitStart = transFitStartIndex - transStartIndex; // e.g. always zero
             int fitStop = transEndIndex - transStartIndex;
             int nData = transEndIndex - transStartIndex;
-            System.out.println("  fitStart " + fitStart + " fitStop " + fitStop + " nData " + nData);
+//            System.out.println("  fitStart " + fitStart + " fitStop " + fitStop + " nData " + nData);
 
             CurveFitData curveFitData = new CurveFitData();
             param[1] = param[2] = param[3] = C_UNITIALIZED;              
@@ -337,32 +338,32 @@ public class CursorEstimator {
                 param[3] = 2.0;
             }
             
-            System.out.println("i " + i + " Z " + param[1] + " A " + param[2] + " T " + param[3]);
+//            System.out.println("i " + i + " Z " + param[1] + " A " + param[2] + " T " + param[3]);
             
             curveFitter.setFitAlgorithm(FitAlgorithm.SLIMCURVE_LMA);
 
             ret = curveFitter.fitData(data);
 
             if (ret >= 0) {
-                System.out.println("for start " + fitStart + " stop " + fitStop + " chiSq is " + data[0].getChiSquare());
+//                System.out.println("for start " + fitStart + " stop " + fitStop + " chiSq is " + data[0].getChiSquare());
                 chiSqTable[i] = data[0].getParams()[0]; //TODO ARG s/b same or better yet not kept in two places: data[0].getChiSquare();
             }
             else {
-                System.out.println("ret from fitData is " + ret);
+//                System.out.println("ret from fitData is " + ret);
                 chiSqTable[i] = 1e10f; // "silly value"
             }
         }
 
         // "Find the minimum chisq in this range"
         index = findMin(chiSqTable, 2 * ATTEMPTS + 1);
-        System.out.println("min chisq index is " + index + " value " + chiSqTable[index]);
+//        System.out.println("min chisq index is " + index + " value " + chiSqTable[index]);
         
         if (chiSqTable[index] > 9e9f) {  // "no luck here..."
-            System.out.println("no luck here return");
-            for (double chiSq : chiSqTable) {
-                System.out.println("chiSq is " + chiSq);
-            }
-            System.out.println("index is " + index);
+//            System.out.println("no luck here return");
+//            for (double chiSq : chiSqTable) {
+//                System.out.println("chiSq is " + chiSq);
+//            }
+//            System.out.println("index is " + index);
 
             returnValue[PROMPT_START]    = startp;
             returnValue[PROMPT_STOP]     = endp;
@@ -370,7 +371,7 @@ public class CursorEstimator {
             returnValue[TRANSIENT_START] = transStartIndex;
             returnValue[DATA_START]      = startt;
             returnValue[TRANSIENT_STOP]  = transEndIndex;
-            System.out.print("1 ");
+//            System.out.print("1 ");
             dump(returnValue);
             return returnValue; //TODO do estimate resets/frees???
         }
@@ -391,19 +392,29 @@ public class CursorEstimator {
         returnValue[TRANSIENT_START] = transStartIndex;
         returnValue[DATA_START]      = transFitStartIndex;
         returnValue[TRANSIENT_STOP]  = transEndIndex;
-        System.out.print("2 ");
+//        System.out.print("2 ");
         dump(returnValue);
         return returnValue;
     }
     
     private static void dump(double[] value) {
-        System.out.print("prompt ");
-        System.out.print("start " + value[PROMPT_START]);
-        System.out.print("end " + value[PROMPT_STOP]);
-        System.out.print("transient ");
-        System.out.print("start " + value[TRANSIENT_START]);
-        System.out.print("data start " + value[DATA_START]);
-        System.out.println("end " + value[TRANSIENT_STOP]);
+//        System.out.print("prompt ");
+//        System.out.print("start " + value[PROMPT_START]);
+//        System.out.print("end " + value[PROMPT_STOP]);
+//        System.out.print("transient ");
+//        System.out.print("start " + value[TRANSIENT_START]);
+//        System.out.print("data start " + value[DATA_START]);
+//        System.out.println("end " + value[TRANSIENT_STOP]);
+        if (value[DATA_START] < value[TRANSIENT_START]) {
+            if (value[DATA_START] < 0.0) {
+                System.out.println("Calculated data start is less than zero!!!");
+                value[DATA_START] = 0.0;
+                
+            }
+            double tmp = value[DATA_START];
+            value[DATA_START] = value[TRANSIENT_START];
+            value[TRANSIENT_START] = tmp;
+        }
     }
 
     /**
@@ -422,7 +433,7 @@ public class CursorEstimator {
         double[] adjusted = null;
         int startIndex = (int) Math.ceil(start / inc);
         int stopIndex = (int) Math.floor(stop / inc) + 1;
-        System.out.println("stop is " + stop + " stopIndex " + stopIndex);
+//        System.out.println("stop is " + stop + " stopIndex " + stopIndex);
         int length = stopIndex - startIndex;
         if (length <= 0) {
             return adjusted;
@@ -440,7 +451,7 @@ public class CursorEstimator {
         for (int i = startIndex; i < stopIndex; ++i) {
             adjusted[i - startIndex] = (prompt[i] - baseline) / scaling;
         }
-        System.out.println("adjusted " + adjusted[0] + " " + adjusted[1] + " " + adjusted[2]);
+//        System.out.println("adjusted " + adjusted[0] + " " + adjusted[1] + " " + adjusted[2]);
         return adjusted;
     }
     
@@ -569,15 +580,15 @@ public class CursorEstimator {
 
     private static int findMax(double[] values, int startIndex, int endIndex) {
         if (endIndex > values.length) {
-            System.out.println("CursorEstimator.findMax endIndex is " + endIndex + " values.length is " + values.length);
+ //           System.out.println("CursorEstimator.findMax endIndex is " + endIndex + " values.length is " + values.length);
             endIndex = values.length;
         }
         if (startIndex > values.length) {
-            System.out.println("CursorEstimator.findMax startIndex is " + startIndex + " values.length is " + values.length);
+ //           System.out.println("CursorEstimator.findMax startIndex is " + startIndex + " values.length is " + values.length);
             startIndex = values.length;
         }
         if (values.length == 0) {
-            System.out.println("CursorEstimator.findMax but values is length zero");
+ //           System.out.println("CursorEstimator.findMax but values is length zero");
             return startIndex;
         }
         int index = startIndex;

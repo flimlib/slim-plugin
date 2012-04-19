@@ -659,12 +659,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                 public void actionPerformed(ActionEvent e) {
                     String selectedItem = (String) _promptComboBox.getSelectedItem();
                     boolean isExcitationLoaded = false;
-                    if (EXCITATION_NONE.equals(selectedItem)) {
-                        if (null != _listener) {
-                            _listener.cancelExcitation();
-                        }
-                    }
-                    else if (EXCITATION_FILE.equals(selectedItem)) {
+                    if (EXCITATION_FILE.equals(selectedItem)) {
                         OpenDialog dialog = new OpenDialog("Load Excitation File", "");
                         String directory = dialog.getDirectory();
                         String fileName = dialog.getFileName();
@@ -692,6 +687,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                         _promptWidthField.setText(text);
                         _promptBaselineField.setText("0.0");
                         enablePromptCursors(false);
+                        if (null != _listener) {
+                            _listener.cancelExcitation();
+                        }
                     }
                 }
             }

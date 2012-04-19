@@ -399,6 +399,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     }
                     
                     double chiSqTarget = m_uiPanel.getChiSquareTarget();
+//                    System.out.println("prompt is " + prompt + " and fitting cursor thinks prompt " + _fittingCursor.getHasPrompt());
                     if (null != prompt && _fittingCursor.getHasPrompt()) {
                         double[] results = CursorEstimator.estimateCursors
                                 (xInc, prompt, decay, chiSqTarget);
@@ -572,7 +573,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
     private boolean updateExcitation(IUserInterfacePanel uiPanel, Excitation excitation) {
         boolean success = false;
-        System.out.println("###update excitation " + excitation);
+//        System.out.println("###update excitation " + excitation);
         if (null != excitation) {
             if (null != m_excitationPanel) {
                 m_excitationPanel.quit();
@@ -642,8 +643,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         OpenDialog dialog = new OpenDialog("Load Data", m_path, m_file);
         m_path = dialog.getDirectory();
         m_file = dialog.getFileName();
-        System.out.println("directory is " + dialog.getDirectory());
-        System.out.println("file is " + dialog.getFileName());
+//        System.out.println("directory is " + dialog.getDirectory());
+//        System.out.println("file is " + dialog.getFileName());
         return true;
     }
 
@@ -1265,8 +1266,10 @@ public class SLIMProcessor <T extends RealType<T>> {
         int y = uiPanel.getY();
         m_startBin = fittingCursor.getDataStartBin();
         m_stopBin = fittingCursor.getTransientStopBin();
-        System.out.println("m_startBin is " + m_startBin + " m_stopBin " + m_stopBin);
-        System.out.println("_fittingCursor " + _fittingCursor.getTransientStartValue() + " " + _fittingCursor.getTransientStartBin() + " " + _fittingCursor.getTransientStopValue());
+//        System.out.println("m_startBin is " + m_startBin + " m_stopBin " + m_stopBin);
+//        System.out.println("FYI FWIW prompt delay is " + _fittingCursor.getPromptDelay());
+//        System.out.println("prompt start is " + _fittingCursor.getPromptStartValue() + " stop " + _fittingCursor.getPromptStopValue());
+//        System.out.println("_fittingCursor start value " + _fittingCursor.getTransientStartValue() + " bin " + _fittingCursor.getTransientStartBin() + " stop value " + _fittingCursor.getTransientStopValue() + " bin " + _fittingCursor.getTransientStopBin());
         return fitPixel(uiPanel, x, y);
     }
 
@@ -1299,7 +1302,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             for (int c = 0; c < m_bins; ++c) {
                 photons += yCount[c];
             }
-            System.out.println("PHOTONS " + photons);
+//            System.out.println("PHOTONS " + photons);
             
             curveFitData.setYCount(yCount);
             int transStartIndex = _fittingCursor.getTransientStartBin();
@@ -1308,7 +1311,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             curveFitData.setTransStartIndex(transStartIndex);
             curveFitData.setDataStartIndex(dataStartIndex);
             curveFitData.setTransEndIndex(transStopIndex);
-            System.out.println("uiPanel.getFunction is " + uiPanel.getAlgorithm() + " SLIMCURVE_RLD_LMA is " + FitAlgorithm.SLIMCURVE_RLD_LMA);
+//            System.out.println("uiPanel.getFunction is " + uiPanel.getAlgorithm() + " SLIMCURVE_RLD_LMA is " + FitAlgorithm.SLIMCURVE_RLD_LMA);
            
             yFitted = new double[m_bins];
             curveFitData.setYFitted(yFitted);
@@ -1328,7 +1331,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         getCurveFitter(uiPanel).fitData(dataArray);
         
         // show decay graph for visible channel
-        String title = "Pixel " + x + " " + y;
+        String title = "Fitted Pixel " + x + " " + y;
         if (1 < m_channels) {
             title += " Channel " + (m_channel + 1);
         }
@@ -1456,7 +1459,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     private Image<DoubleType> makeImage(int channels, int width, int height, int parameters) {
         Image<DoubleType> image = null;
 
-        System.out.println("channels width height params " + channels + " " + width + " " + height + " " + parameters);
+//        System.out.println("channels width height params " + channels + " " + width + " " + height + " " + parameters);
         
         // create image object
         int dim[] = { width, height, channels, parameters }; //TODO when we keep chi square in image  ++parameters };
@@ -1669,7 +1672,9 @@ public class SLIMProcessor <T extends RealType<T>> {
                 excitation = m_excitationPanel.getValues(start, stop, base);
             }            
             curveFitter.setInstrumentResponse(excitation);
+//            System.out.println("$$$ EXCITATION $$$");
         }
+//        else System.out.println("$$$ NO EXCITATION $$$");
         return curveFitter;
     }
 
@@ -1764,7 +1769,6 @@ public class SLIMProcessor <T extends RealType<T>> {
             double promptBaseline = cursor.getPromptBaselineValue();
             
             // look for changes, current vs. saved cursor values
-            boolean refit = false;
             if (null == _transStart
                     || null == _dataStart
                     || null == _transStop
@@ -1777,11 +1781,10 @@ public class SLIMProcessor <T extends RealType<T>> {
                     || promptStart    != _promptStart
                     || promptStop     != _promptStop
                     || promptBaseline != _promptBaseline) {
-                refit = true;
-            }
-            
-            // trigger refit
-            if (refit) {   
+                
+                // trigger refit
+                System.out.append("*** REFIT ***");
+  
                 // update saved cursor values for next time
                 _transStart     = transStart;
                 _dataStart      = dataStart;
