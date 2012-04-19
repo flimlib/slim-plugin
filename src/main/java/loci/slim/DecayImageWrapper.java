@@ -13,6 +13,7 @@ import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.image.ImageFactory;
 import mpicbg.imglib.io.ImageOpener;
+import mpicbg.imglib.outofbounds.OutOfBoundsStrategyMirrorFactory;
 import mpicbg.imglib.type.numeric.RealType;
 import mpicbg.imglib.type.numeric.real.DoubleType;
 
@@ -39,6 +40,8 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
         _bins     = bins;
         _binIndex = binIndex;
 
+//        OutOfBoundsStrategyMirrorFactory strategyFactory = new OutOfBoundsStrategyMirrorFactory<T>();
+//        _cursor = image.createLocalizableByDimCursor(strategyFactory);
         _cursor = image.createLocalizableByDimCursor();
     }
     

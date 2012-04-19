@@ -68,7 +68,8 @@ import loci.formats.FormatTools;
 import loci.formats.IFormatReader;
 import loci.formats.ImageReader;
 import loci.slim.analysis.SLIMAnalysis;
-import loci.slim.binning.SLIMBinning;
+import loci.slim.process.ISLIMBinner;
+import loci.slim.process.SLIMBinning;
 import loci.slim.colorizer.DataColorizer;
 import loci.slim.colorizer.DataColorizer2;
 import loci.slim.fitting.cursor.FitterEstimator;
@@ -854,6 +855,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         // set up preprocessor chain
         IProcessor processor = decayImage;
+        ISLIMBinner binner = m_binning.getBinner(uiPanel.getBinning());
+        if (null != binner) {
+            binner.init(m_width, m_height);
+            binner.chain(processor);
+            processor = binner;
+        }
         if (fitInfo.getThreshold() > 0) {
             IProcessor threshold = new Threshold(fitInfo.getStartDecay(), fitInfo.getStopDecay(), fitInfo.getThreshold());
             threshold.chain(processor);
@@ -1281,7 +1288,20 @@ public class SLIMProcessor <T extends RealType<T>> {
      */
     private Image<DoubleType> fitPixel(IUserInterfacePanel uiPanel, int x, int y) {
         Image<DoubleType> fittedPixels = null;
-
+        
+        // set up the source
+        IDecayImage decayImage = new DecayImageWrapper(m_image, m_width, m_height, m_channels, m_bins, m_binIndex);
+        IProcessor processor = decayImage;
+        ISLIMBinner binner = m_binning.getBinner(uiPanel.getBinning());
+        if (null != binner) {
+            binner.init(m_width, m_height);
+            binner.chain(processor);
+            processor = binner;
+        }
+        
+        // set up the location
+        int[] location = new int[] { m_x, m_y, m_channel };
+        
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
         double params[] = uiPanel.getParameters(); //TODO wrong; params should possibly come from already fitted data
@@ -1294,15 +1314,14 @@ public class SLIMProcessor <T extends RealType<T>> {
         for (int channel : getChannelIndices(m_fitAllChannels, m_channel, m_channels)) {
             curveFitData = new CurveFitData();
             curveFitData.setParams(params.clone()); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
-            yCount = new double[m_bins];
-            for (int b = 0; b < m_bins; ++b) {
-                yCount[b] = getData(m_cursor, channel, x, y, b);
-            }
+
+            location[2] = channel;
+            yCount = processor.getPixel(location);
             int photons = 0;
             for (int c = 0; c < m_bins; ++c) {
                 photons += yCount[c];
             }
-//            System.out.println("PHOTONS " + photons);
+            System.out.println("PHOTONS " + photons);
             
             curveFitData.setYCount(yCount);
             int transStartIndex = _fittingCursor.getTransientStartBin();
