@@ -42,7 +42,7 @@ package loci.slim;
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ISelectListener.java">Trac</a>,
  * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ISelectListener.java">SVN</a></dd></dl>
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public interface ISelectListener {
 

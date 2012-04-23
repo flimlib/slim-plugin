@@ -42,7 +42,7 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 
 /**
- * A kludge because StackWindow has issues.
+ * A kludge needed because StackWindow has issues.
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/MyStackWindow.java">Trac</a>,

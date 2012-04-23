@@ -34,11 +34,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
-import java.lang.UnsupportedOperationException;
 import java.util.Iterator;
 
 /**
- * TODO
+ * Iterator that supplies a series of chunky pixels.
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixelEffectIterator.java">Trac</a>,
@@ -55,6 +54,14 @@ public class ChunkyPixelEffectIterator implements Iterator {
     int _y;
     ChunkyPixel _chunkyPixel;
 
+    /**
+     * Constructor, sets up the chunky pixel iterator with a table of chunky
+     * pixels and the width and height of the image being processed.
+     * 
+     * @param table
+     * @param width
+     * @param height 
+     */
     public ChunkyPixelEffectIterator(IChunkyPixelTable table, int width, int height) {
         _table = table;
         _width = width;
@@ -69,20 +76,27 @@ public class ChunkyPixelEffectIterator implements Iterator {
         _chunkyPixel = getNextChunkyPixel();
     }
 
+    @Override
     public boolean hasNext() {
         return _chunkyPixel != null;
     }
 
+    @Override
     public ChunkyPixel next() {
         ChunkyPixel chunkyPixel = _chunkyPixel;
         _chunkyPixel = getNextChunkyPixel();
         return chunkyPixel;
     }
 
+    @Override
     public void remove() {
         throw new UnsupportedOperationException();
     }
 
+    /*
+     * Gets the next chunky pixel from the table.
+     * 
+     */
     ChunkyPixel getNextChunkyPixel() {
         // get the relative chunky pixel from the table
         ChunkyPixel relChunkyPixel = _table.getChunkyPixel(_index);

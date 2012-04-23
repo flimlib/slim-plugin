@@ -35,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim;
 
 /**
- * TODO
+ * Interface for a table of chunky pixels.
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/IChunkyPixelTable.java">Trac</a>,

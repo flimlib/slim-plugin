@@ -35,18 +35,18 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim;
 
 /**
- * TODO
+ * Table used for the "chunky pixel" effect.
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixelTableImpl.java">Trac</a>,
  * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixelTableImpl.java">SVN</a></dd></dl>
  *
- * @author Aivar Grislis grislis at wisc.edu
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class ChunkyPixelTableImpl implements IChunkyPixelTable {
    static final int WIDTH  = 16;
    static final int HEIGHT = 16;
-   static final ChunkyPixel[] m_table = {
+   static final ChunkyPixel[] _table = {
        
        // divide 16x16 square into 4 8x8 parts
        
@@ -405,22 +405,26 @@ public class ChunkyPixelTableImpl implements IChunkyPixelTable {
         new ChunkyPixel(15, 15,  1,  1)
    };
 
+   @Override
    public int size() {
        return WIDTH * HEIGHT;
    }
 
+   @Override
    public int getWidth() {
        return WIDTH;
    }
 
+   @Override
    public int getHeight() {
        return HEIGHT;
    }
 
+   @Override
    public ChunkyPixel getChunkyPixel(int index) {
        ChunkyPixel chunkyPixel = null;
-       if (index < m_table.length) {
-           chunkyPixel = m_table[index];
+       if (index < _table.length) {
+           chunkyPixel = _table[index];
        }
        return chunkyPixel;
    }

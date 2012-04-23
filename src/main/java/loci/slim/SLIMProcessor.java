@@ -67,7 +67,6 @@ import loci.slim.fitting.cursor.FitterEstimator;
 import loci.slim.heuristics.CursorEstimator;
 import loci.slim.process.IProcessor;
 import loci.slim.process.Threshold;
-import loci.slim.ui.DecayGraph;
 import loci.slim.ui.ExcitationPanel;
 import loci.slim.ui.IUserInterfacePanel;
 import loci.slim.ui.IUserInterfacePanelListener;
@@ -107,8 +106,6 @@ import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 
-
-//TODO tidy up SLIMProcessor
 /**
  * SLIMProcessor is the main class of the SLIM Plugin. It was originally just
  * thrown together to get something working, with some code/techniques borrowed

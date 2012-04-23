@@ -43,26 +43,18 @@ import java.util.Scanner;
 import loci.formats.FormatException;
 import loci.formats.in.ICSReader;
 import loci.formats.meta.MetadataRetrieve;
-import loci.formats.meta.MetadataStore;
 import loci.formats.out.ICSWriter;
 
-import mpicbg.imglib.container.planar.PlanarContainerFactory;
-import mpicbg.imglib.cursor.Cursor;
-import mpicbg.imglib.cursor.LocalizableByDimCursor;
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.image.ImageFactory;
-import mpicbg.imglib.io.ImageOpener;
 import mpicbg.imglib.type.numeric.RealType;
-import mpicbg.imglib.type.numeric.real.DoubleType;
 
 /**
- * TODO
+ * Loads and saves excitation files.
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ExcitationFileHandler.java">Trac</a>,
  * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ExcitationFileHandler.java">SVN</a></dd></dl>
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class ExcitationFileHandler <T extends RealType<T>> {
     private static final String ICS = ".ics";

@@ -35,7 +35,8 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim;
 
 /**
- * TODO
+ * Class that handles drawing the image using progressively smaller "chunky"
+ * (larger than single pixel) pixels.
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixel.java">Trac</a>,
@@ -51,7 +52,14 @@ public class ChunkyPixel {
     int[] _inputLocation;
     int[] _outputLocation;
 
-    @Deprecated
+    /**
+     * Constructor.
+     * 
+     * @param x
+     * @param y
+     * @param width
+     * @param height 
+     */
     public ChunkyPixel(int x, int y, int width, int height) {
         _x = x;
         _y = y;
@@ -61,34 +69,74 @@ public class ChunkyPixel {
         _outputLocation = null;
     }
 
+    /**
+     * Gets the x location.
+     * 
+     * @return 
+     */
     public int getX() {
         return _x;
     }
 
+    /**
+     * Gets the y location.
+     * 
+     * @return 
+     */
     public int getY() {
         return _y;
     }
 
+    /**
+     * Gets the width to draw the pixel.
+     * 
+     * @return 
+     */
     public int getWidth() {
         return _width;
     }
 
+    /**
+     * Gets the height to draw the pixel.
+     * 
+     * @return 
+     */
     public int getHeight() {
         return _height;
     }
-    
+
+    /**
+     * Sets the location of the pixel in the input image.
+     * 
+     * @param location 
+     */
     public void setInputLocation(int[] location) {
         _inputLocation = location;
     }
 
+    /**
+     * Gets the location of the pixel in the input image.
+     * 
+     * @return 
+     */
     public int[] getInputLocation() {
         return _inputLocation;
     }
-    
+
+    /**
+     * Sets the location of the pixel in the output image.
+     * 
+     * @param location 
+     */
     public void setOutputLocation(int[] location) {
         _outputLocation = location;
     }
-    
+
+    /**
+     * Gets the location of the pixel in the output image.
+     * 
+     * @return 
+     */
     public int[] getOutputLocation() {
         return _outputLocation;
     }

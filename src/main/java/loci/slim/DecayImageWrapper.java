@@ -7,15 +7,9 @@ package loci.slim;
 import loci.slim.fitting.IDecayImage;
 import loci.slim.process.IProcessor;
 
-import mpicbg.imglib.container.planar.PlanarContainerFactory;
-import mpicbg.imglib.cursor.Cursor;
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
-import mpicbg.imglib.image.ImageFactory;
-import mpicbg.imglib.io.ImageOpener;
-import mpicbg.imglib.outofbounds.OutOfBoundsStrategyMirrorFactory;
 import mpicbg.imglib.type.numeric.RealType;
-import mpicbg.imglib.type.numeric.real.DoubleType;
 
 /**
  * This class wraps an image that has a decay curve for each pixel.
@@ -40,8 +34,6 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
         _bins     = bins;
         _binIndex = binIndex;
 
-//        OutOfBoundsStrategyMirrorFactory strategyFactory = new OutOfBoundsStrategyMirrorFactory<T>();
-//        _cursor = image.createLocalizableByDimCursor(strategyFactory);
         _cursor = image.createLocalizableByDimCursor();
     }
     
@@ -121,6 +113,9 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
         return decay;
     }
 
+    /**
+     * Gets underlying image.
+     */
     @Override
     public Image<T> getImage() {
         return _image;

@@ -37,7 +37,7 @@ package loci.slim;
 import mpicbg.imglib.image.Image;
 
 /**
- * TODO
+ * Utility class for accessing Image dimensions.
  *
  * @author Barry DeZonia
  * @author Aivar Grislis

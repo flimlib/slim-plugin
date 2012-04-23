@@ -55,17 +55,17 @@ import mpicbg.imglib.type.numeric.RealType;
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/GrayScaleImage.java">Trac</a>,
  * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/GrayScaleImage.java">SVN</a></dd></dl>
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
-    private int m_width;
-    private int m_height;
-    private ImageStack m_imageStack;
-    private MyStackWindow m_stackWindow;
-    private ISelectListener m_listener;
-    private byte[] m_saveOutPixels[];
-    private double m_minNonZeroPhotonCount;
-    private int[] m_brightestPoint;
+    private int _width;
+    private int _height;
+    private ImageStack _imageStack;
+    private MyStackWindow _stackWindow;
+    private ISelectListener _listener;
+    private byte[] _saveOutPixels[];
+    private double _minNonZeroPhotonCount;
+    private int[] _brightestPoint;
 
     public GrayScaleImage(Image<T> image) {
         String title = image.getName();
@@ -77,8 +77,8 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         //for (int i = 0; i < dimensions.length; ++i) {
         //    System.out.println("dim[" + i + "] " + dimensions[i]);
         //}
-        m_width = dimensions[0];
-        m_height = dimensions[1];
+        _width = dimensions[0];
+        _height = dimensions[1];
         int bins = dimensions[2];
         int channels = 1;
         if (dimensions.length > 3) {
@@ -86,25 +86,25 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         }
 
         // building an image stack
-        m_imageStack = new ImageStack(m_width, m_height);
-        m_saveOutPixels = new byte[channels][];
+        _imageStack = new ImageStack(_width, _height);
+        _saveOutPixels = new byte[channels][];
 
         LocalizableByDimCursor cursor = image.createLocalizableByDimCursor();
-        double[][] pixels = new double[m_width][m_height];
+        double[][] pixels = new double[_width][_height];
         int[] position = (channels > 1) ? new int[4] : new int[3];
 
-        m_minNonZeroPhotonCount = Double.MAX_VALUE;
+        _minNonZeroPhotonCount = Double.MAX_VALUE;
         for (int c = 0; c < channels; ++c) {
             if (channels > 1) {
                 position[3] = c;
             }
-            byte[] outPixels = new byte[m_width * m_height];
+            byte[] outPixels = new byte[_width * _height];
 
             // sum photon counts
             double maxPixel = 0.0;
-            for (int x = 0; x < m_width; ++x) {
+            for (int x = 0; x < _width; ++x) {
                 position[0] = x;
-                for (int y = 0; y < m_height; ++y) {
+                for (int y = 0; y < _height; ++y) {
                     position[1] = y;
                     pixels[x][y] = 0.0;
                     for (int b = 0; b < bins; ++b) {
@@ -115,42 +115,42 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                         pixels[x][y] += photonCount;
                         
                         // keep track of minimum
-                        if (0.0 < photonCount && photonCount < m_minNonZeroPhotonCount) {
-                            m_minNonZeroPhotonCount = photonCount;
+                        if (0.0 < photonCount && photonCount < _minNonZeroPhotonCount) {
+                            _minNonZeroPhotonCount = photonCount;
                         }
                     }
                     // keep track of maximum value and its coordinates
                     if (pixels[x][y] > maxPixel) {
                         maxPixel = pixels[x][y];
-                        m_brightestPoint = new int[] { x , y };
+                        _brightestPoint = new int[] { x , y };
                     }
                 }
             }
 
             // convert to grayscale
-            for (int x = 0; x < m_width; ++x) {
-                for (int y = 0; y < m_height; ++y) {
-                    outPixels[y * m_width + x] = (byte) (pixels[x][y] * 255 / maxPixel);
+            for (int x = 0; x < _width; ++x) {
+                for (int y = 0; y < _height; ++y) {
+                    outPixels[y * _width + x] = (byte) (pixels[x][y] * 255 / maxPixel);
                 }
             }
 
             // add a slice
-           // m_imageStack.addSlice("" + c, true, outPixels); // stopped working 12/1/10
-            m_imageStack.addSlice("" + c, outPixels);
-            m_saveOutPixels[c] = outPixels;
+           // _imageStack.addSlice("" + c, true, outPixels); // stopped working 12/1/10
+            _imageStack.addSlice("" + c, outPixels);
+            _saveOutPixels[c] = outPixels;
         }
-        ImagePlus imagePlus = new ImagePlus(title, m_imageStack);
-        m_stackWindow = new MyStackWindow(imagePlus);
-        m_stackWindow.setVisible(true);
+        ImagePlus imagePlus = new ImagePlus(title, _imageStack);
+        _stackWindow = new MyStackWindow(imagePlus);
+        _stackWindow.setVisible(true);
         
-        System.out.println("minNonZeroPhotonCount is " + m_minNonZeroPhotonCount);
+        System.out.println("minNonZeroPhotonCount is " + _minNonZeroPhotonCount);
 
-        //System.out.println("Channel selector " + m_stackWindow.getChannelSelector());
-        //System.out.println("Slice selector " + m_stackWindow.getSliceSelector());
-        //System.out.println("Frame selector " + m_stackWindow.getFrameSelector());
+        //System.out.println("Channel selector " + _stackWindow.getChannelSelector());
+        //System.out.println("Slice selector " + _stackWindow.getSliceSelector());
+        //System.out.println("Frame selector " + _stackWindow.getFrameSelector());
 
         // hook up mouse listener
-        ImageCanvas canvas = m_stackWindow.getCanvas();
+        ImageCanvas canvas = _stackWindow.getCanvas();
         canvas.addMouseListener(
             new MouseListener() {
                 @Override
@@ -163,8 +163,8 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                 public void mouseEntered(MouseEvent e) {}
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    if (null != m_listener) {
-                        m_listener.selected(getChannel(), e.getX(), e.getY());
+                    if (null != _listener) {
+                        _listener.selected(getChannel(), e.getX(), e.getY());
                     }
                 }
             }
@@ -178,7 +178,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
      */
     @Override
     public void setListener(ISelectListener listener) {
-        m_listener = listener;
+        _listener = listener;
     }
 
     /**
@@ -189,7 +189,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
     @Override
     public int getChannel(){
         // covert 1...n to 0...n-1
-        return m_stackWindow.getSlice() - 1;
+        return _stackWindow.getSlice() - 1;
     }
 
     /**
@@ -199,12 +199,12 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
      */
     @Override
     public void enable(boolean enable) {
-        m_stackWindow.setEnabled(enable);
+        _stackWindow.setEnabled(enable);
     }
 
     @Override
     public float getZoomFactor() {
-        return m_stackWindow.getZoomFactor();
+        return _stackWindow.getZoomFactor();
     }
 
     /**
@@ -220,19 +220,19 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         int returnValue = 0;
         //TODO this consistently results in "OutOfMemoryError: Java heap space"
         // getPixels calls getProcessor.
-        // byte pixels[] = (byte [])m_imageStack.getPixels(channel + 1);
-        byte pixels[] = m_saveOutPixels[channel];
-        returnValue |= pixels[y * m_width + x] & 0xff;
+        // byte pixels[] = (byte [])_imageStack.getPixels(channel + 1);
+        byte pixels[] = _saveOutPixels[channel];
+        returnValue |= pixels[y * _width + x] & 0xff;
         return returnValue;
     }
     
     @Override
     public double getMinNonZeroPhotonCount() {
-        return m_minNonZeroPhotonCount;
+        return _minNonZeroPhotonCount;
     }
     
     @Override
     public int[] getBrightestPoint() {
-        return m_brightestPoint;
+        return _brightestPoint;
     }
 }

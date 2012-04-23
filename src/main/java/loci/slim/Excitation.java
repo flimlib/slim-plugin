@@ -38,15 +38,15 @@ package loci.slim;
  * This class is a container for values for the instrument response function,
  * aka excitation, aka prompt, aka lamp function.
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class Excitation {
-    private final String m_fileName;
-    private final double[] m_values;
-    private final double m_timeInc;
-    private int m_start;
-    private int m_stop;
-    private double m_base;
+    private final String _fileName;
+    private final double[] _values;
+    private final double _timeInc;
+    private int _start;
+    private int _stop;
+    private double _base;
 
     /**
      * Creates an excitation with given filename and values.
@@ -55,9 +55,9 @@ public class Excitation {
      * @param values
      */
     public Excitation(String fileName, double[] values, double timeInc) {
-        m_fileName = fileName;
-        m_values = values;
-        m_timeInc = timeInc;
+        _fileName = fileName;
+        _values = values;
+        _timeInc = timeInc;
     }
 
     /**
@@ -66,7 +66,7 @@ public class Excitation {
      * @return
      */
     public String getFileName() {
-        return m_fileName;
+        return _fileName;
     }
 
     /**
@@ -75,7 +75,7 @@ public class Excitation {
      * @return
      */
     public double[] getValues() {
-        return m_values;
+        return _values;
     }
 
     /**
@@ -84,7 +84,7 @@ public class Excitation {
      * @return
      */
     public double getTimeInc() {
-        return m_timeInc;
+        return _timeInc;
     }
 
     /**
@@ -93,7 +93,7 @@ public class Excitation {
      * @param start
      */
     public void setStart(int start) {
-        m_start = start;
+        _start = start;
     }
 
     /**
@@ -102,7 +102,7 @@ public class Excitation {
      * @return
      */
     public int getStart() {
-        return m_start;
+        return _start;
     }
 
     /**
@@ -111,7 +111,7 @@ public class Excitation {
      * @param stop
      */
     public void setStop(int stop) {
-        m_stop = stop;
+        _stop = stop;
     }
 
     /**
@@ -120,7 +120,7 @@ public class Excitation {
      * @return
      */
     public int getStop() {
-        return m_stop;
+        return _stop;
     }
 
     /**
@@ -129,7 +129,7 @@ public class Excitation {
      * @param base
      */
     public void setBase(double base) {
-        m_base = base;
+        _base = base;
     }
 
     /**
@@ -138,7 +138,7 @@ public class Excitation {
      * @return
      */
     public double getBase() {
-        return m_base;
+        return _base;
     }
 
 }
