@@ -1,3 +1,8 @@
+//
+// DecayGraph.java
+//
+
+
 /*
 Combined spectral-lifetime image analysis plugin.
 
@@ -67,7 +72,7 @@ import org.jfree.ui.RectangleEdge;
  *
  * It also has a user interface to set the start and stop of the fit.
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     static final Dimension SIZE = new Dimension(500, 270);
@@ -276,8 +281,8 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     JFreeChart createCombinedChart(int bins, double timeInc) {
 
         // create empty chart data sets
-        _decayDataset = new XYSeriesCollection();;
-        _residualDataset = new XYSeriesCollection();;
+        _decayDataset = new XYSeriesCollection();
+        _residualDataset = new XYSeriesCollection();
 
         // make a common horizontal axis for both sub-plots
         NumberAxis timeAxis = new NumberAxis(TIME_AXIS_LABEL);
@@ -517,6 +522,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
          * @param event
          * @param layer
          */
+        @Override
         protected void processMouseMotionEvent
                 (MouseEvent event, JXLayer<? extends V> layer)
         {
@@ -540,7 +546,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                             }
                             else {
                                 _dataStartMarkerProportion = _transStopMarkerProportion;
-                            };
+                            }
                         }
                         else {
                             _dataStartMarkerProportion = _transStartMarkerProportion;
@@ -592,6 +598,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
          * @param e
          * @param l
          */
+        @Override
         protected void processMouseEvent(MouseEvent e, JXLayer<? extends V> l) {
             super.processMouseEvent(e, l);
             if (null != _transStartMarkerProportion && null != _transStopMarkerProportion) {
@@ -661,6 +668,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                     _dragTransStartMarker = _dragDataStartMarker = _dragTransStopMarker = false;
                     SwingUtilities.invokeLater(
                             new Runnable() {
+                                @Override
                                 public void run() {
                                     if (null != _listener) {
                                         _listener.setStartStopProportion
@@ -699,6 +707,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     }  
     
     private class FittingCursorListener implements IFittingCursorListener {
+        @Override
         public void cursorChanged(FittingCursor cursor) {
             double transStart = cursor.getTransientStartValue();
             double dataStart  = cursor.getDataStartValue();

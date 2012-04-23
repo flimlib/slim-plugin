@@ -1,5 +1,5 @@
 //
-// CursorHelper.java
+// CursorEstimator.java
 //
 
 /*
@@ -35,11 +35,8 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.heuristics;
 
 import loci.curvefitter.CurveFitData;
-import loci.curvefitter.ICurveFitData;
-import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.NoiseModel;
-import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.SLIMCurveFitter;
 
 /**
@@ -173,6 +170,15 @@ public class CursorEstimator {
         return returnValue;
     }
 
+    /**
+     * Provides estimation of prompt and decay cursors.
+     * 
+     * @param xInc
+     * @param prompt
+     * @param decay
+     * @param chiSqTarget
+     * @return 
+     */
     public static double[] estimateCursors(double xInc, double[] prompt,
             double[] decay, double chiSqTarget) {
 //        System.out.println("xInc " + xInc + " prompt " + prompt + " decay " + decay + " chiSqTarget " + chiSqTarget);
@@ -405,6 +411,7 @@ public class CursorEstimator {
 //        System.out.print("start " + value[TRANSIENT_START]);
 //        System.out.print("data start " + value[DATA_START]);
 //        System.out.println("end " + value[TRANSIENT_STOP]);
+        //TODO ARG patches a bug!:
         if (value[DATA_START] < value[TRANSIENT_START]) {
             if (value[DATA_START] < 0.0) {
                 System.out.println("Calculated data start is less than zero!!!");

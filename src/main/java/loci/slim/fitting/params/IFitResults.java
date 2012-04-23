@@ -1,11 +1,11 @@
 //
-// ILocalFitResults.java
+// FitResults.java
 //
 
 /*
-ImageJ software for multidimensional image processing and analysis.
+SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2011, ImageJDev.org.
+Copyright (c) 2010, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,16 +40,46 @@ package loci.slim.fitting.params;
  * @author Aivar Grislis
  */
 public interface IFitResults {
-    
+
+    /**
+     * Sets fitted chi square result.
+     * 
+     * @param chiSquare 
+     */
     public void setChiSquare(double chiSquare);
-    
+
+    /**
+     * Gets fitted chi square result.
+     * 
+     * @return 
+     */
     public double getChiSquare();
-    
+
+    /**
+     * Sets fitted parameters.
+     * 
+     * @param params 
+     */
     public void setParams(double[] params);
-    
+
+    /**
+     * Gets fitted parameters.
+     * 
+     * @return 
+     */
     public double[] getParams();
-    
+
+    /**
+     * Sets fitted curve.
+     * 
+     * @param yFitted 
+     */
     public void setYFitted(double[] yFitted);
-    
+
+    /**
+     * Gets fitted curve.
+     * 
+     * @return 
+     */
     public double[] getYFitted();
 }

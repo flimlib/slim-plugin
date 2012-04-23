@@ -3,9 +3,9 @@
 //
 
 /*
-ImageJ software for multidimensional image processing and analysis.
+SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2011, ImageJDev.org.
+Copyright (c) 2010, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -48,9 +48,9 @@ import java.util.Set;
 public class FittingCursor {
     private static final String DOUBLE_ZERO_STRING = "0.0";
     private static final String INTEGER_ZERO_STRING = "0";
-    private double _inc;
-    private int _bins;
-    private Set<IFittingCursorListener> _listeners;
+    private final double _inc;
+    private final int _bins;
+    private final Set<IFittingCursorListener> _listeners;
     private boolean _showBins;
     private volatile boolean _suspend;
     private boolean _hasPrompt;
@@ -192,7 +192,7 @@ public class FittingCursor {
      * @return 
      */
     public String getPromptDelay() {
-        StringBuffer returnValue = new StringBuffer();
+        StringBuilder returnValue = new StringBuilder();
         if (_showBins) {
             if (_hasPrompt) {
                 int delay = getPromptStartBin() - getTransientStartBin();
@@ -295,7 +295,7 @@ public class FittingCursor {
      * @return 
      */
     public String getPromptWidth() {
-        StringBuffer returnValue = new StringBuffer();
+        StringBuilder returnValue = new StringBuilder();
         if (_showBins) {
             if (_hasPrompt) {
                 int width = getPromptStopBin() - getPromptStartBin();
@@ -450,7 +450,7 @@ public class FittingCursor {
      * @return 
      */
     public String getTransientStart() {
-        StringBuffer returnValue = new StringBuffer();
+        StringBuilder returnValue = new StringBuilder();
         if (_showBins) {
             returnValue.append(getTransientStartBin());
         }
@@ -530,7 +530,7 @@ public class FittingCursor {
      * @return 
      */
     public String getDataStart() {
-        StringBuffer returnValue = new StringBuffer();
+        StringBuilder returnValue = new StringBuilder();
         if (_showBins) {
             returnValue.append(getDataStartBin());
         }
@@ -611,7 +611,7 @@ public class FittingCursor {
      * @return 
      */
     public String getTransientStop() {
-        StringBuffer returnValue = new StringBuffer();
+        StringBuilder returnValue = new StringBuilder();
         if (_showBins) {
             returnValue.append(getTransientStopBin());
         }

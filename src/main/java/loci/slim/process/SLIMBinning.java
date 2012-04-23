@@ -39,9 +39,6 @@ import ij.IJ;
 import java.util.ArrayList;
 import java.util.List;
 
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.RealType;
-
 import net.java.sezpoz.Index;
 import net.java.sezpoz.IndexItem;
 
@@ -49,10 +46,10 @@ import net.java.sezpoz.IndexItem;
  * TODO
  *
  * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/binning/SLIMBinning.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/binning/SLIMBinning.java">SVN</a></dd></dl>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/process/SLIMBinning.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/process/SLIMBinning.java">SVN</a></dd></dl>
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class SLIMBinning {
     public static final String NONE = "None";

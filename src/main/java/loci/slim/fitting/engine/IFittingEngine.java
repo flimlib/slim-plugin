@@ -3,9 +3,9 @@
 //
 
 /*
-ImageJ software for multidimensional image processing and analysis.
+SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2011, ImageJDev.org.
+Copyright (c) 2010, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

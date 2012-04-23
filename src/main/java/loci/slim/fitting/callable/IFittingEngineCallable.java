@@ -3,9 +3,9 @@
 //
 
 /*
-ImageJ software for multidimensional image processing and analysis.
+SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2011, ImageJDev.org.
+Copyright (c) 2010, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,12 +43,24 @@ import java.util.concurrent.Callable;
 
 /**
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public interface IFittingEngineCallable extends Callable<IFitResults> {
-    
+
+    /**
+     * Set up for a fit.
+     * 
+     * @param curveFitter
+     * @param params
+     * @param data 
+     */
     public void setup(ICurveFitter curveFitter,
             IGlobalFitParams params, ILocalFitParams data);
-    
+
+    /**
+     * Do the fit.
+     * 
+     * @return 
+     */
     public IFitResults call();
 }

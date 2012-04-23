@@ -39,12 +39,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.jdesktop.jxlayer.JXLayer;
@@ -54,7 +51,6 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.CombinedDomainXYPlot;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.data.xy.XYSeries;
@@ -65,13 +61,13 @@ import loci.slim.fitting.cursor.FittingCursor;
 import loci.slim.fitting.cursor.IFittingCursorListener;
 
 /**
- * TODO
+ * Graph that displays the excitation or prompt.
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/ExcitationGraph.java">Trac</a>,
  * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/ExcitationGraph.java">SVN</a></dd></dl>
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class ExcitationGraph implements IStartStopBaseProportionListener {
     static final Dimension SIZE = new java.awt.Dimension(500, 270);
@@ -143,7 +139,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
                 (chartPanel, _excitationPlot, this, _maxHorzValue, _maxVertValue);
         _layer.setUI(_startStopBaseDraggingUI);
 
-     System.out.println("ExcitationGraph start " + start + " stop " + stop + " base " + base);
+     //System.out.println("ExcitationGraph start " + start + " stop " + stop + " base " + base);
         // initialize the vertical bars that show start and stop time bins and
         // the horizontal bar with the base count.
         _startStopBaseDraggingUI.setStartStopBaseValues(_start, _stop, _base);
@@ -157,7 +153,12 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
     public JComponent getComponent() {
         return _layer;
     }
-    
+
+    /**
+     * Sets the fitting cursor.
+     * 
+     * @param fittingCursor 
+     */
     public void setFittingCursor(FittingCursor fittingCursor) {
         if (null == _fittingCursor) {
             _fittingCursorListener = new FittingCursorListener();
@@ -376,6 +377,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
          * @param e
          * @param l
          */
+        @Override
         protected void processMouseMotionEvent(MouseEvent e, JXLayer<? extends V> l) {
             super.processMouseMotionEvent(e, l);
             if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
@@ -506,6 +508,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
                             = _draggingBaseMarker = false;
                     SwingUtilities.invokeLater(
                             new Runnable() {
+                                @Override
                                 public void run() {
                                     _listener.setStartStopBaseProportion(
                                             _startMarkerProportion,
@@ -552,6 +555,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
     }
     
     private class FittingCursorListener implements IFittingCursorListener {
+        @Override
         public void cursorChanged(FittingCursor cursor) {
             double promptStart    = cursor.getPromptStartValue();
             double promptStop     = cursor.getPromptStopValue();

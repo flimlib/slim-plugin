@@ -35,43 +35,25 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.ui;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 
-import javax.swing.border.Border;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SpringLayout;
-import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
 
 import loci.slim.Excitation;
 import loci.slim.fitting.cursor.FittingCursor;
 
 /**
- * TODO
+ * Panel that holds the excitation graph.
  *
  * <dl><dt><b>Source code:</b></dt>
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/ExcitationPanel.java">Trac</a>,
  * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/ExcitationPanel.java">SVN</a></dd></dl>
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class ExcitationPanel extends JFrame {
+    private static final String TITLE = "Instrument Response Function";
     private Excitation _excitation;
     private int _bins;
     private double _timeInc;
@@ -80,7 +62,7 @@ public class ExcitationPanel extends JFrame {
 
         _excitation = excitation;
 
-        this.setTitle("Instrument Response Function");
+        this.setTitle(TITLE);
         
         double start = fittingCursor.getPromptStartValue();
         double stop  = fittingCursor.getPromptStopValue();

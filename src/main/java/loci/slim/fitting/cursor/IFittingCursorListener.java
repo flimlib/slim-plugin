@@ -1,11 +1,11 @@
 //
-// ICursor.java
+// IFittingCursorListener.java
 //
 
 /*
-ImageJ software for multidimensional image processing and analysis.
+SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2011, ImageJDev.org.
+Copyright (c) 2010, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,10 +35,16 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.fitting.cursor;
 
 /**
- *
- * @author Aivar Grislis
+ * Listener interface for fitting cursor changes.
+ * 
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public interface IFittingCursorListener {
-    
+
+    /**
+     * Callback when the cursor changes.
+     * 
+     * @param cursor 
+     */
     public void cursorChanged(FittingCursor cursor);
 }

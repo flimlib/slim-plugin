@@ -47,7 +47,7 @@ import java.util.concurrent.ThreadFactory;
  * Manages a FixedThreadPool to parallelize Callable tasks.  The type parameter
  * T represents the type of the task result.
  * 
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class ThreadPool<T> {
     private static int _threadPoolCounter = 0;

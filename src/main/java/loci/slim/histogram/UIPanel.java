@@ -1,14 +1,43 @@
+//
+// UIPanel.java
+//
+
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+SLIMPlugin for combined spectral-lifetime image analysis.
+
+Copyright (c) 2010, UW-Madison LOCI
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the UW-Madison LOCI nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
+
 package loci.slim.histogram;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -71,37 +100,46 @@ public class UIPanel extends JPanel {
         _minTextField = new JTextField();
         _minTextField.addActionListener(
             new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent event) {
                     updateMin();
                 }
             }
         );
-        _minTextField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                updateMin();
+        _minTextField.addFocusListener(
+            new FocusAdapter() {
+                @Override
+                public void focusLost(FocusEvent e) {
+                    updateMin();
+                }
             }
-        });
+        );
         readOutPanel.add(_minTextField);
 
         _maxTextField = new JTextField();
         _maxTextField.addActionListener(
             new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent event) {
                     updateMax();
                 }
             }
         );
-        _maxTextField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                updateMax();
+        _maxTextField.addFocusListener(
+            new FocusAdapter() {
+                @Override
+                public void focusLost(FocusEvent e) {
+                    updateMax();
+                }
             }
-        });
+        );
         readOutPanel.add(_maxTextField);
         add(readOutPanel);
  
         _autoRangeCheckBox = new JCheckBox(AUTO_RANGING, _autoRange);
         _autoRangeCheckBox.addItemListener(
             new ItemListener() {
+                @Override
                 public void itemStateChanged(ItemEvent e) {
                     _autoRange = _autoRangeCheckBox.isSelected();
                     enableUI(_autoRange);
@@ -116,6 +154,7 @@ public class UIPanel extends JPanel {
         _excludePixelsCheckBox = new JCheckBox(EXCLUDE_PIXELS, _excludePixels);
         _excludePixelsCheckBox.addItemListener(
             new ItemListener() {
+                @Override
                 public void itemStateChanged(ItemEvent e) {
                     _excludePixels = _excludePixelsCheckBox.isSelected();
                     if (null != _listener) {
@@ -130,6 +169,7 @@ public class UIPanel extends JPanel {
             new JCheckBox(COMBINE_CHANNELS, _combineChannels);
         _combineChannelsCheckBox.addItemListener(
             new ItemListener() {
+                @Override
                 public void itemStateChanged(ItemEvent e) {
                     _combineChannels = _combineChannelsCheckBox.isSelected();
                     if (null != _listener) {
@@ -157,6 +197,7 @@ public class UIPanel extends JPanel {
             new JCheckBox(DISPLAY_CHANNELS, _displayChannels);
         _displayChannelsCheckBox.addItemListener(
             new ItemListener() {
+                @Override
                 public void itemStateChanged(ItemEvent e) {
                     _displayChannels = _displayChannelsCheckBox.isSelected();
                     if (null != _listener) {
@@ -213,22 +254,44 @@ public class UIPanel extends JPanel {
         _listener = listener;
     }
 
+    /**
+     * Sets whether to automatically set the LUT range.
+     * 
+     * @param autoRange 
+     */
     public void setAutoRange(boolean autoRange) {
         _autoRange = autoRange;
         _autoRangeCheckBox.setSelected(autoRange);
         enableUI(autoRange);
     }
-    
+
+    /**
+     * Sets whether to combine all channels.
+     * 
+     * For IJ1 this doesn't change anything.
+     * 
+     * @param combineChannels 
+     */
     public void setCombineChannels(boolean combineChannels) {
         _combineChannels = combineChannels;
         _combineChannelsCheckBox.setSelected(combineChannels);
     }
-    
+
+    /**
+     * Sets whether to display all channels.
+     * 
+     * @param displayChannels 
+     */
     public void setDisplayChannels(boolean displayChannels) {
         _displayChannels = displayChannels;
         _displayChannelsCheckBox.setSelected(displayChannels);
     }
-    
+
+    /**
+     * Enables or disables the checkbox UI.
+     * 
+     * @param enable 
+     */
     public void enableChannels(boolean enable) {
         _combineChannelsCheckBox.setEnabled(enable);
         _displayChannelsCheckBox.setEnabled(enable);

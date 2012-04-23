@@ -56,7 +56,7 @@ import net.java.sezpoz.IndexItem;
  * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/SLIMAnalysis.java">Trac</a>,
  * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/SLIMAnalysis.java">SVN</a></dd></dl>
  *
- * @author Aivar Grislis
+ * @author Aivar Grislis grislis at wisc dot edu
  */
 public class SLIMAnalysis {
     IndexItem<SLIMAnalyzer, ISLIMAnalyzer> _plugins[];
