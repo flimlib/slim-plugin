@@ -88,7 +88,7 @@ import loci.slim.fitting.cursor.FittingCursor;
 import loci.slim.fitting.cursor.FittingCursorHelper;
 import loci.slim.fitting.cursor.IFittingCursorListener;
 import loci.slim.fitting.engine.IFittingEngine;
-import loci.slim.fitting.images.ColorizedImageParser;
+import loci.slim.fitting.images.FittedImageParser;
 import loci.slim.fitting.params.IGlobalFitParams;
 import loci.slim.fitting.params.LocalFitParams;
 import loci.slim.fitting.params.GlobalFitParams;
@@ -96,8 +96,8 @@ import loci.slim.fitting.params.ILocalFitParams;
 import loci.slim.fitting.params.IFitResults;
 
 import loci.slim.fitting.FitInfo;
-import loci.slim.fitting.images.ColorizedImageFitter;
-import loci.slim.fitting.images.ColorizedImageFitter.ColorizedImageType;
+import loci.slim.fitting.images.FittedImageFitter;
+import loci.slim.fitting.images.FittedImageFitter.FittedImageType;
 import loci.slim.heuristics.Estimator;
 import loci.slim.heuristics.IEstimator;
 import loci.slim.histogram.HistogramTool;
@@ -342,7 +342,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 }
 
                 /**
-                 * Creates an excitation curve from currrent X, Y and saves to file.
+                 * Creates an excitation curve from current X, Y and saves to file.
                  *
                  * @param fileName
                  * @return whether successful
@@ -908,16 +908,16 @@ public class SLIMProcessor <T extends RealType<T>> {
             colorizedChannels = channels;
         }
         int[] dimension = new int[] { width, height, colorizedChannels };
-        ColorizedImageFitter imageColorizer = null;
+        FittedImageFitter imageColorizer = null;
         String outputs = fitInfo.getFittedImages();
         if (null != outputs) {
             int components = fitInfo.getComponents();
             boolean stretched = fitInfo.getStretched();
-            ColorizedImageParser parser =
-                    new ColorizedImageParser(outputs, components, stretched,
+            FittedImageParser parser =
+                    new FittedImageParser(outputs, components, stretched,
                             fitInfo.getFree());
-            ColorizedImageType[] outputImages = parser.getColorizedImages();
-            imageColorizer = new ColorizedImageFitter();
+            FittedImageType[] outputImages = parser.getColorizedImages();
+            imageColorizer = new FittedImageFitter();
             imageColorizer.setUpFit(
                     outputImages,
                     dimension,
@@ -1038,7 +1038,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             ChunkyPixel[] pixels,
             IGlobalFitParams globalFitParams,
             ILocalFitParams[] localFitParams,
-            ColorizedImageFitter imageColorizer,
+            FittedImageFitter imageColorizer,
             IFittedImage fittedImage) {
 
         //TODO use Lists or just arrays? This just converts from array to List.

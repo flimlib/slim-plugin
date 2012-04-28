@@ -35,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim;
 
 /**
- * Interface for a grayscale pixel value.
+ * Interface for a grayscale pixel value getter.
  * 
  * @author Aivar Grislis grislis at wisc dot edu
  */

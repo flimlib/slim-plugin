@@ -1,5 +1,5 @@
 //
-// IColorizedFittedImage.java
+// SimpleFittedImage.java
 //
 
 /*
@@ -36,22 +36,41 @@ package loci.slim.fitting.images;
 
 import java.awt.image.IndexColorModel;
 
-import ij.process.ImageProcessor;
+import loci.slim.IGrayScalePixelValue;
+import loci.slim.mask.IMaskGroup;
 
 /**
+ * Simple image that just displays one of the input parameters.
  *
  * @author Aivar Grislis grislis at wisc dot edu
  */
-public interface IColorizedFittedImage {
+public class SimpleFittedImage extends AbstractBaseFittedImage {
+    private int _parameterIndex;
+
+    /**
+     * Constructor, giving index of input parameter to display
+     *
+     * @param title
+     * @param dimension
+     * @param parameterIndex
+     */
+    public SimpleFittedImage(String title, int[] dimension,
+            IndexColorModel indexColorModel, int parameterIndex,
+            boolean colorizeGrayScale, IGrayScalePixelValue grayScalePixelValue,
+            IMaskGroup[] maskGroup) {
+        super(title, dimension, indexColorModel, colorizeGrayScale,
+                grayScalePixelValue, maskGroup);
+        _parameterIndex = parameterIndex;
+    }
     
-    public void init(int width, int height, int channel,
-            IndexColorModel indexColorModel);
-    
-    public void setColorModel(IndexColorModel indexColorModel);
-    
-    public ImageProcessor getImageProcessor();
-    
-    public void setMinAndMax(double min, double max);
-    
-    public void draw(int x, int y, double value);
+    /**
+     * Given the array of fitted parameters, get the value for this image.
+     * 
+     * @param parameters
+     * @return 
+     */
+    @Override
+    public double getValue(double[] parameters) {
+        return parameters[_parameterIndex];
+    }
 }

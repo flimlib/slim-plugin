@@ -66,10 +66,10 @@ public class HistogramTool {
     private static HistogramTool INSTANCE = null;
     private final Object _synchObject = new Object();
     private JFrame _frame;
-    private HistogramData _histogramData;
+    private HistogramDataGroup _histogramDataGroup;
     private HistogramPanel _histogramPanel;
     private ColorBarPanel _colorBarPanel;
-    private UIPanel _uiPanel;
+    private HistogramUIPanel _uiPanel;
  
     /**
      * Constructor, handles layout and wiring.
@@ -83,7 +83,7 @@ public class HistogramTool {
         _colorBarPanel = new ColorBarPanel(WIDTH, INSET, COLORBAR_HEIGHT);
         _colorBarPanel.setLUT(getLUT());
         boolean hasChannels = false;
-        _uiPanel = new UIPanel(hasChannels);
+        _uiPanel = new HistogramUIPanel(hasChannels);
         _uiPanel.setListener(new UIPanelListener());
 
         _frame = new JFrame("Histogram");
@@ -167,14 +167,14 @@ public class HistogramTool {
      * 
      * @param histogramData 
      */
-    public void setHistogramData(HistogramData histogramData) {
+    public void setHistogramData(HistogramDataGroup histogramData) {
         double[] minMaxView;
         double[] minMaxLUT;
         synchronized (_synchObject) {
-            _histogramData = histogramData;
-            _histogramData.setListener(new HistogramDataListener());
-            minMaxView = _histogramData.getMinMaxView();
-            minMaxLUT  = _histogramData.getMinMaxLUT();
+            _histogramDataGroup = histogramData;
+            _histogramDataGroup.setListener(new HistogramDataListener());
+            minMaxView = _histogramDataGroup.getMinMaxView();
+            minMaxLUT  = _histogramDataGroup.getMinMaxLUT();
         }
         
         if (_frame.isVisible()) {
@@ -183,9 +183,14 @@ public class HistogramTool {
         _frame.setTitle(histogramData.getTitle());
         
         _histogramPanel.setBins(histogramData.binValues(WIDTH));
-        _histogramPanel.setCursors(cursorPixelFromValue(false, minMaxLUT[0]), cursorPixelFromValue(false, minMaxLUT[1])); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
  
-        _uiPanel.setAutoRange(histogramData.getAutoRange());
+        boolean autoRange = histogramData.getAutoRange();
+        _uiPanel.setAutoRange(autoRange);
+        if (!autoRange) {
+            _histogramPanel.setCursors(cursorPixelFromValue
+                    (false, minMaxLUT[0]), cursorPixelFromValue(false, minMaxLUT[1])); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
+        }        
+        _uiPanel.setExcludePixels(histogramData.getExcludePixels());
         _uiPanel.setCombineChannels(histogramData.getCombineChannels());
         _uiPanel.setDisplayChannels(histogramData.getDisplayChannels());
         _uiPanel.enableChannels(histogramData.hasChannels());        
@@ -200,7 +205,7 @@ public class HistogramTool {
      */
     private double pixelToValue(int pixel) {
         synchronized (_synchObject) {
-            double[] minMaxView = _histogramData.getMinMaxView();
+            double[] minMaxView = _histogramDataGroup.getMinMaxView();
             double min = minMaxView[0];
             return min + pixelToValueRelative(pixel);
         }
@@ -208,7 +213,7 @@ public class HistogramTool {
     
     private double pixelToValueRelative(int pixel) {
         synchronized (_synchObject) {
-            double[] minMaxView = _histogramData.getMinMaxView();
+            double[] minMaxView = _histogramDataGroup.getMinMaxView();
             double min = minMaxView[0];
             double max = minMaxView[1];
             double valuePerPixel = (max - min) / PaletteFix.getSize();
@@ -221,7 +226,7 @@ public class HistogramTool {
      */
     private int valueToPixel(double value) {
         synchronized (_synchObject) {
-            double[] minMaxView = _histogramData.getMinMaxView();
+            double[] minMaxView = _histogramDataGroup.getMinMaxView();
             double min = minMaxView[0];
             double max = minMaxView[1];
             int pixel = (int)(PaletteFix.getSize() * (value - min) / (max - min));
@@ -235,7 +240,7 @@ public class HistogramTool {
     private void changed(double minView, double maxView,
                 double minLUT, double maxLUT) {
         synchronized (_synchObject) {
-            int[] bins = _histogramData.binValues(WIDTH);
+            int[] bins = _histogramDataGroup.binValues(WIDTH);
             _histogramPanel.setBins(bins);
             _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
             //TODO changed is currently called from two places:
@@ -244,7 +249,7 @@ public class HistogramTool {
             // ii) if the user types in a new LUT range this gets called.
             // iii) in the future more UI interactions will wind up here
             //
-            _histogramData.redisplay();
+            _histogramDataGroup.redisplay();
         }
     }
 
@@ -306,7 +311,7 @@ public class HistogramTool {
             
             // save and redraw image
             synchronized (_synchObject) {
-                _histogramData.setMinMaxLUT(minLUT, maxLUT);
+                _histogramDataGroup.setMinMaxLUT(minLUT, maxLUT);
             }
         }
 
@@ -368,12 +373,12 @@ public class HistogramTool {
                 double value = pixelToValueRelative(_dragPixels);
                 synchronized (_synchObject) {
                     // get current LUT bounds
-                    double[] minMaxLUT = _histogramData.getMinMaxLUT();
+                    double[] minMaxLUT = _histogramDataGroup.getMinMaxLUT();
                     double minLUT = minMaxLUT[0];
                     double maxLUT = minMaxLUT[1];
 
                     // adjust the appropriate left or right side of the view
-                    double[] minMaxView = _histogramData.getMinMaxView();
+                    double[] minMaxView = _histogramDataGroup.getMinMaxView();
                     double minView = minMaxView[0];
                     double maxView = minMaxView[1];
                     if (value < 0) {
@@ -386,7 +391,7 @@ public class HistogramTool {
                     }
 
                     // update histogram data min and max view
-                    _histogramData.setMinMaxView(minView, maxView);
+                    _histogramDataGroup.setMinMaxView(minView, maxView);
                     
                     // keep other cursor fixed
                     int pixel;
@@ -411,7 +416,7 @@ public class HistogramTool {
                     }
                     
                     // get updated histogram data and show it                 
-                    int[] bins = _histogramData.binValues(PaletteFix.ADJUSTED_SIZE);
+                    int[] bins = _histogramDataGroup.binValues(WIDTH);
                     _histogramPanel.setBins(bins);
                     _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
                     
@@ -426,12 +431,12 @@ public class HistogramTool {
         @Override
         public void setAutoRange(boolean autoRange) {
             synchronized (_synchObject) {
-                 _histogramData.setAutoRange(autoRange);
+                 _histogramDataGroup.setAutoRange(autoRange);
                  
                  if (autoRange) {
                      //TODO ARG:
                     // It is not always true that the cursors will be (null, null)
-                    // [same as (0, 254)], th3 exception happens if you are showing
+                    // [same as (0, 254)], the exception happens if you are showing
                     // all channels but only autoranging your channel.
                     _histogramPanel.setCursors(null, null);
                     
@@ -450,12 +455,7 @@ public class HistogramTool {
         public void setExcludePixels(boolean excludePixels) {
             //TODO ARG Mask selfMask = null;
             synchronized (_synchObject) {
-                if (excludePixels) {
-
-                }
-                else {
-
-                }
+                _histogramDataGroup.excludePixels(excludePixels);
                 //TODO ARG
                 System.out.println("set exclude pixels " + excludePixels);
             }
@@ -464,7 +464,7 @@ public class HistogramTool {
         @Override
         public void setCombineChannels(boolean combineChannels) {
             synchronized (_synchObject) {
-                _histogramData.setCombineChannels(combineChannels);
+                _histogramDataGroup.setCombineChannels(combineChannels);
             }
             //TODO
             //System.out.println("HistogramTool.UIPanelListener.setCombineChannels(" + combineChannels + ")");
@@ -473,10 +473,10 @@ public class HistogramTool {
         @Override
         public void setDisplayChannels(boolean displayChannels) {
             synchronized (_synchObject) {
-                _histogramData.setDisplayChannels(displayChannels);
+                _histogramDataGroup.setDisplayChannels(displayChannels);
                 
                 // get updated histogram data and show it                 
-                int[] bins = _histogramData.binValues(PaletteFix.ADJUSTED_SIZE);
+                int[] bins = _histogramDataGroup.binValues(WIDTH);
                 _histogramPanel.setBins(bins);
             }
             //TODO
@@ -496,11 +496,11 @@ public class HistogramTool {
                 
                 synchronized (_synchObject) {
                     // if necessary, expand the view to fit the LUT
-                    double[] minMaxView = _histogramData.getMinMaxView();
+                    double[] minMaxView = _histogramDataGroup.getMinMaxView();
                     minView = Math.min(minLUT, minMaxView[0]);
                     maxView = Math.max(maxLUT, minMaxView[1]);
-                    _histogramData.setMinMaxView(minView, maxView);
-                    _histogramData.setMinMaxLUT(minLUT, maxLUT);
+                    _histogramDataGroup.setMinMaxView(minView, maxView);
+                    _histogramDataGroup.setMinMaxLUT(minLUT, maxLUT);
 
                     //TODO ARG this is quite a bit off:
                     // note that if you stretch the bounds on one side you need

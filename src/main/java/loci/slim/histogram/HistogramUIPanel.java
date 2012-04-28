@@ -55,7 +55,7 @@ import ij.IJ;
  * 
  * @author Aivar Grislis grislis at wisc dot edu
  */
-public class UIPanel extends JPanel {
+public class HistogramUIPanel extends JPanel {
     private static final String AUTO_RANGING = "Adjust range to min/max values";
     private static final String EXCLUDE_PIXELS = "Hide pixels outside range";
     private static final String DISPLAY_CHANNELS = "Display all channels";
@@ -81,7 +81,7 @@ public class UIPanel extends JPanel {
      * 
      * @param hasChannels
      */
-    public UIPanel(boolean hasChannels) {
+    public HistogramUIPanel(boolean hasChannels) {
         super();
 
         // initial state
@@ -263,6 +263,16 @@ public class UIPanel extends JPanel {
         _autoRange = autoRange;
         _autoRangeCheckBox.setSelected(autoRange);
         enableUI(autoRange);
+    }
+
+    /**
+     * Sets whether to hide out of range pixels.
+     * 
+     * @param excludePixels 
+     */
+    public void setExcludePixels(boolean excludePixels) {
+        _excludePixels = excludePixels;
+        _excludePixelsCheckBox.setSelected(excludePixels);
     }
 
     /**

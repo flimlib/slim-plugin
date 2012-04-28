@@ -72,10 +72,12 @@ public class MaskGroup implements IMaskGroup {
 
         // combine maska and notify other nodes
         for (IMaskNode otherNode : _nodeList) {
+            System.out.println("MaskGroup.updateMask, consider " + otherNode);
             // don't notify the caller
             if (otherNode != node) {
                 // don't combine the recipients mask
                 Mask combinedMask = Mask.addOtherMasks(mask, _maskMap.values());
+                System.out.println("MaskGroup.updateMask, notify " + combinedMask);
                 otherNode.updateOtherMask(combinedMask);
             }
         }

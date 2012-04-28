@@ -34,21 +34,23 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.histogram;
 
-import loci.slim.fitting.images.IColorizedImage;
+import loci.slim.fitting.images.IFittedImage;
+import loci.slim.mask.IMaskGroup;
 
 /**
- * Keeps an array of HistogramChannels for a given image.  Builds the 
+ * Keeps an array of HistogramDataNodes for a given image.  Builds the 
  * histogram data as appropriate.  Handles updates as the fitted results are
- * available.  Handles optional autoranging.
+ * available.  Handles optional auto-ranging.
  * 
  * @author Aivar Grislis grislis at wisc dot edu
  */
-public class HistogramData {
-    private IColorizedImage _image;
+public class HistogramDataGroup {
+    private IFittedImage _image;
     private String _title;
-    private HistogramDataChannel[] _channel;
+    private HistogramDataNode[] _channel;
     private int _channelIndex;
     private boolean _autoRange;
+    private boolean _excludePixels;
     private boolean _combineChannels;
     private boolean _displayChannels;
     private double _minView;
@@ -66,12 +68,13 @@ public class HistogramData {
      * 
      * @param channel 
      */
-    public HistogramData(IColorizedImage image, String title,
-            HistogramDataChannel[] channel) {
+    public HistogramDataGroup(IFittedImage image, String title,
+            HistogramDataNode[] channel) {
         _image = image;
         _title = title;
         _channel = channel;
         _autoRange = true;
+        _excludePixels = false;
         _combineChannels = hasChannels();
         _displayChannels = hasChannels();
         _channelIndex = 0;
@@ -90,7 +93,7 @@ public class HistogramData {
     public void setListener(IHistogramDataListener listener) {
         _listener = listener;
     }
-     
+
     /**
      * Gets a descriptive title to display on histogram UI for this data.
      * 
@@ -134,6 +137,24 @@ public class HistogramData {
      */
     public void setAutoRange(boolean autoRange) {
         update(autoRange, _combineChannels);
+    }
+
+    /**
+     * Sets whether or not we should hide out-of-range pixels.
+     * 
+     * @param excludePixels 
+     */
+    public void setExcludePixels(boolean excludePixels) {
+        _excludePixels = excludePixels;
+    }
+
+    /**
+     * Sets whether or not we should hide out-of-range pixels.
+     * 
+     * @return 
+     */
+    public boolean getExcludePixels() {
+        return _excludePixels;
     }
     
     /**
@@ -274,6 +295,31 @@ public class HistogramData {
         _minLUT = min;
         _maxLUT = max;
         redisplay();
+    }
+    
+    //TODO
+    // this is setting exclude pixels on/off once you are viewing the histogram
+    // if you click on another image and the histogram shows data for that image
+    // that doesn't necessarily trigger mask propagation.
+    //
+    // Note that this is just setting up pixel masking for one channel.  Shouldn't
+    // this pertain to all channels?  (With different mask for each channel).
+    // The other UI is not channel-specific, so neither should this checkbox be.
+    // When/if we do have different LUTs for each channel this will get even more
+    // complicated.
+    //
+    // Note also that if this is to work during the fit process it gets more
+    // complicated.  As more and more pixels are drawn, we need to build newer
+    // exclusion masks and propagate them.
+    
+    public void excludePixels(boolean excludePixels) {
+        setExcludePixels(excludePixels);
+        if (excludePixels) {
+            _channel[_channelIndex].propagateMask(_minLUT, _maxLUT);
+        }
+        else {
+            _channel[_channelIndex].rescindMask();
+        }
     }
 
     /**

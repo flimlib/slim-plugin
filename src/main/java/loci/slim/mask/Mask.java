@@ -107,6 +107,10 @@ public class Mask {
      * @return 
      */
     public Mask add(Mask mask) {
+        if (null == mask) {
+            return this;
+        }
+        
         boolean[][] bits = mask.getBits();
         int width = bits[0].length;
         int height = bits.length;
@@ -123,33 +127,45 @@ public class Mask {
      * Given a collection of masks, adds them all together except for one mask
      * specified to be excluded.
      * 
+     * Having this be part of the Mask class hides implementation details.
+     * 
      * @param excludedMask
      * @param masks
-     * @return 
+     * @return mask or null
      */
     public static Mask addOtherMasks(Mask excludedMask, Collection<Mask> masks) {
-        boolean[][] result = null;
-        int width = 0;
-        int height = 0;
-        for (Mask mask : masks) {
-            if (mask != excludedMask) {
-                boolean[][] addition = mask.getBits();
-                if (null != addition) {
-                    if (null == result) {
-                        result = mask.getBits().clone();
-                        width = result[0].length;
-                        height = result.length;
-                    }
-                    else {
-                        for (int x = 0; x < width; ++x) {
-                            for (int y = 0; y < height; ++y) {
-                                result[x][y] = result[x][y] && addition[x][y];
+        Mask returnValue = null;
+        if (!masks.isEmpty()) {
+            boolean[][] result = null;
+            int width = 0;
+            int height = 0;
+            for (Mask mask : masks) {
+                if (null != mask) {
+                    if (mask != excludedMask) {
+                        boolean[][] addition = mask.getBits();
+                        if (null != addition) {
+                            // lazy initialization of results
+                            if (null == result) {
+                                result = mask.getBits().clone();
+                                width  = result[0].length;
+                                height = result.length;
+                            }
+                            for (int x = 0; x < width; ++x) {
+                                for (int y = 0; y < height; ++y) {
+                                    result[x][y] = result[x][y] && addition[x][y];
+                                }
                             }
                         }
                     }
                 }
             }
+            if (null != result) {
+                returnValue = new Mask(result);
+            }
         }
-        return new Mask(result);
+        else {
+            System.out.println("masks is empty");
+        }
+        return returnValue;
     }
 }

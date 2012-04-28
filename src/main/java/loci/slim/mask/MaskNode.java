@@ -48,6 +48,7 @@ public class MaskNode implements IMaskNode {
     public MaskNode(IMaskGroup maskGroup, IMaskNodeListener listener) {
         _maskGroup = maskGroup;
         _listener = listener;
+        maskGroup.addNode(this);
     }
 
     /**
@@ -55,7 +56,9 @@ public class MaskNode implements IMaskNode {
      * 
      * @param mask 
      */
+    @Override
     public void updateSelfMask(Mask mask) {
+        System.out.println("MaskNode.updateSelfMask " + mask);
         _maskGroup.updateMask(this, mask);
     }
 
@@ -64,6 +67,7 @@ public class MaskNode implements IMaskNode {
      * 
      * @return 
      */
+    @Override
     public Mask getSelfMask() {
         return _selfMask;
     }
@@ -73,6 +77,7 @@ public class MaskNode implements IMaskNode {
      * 
      * @param mask 
      */
+    @Override
     public void updateOtherMask(Mask mask) {
         _otherMask = mask;
         _listener.updateMask(mask);
@@ -83,6 +88,7 @@ public class MaskNode implements IMaskNode {
      * 
      * @return 
      */
+    @Override
     public Mask getOtherMask() {
         return _otherMask;
     }
@@ -92,6 +98,7 @@ public class MaskNode implements IMaskNode {
      * 
      * @return 
      */
+    @Override
     public Mask getTotalMask() {
         return _selfMask.add(_otherMask);
     }

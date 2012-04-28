@@ -1,7 +1,36 @@
+//
+// AbstractBaseFittedImage.java
+//
+
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+SLIMPlugin for combined spectral-lifetime image analysis.
+
+Copyright (c) 2010, UW-Madison LOCI
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the UW-Madison LOCI nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
 
 package loci.slim.fitting.images;
 
@@ -15,21 +44,23 @@ import java.util.List;
 
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.process.FloatProcessor;
 
 import loci.slim.IGrayScalePixelValue;
-import loci.slim.histogram.HistogramData;
-import loci.slim.histogram.HistogramDataChannel;
+import loci.slim.histogram.HistogramDataGroup;
+import loci.slim.histogram.HistogramDataNode;
 import loci.slim.histogram.HistogramTool;
 import loci.slim.histogram.PaletteFix;
+import loci.slim.mask.IMaskGroup;
+import loci.slim.mask.Mask;
 
 import loci.slim.MyStackWindow;
 
 /**
- *
- * @author aivar
+ * Base class for the fitted images.
+ * 
+ * @author Aivar Grislis grislis at wisc dot edu
  */
-abstract public class AbstractBaseColorizedImage implements IColorizedImage {
+abstract public class AbstractBaseFittedImage implements IFittedImage {
     private static final int UNKNOWN_CHANNEL = -1;
     private String _title;
     private int _width;
@@ -42,16 +73,17 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
     private MyStackWindow _stackWindow;
     private double _values[][];
     private IColorizedFittedImage[] _fittedImages;
-    private HistogramDataChannel[] _dataChannels;
-    private HistogramData _histogramData;
+    private HistogramDataNode[] _dataChannels;
+    private HistogramDataGroup _histogramData;
     private IColorizedFittedImage _fittedImage;
     
-    public AbstractBaseColorizedImage(
+    public AbstractBaseFittedImage(
             String title,
             int[] dimension,
             IndexColorModel indexColorModel,
             boolean colorizeGrayScale,
-            IGrayScalePixelValue grayScalePixelValue) {
+            IGrayScalePixelValue grayScalePixelValue,
+            IMaskGroup[] maskGroup) {
         _title = title;
         _width = dimension[0];
         _height = dimension[1];
@@ -67,15 +99,15 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
                 = new ArrayList<IColorizedFittedImage>();
         
         // building a list of HistogramDataChannels
-        List<HistogramDataChannel> dataChannelList
-                = new ArrayList<HistogramDataChannel>();
+        List<HistogramDataNode> dataChannelList
+                = new ArrayList<HistogramDataNode>();
         
         for (int c = 0; c < _channels; ++c) {       
             // build the histogram data
             _values = new double[_width][_height];
             clear(_values);
-            HistogramDataChannel histogramDataChannel
-                    = new HistogramDataChannel(_values);
+            HistogramDataNode histogramDataChannel
+                    = new HistogramDataNode(_values);
             dataChannelList.add(histogramDataChannel);
             
             // build the actual displayed image
@@ -117,9 +149,13 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
         _fittedImages
                 = fittedImageList.toArray(new IColorizedFittedImage[0]);
         _dataChannels
-                = dataChannelList.toArray(new HistogramDataChannel[0]);
+                = dataChannelList.toArray(new HistogramDataNode[0]);
         
-        _histogramData = new HistogramData(this, title, _dataChannels); 
+        for (int i = 0; i < _dataChannels.length; ++i) {
+            _dataChannels[i].setMaskGroup(maskGroup[i]);
+        }
+        
+        _histogramData = new HistogramDataGroup(this, title, _dataChannels); 
     }
 
     /**
@@ -146,7 +182,7 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
      * Gets the associated histogram data object.
      * @return
      */
-    public HistogramData getHistogramData() {
+    public HistogramDataGroup getHistogramData() {
         return _histogramData;
     }
 
@@ -190,6 +226,21 @@ abstract public class AbstractBaseColorizedImage implements IColorizedImage {
         double[] minMaxLUT = _histogramData.getMinMaxLUT();
         redisplay(minMaxLUT);
     }
+
+    //TODO MASK
+    /**
+     * Redisplays the image after the mask changes.
+     * 
+     * @param mask 
+     */
+    //public void redisplay(Mask mask) {
+    //    for (IColorizedFittedImage fittedImage : _fittedImages) {
+    //        fittedImage.setMask(mask);
+    //    }
+    //    if (null != _fittedImage) {
+    //        _fittedImage.
+    //    }
+    //}
 
     /*
      * Redisplay the image with new LUT range.

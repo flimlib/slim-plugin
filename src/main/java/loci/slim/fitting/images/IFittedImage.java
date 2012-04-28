@@ -1,5 +1,5 @@
 //
-// IColorizedFittedImage.java
+// IFittedImage.java
 //
 
 /*
@@ -36,22 +36,84 @@ package loci.slim.fitting.images;
 
 import java.awt.image.IndexColorModel;
 
-import ij.process.ImageProcessor;
+import loci.slim.histogram.HistogramDataGroup;
 
 /**
  *
  * @author Aivar Grislis grislis at wisc dot edu
  */
-public interface IColorizedFittedImage {
+public interface IFittedImage {
     
-    public void init(int width, int height, int channel,
-            IndexColorModel indexColorModel);
+    /**
+     * Gets the title of this image.
+     * 
+     * @return title
+     */
+    public String getTitle();
     
-    public void setColorModel(IndexColorModel indexColorModel);
+    /**
+     * Sets the color model used to display float values.
+     * 
+     * @param colorModel 
+     */
+    public void setColorModel(IndexColorModel colorModel);
+
+    /**
+     * Gets the associated histogram data object.
+     * 
+     * @return
+     */
+    public HistogramDataGroup getHistogramData();
+
+    /**
+     * Begins a fit.
+     */
+    public void beginFit();
+
+    /**
+     * Ends a fit.
+     */
+    public void endFit();
     
-    public ImageProcessor getImageProcessor();
-    
-    public void setMinAndMax(double min, double max);
-    
-    public void draw(int x, int y, double value);
+    /**
+     * Cancels a fit
+     */
+    public void cancelFit();
+
+    /**
+     * Updates the fitted parameters for a pixel.
+     * 
+     * @param location
+     * @param parameters
+     */
+    public void updatePixel(int[] location, double[] parameters);
+
+    /**
+     * Updates the fitted parameters for a pixel.  The pixel is drawn
+     * outsized at first.
+     * 
+     * @param location
+     * @param dimension
+     * @param parameters
+     */
+    public void updateChunkyPixel(int[] location, int[] dimension, double[] parameters);
+
+    /**
+     * Recalculates the image histogram and resets the palette.  Called 
+     * periodically during the fit.
+     */
+    public void recalcHistogram();
+
+    /**
+     * Redisplays the image.
+     */
+    public void redisplay();
+
+    /**
+     * Given the array of fitted parameters, get the value for this image.
+     * 
+     * @param parameters
+     * @return 
+     */
+    public double getValue(double[] parameters);
 }

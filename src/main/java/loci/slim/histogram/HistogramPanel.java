@@ -245,7 +245,6 @@ public class HistogramPanel extends JPanel {
      * @param maxCursor null or maximum cursor position in pixels
      */
     public void setCursors(Integer minCursor, Integer maxCursor) {
-        System.out.println("setCursors(" + minCursor + "," + maxCursor);
         synchronized (_synchObject) {
             if (null == minCursor) {
                 if (null == maxCursor) {
