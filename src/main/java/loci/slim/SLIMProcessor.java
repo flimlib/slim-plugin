@@ -67,7 +67,9 @@ import loci.slim.fitting.cursor.FitterEstimator;
 import loci.slim.heuristics.CursorEstimator;
 import loci.slim.process.IProcessor;
 import loci.slim.process.Threshold;
+import loci.slim.ui.DecayGraph;
 import loci.slim.ui.ExcitationPanel;
+import loci.slim.ui.IDecayGraph;
 import loci.slim.ui.IUserInterfacePanel;
 import loci.slim.ui.IUserInterfacePanelListener;
 import loci.slim.ui.UserInterfacePanel;
@@ -1080,6 +1082,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         ICurveFitData curveFitData;
         double yCount[];
         double yFitted[];
+        int photons = 0;
 
         // loop over all channels or just the current one
         for (int channel : getChannelIndices(_fitAllChannels, _channel, _channels)) {
@@ -1091,7 +1094,6 @@ public class SLIMProcessor <T extends RealType<T>> {
             }
 
             // count photons and pixels
-            int photons = 0;
             int pixels = 0;
 
             // sum this channel
@@ -1131,7 +1133,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         if (1 < _channels) {
             title += " Channel " + (_channel + 1);
         }
-        showDecayGraph(title, uiPanel, _fittingCursor, dataArray[visibleChannel]);
+        showDecayGraph(title, uiPanel, _fittingCursor,
+                dataArray[visibleChannel], photons);
         uiPanel.setParameters(dataArray[visibleChannel].getParams());
 
         // get the results
@@ -1155,6 +1158,10 @@ public class SLIMProcessor <T extends RealType<T>> {
         ICurveFitData curveFitData;
         double yCount[];
         double yFitted[];
+        int[] photons = new int[getRois().length];
+        for (int i = 0; i < photons.length; ++i) {
+            photons[i] = 0;
+        }
 
         // loop over all channels or just the current one
         for (int channel : getChannelIndices(_fitAllChannels, _channel, _channels)) {
@@ -1173,7 +1180,9 @@ public class SLIMProcessor <T extends RealType<T>> {
                         if (roi.contains(bounds.x + x, bounds.y + y)) {
                             ++pixels;
                             for (int b = 0; b < _bins; ++b) {
-                                yCount[b] += getData(_cursor, channel, x, y, b);
+                                double count = getData(_cursor, channel, x, y, b);
+                                yCount[b] += count;
+                                photons[roiNumber - 1] += count;
                             }
                         }
                     }
@@ -1214,7 +1223,8 @@ public class SLIMProcessor <T extends RealType<T>> {
             if (1 < _channels) {
                 title += " Channel " + (_channel + 1);
             }
-            showDecayGraph(title, uiPanel, _fittingCursor, dataArray[dataIndex]);
+            showDecayGraph(title, uiPanel, _fittingCursor,
+                    dataArray[dataIndex], photons[roiNumber - 1]);
             double lifetime = dataArray[dataIndex].getParams()[3];
             if (lifetime < min) {
                 min = lifetime;
@@ -1304,6 +1314,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         ICurveFitData curveFitData;
         double yCount[];
         double yFitted[];
+        int photons = 0;
 
         // loop over all channels or just the current one
         for (int channel : getChannelIndices(_fitAllChannels, _channel, _channels)) {
@@ -1312,7 +1323,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 
             location[2] = channel;
             yCount = processor.getPixel(location);
-            int photons = 0;
             for (int c = 0; c < _bins; ++c) {
                 photons += yCount[c];
             }
@@ -1353,7 +1363,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         if (_fitAllChannels) {
             visibleChannel = _channel;
         }
-        showDecayGraph(title, uiPanel, _fittingCursor, dataArray[visibleChannel]);
+        showDecayGraph(title, uiPanel, _fittingCursor,
+                dataArray[visibleChannel], photons);
 
         // update UI parameters
         uiPanel.setParameters(dataArray[visibleChannel].getParams());
@@ -1748,9 +1759,10 @@ public class SLIMProcessor <T extends RealType<T>> {
     private void showDecayGraph(final String title,
             final IUserInterfacePanel uiPanel,
             final FittingCursor fittingCursor,
-            final ICurveFitData data)
+            final ICurveFitData data,
+            int photons)
     {
-        loci.slim.ui.IDecayGraph decayGraph = loci.slim.ui.DecayGraph.getInstance();
+        IDecayGraph decayGraph = DecayGraph.getInstance();
         JFrame frame = decayGraph.init(uiPanel.getFrame(), _bins, _timeRange);
         decayGraph.setTitle(title);
         decayGraph.setFittingCursor(fittingCursor);
@@ -1759,6 +1771,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         double transStop  = fittingCursor.getTransientStopValue();
         decayGraph.setStartStop(transStart, dataStart, transStop);
         decayGraph.setData(data);
+        decayGraph.setPhotons(photons);
     }
     
     /**

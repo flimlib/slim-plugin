@@ -37,14 +37,25 @@ package loci.slim.ui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import javax.swing.BoxLayout;
 
+
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import loci.curvefitter.ICurveFitData;
@@ -113,8 +124,8 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     XYSeriesCollection _decayDataset;
     XYSeriesCollection _residualDataset;
 
-    JFreeChart m_decayChart;
-    JFreeChart m_residualsChart;
+    JTextField _photonTextField;
+    JCheckBox _logCheckBox;
 
     /**
      * Public constructor, may be used to create non-singletons.
@@ -178,7 +189,35 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 
             // create a frame for the chart
             _frame = new JFrame();
-            _frame.getContentPane().add(layer);
+            Container container = _frame.getContentPane();
+            container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));
+            container.add(layer);
+            
+            JPanel miscPane = new JPanel();
+            miscPane.setLayout(new FlowLayout());
+            JLabel label = new JLabel("Photon count:");
+            miscPane.add(label);
+            _photonTextField = new JTextField(7);
+            _photonTextField.setEditable(false);
+            miscPane.add(_photonTextField);
+            _logCheckBox = new JCheckBox("Logarithmic");
+            _logCheckBox.setSelected(_logarithmic);
+            _logCheckBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    _logarithmic = _logCheckBox.isSelected();
+                    NumberAxis photonAxis;
+                    if (_logarithmic) {
+                        photonAxis = new LogarithmicAxis(PHOTON_AXIS_LABEL);
+                    }
+                    else {
+                        photonAxis = new NumberAxis(PHOTON_AXIS_LABEL);
+                    }
+                    _decaySubPlot.setRangeAxis(photonAxis);
+                }
+            });
+            miscPane.add(_logCheckBox);
+            container.add(miscPane);
+
             _frame.setSize(FRAME_SIZE);
             _frame.pack();
             _frame.setLocationRelativeTo(frame);
@@ -222,6 +261,24 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     public void setData(ICurveFitData data) {
         createDatasets(_bins, _timeInc, data);
 
+    }
+
+    /**
+     * Sets the displayed photon count.
+     * 
+     * @param photons 
+     */
+    public void setPhotons(int photons) {
+        _photonTextField.setText("" + photons);
+    }
+
+    /*
+     * Sets whether vertical axis should be logarithmic.
+     * 
+     * @param logarithmic
+     */
+    public void setLogarithmic(boolean logarithmic) {
+        _logarithmic = logarithmic;
     }
 
     /**

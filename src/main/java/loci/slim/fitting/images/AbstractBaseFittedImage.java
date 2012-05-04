@@ -76,6 +76,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
     private HistogramDataNode[] _dataChannels;
     private HistogramDataGroup _histogramData;
     private IColorizedFittedImage _fittedImage;
+    private Mask _mask;
     
     public AbstractBaseFittedImage(
             String title,
@@ -107,7 +108,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
             _values = new double[_width][_height];
             clear(_values);
             HistogramDataNode histogramDataChannel
-                    = new HistogramDataNode(_values);
+                    = new HistogramDataNode(this, _values);
             dataChannelList.add(histogramDataChannel);
             
             // build the actual displayed image
@@ -225,6 +226,41 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
     public void redisplay() {
         double[] minMaxLUT = _histogramData.getMinMaxLUT();
         redisplay(minMaxLUT);
+    }
+    
+    public void redraw(Mask mask) {
+        if (mask != _mask) {
+            _mask = mask;
+            
+            if (_histogramData.getAutoRange()) {
+                double[] minMaxLUT = _histogramData.getMinMaxLUT(); //TODO too much repeated code from "redisplay()"
+                minMaxLUT = PaletteFix.adjustMinMax(minMaxLUT[0], minMaxLUT[1]);
+                if (_colorizeGrayScale) {
+                    // redraw all images with new LUT
+                    for (IColorizedFittedImage fittedImage : _fittedImages) {
+                        fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]); //TODO we are redrawing all images anyway, then the current one again below...
+                    }
+                }
+                else {
+                    // when using a FloatProcessor the LUT belongs to entire stack
+                    _fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
+                }
+            }
+
+            for (int y = 0; y < _values[0].length; ++y) {
+                for (int x = 0; x < _values.length; ++x) {
+                    double value = Double.NaN;
+                    if (null == mask || mask.test(x, y)) {
+                        value = _values[x][y];
+                    }
+                    _fittedImage.draw(x, y, value);
+                }
+            }
+
+            //TODO
+            System.out.println("imagePlus.setProcessor etc.");
+            _imagePlus.setProcessor(_fittedImage.getImageProcessor().duplicate()); 
+        }
     }
 
     //TODO MASK

@@ -37,6 +37,7 @@ package loci.slim.fitting.images;
 import java.awt.image.IndexColorModel;
 
 import loci.slim.histogram.HistogramDataGroup;
+import loci.slim.mask.Mask;
 
 /**
  *
@@ -105,9 +106,16 @@ public interface IFittedImage {
     public void recalcHistogram();
 
     /**
-     * Redisplays the image.
+     * Redisplays the image after a LUT change.
      */
     public void redisplay();
+    
+    /**
+     * Redisplays the image after masking.
+     * 
+     * @param mask
+     */
+    public void redraw(Mask mask);
 
     /**
      * Given the array of fitted parameters, get the value for this image.

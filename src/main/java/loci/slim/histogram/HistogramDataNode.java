@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.histogram;
 
+import loci.slim.fitting.images.IFittedImage;
 import loci.slim.mask.IMaskGroup;
 import loci.slim.mask.IMaskNode;
 import loci.slim.mask.IMaskNodeListener;
@@ -48,6 +49,7 @@ import loci.slim.mask.MaskNode;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class HistogramDataNode {
+    private IFittedImage _fittedImage;
     private double[][] _values;
     private IMaskNode _maskNode;
     private Mask _selfMask;
@@ -64,18 +66,33 @@ public class HistogramDataNode {
      * 2) If the image shows colorized grayscale, a la SPCImage, the image values
      * will be incorrect.
      * 
+     * @param fittedImage
      * @param values 
      */
-    public HistogramDataNode(double[][] values) {
+    public HistogramDataNode(IFittedImage fittedImage, double[][] values) {
+        _fittedImage = fittedImage;
         _values = values;
     }
-    
+
+    /**
+     * Assigns a mask group.
+     * 
+     * @param maskGroup 
+     */
     public void setMaskGroup(IMaskGroup maskGroup) {
+        // create a new mask node that listens to the group
         _maskNode = new MaskNode(maskGroup, new IMaskNodeListener () {
             public void updateMask(Mask mask) {
                 System.out.println("HistogramDataNode.setMaskGroup IMaskNodeListener.updateMask " + mask);
+                if (null != mask) {
+                    boolean[][] bits = mask.getBits();
+                    if (null != bits) {
+                        System.out.println("mask excludes " + countBits(bits));
+                    }
+                }
                 setOtherMask(mask);
                 //TODO redraw, here or in setOtherMask()
+                _fittedImage.redraw(mask);
             }
         });
     }
@@ -110,9 +127,11 @@ public class HistogramDataNode {
         
         _otherMask = mask;
         if (null == _selfMask) {
+            // no self, so total mask is just other
             _totalMask = mask;
         }
         else {
+            // total mask is self plus other
             _totalMask = _selfMask.add(mask);
         }
         
@@ -144,7 +163,9 @@ public class HistogramDataNode {
             _totalMask = mask.add(_otherMask);
         }
 
-        System.out.println("I am " + this + " setSelfMask, total mask excludes " + countBits(_totalMask.getBits()));
+        System.out.print("I am " + this);
+        if (null != _totalMask) System.out.print(" setSelfMask, total mask excludes " + countBits(_totalMask.getBits()));
+        System.out.println();
     }
     
     public int countBits(boolean[][] bits) {

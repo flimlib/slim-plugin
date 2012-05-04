@@ -67,21 +67,50 @@ public class MaskGroup implements IMaskGroup {
 
     @Override
     public void updateMask(IMaskNode node, Mask mask) {
+        checkMask("incoming", mask);
         // update map with given mask
         _maskMap.put(node, mask);
 
-        // combine maska and notify other nodes
-        for (IMaskNode otherNode : _nodeList) {
-            System.out.println("MaskGroup.updateMask, consider " + otherNode);
+        // combine masks and notify other nodes
+        for (IMaskNode peerNode : _nodeList) {
+            System.out.println("MaskGroup.updateMask, consider " + peerNode);
             // don't notify the caller
-            if (otherNode != node) {
+            if (peerNode != node) {
                 // don't combine the recipients mask
-                Mask combinedMask = Mask.addOtherMasks(mask, _maskMap.values());
+                Mask peerMask = _maskMap.get(peerNode);
+                Mask combinedMask = Mask.addOtherMasks(peerMask, _maskMap.values());
+                checkMask("combined", combinedMask);
                 System.out.println("MaskGroup.updateMask, notify " + combinedMask);
-                otherNode.updateOtherMask(combinedMask);
+                peerNode.updateOtherMask(combinedMask);
             }
+            else System.out.println("MaskGroup.updateMask, originating node " + node + " skipped");
         }
 
 
+    }
+    
+    private void checkMask(String title, Mask mask) {
+        int trues = 0;
+        int falses = 0;
+        if (null == mask) {
+            System.out.println("Mask is null");
+            return;
+        }
+        boolean[][] bits = mask.getBits();
+        if (null == bits) {
+            System.out.println("mask has null bits");
+            return;
+        }
+        for (int y = 0; y < bits[0].length; ++y) {
+            for (int x = 0; x < bits.length; ++x) {
+                if (bits[x][y]) {
+                    ++trues;
+                }
+                else {
+                    ++falses;
+                }
+            }
+        }
+        System.out.println(title + " mask has " + trues + " trues " + falses + " falses");
     }
 }

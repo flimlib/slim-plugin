@@ -74,6 +74,13 @@ public interface IDecayGraph {
     public void setData(ICurveFitData data);
     
     /**
+     * Sets number of photons in fit.
+     * 
+     * @param photons
+     */
+    public void setPhotons(int photons);
+    
+    /**
      * Changes (or initializes) the start and stop vertical bars.
      *
      * @param transientStart
