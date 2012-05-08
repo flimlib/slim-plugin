@@ -40,7 +40,8 @@ import loci.slim.histogram.HistogramDataGroup;
 import loci.slim.mask.Mask;
 
 /**
- *
+ * Interface for a fitted image.
+ * 
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public interface IFittedImage {

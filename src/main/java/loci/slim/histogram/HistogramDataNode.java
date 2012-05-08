@@ -83,15 +83,7 @@ public class HistogramDataNode {
         // create a new mask node that listens to the group
         _maskNode = new MaskNode(maskGroup, new IMaskNodeListener () {
             public void updateMask(Mask mask) {
-                System.out.println("HistogramDataNode.setMaskGroup IMaskNodeListener.updateMask " + mask);
-                if (null != mask) {
-                    boolean[][] bits = mask.getBits();
-                    if (null != bits) {
-                        System.out.println("mask excludes " + countBits(bits));
-                    }
-                }
                 setOtherMask(mask);
-                //TODO redraw, here or in setOtherMask()
                 _fittedImage.redraw(mask);
             }
         });
@@ -121,10 +113,6 @@ public class HistogramDataNode {
      * @param mask or null
      */
     public void setOtherMask(Mask mask) {
-        System.out.print("incoming other mask " + mask);
-        if (null != mask) System.out.print(" excludes " + countBits(mask.getBits()));
-        System.out.println();
-        
         _otherMask = mask;
         if (null == _selfMask) {
             // no self, so total mask is just other
@@ -134,10 +122,6 @@ public class HistogramDataNode {
             // total mask is self plus other
             _totalMask = _selfMask.add(mask);
         }
-        
-        System.out.print("I am " + this + " setOtherMask, total mask " + _totalMask);
-        if (null != _totalMask) System.out.print(" excludes " + countBits(_totalMask.getBits()));
-        System.out.println();
     }
 
     /**
@@ -162,22 +146,6 @@ public class HistogramDataNode {
         else {
             _totalMask = mask.add(_otherMask);
         }
-
-        System.out.print("I am " + this);
-        if (null != _totalMask) System.out.print(" setSelfMask, total mask excludes " + countBits(_totalMask.getBits()));
-        System.out.println();
-    }
-    
-    public int countBits(boolean[][] bits) {
-        int counter = 0;
-        if (null != bits) {
-            for (int y = 0; y < bits[0].length; ++y) {
-                for (int x = 0; x < bits.length; ++x) {
-                    if (!bits[x][y]) ++counter;
-                }
-            }
-        }
-        return counter;
     }
 
     /**
@@ -275,8 +243,6 @@ public class HistogramDataNode {
         if (masked) {
             selfMask = new Mask(bits);
         }
-
-        System.out.println("HistogramDataNode.propagateMask " + selfMask);
         setSelfMask(selfMask);
         _maskNode.updateSelfMask(selfMask);
     }
@@ -287,8 +253,6 @@ public class HistogramDataNode {
      */
     public void rescindMask() {
         Mask selfMask = null;
-        
-        System.out.println("HistogramDataNode.rescindMask");
         setSelfMask(selfMask);
         _maskNode.updateSelfMask(selfMask);
     }

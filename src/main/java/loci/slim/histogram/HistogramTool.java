@@ -249,6 +249,11 @@ public class HistogramTool {
             // ii) if the user types in a new LUT range this gets called.
             // iii) in the future more UI interactions will wind up here
             //
+            //TODO if the user drags a new LUT range this doesn't get called!
+            
+          System.out.println("changed min/maxView " + minView + " " + maxView + " min/maxLUT " + minLUT + " " + maxLUT);  
+            
+            
             _histogramDataGroup.redisplay();
         }
     }
@@ -312,6 +317,9 @@ public class HistogramTool {
             // save and redraw image
             synchronized (_synchObject) {
                 _histogramDataGroup.setMinMaxLUT(minLUT, maxLUT);
+                if (_uiPanel.getExcludePixels()) {
+                    _histogramDataGroup.excludePixels(true);
+                }
             }
         }
 
@@ -456,8 +464,6 @@ public class HistogramTool {
             //TODO ARG Mask selfMask = null;
             synchronized (_synchObject) {
                 _histogramDataGroup.excludePixels(excludePixels);
-                //TODO ARG
-                System.out.println("set exclude pixels " + excludePixels);
             }
         }
         

@@ -72,10 +72,10 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
     private ImagePlus _imagePlus;
     private MyStackWindow _stackWindow;
     private double _values[][];
-    private IColorizedFittedImage[] _fittedImages;
+    private IFittedImageSlice[] _fittedImages;
     private HistogramDataNode[] _dataChannels;
     private HistogramDataGroup _histogramData;
-    private IColorizedFittedImage _fittedImage;
+    private IFittedImageSlice _fittedImage;
     private Mask _mask;
     
     public AbstractBaseFittedImage(
@@ -96,8 +96,8 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         _imageStack = new ImageStack(_width, _height);
         
         // building a list of displayed images
-        List<IColorizedFittedImage> fittedImageList
-                = new ArrayList<IColorizedFittedImage>();
+        List<IFittedImageSlice> fittedImageList
+                = new ArrayList<IFittedImageSlice>();
         
         // building a list of HistogramDataChannels
         List<HistogramDataNode> dataChannelList
@@ -112,7 +112,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
             dataChannelList.add(histogramDataChannel);
             
             // build the actual displayed image
-            IColorizedFittedImage fittedImage = null;
+            IFittedImageSlice fittedImage = null;
             if (colorizeGrayScale) {
                 fittedImage
                         = new ColorizedFittedImage(grayScalePixelValue, _values); 
@@ -148,7 +148,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         });
         
         _fittedImages
-                = fittedImageList.toArray(new IColorizedFittedImage[0]);
+                = fittedImageList.toArray(new IFittedImageSlice[0]);
         _dataChannels
                 = dataChannelList.toArray(new HistogramDataNode[0]);
         
@@ -174,7 +174,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
      * @param colorModel 
      */
     public void setColorModel(IndexColorModel colorModel) {
-        for (IColorizedFittedImage fittedImage : _fittedImages) {
+        for (IFittedImageSlice fittedImage : _fittedImages) {
             fittedImage.setColorModel(colorModel);
         }
     }    
@@ -227,7 +227,12 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         double[] minMaxLUT = _histogramData.getMinMaxLUT();
         redisplay(minMaxLUT);
     }
-    
+
+    /**
+     * Redraws the entire image after a masking change.
+     * 
+     * @param mask 
+     */
     public void redraw(Mask mask) {
         if (mask != _mask) {
             _mask = mask;
@@ -235,9 +240,10 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
             if (_histogramData.getAutoRange()) {
                 double[] minMaxLUT = _histogramData.getMinMaxLUT(); //TODO too much repeated code from "redisplay()"
                 minMaxLUT = PaletteFix.adjustMinMax(minMaxLUT[0], minMaxLUT[1]);
+                System.out.println("image " + _title + " min max " + minMaxLUT[0] + " " + minMaxLUT[1]);
                 if (_colorizeGrayScale) {
                     // redraw all images with new LUT
-                    for (IColorizedFittedImage fittedImage : _fittedImages) {
+                    for (IFittedImageSlice fittedImage : _fittedImages) {
                         fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]); //TODO we are redrawing all images anyway, then the current one again below...
                     }
                 }
@@ -286,7 +292,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         if (null != _fittedImage) {
             if (_colorizeGrayScale) {
                 // redraw all images with new LUT
-                for (IColorizedFittedImage fittedImage : _fittedImages) {
+                for (IFittedImageSlice fittedImage : _fittedImages) {
                     fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
                 }
             }

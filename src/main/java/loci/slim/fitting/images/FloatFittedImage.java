@@ -43,7 +43,7 @@ import ij.process.ImageProcessor;
  * 
  * @author Aivar Grislis grislis at wisc dot edu
  */
-public class FloatFittedImage implements IColorizedFittedImage {
+public class FloatFittedImage implements IFittedImageSlice {
     int _width;
     int _height;
     int _channel;

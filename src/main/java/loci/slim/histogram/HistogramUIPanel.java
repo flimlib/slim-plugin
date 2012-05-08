@@ -276,6 +276,15 @@ public class HistogramUIPanel extends JPanel {
     }
 
     /**
+     * Gets whether to hide out of range pixels.
+     * 
+     * @return 
+     */
+    public boolean getExcludePixels() {
+        return _excludePixels;
+    }
+
+    /**
      * Sets whether to combine all channels.
      * 
      * For IJ1 this doesn't change anything.

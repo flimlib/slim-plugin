@@ -48,7 +48,7 @@ import loci.slim.IGrayScalePixelValue;
  * 
  * @author Aivar Grislis grislis at wisc dot edu
  */
-public class ColorizedFittedImage implements IColorizedFittedImage {
+public class ColorizedFittedImage implements IFittedImageSlice {
     private static final float SATURATION = 0.75f;
     IGrayScalePixelValue _grayScalePixelValue;
     double[][] _values;
@@ -97,7 +97,7 @@ public class ColorizedFittedImage implements IColorizedFittedImage {
 
     @Override
     public void setMinAndMax(double min, double max) {
-        if (min != _min || max != max) {
+        if (min != _min || max != _max) {
             _min = min;
             _max = max;
 
@@ -138,7 +138,9 @@ public class ColorizedFittedImage implements IColorizedFittedImage {
      * 
      */
     private Color getColorizedGrayColor(int grayValue, double value) {
-        if (_max == _min) {
+        if (_max == _min
+                || Double.isNaN(value)
+                || value < _min || value > _max) {
             return getGrayColor(grayValue);
         }
         
@@ -147,7 +149,7 @@ public class ColorizedFittedImage implements IColorizedFittedImage {
         
         // convert 0.0..1.0 to 1..254 (colors 0 and 255 have a special use)
         int index = 1 + (int) (value * 253);
-        
+
         // get color
         Color color = new Color(_indexColorModel.getRGB(index));
 

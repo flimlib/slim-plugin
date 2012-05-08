@@ -39,19 +39,51 @@ import java.awt.image.IndexColorModel;
 import ij.process.ImageProcessor;
 
 /**
- *
+ * This interface is for a 2D slice of the fitted image.
+ * 
  * @author Aivar Grislis grislis at wisc dot edu
  */
-public interface IColorizedFittedImage {
-    
+public interface IFittedImageSlice {
+
+    /**
+     * Initializes a slice.
+     * 
+     * @param width
+     * @param height
+     * @param channel
+     * @param indexColorModel 
+     */
     public void init(int width, int height, int channel,
             IndexColorModel indexColorModel);
-    
+
+    /**
+     * Changes LUT.
+     * 
+     * @param indexColorModel 
+     */
     public void setColorModel(IndexColorModel indexColorModel);
-    
+
+    /**
+     * Gets the underlying IJ image processor.
+     * 
+     * @return 
+     */
     public ImageProcessor getImageProcessor();
-    
+
+    /**
+     * Sets the minimum and maximum values for the LUT range.
+     * 
+     * @param min
+     * @param max 
+     */
     public void setMinAndMax(double min, double max);
-    
+
+    /**
+     * Draws a single pixel with current LUT and LUT range.
+     * 
+     * @param x
+     * @param y
+     * @param value 
+     */
     public void draw(int x, int y, double value);
 }
