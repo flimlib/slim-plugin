@@ -139,7 +139,7 @@ public class HistogramTool {
         // only 254 of the LUT colors.  The first and last colors will represent
         // values less than and greater than the LUT range respectively.
 
-        colorModel = PaletteFix.fixIndexColorModel(colorModel, Color.BLACK, Color.WHITE);
+        colorModel = PaletteFix.fixIndexColorModel(colorModel, Color.BLACK, Color.BLACK);
         return colorModel;
     }
     
