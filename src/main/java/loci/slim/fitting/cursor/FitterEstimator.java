@@ -34,11 +34,13 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.fitting.cursor;
 
+import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.IFitterEstimator;
 
 /**
  * This is a class used when doing a fit with an RLD estimate fit combined
- * with a LMA fit.  It allows for some peculiarities of TRI2.
+ * with a LMA fit.  It allows for some peculiarities of TRI2 to ensure matching
+ * results.
  *
  * @author Aivar Grislis grislis at wisc dot edu
  */
@@ -69,6 +71,54 @@ public class FitterEstimator implements IFitterEstimator {
         return yCount[transEstimateStartIndex];
     }
 
+    /**
+     * Adjusts the mono exponential triple integral fit estimate for further
+     * mono, bi, tri, and stretched exponential fitting.
+     * 
+     * Based on TRfitting.c from TRI2.  In TRI2 this is all table-driven, using
+     * "fitType[i].preEstimateFactors[0]" etc.  Comments below give those table
+     * entry values.
+     * 
+     * @param params
+     * @param fitFunction
+     * @param A
+     * @param tau
+     * @param Z 
+     */
+    @Override
+    public void adjustEstimatedParams(double[] params, FitFunction fitFunction,
+            double A, double tau, double Z) {
+        switch (fitFunction) {
+            case SINGLE_EXPONENTIAL:
+                params[1] = Z;                // 1.0
+                params[2] = A;                // 1.0
+                params[3] = tau;              // 1.0
+                break;
+            case DOUBLE_EXPONENTIAL:
+                params[1] = Z;                // 1.0
+                params[2] = 0.75 * A;         // 0.75
+                params[3] = tau;              // 1.0
+                params[4] = 0.25 * A;         // 0.25
+                params[5] = 0.6666667 * tau;  // 0.6666667
+                break;
+            case TRIPLE_EXPONENTIAL:
+                params[1] = Z;                // 1.0
+                params[2] = 0.75 * A;         // 0.75
+                params[3] = tau;              // 1.0
+                params[4] = 1.0 / 6.0 * A;    // 1.0 / 6.0
+                params[5] = 0.6666667 * tau;  // 0.6666667
+                params[6] = 1.0 / 6.0 * A;    // 1.0 / 6.0
+                params[7] = 0.3333333 * tau;  // 0.3333333
+                break;
+            case STRETCHED_EXPONENTIAL:
+                params[1] = Z;                // 1.0
+                params[2] = A;                // 1.0
+                params[3] = tau;              // 1.0
+                params[4] = 1.5;              // -1.5
+                break;
+        }
+    }
+    
     public int findMax(double[] value, int start, int stop) {
         int index = start;
         double max = value[start];

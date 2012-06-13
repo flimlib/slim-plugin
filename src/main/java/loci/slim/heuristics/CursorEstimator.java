@@ -498,6 +498,7 @@ public class CursorEstimator {
      *
      * @return
      */
+    //TODO ARG this is incomplete;missing RLD fit call; this is not called from anywhere
     public static double[] estimateParameters(boolean useRLD,
             boolean useBackground,
             double[] trans,
