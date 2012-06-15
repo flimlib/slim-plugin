@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.fitting.cursor;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.NoiseModel;
 import loci.curvefitter.IFitterEstimator;
 
 /**
@@ -69,6 +70,11 @@ public class FitterEstimator implements IFitterEstimator {
         // A parameter estimate changes for RLD estimate fit
         int transEstimateStartIndex = findMax(yCount, start, stop);
         return yCount[transEstimateStartIndex];
+    }
+    
+    @Override
+    public NoiseModel getEstimateNoiseModel(NoiseModel noiseModel) {
+        return NoiseModel.POISSON_FIT;
     }
 
     /**
