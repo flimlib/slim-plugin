@@ -46,12 +46,6 @@ import loci.curvefitter.IFitterEstimator;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class FitterEstimator implements IFitterEstimator {
-    
-    @Override
-    public boolean usePrompt() {
-        // no prompt for RLD estimate fit
-        return false;
-    }
 
     @Override
     public int getEstimateStartIndex(double[] yCount, int start, int stop) {
