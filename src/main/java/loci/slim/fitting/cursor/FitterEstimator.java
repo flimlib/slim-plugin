@@ -86,41 +86,80 @@ public class FitterEstimator implements IFitterEstimator {
      * entry values.
      * 
      * @param params
+     * @param free
      * @param fitFunction
      * @param A
      * @param tau
      * @param Z 
      */
     @Override
-    public void adjustEstimatedParams(double[] params, FitFunction fitFunction,
-            double A, double tau, double Z) {
+    public void adjustEstimatedParams(double[] params, boolean[] free,
+            FitFunction fitFunction, double A, double tau, double Z) {
         switch (fitFunction) {
             case SINGLE_EXPONENTIAL:
-                params[1] = Z;                // 1.0
-                params[2] = A;                // 1.0
-                params[3] = tau;              // 1.0
+                if (free[0]) {
+                    params[1] = Z;                // 1.0
+                }
+                if (free[1]) {
+                    params[2] = A;                // 1.0
+                }
+                if (free[2]) {
+                    params[3] = tau;              // 1.0
+                }
                 break;
             case DOUBLE_EXPONENTIAL:
-                params[1] = Z;                // 1.0
-                params[2] = 0.75 * A;         // 0.75
-                params[3] = tau;              // 1.0
-                params[4] = 0.25 * A;         // 0.25
-                params[5] = 0.6666667 * tau;  // 0.6666667
+                if (free[0]) {
+                    params[1] = Z;                // 1.0
+                }
+                if (free[1]) {
+                    params[2] = 0.75 * A;         // 0.75
+                }
+                if (free[2]) {
+                    params[3] = tau;              // 1.0
+                }
+                if (free[3]) {
+                    params[4] = 0.25 * A;         // 0.25
+                }
+                if (free[4]) {
+                    params[5] = 0.6666667 * tau;  // 0.
+                }
                 break;
             case TRIPLE_EXPONENTIAL:
-                params[1] = Z;                // 1.0
-                params[2] = 0.75 * A;         // 0.75
-                params[3] = tau;              // 1.0
-                params[4] = 1.0 / 6.0 * A;    // 1.0 / 6.0
-                params[5] = 0.6666667 * tau;  // 0.6666667
-                params[6] = 1.0 / 6.0 * A;    // 1.0 / 6.0
-                params[7] = 0.3333333 * tau;  // 0.3333333
+                if (free[0]) {
+                    params[1] = Z;                // 1.0
+                }
+                if (free[1]) {
+                    params[2] = 0.75 * A;         // 0.75
+                }
+                if (free[2]) {
+                    params[3] = tau;              // 1.0
+                }
+                if (free[3]) {
+                    params[4] = 1.0 / 6.0 * A;    // 1.0 / 6.0
+                }
+                if (free[4]) {
+                    params[5] = 0.6666667 * tau;  // 0.6666667
+                }
+                if (free[5]) {
+                    params[6] = 1.0 / 6.0 * A;    // 1.0 / 6.0
+                }
+                if (free[6]) {
+                    params[7] = 0.3333333 * tau;  // 0.3333333
+                }
                 break;
             case STRETCHED_EXPONENTIAL:
-                params[1] = Z;                // 1.0
-                params[2] = A;                // 1.0
-                params[3] = tau;              // 1.0
-                params[4] = 1.5;              // -1.5
+                if (free[0]) {
+                    params[1] = Z;                // 1.0
+                }
+                if (free[1]) {
+                    params[2] = A;                // 1.0
+                }
+                if (free[2]) {
+                    params[3] = tau;              // 1.0
+                }
+                if (free[3]) {
+                    params[4] = 1.5;              // -1.5
+                }
                 break;
         }
     }
