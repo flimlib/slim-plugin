@@ -571,7 +571,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
     private boolean updateExcitation(IUserInterfacePanel uiPanel, Excitation excitation) {
         boolean success = false;
-//        System.out.println("###update excitation " + excitation);
+        System.out.println("###update excitation " + excitation);
         if (null != excitation) {
             if (null != _excitationPanel) {
                 _excitationPanel.quit();
@@ -803,8 +803,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         fitInfo.setColorizeGrayScale(uiPanel.getColorizeGrayScale());
         fitInfo.setAnalysisList(uiPanel.getAnalysisList());
         fitInfo.setFitAllChannels(uiPanel.getFitAllChannels());
-        fitInfo.setStartDecay(fittingCursor.getDataStartBin());
-        fitInfo.setStopDecay(fittingCursor.getTransientStopBin());
+        fitInfo.setTransientStart(fittingCursor.getTransientStartBin());
+        fitInfo.setDataStart(fittingCursor.getDataStartBin());
+        fitInfo.setTransientStop(fittingCursor.getTransientStopBin());
         fitInfo.setThreshold(uiPanel.getThreshold());
         fitInfo.setChiSquareTarget(uiPanel.getChiSquareTarget());
         fitInfo.setBinning(uiPanel.getBinning());   
@@ -859,7 +860,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             processor = binner;
         }
         if (fitInfo.getThreshold() > 0) {
-            IProcessor threshold = new Threshold(fitInfo.getStartDecay(), fitInfo.getStopDecay(), fitInfo.getThreshold());
+            IProcessor threshold = new Threshold(fitInfo.getDataStart(), fitInfo.getTransientStop(), fitInfo.getThreshold());
             threshold.chain(processor);
             processor = threshold;
         }
@@ -937,8 +938,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         globalFitParams.setFitAlgorithm(fitInfo.getAlgorithm());
         globalFitParams.setFitFunction(fitInfo.getFunction());
         globalFitParams.setNoiseModel(fitInfo.getNoiseModel());
-        globalFitParams.setStartDecay(fitInfo.getStartDecay());
-        globalFitParams.setStopDecay(fitInfo.getStopDecay());
+        globalFitParams.setTransientStart(fitInfo.getTransientStart());
+        globalFitParams.setDataStart(fitInfo.getDataStart());
+        globalFitParams.setTransientStop(fitInfo.getTransientStop());
         globalFitParams.setXInc(fitInfo.getXInc());
         globalFitParams.setPrompt(fitInfo.getPrompt());
         globalFitParams.setStartPrompt(fitInfo.getStartPrompt());
@@ -976,8 +978,6 @@ public class SLIMProcessor <T extends RealType<T>> {
                     ILocalFitParams localFitParams = new LocalFitParams();
                     localFitParams.setY(decay);
                     localFitParams.setSig(null);
-                    localFitParams.setFitStart(fitInfo.getStartDecay());
-                    localFitParams.setFitStop(fitInfo.getStopDecay());
                     localFitParams.setParams(fitInfo.getParameters());
                     double[] yFitted = new double[bins];
                     localFitParams.setYFitted(yFitted);
@@ -1810,7 +1810,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     || promptBaseline != _promptBaseline) {
                 
                 // trigger refit
-                System.out.append("*** REFIT ***");
+                System.out.println("*** REFIT ***");
   
                 // update saved cursor values for next time
                 _transStart     = transStart;

@@ -69,26 +69,6 @@ public class LocalFitParams implements ILocalFitParams {
     }
     
     @Override
-    public void setFitStart(int fitStart) {
-        _fitStart = fitStart;
-    }
-    
-    @Override
-    public int getFitStart() {
-        return _fitStart;
-    }
-    
-    @Override
-    public void setFitStop(int fitStop) {
-        _fitStop = fitStop;
-    }
-    
-    @Override
-    public int getFitStop() {
-        return _fitStop;
-    }
-    
-    @Override
     public void setParams(double[] params) {
         _params = params;
     }

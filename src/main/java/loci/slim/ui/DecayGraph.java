@@ -416,7 +416,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         double xCurrent = 0.0;
         for (int i = 0; i < bins; ++i) {
             // show transient data
-            double yData = data.getYCount()[i];
+            double yData = data.getTransient()[i];
             
             // keep track of maximum
             if (yData > yDataMax) {
@@ -451,7 +451,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                 
                 // from dataStart..transEnd show residuals
                 if (dataStart <= i && 0.0 < yFitted) {
-                    double yData = data.getYCount()[i];
+                    double yData = data.getTransient()[i];
                     series4.add(xCurrent, yData - yFitted);
                 }
                 else {

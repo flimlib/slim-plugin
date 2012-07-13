@@ -87,11 +87,15 @@ public interface IGlobalFitParams {
     
     public int getStopPrompt();
     
-    public void setStartDecay(int startDecay);
+    public int getTransientStart();
     
-    public int getStartDecay();
+    public void setTransientStart(int transientStart);
     
-    public void setStopDecay(int stopDecay);
+    public int getDataStart();
     
-    public int getStopDecay();
+    public void setDataStart(int dataStart);
+    
+    public int getTransientStop();
+    
+    public void setTransientStop(int transientStop);
 }

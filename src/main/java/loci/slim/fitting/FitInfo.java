@@ -57,8 +57,9 @@ public class FitInfo {
     private boolean _colorizeGrayScale;
     private String[] _analysisList;
     private boolean _fitAllChannels;
-    private int _startDecay;
-    private int _stopDecay;
+    private int _transientStart;
+    private int _dataStart;
+    private int _transientStop;
     private double _xInc;
     private int _threshold; //TODO this s/b accounted for by IInputImage
     private double _chiSquareTarget;
@@ -286,39 +287,57 @@ public class FitInfo {
     }
 
     /**
-     * Gets starting bin of fit.
+     * Gets starting bin of transient.
      *
      * @return start
      */
-    public int getStartDecay() {
-        return _startDecay;
+    public int getTransientStart() {
+        return _transientStart;
     }
 
     /**
-     * Sets starting bin of fit.
+     * Sets starting bin of transient.
      *
      * @param bin
      */
-    public void setStartDecay(int bin) {
-        _startDecay = bin;
+    public void setTransientStart(int bin) {
+        _transientStart = bin;
     }
 
     /**
-     * Gets stopping bin of fit (inclusive).
+     * Gets starting data bin of transient.
+     * 
+     * @return 
+     */
+    public int getDataStart() {
+        return _dataStart;
+    }
+    
+    /**
+     * Sets starting data bin of transient.
+     * 
+     * @param bin
+     */
+    public void setDataStart(int bin) {
+        _dataStart = bin;
+    }
+
+    /**
+     * Gets stopping bin of transient (inclusive).
      *
      * @return stop
      */
-    public int getStopDecay() {
-        return _stopDecay;
+    public int getTransientStop() {
+        return _transientStop;
     }
 
     /**
-     * Sets stopping bin of fit.
+     * Sets stopping bin of transient.
      *
      * @param bin
      */
-    public void setStopDecay(int bin) {
-        _stopDecay = bin;
+    public void setTransientStop(int bin) {
+        _transientStop = bin;
     }
 
     /**

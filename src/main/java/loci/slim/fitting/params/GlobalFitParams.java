@@ -56,8 +56,9 @@ public class GlobalFitParams implements IGlobalFitParams {
     private boolean[] _free;
     private int _startPrompt;
     private int _stopPrompt;
-    private int _startDecay;
-    private int _stopDecay;
+    private int _transientStart;
+    private int _dataStart;
+    private int _transientStop;
 
     @Override
     public void setEstimator(IFitterEstimator estimator) {
@@ -160,22 +161,32 @@ public class GlobalFitParams implements IGlobalFitParams {
     }
     
     @Override
-    public void setStartDecay(int startDecay) {
-        _startDecay = startDecay;
+    public void setTransientStart(int transientStart) {
+        _transientStart = transientStart;
+    }
+
+    @Override
+    public int getTransientStart() {
+        return _transientStart;
     }
     
     @Override
-    public int getStartDecay() {
-        return _startDecay;
+    public void setDataStart(int dataStart) {
+        _dataStart = dataStart;
     }
     
     @Override
-    public void setStopDecay(int stopDecay) {
-        _stopDecay = stopDecay;
+    public int getDataStart() {
+        return _dataStart;
     }
     
     @Override
-    public int getStopDecay() {
-        return _stopDecay;
+    public void setTransientStop(int transientStop) {
+        _transientStop = transientStop;
+    }
+    
+    @Override
+    public int getTransientStop() {
+        return _transientStop;
     }
 }

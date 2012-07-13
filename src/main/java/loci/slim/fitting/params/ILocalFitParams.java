@@ -50,14 +50,6 @@ public interface ILocalFitParams {
     
     public double[] getSig();
     
-    public void setFitStart(int fitStart);
-    
-    public int getFitStart();
-    
-    public void setFitStop(int fitStop);
-    
-    public int getFitStop();
-    
     public void setParams(double[] params);
     
     public double[] getParams();
