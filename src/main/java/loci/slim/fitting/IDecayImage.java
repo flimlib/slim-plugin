@@ -34,7 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.fitting;
 
-import loci.slim.process.IProcessor;
+import loci.slim.preprocess.IProcessor;
 
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.RealType;

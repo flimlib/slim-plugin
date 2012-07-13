@@ -1,11 +1,11 @@
 //
-// Bin7x7.java
+// ISLIMBinner.java
 //
 
 /*
-SLIMPlugin for combined spectral-lifetime image analysis.
+ImageJ software for multidimensional image processing and analysis.
 
-Copyright (c) 2010, UW-Madison LOCI
+Copyright (c) 2011, ImageJDev.org.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,20 +32,15 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.process;
+package loci.slim.preprocess;
 
 /**
- * A plugin within a plugin, this is used to bin the fit input.
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/process/Bin3x3.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/process/Bin3x3.java">SVN</a></dd></dl>
- *
+ * Interface for an input processor that does binning.
+ * 
  * @author Aivar Grislis grislis at wisc dot edu
  */
-@SLIMBinner("7 x 7")
-public class Bin7x7 extends SquareBinner implements ISLIMBinner {
-    public void init(int width, int height) {
-        super.init(3, width, height);
-    }
+public interface ISLIMBinner extends IProcessor {
+    
+    public void init(int width, int height);
+    
 }

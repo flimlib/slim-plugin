@@ -1,5 +1,5 @@
 //
-// IColorize.java
+// Threshold.java
 //
 
 /*
@@ -32,37 +32,55 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.colorizer;
-
-import java.awt.Color;
+package loci.slim.preprocess;
 
 /**
- * TODO
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/IColorize.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/IColorize.java">SVN</a></dd></dl>
- *
- * @author Aivar Grislis grislis at wisc.edu
+ * This class thresholds the image to a given photon count.
+ * 
+ * @author Aivar Grislis grislis at wisc dot edu
  */
-public interface IColorize {
-
+public class Threshold implements IProcessor {
+    private final int _start;
+    private final int _stop;
+    private final int _photons;
+    private IProcessor _processor;
+    
+    public Threshold(int start, int stop, int threshold) {
+        _start            = start;
+        _stop             = stop;
+        _photons        = threshold;
+    }
+    
     /**
-     * Expresses the value as a interpolated Color, given the start
-     * and stop values.
-     *
-     * @param start
-     * @param stop
-     * @param value
-     * @return
+     * Specifies a source IProcessor to be chained to this one.
+     * 
+     * @param processor 
      */
-    public Color colorize(double start, double stop, double value);
-
+    public void chain(IProcessor processor) {
+        _processor = processor;
+    }
+    
     /**
-     * Generates a color bar or ramp.
-     *
-     * @param pixels
-     * @return
+     * Gets input pixel value.
+     * 
+     * @param x
+     * @param y
+     * @param channel
+     * @return null or pixel value
      */
-    public Color[] bar(int pixels);
+    public double[] getPixel(int[] location) {
+        double[] decay = _processor.getPixel(location);
+        
+        // reject any pixels that have less than the threshold number of photons
+        if (null != decay) {
+            double sum = 0.0;
+            for (int bin = _start; bin <= _stop; ++bin) {
+                sum += decay[bin];
+            }
+            if (sum < _photons) {
+                decay = null;
+            }
+        }
+        return decay;
+    }  
 }

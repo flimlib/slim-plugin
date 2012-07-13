@@ -36,7 +36,7 @@ package loci.slim;
 
 /**
  * This class is a container for values for the instrument response function,
- * aka excitation, aka prompt, aka lamp function.
+ * aka IRF, aka excitation, aka prompt, aka lamp function.
  *
  * @author Aivar Grislis grislis at wisc dot edu
  */

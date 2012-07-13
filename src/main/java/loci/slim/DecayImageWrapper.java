@@ -5,7 +5,7 @@
 package loci.slim;
 
 import loci.slim.fitting.IDecayImage;
-import loci.slim.process.IProcessor;
+import loci.slim.preprocess.IProcessor;
 
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;

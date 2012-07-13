@@ -1,11 +1,11 @@
 //
-// ISLIMBinner.java
+// SLIMBinner.java
 //
 
 /*
-ImageJ software for multidimensional image processing and analysis.
+SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2011, ImageJDev.org.
+Copyright (c) 2010, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -15,7 +15,7 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the names of the ImageJDev.org developers nor the
+    * Neither the name of the UW-Madison LOCI nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -32,15 +32,31 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.process;
+package loci.slim.preprocess;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import net.java.sezpoz.Indexable;
 
 /**
- * Interface for an input processor that does binning.
- * 
+ * Annotation used to name ISLIMBinner implementations.  These names appear
+ * in the dropdown list in the UI.
+ *
+ * Syntax:
+ *  @SLIMBinner("Binner")
+ *
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/process/SLIMBinner.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/process/SLIMBinner.java">SVN</a></dd></dl>
+ *
  * @author Aivar Grislis grislis at wisc dot edu
  */
-public interface ISLIMBinner extends IProcessor {
-    
-    public void init(int width, int height);
-    
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
+@Retention(RetentionPolicy.SOURCE)
+@Indexable(type=ISLIMBinner.class)
+public @interface SLIMBinner {
+    String value();
 }

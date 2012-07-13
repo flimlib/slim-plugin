@@ -1,5 +1,5 @@
 //
-// SLIMBinner.java
+// Bin3x3.java
 //
 
 /*
@@ -15,7 +15,7 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the UW-Madison LOCI nor the
+    * Neither the names of the ImageJDev.org developers nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -32,31 +32,20 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.process;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import net.java.sezpoz.Indexable;
+package loci.slim.preprocess;
 
 /**
- * Annotation used to name ISLIMBinner implementations.  These names appear
- * in the dropdown list in the UI.
- *
- * Syntax:
- *  @SLIMBinner("Binner")
+ * A plugin within a plugin, this is used to bin the fit input.
  *
  * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/process/SLIMBinner.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/process/SLIMBinner.java">SVN</a></dd></dl>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/process/Bin3x3.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/process/Bin3x3.java">SVN</a></dd></dl>
  *
- * @author Aivar Grislis grislis at wisc dot edu
+ * @author Aivar Grislis
  */
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
-@Retention(RetentionPolicy.SOURCE)
-@Indexable(type=ISLIMBinner.class)
-public @interface SLIMBinner {
-    String value();
+@SLIMBinner("3 x 3")
+public class Bin3x3 extends SquareBinner implements ISLIMBinner {
+    public void init(int width, int height) {
+        super.init(1, width, height);
+    }
 }

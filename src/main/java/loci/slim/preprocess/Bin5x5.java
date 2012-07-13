@@ -1,5 +1,5 @@
 //
-// IColorizeRangeListener.java
+// Bin5x5.java
 //
 
 /*
@@ -15,7 +15,7 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the UW-Madison LOCI nor the
+    * Neither the names of the ImageJDev.org developers nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -32,27 +32,20 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.colorizer;
+package loci.slim.preprocess;
 
 /**
- * Passes around settings changes.
+ * A plugin within a plugin, this is used to bin the fit input.
  *
  * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/IColorizeRangeListener.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/colorizer/IColorizeRangeListener.java">SVN</a></dd></dl>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/binning/plugins/Bin3x3.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/binning/plugins/Bin3x3.java">SVN</a></dd></dl>
  *
- * @author Aivar Grislis grislis at wisc.edu
+ * @author Aivar Grislis
  */
-public interface IColorizeRangeListener {
-
-    /**
-     * Set new range settings.
-     *
-     * @param auto
-     * @param start
-     * @param stop
-     * @param min
-     * @param max
-     */
-    public void setRange(boolean auto, double start, double stop, double min, double max);
+@SLIMBinner("5 x 5")
+public class Bin5x5 extends SquareBinner implements ISLIMBinner {
+    public void init(int width, int height) {
+        super.init(2, width, height);
+    }
 }

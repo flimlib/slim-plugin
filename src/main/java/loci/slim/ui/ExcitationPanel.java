@@ -42,6 +42,7 @@ import javax.swing.JPanel;
 
 import loci.slim.Excitation;
 import loci.slim.fitting.cursor.FittingCursor;
+import loci.slim.heuristics.ExcitationScaler;
 
 /**
  * Panel that holds the excitation graph.
@@ -95,42 +96,15 @@ public class ExcitationPanel extends JFrame {
     }
 
     /**
-     * This is based on TRCursors.c UpdatePrompt in TRI2.
+     * Gets the excitation values scaled for a particular start/stop/base cursor.
      * 
      * @param start
      * @param stop
      * @return 
      */
     public double[] getValues(double start, double stop, double base) {
-        int startIndex = (int) Math.ceil(start / _timeInc);
-        if (startIndex < 0) {
-            startIndex = 0;
-        }
-        int stopIndex = (int) Math.floor(stop / _timeInc) + 1;
-        if (stopIndex > _bins) {
-            stopIndex = _bins;
-        }
         
-        if (stopIndex <= startIndex) {
-            return null;
-        }
-        
-        double inValues[] = _excitation.getValues();
-        double scaling = 0.0;
-        for (int i = startIndex; i < stopIndex; ++i) {
-            scaling += inValues[i];
-        }
-        
-        if (0.0 == scaling) {
-            return null;
-        }
- 
-        double[] values = new double[stopIndex - startIndex];
-        int j = 0;
-        for (int i = startIndex; i < stopIndex; ++i) {
-            values[j++] = (inValues[i] - base) / scaling;
-        }    
-        return values;
+        return ExcitationScaler.scale(_excitation.getValues(), start, stop, base, _timeInc, _bins);
     }
 
     /*
