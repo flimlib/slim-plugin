@@ -10,6 +10,8 @@ package loci.slim.heuristics;
  * @author Aivar Grislis
  */
 public class ExcitationScaler {
+    // use to create data for ExcitationScalerTest
+    private static final boolean createTestData = false;
 
     /**
      * This is based on TRCursors.c UpdatePrompt in TRI2.
@@ -23,16 +25,7 @@ public class ExcitationScaler {
      * @return 
      */
     public static double[] scale(double[] decay, double start, double stop, double base, double timeInc, int bins) {
-        System.out.println("Excitation.scale, start " + start + " stop " + stop + " base " + base);
-        System.out.println("timeInc " + timeInc + " bins " + bins);
 
-        System.out.print("{");
-        for (double d : decay) {
-            System.out.print(" " + d + ",");
-        }
-        System.out.println("}");
-        
-        
         int startIndex = (int) Math.ceil(start / timeInc);
         if (startIndex < 0) {
             startIndex = 0;
@@ -41,7 +34,6 @@ public class ExcitationScaler {
         if (stopIndex > bins) {
             stopIndex = bins;
         }
-        System.out.println("startIndex " + startIndex + " stopIndex " + stopIndex);
         
         if (stopIndex <= startIndex) {
             return null;
@@ -62,12 +54,35 @@ public class ExcitationScaler {
             values[i] /= scaling;
         }
 
-        System.out.print("{");
-        for (double val : values) {
-            System.out.print(" " + val + ",");
+        // Can be used to generate data to cut & paste into test methods
+        if (createTestData) {
+            System.out.println("----8<-----");
+            System.out.print("double[] decay = {");
+            for (int i = 0; i < decay.length; ++i) {
+                if (i > 0) {
+                    System.out.print(",");
+                }
+                System.out.print(" " + decay[i]);
+            }
+            System.out.println(" };");
+            
+            System.out.println("double start = " + start + ";");
+            System.out.println("double stop = " + stop + ";");
+            System.out.println("double base = " + base + ";");
+            System.out.println("double timeInc " + timeInc + ";");
+            System.out.println("int bins = " + bins + ";");
+            
+            System.out.print("double[] expResult = {");
+            for (int i = 0; i < values.length; ++i) {
+                if (i > 0) {
+                    System.out.print(",");
+                }
+                System.out.print(" " + values[i]);
+            }
+            System.out.println(" };");
+            System.out.println("-----------");
         }
-        System.out.println("}");
+        
         return values;
-    }
-    
+    }   
 }

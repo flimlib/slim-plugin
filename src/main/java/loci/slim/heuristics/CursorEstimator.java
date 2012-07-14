@@ -59,79 +59,8 @@ public class CursorEstimator {
     // This is the value I get for unitialized floats in Visual Studio 2008;
     // used to debug & compare SLIM Plugin and TRI2 in marginal situations.
     private static final double C_UNITIALIZED = -1.0737418E8;
-
-    //TODO not used; estimateCursors below is the version used.
-    @Deprecated
-    public static double[] estimateExcitationCursors(double[] excitation) {
-        double baseline;
-        double maxval;
-        int index;
-        int startp = 0;
-        int endp = 0;
-        int i;
-        double[] diffed = new double[excitation.length];
-        int steepp;
-
-        // "Estimate prompt baseline; very rough and ready"
-        index = findMax(excitation);
-        maxval = excitation[index];
-
-        if (index > excitation.length * 3 /4) { // "integer arithmetic"
-            baseline = 0.0f;
-        }
-        else {
-            baseline = 0.0f;
-            int index2 = (index + excitation.length) / 2;
-            for (i = index2; i < excitation.length; ++i) {
-                baseline += excitation[i];
-            }
-            baseline /= (excitation.length - index2);
-        }
-
-        // "Where does the prompt first drop to (peak amplitude - baseline) / 10?
-        // This could be silly if the baseline is silly; caveat emptor!"
-        for (i = index; i > 0; --i) {
-            if ((excitation[i] - baseline) < 0.1 * (maxval - baseline)) {
-                break;
-            }
-        }
-        startp = i; // "First estimate"
-
-        // "And first drop away again?"
-        for (i = index; i < excitation.length - 1; ++i) {
-            if ((excitation[i] - baseline) < 0.1 * (maxval - baseline)) {
-                break;
-            }
-        }
-        endp = i;
-
-        // "Differentiate"
-        for (i = 0; i < index; ++i) {
-            diffed[i] = excitation[i + 1] - excitation[i];
-        }
-
-        // "Find the steepest rise"
-        steepp = (int) findMax(diffed, index);
-        if (steepp < startp) {
-            startp = steepp;
-        }
-
-        // "One more sanity check"
-        if (endp == startp) {
-            if (endp == excitation.length) {
-                --startp;
-            }
-            else {
-                ++endp;
-            }
-        }
-
-        double[] returnValue = new double[3];
-        returnValue[PROMPT_START]    = startp;
-        returnValue[PROMPT_STOP]     = endp;
-        returnValue[PROMPT_BASELINE] = baseline;
-        return returnValue;
-    }
+    // used to create data for CursorEstimatorTest
+    private static final boolean createTestData = false;
 
     /**
      * Provides estimation of decay cursors.
@@ -145,7 +74,6 @@ public class CursorEstimator {
      * @return 
      */
     public static int[] estimateDecayCursors(double xInc, double[] decay) {
-//        System.out.println("estimateDecayCursors");
         int maxIndex = findMax(decay);
         double[] diffed = new double[maxIndex];
         // "Differentiate"
@@ -174,6 +102,9 @@ public class CursorEstimator {
 
     /**
      * Provides estimation of prompt and decay cursors.
+     * 
+     * Returns a double array so that the prompt baseline may be returned.
+     * Other values are expressed in integer bins.
      * 
      * @param xInc
      * @param prompt
@@ -204,6 +135,34 @@ public class CursorEstimator {
         int transStartIndex;
         int transFitStartIndex;
         int transEndIndex;
+        
+        // Can be used to generate data to cut & paste into test methods
+        if (createTestData) {
+            System.out.println("----8<----- 1/2");
+            System.out.println("double xInc = " + xInc + ";");
+            
+            System.out.print("double[] prompt = {");
+            for (int n = 0; n < prompt.length; ++n) {
+                if (n > 0) {
+                    System.out.print(",");
+                }
+                System.out.print(" " + prompt[n]);
+            }
+            System.out.println(" };");
+            
+            System.out.print("double[] decay = {");
+            for (int n = 0; n < decay.length; ++n) {
+                if (n > 0) {
+                    System.out.print(",");
+                }
+                System.out.print(" " + decay[n]);
+            }
+            System.out.println(" };");            
+            
+            System.out.println("double chiSqTarget = " + chiSqTarget + ";");
+            
+            System.out.println("-----------");
+        }
 
         // "Estimate prompt baseline; very rough and ready"
         index = findMax(prompt);
@@ -307,7 +266,7 @@ public class CursorEstimator {
             returnValue[TRANSIENT_START] = transStartIndex;
             returnValue[DATA_START]      = startt;
             returnValue[TRANSIENT_STOP]  = transEndIndex;
-            dump(returnValue);
+            endGame(returnValue);
             ij.IJ.log("#1 OOPS");
             return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
         }
@@ -317,7 +276,8 @@ public class CursorEstimator {
         System.out.println("ADJUST PROMPT " + startp + " " + endp + " " + baseline + " " + xInc);
         System.out.println("from " + prompt[0] + " " + prompt[1] + " " + prompt[2]);
         
-        double[] adjustedPrompt = adjustPrompt(prompt, startp*xInc, endp*xInc, baseline, xInc);
+        double[] adjustedPrompt = ExcitationScaler.scale(prompt, startp * xInc, endp * xInc, baseline, xInc, decay.length);
+
         System.out.println("to " + adjustedPrompt[0] + " " + adjustedPrompt[1] + " " + adjustedPrompt[2]);
 
         for (i = 0; i < 2 * ATTEMPTS + 1; ++i, ++transStartIndex) {
@@ -391,7 +351,7 @@ public class CursorEstimator {
 //            for (double chiSq : chiSqTable) {
 //                System.out.println("chiSq is " + chiSq);
 //            }
-//            System.out.println("index is " + index);
+//            System.out.println("index is " + index);1.5
 
             returnValue[PROMPT_START]    = startp;
             returnValue[PROMPT_STOP]     = endp;
@@ -402,7 +362,7 @@ public class CursorEstimator {
 //            System.out.print("1 ");
             
             --returnValue[TRANSIENT_STOP];
-            dump(returnValue);
+            endGame(returnValue);
             
             
             for (int ii = 0; ii < chiSqTable.length; ++ii) {
@@ -428,14 +388,12 @@ public class CursorEstimator {
         returnValue[TRANSIENT_START] = transStartIndex;
         returnValue[DATA_START]      = transFitStartIndex;
         returnValue[TRANSIENT_STOP]  = transEndIndex;
-//        System.out.print("2 ");
-        --returnValue[TRANSIENT_STOP];
-        dump(returnValue);
+        endGame(returnValue);
         ij.IJ.log("#3 SUCCESS");
         return returnValue;
     }
     
-    private static void dump(double[] value) {
+    private static void endGame(double[] value) {
 //        System.out.print("prompt ");
 //        System.out.print("start " + value[PROMPT_START]);
 //        System.out.print("end " + value[PROMPT_STOP]);
@@ -454,44 +412,21 @@ public class CursorEstimator {
             value[DATA_START] = value[TRANSIENT_START];
             value[TRANSIENT_START] = tmp;
         }
-    }
-
-    /**
-     * Based on TRI2 TRCursor.c UpdatePrompt
-     * 
-     * @param prompt
-     * @param start
-     * @param stop
-     * @param baseline
-     * @param inc
-     * @return 
-     */
-    private static double[] adjustPrompt(double[] prompt, double start, double stop,
-            double baseline, double inc)
-    {
-        double[] adjusted = null;
-        int startIndex = (int) Math.ceil(start / inc);
-        int stopIndex = (int) Math.floor(stop / inc) + 1;
-//        System.out.println("stop is " + stop + " stopIndex " + stopIndex);
-        int length = stopIndex - startIndex;
-        if (length <= 0) {
-            return adjusted;
-        }
-        double scaling = 0.0;
-        for (int i = startIndex; i < stopIndex; ++i) {
-            if (i < prompt.length) {
-                scaling += prompt[i];
+        
+        // Can be used to generate data to cut & paste into test methods
+        if (createTestData) {
+            System.out.println("----8<----- 2/2");
+            
+            System.out.print("double[] expResult = {");
+            for (int i = 0; i < value.length; ++i) {
+                if (i > 0) {
+                    System.out.print(",");
+                }
+                System.out.print(" " + value[i]);
             }
-        }
-        if (0.0 == scaling) {
-            return adjusted;
-        }
-        adjusted = new double[length];
-        for (int i = startIndex; i < stopIndex; ++i) {
-            adjusted[i - startIndex] = (prompt[i] - baseline) / scaling;
-        }
-//        System.out.println("adjusted " + adjusted[0] + " " + adjusted[1] + " " + adjusted[2]);
-        return adjusted;
+            System.out.println(" };");
+            System.out.println("-----------");
+        }   
     }
     
     private static double[] adjustDecay(double[] decay, int startIndex, int endIndex) {
@@ -531,6 +466,7 @@ public class CursorEstimator {
      * @return
      */
     //TODO ARG this is incomplete;missing RLD fit call; this is not called from anywhere
+    @Deprecated
     public static double[] estimateParameters(boolean useRLD,
             boolean useBackground,
             double[] trans,

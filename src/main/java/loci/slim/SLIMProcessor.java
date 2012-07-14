@@ -569,9 +569,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         return decay;
     }
 
+    /*
+     * This method is called when a new excitation is loaded.
+     */
     private boolean updateExcitation(IUserInterfacePanel uiPanel, Excitation excitation) {
         boolean success = false;
-        System.out.println("###update excitation " + excitation);
+        System.out.println("###update excitation####" + excitation);
         if (null != excitation) {
             if (null != _excitationPanel) {
                 _excitationPanel.quit();
@@ -1323,20 +1326,25 @@ public class SLIMProcessor <T extends RealType<T>> {
 
             location[2] = channel;
             yCount = processor.getPixel(location);
-            for (int c = 0; c < _bins; ++c) {
-                photons += yCount[c];
-            }
-            System.out.println("PHOTONS " + photons);
             
             curveFitData.setYCount(yCount);
             int transStartIndex = _fittingCursor.getTransientStartBin();
             int dataStartIndex = _fittingCursor.getDataStartBin();
             int transStopIndex = _fittingCursor.getTransientStopBin();
+            System.out.println("CURSORS " + transStartIndex + " " + dataStartIndex + " " + transStopIndex);
             curveFitData.setTransStartIndex(transStartIndex);
             curveFitData.setDataStartIndex(dataStartIndex);
             curveFitData.setTransEndIndex(transStopIndex);
 //            System.out.println("uiPanel.getFunction is " + uiPanel.getAlgorithm() + " SLIMCURVE_RLD_LMA is " + FitAlgorithm.SLIMCURVE_RLD_LMA);
-           
+
+            //TODO ARG this photon counting needs to be channel specific and also part of summed and ROI fits.
+            photons = 0;
+            for (int c = dataStartIndex; c < transStopIndex; ++c) {
+                if (c < yCount.length) {
+                    photons += yCount[c];
+                }
+            }
+          
             yFitted = new double[_bins];
             curveFitData.setYFitted(yFitted);
             curveFitData.setChiSquareTarget(chiSquareTarget);
@@ -1364,7 +1372,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             visibleChannel = _channel;
         }
         showDecayGraph(title, uiPanel, _fittingCursor,
-                dataArray[visibleChannel], photons);
+                dataArray[visibleChannel], photons); //TODO ARG this s/b the photon count for the appropriate channel; currently it will sum all channels.
 
         // update UI parameters
         uiPanel.setParameters(dataArray[visibleChannel].getParams());
@@ -1810,7 +1818,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     || promptBaseline != _promptBaseline) {
                 
                 // trigger refit
-                System.out.println("*** REFIT ***");
+                System.out.println("*** CURSOR CHANGE REFIT ***");
   
                 // update saved cursor values for next time
                 _transStart     = transStart;
