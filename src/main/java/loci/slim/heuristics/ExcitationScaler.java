@@ -25,7 +25,7 @@ public class ExcitationScaler {
      * @return 
      */
     public static double[] scale(double[] decay, double start, double stop, double base, double timeInc, int bins) {
-
+        
         int startIndex = (int) Math.ceil(start / timeInc);
         if (startIndex < 0) {
             startIndex = 0;
@@ -53,7 +53,7 @@ public class ExcitationScaler {
         for (int i = 0; i < values.length; ++i) {
             values[i] /= scaling;
         }
-
+        
         // Can be used to generate data to cut & paste into test methods
         if (createTestData) {
             System.out.println("----8<-----");

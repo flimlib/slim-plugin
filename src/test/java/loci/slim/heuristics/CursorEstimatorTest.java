@@ -53,6 +53,9 @@ public class CursorEstimatorTest {
 
     /**
      * Test of estimateCursors method, of class CursorEstimator.
+     * 
+     * Since the method under test uses curve fitting this test may break if
+     * the fitting process is tweaked.
      */
     @Test
     public void testEstimateCursors() {

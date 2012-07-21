@@ -38,10 +38,15 @@ import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Set;
 
+import loci.curvefitter.IFitterEstimator;
+
 /**
  * Keeps cursor information.  Note that the actual fit process only deals with
  * bin number indices, but we need to keep the time value to be compatible
- * with TRI2.
+ * with TRI2.  Also time value is more meaningful to user looking at graph.
+ * 
+ * Historically I developed SLIM Plugin using bin indices.  I left the capability
+ * to show bins in the UI, but that hasn't been tested exhaustively.
  * 
  * @author Aivar Grislis
  */
@@ -51,9 +56,15 @@ public class FittingCursor {
     private final double _inc;
     private final int _bins;
     private final Set<IFittingCursorListener> _listeners;
+    private final IFitterEstimator _fitterEstimator;
     private boolean _showBins;
     private volatile boolean _suspend;
     private boolean _hasPrompt;
+    private int _promptStartBin;
+    private int _promptStopBin;
+    private int _transientStartBin;
+    private int _dataStartBin;
+    private int _transientStopBin;
     private double _promptStartValue;
     private double _promptStopValue;
     private double _promptBaselineValue;
@@ -66,10 +77,12 @@ public class FittingCursor {
      * 
      * @param inc time increment per bin
      * @param bins total number of bins
+     * @params fitterEstimator
      */
-    public FittingCursor(double inc, int bins) {
+    public FittingCursor(double inc, int bins, IFitterEstimator fitterEstimator) {
         _inc = inc;
         _bins = bins;
+        _fitterEstimator = fitterEstimator;
         _listeners = new HashSet<IFittingCursorListener>();
         _showBins = false;
         _suspend = false;
@@ -164,6 +177,7 @@ public class FittingCursor {
         if (_showBins) {
             Integer parsedInteger = getIntegerValue(promptDelay);
             if (null != parsedInteger) {
+                
                 promptDelayValue = _inc * parsedInteger;
             }
         }
@@ -262,7 +276,8 @@ public class FittingCursor {
  
     /**
      * Sets the end of the prompt based on a prompt width string.  Handles bins
-     * or time values.
+     * or time values (that's why we are parsing a string vs taking an int or
+     * float parameter).
      * 
      * @param promptWidth 
      */
@@ -335,7 +350,7 @@ public class FittingCursor {
     public int getPromptStopBin() {
         int returnValue = 0;
         if (_hasPrompt) {
-            returnValue = (int) Math.floor(_promptStopValue / _inc) + 1;
+            returnValue = (int) Math.floor(_promptStopValue / _inc); //TODO ARG seems to prevent round-tripping int -> float -> int, was: + 1;
         }
         return returnValue;
     }
@@ -423,22 +438,25 @@ public class FittingCursor {
      * @param transientStart 
      */
     public void setTransientStart(String transientStart) {
-        Double transientStartValue = null;
         if (_showBins) {
-            Integer parsedInteger = getIntegerValue(transientStart);
-            if (null != parsedInteger) {
-                transientStartValue = _inc * parsedInteger;
+            Integer bin = getIntegerValue(transientStart);
+            if (null != bin) {
+                if (bin <= _dataStartBin && bin >= 0) {
+                    _transientStartBin = bin;
+                    _transientStartValue = _fitterEstimator.binToValue(bin, _inc);
+                }
             }
         }
         else {
-            transientStartValue = getDoubleValue(transientStart);
-        }
-        if (null != transientStartValue) {
-            if (transientStartValue <= _dataStartValue &&
-                    transientStartValue >= 0.0) {
-                _transientStartValue = transientStartValue;
+            Double value = getDoubleValue(transientStart);
+            if (null != value) {
+                if (value <= _dataStartValue && value >= 0.0) {
+                    _transientStartValue = value;
+                    _transientStartBin = _fitterEstimator.valueToBin(value, _inc, _bins);
+                }
             }
         }
+
         // either update others with new valid value or undo our invalid value
         notifyListeners();
     }
@@ -466,7 +484,9 @@ public class FittingCursor {
      * @param bin 
      */
     public void setTransientStartBin(int bin) {
-        _transientStartValue = _inc * bin;
+        _transientStartBin = bin;
+        _transientStartValue = _fitterEstimator.binToValue(bin, _inc);
+
         notifyListeners();
     }
 
@@ -476,7 +496,7 @@ public class FittingCursor {
      * @return 
      */
     public int getTransientStartBin() {
-        return (int) Math.ceil(_transientStartValue / _inc);
+        return _transientStartBin;
     }
 
     /**
@@ -486,6 +506,8 @@ public class FittingCursor {
      */
     public void setTransientStartValue(double value) {
         _transientStartValue = value;
+        _transientStartBin = _fitterEstimator.valueToBin(value, _inc, _bins);
+        
         notifyListeners();
     }
 
@@ -505,21 +527,25 @@ public class FittingCursor {
      * @param dataStart 
      */    
     public void setDataStart(String dataStart) {
-        Double dataStartValue = null;
         if (_showBins) {
-            Integer parsedInteger = getIntegerValue(dataStart);
-            if (null != parsedInteger) {
-                dataStartValue = _inc * parsedInteger;
+            Integer bin = getIntegerValue(dataStart);
+            if (null != bin) {
+                if (bin >= _transientStartBin && bin <= _transientStopBin) {
+                    _dataStartBin = bin;
+                    _dataStartValue = _fitterEstimator.binToValue(bin, _inc);
+                }
             }
         }
         else {
-            dataStartValue = getDoubleValue(dataStart);
-        }
-        if (null != dataStartValue) {
-            if (dataStartValue <= _transientStopValue) {
-                _dataStartValue = dataStartValue;
+            Double value = getDoubleValue(dataStart);
+            if (null != value) {
+                if (value >= _transientStartValue && value <= _transientStopValue) {
+                    _dataStartValue = value;
+                    _dataStartBin = _fitterEstimator.valueToBin(value, _inc, _bins);
+                }
             }
-        }
+        }        
+        
         // either update with new valid values or undo invalid values
         notifyListeners();
     }
@@ -546,7 +572,8 @@ public class FittingCursor {
      * @param bin 
      */
     public void setDataStartBin(int bin) {
-        _dataStartValue = _inc * bin;
+        _dataStartBin = bin;
+        _dataStartValue = _fitterEstimator.binToValue(bin, _inc);
         notifyListeners();
     }
 
@@ -556,7 +583,7 @@ public class FittingCursor {
      * @return 
      */
     public int getDataStartBin() {
-        return (int) Math.ceil(_dataStartValue / _inc);
+        return _dataStartBin;
     }
 
     /**
@@ -566,6 +593,7 @@ public class FittingCursor {
      */
     public void setDataStartValue(double value) {
         _dataStartValue = value;
+        _dataStartBin = _fitterEstimator.valueToBin(value, _inc, _bins);
         notifyListeners();
     }
 
@@ -583,24 +611,27 @@ public class FittingCursor {
      * values.
      * 
      * @param transientStop 
-     */    
+     */
     public void setTransientStop(String transientStop) {
-        Double transientStopValue = null;
         if (_showBins) {
-            Integer parsedInteger = getIntegerValue(transientStop);
-            if (null != parsedInteger) {
-                transientStopValue = _inc * parsedInteger;
+            Integer bin = getIntegerValue(transientStop);
+            if (null != bin) {
+                if (bin >= _dataStartBin && bin < _bins) {
+                    _transientStopBin = bin;
+                    _transientStopValue = _fitterEstimator.binToValue(bin, _inc);
+                }
             }
         }
         else {
-            transientStopValue = getDoubleValue(transientStop);
-        }
-        if (null != transientStopValue) {
-            if (transientStopValue >= _dataStartValue &&
-                    transientStopValue <= _inc * _bins) {
-                _transientStopValue = transientStopValue;
+            Double value = getDoubleValue(transientStop);
+            if (null != value) {
+                if (value >= _dataStartValue && value < _inc * _bins) {
+                    _transientStopValue = value;
+                    _transientStopBin = _fitterEstimator.endValueToBin(value, _inc, _bins);
+                }
             }
         }
+
         // either update with new valid values or undo invalid values
         notifyListeners();
     }
@@ -627,7 +658,8 @@ public class FittingCursor {
      * @param bin 
      */
     public void setTransientStopBin(int bin) {
-        _transientStopValue = _inc * bin;
+        _transientStopBin = bin;
+        _transientStopValue = _fitterEstimator.binToValue(bin, _inc);
         notifyListeners();
     }
 
@@ -637,7 +669,7 @@ public class FittingCursor {
      * @return 
      */
     public int getTransientStopBin() {
-        return (int) Math.floor(_transientStopValue / _inc) + 1;
+        return _transientStopBin;
     }
 
     /**
@@ -647,6 +679,7 @@ public class FittingCursor {
      */
     public void setTransientStopValue(double value) {
         _transientStopValue = value;
+        _transientStopBin = _fitterEstimator.endValueToBin(value, _inc, _bins);
         notifyListeners();
     }
 

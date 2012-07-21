@@ -50,11 +50,6 @@ public interface IUserInterfacePanelListener {
      * Cancels ongoing fit.
      */
     public void cancelFit();
-    
-    /**
-     * Triggers a refit of current pixel.
-     */
-    public void doPixelFit();
 
     /**
      * Quits running plugin.

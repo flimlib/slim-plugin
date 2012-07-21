@@ -36,12 +36,13 @@ package loci.slim.fitting.config;
 
 import loci.slim.fitting.callable.IFittingEngineCallable;
 import loci.slim.fitting.callable.FittingEngineCallable;
-import loci.slim.fitting.cursor.LameCursorEstimator;
+import loci.slim.fitting.cursor.FitterEstimator;
 import loci.slim.fitting.cursor.ICursorEstimator;
 import loci.slim.fitting.engine.IFittingEngine;
 import loci.slim.fitting.engine.ThreadedFittingEngine;
 
 import loci.curvefitter.ICurveFitter;
+import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.SLIMCurveFitter;
 
 /**
@@ -56,7 +57,7 @@ public class Configuration extends ConfigurationHelper {
     private int _threads = 8;
     private IFittingEngine _fittingEngine;
     private ICurveFitter _curveFitter;
-    private ICursorEstimator _cursorEstimator;
+    private IFitterEstimator _cursorEstimator;
 
     /**
      * Private constructor for singleton pattern.
@@ -89,9 +90,9 @@ public class Configuration extends ConfigurationHelper {
         return _curveFitter;
     }
     
-    public synchronized ICursorEstimator getCursorEstimator() {
+    public synchronized IFitterEstimator getCursorEstimator() {
         if (null == _cursorEstimator) {
-            _cursorEstimator = new LameCursorEstimator();
+            _cursorEstimator = new FitterEstimator();
         }
         return _cursorEstimator;
     }

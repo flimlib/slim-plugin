@@ -114,7 +114,6 @@ public class CursorEstimator {
      */
     public static double[] estimateCursors(double xInc, double[] prompt,
             double[] decay, double chiSqTarget) {
-//        System.out.println("xInc " + xInc + " prompt " + prompt + " decay " + decay + " chiSqTarget " + chiSqTarget);
         double[] returnValue = new double[6];
         double baseline;
         double maxval; // TRCursors.c has "unsigned short maxsval, maxval; double maxfval, *diffed;"
@@ -183,15 +182,11 @@ public class CursorEstimator {
         // "Where does the prompt first drop to (peak amplitude - baseline) / 10?
         // This could be silly if the baseline is silly; caveat emptor!"
         for (i = index; i > 0; --i) {
-            double lhs = prompt[i] - baseline;
-            double rhs = 0.1 * (maxval - baseline);
-            System.out.println("lhs " + lhs + " rhs " + rhs);
             if ((prompt[i] - baseline) < 0.1 * (maxval - baseline)) {
                 break;
             }
         }
         startp = i; // "First estimate"
-        ij.IJ.log("startp first estimate " + startp);
 
         // "And first drop away again?"
         for (i = index; i < prompt.length - 1; ++i) {
@@ -200,7 +195,6 @@ public class CursorEstimator {
             }
         }
         endp = i;
-        ij.IJ.log("endp is " + endp);
 
         // "Differentiate"
         for (i = 0; i < index; ++i) {
@@ -222,8 +216,6 @@ public class CursorEstimator {
                 ++endp;
             }
         }
-        
-        ij.IJ.log("steepp " + steepp + " startp " + startp + " endp " + endp);
 
         // "Now do the same for the transient decay"
         index = findMax(decay);
@@ -243,15 +235,8 @@ public class CursorEstimator {
             startt = 0;
         }
 
- //       System.out.println("steepest prompt " + steepp + " steepest transient " + steept);
- //       System.out.println("startt is " + startt);
- //       System.out.println("   startp " + startp + " endp " + endp + " baseline " + baseline);
-
         // "Now we've got estimates we can do some Marquardt fitting to fine-tune
         // the estimates"
-        
-        ij.IJ.log("steept is " + steept + " startt " + startt);
-
         transStartIndex = startt - ATTEMPTS;
         if (transStartIndex < 0) {
             transStartIndex = 0;
@@ -267,30 +252,17 @@ public class CursorEstimator {
             returnValue[DATA_START]      = startt;
             returnValue[TRANSIENT_STOP]  = transEndIndex;
             endGame(returnValue);
-            ij.IJ.log("#1 OOPS");
             return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
         }
 
-//        System.out.println("prompt " + prompt.length + " decay " + decay.length);
-        
-        System.out.println("ADJUST PROMPT " + startp + " " + endp + " " + baseline + " " + xInc);
-        System.out.println("from " + prompt[0] + " " + prompt[1] + " " + prompt[2]);
-        
         double[] adjustedPrompt = ExcitationScaler.scale(prompt, startp * xInc, endp * xInc, baseline, xInc, decay.length);
 
-        System.out.println("to " + adjustedPrompt[0] + " " + adjustedPrompt[1] + " " + adjustedPrompt[2]);
-
         for (i = 0; i < 2 * ATTEMPTS + 1; ++i, ++transStartIndex) {
-            ij.IJ.log("fit attempt " + i);
-
             transFitStartIndex = transStartIndex;
-//            System.out.println("transStartIndex " + transStartIndex + " transFitStartIndex " + transFitStartIndex + " transEndIndex " + transEndIndex);
 
             int fitStart = transFitStartIndex - transStartIndex; // e.g. always zero
             int fitStop = transEndIndex - transStartIndex;
             int nData = transEndIndex - transStartIndex;
-            ij.IJ.log("fitStart " + fitStart + " fitStop " + fitStop + " ndata " + nData);
-//            System.out.println("  fitStart " + fitStart + " fitStop " + fitStop + " nData " + nData);
 
             CurveFitData curveFitData = new CurveFitData();
             param[1] = param[2] = param[3] = C_UNITIALIZED;              
@@ -323,52 +295,34 @@ public class CursorEstimator {
                 param[3] = 2.0;
             }
             
-//            System.out.println("i " + i + " Z " + param[1] + " A " + param[2] + " T " + param[3]);
-            
             curveFitter.setFitAlgorithm(FitAlgorithm.SLIMCURVE_LMA);
 
             ret = curveFitter.fitData(data);
-            
-            ij.IJ.log("ret from LMA is " + ret);
 
             if (ret >= 0) {
-//                System.out.println("for start " + fitStart + " stop " + fitStop + " chiSq is " + data[0].getChiSquare());
-                chiSqTable[i] = data[0].getParams()[0]; //TODO ARG s/b same or better yet not kept in two places: data[0].getChiSquare();
-                System.out.println("chiSqTable[" + i + "] becomes " + chiSqTable[i]);
+                double chiSq = data[0].getParams()[0];
+                // want non-reduced chi square
+                chiSqTable[i] = chiSq * (fitStop - fitStart - 3);
             }
             else {
-//                System.out.println("ret from fitData is " + ret);
                 chiSqTable[i] = 1e10f; // "silly value"
             }
         }
-
+        
         // "Find the minimum chisq in this range"
         index = findMin(chiSqTable, 2 * ATTEMPTS + 1);
-//        System.out.println("min chisq index is " + index + " value " + chiSqTable[index]);
         
         if (chiSqTable[index] > 9e9f) {  // "no luck here..."
-//            System.out.println("no luck here return");
-//            for (double chiSq : chiSqTable) {
-//                System.out.println("chiSq is " + chiSq);
-//            }
-//            System.out.println("index is " + index);1.5
-
             returnValue[PROMPT_START]    = startp;
             returnValue[PROMPT_STOP]     = endp;
             returnValue[PROMPT_BASELINE] = baseline;
             returnValue[TRANSIENT_START] = transStartIndex;
             returnValue[DATA_START]      = startt;
             returnValue[TRANSIENT_STOP]  = transEndIndex;
-//            System.out.print("1 ");
             
             --returnValue[TRANSIENT_STOP];
             endGame(returnValue);
             
-            
-            for (int ii = 0; ii < chiSqTable.length; ++ii) {
-                ij.IJ.log("chiSqTable[" + ii + "] is " + chiSqTable[ii]);
-            }
-            ij.IJ.log("#2 NO LUCK HERE " + chiSqTable[index]);
             return returnValue; //TODO do estimate resets/frees???
         }
 
@@ -380,8 +334,6 @@ public class CursorEstimator {
         transStartIndex += index;
         transFitStartIndex = transStartIndex + (transEndIndex - transStartIndex) / 20;
         
-        System.out.println("made it all the way to the end of estimateCursors");
-        
         returnValue[PROMPT_START]    = startp;
         returnValue[PROMPT_STOP]     = endp;
         returnValue[PROMPT_BASELINE] = baseline;
@@ -389,18 +341,10 @@ public class CursorEstimator {
         returnValue[DATA_START]      = transFitStartIndex;
         returnValue[TRANSIENT_STOP]  = transEndIndex;
         endGame(returnValue);
-        ij.IJ.log("#3 SUCCESS");
         return returnValue;
     }
     
     private static void endGame(double[] value) {
-//        System.out.print("prompt ");
-//        System.out.print("start " + value[PROMPT_START]);
-//        System.out.print("end " + value[PROMPT_STOP]);
-//        System.out.print("transient ");
-//        System.out.print("start " + value[TRANSIENT_START]);
-//        System.out.print("data start " + value[DATA_START]);
-//        System.out.println("end " + value[TRANSIENT_STOP]);
         //TODO ARG patches a bug!:
         if (value[DATA_START] < value[TRANSIENT_START]) {
             if (value[DATA_START] < 0.0) {
@@ -496,7 +440,7 @@ public class CursorEstimator {
 
         return new double[] { z, a, t };
     }
- 
+    
     /**
      * Convert time-based value to a bin number.
      *
@@ -508,6 +452,7 @@ public class CursorEstimator {
      * @param max
      * @return 
      */
+    @Deprecated //TODO ARG no callers
     public static int valueToBin(boolean upper, double value, double inc,
             int max)
     {
@@ -541,6 +486,7 @@ public class CursorEstimator {
      * @param max
      * @return 
      */
+    @Deprecated //TODO ARG no callers
     public static double binToValue(boolean upper, int bin, double inc,
             double max) {
         return bin * inc;
@@ -556,15 +502,12 @@ public class CursorEstimator {
 
     private static int findMax(double[] values, int startIndex, int endIndex) {
         if (endIndex > values.length) {
- //           System.out.println("CursorEstimator.findMax endIndex is " + endIndex + " values.length is " + values.length);
             endIndex = values.length;
         }
         if (startIndex > values.length) {
- //           System.out.println("CursorEstimator.findMax startIndex is " + startIndex + " values.length is " + values.length);
             startIndex = values.length;
         }
         if (values.length == 0) {
- //           System.out.println("CursorEstimator.findMax but values is length zero");
             return startIndex;
         }
         int index = startIndex;

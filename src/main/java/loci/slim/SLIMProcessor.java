@@ -268,7 +268,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         IEstimator estimator = new Estimator();
         
         // cursor support
-        _fittingCursor = new FittingCursor(_timeRange, _bins);
+        _fittingCursor = new FittingCursor(_timeRange, _bins, new FitterEstimator());
         _fittingCursor.addListener(new FittingCursorListener());
         
         // show the UI; do fits
@@ -313,7 +313,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 
                 /**
                  * Triggers refit of current pixel.
-                 */
+                 *
                 @Override
                 public void doPixelFit() {
                     // ordinarily these fits take place in the thread at the end 
@@ -321,7 +321,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     //TODO ARG
                     // this is a hack until I refactor out a FittingEngine.
                     fitPixel(uiPanel, _fittingCursor);
-                }
+                }*/
                 
                 /**
                  * Quits running plugin.
@@ -396,6 +396,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     }
                     
                     double chiSqTarget = _uiPanel.getChiSquareTarget();
+                    System.out.println("chiSqTarget is " + chiSqTarget);
 //                    System.out.println("prompt is " + prompt + " and fitting cursor thinks prompt " + _fittingCursor.getHasPrompt());
                     if (null != prompt && _fittingCursor.getHasPrompt()) {
                         double[] results = CursorEstimator.estimateCursors
@@ -502,6 +503,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
 
             // do the fit
+            System.out.println("// do the fit!!!");
             fitData(uiPanel);
 
             _fitInProgress = false;
@@ -591,6 +593,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             }
 
             double chiSqTarget = uiPanel.getChiSquareTarget();
+            System.out.println("chiSqTarget is " + chiSqTarget);
             double[] results = CursorEstimator.estimateCursors
                     (_timeRange, excitation.getValues(), decay, chiSqTarget);
             
@@ -1331,11 +1334,9 @@ public class SLIMProcessor <T extends RealType<T>> {
             int transStartIndex = _fittingCursor.getTransientStartBin();
             int dataStartIndex = _fittingCursor.getDataStartBin();
             int transStopIndex = _fittingCursor.getTransientStopBin();
-            System.out.println("CURSORS " + transStartIndex + " " + dataStartIndex + " " + transStopIndex);
             curveFitData.setTransStartIndex(transStartIndex);
             curveFitData.setDataStartIndex(dataStartIndex);
             curveFitData.setTransEndIndex(transStopIndex);
-//            System.out.println("uiPanel.getFunction is " + uiPanel.getAlgorithm() + " SLIMCURVE_RLD_LMA is " + FitAlgorithm.SLIMCURVE_RLD_LMA);
 
             //TODO ARG this photon counting needs to be channel specific and also part of summed and ROI fits.
             photons = 0;

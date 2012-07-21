@@ -39,13 +39,25 @@ import loci.curvefitter.ICurveFitter.NoiseModel;
 import loci.curvefitter.IFitterEstimator;
 
 /**
- * This is a class used when doing a fit with an RLD estimate fit combined
- * with a LMA fit.  It allows for some peculiarities of TRI2 to ensure matching
- * results.
  *
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class FitterEstimator implements IFitterEstimator {
+
+    @Override
+    public double getDefaultA() {
+        return 1000.0;
+    }
+
+    @Override
+    public double getDefaultT() {
+        return 2.0;
+    }
+
+    @Override
+    public double getDefaultZ() {
+        return 0.0;
+    }
 
     @Override
     public int getEstimateStartIndex(double[] yCount, int start, int stop) {
@@ -70,7 +82,7 @@ public class FitterEstimator implements IFitterEstimator {
     public NoiseModel getEstimateNoiseModel(NoiseModel noiseModel) {
         return NoiseModel.POISSON_FIT;
     }
-
+    
     /**
      * Adjusts the mono exponential triple integral fit estimate for further
      * mono, bi, tri, and stretched exponential fitting.
@@ -158,7 +170,7 @@ public class FitterEstimator implements IFitterEstimator {
         }
     }
     
-    public int findMax(double[] value, int start, int stop) {
+    int findMax(double[] value, int start, int stop) {
         int index = start;
         double max = value[start];
         for (int i = start; i < stop; ++i) {
@@ -168,5 +180,34 @@ public class FitterEstimator implements IFitterEstimator {
             }
         }
         return index;
+    }
+
+    @Override
+    public double binToValue(int bin, double inc) {
+        return bin * inc;
+    }
+
+    @Override
+    public int valueToBin(double value, double inc, int bins) {
+        int bin = (int) Math.ceil(value / inc);
+        if (bin < 0) {
+            bin = 0;
+        }
+        else if (bin >= bins) {
+            bin = bins - 1;
+        }
+        return bin;
+    }
+
+    @Override
+    public int endValueToBin(double value, double inc, int bins) {
+        int bin = (int) Math.floor(value / inc) + 1;
+        if (bin < 0) {
+            bin = 0;
+        }
+        else if (bin >= bins) {
+            bin = bins - 1;
+        }
+        return bin;
     }
 }
