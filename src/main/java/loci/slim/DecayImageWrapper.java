@@ -23,16 +23,18 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
     private int _channels;
     private int _bins;
     private int _binIndex;
+    private int _increment;
     private LocalizableByDimCursor<T> _cursor;
     
     public DecayImageWrapper(Image<T> image, int width, int height,
-            int channels, int bins, int binIndex) {
+            int channels, int bins, int binIndex, int increment) {
         _image    = image;
         _width    = width;
         _height   = height;
         _channels = channels;
         _bins     = bins;
         _binIndex = binIndex;
+        _increment = increment;
 
         _cursor = image.createLocalizableByDimCursor();
     }
@@ -108,7 +110,7 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
         for (int i = 0; i < _bins; ++i) {
             innerLocation[_binIndex] = i;
             _cursor.moveTo(innerLocation);
-            decay[i] = _cursor.getType().getRealFloat();
+            decay[i] = _cursor.getType().getRealFloat() / _increment;
         }
         return decay;
     }

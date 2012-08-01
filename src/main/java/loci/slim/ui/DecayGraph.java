@@ -102,7 +102,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     static final Color DATA_START_COLOR = Color.GREEN.darker();
     static final Color TRANS_STOP_COLOR = Color.RED.darker();
     static final Color BASE_COLOR = Color.GREEN.darker();
-    static final Color RESIDUAL_COLOR = Color.GRAY.brighter();
+    static final Color RESIDUAL_COLOR = Color.GRAY;
     
     private static final Object _synchObject = new Object();
 
@@ -378,6 +378,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         NumberAxis residualAxis = new NumberAxis(RESIDUAL_AXIS_LABEL);
         XYSplineRenderer residualRenderer = new XYSplineRenderer();
         residualRenderer.setSeriesPaint(0, RESIDUAL_COLOR);
+        residualRenderer.setSeriesLinesVisible(0, false);
         residualRenderer.setSeriesShape
                 (0, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f, 2.0f));
         

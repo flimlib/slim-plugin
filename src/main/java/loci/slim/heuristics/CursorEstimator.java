@@ -56,9 +56,6 @@ public class CursorEstimator {
     public static final int DATA_START          = 4;
     public static final int TRANSIENT_STOP      = 5;
     private static final int ATTEMPTS = 10;
-    // This is the value I get for unitialized floats in Visual Studio 2008;
-    // used to debug & compare SLIM Plugin and TRI2 in marginal situations.
-    private static final double C_UNITIALIZED = -1.0737418E8;
     // used to create data for CursorEstimatorTest
     private static final boolean createTestData = false;
 
@@ -255,8 +252,13 @@ public class CursorEstimator {
             return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
         }
 
-        double[] adjustedPrompt = ExcitationScaler.scale(prompt, startp * xInc, endp * xInc, baseline, xInc, decay.length);
-
+        //TODO ARG 7/32/12:
+        int modStartp = Kludge.kludgeStart(startp * xInc, xInc, startp);
+        int modEndp = Kludge.kludgeEnd(endp * xInc, xInc, endp);
+        
+        
+        double[] adjustedPrompt = ExcitationScaler.scale(prompt, modStartp /*startp*/, modEndp /*endp*/, baseline, xInc, decay.length);
+        
         for (i = 0; i < 2 * ATTEMPTS + 1; ++i, ++transStartIndex) {
             transFitStartIndex = transStartIndex;
 
@@ -264,9 +266,8 @@ public class CursorEstimator {
             int fitStop = transEndIndex - transStartIndex;
             int nData = transEndIndex - transStartIndex;
 
-            CurveFitData curveFitData = new CurveFitData();
-            param[1] = param[2] = param[3] = C_UNITIALIZED;              
-            curveFitData.setParams(param); //TODO param has random values!!
+            CurveFitData curveFitData = new CurveFitData();           
+            curveFitData.setParams(param);
                         
             double[] adjustedDecay = adjustDecay(decay, transStartIndex, transEndIndex);
             
@@ -401,95 +402,6 @@ public class CursorEstimator {
             z = val/n;
         }
         return z;
-    }
-
-    /**
-     * "Get initial estimates for the params that go forward to Marquardt".
-     * (Based on expParameterEstimation from TRfitting.c.)
-     *
-     * @return
-     */
-    //TODO ARG this is incomplete;missing RLD fit call; this is not called from anywhere
-    @Deprecated
-    public static double[] estimateParameters(boolean useRLD,
-            boolean useBackground,
-            double[] trans,
-            int transFitStartIndex,
-            int transStartIndex,
-            int transEndIndex) {
-        double a, t, z;
-
-        // initial guess
-        a = 1000.0f;
-        t = 2.0f;
-        z = 0.0f;
-        
-        if (useRLD) {
-            transFitStartIndex = findMax(trans, transFitStartIndex, transEndIndex);
-            //TODO ARG do a RLD fit using trans, transFitStartIndex, transStartIndex, transEndIndex
-            // see wiki entry "expParameterEstimation from TRfitting.c"
-            //   note that the prompt is disregarded here
-            int returnValue = -1;
-            if (returnValue >= 0) {
-                a = t = z = 0.0f;
-            }
-        }
-        else if (useBackground) {
-            z = calcBgFromPrepulse(trans, transStartIndex);
-        }
-
-        return new double[] { z, a, t };
-    }
-    
-    /**
-     * Convert time-based value to a bin number.
-     *
-     * Based on TRI2.  Note that 'valueToBin' and 'binToValue' won't round-trip.
-     *
-     * @param upper
-     * @param value
-     * @param inc
-     * @param max
-     * @return 
-     */
-    @Deprecated //TODO ARG no callers
-    public static int valueToBin(boolean upper, double value, double inc,
-            int max)
-    {
-        int intValue = 0;
-        if (upper) {
-            intValue = (int) Math.ceil(value / inc) + 1;
-        }
-        else {
-            intValue = (int) Math.floor(value / inc);
-        }
-        // constrain within limits
-        if (intValue < 0) {
-            intValue = 0;
-        }
-        if (intValue > max) {
-            intValue = max;
-        }
-        return intValue;
-    }
-
-    /**
-     * Convert bin number to time-based value.
-     * 
-     * Based on TRI2.  Note that 'binToValue' and 'valueToBin' won't round-trip.
-     * 
-     * The 'upper' and 'max' parameters are not utilized in this implementation.
-     * 
-     * @param upper
-     * @param bin
-     * @param inc
-     * @param max
-     * @return 
-     */
-    @Deprecated //TODO ARG no callers
-    public static double binToValue(boolean upper, int bin, double inc,
-            double max) {
-        return bin * inc;
     }
 
     private static int findMax(double[] values) {

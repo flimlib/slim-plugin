@@ -151,6 +151,12 @@ public class FittedImageFactory {
                         indexColorModel, 2, components, colorizeGrayScale,
                         grayScalePixelValue, maskGroup);
                 break;
+            case Tm:
+     System.out.println("in FittedImageFactory for Tm");
+                fittedImage = new TauMeanImage("Tm", dimension,
+                        indexColorModel, 0, components, colorizeGrayScale,
+                        grayScalePixelValue, maskGroup);
+                break;
         }
         return fittedImage;
     }

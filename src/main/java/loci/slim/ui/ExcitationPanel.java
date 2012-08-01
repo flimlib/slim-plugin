@@ -98,13 +98,14 @@ public class ExcitationPanel extends JFrame {
     /**
      * Gets the excitation values scaled for a particular start/stop/base cursor.
      * 
-     * @param start
-     * @param stop
+     * @param startIndex
+     * @param stopIndex
+     * @param base;
      * @return 
      */
-    public double[] getValues(double start, double stop, double base) {
-        
-        return ExcitationScaler.scale(_excitation.getValues(), start, stop, base, _timeInc, _bins);
+    public double[] getValues(int startIndex, int stopIndex, double base) {
+        return ExcitationScaler.scale(_excitation.getValues(),
+                startIndex, stopIndex, base, _timeInc, _bins);
     }
 
     /*

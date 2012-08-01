@@ -75,6 +75,7 @@ import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.ICurveFitter.NoiseModel;
+import loci.curvefitter.IFitterEstimator;
 import loci.slim.fitting.cursor.FittingCursorHelper;
 import loci.slim.fitting.cursor.IFittingCursorUI;
 
@@ -94,6 +95,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     private static final Character SUB_1  = '\u2081';
     private static final Character SUB_2  = '\u2082';
     private static final Character SUB_3  = '\u2083';
+    private static final Character SUB_M  = '\u2098'; // Unicode 6.0.0 (October 2010)
     
     private static final String SUM_REGION = "Sum All Pixels";
     private static final String ROIS_REGION = "Sum Each ROI";
@@ -147,18 +149,19 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     private static final String T_H = TAU + " H";
     private static final String F_UPPER = "F";
     private static final String F_LOWER = "f";
+    private static final String TAU_MEAN = "" + TAU + "m"; // SUB_M;
     
     private static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T };
-    private static final String DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER };
-    private static final String TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER };    
+    private static final String DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN };
+    private static final String TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN };    
     private static final String STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T };    
     
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
     
     private FittingCursorHelper _fittingCursorHelper;
+    private IFitterEstimator _fitterEstimator;
     
-    public IUserInterfacePanelListener _listener;
-    private boolean _showBins = true;
+    private IUserInterfacePanelListener _listener;
     int _fittedParameterCount = 0;
 
     // UI panel
@@ -182,6 +185,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JTextField _transientStopField;
     JTextField _promptDelayField;
     JTextField _promptWidthField;
+    JCheckBox _showBins;
     JComboBox _promptComboBox;
     JButton _estimateCursorsButton;
     
@@ -256,11 +260,13 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
     public UserInterfacePanel(boolean tabbed, boolean showTau,
             String[] analysisChoices, String[] binningChoices,
-            FittingCursorHelper fittingCursorHelper)
+            FittingCursorHelper fittingCursorHelper,
+            IFitterEstimator fitterEstimator)
     {
         String lifetimeLabel = "" + (showTau ? TAU : LAMBDA);
         
         _fittingCursorHelper = fittingCursorHelper;
+        _fitterEstimator = fitterEstimator;
         
         _frame = new JFrame("SLIM Plugin");
 
@@ -450,6 +456,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _functionComboBox = new JComboBox(FUNCTION_ITEMS);
         _functionComboBox.addItemListener(
             new ItemListener() {
+                @Override
                 public void itemStateChanged(ItemEvent e) {
                     if (e.getStateChange() == ItemEvent.SELECTED) {
                         String item = (String) e.getItem();
@@ -650,6 +657,20 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         });
         cursorPanel.add(_promptWidthField);
         
+        JLabel dummyLabel = new JLabel("");
+        dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(dummyLabel);
+        _showBins = new JCheckBox("Display as indices");
+        _showBins.addItemListener(
+            new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    boolean showBins = e.getStateChange() == ItemEvent.SELECTED;
+                    _fittingCursorHelper.setShowBins(showBins);
+                }
+            }
+        );
+        cursorPanel.add(_showBins);
+        
         JLabel excitationLabel = new JLabel("Excitation");
         excitationLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         cursorPanel.add(excitationLabel);
@@ -696,9 +717,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         );
         cursorPanel.add(_promptComboBox);
         
-        JLabel dummyLabel = new JLabel("");
-        dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(dummyLabel);
+        JLabel dummyLabel2 = new JLabel("");
+        dummyLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(dummyLabel2);
         _estimateCursorsButton = new JButton("Estimate Cursors");
         _estimateCursorsButton.addActionListener(
             new ActionListener() {
@@ -712,7 +733,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         cursorPanel.add(_estimateCursorsButton);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(cursorPanel, 8, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(cursorPanel, 9, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", cursorPanel);
@@ -1454,38 +1475,48 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     public void setParameters(double params[]) {
         String function = (String) _functionComboBox.getSelectedItem();
         if (function.equals(SINGLE_EXPONENTIAL)) {
-            _aParam1.setText    ("" + (float) params[2]);
-            _tParam1.setText    ("" + (float) params[3]);
-            _zParam1.setText    ("" + (float) params[1]);
-            _chiSqParam1.setText("" + (float) params[0]);
+            _aParam1.setText    (paramToString(params[2], 3));
+            _tParam1.setText    (paramToString(params[3], 3));
+            _zParam1.setText    (paramToString(params[1], 3));
+            _chiSqParam1.setText(paramToString(params[0], 6));
         }
         else if (function.equals(DOUBLE_EXPONENTIAL)) {
-            _a1Param2.setText   ("" + (float) params[2]);
-            _t1Param2.setText   ("" + (float) params[3]);
-            _a2Param2.setText   ("" + (float) params[4]);
-            _t2Param2.setText   ("" + (float) params[5]);
-            _zParam2.setText    ("" + (float) params[1]);
-            _chiSqParam2.setText("" + (float) params[0]);
+            _a1Param2.setText   (paramToString(params[2], 3));
+            _t1Param2.setText   (paramToString(params[3], 3));
+            _a2Param2.setText   (paramToString(params[4], 3));
+            _t2Param2.setText   (paramToString(params[5], 3));
+            _zParam2.setText    (paramToString(params[1], 3));
+            _chiSqParam2.setText(paramToString(params[0], 6));
         }
         else if (function.equals(TRIPLE_EXPONENTIAL)) {
-            _a1Param3.setText   ("" + (float) params[2]);
-            _t1Param3.setText   ("" + (float) params[3]);
-            _a2Param3.setText   ("" + (float) params[4]);
-            _t2Param3.setText   ("" + (float) params[5]);
-            _a3Param3.setText   ("" + (float) params[6]);
-            _t3Param3.setText   ("" + (float) params[7]);
-            _zParam3.setText    ("" + (float) params[1]);
-            _chiSqParam3.setText("" + (float) params[0]);
+            _a1Param3.setText   (paramToString(params[2], 3));
+            _t1Param3.setText   (paramToString(params[3], 3));
+            _a2Param3.setText   (paramToString(params[4], 3));
+            _t2Param3.setText   (paramToString(params[5], 3));
+            _a3Param3.setText   (paramToString(params[6], 3));
+            _t3Param3.setText   (paramToString(params[7], 3));
+            _zParam3.setText    (paramToString(params[1], 3));
+            _chiSqParam3.setText(paramToString(params[0], 6));
         }
         else if (function.equals(STRETCHED_EXPONENTIAL)) {
-            _aParam4.setText    ("" + (float) params[2]);
-            _tParam4.setText    ("" + (float) params[3]);
-            _hParam4.setText    ("" + (float) params[4]);
-            _zParam4.setText    ("" + (float) params[1]);
-            _chiSqParam4.setText("" + (float) params[0]);
+            _aParam4.setText    (paramToString(params[2], 3));
+            _tParam4.setText    (paramToString(params[3], 3));
+            _hParam4.setText    (paramToString(params[4], 3));
+            _zParam4.setText    (paramToString(params[1], 3));
+            _chiSqParam4.setText(paramToString(params[0], 6));
         }
     }
+    
+    private String paramToString(double param, int places) {
+        return "" + _fitterEstimator.roundToDecimalPlaces(param, places);
+    }
 
+    /**
+     * This version is used to initialize the parameters.
+     * 
+     * @param function
+     * @param params 
+     */
     public void setFunctionParameters(int function, double params[]) {
         switch (function) {
             case 0:

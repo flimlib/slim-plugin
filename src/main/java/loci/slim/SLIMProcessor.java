@@ -55,6 +55,7 @@ import javax.swing.JFrame;
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
+import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.JaolhoCurveFitter;
 import loci.curvefitter.SLIMCurveFitter;
 import loci.formats.FormatException;
@@ -63,7 +64,7 @@ import loci.formats.ImageReader;
 import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.preprocess.ISLIMBinner;
 import loci.slim.preprocess.SLIMBinning;
-import loci.slim.fitting.cursor.FitterEstimator;
+import loci.slim.heuristics.FitterEstimator;
 import loci.slim.heuristics.CursorEstimator;
 import loci.slim.preprocess.IProcessor;
 import loci.slim.preprocess.Threshold;
@@ -178,6 +179,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     private int _binIndex;
 
     private double _timeRange;
+    private int _increment;
     private double _minNonZeroPhotonCount;
 
     private FitRegion _region;
@@ -266,9 +268,10 @@ public class SLIMProcessor <T extends RealType<T>> {
     private void doFits() {
         // heuristics
         IEstimator estimator = new Estimator();
+        IFitterEstimator fitterEstimator = new FitterEstimator();
         
         // cursor support
-        _fittingCursor = new FittingCursor(_timeRange, _bins, new FitterEstimator());
+        _fittingCursor = new FittingCursor(_timeRange, _bins, fitterEstimator);
         _fittingCursor.addListener(new FittingCursorListener());
         
         // show the UI; do fits
@@ -276,7 +279,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         fittingCursorHelper.setFittingCursor(_fittingCursor);
         final IUserInterfacePanel uiPanel = new UserInterfacePanel(TABBED,
                 USE_TAU, _analysis.getChoices(), _binning.getChoices(),
-                fittingCursorHelper);
+                fittingCursorHelper, fitterEstimator);
         _uiPanel = uiPanel; //TODO almost got by having it just be a local variable
         uiPanel.setX(0);
         uiPanel.setY(0);
@@ -310,18 +313,6 @@ public class SLIMProcessor <T extends RealType<T>> {
                         _fitInfo.setCancel(true);
                     }
                 }
-                
-                /**
-                 * Triggers refit of current pixel.
-                 *
-                @Override
-                public void doPixelFit() {
-                    // ordinarily these fits take place in the thread at the end 
-                    // of this method.
-                    //TODO ARG
-                    // this is a hack until I refactor out a FittingEngine.
-                    fitPixel(uiPanel, _fittingCursor);
-                }*/
                 
                 /**
                  * Quits running plugin.
@@ -722,16 +713,15 @@ public class SLIMProcessor <T extends RealType<T>> {
             if (null != timeBase) {
                 _timeRange = timeBase.floatValue();
             }
+            _increment = 1;
+            Number increment = (Number) _globalMetadata.get("MeasureInfo.incr");
+            if (null != increment) {
+                _increment = increment.intValue();
+                System.out.println("MeasureInfo.incr is " + _increment);
+            }
         }
         _timeRange /= _bins;
 
-        //TODO ARG debugging
-        if (null != _globalMetadata) {
-            java.util.Set<String> keySet = _globalMetadata.keySet();
-            for (String key : keySet) {
-                System.out.println("key: " + key + " value:" + _globalMetadata.get(key));
-            } 
-        }
         return true;
     }
 
@@ -836,17 +826,22 @@ public class SLIMProcessor <T extends RealType<T>> {
         FitInfo fitInfo = getFitInfo(_grayScaleImage, uiPanel, _fittingCursor);
         fitInfo.setXInc(_timeRange);
         if (_fittingCursor.getHasPrompt() && null != _excitationPanel) {
-            double start = _fittingCursor.getPromptStartValue();
-            double stop  = _fittingCursor.getPromptStopValue();
+            int startIndex = _fittingCursor.getPromptStartBin();
+            int stopIndex  = _fittingCursor.getPromptStopBin();
             double base  = _fittingCursor.getPromptBaselineValue();
-            double[] values = _excitationPanel.getValues(start, stop, base);
+            
+            //TODO ARG 7/31/12
+            int modStartIndex = loci.slim.heuristics.Kludge.kludgeStart(startIndex * _increment, _increment, startIndex);
+            int modStopIndex  = loci.slim.heuristics.Kludge.kludgeEnd(stopIndex * _increment, _increment, stopIndex);
+   
+            double[] values = _excitationPanel.getValues(modStartIndex /*startIndex*/, modStopIndex /*stopIndex*/, base);
             fitInfo.setPrompt(values);
         }
         fitInfo.setIndexColorModel(HistogramTool.getIndexColorModel());
         _fitInfo = fitInfo;
         
         // set up images
-        IDecayImage decayImage = new DecayImageWrapper(_image, _width, _height, _channels, _bins, _binIndex);
+        IDecayImage decayImage = new DecayImageWrapper(_image, _width, _height, _channels, _bins, _binIndex, _increment);
         IFittedImage previousImage = null;
         int width = decayImage.getWidth();
         int height = decayImage.getHeight();
@@ -1301,7 +1296,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         Image<DoubleType> fittedPixels = null;
         
         // set up the source
-        IDecayImage decayImage = new DecayImageWrapper(_image, _width, _height, _channels, _bins, _binIndex);
+        IDecayImage decayImage = new DecayImageWrapper(_image, _width, _height, _channels, _bins, _binIndex, _increment);
         IProcessor processor = decayImage;
         ISLIMBinner binner = _binning.getBinner(uiPanel.getBinning());
         if (null != binner) {
@@ -1700,10 +1695,15 @@ public class SLIMProcessor <T extends RealType<T>> {
         if (null != _excitationPanel) {
             double[] excitation = null;
             if (null != _excitationPanel) {
-                double start = _fittingCursor.getPromptStartValue();
-                double stop  = _fittingCursor.getPromptStopValue();
+                int startIndex = _fittingCursor.getPromptStartBin();
+                int stopIndex  = _fittingCursor.getPromptStopBin();
                 double base  = _fittingCursor.getPromptBaselineValue();
-                excitation = _excitationPanel.getValues(start, stop, base);
+                
+                //TODO ARG 7/31/12
+                int modStartIndex = loci.slim.heuristics.Kludge.kludgeStart(startIndex * _increment, _increment, startIndex);
+                int modStopIndex  = loci.slim.heuristics.Kludge.kludgeEnd(stopIndex * _increment, _increment, stopIndex);
+        
+                excitation = _excitationPanel.getValues(modStartIndex /*startIndex*/, modStopIndex /*stopIndex*/, base);
             }            
             curveFitter.setInstrumentResponse(excitation);
 //            System.out.println("$$$ EXCITATION $$$");
@@ -1717,6 +1717,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * free (vs. fixed).
      */
     private boolean[] translateFree(FitFunction fitFunction, boolean free[]) {
+        System.out.println("SLIMProcessor.translateFree free length is " + free.length);
         boolean translated[] = new boolean[free.length];
         switch (fitFunction) {
             case SINGLE_EXPONENTIAL:

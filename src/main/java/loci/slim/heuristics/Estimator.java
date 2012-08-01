@@ -57,7 +57,7 @@ public class Estimator implements IEstimator {
     
     @Override
     public int getThreshold() {
-        return 1000;
+        return 100;
     }
     
     @Override

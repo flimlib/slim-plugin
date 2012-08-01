@@ -4,6 +4,8 @@
  */
 package loci.slim.heuristics;
 
+import loci.curvefitter.IFitterEstimator;
+
 /**
  * A class with static functions for working with the excitation.
  * 
@@ -24,21 +26,9 @@ public class ExcitationScaler {
      * @param bins
      * @return 
      */
-    public static double[] scale(double[] decay, double start, double stop, double base, double timeInc, int bins) {
-        
-        int startIndex = (int) Math.ceil(start / timeInc);
-        if (startIndex < 0) {
-            startIndex = 0;
-        }
-        int stopIndex = (int) Math.floor(stop / timeInc) + 1;
-        if (stopIndex > bins) {
-            stopIndex = bins;
-        }
-        
-        if (stopIndex <= startIndex) {
-            return null;
-        }
-        
+    public static double[] scale(double[] decay, int startIndex, int stopIndex, double base, double timeInc, int bins) {
+
+        // stop index is exclusive
         double[] values = new double[stopIndex - startIndex];
         double scaling = 0.0;
         for (int i = 0; i < values.length; ++i) {
@@ -66,8 +56,8 @@ public class ExcitationScaler {
             }
             System.out.println(" };");
             
-            System.out.println("double start = " + start + ";");
-            System.out.println("double stop = " + stop + ";");
+            System.out.println("int startIndex = " + startIndex + ";");
+            System.out.println("int stopIndex = " + stopIndex + ";");
             System.out.println("double base = " + base + ";");
             System.out.println("double timeInc " + timeInc + ";");
             System.out.println("int bins = " + bins + ";");

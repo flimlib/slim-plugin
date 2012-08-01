@@ -32,7 +32,7 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.fitting.cursor;
+package loci.slim.heuristics;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.NoiseModel;
@@ -43,6 +43,8 @@ import loci.curvefitter.IFitterEstimator;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class FitterEstimator implements IFitterEstimator {
+    private static final int BINS = 256;
+    private static final boolean oldWay = false;
 
     @Override
     public double getDefaultA() {
@@ -61,7 +63,7 @@ public class FitterEstimator implements IFitterEstimator {
 
     @Override
     public int getEstimateStartIndex(double[] yCount, int start, int stop) {
-        //System.out.println("FitterEstimator.getEstimateStartIndex " + yCount.length + " " + start + " " + stop);
+        System.out.println("FitterEstimator.getEstimateStartIndex " + yCount.length + " " + start + " " + stop);
         if (start < 0) {
             start = 0;
         } //TODO ARG patch for an exception
@@ -182,32 +184,86 @@ public class FitterEstimator implements IFitterEstimator {
         return index;
     }
 
+    public int endValueToBin(double value, double inc) {
+        int returnValue = 0;
+        if (oldWay) {
+            returnValue = (int) Math.floor(value / inc) + 1;
+            if (returnValue < 0) {
+                System.out.println("endValueToBin bins is negative!!:" + returnValue);
+            }
+            else if (returnValue >= BINS) {
+                System.out.println("endValueToBin bins is >= BINS " + returnValue);
+            }
+        }
+        else {
+            returnValue = roundToNearestInteger(value / inc);
+        }
+        return returnValue;
+    }
+
+
+    /**
+     * Converts time-based value to a bin number.<p>
+     * Note that 'valueToBin' and 'binToValue' should round-trip.
+     * 
+     * @param value
+     * @param inc
+     * @return 
+     */
+    @Override
+    public int valueToBin(double value, double inc) {
+        int returnValue = 0;
+        if (oldWay) {
+            returnValue = (int) Math.ceil(value / inc);
+            if (returnValue < 0) {
+                System.out.println("valueToBin returnValue is negative!!: " + returnValue);
+            }
+            else if (returnValue >= BINS) {
+                System.out.println("valueToBin returnValue is > bins!!:" + returnValue);
+            }
+        }
+        else {
+            returnValue = roundToNearestInteger(value / inc);
+        }
+        return returnValue;
+    }
+
+    /**
+     * Converts bin number to time-based value.  Rounds to four decimal places.<p>
+     * Note that 'binToValue' and 'valueToBin' should round-trip.
+     * 
+     * @param bin
+     * @param inc
+     * @return 
+     */
     @Override
     public double binToValue(int bin, double inc) {
-        return bin * inc;
+        double returnValue = 0;
+        if (oldWay) {
+            returnValue = bin * inc;
+        }
+        else {
+            returnValue = roundToDecimalPlaces(bin * inc, 4);
+        }
+        return returnValue;
     }
-
+ 
     @Override
-    public int valueToBin(double value, double inc, int bins) {
-        int bin = (int) Math.ceil(value / inc);
-        if (bin < 0) {
-            bin = 0;
-        }
-        else if (bin >= bins) {
-            bin = bins - 1;
-        }
-        return bin;
+    public double roundToDecimalPlaces(double value, int decimalPlaces) {
+        double decimalTerm = Math.pow(10.0, decimalPlaces);
+        int tmp = roundToNearestInteger(value * decimalTerm);
+        double rounded = (double) tmp / decimalTerm;
+        System.out.println("value " + value + " rounds to " + rounded);
+        return rounded;
     }
-
-    @Override
-    public int endValueToBin(double value, double inc, int bins) {
-        int bin = (int) Math.floor(value / inc) + 1;
-        if (bin < 0) {
-            bin = 0;
+    
+    private int roundToNearestInteger(double value) {
+        if (value < 0.0) {
+            value -= 0.5;
         }
-        else if (bin >= bins) {
-            bin = bins - 1;
+        else {
+            value += 0.5;
         }
-        return bin;
+        return (int) value;
     }
 }

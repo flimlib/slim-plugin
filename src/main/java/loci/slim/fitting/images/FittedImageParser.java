@@ -51,6 +51,7 @@ public class FittedImageParser {
     private static final Character TAU    = '\u03c4';
     private static final String TAU_STRING = "" + TAU;
     private static final String CHI_SQ_STRING = "" + CHI + SQUARE;
+    private static final String TAU_MEAN_STRING = "" + TAU + "m";
     private static final int Z_INDEX = 0;
     private static final int A1_INDEX = 1;
     private static final int T1_INDEX = 2;
@@ -196,7 +197,10 @@ public class FittedImageParser {
                         list.add(FittedImageType.f3);
                         break;
                 }
-            }        
+            }
+            else if ("Tm".equals(token) || TAU_MEAN_STRING.equals(token)) {
+                list.add(FittedImageType.Tm);
+            }
         }
         return list.toArray(new FittedImageType[0]);
     }

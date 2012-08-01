@@ -83,6 +83,16 @@ public class FittingCursorHelper implements IFittingCursorUI {
     }
 
     /**
+     * Sets whether to show bins or time values for cursors.
+     * 
+     * @param showBins 
+     */
+    public void setShowBins(boolean showBins) {
+        _fittingCursor.setShowBins(showBins);
+        showFittingCursor();
+    }
+
+    /**
      * Turns on/off prompt cursors.
      * 
      * @param enable 

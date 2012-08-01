@@ -1,5 +1,5 @@
 //
-// IProcessor.java
+// Bin9x9.java
 //
 
 /*
@@ -35,24 +35,17 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.preprocess;
 
 /**
- * Interface for an input processor.
+ * A plugin within a plugin, this is used to bin the fit input.
  *
- * @author Aivar Grislis grislis at wisc dot edu
+ * <dl><dt><b>Source code:</b></dt>
+ * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/process/Bin3x3.java">Trac</a>,
+ * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/process/Bin3x3.java">SVN</a></dd></dl>
+ *
+ * @author Aivar Grislis
  */
-public interface IProcessor {
-
-    /**
-     * Specifies a source IProcessor to be chained to this one.
-     * 
-     * @param processor 
-     */
-    public void chain(IProcessor processor);
-    
-    /**
-     * Gets input pixel value.
-     * 
-     * @param location array, i.e. { x, y, channel }
-     * @return null or pixel value
-     */
-    public double[] getPixel(int[] location);
+@SLIMBinner("9 x 9")
+public class Bin9x9 extends SquareBinner implements ISLIMBinner {
+    public void init(int width, int height) {
+        super.init(4, width, height);
+    }
 }

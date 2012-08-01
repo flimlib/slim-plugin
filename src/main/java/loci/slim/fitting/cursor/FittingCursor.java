@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.fitting.cursor;
 
+import loci.slim.heuristics.FitterEstimator;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Set;
@@ -53,6 +54,7 @@ import loci.curvefitter.IFitterEstimator;
 public class FittingCursor {
     private static final String DOUBLE_ZERO_STRING = "0.0";
     private static final String INTEGER_ZERO_STRING = "0";
+    private static final int DECIMAL_PLACES = 4;
     private final double _inc;
     private final int _bins;
     private final Set<IFittingCursorListener> _listeners;
@@ -71,6 +73,8 @@ public class FittingCursor {
     private double _transientStartValue;
     private double _dataStartValue;
     private double _transientStopValue;
+    //TODO ARG
+    private boolean _kludge = true;
 
     /**
      * Constructor
@@ -176,9 +180,8 @@ public class FittingCursor {
         Double promptDelayValue = null;
         if (_showBins) {
             Integer parsedInteger = getIntegerValue(promptDelay);
-            if (null != parsedInteger) {
-                
-                promptDelayValue = _inc * parsedInteger;
+            if (null != parsedInteger) {              
+                promptDelayValue = _fitterEstimator.binToValue(parsedInteger, _inc);
             }
         }
         else {
@@ -219,6 +222,7 @@ public class FittingCursor {
         else {
             if (_hasPrompt) {
                 double delay = getPromptStartValue() - getTransientStartValue();
+                delay = _fitterEstimator.roundToDecimalPlaces(delay, DECIMAL_PLACES); 
                 returnValue.append(delay);
             }
             else {
@@ -234,7 +238,7 @@ public class FittingCursor {
      * @param bin 
      */
     public void setPromptStartBin(int bin) {
-        _promptStartValue = _inc * bin;
+        _promptStartValue = _fitterEstimator.binToValue(bin, _inc);
         notifyListeners();
     }
 
@@ -246,7 +250,18 @@ public class FittingCursor {
     public int getPromptStartBin() {
         int returnValue  = 0;
         if (_hasPrompt) {
-            returnValue = (int) Math.ceil(_promptStartValue / _inc);
+            returnValue = _fitterEstimator.valueToBin(_promptStartValue, _inc);
+            
+            /*int tmp = (int) Math.ceil(_promptStartValue / _inc);
+            
+            if (returnValue != tmp) {
+                System.out.println("*******getPromptStartBin********");
+                System.out.println("SP " + returnValue + " TRI2 " + tmp);
+                if (_kludge) {
+                    System.out.println("go with " + tmp);
+                    returnValue = tmp;
+                }
+            }*/
         }
         return returnValue;
     }
@@ -323,6 +338,7 @@ public class FittingCursor {
         else {
             if (_hasPrompt) {
                 double width = getPromptStopValue() - getPromptStartValue();
+                width = _fitterEstimator.roundToDecimalPlaces(width, DECIMAL_PLACES);                
                 returnValue.append(width);
             }
             else {
@@ -338,7 +354,7 @@ public class FittingCursor {
      * @param bin 
      */
     public void setPromptStopBin(int bin) {
-        _promptStopValue = _inc * bin;
+        _promptStopValue = _fitterEstimator.binToValue(bin, _inc);
         notifyListeners();
     }
 
@@ -350,7 +366,7 @@ public class FittingCursor {
     public int getPromptStopBin() {
         int returnValue = 0;
         if (_hasPrompt) {
-            returnValue = (int) Math.floor(_promptStopValue / _inc); //TODO ARG seems to prevent round-tripping int -> float -> int, was: + 1;
+            returnValue = ((FitterEstimator) _fitterEstimator).valueToBin(_promptStopValue, _inc);
         }
         return returnValue;
     }
@@ -426,7 +442,11 @@ public class FittingCursor {
     public double getPromptBaselineValue() {
         double returnValue = 0.0;
         if (_hasPrompt) {
-            returnValue = _promptBaselineValue;
+            System.out.println("promptBaselineValue is " + _promptBaselineValue);
+            
+            
+            returnValue = _fitterEstimator.roundToDecimalPlaces(_promptBaselineValue, DECIMAL_PLACES);
+            System.out.println("returnValue is " + returnValue);
         }
         return returnValue;
     }
@@ -452,7 +472,7 @@ public class FittingCursor {
             if (null != value) {
                 if (value <= _dataStartValue && value >= 0.0) {
                     _transientStartValue = value;
-                    _transientStartBin = _fitterEstimator.valueToBin(value, _inc, _bins);
+                    _transientStartBin = _fitterEstimator.valueToBin(value, _inc);
                 }
             }
         }
@@ -505,8 +525,8 @@ public class FittingCursor {
      * @param value 
      */
     public void setTransientStartValue(double value) {
-        _transientStartValue = value;
-        _transientStartBin = _fitterEstimator.valueToBin(value, _inc, _bins);
+        _transientStartValue = _fitterEstimator.roundToDecimalPlaces(value, DECIMAL_PLACES);
+        _transientStartBin = _fitterEstimator.valueToBin(value, _inc);
         
         notifyListeners();
     }
@@ -541,7 +561,7 @@ public class FittingCursor {
             if (null != value) {
                 if (value >= _transientStartValue && value <= _transientStopValue) {
                     _dataStartValue = value;
-                    _dataStartBin = _fitterEstimator.valueToBin(value, _inc, _bins);
+                    _dataStartBin = _fitterEstimator.valueToBin(value, _inc);
                 }
             }
         }        
@@ -592,8 +612,8 @@ public class FittingCursor {
      * @param value 
      */
     public void setDataStartValue(double value) {
-        _dataStartValue = value;
-        _dataStartBin = _fitterEstimator.valueToBin(value, _inc, _bins);
+        _dataStartValue = _fitterEstimator.roundToDecimalPlaces(value, DECIMAL_PLACES);
+        _dataStartBin = _fitterEstimator.valueToBin(value, _inc);
         notifyListeners();
     }
 
@@ -627,7 +647,7 @@ public class FittingCursor {
             if (null != value) {
                 if (value >= _dataStartValue && value < _inc * _bins) {
                     _transientStopValue = value;
-                    _transientStopBin = _fitterEstimator.endValueToBin(value, _inc, _bins);
+                    _transientStopBin = ((FitterEstimator) _fitterEstimator).endValueToBin(value, _inc);
                 }
             }
         }
@@ -678,8 +698,8 @@ public class FittingCursor {
      * @param value 
      */
     public void setTransientStopValue(double value) {
-        _transientStopValue = value;
-        _transientStopBin = _fitterEstimator.endValueToBin(value, _inc, _bins);
+        _transientStopValue = _fitterEstimator.roundToDecimalPlaces(value, DECIMAL_PLACES);
+        _transientStopBin = ((FitterEstimator) _fitterEstimator).endValueToBin(value, _inc);
         notifyListeners();
     }
 
