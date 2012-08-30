@@ -4,6 +4,9 @@
  */
 package loci.slim.heuristics;
 
+import ij.IJ;
+
+//TODO remove this class once next version of TRI2 is available.
 /**
  *
  * @author aivar
@@ -15,8 +18,8 @@ public class Kludge {
         if (kludge) {
             int newBin = (int) Math.ceil(value / inc);
             if (bin != newBin) {
-                System.out.println("Kludge: Old start bin was " + bin + " go with " + newBin);
-                bin = newBin;
+                IJ.log("Kludge: start bin was " + bin + " old version " + newBin);
+                //bin = newBin;
             }
         }
         
@@ -27,8 +30,8 @@ public class Kludge {
         if (kludge) {
             int newBin = (int) Math.floor(value / inc) + 1;
             if (bin != newBin) {
-                System.out.println("Kludge: Old end bin was " + bin + " go with " + newBin);
-                bin = newBin;
+                IJ.log("Kludge: end bin was " + bin + " old version " + newBin);
+                //bin = newBin;
             }
         }
         return bin;
