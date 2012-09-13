@@ -828,13 +828,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         if (_fittingCursor.getHasPrompt() && null != _excitationPanel) {
             int startIndex = _fittingCursor.getPromptStartBin();
             int stopIndex  = _fittingCursor.getPromptStopBin();
-            double base  = _fittingCursor.getPromptBaselineValue();
-            
-            //TODO ARG 7/31/12
-            int modStartIndex = loci.slim.heuristics.Kludge.kludgeStart(startIndex * _increment, _increment, startIndex);
-            int modStopIndex  = loci.slim.heuristics.Kludge.kludgeEnd(stopIndex * _increment, _increment, stopIndex);
-   
-            double[] values = _excitationPanel.getValues(modStartIndex /*startIndex*/, modStopIndex /*stopIndex*/, base);
+            double base  = _fittingCursor.getPromptBaselineValue();   
+            double[] values = _excitationPanel.getValues(startIndex, stopIndex, base);
             fitInfo.setPrompt(values);
         }
         fitInfo.setIndexColorModel(HistogramTool.getIndexColorModel());
@@ -1698,17 +1693,10 @@ public class SLIMProcessor <T extends RealType<T>> {
                 int startIndex = _fittingCursor.getPromptStartBin();
                 int stopIndex  = _fittingCursor.getPromptStopBin();
                 double base  = _fittingCursor.getPromptBaselineValue();
-                
-                //TODO ARG 7/31/12
-                int modStartIndex = loci.slim.heuristics.Kludge.kludgeStart(startIndex * _increment, _increment, startIndex);
-                int modStopIndex  = loci.slim.heuristics.Kludge.kludgeEnd(stopIndex * _increment, _increment, stopIndex);
-        
-                excitation = _excitationPanel.getValues(modStartIndex /*startIndex*/, modStopIndex /*stopIndex*/, base);
+                excitation = _excitationPanel.getValues(startIndex, stopIndex, base);
             }            
             curveFitter.setInstrumentResponse(excitation);
-//            System.out.println("$$$ EXCITATION $$$");
         }
-//        else System.out.println("$$$ NO EXCITATION $$$");
         return curveFitter;
     }
 
@@ -1717,7 +1705,6 @@ public class SLIMProcessor <T extends RealType<T>> {
      * free (vs. fixed).
      */
     private boolean[] translateFree(FitFunction fitFunction, boolean free[]) {
-        System.out.println("SLIMProcessor.translateFree free length is " + free.length);
         boolean translated[] = new boolean[free.length];
         switch (fitFunction) {
             case SINGLE_EXPONENTIAL:

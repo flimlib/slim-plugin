@@ -250,14 +250,8 @@ public class CursorEstimator {
             returnValue[TRANSIENT_STOP]  = transEndIndex;
             endGame(returnValue);
             return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
-        }
-
-        //TODO ARG 7/32/12:
-        int modStartp = Kludge.kludgeStart(startp * xInc, xInc, startp);
-        int modEndp = Kludge.kludgeEnd(endp * xInc, xInc, endp);
-        
-        
-        double[] adjustedPrompt = ExcitationScaler.scale(prompt, modStartp /*startp*/, modEndp /*endp*/, baseline, xInc, decay.length);
+        }      
+        double[] adjustedPrompt = ExcitationScaler.scale(prompt, startp, endp, baseline, xInc, decay.length);
         
         for (i = 0; i < 2 * ATTEMPTS + 1; ++i, ++transStartIndex) {
             transFitStartIndex = transStartIndex;
