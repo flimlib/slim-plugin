@@ -154,6 +154,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     private volatile boolean _cancel;
     private volatile boolean _fitInProgress;
     private volatile boolean _fitted;
+	private volatile boolean _summed;
+	private volatile boolean _refit;
 
     private static final String FILE_KEY = "file";
     private static final String PATH_KEY = "path";
@@ -219,6 +221,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         _cancel = false;
         _fitInProgress = false;
         _fitted = false;
+		_refit = false;
     }
 
     public void processImage(Image<T> image) {
@@ -302,6 +305,16 @@ public class SLIMProcessor <T extends RealType<T>> {
                     _cancel = false;
                     _fitInProgress = true;
                 }
+				
+				/**
+				 * Triggers a refit.
+				 */
+				@Override
+				public void reFit() {
+					_cancel = false;
+					_fitInProgress = true;
+					_refit = true;
+				}
 
                 /**
                  * Cancels ongoing fit.
@@ -493,9 +506,20 @@ public class SLIMProcessor <T extends RealType<T>> {
             // get settings of requested fit
             getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
 
-            // do the fit
-            System.out.println("// do the fit!!!");
-            fitData(uiPanel);
+			if (_refit) {
+				if (_summed) {
+					fitSummed(_uiPanel);
+				}
+				else {
+					fitPixel(_uiPanel, _fittingCursor);
+				}
+				_refit = false;
+			}
+			else {
+				// do the fit
+				fitData(uiPanel);
+				_summed = uiPanel.getRegion() == FitRegion.SUMMED;
+			}
 
             _fitInProgress = false;
             //uiPanel.enable(true);
@@ -1807,7 +1831,6 @@ public class SLIMProcessor <T extends RealType<T>> {
                     || promptBaseline != _promptBaseline) {
                 
                 // trigger refit
-                System.out.println("*** CURSOR CHANGE REFIT ***");
   
                 // update saved cursor values for next time
                 _transStart     = transStart;
@@ -1817,7 +1840,12 @@ public class SLIMProcessor <T extends RealType<T>> {
                 _promptStop     = promptStop;
                 _promptBaseline = promptBaseline;
 
-                fitPixel(_uiPanel, _fittingCursor);
+				if (_summed) {
+					fitSummed(_uiPanel);
+				}
+				else {
+					fitPixel(_uiPanel, _fittingCursor);
+				}
             }
         }
     }

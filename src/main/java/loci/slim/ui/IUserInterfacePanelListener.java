@@ -45,6 +45,11 @@ public interface IUserInterfacePanelListener {
      * Triggers a fit.
      */
     public void doFit();
+	
+	/**
+	 * Triggers a refit.
+	 */
+	public void reFit();
 
     /**
      * Cancels ongoing fit.

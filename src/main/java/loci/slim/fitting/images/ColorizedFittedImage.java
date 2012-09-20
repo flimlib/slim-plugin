@@ -147,7 +147,7 @@ public class ColorizedFittedImage implements IFittedImageSlice {
         // convert value to 0.0..1.0
         value = (value - _min) / (_max - _min);
         
-        // convert 0.0..1.0 to 1..254 (colors 0 and 255 have a special use)
+        // convert 0.0..1.0 to 1..254 (colors 0 and 255 have a special use) //TODO ARG problem here; the only value that results in index 254 is _max.
         int index = 1 + (int) (value * 253);
 
         // get color

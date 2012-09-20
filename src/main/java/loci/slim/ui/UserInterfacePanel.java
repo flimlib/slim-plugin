@@ -37,6 +37,7 @@ package loci.slim.ui;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import java.awt.ItemSelectable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -448,6 +449,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         fitPanel.add(algorithmLabel);
         _algorithmComboBox = new JComboBox(ALGORITHM_ITEMS);
         _algorithmComboBox.setSelectedItem(SLIM_CURVE_RLD_LMA_ALGORITHM);
+		refitUponStateChange(_algorithmComboBox);
         fitPanel.add(_algorithmComboBox);
 
         JLabel functionLabel = new JLabel("Function");
@@ -468,6 +470,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                 }
             }
         );
+		refitUponStateChange(_functionComboBox);
         fitPanel.add(_functionComboBox);
 
         JLabel noiseModelLabel = new JLabel("Noise Model");
@@ -475,6 +478,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         fitPanel.add(noiseModelLabel);
         _noiseModelComboBox = new JComboBox(NOISE_MODEL_ITEMS);
         _noiseModelComboBox.setSelectedItem(MAXIMUM_LIKELIHOOD);
+		refitUponStateChange(_noiseModelComboBox);
         fitPanel.add(_noiseModelComboBox);
 
         JLabel fittedImagesLabel = new JLabel("Fitted Images");
@@ -753,12 +757,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         xLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(xLabel);
         _xField = new JTextField(9);
+		refitUponStateChange(_xField);
         controlPanel.add(_xField);
 
         JLabel yLabel = new JLabel("Y");
         yLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(yLabel);
         _yField = new JTextField(9);
+		refitUponStateChange(_yField);
         controlPanel.add(_yField);
 
         JLabel thresholdLabel = new JLabel("Threshold");
@@ -771,12 +777,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         chiSqTargetLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(chiSqTargetLabel);
         _chiSqTargetField = new JTextField(9);
+		refitUponStateChange(_chiSqTargetField);
         controlPanel.add(_chiSqTargetField);
 
         JLabel binningLabel = new JLabel("Bin");
         binningLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(binningLabel);
         _binningComboBox = new JComboBox(binningChoices);
+		refitUponStateChange(_binningComboBox);
         controlPanel.add(_binningComboBox);
 
         // rows, cols, initX, initY, xPad, yPad
@@ -805,6 +813,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _aFix1 = new JCheckBox("Fix");
         //_a1Fix1.addItemListener(this);
         expPanel.add(_aFix1);
+		refitUponStateChange(_aParam1, _aFix1);
 
         JLabel t1Label1 = new JLabel(lifetimeLabel);
         t1Label1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -815,6 +824,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _tFix1 = new JCheckBox("Fix");
         //_t1Fix1.addItemListener(this);
         expPanel.add(_tFix1);
+		refitUponStateChange(_tParam1, _tFix1);
 
         JLabel zLabel1 = new JLabel("Z");
         zLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -825,6 +835,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _zFix1 = new JCheckBox("Fix");
         //_zFix1.addItemListener(this);
         expPanel.add(_zFix1);
+		refitUponStateChange(_zParam1, _zFix1);
 
         JLabel chiSqLabel1 = new JLabel("" + CHI + SQUARE);
         chiSqLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -875,6 +886,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _a1Fix2 = new JCheckBox("Fix");
         //_a1Fix2.addItemListener(this);
         expPanel.add(_a1Fix2);
+		refitUponStateChange(_a1Param2, _a1Fix2);
 
         JLabel t1Label2 = new JLabel(lifetimeLabel + SUB_1);
         t1Label2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -885,6 +897,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _t1Fix2 = new JCheckBox("Fix");
         //_t1Fix2.addItemListener(this);
         expPanel.add(_t1Fix2);
+		refitUponStateChange(_t1Param2, _t1Fix2);
 
         JLabel a2Label2 = new JLabel("A" + SUB_2);
         a2Label2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -895,6 +908,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _a2Fix2 = new JCheckBox("Fix");
         //_a2Fix2.addItemListener(this);
         expPanel.add(_a2Fix2);
+		refitUponStateChange(_a2Param2, _a2Fix2);
 
         JLabel t2Label2 = new JLabel(lifetimeLabel + SUB_2);
         t2Label2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -905,6 +919,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _t2Fix2 = new JCheckBox("Fix");
         //_t2Fix2.addItemListener(this);
         expPanel.add(_t2Fix2);
+		refitUponStateChange(_t2Param2, _t2Fix2);
 
         JLabel zLabel2 = new JLabel("Z");
         zLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -915,6 +930,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _zFix2 = new JCheckBox("Fix");
         //_zFix2.addItemListener(this);
         expPanel.add(_zFix2);
+		refitUponStateChange(_zParam2, _zFix2);
 
         JLabel chiSqLabel2 = new JLabel("" + CHI + SQUARE);
         chiSqLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -966,6 +982,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _a1Fix3 = new JCheckBox("Fix");
         //_a1Fix3.addItemListener(this);
         expPanel.add(_a1Fix3);
+		refitUponStateChange(_a1Param3, _a1Fix3);
 
         JLabel t1Label3 = new JLabel(lifetimeLabel + SUB_1);
         t1Label3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -976,6 +993,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _t1Fix3 = new JCheckBox("Fix");
         //_t1Fix3.addItemListener(this);
         expPanel.add(_t1Fix3);
+		refitUponStateChange(_t1Param3, _t1Fix3);
 
         JLabel a2Label3 = new JLabel("A" + SUB_2);
         a2Label3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -986,6 +1004,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _a2Fix3 = new JCheckBox("Fix");
         //_a2Fix3.addItemListener(this);
         expPanel.add(_a2Fix3);
+		refitUponStateChange(_a2Param3, _a2Fix3);
 
         JLabel t2Label3 = new JLabel(lifetimeLabel + SUB_2);
         t2Label3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -996,6 +1015,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _t2Fix3 = new JCheckBox("Fix");
         //_t2Fix3.addItemListener(this);
         expPanel.add(_t2Fix3);
+		refitUponStateChange(_t2Param3, _t2Fix3);
 
         JLabel a3Label3 = new JLabel("A" + SUB_3);
         a3Label3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1006,6 +1026,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _a3Fix3 = new JCheckBox("Fix");
         //_a3Fix3.addItemListener(this);
         expPanel.add(_a3Fix3);
+		refitUponStateChange(_a3Param3, _a3Fix3);
 
         JLabel t3Label3 = new JLabel(lifetimeLabel + SUB_3);
         t3Label3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1016,6 +1037,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _t3Fix3 = new JCheckBox("Fix");
         //_t3Fix3.addItemListener(this);
         expPanel.add(_t3Fix3);
+		refitUponStateChange(_t3Param3, _t3Fix3);
 
         JLabel zLabel3 = new JLabel("Z");
         zLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1026,7 +1048,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _zFix3 = new JCheckBox("Fix");
         //_zFix3.addItemListener(this);
         expPanel.add(_zFix3);
-
+		refitUponStateChange(_zParam3, _zFix3);
 
         JLabel chiSqLabel3 = new JLabel("" + CHI + SQUARE);
         chiSqLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1080,6 +1102,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _aFix4 = new JCheckBox("Fix");
         //_a1Fix1.addItemListener(this);
         expPanel.add(_aFix4);
+		refitUponStateChange(_aParam4, _aFix4);
 
         JLabel tLabel4 = new JLabel(lifetimeLabel);
         tLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1090,6 +1113,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _tFix4 = new JCheckBox("Fix");
         //_t1Fix1.addItemListener(this);
         expPanel.add(_tFix4);
+		refitUponStateChange(_tParam4, _tFix4);
 
         JLabel hLabel4 = new JLabel("H");
         hLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1100,6 +1124,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _hFix4 = new JCheckBox("Fix");
         //_hFix4.addItemListener(this);
         expPanel.add(_hFix4);
+		refitUponStateChange(_hParam4, _hFix4);
 
         JLabel zLabel1 = new JLabel("Z");
         zLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1110,6 +1135,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _zFix4 = new JCheckBox("Fix");
         //_zFix1.addItemListener(this);
         expPanel.add(_zFix4);
+		refitUponStateChange(_zParam4, _zFix4);
 
         JLabel chiSqLabel4 = new JLabel("" + CHI + SQUARE);
         chiSqLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1156,6 +1182,70 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     private boolean getFitButtonState() {
         return _fitButton.getText().equals(_fitButtonText);
     }
+
+	/**
+	 * Triggers refit if dropdown list selection changes.
+	 * 
+	 * @param itemSelectable 
+	 */
+	private void refitUponStateChange(ItemSelectable itemSelectable) {
+		itemSelectable.addItemListener(
+			new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					if (e.getStateChange() == ItemEvent.SELECTED
+							&& null != _listener) {
+						_listener.reFit();
+					}
+				}
+			});
+	}
+
+	/**
+	 * Triggers refit if text field edited.
+	 * 
+	 * @param textField 
+	 */
+	private void refitUponStateChange(JTextField textField) {
+		textField.addActionListener(
+			new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// trigger if just edited text
+					_listener.reFit();
+				}
+			});
+	}
+
+	/**
+	 * Triggers refit if fitted parameter value or checkbox change.
+	 * 
+	 * @param textField
+	 * @param checkBox 
+	 */
+	private void refitUponStateChange(JTextField textField, final JCheckBox checkBox) {
+		textField.addActionListener(
+			new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// trigger if just edited text and check box is selected.
+					if (checkBox.isSelected()
+							&& null != _listener) {
+						_listener.reFit();
+					}
+				}
+			});
+		
+		checkBox.addItemListener(
+			new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					// definitely trigger if DESELECTED
+					// also if SELECTED, in case text field already edited
+					_listener.reFit();
+				}
+			});
+	}
 
     /*
      * Disables and enables UI during and after a fit.
