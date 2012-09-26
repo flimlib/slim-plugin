@@ -167,7 +167,7 @@ public class ThreadPool<T> {
                     "ImageJ-" /* + getContext().getID() */
                     + "ThreadPool-" + _threadPoolNumber
                     + "-Thread-" + _threadNumber++;
-            System.out.println("NEW THREAD");
+            //System.out.println("NEW THREAD");
             return new Thread(r, threadName);
         }
     }

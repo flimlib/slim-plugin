@@ -96,7 +96,9 @@ public class FittedImageFitter {
         // Show histogram tool for the last image created
         int lastIndex = imageTypes.length - 1;
         if (lastIndex >= 0) {
-            HistogramTool.getInstance().setHistogramData
+			HistogramTool histogramTool = HistogramTool.getInstance();
+			histogramTool.show(false); //TODO ARG hardcoded hasChannels parameter
+            histogramTool.setHistogramData
                     (_fittedImages.get(lastIndex).getHistogramData());
         }
     }

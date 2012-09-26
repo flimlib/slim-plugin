@@ -143,7 +143,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         _stackWindow = new MyStackWindow(imagePlus);
         _stackWindow.setVisible(true);
         
-        System.out.println("minNonZeroPhotonCount is " + _minNonZeroPhotonCount);
+        //System.out.println("minNonZeroPhotonCount is " + _minNonZeroPhotonCount);
 
         //System.out.println("Channel selector " + _stackWindow.getChannelSelector());
         //System.out.println("Slice selector " + _stackWindow.getSliceSelector());

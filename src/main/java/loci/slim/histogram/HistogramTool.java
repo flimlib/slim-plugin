@@ -70,30 +70,6 @@ public class HistogramTool {
     private HistogramPanel _histogramPanel;
     private ColorBarPanel _colorBarPanel;
     private HistogramUIPanel _uiPanel;
- 
-    /**
-     * Constructor, handles layout and wiring.
-     */
-    private HistogramTool() { //TODO ARG how do you pass this in if it is a singleton?  (cf getInstance() below)
-        //TODO ARG need to be able to close this window and have it pop back up as needed
-        // boolean hasChannels) {
-        // create the histogram and color bar display panels
-        _histogramPanel = new HistogramPanel(WIDTH, INSET, HISTOGRAM_HEIGHT);
-        _histogramPanel.setListener(new HistogramPanelListener());
-        _colorBarPanel = new ColorBarPanel(WIDTH, INSET, COLORBAR_HEIGHT);
-        _colorBarPanel.setLUT(getLUT());
-        boolean hasChannels = false;
-        _uiPanel = new HistogramUIPanel(hasChannels);
-        _uiPanel.setListener(new UIPanelListener());
-
-        _frame = new JFrame("Histogram");
-        _frame.setResizable(false);
-        _frame.getContentPane().add(_histogramPanel, BorderLayout.NORTH);
-        _frame.getContentPane().add(_colorBarPanel, BorderLayout.CENTER);
-        _frame.getContentPane().add(_uiPanel, BorderLayout.SOUTH);
-        _frame.pack();
-        _frame.setVisible(true);
-    }
 
     /**
      * Class is a singleton for convenience.
@@ -106,6 +82,33 @@ public class HistogramTool {
         }
         return INSTANCE;
     }
+
+	/**
+	 * Initializer, handles layout and wiring.  Called when set of images is 
+	 * created.
+	 * 
+	 * @param hasChannels 
+	 */
+	public void show(boolean hasChannels) {
+		if (null == _frame || !_frame.isShowing()) {
+			// create the histogram and color bar display panels
+			_histogramPanel = new HistogramPanel(WIDTH, INSET, HISTOGRAM_HEIGHT);
+			_histogramPanel.setListener(new HistogramPanelListener());
+			_colorBarPanel = new ColorBarPanel(WIDTH, INSET, COLORBAR_HEIGHT);
+			_colorBarPanel.setLUT(getLUT());
+
+			_uiPanel = new HistogramUIPanel(hasChannels);
+			_uiPanel.setListener(new UIPanelListener());
+
+			_frame = new JFrame("Histogram");
+			_frame.setResizable(false);
+			_frame.getContentPane().add(_histogramPanel, BorderLayout.NORTH);
+			_frame.getContentPane().add(_colorBarPanel, BorderLayout.CENTER);
+			_frame.getContentPane().add(_uiPanel, BorderLayout.SOUTH);
+			_frame.pack();
+			_frame.setVisible(true);
+		}
+	}
 
     /**
      * Gets an IndexColorModel by loading a hardcoded LUT file.
@@ -176,28 +179,31 @@ public class HistogramTool {
             minMaxView = _histogramDataGroup.getMinMaxView();
             minMaxLUT  = _histogramDataGroup.getMinMaxLUT();
         }
-        
-        if (_frame.isVisible()) {
-            _frame.setVisible(true);
-        }
-        _frame.setTitle(histogramData.getTitle());
-        
-        _histogramPanel.setBins(histogramData.binValues(WIDTH));
- 
-        boolean autoRange = histogramData.getAutoRange();
-        _uiPanel.setAutoRange(autoRange);
-        if (!autoRange) {
-            _histogramPanel.setCursors(cursorPixelFromValue
-                    (false, minMaxLUT[0]), cursorPixelFromValue(false, minMaxLUT[1])); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
-        }        
-        _uiPanel.setExcludePixels(histogramData.getExcludePixels());
-        _uiPanel.setCombineChannels(histogramData.getCombineChannels());
-        _uiPanel.setDisplayChannels(histogramData.getDisplayChannels());
-        _uiPanel.enableChannels(histogramData.hasChannels());        
-        _uiPanel.setMinMaxLUT(minMaxLUT[0], minMaxLUT[1]);
-        
-        _colorBarPanel.setMinMax(minMaxView[0], minMaxView[1],
-                minMaxLUT[0], minMaxLUT[1]);
+		
+		if (null != _frame) {
+			if (_frame.isVisible()) {
+				_frame.setVisible(true);
+			}
+			_frame.setTitle(histogramData.getTitle());
+
+			_histogramPanel.setBins(histogramData.binValues(WIDTH));
+
+			boolean autoRange = histogramData.getAutoRange();
+			_uiPanel.setAutoRange(autoRange);
+			if (!autoRange) {
+				_histogramPanel.setCursors(cursorPixelFromValue
+						(false, minMaxLUT[0]), cursorPixelFromValue(false, minMaxLUT[1])); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
+			}        
+			_uiPanel.setExcludePixels(histogramData.getExcludePixels());
+			_uiPanel.setCombineChannels(histogramData.getCombineChannels());
+			_uiPanel.setDisplayChannels(histogramData.getDisplayChannels());
+			_uiPanel.enableChannels(histogramData.hasChannels());        
+			_uiPanel.setMinMaxLUT(minMaxLUT[0], minMaxLUT[1]);
+
+			_colorBarPanel.setMinMax(minMaxView[0], minMaxView[1],
+					minMaxLUT[0], minMaxLUT[1]);
+		}
+
     }
 
     /*
@@ -251,7 +257,7 @@ public class HistogramTool {
             //
             //TODO if the user drags a new LUT range this doesn't get called!
             
-          System.out.println("changed min/maxView " + minView + " " + maxView + " min/maxLUT " + minLUT + " " + maxLUT);  
+            //System.out.println("changed min/maxView " + minView + " " + maxView + " min/maxLUT " + minLUT + " " + maxLUT);  
             
             
             _histogramDataGroup.redisplay();
@@ -516,7 +522,7 @@ public class HistogramTool {
             }
 
             if (changed) {
-                System.out.println("CHANGED:" + minView + " " + maxView);
+                //System.out.println("CHANGED:" + minView + " " + maxView);
                 // update histogram and color bar
                 changed(minView, maxView, minLUT, maxLUT);
             }

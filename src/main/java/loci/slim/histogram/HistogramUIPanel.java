@@ -353,21 +353,39 @@ public class HistogramUIPanel extends JPanel {
      * shown.
      */
     private void showMinMaxLUT(double min, double max) {
+		String text;
+		
         DoubleFormatter minFormatter = new DoubleFormatter(true, DIGITS, min);
-        _minTextField.setText(minFormatter.getText());
-        try {
-            _minLUT = Double.parseDouble(_minTextField.getText());
-        }
-        catch (NumberFormatException e) {
-            IJ.log("Error parsing min '" + minFormatter.getText() + "' " + e);
-        }
+		text = minFormatter.getText();
+        _minTextField.setText(text);
+		_minLUT = parse(text);
+		
         DoubleFormatter maxFormatter = new DoubleFormatter(false, DIGITS, max);
-        _maxTextField.setText(maxFormatter.getText());
-        try {
-            _maxLUT = Double.parseDouble(_maxTextField.getText());
-        }
-        catch (NumberFormatException e) {
-            IJ.log("Error parsing max '" + maxFormatter.getText() + "' " + e);
-        }
-    }    
+		text = maxFormatter.getText();
+        _maxTextField.setText(text);
+		_maxLUT = parse(text);
+    }
+	
+	private double parse(String text) {
+		double value = 0.0;
+		// check for values of infinity
+		int index = text.indexOf(DoubleFormatter.INFINITY);
+		if (0 == index) {
+			value = Double.POSITIVE_INFINITY;
+			//System.out.println("parsed positive infinity");
+		}
+		else if (1 == index) {
+			value = Double.NEGATIVE_INFINITY;
+			//System.out.print("parsed negative infinity");
+		}
+		else {
+			try {
+				value = Double.parseDouble(text);
+			}
+			catch (NumberFormatException e) {
+				IJ.log("Error parsing '" + text + "' " + e);
+			}
+		}
+		return value;
+	}
 }

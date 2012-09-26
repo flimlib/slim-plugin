@@ -101,7 +101,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     private static final String SUM_REGION = "Sum All Pixels";
     private static final String ROIS_REGION = "Sum Each ROI";
     private static final String PIXEL_REGION = "Single Pixel";
-    private static final String ALL_REGION = "Image";
+    private static final String ALL_REGION = "Images";
     
     private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA";
     private static final String SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD";
@@ -124,7 +124,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     private static final String EXCITATION_FILE = "Load from File";
     private static final String EXCITATION_CREATE = "Use current X Y";
 
-    private static final String FIT_IMAGE = "Fit Image";
+    private static final String FIT_IMAGE = "Fit Images";
     private static final String FIT_PIXEL = "Fit Pixel";
     private static final String FIT_SUMMED_PIXELS = "Fit Summed Pixels";
     private static final String FIT_SUMMED_ROIS = "Fit Summed ROIs";
@@ -133,7 +133,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(10, 10, 10, 10);
     private static final Border ETCHED_BORDER = BorderFactory.createEtchedBorder();
 
-    private static final String REGION_ITEMS[] = { SUM_REGION, ROIS_REGION, PIXEL_REGION, ALL_REGION };
+	//TODO ARG fitting a series of ROIs is broken:
+    private static final String REGION_ITEMS[] = { SUM_REGION, /*ROIS_REGION,*/ PIXEL_REGION, ALL_REGION };
     private static final String ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM };
     private static final String FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL };
     private static final String NOISE_MODEL_ITEMS[] = { GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA, MAXIMUM_LIKELIHOOD };
@@ -865,7 +866,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _startParam1.setSelected(true);
         _startParam1.setEnabled(false);
 
-        panel.add("South", _startParam1);
+		//TODO ARG 9/21/12 disabled non-functioning UI
+        //panel.add("South", _startParam1);
         return panel;
     }
 
@@ -961,7 +963,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _startParam2 = new JCheckBox("Use as starting parameters for fit");
         _startParam2.setSelected(true);
         _startParam2.setEnabled(false);
-        panel.add("South", _startParam2);
+		//TODO ARG 9/21/12 disabled non-functioning UI
+        //panel.add("South", _startParam2);
         return panel;
     }
 
@@ -1081,7 +1084,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _startParam3 = new JCheckBox("Use as starting parameters for fit");
         _startParam3.setSelected(true);
         _startParam3.setEnabled(false);
-        panel.add("South", _startParam3);
+		//TODO ARG 9/21/12 disabled non-functioning UI
+        //panel.add("South", _startParam3);
         return panel;
     }
 
@@ -1164,8 +1168,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _startParam4 = new JCheckBox("Use as starting parameters for fit");
         _startParam4.setSelected(true);
         _startParam4.setEnabled(false);
-
-        panel.add("South", _startParam4);
+        //TODO ARG 9/21/12 disabled non-functioning UI
+        //panel.add("South", _startParam4);
         return panel;
     }
 
@@ -1430,7 +1434,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     public String getFittedImages() {
         StringBuffer returnValue = new StringBuffer();
         String selected = (String) _fittedImagesComboBox.getSelectedItem();
-        System.out.println("selected is " + selected);
+        //System.out.println("selected is " + selected);
         String[] fittedImages = selected.split(" ");
         for (String fittedImage : fittedImages) {
             boolean fit = true;
@@ -1448,7 +1452,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                 returnValue.append(' ');
             }
         }
-        System.out.println("changes to " + returnValue);
+        //System.out.println("changes to " + returnValue);
         return returnValue.toString();
     }
 

@@ -44,21 +44,31 @@ import java.math.RoundingMode;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class DoubleFormatter {
+	public static final char INFINITY = '\u221E';
     double _value;
     String _text;
 
     public DoubleFormatter(boolean min, int digits, double value) {
-        try {
-            MathContext context = new MathContext(digits, min ? RoundingMode.FLOOR : RoundingMode.CEILING);
-            BigDecimal bigDecimalValue = BigDecimal.valueOf(value).round(context);
-            _value = bigDecimalValue.doubleValue();
-            _text = bigDecimalValue.toEngineeringString();
-        }
-        catch (NumberFormatException e) {
-            System.out.println("NumberFormatException " + e.getMessage());
-            _value = 0.0;
-            _text = "0.0";
-        }
+		if (Double.isInfinite(value)) {
+			if (value < 0.0) {
+				_text = "-" + INFINITY;
+			}
+			else {
+				_text = "" + INFINITY;
+			}
+		}
+		else {
+			try {
+				MathContext context = new MathContext(digits, min ? RoundingMode.FLOOR : RoundingMode.CEILING);
+				BigDecimal bigDecimalValue = BigDecimal.valueOf(value).round(context);
+				_value = bigDecimalValue.doubleValue();
+				_text = bigDecimalValue.toEngineeringString();
+			}
+			catch (NumberFormatException e) {
+				_value = 0.0;
+				_text = "0.0";
+			}
+		}
     }
 
     /**

@@ -57,9 +57,10 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  *
  * @author Aivar Grislis
  */
-@SLIMAnalyzer(name="VisAD")
-public class VisADAnalysisPlugin implements ISLIMAnalyzer {
-    @Override
+//TODO ARG 9/21/12 disabled the VisAD plugin since it doesn't function
+//@SLIMAnalyzer(name="VisAD")
+public class VisADAnalysisPlugin /*implements ISLIMAnalyzer*/ {
+    //@Override
 		public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
     		ImagePlus imp = ImageJFunctions.displayAsVirtualStack(image);
     		imp.setTitle("Fitted results");

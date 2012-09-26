@@ -56,7 +56,7 @@ public class MyStackWindow extends StackWindow {
 
     public MyStackWindow(ImagePlus imp) {
         super(imp);
-        System.out.println("MyStackWindow " + imp.getTitle());        
+        //System.out.println("MyStackWindow " + imp.getTitle());        
         m_height = imp.getHeight();
         if (null != sliceSelector) {
             sliceSelector.addAdjustmentListener(

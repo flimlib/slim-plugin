@@ -135,7 +135,8 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
             public void focusGained(FocusEvent e) {
                 int channelIndex = _stackWindow.getSlice() - 1;
                 _histogramData.setChannelIndex(channelIndex);
-                HistogramTool.getInstance().setHistogramData(_histogramData);
+				HistogramTool histogramTool = HistogramTool.getInstance();
+                histogramTool.setHistogramData(_histogramData);
             }
             
             public void focusLost(FocusEvent e) { }

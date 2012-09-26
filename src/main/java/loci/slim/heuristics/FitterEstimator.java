@@ -39,7 +39,8 @@ import loci.curvefitter.ICurveFitter.NoiseModel;
 import loci.curvefitter.IFitterEstimator;
 
 /**
- *
+ * Assorted rules of thumb for fitting.
+ * 
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class FitterEstimator implements IFitterEstimator {
@@ -63,7 +64,7 @@ public class FitterEstimator implements IFitterEstimator {
 
     @Override
     public int getEstimateStartIndex(double[] yCount, int start, int stop) {
-        System.out.println("FitterEstimator.getEstimateStartIndex " + yCount.length + " " + start + " " + stop);
+        //System.out.println("FitterEstimator.getEstimateStartIndex " + yCount.length + " " + start + " " + stop);
         if (start < 0) {
             start = 0;
         } //TODO ARG patch for an exception
@@ -230,7 +231,7 @@ public class FitterEstimator implements IFitterEstimator {
 
     /**
      * Converts bin number to time-based value.  Rounds to four decimal places.<p>
-     * Note that 'binToValue' and 'valueToBin' should round-trip.
+     * Note that 'binToValue' and 'valueToBin' ought to round-trip.
      * 
      * @param bin
      * @param inc
@@ -253,7 +254,7 @@ public class FitterEstimator implements IFitterEstimator {
         double decimalTerm = Math.pow(10.0, decimalPlaces);
         int tmp = roundToNearestInteger(value * decimalTerm);
         double rounded = (double) tmp / decimalTerm;
-        System.out.println("value " + value + " rounds to " + rounded);
+        //System.out.println("value " + value + " rounds to " + rounded);
         return rounded;
     }
     
