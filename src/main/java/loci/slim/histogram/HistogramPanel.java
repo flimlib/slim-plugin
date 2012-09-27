@@ -273,7 +273,15 @@ public class HistogramPanel extends JPanel {
         }
         repaint();
     }
-    
+
+	/**
+	 * Resets the cursors.
+	 */
+	public void resetCursors() {
+        _minCursor = _inset - 1;
+        _maxCursor = _inset + _width;
+		repaint();
+	}
 
     @Override
     public void paintComponent(Graphics g) {

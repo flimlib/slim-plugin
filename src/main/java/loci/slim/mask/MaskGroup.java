@@ -41,6 +41,9 @@ import java.util.Map;
 
 /**
  * Mask group class associates a set of mask nodes.
+ * <p>
+ * Note that mask changes are a results of user interaction using the single
+ * histogram tool, so threading issues are unlikely.
  * 
  * @author Aivar Grislis grislis at wisc dot edu
  */
@@ -66,27 +69,20 @@ public class MaskGroup implements IMaskGroup {
     }
 
     @Override
-    public void updateMask(IMaskNode node, Mask mask) {
-        checkMask("incoming", mask);
-        // update map with given mask
-        _maskMap.put(node, mask);
+    public void updateMask(IMaskNode node) {
+        // update map with node's new self mask
+        _maskMap.put(node, node.getSelfMask());
 
         // combine masks and notify other nodes
         for (IMaskNode peerNode : _nodeList) {
-            System.out.println("MaskGroup.updateMask, consider " + peerNode);
-            // don't notify the caller
+            // skip the caller
             if (peerNode != node) {
-                // don't combine the recipients mask
-                Mask peerMask = _maskMap.get(peerNode);
-                Mask combinedMask = Mask.addOtherMasks(peerMask, _maskMap.values());
-                checkMask("combined", combinedMask);
-                System.out.println("MaskGroup.updateMask, notify " + combinedMask);
-                peerNode.updateOtherMask(combinedMask);
+                // combine all masks but the recipient's
+                Mask peerSelfMask = _maskMap.get(peerNode);
+                Mask peerOtherMask = Mask.addOtherMasks(peerSelfMask, _maskMap.values());
+                peerNode.updateOtherMask(peerOtherMask);
             }
-            else System.out.println("MaskGroup.updateMask, originating node " + node + " skipped");
         }
-
-
     }
     
     private void checkMask(String title, Mask mask) {

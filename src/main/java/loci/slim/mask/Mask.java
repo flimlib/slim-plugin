@@ -163,9 +163,6 @@ public class Mask {
                 returnValue = new Mask(result);
             }
         }
-        else {
-            System.out.println("masks is empty");
-        }
         return returnValue;
     }
 }

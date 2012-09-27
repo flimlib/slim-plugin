@@ -264,8 +264,8 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
                 }
             }
 
-            //TODO
-            System.out.println("imagePlus.setProcessor etc.");
+            //TODO ARG kludge forces redraw
+            //System.out.println("imagePlus.setProcessor etc.");
             _imagePlus.setProcessor(_fittedImage.getImageProcessor().duplicate()); 
         }
     }

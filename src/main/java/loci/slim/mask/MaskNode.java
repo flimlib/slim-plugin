@@ -43,29 +43,35 @@ public class MaskNode implements IMaskNode {
     IMaskGroup _maskGroup;
     IMaskNodeListener _listener;
     Mask _selfMask;
-    volatile Mask _otherMask;
+    Mask _otherMask;
     
     public MaskNode(IMaskGroup maskGroup, IMaskNodeListener listener) {
         _maskGroup = maskGroup;
         _listener = listener;
+		_selfMask = _otherMask = null;
         maskGroup.addNode(this);
     }
 
     /**
-     * This method notifies other nodes that this node has changed its mask.
+     * This method should be called when node has changed its mask.
      * 
-     * @param mask 
+     * @param mask may be null
      */
     @Override
-    public void updateSelfMask(Mask mask) {
-        System.out.println("MaskNode.updateSelfMask " + mask);
-        _maskGroup.updateMask(this, mask);
+    public void updateSelfMask(Mask selfMask) {
+		_selfMask = selfMask;
+		
+		// show changes locally
+		_listener.updateMasks(_otherMask, getTotalMask());
+		
+		// propagate changes through the mask group
+        _maskGroup.updateMask(this);
     }
 
     /**
      * Gets the current mask created by this node.
      * 
-     * @return 
+     * @return mask may be null
      */
     @Override
     public Mask getSelfMask() {
@@ -73,20 +79,21 @@ public class MaskNode implements IMaskNode {
     }
 
     /**
-     * This method notifies this node that other nodes have changed the mask.
+     * This method notifies this node that other nodes have changed masks.
      * 
-     * @param mask 
+     * @param otherMask may be null
      */
     @Override
-    public void updateOtherMask(Mask mask) {
-        _otherMask = mask;
-        _listener.updateMask(mask);
+    public void updateOtherMask(Mask otherMask) {
+        _otherMask = otherMask;
+		
+        _listener.updateMasks(_otherMask, getTotalMask());
     }
 
     /**
      * Gets the current mask created by all other nodes.
      * 
-     * @return 
+     * @return mask may be null
      */
     @Override
     public Mask getOtherMask() {
@@ -94,12 +101,19 @@ public class MaskNode implements IMaskNode {
     }
 
     /**
-     * Gets the current mask.
+     * Gets the current total mask.
      * 
-     * @return 
+     * @return mask may be null
      */
     @Override
     public Mask getTotalMask() {
-        return _selfMask.add(_otherMask);
+		Mask mask = null;
+		if (null == _otherMask) {
+			mask = _selfMask;
+		}
+		else {
+			mask = _otherMask.add(_selfMask);
+		}
+        return mask;
     }
 }

@@ -39,7 +39,6 @@ import loci.slim.mask.IMaskGroup;
 import loci.slim.mask.IMaskNode;
 import loci.slim.mask.IMaskNodeListener;
 import loci.slim.mask.Mask;
-import loci.slim.mask.MaskGroup;
 import loci.slim.mask.MaskNode;
 
 /**
@@ -52,7 +51,6 @@ public class HistogramDataNode {
     private IFittedImage _fittedImage;
     private double[][] _values;
     private IMaskNode _maskNode;
-    private Mask _selfMask;
     private Mask _otherMask;
     private Mask _totalMask;
 
@@ -72,6 +70,7 @@ public class HistogramDataNode {
     public HistogramDataNode(IFittedImage fittedImage, double[][] values) {
         _fittedImage = fittedImage;
         _values = values;
+		_otherMask = _totalMask = null;
     }
 
     /**
@@ -82,9 +81,13 @@ public class HistogramDataNode {
     public void setMaskGroup(IMaskGroup maskGroup) {
         // create a new mask node that listens to the group
         _maskNode = new MaskNode(maskGroup, new IMaskNodeListener () {
-            public void updateMask(Mask mask) {
-                setOtherMask(mask);
-                _fittedImage.redraw(mask);
+			// listen for mask changes
+			@Override
+            public void updateMasks(Mask otherMask, Mask totalMask) {
+				_otherMask = otherMask;
+				_totalMask = totalMask;
+				
+                _fittedImage.redraw(_totalMask);
             }
         });
     }
@@ -98,56 +101,6 @@ public class HistogramDataNode {
         return _values;
     }
     
-    /**
-     * Gets the current other mask, which masks pixels hidden by others.
-     * 
-     * @return mask or null
-     */
-    public Mask getOtherMask() {
-        return _otherMask;
-    }
-
-    /**
-     * Sets the current other mask, which masks pixels hidden by others.
-     * 
-     * @param mask or null
-     */
-    public void setOtherMask(Mask mask) {
-        _otherMask = mask;
-        if (null == _selfMask) {
-            // no self, so total mask is just other
-            _totalMask = mask;
-        }
-        else {
-            // total mask is self plus other
-            _totalMask = _selfMask.add(mask);
-        }
-    }
-
-    /**
-     * Gets the current self mask, which masks pixels hidden by self.
-     * 
-     * @return mask or null
-     */
-    public Mask getSelfMask() {
-        return _selfMask;
-    }
-
-    /**
-     * Sets the current self mask, which masks pixels hidden by self.
-     * 
-     * @param mask or null
-     */
-    public void setSelfMask(Mask mask) {
-        _selfMask = mask;
-        if (null == mask) {
-            _totalMask = _otherMask;
-        }
-        else {
-            _totalMask = mask.add(_otherMask);
-        }
-    }
-
     /**
      * Finds the actual minimum and maximum values.
      * Called initially and after values change.
@@ -243,7 +196,6 @@ public class HistogramDataNode {
         if (masked) {
             selfMask = new Mask(bits);
         }
-        setSelfMask(selfMask);
         _maskNode.updateSelfMask(selfMask);
     }
 
@@ -253,7 +205,6 @@ public class HistogramDataNode {
      */
     public void rescindMask() {
         Mask selfMask = null;
-        setSelfMask(selfMask);
         _maskNode.updateSelfMask(selfMask);
     }
 }

@@ -59,7 +59,6 @@ public interface IMaskGroup {
      * Updates the mask, notifies group.
      * 
      * @param node originating node
-     * @param mask updated mask
      */
-    public void updateMask(IMaskNode node, Mask mask);
+    public void updateMask(IMaskNode node);
 }

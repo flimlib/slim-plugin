@@ -296,6 +296,15 @@ public class HistogramDataGroup {
         _maxLUT = max;
         redisplay();
     }
+
+	/**
+	 * Gets minimum and maximum extents of the data.
+	 * 
+	 * @return 
+	 */
+	public double[] getMinMaxData() {
+		return new double[] { _minData, _maxData };
+	}
     
     //TODO
     // this is setting exclude pixels on/off once you are viewing the histogram

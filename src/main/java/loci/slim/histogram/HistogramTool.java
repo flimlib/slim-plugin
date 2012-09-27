@@ -62,7 +62,7 @@ public class HistogramTool {
     private final static int HISTOGRAM_HEIGHT = 140;
     private final static int COLORBAR_HEIGHT = 20;
     private final static int TASK_PERIOD = 100;
-    private final static String LUT = "lifetime.lut";
+    private final static String LUT = "lifetime.lut"; // use a specific LUT; most IJ LUTs unsuitable
     private static HistogramTool INSTANCE = null;
     private final Object _synchObject = new Object();
     private JFrame _frame;
@@ -246,6 +246,7 @@ public class HistogramTool {
     private void changed(double minView, double maxView,
                 double minLUT, double maxLUT) {
         synchronized (_synchObject) {
+			_histogramDataGroup.setMinMaxView(minView, maxView); //TODO ARG added this 9/27 to change hDG internal minMaxViews
             int[] bins = _histogramDataGroup.binValues(WIDTH);
             _histogramPanel.setBins(bins);
             _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
@@ -278,6 +279,33 @@ public class HistogramTool {
         }
         return pixel;
     }
+	
+	private void excludePixels(boolean exclude) {
+		// pass along the changes
+		_histogramDataGroup.excludePixels(exclude);
+		
+		double minView;
+		double maxView;
+        double minMaxLUT[]  = _histogramDataGroup.getMinMaxLUT();
+		double minLUT = minMaxLUT[0];
+		double maxLUT = minMaxLUT[1];
+		
+		if (exclude) {
+			// zoom to fit current min/max LUT settings
+			minView = minLUT;
+			maxView = maxLUT;
+		}
+		else {
+			double minMaxData[] = _histogramDataGroup.getMinMaxData();
+			minView = minMaxData[0];
+			maxView = minMaxData[1];
+		}
+		
+		changed(minView, maxView, minLUT, maxLUT);
+		
+		// reset cursor positions
+		_histogramPanel.resetCursors();
+	}
 
     /**
      * Inner class listens for changes during the fit.
@@ -324,7 +352,8 @@ public class HistogramTool {
             synchronized (_synchObject) {
                 _histogramDataGroup.setMinMaxLUT(minLUT, maxLUT);
                 if (_uiPanel.getExcludePixels()) {
-                    _histogramDataGroup.excludePixels(true);
+					// keep on hiding pixels
+					excludePixels(true);
                 }
             }
         }
@@ -467,9 +496,8 @@ public class HistogramTool {
         
         @Override
         public void setExcludePixels(boolean excludePixels) {
-            //TODO ARG Mask selfMask = null;
             synchronized (_synchObject) {
-                _histogramDataGroup.excludePixels(excludePixels);
+				excludePixels(excludePixels);
             }
         }
         
@@ -516,7 +544,7 @@ public class HistogramTool {
 
                     //TODO ARG this is quite a bit off:
                     // note that if you stretch the bounds on one side you need
-                    // to adjust the position of the other side.
+                    // to adjust the position of the other side cursor.
                     _histogramPanel.setCursors(cursorPixelFromValue(false, minLUT), cursorPixelFromValue(false, maxLUT)); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
                 }
             }
