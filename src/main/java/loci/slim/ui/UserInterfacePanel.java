@@ -128,12 +128,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     private static final String FIT_PIXEL = "Fit Pixel";
     private static final String FIT_SUMMED_PIXELS = "Fit Summed Pixels";
     private static final String FIT_SUMMED_ROIS = "Fit Summed ROIs";
-    private static final String CANCEL_IMAGES = "Cancel Images";
+    private static final String CANCEL_FIT = "Cancel Fit";
 
     private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(10, 10, 10, 10);
     private static final Border ETCHED_BORDER = BorderFactory.createEtchedBorder();
 
-	//TODO ARG fitting a series of ROIs is broken:
+	//TODO ARG fitting a series of ROIs is broken, so omit that possibility, for now:
     private static final String REGION_ITEMS[] = { SUM_REGION, /*ROIS_REGION,*/ PIXEL_REGION, ALL_REGION };
     private static final String ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM };
     private static final String FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL };
@@ -1180,7 +1180,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     }
     
     private void setFitButtonState(boolean on) {
-        _fitButton.setText(on ? _fitButtonText : CANCEL_IMAGES);
+        _fitButton.setText(on ? _fitButtonText : CANCEL_FIT);
     }
     
     private boolean getFitButtonState() {

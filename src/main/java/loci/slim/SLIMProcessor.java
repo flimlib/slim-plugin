@@ -311,6 +311,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 				 */
 				@Override
 				public void reFit() {
+					System.out.println("REFIT");
 					_cancel = false;
 					_fitInProgress = true;
 					_refit = true;
@@ -508,7 +509,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 			if (_refit) {
 				if (_summed) {
-					fitSummed(_uiPanel);
+					fitSummed(_uiPanel, _fittingCursor);
 				}
 				else {
 					fitPixel(_uiPanel, _fittingCursor);
@@ -1089,6 +1090,20 @@ public class SLIMProcessor <T extends RealType<T>> {
             imageColorizer.recalcHistogram();
         }
     }
+	
+	//TODO ARG
+	// this variant of fitSummed is based on a similar one for fitPixel
+	// both of these should really be getting the start/stopBin info from the
+	// uiPanel.  There is a race however, one FittingCursorListener triggers the
+	// fit and one FittingCursorListener updates the uiPanel (when dragging the
+	// cursors; if you type in new ones the uiPanel will be up-to-date).
+	
+	// added kludge to make moving cursors in DecayGraph do a refit.
+	private void fitSummed(IUserInterfacePanel uiPanel, FittingCursor fittingCursor) {
+        _startBin = fittingCursor.getDataStartBin();
+        _stopBin = fittingCursor.getTransientStopBin();
+		fitSummed(uiPanel);
+	}
 
     /*
      * Sums all pixels and fits the result.
@@ -1841,9 +1856,11 @@ public class SLIMProcessor <T extends RealType<T>> {
                 _promptBaseline = promptBaseline;
 
 				if (_summed) {
-					fitSummed(_uiPanel);
+					System.out.println("REFIT SUMMED");
+					fitSummed(_uiPanel, _fittingCursor);
 				}
 				else {
+					System.out.println("REFIT SINGLE PIXEL");
 					fitPixel(_uiPanel, _fittingCursor);
 				}
             }
