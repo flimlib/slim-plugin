@@ -78,8 +78,7 @@ public class CursorEstimator {
             diffed[i] = decay[i + 1] - decay[i];
         }
         int steepIndex = findMax(diffed);
-
-        int startIndex = 2 * maxIndex - steepIndex;
+        int startIndex = maxIndex + (maxIndex - steepIndex) / 3;
         int stopIndex = 9 * decay.length / 10;
 
         // sanity check
@@ -89,9 +88,15 @@ public class CursorEstimator {
         if (startIndex < 0) {
             startIndex = 0;
         }
+		if (steepIndex > startIndex) {
+			steepIndex = startIndex - 1;
+		}
+		if (steepIndex < 0) {
+			steepIndex = 0;
+		}
 
         int[] returnValue = new int[6];
-        returnValue[TRANSIENT_START] = 0;
+        returnValue[TRANSIENT_START] = steepIndex;
         returnValue[DATA_START]      = startIndex;
         returnValue[TRANSIENT_STOP]  = stopIndex;
         return returnValue;

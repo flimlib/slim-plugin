@@ -311,7 +311,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 				 */
 				@Override
 				public void reFit() {
-					System.out.println("REFIT");
 					_cancel = false;
 					_fitInProgress = true;
 					_refit = true;
@@ -401,7 +400,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     }
                     
                     double chiSqTarget = _uiPanel.getChiSquareTarget();
-                    System.out.println("chiSqTarget is " + chiSqTarget);
+//                    System.out.println("chiSqTarget is " + chiSqTarget);
 //                    System.out.println("prompt is " + prompt + " and fitting cursor thinks prompt " + _fittingCursor.getHasPrompt());
                     if (null != prompt && _fittingCursor.getHasPrompt()) {
                         double[] results = CursorEstimator.estimateCursors
@@ -451,20 +450,23 @@ public class SLIMProcessor <T extends RealType<T>> {
                 public void selected(int channel, int x, int y) {
                     // just ignore clicks during a fit
                     if (!_fitInProgress) {
-                        synchronized (_synchFit) {
-                            float zoomFactor = ((GrayScaleImage)_grayScaleImage).getZoomFactor();
-                            x *= zoomFactor;
-                            y *= zoomFactor;
-                            
-                            _x = x;
-                            _y = y; //TODO ARG 4/6/12 trying to fix my flakey bug
-                            
-                            uiPanel.setX(x);
-                            uiPanel.setY(y);
-                            getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
-                            // fit on the pixel clicked
-                            fitPixel(uiPanel, _fittingCursor);
-                        }
+						// ignore clicks when in summed mode
+						if (!_summed) {
+							synchronized (_synchFit) {
+								float zoomFactor = ((GrayScaleImage)_grayScaleImage).getZoomFactor();
+								x *= zoomFactor;
+								y *= zoomFactor;
+
+								_x = x;
+								_y = y;
+
+								uiPanel.setX(x);
+								uiPanel.setY(y);
+								getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
+								// fit on the pixel clicked
+								fitPixel(uiPanel, _fittingCursor);
+							}
+						}
                     }
                 }
             }
@@ -592,7 +594,6 @@ public class SLIMProcessor <T extends RealType<T>> {
      */
     private boolean updateExcitation(IUserInterfacePanel uiPanel, Excitation excitation) {
         boolean success = false;
-        System.out.println("###update excitation####" + excitation);
         if (null != excitation) {
             if (null != _excitationPanel) {
                 _excitationPanel.quit();
@@ -609,7 +610,6 @@ public class SLIMProcessor <T extends RealType<T>> {
             }
 
             double chiSqTarget = uiPanel.getChiSquareTarget();
-            System.out.println("chiSqTarget is " + chiSqTarget);
             double[] results = CursorEstimator.estimateCursors
                     (_timeRange, excitation.getValues(), decay, chiSqTarget);
             
@@ -649,7 +649,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         _param          = uiPanel.getParameters();
         _free           = uiPanel.getFree();
         
-        _startBin       = cursor.getTransientStartBin();
+        _startBin       = cursor.getDataStartBin(); //TODO ARG 9/28/12 was getTrans.StartBin
         _stopBin        = cursor.getTransientStopBin();
     }
 
@@ -704,11 +704,11 @@ public class SLIMProcessor <T extends RealType<T>> {
         int[] dimensions = new int[0];
         try {
             dimensions = image.getDimensions();
-            System.out.println("dimensions size is " + dimensions.length);
-            for (int i : dimensions) {
-                System.out.print("" + i + " ");
-            }
-            System.out.println();
+            //System.out.println("dimensions size is " + dimensions.length);
+            //for (int i : dimensions) {
+            //    System.out.print("" + i + " ");
+            //}
+            //System.out.println();
         }
         catch (NullPointerException e) {
             System.out.println("image.getDimensions throws NullPointerException " + e.getMessage());
@@ -719,17 +719,17 @@ public class SLIMProcessor <T extends RealType<T>> {
         _height = ImageUtils.getHeight(image);
         _channels = ImageUtils.getNChannels(image);
         //TODO this is broken; returns 1 when there are 16 channels; corrected below
-        System.out.println("ImageUtils.getNChannels returns " + _channels);
+        //System.out.println("ImageUtils.getNChannels returns " + _channels);
         _hasChannels = false;
         if (dimensions.length > 3) {
             _hasChannels = true;
             _channelIndex = 3;
             _channels = dimensions[_channelIndex];
         }
-        System.out.println("corrected to " + _channels);
+        //System.out.println("corrected to " + _channels);
         _bins = ImageUtils.getDimSize(image, FormatTools.LIFETIME);
         _binIndex = 2;
-        System.out.println("width " + _width + " height " + _height + " timeBins " + _bins + " channels " + _channels);
+        //System.out.println("width " + _width + " height " + _height + " timeBins " + _bins + " channels " + _channels);
         _cursor = image.createLocalizableByDimCursor();
         
         _timeRange = 10.0f;
@@ -742,7 +742,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             Number increment = (Number) _globalMetadata.get("MeasureInfo.incr");
             if (null != increment) {
                 _increment = increment.intValue();
-                System.out.println("MeasureInfo.incr is " + _increment);
+                //System.out.println("MeasureInfo.incr is " + _increment);
             }
         }
         _timeRange /= _bins;
@@ -760,7 +760,7 @@ public class SLIMProcessor <T extends RealType<T>> {
        String path = prefs.get(PATH_KEY, "");
        String file = prefs.get(FILE_KEY, "");
        
-       System.out.println("path " + path + " file " + file);
+       //System.out.println("path " + path + " file " + file);
        return new String[] { prefs.get(PATH_KEY, ""), prefs.get(FILE_KEY, "") };
     }
 
@@ -1110,7 +1110,9 @@ public class SLIMProcessor <T extends RealType<T>> {
      */
     private Image<DoubleType> fitSummed(IUserInterfacePanel uiPanel) {
         Image<DoubleType> fittedPixels = null;
-        double params[] = uiPanel.getParameters(); //TODO go cumulative
+        double params[] = uiPanel.getParameters(); //TODO go cumulative; i.e. refit with last fit results as estimate
+		
+		//System.out.println("FIT SUMMED startBin " + _startBin + " stopBin " + _stopBin);
         
         // build the data
         ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
@@ -1856,11 +1858,9 @@ public class SLIMProcessor <T extends RealType<T>> {
                 _promptBaseline = promptBaseline;
 
 				if (_summed) {
-					System.out.println("REFIT SUMMED");
 					fitSummed(_uiPanel, _fittingCursor);
 				}
 				else {
-					System.out.println("REFIT SINGLE PIXEL");
 					fitPixel(_uiPanel, _fittingCursor);
 				}
             }
