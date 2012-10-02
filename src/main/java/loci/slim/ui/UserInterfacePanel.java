@@ -1210,13 +1210,30 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @param textField 
 	 */
-	private void refitUponStateChange(JTextField textField) {
+	private void refitUponStateChange(final JTextField textField) {
 		textField.addActionListener(
 			new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					// trigger if just edited text
 					_listener.reFit();
+				}
+			});
+		textField.addFocusListener(
+			new FocusListener() {
+				private String _text;
+				
+				@Override
+				public void focusGained(FocusEvent e) {
+					_text = textField.getText();
+				}
+				
+				@Override
+				public void focusLost(FocusEvent e) {
+					if (!_text.equals(textField.getText())) {
+						// trigger if just edited text
+						_listener.reFit();
+					}
 				}
 			});
 	}
