@@ -1516,7 +1516,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     }
 
     public double getChiSquareTarget() {
-        return Double.valueOf(_chiSqTargetField.getText());
+		double chiSqTarget = 1.5;
+		try {
+			chiSqTarget = Double.valueOf(_chiSqTargetField.getText());
+		}
+		catch (NumberFormatException e) {
+			_chiSqTargetField.setText("" + chiSqTarget);
+		}
+        return chiSqTarget;
     }
     
     public void setChiSquareTarget(double chiSqTarget) {
@@ -1547,38 +1554,44 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
     public double[] getParameters() {
         double parameters[] = null;
-        String function = (String) _functionComboBox.getSelectedItem();
-        if (function.equals(SINGLE_EXPONENTIAL)) {
-            parameters = new double[4];
-            parameters[2] = Double.valueOf(_aParam1.getText());
-            parameters[3] = Double.valueOf(_tParam1.getText());
-            parameters[1] = Double.valueOf(_zParam1.getText());
-        }
-        else if (function.equals(DOUBLE_EXPONENTIAL)) {
-            parameters = new double[6];
-            parameters[2] = Double.valueOf(_a1Param2.getText());
-            parameters[3] = Double.valueOf(_t1Param2.getText());
-            parameters[4] = Double.valueOf(_a2Param2.getText());
-            parameters[5] = Double.valueOf(_t2Param2.getText());
-            parameters[1] = Double.valueOf(_zParam2.getText());
-        }
-        else if (function.equals(TRIPLE_EXPONENTIAL)) {
-            parameters = new double[8];
-            parameters[2] = Double.valueOf(_a1Param3.getText());
-            parameters[3] = Double.valueOf(_t1Param3.getText());
-            parameters[4] = Double.valueOf(_a2Param3.getText());
-            parameters[5] = Double.valueOf(_t2Param3.getText());
-            parameters[6] = Double.valueOf(_a3Param3.getText());
-            parameters[7] = Double.valueOf(_t3Param3.getText());
-            parameters[1] = Double.valueOf(_zParam3.getText());
-        }
-        else if (function.equals(STRETCHED_EXPONENTIAL)) {
-            parameters = new double[5];
-            parameters[2] = Double.valueOf(_aParam4.getText());
-            parameters[3] = Double.valueOf(_tParam4.getText());
-            parameters[4] = Double.valueOf(_hParam4.getText());
-            parameters[1] = Double.valueOf(_zParam4.getText());
-        }
+		try {
+			String function = (String) _functionComboBox.getSelectedItem();
+			if (function.equals(SINGLE_EXPONENTIAL)) {
+				parameters = new double[4];
+				parameters[2] = Double.valueOf(_aParam1.getText());
+				parameters[3] = Double.valueOf(_tParam1.getText());
+				parameters[1] = Double.valueOf(_zParam1.getText());
+			}
+			else if (function.equals(DOUBLE_EXPONENTIAL)) {
+				parameters = new double[6];
+				parameters[2] = Double.valueOf(_a1Param2.getText());
+				parameters[3] = Double.valueOf(_t1Param2.getText());
+				parameters[4] = Double.valueOf(_a2Param2.getText());
+				parameters[5] = Double.valueOf(_t2Param2.getText());
+				parameters[1] = Double.valueOf(_zParam2.getText());
+			}
+			else if (function.equals(TRIPLE_EXPONENTIAL)) {
+				parameters = new double[8];
+				parameters[2] = Double.valueOf(_a1Param3.getText());
+				parameters[3] = Double.valueOf(_t1Param3.getText());
+				parameters[4] = Double.valueOf(_a2Param3.getText());
+				parameters[5] = Double.valueOf(_t2Param3.getText());
+				parameters[6] = Double.valueOf(_a3Param3.getText());
+				parameters[7] = Double.valueOf(_t3Param3.getText());
+				parameters[1] = Double.valueOf(_zParam3.getText());
+			}
+			else if (function.equals(STRETCHED_EXPONENTIAL)) {
+				parameters = new double[5];
+				parameters[2] = Double.valueOf(_aParam4.getText());
+				parameters[3] = Double.valueOf(_tParam4.getText());
+				parameters[4] = Double.valueOf(_hParam4.getText());
+				parameters[1] = Double.valueOf(_zParam4.getText());
+			}
+		}
+		catch (NumberFormatException e) {
+			//TODO recover
+		}
+
         parameters[0] = 0.0;
         return parameters;
     }
