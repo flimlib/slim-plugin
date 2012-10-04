@@ -36,6 +36,7 @@ package loci.slim.ui;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.ItemSelectable;
 import java.awt.event.ActionEvent;
@@ -57,6 +58,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -77,6 +79,7 @@ import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.ICurveFitter.NoiseModel;
 import loci.curvefitter.IFitterEstimator;
+import loci.slim.IThresholdUpdate;
 import loci.slim.fitting.cursor.FittingCursorHelper;
 import loci.slim.fitting.cursor.IFittingCursorUI;
 
@@ -164,6 +167,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     private IFitterEstimator _fitterEstimator;
     
     private IUserInterfacePanelListener _listener;
+	private IThresholdUpdate _thresholdListener;
     int _fittedParameterCount = 0;
 
     // UI panel
@@ -403,6 +407,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     public void setListener(IUserInterfacePanelListener listener) {
         _listener = listener;
     }
+	
+	public void setThresholdListener(IThresholdUpdate thresholdListener) {
+		_thresholdListener = thresholdListener;
+	}
 
     @Override
     public void reset() {
@@ -772,6 +780,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         thresholdLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(thresholdLabel);
         _thresholdField = new JTextField(9);
+		updateThresholdChange(_thresholdField);
         controlPanel.add(_thresholdField);
 
         JLabel chiSqTargetLabel = new JLabel(CHI_SQ_TARGET);
@@ -1244,18 +1253,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * @param textField
 	 * @param checkBox 
 	 */
-	private void refitUponStateChange(JTextField textField, final JCheckBox checkBox) {
-		textField.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					// trigger if just edited text and check box is selected.
-					if (checkBox.isSelected()
-							&& null != _listener) {
-						_listener.reFit();
-					}
-				}
-			});
+	private void refitUponStateChange(final JTextField textField, final JCheckBox checkBox) {
+        refitUponStateChange(textField);
 		
 		checkBox.addItemListener(
 			new ItemListener() {
@@ -1266,6 +1265,44 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					_listener.reFit();
 				}
 			});
+	}
+	
+	private void updateThresholdChange(final JTextField textField) {
+		textField.addActionListener(
+			new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// trigger if just edited text
+					updateThreshold(textField.getText());
+				}
+			});
+		textField.addFocusListener(
+			new FocusListener() {
+				private String _text;
+				
+				@Override
+				public void focusGained(FocusEvent e) {
+					_text = textField.getText();
+				}
+				
+				@Override
+				public void focusLost(FocusEvent e) {
+					if (!_text.equals(textField.getText())) {
+						// trigger if just edited text
+						updateThreshold(textField.getText());
+					}
+				}
+			});
+	}
+	
+	private void updateThreshold(String text) {
+        try {
+			int threshold = Integer.parseInt(text);
+			_thresholdListener.updateThreshold(threshold);
+		}
+		catch (NumberFormatException e) {
+			
+		}
 	}
 
     /*

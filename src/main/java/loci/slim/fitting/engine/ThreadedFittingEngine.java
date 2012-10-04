@@ -101,7 +101,7 @@ public class ThreadedFittingEngine implements IFittingEngine {
         IFittingEngineCallable callable
                 = Configuration.getInstance().newFittingEngineCallable();
         callable.setup(_curveFitter, params, data);
-        return callable.call();
+		return callable.call();
     }
     
     /**

@@ -315,11 +315,18 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
      * Updates the fitted parameters for a pixel.
      *
      * @param location
-     * @param parameters
+     * @param parameters null signals error
      */
     public void updatePixel(int[] location, double[] parameters) {
-        // compute our displayable value from params
-        double value = getValue(parameters);
+		double value;
+		
+		if (null == parameters) {
+			value = Double.NaN;
+		}
+		else {
+			// compute our displayable value from parameters
+			value = getValue(parameters);
+		}
         
         int x       = location[0];
         int y       = location[1];

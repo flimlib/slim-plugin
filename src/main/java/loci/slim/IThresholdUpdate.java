@@ -1,5 +1,5 @@
 //
-// FitResults.java
+// GrayScaleImage.java
 //
 
 /*
@@ -15,7 +15,7 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the names of the ImageJDev.org developers nor the
+    * Neither the name of the UW-Madison LOCI nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -32,54 +32,26 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.fitting.params;
+package loci.slim;
 
 /**
- * Interface for container for local fitted results for current pixel.
+ * An interface to allow updated threshold values to be communicated.
  * 
- * @author Aivar Grislis
+ * @author Aivar Grislis aivar at wisc dot edu
  */
-public interface IFitResults {
-
-    /**
-     * Sets fitted chi square result.
-     * 
-     * @param chiSquare 
-     */
-    public void setChiSquare(double chiSquare);
-
-    /**
-     * Gets fitted chi square result.
-     * 
-     * @return 
-     */
-    public double getChiSquare();
-
-    /**
-     * Sets fitted parameters.
-     * 
-     * @param params or null
-     */
-    public void setParams(double[] params);
-
-    /**
-     * Gets fitted parameters.
-     * 
-     * @return null or fitted params
-     */
-    public double[] getParams();
-
-    /**
-     * Sets fitted curve.
-     * 
-     * @param yFitted 
-     */
-    public void setYFitted(double[] yFitted);
-
-    /**
-     * Gets fitted curve.
-     * 
-     * @return 
-     */
-    public double[] getYFitted();
+public interface IThresholdUpdate {
+	
+	/**
+	 * Gets an initial threshold estimate.
+	 * 
+	 * @return 
+	 */
+	public int estimateThreshold();
+	
+	/**
+	 * Update the threshold value.
+	 * 
+	 * @param threshold 
+	 */
+	public void updateThreshold(int threshold);
 }

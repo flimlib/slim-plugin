@@ -158,7 +158,8 @@ public class OutputImageWrapper implements IFittedImage {
         for (int i = 0; i < _parameters; ++i) {
             _location[_parameterIndex] = i;
             _cursor.moveTo(_location);
-            _cursor.getType().set(value[i]);
+			// a pixel with an error fitting will have null value
+            _cursor.getType().set(null == value ? Double.NaN : value[i]);
         }
     }
 

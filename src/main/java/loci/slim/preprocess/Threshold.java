@@ -40,15 +40,11 @@ package loci.slim.preprocess;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class Threshold implements IProcessor {
-    private final int _start;
-    private final int _stop;
-    private final int _photons;
+    private final int _threshold;
     private IProcessor _processor;
     
-    public Threshold(int start, int stop, int threshold) {
-        _start            = start;
-        _stop             = stop;
-        _photons        = threshold;
+    public Threshold(int threshold) {
+        _threshold = threshold;
     }
     
     /**
@@ -63,9 +59,7 @@ public class Threshold implements IProcessor {
     /**
      * Gets input pixel value.
      * 
-     * @param x
-     * @param y
-     * @param channel
+     * @param location
      * @return null or pixel value
      */
     public double[] getPixel(int[] location) {
@@ -74,10 +68,10 @@ public class Threshold implements IProcessor {
         // reject any pixels that have less than the threshold number of photons
         if (null != decay) {
             double sum = 0.0;
-            for (int bin = _start; bin <= _stop; ++bin) {
+            for (int bin = 0; bin < decay.length; ++bin) {
                 sum += decay[bin];
             }
-            if (sum < _photons) {
+            if (sum < _threshold) {
                 decay = null;
             }
         }

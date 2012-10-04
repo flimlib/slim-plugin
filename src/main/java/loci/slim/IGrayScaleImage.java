@@ -45,7 +45,7 @@ package loci.slim;
  *
  * @author Aivar Grislis
  */
-public interface IGrayScaleImage extends IGrayScalePixelValue {
+public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate {
 
     /**
      * Sets a listener for when the user clicks on the image.
@@ -84,6 +84,13 @@ public interface IGrayScaleImage extends IGrayScalePixelValue {
      * @return 
      */
     public double getMinNonZeroPhotonCount();
+
+	/**
+	 * Gets the photon count of the brightest point in the image.
+	 * 
+	 * @return 
+	 */
+	public double getMaxTotalPhotons();
 
     /**
      * Gets the coordinates of the brightest point in the image.

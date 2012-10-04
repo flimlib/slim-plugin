@@ -471,8 +471,15 @@ public class SLIMProcessor <T extends RealType<T>> {
                 }
             }
         );
-        // get a correction factor for photon counts
+        // get a correction factor for photon counts //TODO this is available in metadata
         _minNonZeroPhotonCount = _grayScaleImage.getMinNonZeroPhotonCount();
+		
+		// get estimated threshold value
+		int threshold = _grayScaleImage.estimateThreshold();
+		uiPanel.setThreshold(threshold);
+
+		// show threshold updates from UI panel on gray image
+		uiPanel.setThresholdListener(_grayScaleImage);
 
         // what is the brightest point in the image?
         int[] brightestPoint = _grayScaleImage.getBrightestPoint();
@@ -881,7 +888,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             processor = binner;
         }
         if (fitInfo.getThreshold() > 0) {
-            IProcessor threshold = new Threshold(fitInfo.getDataStart(), fitInfo.getTransientStop(), fitInfo.getThreshold());
+            IProcessor threshold = new Threshold(fitInfo.getThreshold());
             threshold.chain(processor);
             processor = threshold;
         }
@@ -1078,6 +1085,15 @@ public class SLIMProcessor <T extends RealType<T>> {
             double[] results = result.getParams();
             ChunkyPixel p = pixels[i];
             int[] location = p.getOutputLocation();
+
+			//TODO ARG gpl1.sdt, TRI2 errors out with -2
+			if (false && location[0] == 101 && location[1] == 73) {
+				System.out.println("fitting 101 73");
+				System.out.println("results is " + results);
+				if (null != results) {
+					System.out.println("results size " + results.length);
+				}
+			}
          
             // if producing colorized images, feed this pixel to colorizer
             if (null != imageColorizer) {
@@ -1389,10 +1405,20 @@ public class SLIMProcessor <T extends RealType<T>> {
             curveFitData.setPixels(1);
             curveFitDataList.add(curveFitData);
         }
+
+		boolean debug = false;
+		if (x == 101 && y == 73) {
+			System.out.println("fit single pixel 101 73");
+			debug = true;
+		}
         
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
-        getCurveFitter(uiPanel).fitData(dataArray);
+        int returnValue = getCurveFitter(uiPanel).fitData(dataArray);
+		
+		if (debug) {
+			System.out.println("returns " + returnValue);
+		}
         
         // show decay graph for visible channel
         String title = "Fitted Pixel " + x + " " + y;

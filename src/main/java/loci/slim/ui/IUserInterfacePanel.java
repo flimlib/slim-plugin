@@ -40,6 +40,7 @@ import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.ICurveFitter.NoiseModel;
+import loci.slim.IThresholdUpdate;
 import loci.slim.fitting.cursor.FittingCursorHelper;
 
 /**
@@ -64,6 +65,11 @@ public interface IUserInterfacePanel {
      * Sets the listener
      */
     public void setListener(IUserInterfacePanelListener listener);
+
+	/**
+	 * Sets the threshold listener.
+	 */
+	public void setThresholdListener(IThresholdUpdate thresholdListener);
 
     /**
      * Resets the UI after a fit.

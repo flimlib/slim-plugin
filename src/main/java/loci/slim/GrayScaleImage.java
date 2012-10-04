@@ -34,9 +34,12 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.ImageCanvas;
+import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -58,13 +61,18 @@ import mpicbg.imglib.type.numeric.RealType;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
+	//TODO ARG 10/3/12 was formerly using a ByteProcessor, switch to ShortProcessor; _8bit switch temporary for backward compatibility
+	private boolean _8bit = false;
     private int _width;
     private int _height;
+	private ImagePlus _imagePlus;
     private ImageStack _imageStack;
     private MyStackWindow _stackWindow;
     private ISelectListener _listener;
-    private byte[] _saveOutPixels[];
+    private byte[][] _saveOutPixels;
+	private short[][] _saveOutPixels2;
     private double _minNonZeroPhotonCount;
+	private double _maxTotalPhotons;
     private int[] _brightestPoint;
 
     public GrayScaleImage(Image<T> image) {
@@ -87,7 +95,12 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 
         // building an image stack
         _imageStack = new ImageStack(_width, _height);
-        _saveOutPixels = new byte[channels][];
+		if (_8bit) {
+            _saveOutPixels = new byte[channels][];
+		}
+		else {
+            _saveOutPixels2 = new short[channels][];
+        }
 
         LocalizableByDimCursor cursor = image.createLocalizableByDimCursor();
         double[][] pixels = new double[_width][_height];
@@ -99,6 +112,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                 position[3] = c;
             }
             byte[] outPixels = new byte[_width * _height];
+			short[] outPixels2 = new short[_width * _height];
 
             // sum photon counts
             double maxPixel = 0.0;
@@ -122,27 +136,47 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                     // keep track of maximum value and its coordinates
                     if (pixels[x][y] > maxPixel) {
                         maxPixel = pixels[x][y];
+						if (maxPixel > _maxTotalPhotons) {
+							_maxTotalPhotons = maxPixel;
+						}
                         _brightestPoint = new int[] { x , y };
                     }
                 }
             }
+		
+			if (_8bit) {
+				// convert to grayscale
+				for (int x = 0; x < _width; ++x) {
+					for (int y = 0; y < _height; ++y) {
+						outPixels[y * _width + x] = (byte) (pixels[x][y] * 255 / maxPixel);
+					}
+				}
+				// add a slice
+				// _imageStack.addSlice("" + c, true, outPixels); // stopped working 12/1/10
+				_imageStack.addSlice("" + c, outPixels);
+				_saveOutPixels[c] = outPixels;
+			}
+			else {
+				// convert to short
+				for (int x = 0; x < _width; ++x) {
+					for (int y = 0; y < _height; ++y) {
+						outPixels2[y * _width + x] = (short) (pixels[x][y] / _minNonZeroPhotonCount);
+					}
+				}
+				// add a slice
+				_imageStack.addSlice("" + c, outPixels2);
+				_saveOutPixels2[c] = outPixels2;
+			}
 
-            // convert to grayscale
-            for (int x = 0; x < _width; ++x) {
-                for (int y = 0; y < _height; ++y) {
-                    outPixels[y * _width + x] = (byte) (pixels[x][y] * 255 / maxPixel);
-                }
-            }
 
-            // add a slice
-           // _imageStack.addSlice("" + c, true, outPixels); // stopped working 12/1/10
-            _imageStack.addSlice("" + c, outPixels);
-            _saveOutPixels[c] = outPixels;
         }
-        ImagePlus imagePlus = new ImagePlus(title, _imageStack);
-        _stackWindow = new MyStackWindow(imagePlus);
+        _imagePlus = new ImagePlus(title, _imageStack);
+        _stackWindow = new MyStackWindow(_imagePlus);
         _stackWindow.setVisible(true);
         
+		int threshold = estimateThreshold();
+		updateThreshold(threshold);
+		
         //System.out.println("minNonZeroPhotonCount is " + _minNonZeroPhotonCount);
 
         //System.out.println("Channel selector " + _stackWindow.getChannelSelector());
@@ -218,11 +252,21 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
     @Override
     public int getPixel(int channel, int x, int y) {
         int returnValue = 0;
-        //TODO this consistently results in "OutOfMemoryError: Java heap space"
-        // getPixels calls getProcessor.
-        // byte pixels[] = (byte [])_imageStack.getPixels(channel + 1);
-        byte pixels[] = _saveOutPixels[channel];
-        returnValue |= pixels[y * _width + x] & 0xff;
+		if (_8bit) {
+			//TODO this consistently results in "OutOfMemoryError: Java heap space"
+			// getPixels calls getProcessor.
+			// byte pixels[] = (byte [])_imageStack.getPixels(channel + 1);
+			byte pixels[] = _saveOutPixels[channel];
+			returnValue |= pixels[y * _width + x] & 0xff;
+		}
+		else {
+			// a * 255 / b == 255 only when a == b, so we need to multiply by 256
+			returnValue = _saveOutPixels2[channel][y * _width + x] * 256 / (int) getMaxTotalPhotons();
+			if (returnValue > 255) {
+				returnValue = 255;
+			}
+			returnValue &= 0xff;
+		}
         return returnValue;
     }
     
@@ -230,9 +274,26 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
     public double getMinNonZeroPhotonCount() {
         return _minNonZeroPhotonCount;
     }
+	
+	@Override
+	public double getMaxTotalPhotons() {
+		return _maxTotalPhotons / _minNonZeroPhotonCount;
+	}
     
     @Override
     public int[] getBrightestPoint() {
         return _brightestPoint;
     }
+	
+	@Override
+	public int estimateThreshold() {
+		return _imagePlus.getProcessor().getAutoThreshold();
+	}
+	
+	@Override
+	public void updateThreshold(int threshold) {
+		ImageProcessor imageProcessor = _imagePlus.getProcessor();
+		imageProcessor.setThreshold(0.0, (double) threshold, ImageProcessor.RED_LUT);
+		_imagePlus.updateAndDraw();
+	}
 }

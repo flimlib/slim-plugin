@@ -135,7 +135,7 @@ public class FittedImageFitter {
      * Updates the fitted parameters for a pixel.
      * 
      * @param location
-     * @param parameters
+     * @param parameters may be null
      */
     public void updatePixel(int[] location, double[] parameters) {
         for (IFittedImage fittedImage : _fittedImages) {
@@ -149,7 +149,7 @@ public class FittedImageFitter {
      * 
      * @param location
      * @param dimension
-     * @param parameters
+     * @param parameters may be null
      */
     public void updateChunkyPixel(int[] location, int[] dimension, double[] parameters) {
         for (IFittedImage fittedImage : _fittedImages) {
