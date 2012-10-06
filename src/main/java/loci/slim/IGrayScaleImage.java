@@ -45,7 +45,7 @@ package loci.slim;
  *
  * @author Aivar Grislis
  */
-public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate {
+public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate, ICursorListener {
 
     /**
      * Sets a listener for when the user clicks on the image.

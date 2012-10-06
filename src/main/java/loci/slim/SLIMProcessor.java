@@ -493,7 +493,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         // fit on the brightest pixel
         getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
-        fitPixel(uiPanel, _fittingCursor); 
+        fitPixel(uiPanel, _fittingCursor);
 
         // processing loop; waits for UI panel input
         while (!_quit) {
@@ -1126,6 +1126,9 @@ public class SLIMProcessor <T extends RealType<T>> {
      */
     private Image<DoubleType> fitSummed(IUserInterfacePanel uiPanel) {
         Image<DoubleType> fittedPixels = null;
+		
+		_grayScaleImage.hideCursor();
+		
         double params[] = uiPanel.getParameters(); //TODO go cumulative; i.e. refit with last fit results as estimate
 		
 		//System.out.println("FIT SUMMED startBin " + _startBin + " stopBin " + _stopBin);
@@ -1346,6 +1349,8 @@ public class SLIMProcessor <T extends RealType<T>> {
      */
     private Image<DoubleType> fitPixel(IUserInterfacePanel uiPanel, int x, int y) {
         Image<DoubleType> fittedPixels = null;
+		
+		_grayScaleImage.showCursor(_x, _y);
         
         // set up the source
         IDecayImage decayImage = new DecayImageWrapper(_image, _width, _height, _channels, _bins, _binIndex, _increment);
@@ -1827,7 +1832,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             int photons)
     {
         IDecayGraph decayGraph = DecayGraph.getInstance();
-        JFrame frame = decayGraph.init(uiPanel.getFrame(), _bins, _timeRange);
+        JFrame frame = decayGraph.init(uiPanel.getFrame(), _bins, _timeRange, _grayScaleImage);
         decayGraph.setTitle(title);
         decayGraph.setFittingCursor(fittingCursor);
         double transStart = fittingCursor.getTransientStartValue();

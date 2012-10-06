@@ -33,6 +33,7 @@ package loci.slim.ui;
 import javax.swing.JFrame;
 
 import loci.curvefitter.ICurveFitData;
+import loci.slim.ICursorListener;
 import loci.slim.fitting.cursor.FittingCursor;
 
 /**
@@ -47,9 +48,10 @@ public interface IDecayGraph {
      *
      * @param bins
      * @param timeInc
+	 * @param grayScale
      * @return frame
      */
-    public JFrame init(final JFrame frame, final int bins, final double timeInc);
+    public JFrame init(final JFrame frame, final int bins, final double timeInc, ICursorListener cursorListener);
 
     /**
      * Changes (or initializes) the cursor (start/stop bins/values) for the fit.

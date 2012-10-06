@@ -43,6 +43,8 @@ import java.awt.Graphics2D;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.BorderLayout;
@@ -59,6 +61,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import loci.curvefitter.ICurveFitData;
+import loci.slim.ICursorListener;
 import loci.slim.fitting.cursor.FittingCursor;
 import loci.slim.fitting.cursor.IFittingCursorListener;
 
@@ -126,6 +129,8 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 
     JTextField _photonTextField;
     JCheckBox _logCheckBox;
+	
+	ICursorListener _cursorListener;
 
     /**
      * Public constructor, may be used to create non-singletons.
@@ -153,7 +158,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
      * @param timeInc
      * @return frame
      */
-    public JFrame init(final JFrame frame, final int bins, final double timeInc) {
+    public JFrame init(final JFrame frame, final int bins, final double timeInc, ICursorListener cursorListener) {
         boolean create = false;
         if (null == _frame
                 || !_frame.isVisible()
@@ -164,6 +169,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             _bins = bins;
             _timeInc = timeInc;
             _maxValue = timeInc * bins;
+			_cursorListener = cursorListener;
             
             if (null != _frame) {
                 // delete existing frame
@@ -221,7 +227,13 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             _frame.setSize(FRAME_SIZE);
             _frame.pack();
             _frame.setLocationRelativeTo(frame);
-            _frame.setVisible(true);            
+            _frame.setVisible(true);
+			_frame.addWindowListener(new WindowAdapter() {
+				@Override
+			    public void windowClosing(WindowEvent e) {
+					_cursorListener.hideCursor();
+				}
+			});
         }
         return _frame;
     }

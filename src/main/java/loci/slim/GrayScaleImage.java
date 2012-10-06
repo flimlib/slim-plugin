@@ -34,13 +34,16 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.ImageCanvas;
+import ij.gui.ImageRoi;
+import ij.gui.Roi;
+import ij.gui.Overlay;
 import ij.process.ImageProcessor;
-import ij.process.ShortProcessor;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -61,6 +64,11 @@ import mpicbg.imglib.type.numeric.RealType;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
+	private static final int CURSOR_WIDTH = 11;
+	private static final int CURSOR_HEIGHT = 11;
+	private static final Color CURSOR_COLOR = Color.BLACK;
+	private static final Color THRESHOLD_COLOR = Color.RED;
+	private static final int MASK_TRANSPARENCY = 0xa0;
 	//TODO ARG 10/3/12 was formerly using a ByteProcessor, switch to ShortProcessor; _8bit switch temporary for backward compatibility
 	private boolean _8bit = false;
     private int _width;
@@ -74,6 +82,15 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
     private double _minNonZeroPhotonCount;
 	private double _maxTotalPhotons;
     private int[] _brightestPoint;
+	private BufferedImage _cursorImage;
+	private BufferedImage _errorImage;
+	private BufferedImage _hiddenImage;
+	private BufferedImage _thresholdImage;
+	private Roi _cursorRoi;
+	private Roi _errorRoi;
+	private Roi _hiddenRoi;
+	private Roi _thresholdRoi;
+	private Overlay _overlay;
 
     public GrayScaleImage(Image<T> image) {
         String title = image.getName();
@@ -82,9 +99,6 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
             title = title.substring(0, spaceIndex);
         }
         int dimensions[] = image.getDimensions();
-        //for (int i = 0; i < dimensions.length; ++i) {
-        //    System.out.println("dim[" + i + "] " + dimensions[i]);
-        //}
         _width = dimensions[0];
         _height = dimensions[1];
         int bins = dimensions[2];
@@ -173,9 +187,6 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         _imagePlus = new ImagePlus(title, _imageStack);
         _stackWindow = new MyStackWindow(_imagePlus);
         _stackWindow.setVisible(true);
-        
-		int threshold = estimateThreshold();
-		updateThreshold(threshold);
 		
         //System.out.println("minNonZeroPhotonCount is " + _minNonZeroPhotonCount);
 
@@ -203,7 +214,72 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                 }
             }
         );
+		
+		_overlay = createOverlay(_imagePlus);
+		_imagePlus.setOverlay(_overlay);
+		
+		int threshold = estimateThreshold();
+		updateThreshold(threshold);		
     }
+	
+	public void hideCursor() {
+		_cursorRoi.setLocation(-CURSOR_WIDTH, -CURSOR_HEIGHT);
+		_imagePlus.draw();
+	}
+	
+	public void showCursor(int x, int y) {
+		x -= CURSOR_WIDTH / 2;
+		y -= CURSOR_HEIGHT / 2;
+		_cursorRoi.setLocation(x, y);
+		_imagePlus.draw();
+	}
+	
+	private Overlay createOverlay(ImagePlus imagePlus) {
+		int width = imagePlus.getWidth();
+		int height = imagePlus.getHeight();
+		
+        _cursorImage = createCursorImage();
+		_errorImage  = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		_hiddenImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		_thresholdImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		
+		Overlay overlay = new Overlay();
+		_errorRoi = new ImageRoi(0, 0, _errorImage);
+		overlay.add(_errorRoi);
+		_hiddenRoi = new ImageRoi(0, 0, _hiddenImage);
+		overlay.add(_hiddenRoi);
+		_thresholdRoi = new ImageRoi(0, 0, _thresholdImage);
+		overlay.add(_thresholdRoi);
+		_cursorRoi = new ImageRoi(0, 0, _cursorImage);
+		overlay.add(_cursorRoi);
+		
+		return overlay;
+	}
+	
+	private BufferedImage createCursorImage() {
+		int color = getColor(CURSOR_COLOR, 0xff);
+		BufferedImage cursorImage = new BufferedImage(CURSOR_WIDTH, CURSOR_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		for (int y = 0; y < CURSOR_HEIGHT; ++y) {
+			for (int x = 0; x < CURSOR_WIDTH; ++x) {
+				if (x == CURSOR_WIDTH / 2) {
+					if (y != CURSOR_HEIGHT / 2) {
+						cursorImage.setRGB(x, y, color);
+					}
+				}
+				else if (y == CURSOR_HEIGHT / 2) {
+					cursorImage.setRGB(x, y, color);
+				}
+			}
+		}
+		return cursorImage;
+	}
+		
+	private int getColor(Color color, int alpha) {
+		int red   = color.getRed();
+		int green = color.getGreen();
+		int blue  = color.getBlue();
+		return (alpha << 24) | (red << 16) | (green << 8) | blue;
+	}
 
     /**
      * Sets a listener for when the user clicks on the image.
@@ -292,8 +368,24 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	
 	@Override
 	public void updateThreshold(int threshold) {
+		/*
 		ImageProcessor imageProcessor = _imagePlus.getProcessor();
 		imageProcessor.setThreshold(0.0, (double) threshold, ImageProcessor.RED_LUT);
 		_imagePlus.updateAndDraw();
+		*/
+		for (int y = 0; y < _height; ++y) {
+		    for (int x = 0; x < _width; ++x) {
+			   int alpha = 0;
+               if (_saveOutPixels2[getChannel()][y * _width + x] < threshold) {
+				   alpha = MASK_TRANSPARENCY;
+			   }
+			   _thresholdImage.setRGB(x, y, getColor(THRESHOLD_COLOR, alpha));
+		    }
+		}
+		_imagePlus.draw();
+	}
+	
+	private class MaskManager {
+		
 	}
 }
