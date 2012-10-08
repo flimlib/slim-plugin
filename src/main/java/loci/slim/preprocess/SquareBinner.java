@@ -75,41 +75,45 @@ public class SquareBinner implements IProcessor {
      * @return pixel value
      */
     public double[] getPixel(int[] location) {
-        double[] sum = _processor.getPixel(location).clone();
-        
-        int x = location[0];
-        int y = location[1];
-        
-        int startX = x - _size;
-        if (startX < 0) {
-            startX = 0;
-        }
-        int stopX  = x + _size;
-        if (stopX >= _width) {
-            stopX = _width - 1;
-        }
-        int startY = y - _size;
-        if (startY < 0) {
-            startY = 0;
-        }
-        int stopY  = y + _size;
-        if (stopY >= _height) {
-            stopY = _height - 1;
-        }
-        
-        for (int j = startY; j <= stopY; ++j) {
-            for (int i = startX; i <= stopX; ++i) {
-                if (j != y || i != x) {
-                    location[0] = i;
-                    location[1] = j;
-                    double[] pixel = _processor.getPixel(location);
-                    
-                    if (null != pixel) {
-                        add(sum, pixel);
-                    }
-                }
-            }
-        }
+        double[] sum = _processor.getPixel(location);
+		if (null != sum) {
+			// keep a running sum; don't change source pixel
+			sum = sum.clone();
+			
+			int x = location[0];
+			int y = location[1];
+
+			int startX = x - _size;
+			if (startX < 0) {
+				startX = 0;
+			}
+			int stopX  = x + _size;
+			if (stopX >= _width) {
+				stopX = _width - 1;
+			}
+			int startY = y - _size;
+			if (startY < 0) {
+				startY = 0;
+			}
+			int stopY  = y + _size;
+			if (stopY >= _height) {
+				stopY = _height - 1;
+			}
+
+			for (int j = startY; j <= stopY; ++j) {
+				for (int i = startX; i <= stopX; ++i) {
+					if (j != y || i != x) {
+						location[0] = i;
+						location[1] = j;
+						double[] pixel = _processor.getPixel(location);
+
+						if (null != pixel) {
+							add(sum, pixel);
+						}
+					}
+				}
+			}
+		}
         return sum;
     }
 

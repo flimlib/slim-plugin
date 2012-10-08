@@ -52,10 +52,14 @@ public class SimpleFittedImage extends AbstractBaseFittedImage {
      *
      * @param title
      * @param dimension
+	 * @param indexColorModel
      * @param parameterIndex
+	 * @param colorizeGrayScale
+	 * @param grayScalePixelValue;
+	 * @param maskGroup;
      */
     public SimpleFittedImage(String title, int[] dimension,
-            IndexColorModel indexColorModel, int parameterIndex,
+			IndexColorModel indexColorModel, int parameterIndex,
             boolean colorizeGrayScale, IGrayScalePixelValue grayScalePixelValue,
             IMaskGroup[] maskGroup) {
         super(title, dimension, indexColorModel, colorizeGrayScale,

@@ -212,6 +212,7 @@ public class SLIMProcessor <T extends RealType<T>> {
     
     private FitInfo _fitInfo;
 
+	private int _fitOrdinal = 1;
     private int _debug = 0;
 
     public SLIMProcessor() {
@@ -881,16 +882,16 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         // set up preprocessor chain
         IProcessor processor = decayImage;
+        if (fitInfo.getThreshold() > 0) {
+            IProcessor threshold = new Threshold(fitInfo.getThreshold());
+            threshold.chain(processor);
+            processor = threshold;
+        }
         ISLIMBinner binner = _binning.getBinner(uiPanel.getBinning());
         if (null != binner) {
             binner.init(_width, _height);
             binner.chain(processor);
             processor = binner;
-        }
-        if (fitInfo.getThreshold() > 0) {
-            IProcessor threshold = new Threshold(fitInfo.getThreshold());
-            threshold.chain(processor);
-            processor = threshold;
         }
         
         // create a fitting engine to use
