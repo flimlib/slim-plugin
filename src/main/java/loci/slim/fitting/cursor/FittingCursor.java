@@ -645,7 +645,7 @@ public class FittingCursor {
         else {
             Double value = getDoubleValue(transientStop);
             if (null != value) {
-                if (value >= _dataStartValue && value < _inc * _bins) {
+                if (value >= _dataStartValue && value <= _inc * _bins) {
                     _transientStopValue = value;
                     _transientStopBin = ((FitterEstimator) _fitterEstimator).endValueToBin(value, _inc);
                 }

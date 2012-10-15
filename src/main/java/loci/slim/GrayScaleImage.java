@@ -47,6 +47,8 @@ import java.awt.image.BufferedImage;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import loci.slim.mask.Mask;
+
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.ComplexType;
@@ -66,9 +68,11 @@ import mpicbg.imglib.type.numeric.RealType;
 public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	private static final int CURSOR_WIDTH = 11;
 	private static final int CURSOR_HEIGHT = 11;
-	private static final Color CURSOR_COLOR = Color.BLACK;
+	private static final Color CURSOR_COLOR = Color.YELLOW;
 	private static final Color THRESHOLD_COLOR = Color.RED;
-	private static final int MASK_TRANSPARENCY = 0xa0;
+	private static final Color ERROR_COLOR = Color.GREEN.brighter();
+	private static final int THRESHOLD_TRANSPARENCY = 0xa0;
+	private static final int ERROR_TRANSPARENCY = 0xff;
 	//TODO ARG 10/3/12 was formerly using a ByteProcessor, switch to ShortProcessor; _8bit switch temporary for backward compatibility
 	private boolean _8bit = false;
     private int _width;
@@ -258,16 +262,28 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	
 	private BufferedImage createCursorImage() {
 		int color = getColor(CURSOR_COLOR, 0xff);
+		int black = getColor(Color.GRAY, 0xff);
 		BufferedImage cursorImage = new BufferedImage(CURSOR_WIDTH, CURSOR_HEIGHT, BufferedImage.TYPE_INT_ARGB);
 		for (int y = 0; y < CURSOR_HEIGHT; ++y) {
 			for (int x = 0; x < CURSOR_WIDTH; ++x) {
-				if (x == CURSOR_WIDTH / 2) {
+				if (x == CURSOR_WIDTH / 2 - 1 || x == CURSOR_WIDTH / 2 + 1) {
+					if (y < CURSOR_HEIGHT / 2 - 1 || y > CURSOR_HEIGHT / 2 + 1) {
+						cursorImage.setRGB(x, y, black);
+					}
+				}
+				else if (x == CURSOR_WIDTH / 2) {
 					if (y != CURSOR_HEIGHT / 2) {
 						cursorImage.setRGB(x, y, color);
 					}
 				}
+				else if (y == CURSOR_HEIGHT / 2 - 1) {
+					cursorImage.setRGB(x, y, black);
+				}
 				else if (y == CURSOR_HEIGHT / 2) {
 					cursorImage.setRGB(x, y, color);
+				}
+				else if (y == CURSOR_HEIGHT / 2 + 1) {
+					cursorImage.setRGB(x, y, black);
 				}
 			}
 		}
@@ -368,16 +384,11 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	
 	@Override
 	public void updateThreshold(int threshold) {
-		/*
-		ImageProcessor imageProcessor = _imagePlus.getProcessor();
-		imageProcessor.setThreshold(0.0, (double) threshold, ImageProcessor.RED_LUT);
-		_imagePlus.updateAndDraw();
-		*/
 		for (int y = 0; y < _height; ++y) {
 		    for (int x = 0; x < _width; ++x) {
 			   int alpha = 0;
                if (_saveOutPixels2[getChannel()][y * _width + x] < threshold) {
-				   alpha = MASK_TRANSPARENCY;
+				   alpha = THRESHOLD_TRANSPARENCY;
 			   }
 			   _thresholdImage.setRGB(x, y, getColor(THRESHOLD_COLOR, alpha));
 		    }
@@ -385,7 +396,22 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		_imagePlus.draw();
 	}
 	
-	private class MaskManager {
-		
+	@Override
+	public void resetErrorMask(int channel) {
+        updateErrorMask(new Mask(_width, _height), channel);
+	}
+
+	@Override
+	public void updateErrorMask(Mask mask, int channel) {
+		for (int y = 0; y < _height; ++y) {
+			for (int x = 0; x < _width; ++x) {
+				int alpha = 0;
+				if (mask.test(x, y)) {
+					alpha = ERROR_TRANSPARENCY;
+				}
+				_errorImage.setRGB(x, y, getColor(ERROR_COLOR, alpha));
+			}
+		}
+		_imagePlus.draw();
 	}
 }

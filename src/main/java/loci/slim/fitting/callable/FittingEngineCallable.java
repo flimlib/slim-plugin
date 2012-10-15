@@ -89,16 +89,15 @@ public class FittingEngineCallable implements IFittingEngineCallable {
         int returnValue = _curveFitter.fitData(curveFitDataArray);
 
         _result = new FitResults();
-		if (returnValue > 0) {
+		_result.setParams(curveFitData.getParams());
+		if (returnValue >= 0) {
 			// success
 			_result.setChiSquare(curveFitData.getChiSquare());
-			_result.setParams(curveFitData.getParams());
 			_result.setYFitted(curveFitData.getYFitted());
 		}
 		else {
 			// failed to fit
 			_result.setChiSquare(0.0);
-			_result.setParams(null);
 			_result.setYFitted(new double[] { });
 		}
  

@@ -62,6 +62,8 @@ import loci.formats.FormatException;
 import loci.formats.FormatTools;
 import loci.formats.ImageReader;
 import loci.slim.analysis.SLIMAnalysis;
+import loci.slim.fitting.ErrorManager;
+import loci.slim.fitting.IErrorListener;
 import loci.slim.preprocess.ISLIMBinner;
 import loci.slim.preprocess.SLIMBinning;
 import loci.slim.heuristics.FitterEstimator;
@@ -933,6 +935,10 @@ public class SLIMProcessor <T extends RealType<T>> {
         int pixelCount = 0;
         int totalPixelCount = totalPixelCount(width, height, channels, fitAllChannels);
         int pixelsToProcessCount = 0;
+		
+		// show errors on grayscale
+		ErrorManager errorManager = new ErrorManager(width, height, channels);
+		errorManager.setListener(_grayScaleImage);
  
         // handle optionally producing colorized images during the fit
         int colorizedChannels = 1;
@@ -1024,7 +1030,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                         ILocalFitParams[] localFitParamsArray = localFitParamsList.toArray(new ILocalFitParams[0]);
                         localFitParamsList.clear();
                         
-                        processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, imageColorizer, newImage);
+                        processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, errorManager, imageColorizer, newImage);
                     }
                 }
             }
@@ -1042,7 +1048,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             if (pixelsToProcessCount > 0) {
                 ChunkyPixel[] pixelArray = pixelList.toArray(new ChunkyPixel[0]);
                 ILocalFitParams[] localFitParamsArray = localFitParamsList.toArray(new ILocalFitParams[0]);
-                processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, imageColorizer, newImage);
+                processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, errorManager, imageColorizer, newImage);
             }
             if (null != imageColorizer) {
                 imageColorizer.endFit();
@@ -1061,6 +1067,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param pixels
      * @param globalFitParams
      * @param localFitParams
+	 * @param errorManager
      * @param imageColorizer
      * @param fittedImage
      */
@@ -1069,6 +1076,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             ChunkyPixel[] pixels,
             IGlobalFitParams globalFitParams,
             ILocalFitParams[] localFitParams,
+			ErrorManager errorManager,
             FittedImageFitter imageColorizer,
             IFittedImage fittedImage) {
 
@@ -1083,24 +1091,30 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         for (int i = 0; i < resultsList.size(); ++i) {
             IFitResults result = resultsList.get(i);
-            double[] results = result.getParams();
+            double[] params = result.getParams();
             ChunkyPixel p = pixels[i];
             int[] location = p.getOutputLocation();
-
-			//TODO ARG gpl1.sdt, TRI2 errors out with -2
-			if (false && location[0] == 101 && location[1] == 73) {
-				System.out.println("fitting 101 73");
-				System.out.println("results is " + results);
-				if (null != results) {
-					System.out.println("results size " + results.length);
+			
+			// check for errors
+			if (Double.NaN == params[0]) {
+				if (null != errorManager) {
+					int x = location[0];
+					int y = location[1];
+					int channel = 0;
+					if (location.length > 2) {
+						channel = location[2];
+					}
+					errorManager.noteError(x, y, channel);
 				}
+				//TODO ARG need to draw a NaN here over any prior chunky pixels (when chunky pixels are working right)
 			}
-         
-            // if producing colorized images, feed this pixel to colorizer
-            if (null != imageColorizer) {
-                imageColorizer.updatePixel(location, results);
-            }
-            fittedImage.setPixel(location, results);
+			else {
+				// if producing colorized images, feed this pixel to colorizer
+				if (null != imageColorizer) {
+					imageColorizer.updatePixel(location, params);
+				}
+				fittedImage.setPixel(location, params);
+			}
         }
 
         if (null != imageColorizer) {

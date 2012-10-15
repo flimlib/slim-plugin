@@ -36,7 +36,6 @@ package loci.slim.ui;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.ItemSelectable;
 import java.awt.event.ActionEvent;
@@ -48,6 +47,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +58,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -67,10 +66,7 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
-import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 import ij.io.SaveDialog;
 
@@ -90,76 +86,81 @@ import loci.slim.fitting.cursor.IFittingCursorUI;
  */
 
 public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI {
+	private static final String TITLE = "SLIM Plugin";
+	
     // Unicode special characters
-    private static final Character CHI    = '\u03c7';
-    private static final Character SQUARE = '\u00b2';
-    private static final Character TAU    = '\u03c4';
-    private static final Character LAMBDA = '\u03bb';
-    private static final Character SIGMA  = '\u03c3';
-    private static final Character SUB_1  = '\u2081';
-    private static final Character SUB_2  = '\u2082';
-    private static final Character SUB_3  = '\u2083';
-    private static final Character SUB_M  = '\u2098'; // Unicode 6.0.0 (October 2010)
+    private static final Character CHI    = '\u03c7',
+                                   SQUARE = '\u00b2',
+                                   TAU    = '\u03c4',
+                                   LAMBDA = '\u03bb',
+                                   SIGMA  = '\u03c3',
+                                   SUB_1  = '\u2081',
+                                   SUB_2  = '\u2082',
+                                   SUB_3  = '\u2083',
+                                   SUB_M  = '\u2098'; // Unicode 6.0.0 (October 2010)
     
-    private static final String SUM_REGION = "Sum All Pixels";
-    private static final String ROIS_REGION = "Sum Each ROI";
-    private static final String PIXEL_REGION = "Single Pixel";
-    private static final String ALL_REGION = "Images";
+    private static final String SUM_REGION = "Sum All Pixels",
+                                ROIS_REGION = "Sum Each ROI",
+                                PIXEL_REGION = "Single Pixel",
+                                ALL_REGION = "Images";
     
-    private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA";
-    private static final String SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD";
-    private static final String SLIM_CURVE_LMA_ALGORITHM = "SLIMCurve LMA";
-    private static final String SLIM_CURVE_RLD_LMA_ALGORITHM = "SLIMCurve RLD+LMA";
+    private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA",
+                                SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD",
+                                SLIM_CURVE_LMA_ALGORITHM = "SLIMCurve LMA",
+                                SLIM_CURVE_RLD_LMA_ALGORITHM = "SLIMCurve RLD+LMA";
 
-    private static final String SINGLE_EXPONENTIAL = "Single Exponential";
-    private static final String DOUBLE_EXPONENTIAL = "Double Exponential";
-    private static final String TRIPLE_EXPONENTIAL = "Triple Exponential";
-    private static final String STRETCHED_EXPONENTIAL = "Stretched Exponential";
+    private static final String SINGLE_EXPONENTIAL = "Single Exponential",
+                                DOUBLE_EXPONENTIAL = "Double Exponential",
+                                TRIPLE_EXPONENTIAL = "Triple Exponential",
+                                STRETCHED_EXPONENTIAL = "Stretched Exponential";
 
-    private static final String GAUSSIAN_FIT = "Gaussian Fit";
-    private static final String POISSON_FIT = "Poisson Fit";
-    private static final String POISSON_DATA = "Poisson Data";
-    private static final String MAXIMUM_LIKELIHOOD = "Max. Likelihood Est.";
+    private static final String GAUSSIAN_FIT = "Gaussian Fit",
+                                POISSON_FIT = "Poisson Fit",
+                                POISSON_DATA = "Poisson Data",
+                                MAXIMUM_LIKELIHOOD = "Max. Likelihood Est.";
 
     private static final String CHI_SQ_TARGET = "" + CHI + SQUARE + " Target";
 
-    private static final String EXCITATION_NONE = "None";
-    private static final String EXCITATION_FILE = "Load from File";
-    private static final String EXCITATION_CREATE = "Use current X Y";
+    private static final String EXCITATION_NONE = "None",
+                                EXCITATION_FILE = "Load from File",
+                                EXCITATION_CREATE = "Use current X Y";
 
-    private static final String FIT_IMAGE = "Fit Images";
-    private static final String FIT_PIXEL = "Fit Pixel";
-    private static final String FIT_SUMMED_PIXELS = "Fit Summed Pixels";
-    private static final String FIT_SUMMED_ROIS = "Fit Summed ROIs";
-    private static final String CANCEL_FIT = "Cancel Fit";
+    private static final String FIT_IMAGE = "Fit Images",
+                                FIT_PIXEL = "Fit Pixel",
+                                FIT_SUMMED_PIXELS = "Fit Summed Pixels",
+                                FIT_SUMMED_ROIS = "Fit Summed ROIs",
+                                CANCEL_FIT = "Cancel Fit";
 
-    private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(10, 10, 10, 10);
-    private static final Border ETCHED_BORDER = BorderFactory.createEtchedBorder();
+    private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(10, 10, 10, 10),
+                                ETCHED_BORDER = BorderFactory.createEtchedBorder();
 
 	//TODO ARG fitting a series of ROIs is broken, so omit that possibility, for now:
-    private static final String REGION_ITEMS[] = { SUM_REGION, /*ROIS_REGION,*/ PIXEL_REGION, ALL_REGION };
-    private static final String ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM };
-    private static final String FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL };
-    private static final String NOISE_MODEL_ITEMS[] = { GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA, MAXIMUM_LIKELIHOOD };
+    private static final String REGION_ITEMS[] = { SUM_REGION, /*ROIS_REGION,*/ PIXEL_REGION, ALL_REGION },
+                                ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM },
+                                FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL },
+                                NOISE_MODEL_ITEMS[] = { GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA, MAXIMUM_LIKELIHOOD };
     
-    private static final String A_T_Z_X2 = "A " + TAU + " Z " + CHI + SQUARE;
-    private static final String A_T_X2 = "A " + TAU + " " + CHI + SQUARE;
-    private static final String A_T = "A " + TAU;
-    private static final String T_X2 = TAU + " " + CHI + SQUARE;
-    private static final String T = "" + TAU;
-    private static final String A_T_H_Z_X2 = "A " + TAU + " H Z " + CHI + SQUARE;
-    private static final String A_T_H_X2 = "A " + TAU + " H " + CHI + SQUARE;
-    private static final String A_T_H = "A " + TAU + " H";
-    private static final String T_H_X2 = TAU + " H " + CHI + SQUARE;
-    private static final String T_H = TAU + " H";
-    private static final String F_UPPER = "F";
-    private static final String F_LOWER = "f";
-    private static final String TAU_MEAN = "" + TAU + "m"; // SUB_M;
+    private static final String A_T_Z_X2 = "A " + TAU + " Z " + CHI + SQUARE,
+                                A_T_X2 = "A " + TAU + " " + CHI + SQUARE,
+                                A_T = "A " + TAU,
+                                T_X2 = TAU + " " + CHI + SQUARE,
+                                T = "" + TAU,
+                                A_T_H_Z_X2 = "A " + TAU + " H Z " + CHI + SQUARE,
+                                A_T_H_X2 = "A " + TAU + " H " + CHI + SQUARE,
+                                A_T_H = "A " + TAU + " H",
+                                T_H_X2 = TAU + " H " + CHI + SQUARE,
+                                T_H = TAU + " H",
+                                F_UPPER = "F",
+                                F_LOWER = "f",
+                                TAU_MEAN = "" + TAU + "m"; // SUB_M;
+	
+	private static final String FITTING_ERROR = "Fitting Error",
+			                    NO_FIT = "--";
     
-    private static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T };
-    private static final String DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN };
-    private static final String TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN };    
-    private static final String STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T };    
+    private static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T },
+                                DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN },
+                                TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN },    
+                                STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T };    
     
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
     
@@ -205,8 +206,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     // parameter panel
     JPanel _paramPanel;
     int _paramPanelIndex;
+	boolean _noFit;
 
-    // single exponent fit
+    // single exponential fit
     JTextField _aParam1;
     JCheckBox _aFix1;
     JTextField _tParam1;
@@ -214,9 +216,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JTextField _zParam1;
     JCheckBox _zFix1;
     JTextField _chiSqParam1;
+	JLabel _errorLabel1;
     JCheckBox _startParam1;
 
-    // double exponent fit
+    // double exponential fit
     JTextField _a1Param2;
     JCheckBox _a1Fix2;
     JTextField _a2Param2;
@@ -228,9 +231,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JTextField _zParam2;
     JCheckBox _zFix2;
     JTextField _chiSqParam2;
+	JLabel _errorLabel2;
     JCheckBox _startParam2;
 
-    // triple exponent fit
+    // triple exponential fit
     JTextField _a1Param3;
     JCheckBox _a1Fix3;
     JTextField _a2Param3;
@@ -246,9 +250,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JTextField _zParam3;
     JCheckBox _zFix3;
     JTextField _chiSqParam3;
+	JLabel _errorLabel3;
     JCheckBox _startParam3;
 
-    // stretched exonent fit
+    // stretched exponential fit
     JTextField _aParam4;
     JCheckBox _aFix4;
     JTextField _tParam4;
@@ -258,6 +263,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JTextField _zParam4;
     JCheckBox _zFix4;
     JTextField _chiSqParam4;
+	JLabel _errorLabel4;
     JCheckBox _startParam4;
 
     JButton _quitButton;
@@ -274,7 +280,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _fittingCursorHelper = fittingCursorHelper;
         _fitterEstimator = fitterEstimator;
         
-        _frame = new JFrame("SLIM Plugin");
+        _frame = new JFrame(TITLE);
 
         // create outer panel
         JPanel outerPanel = new JPanel();
@@ -855,6 +861,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         expPanel.add(_chiSqParam1);
         JLabel nullLabel1 = new JLabel("");
         expPanel.add(nullLabel1);
+		
+		JLabel nullLabel1a = new JLabel("");
+		expPanel.add(nullLabel1a);
+		_errorLabel1 = new JLabel(FITTING_ERROR);
+		_errorLabel1.setVisible(false);
+		expPanel.add(_errorLabel1);
+		JLabel nullLabel1b = new JLabel("");
+		expPanel.add(nullLabel1b);
 
         //TODO:
         // SLIMPlotter look & feel:
@@ -866,7 +880,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         //_chiSqParam1.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(expPanel, 4, 3, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(expPanel, 5, 3, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", expPanel);
@@ -951,6 +965,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         expPanel.add(_chiSqParam2);
         JLabel nullLabel2 = new JLabel("");
         expPanel.add(nullLabel2);
+				
+		JLabel nullLabel2a = new JLabel("");
+		expPanel.add(nullLabel2a);
+		_errorLabel2 = new JLabel(FITTING_ERROR);
+		_errorLabel2.setVisible(false);
+		expPanel.add(_errorLabel2);
+		JLabel nullLabel2b = new JLabel("");
+		expPanel.add(nullLabel2b);
 
         //TODO:
         // From SLIMPlotter
@@ -964,7 +986,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         //_chiSqParam2.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(expPanel, 6, 3, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(expPanel, 7, 3, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", expPanel);
@@ -1070,6 +1092,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         expPanel.add(_chiSqParam3);
         JLabel nullLabel3 = new JLabel("");
         expPanel.add(nullLabel3);
+		
+		JLabel nullLabel3a = new JLabel("");
+		expPanel.add(nullLabel3a);
+		_errorLabel3 = new JLabel(FITTING_ERROR);
+		_errorLabel3.setVisible(false);
+		expPanel.add(_errorLabel3);
+		JLabel nullLabel3b = new JLabel("");
+		expPanel.add(nullLabel3b);
 
         //TODO:
         // SLIMPlotter look & feel:
@@ -1085,7 +1115,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         //_chiSqParam3.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(expPanel, 8, 3, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(expPanel, 9, 3, 4, 4, 4, 4);
         
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", expPanel);
@@ -1156,8 +1186,16 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _chiSqParam4 = new JTextField(9);
         _chiSqParam4.setEditable(false);
         expPanel.add(_chiSqParam4);
-        JLabel nullLabel1 = new JLabel("");
-        expPanel.add(nullLabel1);
+        JLabel nullLabel4 = new JLabel("");
+        expPanel.add(nullLabel4);
+		
+		JLabel nullLabel4a = new JLabel("");
+		expPanel.add(nullLabel4a);
+		_errorLabel4 = new JLabel(FITTING_ERROR);
+		_errorLabel4.setVisible(false);
+		expPanel.add(_errorLabel4);
+		JLabel nullLabel4b = new JLabel("");
+		expPanel.add(nullLabel4b);
 
         //TODO:
         // SLIMPlotter look & feel:
@@ -1169,7 +1207,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         //_chiSqParam1.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(expPanel, 5, 3, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(expPanel, 6, 3, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", expPanel);
@@ -1591,80 +1629,165 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
     public double[] getParameters() {
         double parameters[] = null;
-		try {
+		if (_noFit) {
 			String function = (String) _functionComboBox.getSelectedItem();
 			if (function.equals(SINGLE_EXPONENTIAL)) {
 				parameters = new double[4];
-				parameters[2] = Double.valueOf(_aParam1.getText());
-				parameters[3] = Double.valueOf(_tParam1.getText());
-				parameters[1] = Double.valueOf(_zParam1.getText());
 			}
 			else if (function.equals(DOUBLE_EXPONENTIAL)) {
 				parameters = new double[6];
-				parameters[2] = Double.valueOf(_a1Param2.getText());
-				parameters[3] = Double.valueOf(_t1Param2.getText());
-				parameters[4] = Double.valueOf(_a2Param2.getText());
-				parameters[5] = Double.valueOf(_t2Param2.getText());
-				parameters[1] = Double.valueOf(_zParam2.getText());
 			}
 			else if (function.equals(TRIPLE_EXPONENTIAL)) {
 				parameters = new double[8];
-				parameters[2] = Double.valueOf(_a1Param3.getText());
-				parameters[3] = Double.valueOf(_t1Param3.getText());
-				parameters[4] = Double.valueOf(_a2Param3.getText());
-				parameters[5] = Double.valueOf(_t2Param3.getText());
-				parameters[6] = Double.valueOf(_a3Param3.getText());
-				parameters[7] = Double.valueOf(_t3Param3.getText());
-				parameters[1] = Double.valueOf(_zParam3.getText());
 			}
 			else if (function.equals(STRETCHED_EXPONENTIAL)) {
 				parameters = new double[5];
-				parameters[2] = Double.valueOf(_aParam4.getText());
-				parameters[3] = Double.valueOf(_tParam4.getText());
-				parameters[4] = Double.valueOf(_hParam4.getText());
-				parameters[1] = Double.valueOf(_zParam4.getText());
+			}
+			for (int i = 0; i < parameters.length; ++i) {
+				parameters[i] = Double.NaN;
 			}
 		}
-		catch (NumberFormatException e) {
-			//TODO recover
-		}
+		else {
+			try {
+				String function = (String) _functionComboBox.getSelectedItem();
+				if (function.equals(SINGLE_EXPONENTIAL)) {
+					parameters = new double[4];
+					parameters[2] = Double.valueOf(_aParam1.getText());
+					parameters[3] = Double.valueOf(_tParam1.getText());
+					parameters[1] = Double.valueOf(_zParam1.getText());
+				}
+				else if (function.equals(DOUBLE_EXPONENTIAL)) {
+					parameters = new double[6];
+					parameters[2] = Double.valueOf(_a1Param2.getText());
+					parameters[3] = Double.valueOf(_t1Param2.getText());
+					parameters[4] = Double.valueOf(_a2Param2.getText());
+					parameters[5] = Double.valueOf(_t2Param2.getText());
+					parameters[1] = Double.valueOf(_zParam2.getText());
+				}
+				else if (function.equals(TRIPLE_EXPONENTIAL)) {
+					parameters = new double[8];
+					parameters[2] = Double.valueOf(_a1Param3.getText());
+					parameters[3] = Double.valueOf(_t1Param3.getText());
+					parameters[4] = Double.valueOf(_a2Param3.getText());
+					parameters[5] = Double.valueOf(_t2Param3.getText());
+					parameters[6] = Double.valueOf(_a3Param3.getText());
+					parameters[7] = Double.valueOf(_t3Param3.getText());
+					parameters[1] = Double.valueOf(_zParam3.getText());
+				}
+				else if (function.equals(STRETCHED_EXPONENTIAL)) {
+					parameters = new double[5];
+					parameters[2] = Double.valueOf(_aParam4.getText());
+					parameters[3] = Double.valueOf(_tParam4.getText());
+					parameters[4] = Double.valueOf(_hParam4.getText());
+					parameters[1] = Double.valueOf(_zParam4.getText());
+				}
+			}
+			catch (NumberFormatException e) {
+				//TODO recover
+			}
 
-        parameters[0] = 0.0;
+			parameters[0] = 0.0; // chiSquare
+		}
         return parameters;
     }
 
     public void setParameters(double params[]) {
+		// parameters NaN signals error
+		_noFit = Double.isNaN(params[0]);
+		
         String function = (String) _functionComboBox.getSelectedItem();
         if (function.equals(SINGLE_EXPONENTIAL)) {
-            _aParam1.setText    (paramToString(params[2], 3));
-            _tParam1.setText    (paramToString(params[3], 3));
-            _zParam1.setText    (paramToString(params[1], 3));
-            _chiSqParam1.setText(paramToString(params[0], 6));
-        }
+			String a, t, z, chiSq;
+			if (_noFit) {
+				// fitted parameters could not be determined
+				a = t = z = chiSq = NO_FIT;
+			}
+			else {
+				a = paramToString(params[2], 3);
+				t = paramToString(params[3], 3);
+				z = paramToString(params[1], 3);
+				chiSq = paramToString(params[0], 6);
+			}
+            _aParam1.setText    (a);
+            _tParam1.setText    (t);
+            _zParam1.setText    (z);
+            _chiSqParam1.setText(chiSq);
+			
+			// show error message as appropriate
+			_errorLabel1.setVisible(_noFit);
+		}
         else if (function.equals(DOUBLE_EXPONENTIAL)) {
-            _a1Param2.setText   (paramToString(params[2], 3));
-            _t1Param2.setText   (paramToString(params[3], 3));
-            _a2Param2.setText   (paramToString(params[4], 3));
-            _t2Param2.setText   (paramToString(params[5], 3));
-            _zParam2.setText    (paramToString(params[1], 3));
-            _chiSqParam2.setText(paramToString(params[0], 6));
+			String a1, t1, a2, t2, z, chiSq;
+			if (_noFit) {
+				// fitted parameters could not be determined
+				a1 = t1 = a2 = t2 = z = chiSq = NO_FIT;
+			}
+			else {
+				a1 = paramToString(params[2], 3);
+				t1 = paramToString(params[3], 3);
+				a2 = paramToString(params[4], 3);
+				t2 = paramToString(params[5], 3);
+				z = paramToString(params[1], 3);
+				chiSq = paramToString(params[0], 6);
+			}
+			
+            _a1Param2.setText   (a1);
+            _t1Param2.setText   (t1);
+            _a2Param2.setText   (a2);
+            _t2Param2.setText   (t2);
+            _zParam2.setText    (z);
+            _chiSqParam2.setText(chiSq);
+			
+			// show error message as appropriate
+		    _errorLabel2.setVisible(_noFit);
         }
         else if (function.equals(TRIPLE_EXPONENTIAL)) {
-            _a1Param3.setText   (paramToString(params[2], 3));
-            _t1Param3.setText   (paramToString(params[3], 3));
-            _a2Param3.setText   (paramToString(params[4], 3));
-            _t2Param3.setText   (paramToString(params[5], 3));
-            _a3Param3.setText   (paramToString(params[6], 3));
-            _t3Param3.setText   (paramToString(params[7], 3));
-            _zParam3.setText    (paramToString(params[1], 3));
-            _chiSqParam3.setText(paramToString(params[0], 6));
+			String a1, t1, a2, t2, a3, t3, z, chiSq;
+			if (_noFit) {
+				// fitted parameters could not be determined
+				a1 = t1 = a2 = t2 = a3 = t3 = z = chiSq = NO_FIT;
+			}
+			else {
+				a1 = paramToString(params[2], 3);
+				t1 = paramToString(params[3], 3);
+				a2 = paramToString(params[4], 3);
+				t2 = paramToString(params[5], 3);
+				a3 = paramToString(params[6], 3);
+				t3 = paramToString(params[7], 3);
+				z = paramToString(params[1], 3);
+				chiSq = paramToString(params[0], 6);
+			}
+            _a1Param3.setText   (a1);
+            _t1Param3.setText   (t1);
+            _a2Param3.setText   (a2);
+            _t2Param3.setText   (t2);
+            _a3Param3.setText   (a3);
+            _t3Param3.setText   (t3);
+            _zParam3.setText    (z);
+            _chiSqParam3.setText(chiSq);
+			_errorLabel3.setVisible(_noFit);
         }
         else if (function.equals(STRETCHED_EXPONENTIAL)) {
-            _aParam4.setText    (paramToString(params[2], 3));
-            _tParam4.setText    (paramToString(params[3], 3));
-            _hParam4.setText    (paramToString(params[4], 3));
-            _zParam4.setText    (paramToString(params[1], 3));
-            _chiSqParam4.setText(paramToString(params[0], 6));
+			String a, t, h, z, chiSq;
+			if (_noFit) {
+				// fitted parameters could not be determined
+				a = t = h = z = chiSq = NO_FIT;
+			}
+			else {
+				a = paramToString(params[2], 3);
+				t = paramToString(params[3], 3);
+				h = paramToString(params[4], 3);
+				z = paramToString(params[1], 3);
+				chiSq = paramToString(params[0], 6);
+			}
+            _aParam4.setText    (a);
+            _tParam4.setText    (t);
+            _hParam4.setText    (h);
+            _zParam4.setText    (z);
+            _chiSqParam4.setText(chiSq);
+			
+			// show error message as appropriate
+			_errorLabel4.setVisible(_noFit);
         }
     }
     
@@ -1685,6 +1808,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                 _tParam1.setText    ("" + (float) params[3]);
                 _zParam1.setText    ("" + (float) params[1]);
                 _chiSqParam1.setText("" + (float) params[0]);
+				_errorLabel1.setVisible(false);
                 break;
             case 1:
                 _a1Param2.setText   ("" + (float) params[2]);
@@ -1693,6 +1817,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                 _t2Param2.setText   ("" + (float) params[5]);
                 _zParam2.setText    ("" + (float) params[1]);
                 _chiSqParam2.setText("" + (float) params[0]);
+				_errorLabel2.setVisible(false);
                 break;
             case 2:
                 _a1Param3.setText   ("" + (float) params[2]);
@@ -1703,6 +1828,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                 _t3Param3.setText   ("" + (float) params[7]);
                 _zParam3.setText    ("" + (float) params[1]);
                 _chiSqParam3.setText("" + (float) params[0]);
+				_errorLabel3.setVisible(false);
                 break;
             case 3:
                 _aParam4.setText    ("" + (float) params[0]);
@@ -1710,6 +1836,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                 _hParam4.setText    ("" + (float) params[2]);
                 _zParam4.setText    ("" + (float) params[1]);
                 _chiSqParam4.setText("" + (float) params[0]);
+				_errorLabel4.setVisible(false);
                 break;
         }
     }

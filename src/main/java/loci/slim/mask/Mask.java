@@ -95,7 +95,7 @@ public class Mask {
      * @param y 
      */
     public void set(int x, int y) {
-        if (null == _bits) {
+        if (null != _bits) {
             _bits[x][y] = true;
         }
     }

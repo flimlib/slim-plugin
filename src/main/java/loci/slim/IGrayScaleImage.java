@@ -34,6 +34,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
+import loci.slim.fitting.IErrorListener;
+import loci.slim.mask.Mask;
+
 
 /**
  * Interface for the GrayScaleImage UI.  Allows user to click on a pixel and
@@ -45,7 +48,7 @@ package loci.slim;
  *
  * @author Aivar Grislis
  */
-public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate, ICursorListener {
+public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate, ICursorListener, IErrorListener {
 
     /**
      * Sets a listener for when the user clicks on the image.
