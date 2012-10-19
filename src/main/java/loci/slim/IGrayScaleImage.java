@@ -35,6 +35,8 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim;
 
 import loci.slim.fitting.IErrorListener;
+import loci.slim.mask.IMaskGroup;
+import loci.slim.mask.IMaskGroupListener;
 import loci.slim.mask.Mask;
 
 
@@ -48,7 +50,7 @@ import loci.slim.mask.Mask;
  *
  * @author Aivar Grislis
  */
-public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate, ICursorListener, IErrorListener {
+public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate, ICursorListener, IErrorListener, IMaskGroupListener {
 
     /**
      * Sets a listener for when the user clicks on the image.
@@ -101,4 +103,11 @@ public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate,
      * @return { x, y }
      */
     public int[] getBrightestPoint();
+	
+	/**
+	 * Sets a mask group to listen for changes.
+	 * 
+	 * @param maskGroup 
+	 */
+	public void listenToMaskGroup(IMaskGroup maskGroup);
 }

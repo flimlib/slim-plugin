@@ -46,8 +46,12 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import loci.slim.mask.IMaskGroup;
+import loci.slim.mask.IMaskNode;
+import loci.slim.mask.IMaskNodeListener;
 
 import loci.slim.mask.Mask;
+import loci.slim.mask.MaskNode;
 
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
@@ -68,10 +72,13 @@ import mpicbg.imglib.type.numeric.RealType;
 public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	private static final int CURSOR_WIDTH = 11;
 	private static final int CURSOR_HEIGHT = 11;
-	private static final Color CURSOR_COLOR = Color.YELLOW;
+	private static final Color CURSOR_COLOR = Color.WHITE;
 	private static final Color THRESHOLD_COLOR = Color.RED;
+	private static final Color HIDDEN_COLOR = Color.BLUE;
 	private static final Color ERROR_COLOR = Color.GREEN.brighter();
+	private static final int TRANSPARENT = 0x00;
 	private static final int THRESHOLD_TRANSPARENCY = 0xa0;
+	private static final int HIDDEN_TRANSPARENCY = 0xa0;
 	private static final int ERROR_TRANSPARENCY = 0xff;
 	//TODO ARG 10/3/12 was formerly using a ByteProcessor, switch to ShortProcessor; _8bit switch temporary for backward compatibility
 	private boolean _8bit = false;
@@ -250,10 +257,10 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		Overlay overlay = new Overlay();
 		_errorRoi = new ImageRoi(0, 0, _errorImage);
 		overlay.add(_errorRoi);
-		_hiddenRoi = new ImageRoi(0, 0, _hiddenImage);
-		overlay.add(_hiddenRoi);
 		_thresholdRoi = new ImageRoi(0, 0, _thresholdImage);
 		overlay.add(_thresholdRoi);
+		_hiddenRoi = new ImageRoi(0, 0, _hiddenImage);
+		overlay.add(_hiddenRoi);
 		_cursorRoi = new ImageRoi(0, 0, _cursorImage);
 		overlay.add(_cursorRoi);
 		
@@ -267,8 +274,11 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		for (int y = 0; y < CURSOR_HEIGHT; ++y) {
 			for (int x = 0; x < CURSOR_WIDTH; ++x) {
 				if (x == CURSOR_WIDTH / 2 - 1 || x == CURSOR_WIDTH / 2 + 1) {
-					if (y < CURSOR_HEIGHT / 2 - 1 || y > CURSOR_HEIGHT / 2 + 1) {
+					if (y <= CURSOR_HEIGHT / 2 - 1 || y >= CURSOR_HEIGHT / 2 + 1) {
 						cursorImage.setRGB(x, y, black);
+					}
+					else if (y == CURSOR_HEIGHT / 2) {
+						cursorImage.setRGB(x, y, color);
 					}
 				}
 				else if (x == CURSOR_WIDTH / 2) {
@@ -386,7 +396,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	public void updateThreshold(int threshold) {
 		for (int y = 0; y < _height; ++y) {
 		    for (int x = 0; x < _width; ++x) {
-			   int alpha = 0;
+			   int alpha = TRANSPARENT;
                if (_saveOutPixels2[getChannel()][y * _width + x] < threshold) {
 				   alpha = THRESHOLD_TRANSPARENCY;
 			   }
@@ -405,7 +415,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	public void updateErrorMask(Mask mask, int channel) {
 		for (int y = 0; y < _height; ++y) {
 			for (int x = 0; x < _width; ++x) {
-				int alpha = 0;
+				int alpha = TRANSPARENT;
 				if (mask.test(x, y)) {
 					alpha = ERROR_TRANSPARENCY;
 				}
@@ -413,5 +423,33 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 			}
 		}
 		_imagePlus.draw();
+	}
+
+	@Override
+    public void listenToMaskGroup(IMaskGroup maskGroup) {
+		//System.out.println("!!! maskGroup " + maskGroup);
+		applyMask(maskGroup.getMask());
+        // create a new mask node that listens to the group
+        IMaskNode maskNode = new MaskNode(maskGroup, new IMaskNodeListener () {
+			// listen for mask changes
+			@Override
+            public void updateMasks(Mask otherMask, Mask totalMask) {
+				//System.out.println("### GrayScaleImage " + otherMask + " " + totalMask);
+                applyMask(otherMask);
+            }
+        });
+    }
+	
+	private void applyMask(Mask mask) {
+        for (int y = 0; y < _height; ++y) {
+            for (int x = 0; x < _width; ++x) {
+                int alpha = TRANSPARENT;
+                if (null != mask && !mask.test(x, y)) {
+				    alpha = HIDDEN_TRANSPARENCY;
+			    }
+			    _hiddenImage.setRGB(x, y, getColor(HIDDEN_COLOR, alpha));
+		    }
+		}
+        _imagePlus.draw();
 	}
 }

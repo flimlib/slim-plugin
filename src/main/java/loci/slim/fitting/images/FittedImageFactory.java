@@ -36,6 +36,7 @@ package loci.slim.fitting.images;
 
 import java.awt.image.IndexColorModel;
 
+import loci.slim.IGrayScaleImage;
 import loci.slim.IGrayScalePixelValue;
 import loci.slim.fitting.images.IFittedImage;
 import loci.slim.fitting.images.SimpleFittedImage;
@@ -63,12 +64,14 @@ public class FittedImageFactory {
     }
     
     public IFittedImage createImage(
+			String file,
             FittedImageType outputImageType,
+			int ordinal,
             int[] dimension,
             IndexColorModel indexColorModel,
             int components,
             boolean colorizeGrayScale,
-            IGrayScalePixelValue grayScalePixelValue,
+            IGrayScaleImage grayScaleImage,
             IMaskGroup[] maskGroup)
     {
         IFittedImage fittedImage = null;
@@ -76,88 +79,150 @@ public class FittedImageFactory {
         switch (outputImageType) {
             case A1:
                 title = (1 == components) ? "A" : "A1";
+				title = addToTitle(title, ordinal, file);
                 fittedImage = new SimpleFittedImage(title, dimension,
                         indexColorModel, FittedImageFitter.A1_INDEX,
-                        colorizeGrayScale, grayScalePixelValue, maskGroup);
+                        colorizeGrayScale, grayScaleImage, maskGroup);
                 break;
             case T1:
                 title = (1 == components) ? "T" : "T1";
+				title = addToTitle(title, ordinal, file);
                 fittedImage = new SimpleFittedImage(title, dimension,
                         indexColorModel, FittedImageFitter.T1_INDEX,
-                        colorizeGrayScale, grayScalePixelValue, maskGroup);
+                        colorizeGrayScale, grayScaleImage, maskGroup);
                 break;
             case A2:
-                fittedImage = new SimpleFittedImage("A2", dimension,
+				title = addToTitle("A2", ordinal, file);
+                fittedImage = new SimpleFittedImage(title, dimension,
                         indexColorModel, FittedImageFitter.A2_INDEX,
-                        colorizeGrayScale, grayScalePixelValue, maskGroup);
+                        colorizeGrayScale, grayScaleImage, maskGroup);
                 break;
             case T2:
-                fittedImage = new SimpleFittedImage("T2", dimension,
+				title = addToTitle("T2", ordinal, file);
+                fittedImage = new SimpleFittedImage(title, dimension,
                         indexColorModel, FittedImageFitter.T2_INDEX,
-                        colorizeGrayScale, grayScalePixelValue, maskGroup);
+                        colorizeGrayScale, grayScaleImage, maskGroup);
                 break;
             case A3:
-                fittedImage = new SimpleFittedImage("A3", dimension,
+				title = addToTitle("A3", ordinal, file);
+                fittedImage = new SimpleFittedImage(title, dimension,
                         indexColorModel, FittedImageFitter.A2_INDEX,
-                        colorizeGrayScale, grayScalePixelValue, maskGroup);
+                        colorizeGrayScale, grayScaleImage, maskGroup);
                 break;
             case T3:
-                fittedImage = new SimpleFittedImage("T3", dimension,
+				title = addToTitle("T3", ordinal, file);
+                fittedImage = new SimpleFittedImage(title, dimension,
                         indexColorModel, FittedImageFitter.T2_INDEX,
-                        colorizeGrayScale, grayScalePixelValue, maskGroup);
+                        colorizeGrayScale, grayScaleImage, maskGroup);
                 break;
             case H:
-                fittedImage = new SimpleFittedImage("H", dimension,
+				title = addToTitle("H", ordinal, file);
+                fittedImage = new SimpleFittedImage(title, dimension,
                         indexColorModel, FittedImageFitter.H_INDEX,
-                        colorizeGrayScale, grayScalePixelValue, maskGroup);
+                        colorizeGrayScale, grayScaleImage, maskGroup);
                 break;
             case Z:
-                fittedImage = new SimpleFittedImage("Z", dimension,
+				title = addToTitle("Z", ordinal, file);
+                fittedImage = new SimpleFittedImage(title, dimension,
                         indexColorModel, FittedImageFitter.Z_INDEX,
-                        colorizeGrayScale, grayScalePixelValue, maskGroup);
+                        colorizeGrayScale, grayScaleImage, maskGroup);
                 break;
             case CHISQ:
-                fittedImage = new SimpleFittedImage("X2", dimension,
+				title = addToTitle("X2", ordinal, file);
+                fittedImage = new SimpleFittedImage(title, dimension,
                         indexColorModel, FittedImageFitter.CHISQ_INDEX,
-                        colorizeGrayScale, grayScalePixelValue, maskGroup);
+                        colorizeGrayScale, grayScaleImage, maskGroup);
                 break;
             case F1:
-                fittedImage = new FractionalIntensityImage("F1", dimension,
+				title = addToTitle("F1", ordinal, file);
+                fittedImage = new FractionalIntensityImage(title, dimension,
                         indexColorModel, 0, components, colorizeGrayScale,
-                        grayScalePixelValue, maskGroup);
+                        grayScaleImage, maskGroup);
                 break;
             case F2:
-                fittedImage = new FractionalIntensityImage("F2", dimension,
+				title = addToTitle("F2", ordinal, file);
+                fittedImage = new FractionalIntensityImage(title, dimension,
                         indexColorModel, 1, components, colorizeGrayScale,
-                        grayScalePixelValue, maskGroup);
+                        grayScaleImage, maskGroup);
                 break;
             case F3:
-                fittedImage = new FractionalIntensityImage("F3", dimension,
+				title = addToTitle("F3", ordinal, file);
+                fittedImage = new FractionalIntensityImage(title, dimension,
                         indexColorModel, 2, components, colorizeGrayScale,
-                        grayScalePixelValue, maskGroup);
+                        grayScaleImage, maskGroup);
                 break;
             case f1:
-                fittedImage = new FractionalContributionImage("f1", dimension,
+				title = addToTitle("f1", ordinal, file);
+                fittedImage = new FractionalContributionImage(title, dimension,
                         indexColorModel, 0, components, colorizeGrayScale,
-                        grayScalePixelValue, maskGroup);
+                        grayScaleImage, maskGroup);
                 break;
             case f2:
-                fittedImage = new FractionalContributionImage("f2", dimension,
+				title = addToTitle("f2", ordinal, file);
+                fittedImage = new FractionalContributionImage(title, dimension,
                         indexColorModel, 1, components, colorizeGrayScale,
-                        grayScalePixelValue, maskGroup);
+                        grayScaleImage, maskGroup);
                 break;
             case f3:
-                fittedImage = new FractionalContributionImage("f3", dimension,
+				title = addToTitle("f3", ordinal, file);
+                fittedImage = new FractionalContributionImage(title, dimension,
                         indexColorModel, 2, components, colorizeGrayScale,
-                        grayScalePixelValue, maskGroup);
+                        grayScaleImage, maskGroup);
                 break;
             case Tm:
-     System.out.println("in FittedImageFactory for Tm");
-                fittedImage = new TauMeanImage("Tm", dimension,
+				title = addToTitle("Tm", ordinal, file);
+                fittedImage = new TauMeanImage(title, dimension,
                         indexColorModel, 0, components, colorizeGrayScale,
-                        grayScalePixelValue, maskGroup);
+                        grayScaleImage, maskGroup);
                 break;
         }
         return fittedImage;
     }
+	
+	private String addToTitle(String title, int ordinal, String file) {
+		int suffixIndex = file.lastIndexOf('.');
+		return title + " (" + romanNumeral(ordinal) + ") " + file.substring(0, suffixIndex);
+	}
+	
+	private String romanNumeral(int ordinal) {
+		StringBuffer result = new StringBuffer();
+		while (ordinal >= 100) { // works until 400: get "cccc" rather than "cd"
+			ordinal -= 100;
+			result.append("c");
+		}
+		if (ordinal >= 90) {
+			ordinal -= 90;
+			result.append("xc");
+		}
+		if (ordinal >= 50) {
+			ordinal -= 50;
+			result.append("l");
+		}
+		if (ordinal >= 40) {
+			ordinal -= 40;
+			result.append("xl");
+		}
+		while (ordinal >= 10) {
+			ordinal -= 10;
+			result.append("x");
+		}
+		if (ordinal >= 9) {
+			ordinal -= 9;
+			result.append("ix");
+		}
+		if (ordinal >= 5) {
+			ordinal -= 5;
+			result.append("v");
+		}
+		if (ordinal >= 4) {
+			ordinal -= 4;
+			result.append("iv");
+		}
+		while (ordinal >= 1) {
+			--ordinal;
+			result.append("i");
+		}
+		
+		return result.toString();
+	}
 }

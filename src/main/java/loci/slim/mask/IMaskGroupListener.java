@@ -1,5 +1,5 @@
 //
-// MaskGroup.java
+// IMaskGroupListener.java
 //
 
 /*
@@ -34,62 +34,17 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.mask;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
- * Mask group class associates a set of mask nodes.
- * <p>
- * Note that mask changes are a results of user interaction using the single
- * histogram tool, so threading issues are unlikely.
+ * Listener interface to receive changes in which mask group is active.
  * 
  * @author Aivar Grislis grislis at wisc dot edu
  */
-public class MaskGroup implements IMaskGroup {
-    List<IMaskNode> _nodeList;
-    Map<IMaskNode, Mask> _maskMap;
-    IMaskNode[] _nodes;
-
-    public MaskGroup() {
-        _nodeList = new ArrayList<IMaskNode>();
-        _maskMap = new HashMap<IMaskNode, Mask>();
-    }
-
-    @Override
-    public void addNode(MaskNode node) {
-		// avoid duplicate entries
-		if (!_nodeList.contains(node)) {
-            _nodeList.add(node);
-		}
-    }
-
-    @Override
-    public void removeNode(MaskNode node) {
-        _nodeList.remove(node);
-        _maskMap.put(node, null);
-    }
-
-    @Override
-    public void updateMask(IMaskNode node) {
-        // update map with node's new self mask
-        _maskMap.put(node, node.getSelfMask());
-
-        // combine masks and notify other nodes
-        for (IMaskNode peerNode : _nodeList) {
-            // skip the caller
-            if (peerNode != node) {
-                // combine all masks but the recipient's
-                Mask peerSelfMask = _maskMap.get(peerNode);
-                Mask peerOtherMask = Mask.addOtherMasks(peerSelfMask, _maskMap.values());
-                peerNode.updateOtherMask(peerOtherMask);
-            }
-        }
-    }
+public interface IMaskGroupListener {
 	
-	@Override
-	public Mask getMask() {
-		return Mask.addOtherMasks(null, _maskMap.values());
-	}
+	/**
+	 * Sets a mask group to listen for changes.
+	 * 
+	 * @param maskGroup 
+	 */
+	public void listenToMaskGroup(IMaskGroup maskGroup);
 }

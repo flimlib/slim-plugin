@@ -69,10 +69,11 @@ public class FittedImageParser {
     /**
      * Creates an instance for a given input string, etc.
      * 
-     * @param input string with colorized images to produce
+     * @param input string with fitted images to produce
      * @param components number of exponential fit components
      * @param stretched whether it's a stretched exponential
      * @param free whether each parameter is free or fixed
+	 * @param ordinal distinguishes groups of fitted images
      */
     public FittedImageParser(String input, int components, boolean stretched,
             boolean[] free) {
@@ -91,12 +92,12 @@ public class FittedImageParser {
     }
 
     /**
-     * Parses the input string and creates array of ColorizedImageType.  Only
+     * Parses the input string and creates array of FittedImageType.  Only
      * creates images which are appropriate for current fit.
      * 
      * @return 
      */
-    public FittedImageType[] getColorizedImages() {
+    public FittedImageType[] getFittedImages() {
         List<FittedImageType> list = new ArrayList<FittedImageType>();
         String[] tokens = _input.split(" ");
         for (String token : tokens) {

@@ -223,7 +223,7 @@ public class HistogramPanel extends JPanel {
      * 
      * @param bins 
      */
-    public void setBins(int[] bins) {
+    public void setBinValues(int[] bins) {
         synchronized (_synchObject) {
             _bins = bins;
             _maxBinCount = Integer.MIN_VALUE;

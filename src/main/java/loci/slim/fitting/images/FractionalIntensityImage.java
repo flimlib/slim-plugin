@@ -36,6 +36,7 @@ package loci.slim.fitting.images;
 
 import java.awt.image.IndexColorModel;
 
+import loci.slim.IGrayScaleImage;
 import loci.slim.IGrayScalePixelValue;
 import loci.slim.mask.IMaskGroup;
 
@@ -62,10 +63,10 @@ public class FractionalIntensityImage extends AbstractBaseFittedImage {
      */
     public FractionalIntensityImage(String title, int[] dimension,
             IndexColorModel indexColorModel, int component, int components,
-            boolean colorizeGrayScale, IGrayScalePixelValue grayScalePixelValue,
+            boolean colorizeGrayScale, IGrayScaleImage grayScaleImage,
             IMaskGroup[] maskGroup) {
         super(title, dimension, indexColorModel, colorizeGrayScale,
-                grayScalePixelValue, maskGroup);
+                grayScaleImage, maskGroup);
         _component = component;
         _components = components;
     }

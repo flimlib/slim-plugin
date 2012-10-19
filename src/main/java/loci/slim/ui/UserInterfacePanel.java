@@ -1337,6 +1337,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         try {
 			int threshold = Integer.parseInt(text);
 			_thresholdListener.updateThreshold(threshold);
+			_listener.reFit();
 		}
 		catch (NumberFormatException e) {
 			

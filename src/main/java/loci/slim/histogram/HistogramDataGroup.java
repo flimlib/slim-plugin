@@ -249,7 +249,7 @@ public class HistogramDataGroup {
 
                     // update listener, if any
                     if (null != _listener) {
-                        _listener.minMaxChanged(minView, maxView, minLUT, maxLUT);
+                        _listener.minMaxChanged(this, minView, maxView, minLUT, maxLUT);
                     }
                 }
             }
@@ -407,7 +407,7 @@ public class HistogramDataGroup {
         _maxDataCurrent = maxDataCurrent;
 
         if (null != _listener) {
-            _listener.minMaxChanged(_minView, _maxView, _minLUT, _maxLUT);
+            _listener.minMaxChanged(this, _minView, _maxView, _minLUT, _maxLUT);
         }
 
         return new double[] { _minLUT, _maxLUT };

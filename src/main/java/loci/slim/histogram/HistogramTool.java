@@ -186,11 +186,16 @@ public class HistogramTool {
 			}
 			_frame.setTitle(histogramData.getTitle());
 
-			_histogramPanel.setBins(histogramData.binValues(WIDTH));
+			_histogramPanel.setBinValues(histogramData.binValues(WIDTH));
 
 			boolean autoRange = histogramData.getAutoRange();
+			//System.out.println("=================");
+			//System.out.println("autorange is " + autoRange);
 			_uiPanel.setAutoRange(autoRange);
-			if (!autoRange) {
+			if (autoRange) {
+				_histogramPanel.setCursors(null, null);
+			}
+			else {
 				_histogramPanel.setCursors(cursorPixelFromValue
 						(false, minMaxLUT[0]), cursorPixelFromValue(false, minMaxLUT[1])); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
 			}        
@@ -248,7 +253,7 @@ public class HistogramTool {
         synchronized (_synchObject) {
 			_histogramDataGroup.setMinMaxView(minView, maxView); //TODO ARG added this 9/27 to change hDG internal minMaxViews
             int[] bins = _histogramDataGroup.binValues(WIDTH);
-            _histogramPanel.setBins(bins);
+            _histogramPanel.setBinValues(bins);
             _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
             //TODO changed is currently called from two places:
             // i) the HistogramData listener will call it periodically during the
@@ -313,10 +318,15 @@ public class HistogramTool {
     private class HistogramDataListener implements IHistogramDataListener {
         
         @Override
-        public void minMaxChanged(double minView, double maxView,
+        public void minMaxChanged(
+				HistogramDataGroup histogramDataGroup,
+				double minView, double maxView,
                 double minLUT, double maxLUT) {
-            changed(minView, maxView, minLUT, maxLUT);
-            _uiPanel.setMinMaxLUT(minLUT, maxLUT);
+			// make sure it's the same current fitted image
+			if (_histogramDataGroup == histogramDataGroup) {
+				changed(minView, maxView, minLUT, maxLUT);
+				_uiPanel.setMinMaxLUT(minLUT, maxLUT);
+			}
         }
     }
 
@@ -460,7 +470,7 @@ public class HistogramTool {
                     
                     // get updated histogram data and show it                 
                     int[] bins = _histogramDataGroup.binValues(WIDTH);
-                    _histogramPanel.setBins(bins);
+                    _histogramPanel.setBinValues(bins);
                     _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
                     
                     // update numbers in UI panel
@@ -517,7 +527,7 @@ public class HistogramTool {
                 
                 // get updated histogram data and show it                 
                 int[] bins = _histogramDataGroup.binValues(WIDTH);
-                _histogramPanel.setBins(bins);
+                _histogramPanel.setBinValues(bins);
             }
             //TODO
             //System.out.println("HistogramTool.UIPanelListener.setDisplayChannels(" + displayChannels + ")");
@@ -542,10 +552,14 @@ public class HistogramTool {
                     _histogramDataGroup.setMinMaxView(minView, maxView);
                     _histogramDataGroup.setMinMaxLUT(minLUT, maxLUT);
 
-                    //TODO ARG this is quite a bit off:
-                    // note that if you stretch the bounds on one side you need
-                    // to adjust the position of the other side cursor.
-                    _histogramPanel.setCursors(cursorPixelFromValue(false, minLUT), cursorPixelFromValue(false, maxLUT)); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
+					// cursors should remain off while autoranging
+					if (!_histogramDataGroup.getAutoRange()) {
+						//TODO ARG this is quite a bit off:
+						// note that if you stretch the bounds on one side you need
+						// to adjust the position of the other side cursor.
+						_histogramPanel.setCursors(cursorPixelFromValue(false, minLUT), cursorPixelFromValue(false, maxLUT)); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
+
+					}
                 }
             }
 

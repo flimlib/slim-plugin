@@ -1,5 +1,5 @@
 //
-// IMaskGroup.java
+// Threshold.java
 //
 
 /*
@@ -15,7 +15,7 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the names of the ImageJDev.org developers nor the
+    * Neither the name of the UW-Madison LOCI nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -32,40 +32,35 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.mask;
+package loci.slim.preprocess;
+
+import ij.gui.Roi;
 
 /**
- * This is an interface for a group of associated mask nodes.
- * 
+ *
  * @author Aivar Grislis grislis at wisc dot edu
  */
-public interface IMaskGroup {
-
-    /**
-     * Adds a mask node to group.
-     * 
-     * @param node 
-     */
-    public void addNode(MaskNode node);
-
-    /**
-     * Removes a mask node from group.
-     * 
-     * @param node 
-     */
-    public void removeNode(MaskNode node);
-
-    /**
-     * Updates the mask, notifies group.
-     * 
-     * @param node originating node
-     */
-    public void updateMask(IMaskNode node);
-
-	/**
-	 * Gets the current total mask for this group.
-	 * 
-	 * @return 
-	 */
-	public Mask getMask();
+public class RoiProcessor implements IProcessor {
+	private Roi[] _rois;
+    private IProcessor _processor;
+	
+	public RoiProcessor(Roi[] rois) {
+		_rois = rois;
+	}
+	
+    @Override
+    public void chain(IProcessor processor) {
+		_processor = processor;
+	}
+    
+    @Override
+    public double[] getPixel(int[] location) {
+		double[] returnValue = _processor.getPixel(location);
+		for (Roi roi : _rois) {
+			if (roi.contains(location[0], location[1])) {
+			   return returnValue;
+			}
+		}
+		return null;
+	}
 }

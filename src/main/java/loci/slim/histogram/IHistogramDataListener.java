@@ -49,6 +49,8 @@ public interface IHistogramDataListener {
      * @param minLUT
      * @param maxLUT 
      */
-    public void minMaxChanged(double minView, double maxView,
+    public void minMaxChanged(
+			HistogramDataGroup histogramDataGroup,
+			double minView, double maxView,
             double minLUT, double maxLUT);
 }

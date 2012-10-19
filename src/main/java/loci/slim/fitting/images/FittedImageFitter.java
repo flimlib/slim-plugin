@@ -38,9 +38,11 @@ import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 import java.util.List;
 
+import loci.slim.IGrayScaleImage;
 import loci.slim.IGrayScalePixelValue;
 import loci.slim.histogram.HistogramTool;
 import loci.slim.mask.IMaskGroup;
+import loci.slim.mask.IMaskGroupListener;
 import loci.slim.mask.MaskGroup;
 
 /**
@@ -66,29 +68,37 @@ public class FittedImageFitter {
     }
     
     public void setUpFit(
+			String file,
             FittedImageType[] imageTypes,
+			int ordinal,
             int[] dimension,
             IndexColorModel indexColorModel,
             int components,
             boolean colorizeGrayScale,
-            IGrayScalePixelValue grayScalePixelValue)
+            IGrayScaleImage grayScaleImage)
     {
-        // create shared MaskGroup for each channel
-        IMaskGroup[] maskGroup = new MaskGroup[imageTypes.length];
+        // create MaskGroup for each channel
+		int fittedChannels = dimension[2];
+        IMaskGroup[] maskGroup = new MaskGroup[fittedChannels];
         for (int i = 0; i < maskGroup.length; ++i) {
             maskGroup[i] = new MaskGroup();
         }
+		//TODO fitted image channels & grayscale image channels c/b out of synch!!!
+		// grayscale image is hooked up to first MaskGroup for channel 0
+		grayScaleImage.listenToMaskGroup(maskGroup[0]);
         
         _fittedImages.clear();
         for (FittedImageType imageType : imageTypes) {
             IFittedImage fittedImage =
-                    FittedImageFactory.getInstance().createImage
-                            (imageType,
+                    FittedImageFactory.getInstance().createImage(
+					        file,
+                            imageType,
+							ordinal,
                             dimension,
                             indexColorModel,
                             components,
                             colorizeGrayScale,
-                            grayScalePixelValue,
+                            grayScaleImage,
                             maskGroup);
             _fittedImages.add(fittedImage);
         }

@@ -45,6 +45,7 @@ import java.util.List;
 import ij.ImagePlus;
 import ij.ImageStack;
 
+import loci.slim.IGrayScaleImage;
 import loci.slim.IGrayScalePixelValue;
 import loci.slim.histogram.HistogramDataGroup;
 import loci.slim.histogram.HistogramDataNode;
@@ -68,6 +69,8 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
     private int _channels;
     private int _channel;
     private boolean _colorizeGrayScale;
+	private IGrayScaleImage _grayScaleImage;
+	private IMaskGroup _maskGroup[];
     private ImageStack _imageStack;
     private ImagePlus _imagePlus;
     private MyStackWindow _stackWindow;
@@ -83,7 +86,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
             int[] dimension,
             IndexColorModel indexColorModel,
             boolean colorizeGrayScale,
-            IGrayScalePixelValue grayScalePixelValue,
+            IGrayScaleImage grayScaleImage,
             IMaskGroup[] maskGroup) {
         _title = title;
         _width = dimension[0];
@@ -91,6 +94,8 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         _channels = dimension[2];
         _channel = UNKNOWN_CHANNEL;
         _colorizeGrayScale = colorizeGrayScale;
+		_grayScaleImage = grayScaleImage;
+		_maskGroup = maskGroup;
         
         // building an image stack
         _imageStack = new ImageStack(_width, _height);
@@ -115,7 +120,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
             IFittedImageSlice fittedImage = null;
             if (colorizeGrayScale) {
                 fittedImage
-                        = new ColorizedFittedImage(grayScalePixelValue, _values); 
+                        = new ColorizedFittedImage(grayScaleImage, _values); 
             }
             else {
                 fittedImage = new FloatFittedImage();
@@ -137,8 +142,11 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
                 _histogramData.setChannelIndex(channelIndex);
 				HistogramTool histogramTool = HistogramTool.getInstance();
                 histogramTool.setHistogramData(_histogramData);
+				
+				_grayScaleImage.listenToMaskGroup(_maskGroup[channelIndex]);
             }
             
+			@Override
             public void focusLost(FocusEvent e) { }
         });
         _stackWindow.addWindowListener(new WindowAdapter() {
@@ -239,19 +247,8 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
             _mask = mask;
             
             if (_histogramData.getAutoRange()) {
-                double[] minMaxLUT = _histogramData.getMinMaxLUT(); //TODO too much repeated code from "redisplay()"
-                minMaxLUT = PaletteFix.adjustMinMax(minMaxLUT[0], minMaxLUT[1]);
-                System.out.println("image " + _title + " min max " + minMaxLUT[0] + " " + minMaxLUT[1]);
-                if (_colorizeGrayScale) {
-                    // redraw all images with new LUT
-                    for (IFittedImageSlice fittedImage : _fittedImages) {
-                        fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]); //TODO we are redrawing all images anyway, then the current one again below...
-                    }
-                }
-                else {
-                    // when using a FloatProcessor the LUT belongs to entire stack
-                    _fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
-                }
+				// autorange to newly masked data
+				recalcHistogram();
             }
 
             for (int y = 0; y < _values[0].length; ++y) {

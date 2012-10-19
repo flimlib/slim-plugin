@@ -36,6 +36,7 @@ package loci.slim.fitting.images;
 
 import java.awt.image.IndexColorModel;
 
+import loci.slim.IGrayScaleImage;
 import loci.slim.IGrayScalePixelValue;
 import loci.slim.mask.IMaskGroup;
 
@@ -60,10 +61,10 @@ public class SimpleFittedImage extends AbstractBaseFittedImage {
      */
     public SimpleFittedImage(String title, int[] dimension,
 			IndexColorModel indexColorModel, int parameterIndex,
-            boolean colorizeGrayScale, IGrayScalePixelValue grayScalePixelValue,
+            boolean colorizeGrayScale, IGrayScaleImage grayScaleImage,
             IMaskGroup[] maskGroup) {
         super(title, dimension, indexColorModel, colorizeGrayScale,
-                grayScalePixelValue, maskGroup);
+                grayScaleImage, maskGroup);
         _parameterIndex = parameterIndex;
     }
     
