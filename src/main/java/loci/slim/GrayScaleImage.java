@@ -46,6 +46,9 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.HashSet;
+import java.util.Set;
+
 import loci.slim.mask.IMaskGroup;
 import loci.slim.mask.IMaskNode;
 import loci.slim.mask.IMaskNodeListener;
@@ -102,6 +105,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	private Roi _hiddenRoi;
 	private Roi _thresholdRoi;
 	private Overlay _overlay;
+	private Set<IMaskGroup> _maskGroupSet;
 
     public GrayScaleImage(Image<T> image) {
         String title = image.getName();
@@ -219,8 +223,13 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                 public void mouseEntered(MouseEvent e) {}
                 @Override
                 public void mouseReleased(MouseEvent e) {
+					// note if you are in zoom tool mode and this click is
+					// also zooming you in, x and y will be wrong
                     if (null != _listener) {
-                        _listener.selected(getChannel(), e.getX(), e.getY());
+						float zoomFactor = _stackWindow.getZoomFactor();
+						int x = (int)(e.getX() * zoomFactor);
+						int y = (int)(e.getY() * zoomFactor);
+						_listener.selected(getChannel(), x, y);
                     }
                 }
             }
@@ -230,7 +239,9 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		_imagePlus.setOverlay(_overlay);
 		
 		int threshold = estimateThreshold();
-		updateThreshold(threshold);		
+		updateThreshold(threshold);
+		
+		_maskGroupSet = new HashSet<IMaskGroup>();
     }
 	
 	public void hideCursor() {
@@ -338,11 +349,6 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         _stackWindow.setEnabled(enable);
     }
 
-    @Override
-    public float getZoomFactor() {
-        return _stackWindow.getZoomFactor();
-    }
-
     /**
      * Gets a grayscale pixel value, to test against a threshold.
      *
@@ -427,26 +433,32 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 
 	@Override
     public void listenToMaskGroup(IMaskGroup maskGroup) {
-		//System.out.println("!!! maskGroup " + maskGroup);
+		// apply the group mask
 		applyMask(maskGroup.getMask());
-        // create a new mask node that listens to the group
-        IMaskNode maskNode = new MaskNode(maskGroup, new IMaskNodeListener () {
-			// listen for mask changes
-			@Override
-            public void updateMasks(Mask otherMask, Mask totalMask) {
-				//System.out.println("### GrayScaleImage " + otherMask + " " + totalMask);
-                applyMask(otherMask);
-            }
-        });
+		
+		// each mask group should have a listener
+		if (!_maskGroupSet.contains(maskGroup)) {
+			_maskGroupSet.add(maskGroup);
+			
+			// create a new mask node that listens to the group
+			IMaskNode maskNode = new MaskNode(maskGroup, new IMaskNodeListener () {
+				// listen for mask changes
+				@Override
+				public void updateMasks(Mask otherMask, Mask totalMask) {
+					applyMask(otherMask);
+				}
+			});
+		}
     }
 	
 	private void applyMask(Mask mask) {
         for (int y = 0; y < _height; ++y) {
             for (int x = 0; x < _width; ++x) {
-                int alpha = TRANSPARENT;
-                if (null != mask && !mask.test(x, y)) {
-				    alpha = HIDDEN_TRANSPARENCY;
-			    }
+				int alpha = HIDDEN_TRANSPARENCY;
+				// a null mask is the same as all bits set
+				if (null == mask || mask.test(x, y)) {
+					alpha = TRANSPARENT;
+				}
 			    _hiddenImage.setRGB(x, y, getColor(HIDDEN_COLOR, alpha));
 		    }
 		}

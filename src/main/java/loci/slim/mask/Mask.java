@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.mask;
 
+import java.lang.Cloneable;
 import java.util.Collection; 
 
 /**
@@ -43,17 +44,33 @@ import java.util.Collection;
  *
  * @author Aivar Grislis
  */
-public class Mask {
+public class Mask implements Cloneable {
     private boolean[][] _bits;
+	private int _width;
+	private int _height;
     
     public Mask(boolean[][] bits) {
+		_width = bits[0].length;
+		_height = bits.length;
         _bits = bits;
     }
     
     public Mask(int width, int height) {
+		_width = width;
+		_height = height;
         // create array of FALSE
         _bits = new boolean[width][height];
     }
+
+	public Mask clone() {
+		boolean[][] bits = new boolean[_width][_height];
+		for (int y = 0; y < _height; ++y) {
+			for (int x = 0; x < _width; ++x) {
+				bits[x][y] = _bits[x][y];
+			}
+		}
+		return new Mask(bits);
+	}
 
     /**
      * Gets the boolean switches.
@@ -100,6 +117,59 @@ public class Mask {
         }
     }
 
+	/**
+	 * Any masking going on?
+	 * 
+	 * @return 
+	 */
+	public boolean hasExcludedPixels() {
+		for (int y = 0; y < _height; ++y) {
+			for (int x = 0; x < _width; ++x) {
+				if (!test(x, y)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Is mask equivalent to another mask?
+	 * 
+	 * @param mask
+	 * @return 
+	 */
+	public boolean equals(Mask mask) {
+		boolean returnValue = false;
+		if (null == mask) {
+			// no mask means all pixels selected
+			boolean[][] bits = mask.getBits();
+			for (int y = 0; y < _height; ++y) {
+				for (int x = 0; x < _width; ++x) {
+					if (!bits[x][y]) {
+						return false;
+					}
+				}
+			}
+		}
+		else {
+			boolean[][] bits = mask.getBits();
+			if (bits.length == _bits.length) {
+				if (bits[0].length == _bits[0].length) {
+					for (int y = 0; y < _height; ++y) {
+						for (int x = 0; x < _width; ++x) {
+							if (bits[x][y] != _bits[x][y]) {
+								return false;
+							}
+						}
+					}
+					returnValue = true;
+				}
+			}
+		}
+        return returnValue;
+	}
+
     /**
      * Adds given mask to current mask, generating a new mask.
      * 
@@ -108,15 +178,12 @@ public class Mask {
      */
     public Mask add(Mask mask) {
         if (null == mask) {
-            return this;
+            return clone();
         }
-        
         boolean[][] bits = mask.getBits();
-        int width = bits[0].length;
-        int height = bits.length;
-        boolean[][] result = new boolean[width][height];
-        for (int x = 0; x < width; ++x) {
-            for (int y = 0; y < height; ++y) {
+        boolean[][] result = new boolean[_width][_height];
+        for (int x = 0; x < _width; ++x) {
+            for (int y = 0; y < _height; ++y) {
                 result[x][y] = _bits[x][y] && bits[x][y];
             }
         }
@@ -124,40 +191,39 @@ public class Mask {
     }
     
     /**
-     * Given a collection of masks, adds them all together except for one mask
-     * specified to be excluded.
-     * 
+     * Given a collection of masks, adds them all together.
+     * <p>
      * Having this be part of the Mask class hides implementation details.
      * 
-     * @param excludedMask
-     * @param masks
+	 * @param masks
      * @return mask or null
      */
-    public static Mask addOtherMasks(Mask excludedMask, Collection<Mask> masks) {
+    public static Mask addMasks(Collection<Mask> masks) {
         Mask returnValue = null;
         if (!masks.isEmpty()) {
             boolean[][] result = null;
-            int width = 0;
+            int width  = 0;
             int height = 0;
+
             for (Mask mask : masks) {
-                if (null != mask) {
-                    if (mask != excludedMask) {
-                        boolean[][] addition = mask.getBits();
-                        if (null != addition) {
-                            // lazy initialization of results
-                            if (null == result) {
-                                result = mask.getBits().clone();
-                                width  = result[0].length;
-                                height = result.length;
-                            }
-                            for (int x = 0; x < width; ++x) {
-                                for (int y = 0; y < height; ++y) {
-                                    result[x][y] = result[x][y] && addition[x][y];
-                                }
-                            }
-                        }
-                    }
-                }
+				if (null != mask) {
+					boolean[][] maskBits = mask.getBits();
+					if (null == result) {
+						width  = maskBits[0].length;
+						height = maskBits.length;
+						result = new boolean[width][height];
+						for (int y = 0; y < height; ++y) {
+							for (int x = 0; x < width; ++x) {
+								result[x][y] = true;
+							}
+						}
+					}
+					for (int y = 0; y < height; ++y) {
+						for (int x = 0; x < width; ++x) {
+							result[x][y] = result[x][y] && maskBits[x][y];
+						}
+					}
+				}
             }
             if (null != result) {
                 returnValue = new Mask(result);
@@ -165,4 +231,19 @@ public class Mask {
         }
         return returnValue;
     }
+	
+	public void debug() {
+		if (null == _bits) {
+			System.out.print("NONE");
+		}
+		else {
+			for (int y = 0; y < _height; ++y) {
+				for (int x = 0; x < _width; ++x) {
+					System.out.print(" " + _bits[x][y]);
+				}
+				System.out.println();
+			}
+		}
+		System.out.println();
+	}
 }

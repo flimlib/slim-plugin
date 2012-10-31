@@ -126,6 +126,10 @@ public class HistogramDataNode {
                 }
             }
         }
+		if (min == max) {
+			// avoid min equals max
+			max = 1.01 * min;
+		}
         return new double[] { min, max };
     }
     

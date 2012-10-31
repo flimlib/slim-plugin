@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.mask;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class MaskGroup implements IMaskGroup {
     }
 
     @Override
-    public void addNode(MaskNode node) {
+    public void addNode(IMaskNode node) {
 		// avoid duplicate entries
 		if (!_nodeList.contains(node)) {
             _nodeList.add(node);
@@ -66,7 +67,7 @@ public class MaskGroup implements IMaskGroup {
     }
 
     @Override
-    public void removeNode(MaskNode node) {
+    public void removeNode(IMaskNode node) {
         _nodeList.remove(node);
         _maskMap.put(node, null);
     }
@@ -74,15 +75,22 @@ public class MaskGroup implements IMaskGroup {
     @Override
     public void updateMask(IMaskNode node) {
         // update map with node's new self mask
-        _maskMap.put(node, node.getSelfMask());
+		Mask selfMask = node.getSelfMask();
+		_maskMap.put(node, selfMask);
 
         // combine masks and notify other nodes
         for (IMaskNode peerNode : _nodeList) {
-            // skip the caller
+            // skip notifying the caller
             if (peerNode != node) {
-                // combine all masks but the recipient's
+                // combine all masks but the recipient's own
                 Mask peerSelfMask = _maskMap.get(peerNode);
-                Mask peerOtherMask = Mask.addOtherMasks(peerSelfMask, _maskMap.values());
+				Collection<Mask> masks = new ArrayList<Mask>(_maskMap.values());
+				if (null != peerSelfMask) {
+                    masks.remove(peerSelfMask);
+				}
+
+				// notify other node
+                Mask peerOtherMask = Mask.addMasks(masks);
                 peerNode.updateOtherMask(peerOtherMask);
             }
         }
@@ -90,6 +98,7 @@ public class MaskGroup implements IMaskGroup {
 	
 	@Override
 	public Mask getMask() {
-		return Mask.addOtherMasks(null, _maskMap.values());
+		// combine all masks
+		return Mask.addMasks(_maskMap.values());
 	}
 }

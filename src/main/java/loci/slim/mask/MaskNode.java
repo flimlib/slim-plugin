@@ -109,7 +109,9 @@ public class MaskNode implements IMaskNode {
     public Mask getTotalMask() {
 		Mask mask = null;
 		if (null == _otherMask) {
-			mask = _selfMask;
+			if (null != _selfMask) {
+				mask = _selfMask.clone();
+			}
 		}
 		else {
 			mask = _otherMask.add(_selfMask);

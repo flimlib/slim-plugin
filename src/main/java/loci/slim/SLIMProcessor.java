@@ -458,10 +458,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 						// ignore clicks when in summed mode
 						if (!_summed) {
 							synchronized (_synchFit) {
-								float zoomFactor = ((GrayScaleImage)_grayScaleImage).getZoomFactor();
-								x *= zoomFactor;
-								y *= zoomFactor;
-
 								_x = x;
 								_y = y;
 

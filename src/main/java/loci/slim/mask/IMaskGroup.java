@@ -46,14 +46,14 @@ public interface IMaskGroup {
      * 
      * @param node 
      */
-    public void addNode(MaskNode node);
+    public void addNode(IMaskNode node);
 
     /**
      * Removes a mask node from group.
      * 
      * @param node 
      */
-    public void removeNode(MaskNode node);
+    public void removeNode(IMaskNode node);
 
     /**
      * Updates the mask, notifies group.

@@ -353,7 +353,7 @@ public class HistogramDataGroup {
         double minView;
         double maxView;
         double[] minMaxData;
-
+		
         minData = maxData = 0.0;
         minDataCurrent = maxDataCurrent = 0.0;
         minLUT = maxLUT = 0.0;

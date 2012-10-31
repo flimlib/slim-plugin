@@ -72,13 +72,6 @@ public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate,
      * @param enable
      */
     public void enable(boolean enable);
-
-    /**
-     * Used to compensate X, Y position when clicking on zoomed image.
-     *
-     * @return
-     */
-    public float getZoomFactor();
     
     /**
      * Gets the minimum, non-zero photon count encountered in the image.
