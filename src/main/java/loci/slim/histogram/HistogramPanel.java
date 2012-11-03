@@ -42,6 +42,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
 import javax.swing.JPanel;
+import javax.swing.ToolTipManager;
 
 /**
  * This is a panel that represents a histogram.  Scale is logarithmic.  Cursors
@@ -53,17 +54,24 @@ import javax.swing.JPanel;
 public class HistogramPanel extends JPanel {
     private static final int ONE_HEIGHT = 20;
     private static final int FUDGE_FACTOR = 4;
+	private static final String QUARTILE_1 = "Q\u2081 ";
+	private static final String QUARTILE_2 = "Q\u2082 (median)";
+	private static final String QUARTILE_3 = "Q\u2083 ";
+	private static final Color DASHED_LINE_COLOR = new Color(10, 10, 10);
     private IHistogramPanelListener _listener;
     private final Object _synchObject = new Object();
     private int _width;
     private int _height;
     private int _inset;
     private int[] _bins;
+	private double[] _binValues;
     private int _maxBinCount;
     private Integer _minCursor;
     private Integer _maxCursor;
     private boolean _draggingMinCursor;
     private boolean _draggingMaxCursor;
+	private double[] _quartiles;
+	private int[] _quartileIndices;
     
     /**
      * Constructor
@@ -83,6 +91,8 @@ public class HistogramPanel extends JPanel {
         _minCursor = _maxCursor = null;
         
         _draggingMinCursor = _draggingMaxCursor = false;
+		
+		ToolTipManager.sharedInstance().registerComponent(this);
         
         setPreferredSize(new Dimension(width + 2 * inset, height));
         addMouseListener(new MouseListener() {
@@ -166,7 +176,7 @@ public class HistogramPanel extends JPanel {
             @Override
             public void mouseDragged(MouseEvent e) {
                 boolean changed = false;
-                int min = 0; // makes the compiler happy
+                int min = 0;
                 int max = 0;
                 synchronized (_synchObject) {
                     if (_draggingMinCursor) {
@@ -209,6 +219,48 @@ public class HistogramPanel extends JPanel {
         });
     }
 
+	@Override
+	public String getToolTipText(MouseEvent e) {
+		String suffix = null;
+		Double value = null;
+		int bin = e.getX() - _inset - 1;
+		if (0 <= bin && bin < _bins.length) {
+			StringBuilder sb = new StringBuilder();
+			if (null != _quartileIndices && null != _quartiles) {
+				if (_quartileIndices[0] == bin) {
+					suffix = QUARTILE_1;
+					value = _quartiles[0];
+				}
+				else if (_quartileIndices[1] == bin) {
+					suffix = QUARTILE_2;
+					value = _quartiles[1];
+				}
+				else if (_quartileIndices[2] == bin) {
+					suffix = QUARTILE_3;
+					value = _quartiles[2];
+				}
+			}
+			if (null == value) {
+				value = _binValues[bin];
+			}
+			sb.append(round(value));
+			sb.append(' ');
+			sb.append(_bins[bin]);
+			if (null != suffix) {
+				sb.append(' ');
+				sb.append(suffix);
+			}
+			return sb.toString();
+		}
+		return null;
+	}
+	
+	private double round(double value) {
+		double result = value * 1000;
+		result = Math.round(result);
+		return result / 1000;
+	}
+
     /**
      * Sets a listener for dragging minimum and maximum.
      *
@@ -235,7 +287,23 @@ public class HistogramPanel extends JPanel {
         }
         repaint();
     }
-
+	
+	public void setStatistics(HistogramStatistics statistics) {
+		synchronized (_synchObject) {
+			_bins = statistics.getBins();
+            _maxBinCount = Integer.MIN_VALUE;
+            for (int i = 0; i < _bins.length; ++i) {
+                if (_bins[i] > _maxBinCount) {
+                    _maxBinCount = _bins[i];
+                }
+            }
+			_binValues = statistics.getBinValues();
+			_quartileIndices = statistics.getQuartileIndices();
+			_quartiles = statistics.getQuartiles();
+		}
+		repaint();
+	}
+	
     /**
      * Changes cursors and redraws.  Note that when they are both null no
      * cursor is diaplayed.  Otherwise if one is null only the other value
@@ -314,7 +382,21 @@ public class HistogramPanel extends JPanel {
                     g.drawLine(_minCursor, 0, _minCursor, _height - 1);
                     g.drawLine(_maxCursor, 0, _maxCursor, _height - 1);
                 }
+				
+				if (null != _quartileIndices) {
+					for (int quartileIndex : _quartileIndices) {
+						drawDashedLine(g, _inset + quartileIndex, 0, _height);
+					}
+				}
             }
         }
-    }    
+    }
+	
+	private void drawDashedLine(Graphics g, int x, int y0, int y1) {
+		g.setXORMode(DASHED_LINE_COLOR);
+		for (int y = y0; y < y1; y += 7) {
+			int yEnding = Math.min(y + 2, y1);
+			g.drawLine(x, y, x, yEnding);
+		}
+	}
 }

@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.histogram;
 
+import java.util.Arrays;
 import loci.slim.fitting.images.IFittedImage;
 import loci.slim.mask.IMaskGroup;
 import loci.slim.mask.IMaskNode;
@@ -48,6 +49,8 @@ import loci.slim.mask.MaskNode;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class HistogramDataNode {
+	private static final int QUARTILE_MARGIN = 5;
+	private static final int IMPOSSIBLE_INDEX = -999;
     private IFittedImage _fittedImage;
     private double[][] _values;
     private IMaskNode _maskNode;
@@ -150,14 +153,15 @@ public class HistogramDataNode {
         for (int i = 0; i < bins; ++i) {
             results[i] = 0;
         }
-        double inverseBinWidth = bins / (nominalMax - nominalMin);
+        //OLD WAY double inverseBinWidth = bins / (nominalMax - nominalMin);
         for (int i = 0; i < _values.length; ++i) {
             for (int j = 0; j < _values[0].length; ++j) {
                 if (null == _otherMask || _otherMask.test(i, j)) {
                     double value = _values[i][j];
                     if (value >= nominalMin && value <= nominalMax) {
                         // assign each value to a bin
-                        int bin = (int)((value - nominalMin) * inverseBinWidth);
+                        //OLD WAY int bin = (int)((value - nominalMin) * inverseBinWidth);
+						int bin = valueToBin(value, bins, nominalMin, nominalMax);
                         if (bin >= bins) {
                             --bin;
                         }
@@ -168,6 +172,71 @@ public class HistogramDataNode {
         }
         return results;
     }
+
+	/**
+	 * Finds the quartiles of the histogram distribution.
+	 * 
+	 * @param quartiles
+	 * @param quartileIndices
+	 * @param bins
+	 * @param nominalMin
+	 * @param nominalMax 
+	 */
+	public void findQuartiles(double[] quartiles, int[] quartileIndices,
+			int bins, double nominalMin, double nominalMax) {
+		int width = _values.length;
+		int height = _values[0].length;
+		double[] tmp = new double[width * height];
+		int tmpIndex = 0;
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
+				if (null == _otherMask || _otherMask.test(x, y)) {
+					double value = _values[x][y];
+					if (!Double.isNaN(value)) {
+					    tmp[tmpIndex++] = value;
+					}
+				}
+			}
+		}
+		
+		Arrays.sort(tmp, 0, tmpIndex);
+		quartiles[0] = tmp[tmpIndex / 4];
+		quartiles[1] = tmp[tmpIndex / 2];
+		quartiles[2] = tmp[3 * tmpIndex / 4];
+		
+		int bin0 = valueToBin(quartiles[0], bins, nominalMin, nominalMax);
+		if (0 < bin0 && bin0 < bins) {
+			quartileIndices[0] = bin0;
+		}
+		else {
+			quartileIndices[0] = IMPOSSIBLE_INDEX;
+		}
+		int bin1 = valueToBin(quartiles[1], bins, nominalMin, nominalMax);
+		if (0 < bin1 && bin1 < bins) {
+			quartileIndices[1] = bin1;
+		}
+		else {
+			quartileIndices[1] = IMPOSSIBLE_INDEX;
+		}
+		int bin2 = valueToBin(quartiles[2], bins, nominalMin, nominalMax);
+		if (0 < bin2 && bin2 < bins) {
+			quartileIndices[2] = bin2;
+		}
+		else {
+			quartileIndices[2] = IMPOSSIBLE_INDEX;
+		}
+		
+		// if quartile indices are too close together don't show quartiles
+		if (quartileIndices[1] - quartileIndices[0] < QUARTILE_MARGIN ||
+				quartileIndices[2] - quartileIndices[1] < QUARTILE_MARGIN) {
+			quartileIndices[0] = quartileIndices[1] = quartileIndices[2] = IMPOSSIBLE_INDEX;
+		}
+	}
+	
+	private int valueToBin(double value, int bins, double nominalMin, double nominalMax) {
+		int bin = (int)((value - nominalMin) * bins / (nominalMax - nominalMin));
+		return bin;
+	}
 
     /**
      * Builds a mask based on which values are within the LUT range and sends it

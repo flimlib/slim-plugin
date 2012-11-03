@@ -70,6 +70,7 @@ public class HistogramTool {
     private HistogramPanel _histogramPanel;
     private ColorBarPanel _colorBarPanel;
     private HistogramUIPanel _uiPanel;
+	private boolean _excludePixels;
 
     /**
      * Class is a singleton for convenience.
@@ -180,25 +181,29 @@ public class HistogramTool {
             minMaxLUT  = _histogramDataGroup.getMinMaxLUT();
         }
 		
+//		System.out.println("----");
+//		System.out.println("setHistogramData");
+//		System.out.println("view " + minMaxView[0] + " "  + minMaxView[1] + " lut " + minMaxLUT[0] + " " + minMaxLUT[1]);
+//		System.out.println("----");
+		
 		if (null != _frame) {
 			if (_frame.isVisible()) {
 				_frame.setVisible(true);
 			}
 			_frame.setTitle(histogramData.getTitle());
 
-			_histogramPanel.setBinValues(histogramData.binValues(WIDTH));
-
+			_histogramPanel.setStatistics(histogramData.getStatistics(WIDTH));
+			
 			boolean autoRange = histogramData.getAutoRange();
-			//System.out.println("=================");
-			//System.out.println("autorange is " + autoRange);
-			_uiPanel.setAutoRange(autoRange);
 			if (autoRange) {
+				// turn cursors off
 				_histogramPanel.setCursors(null, null);
 			}
 			else {
-				_histogramPanel.setCursors(cursorPixelFromValue
-						(false, minMaxLUT[0]), cursorPixelFromValue(false, minMaxLUT[1])); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
-			}        
+				// set cursors to edges
+				_histogramPanel.setCursors(INSET, INSET + WIDTH - 1);
+			}
+			_uiPanel.setAutoRange(autoRange);
 			_uiPanel.setExcludePixels(histogramData.getExcludePixels());
 			_uiPanel.setCombineChannels(histogramData.getCombineChannels());
 			_uiPanel.setDisplayChannels(histogramData.getDisplayChannels());
@@ -252,8 +257,7 @@ public class HistogramTool {
                 double minLUT, double maxLUT) {
         synchronized (_synchObject) {
 			_histogramDataGroup.setMinMaxView(minView, maxView); //TODO ARG added this 9/27 to change hDG internal minMaxViews
-            int[] bins = _histogramDataGroup.binValues(WIDTH);
-            _histogramPanel.setBinValues(bins);
+			_histogramPanel.setStatistics(_histogramDataGroup.getStatistics(WIDTH));
             _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
             //TODO changed is currently called from two places:
             // i) the HistogramData listener will call it periodically during the
@@ -284,27 +288,17 @@ public class HistogramTool {
         }
         return pixel;
     }
-	
-	private void excludePixels(boolean exclude) {
-		// pass along the changes
-		_histogramDataGroup.excludePixels(exclude);
-		
-		double minView;
-		double maxView;
+
+	//TODO TIDY THIS UP  do we need "reset cursor positions"
+	private void zoomToLUT() {
         double minMaxLUT[]  = _histogramDataGroup.getMinMaxLUT();
 		double minLUT = minMaxLUT[0];
 		double maxLUT = minMaxLUT[1];
 		
-		if (exclude) {
-			// zoom to fit current min/max LUT settings
-			minView = minLUT;
-			maxView = maxLUT;
-		}
-		else {
-			double minMaxData[] = _histogramDataGroup.getMinMaxData();
-			minView = minMaxData[0];
-			maxView = minMaxData[1];
-		}
+		// zoom to fit current min/max LUT settings
+		double minView = minLUT;
+		double maxView = maxLUT;
+
 		
 		changed(minView, maxView, minLUT, maxLUT);
 		
@@ -361,10 +355,10 @@ public class HistogramTool {
             // save and redraw image
             synchronized (_synchObject) {
                 _histogramDataGroup.setMinMaxLUT(minLUT, maxLUT);
-                if (_uiPanel.getExcludePixels()) {
-					// keep on hiding pixels
-					excludePixels(true);
-                }
+				if (_excludePixels) {
+					_histogramDataGroup.excludePixels(true);
+				}
+				zoomToLUT();
             }
         }
 
@@ -468,9 +462,8 @@ public class HistogramTool {
                         }
                     }
                     
-                    // get updated histogram data and show it                 
-                    int[] bins = _histogramDataGroup.binValues(WIDTH);
-                    _histogramPanel.setBinValues(bins);
+                    // get updated histogram data and show it
+					_histogramPanel.setStatistics(_histogramDataGroup.getStatistics(WIDTH));
                     _colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
                     
                     // update numbers in UI panel
@@ -480,11 +473,14 @@ public class HistogramTool {
         }
     }
 
+	/**
+	 * Inner class listens to the UI panel
+	 */
     private class UIPanelListener implements IUIPanelListener {
         @Override
         public void setAutoRange(boolean autoRange) {
             synchronized (_synchObject) {
-                 _histogramDataGroup.setAutoRange(autoRange);
+                 _histogramDataGroup.setAutoRange(autoRange); //TODO shows up twice now!!!!TRY CALLING AFTER
                  
                  if (autoRange) {
                      //TODO ARG:
@@ -492,22 +488,22 @@ public class HistogramTool {
                     // [same as (0, 254)], the exception happens if you are showing
                     // all channels but only autoranging your channel.
                     _histogramPanel.setCursors(null, null);
-                    
-                  ///  _histogramData.recalcHistogram(); //TODO histogramData should just keep minData/maxData same as the others
                  }
                  else {
-                    //TODO if you are autoranging, not combining channels, but showing
-                    // all channels, these cursors would need to be calculated
-                    _histogramPanel.setCursors(INSET, INSET + WIDTH - 1); //TODO I was expecting INSET-1 here??
-
+                    _histogramPanel.setCursors(INSET, INSET + WIDTH - 1);
                  }
+
+				 // this will propagate min/max changes
+				// _histogramDataGroup.setAutoRange(autoRange);
             }
         }
         
         @Override
         public void setExcludePixels(boolean excludePixels) {
+			_excludePixels = excludePixels;
             synchronized (_synchObject) {
-				excludePixels(excludePixels);
+		        // pass along the changes
+		        _histogramDataGroup.excludePixels(excludePixels);
             }
         }
         
@@ -516,8 +512,6 @@ public class HistogramTool {
             synchronized (_synchObject) {
                 _histogramDataGroup.setCombineChannels(combineChannels);
             }
-            //TODO
-            //System.out.println("HistogramTool.UIPanelListener.setCombineChannels(" + combineChannels + ")");
         }
         
         @Override
@@ -525,12 +519,9 @@ public class HistogramTool {
             synchronized (_synchObject) {
                 _histogramDataGroup.setDisplayChannels(displayChannels);
                 
-                // get updated histogram data and show it                 
-                int[] bins = _histogramDataGroup.binValues(WIDTH);
-                _histogramPanel.setBinValues(bins);
+                // get updated histogram data and show it
+				_histogramPanel.setStatistics(_histogramDataGroup.getStatistics(WIDTH));
             }
-            //TODO
-            //System.out.println("HistogramTool.UIPanelListener.setDisplayChannels(" + displayChannels + ")");
         }
 
         @Override
@@ -544,31 +535,23 @@ public class HistogramTool {
             if (minLUT < maxLUT) {
                 changed = true;
                 
-                synchronized (_synchObject) {
-                    // if necessary, expand the view to fit the LUT
-                    double[] minMaxView = _histogramDataGroup.getMinMaxView();
-                    minView = Math.min(minLUT, minMaxView[0]);
-                    maxView = Math.max(maxLUT, minMaxView[1]);
-                    _histogramDataGroup.setMinMaxView(minView, maxView);
-                    _histogramDataGroup.setMinMaxLUT(minLUT, maxLUT);
-
-					// cursors should remain off while autoranging
-					if (!_histogramDataGroup.getAutoRange()) {
-						//TODO ARG this is quite a bit off:
-						// note that if you stretch the bounds on one side you need
-						// to adjust the position of the other side cursor.
-						_histogramPanel.setCursors(cursorPixelFromValue(false, minLUT), cursorPixelFromValue(false, maxLUT)); //TODO ARG true, maxLUT)); in this case adding 1 to max is too much!
-
-					}
+                synchronized (_synchObject) { //TODO redo half-assed synchronization in 1.2
+					// adjust view range to LUT range
+					minView = minLUT;
+					maxView = maxLUT;
+					_histogramDataGroup.setMinMaxView(minView, maxView);
+					_histogramDataGroup.setMinMaxLUT(minLUT, maxLUT);
                 }
             }
 
             if (changed) {
-                //System.out.println("CHANGED:" + minView + " " + maxView);
                 // update histogram and color bar
                 changed(minView, maxView, minLUT, maxLUT);
+				
+				if (_excludePixels) {
+				    _histogramDataGroup.excludePixels(true);
+				}
             }
-            //System.out.println("new min LUT is " + minLUT + "new max LUT is " + maxLUT);   
         }
     }
 }

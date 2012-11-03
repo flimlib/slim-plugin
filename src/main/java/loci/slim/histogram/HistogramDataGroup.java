@@ -62,6 +62,7 @@ public class HistogramDataGroup {
     private double _minDataCurrent;
     private double _maxDataCurrent;
     private IHistogramDataListener _listener;
+	private HistogramStatistics _statistics;
 
     /**
      * Constructor, takes an array of HistogramChannels.
@@ -133,7 +134,7 @@ public class HistogramDataGroup {
     /**
      * Sets whether or not histogram should automatically scale to values.
      * 
-     * @param auto whether automatically scales
+     * @param autoRange whether automatically scales
      */
     public void setAutoRange(boolean autoRange) {
         update(autoRange, _combineChannels);
@@ -203,14 +204,14 @@ public class HistogramDataGroup {
     }
 
     /*
-     * Helper function to update autoranging or channel combination.
+     * Helper function to update autoranging or channel combination setting.
      */
     private void update(boolean autoRange, boolean combineChannels) {
         if (_autoRange != autoRange || _combineChannels != combineChannels) {
-            double minView;
-            double maxView;
-            double minLUT;
-            double maxLUT;
+            double minView = _minView;
+            double maxView = _maxView;
+            double minLUT = _minLUT;
+            double maxLUT = _maxLUT;
             
             _autoRange       = autoRange;
             _combineChannels = combineChannels;
@@ -238,19 +239,33 @@ public class HistogramDataGroup {
                         maxView = maxLUT;
                     }
                 }
-                
-                // did anything really change?
-                if (_minView != minView || _maxView != maxView
-                        || _minLUT != minLUT || _maxLUT != maxLUT) {
-                    _minView = minView;
-                    _maxView = maxView;
-                    _minLUT = minLUT;
-                    _maxLUT = maxLUT;
+            }
+			else {
+				// set min/max view/LUT to quartile-based fences
+				if (null != _statistics) {
+					double[] fences = _statistics.getFences();
+					minView = minLUT = fences[0];
+					maxView = maxLUT = fences[1];
+					if (minView < _minData) {
+						minView = minLUT = _minData;
+					}
+					if (maxView > _maxData) {
+						maxView = maxLUT = _maxData;
+					}
+				}
+			}
+			
+            // did anything really change?
+            if (_minView != minView || _maxView != maxView
+                    || _minLUT != minLUT || _maxLUT != maxLUT) {
+                _minView = minView;
+                _maxView = maxView;
+                _minLUT = minLUT;
+                _maxLUT = maxLUT;
 
-                    // update listener, if any
-                    if (null != _listener) {
-                        _listener.minMaxChanged(this, minView, maxView, minLUT, maxLUT);
-                    }
+                // update listener, if any
+                if (null != _listener) {
+                    _listener.minMaxChanged(this, minView, maxView, minLUT, maxLUT);
                 }
             }
         }
@@ -416,28 +431,51 @@ public class HistogramDataGroup {
     public void redisplay() {
         _image.redisplay();
     }
-    
-    public int[] binValues(int bins) {
-        // start new histogram bins           
-        int[] bin = new int[bins];
-        for (int i = 0; i < bins; ++i) {
-            bin[i] = 0;
-        }
-        
+	
+	public HistogramStatistics getStatistics(int binCount) {
+		_statistics = new HistogramStatistics();
+		int[] bins = null;
+		double[] binValues = null;
+		double[] quartiles = null;
+		int[] quartileIndices = null;
+
         if (_displayChannels) {
+			// start new histogram bins           
+			bins = new int[binCount];
+			for (int i = 0; i < binCount; ++i) {
+				bins[i] = 0;
+			}
+			
             // add all channels
             for (int i = 0; i < _channel.length; ++i) {
-                int[] channelBin = _channel[i].binValues(bins, _minView, _maxView);
-                for (int j = 0; j < bins; ++j) {
-                    bin[j] += channelBin[j];
+                int[] channelBins = _channel[i].binValues(binCount, _minView, _maxView);
+                for (int j = 0; j < binCount; ++j) {
+                    bins[j] += channelBins[j];
                 }
             }
         }
         else {
             // just show current channel
-            return _channel[_channelIndex].binValues(bins, _minView, _maxView);
-        }
-            
-        return bin;
-    }
+            bins = _channel[_channelIndex].binValues(binCount, _minView, _maxView);
+			
+			// figure values for bins
+			binValues = new double[binCount];
+			for (int i = 0; i < binCount; ++i) {
+				binValues[i] = _minView + i * (_maxView - _minView) / binCount;
+			}
+			
+			// get median and quartiles
+			quartiles       = new double[3];
+			quartileIndices = new int[3];
+			_channel[_channelIndex].findQuartiles(quartiles, quartileIndices,
+					binCount, _minView, _maxView);
+        }	
+
+		// report results
+		_statistics.setBins(bins);
+		_statistics.setBinValues(binValues);
+		_statistics.setQuartileIndices(quartileIndices);
+		_statistics.setQuartiles(quartiles);
+		return _statistics;
+	}
 }

@@ -138,11 +138,15 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         _stackWindow.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
+				// what channel is active?
                 int channelIndex = _stackWindow.getSlice() - 1;
                 _histogramData.setChannelIndex(channelIndex);
+				
+				// show our data with histogram tool
 				HistogramTool histogramTool = HistogramTool.getInstance();
                 histogramTool.setHistogramData(_histogramData);
-				
+
+				// make sure grayscale image is hooked up also
 				_grayScaleImage.listenToMaskGroup(_maskGroup[channelIndex]);
             }
             
@@ -152,7 +156,10 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
         _stackWindow.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                System.out.println("Closing fitted image " + _title);
+				// when closing, delete all masks
+				for (int i = 0; i < _dataChannels.length; ++i) {
+					_dataChannels[i].rescindMask();
+				}
             }
         });
         
