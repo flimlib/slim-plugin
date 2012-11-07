@@ -170,9 +170,9 @@ public class FittedImageFitter {
      * Recalculates the image histogram and resets the palette.  Called 
      * periodically during the fit.
      */
-    public void recalcHistogram() {    
+    public void updateLUTRange() {    
         for (IFittedImage fittedImage : _fittedImages) {
-            fittedImage.recalcHistogram();
+            fittedImage.updateRanges();
         }
     }    
 

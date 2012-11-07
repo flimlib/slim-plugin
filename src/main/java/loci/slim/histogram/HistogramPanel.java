@@ -52,7 +52,8 @@ import javax.swing.ToolTipManager;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class HistogramPanel extends JPanel {
-    private static final int ONE_HEIGHT = 20;
+	private static final double LOG_ONE_FACTOR = Math.log(3) / Math.log(2);
+	private static final int SINGLE_PIXEL = 1;
     private static final int FUDGE_FACTOR = 4;
 	private static final String QUARTILE_1 = "Q\u2081 ";
 	private static final String QUARTILE_2 = "Q\u2082 (median)";
@@ -66,6 +67,7 @@ public class HistogramPanel extends JPanel {
     private int[] _bins;
 	private double[] _binValues;
     private int _maxBinCount;
+	private boolean _log;
     private Integer _minCursor;
     private Integer _maxCursor;
     private boolean _draggingMinCursor;
@@ -87,6 +89,8 @@ public class HistogramPanel extends JPanel {
         _inset = inset;
         _height = height;
         _bins = null;
+		
+		_log = true;
         
         _minCursor = _maxCursor = null;
         
@@ -260,6 +264,15 @@ public class HistogramPanel extends JPanel {
 		result = Math.round(result);
 		return result / 1000;
 	}
+	
+	public boolean getLog() {
+		return _log;
+	}
+	
+	public void setLogarithmicDisplay(boolean log) {
+		_log = log;
+		repaint();
+	}
 
     /**
      * Sets a listener for dragging minimum and maximum.
@@ -306,7 +319,7 @@ public class HistogramPanel extends JPanel {
 	
     /**
      * Changes cursors and redraws.  Note that when they are both null no
-     * cursor is diaplayed.  Otherwise if one is null only the other value
+     * cursor is displayed.  Otherwise if one is null only the other value
      * changes.
      * 
      * @param minCursor null or minimum cursor position in pixels
@@ -356,18 +369,32 @@ public class HistogramPanel extends JPanel {
         super.paintComponent(g);
         if (null != _bins) {
             synchronized (_synchObject) {
+				
+				// calculate a nominal height for log of one; actually log one is zero
+				int logOneHeight = 0;
+				if (_log) {
+					// this is a hack just to get some proportionality
+					double logTwoHeight = (_height * Math.log(2)) / (Math.log(_maxBinCount) + 1);
+					logOneHeight = (int)(LOG_ONE_FACTOR * logTwoHeight);
+				}
+				
                 int height;
                 for (int i = 0; i < _width; ++i) {
                     if (0 == _bins[i]) {
                         height = 0;
                     }
-                    // note that the log of 1 is zero; have to distinguish from 0
-                    else if (1 == _bins[i]) {
-                        height = ONE_HEIGHT;
-                    }
-                    else {
-                        height = (int) ((_height - ONE_HEIGHT) * Math.log(_bins[i]) / Math.log(_maxBinCount)) + ONE_HEIGHT;
-                    }
+					else if (_log) {
+						if (1 == _bins[i]) {
+							height = logOneHeight;
+						}
+						else {
+							height = (int)((_height - logOneHeight) * Math.log(_bins[i]) / Math.log(_maxBinCount)) + logOneHeight;
+						}
+					}
+					else {
+						// make sure values of one show at least a single pixel
+						height = (int)((_height - SINGLE_PIXEL) * _bins[i] / _maxBinCount) + SINGLE_PIXEL;
+					}
                     if (height > _height) {
                         height = _height;
                     }

@@ -90,7 +90,7 @@ public class HistogramDataNode {
 				_otherMask = otherMask;
 				_totalMask = totalMask;
 				
-                _fittedImage.redraw(_totalMask);
+                _fittedImage.updateMask(_totalMask);
             }
         });
     }
@@ -115,22 +115,24 @@ public class HistogramDataNode {
     public double[] findMinMax() {
         double min = Double.MAX_VALUE;
         double max = Double.MIN_VALUE;
-        for (int i = 0; i < _values.length; ++i) {
-            for (int j = 0; j < _values[0].length; ++j) {
-                if (null == _totalMask || _totalMask.test(i, j)) {
-                    if (!Double.isNaN(_values[i][j])) {
-                        if (_values[i][j] < min) {
-                            min = _values[i][j];
+		
+        for (int y = 0; y < _values[0].length; ++y) {
+            for (int x = 0; x < _values.length; ++x) {
+                if (null == _totalMask || _totalMask.test(x, y)) {
+					double value = _values[x][y];
+                    if (!Double.isNaN(value)) {
+                        if (value < min) {
+                            min = value;
                         }
-                        if (_values[i][j] > max) {
-                            max = _values[i][j];
+                        if (value > max) {
+                            max = value;
                         }
                     } 
                 }
             }
         }
 		if (min == max) {
-			// avoid min equals max
+			// avoid 'min equals max'
 			max = 1.01 * min;
 		}
         return new double[] { min, max };
@@ -153,21 +155,18 @@ public class HistogramDataNode {
         for (int i = 0; i < bins; ++i) {
             results[i] = 0;
         }
-        //OLD WAY double inverseBinWidth = bins / (nominalMax - nominalMin);
-        for (int i = 0; i < _values.length; ++i) {
-            for (int j = 0; j < _values[0].length; ++j) {
-                if (null == _otherMask || _otherMask.test(i, j)) {
-                    double value = _values[i][j];
-                    if (value >= nominalMin && value <= nominalMax) {
-                        // assign each value to a bin
-                        //OLD WAY int bin = (int)((value - nominalMin) * inverseBinWidth);
+        for (int y = 0; y < _values[0].length; ++y) {
+            for (int x = 0; x < _values.length; ++x) {
+                if (null == _otherMask || _otherMask.test(x, y)) {
+                    double value = _values[x][y];
+					if (!Double.isNaN(value)) {
+						// assign each value to a bin
 						int bin = valueToBin(value, bins, nominalMin, nominalMax);
-                        if (bin >= bins) {
-                            --bin;
-                        }
-                        ++results[bin];
-                    } 
-                }
+						if (0 <= bin && bin < bins) {
+							++results[bin];
+						}
+					} 
+				}
             }
         }
         return results;
@@ -179,11 +178,12 @@ public class HistogramDataNode {
 	 * @param quartiles
 	 * @param quartileIndices
 	 * @param bins
-	 * @param nominalMin
-	 * @param nominalMax 
+	 * @param min
+	 * @param max 
 	 */
 	public void findQuartiles(double[] quartiles, int[] quartileIndices,
-			int bins, double nominalMin, double nominalMax) {
+			int bins, double min, double max) {
+		// create an array copy of the values
 		int width = _values.length;
 		int height = _values[0].length;
 		double[] tmp = new double[width * height];
@@ -198,33 +198,17 @@ public class HistogramDataNode {
 				}
 			}
 		}
-		
+
+		// sort the values array and read off quartiles
 		Arrays.sort(tmp, 0, tmpIndex);
 		quartiles[0] = tmp[tmpIndex / 4];
 		quartiles[1] = tmp[tmpIndex / 2];
 		quartiles[2] = tmp[3 * tmpIndex / 4];
-		
-		int bin0 = valueToBin(quartiles[0], bins, nominalMin, nominalMax);
-		if (0 < bin0 && bin0 < bins) {
-			quartileIndices[0] = bin0;
-		}
-		else {
-			quartileIndices[0] = IMPOSSIBLE_INDEX;
-		}
-		int bin1 = valueToBin(quartiles[1], bins, nominalMin, nominalMax);
-		if (0 < bin1 && bin1 < bins) {
-			quartileIndices[1] = bin1;
-		}
-		else {
-			quartileIndices[1] = IMPOSSIBLE_INDEX;
-		}
-		int bin2 = valueToBin(quartiles[2], bins, nominalMin, nominalMax);
-		if (0 < bin2 && bin2 < bins) {
-			quartileIndices[2] = bin2;
-		}
-		else {
-			quartileIndices[2] = IMPOSSIBLE_INDEX;
-		}
+
+		// get bin indices for quartile values
+		quartileIndices[0] = getQuartileIndex(quartiles[0], bins, min, max);
+		quartileIndices[1] = getQuartileIndex(quartiles[1], bins, min, max);
+		quartileIndices[2] = getQuartileIndex(quartiles[2], bins, min, max);
 		
 		// if quartile indices are too close together don't show quartiles
 		if (quartileIndices[1] - quartileIndices[0] < QUARTILE_MARGIN ||
@@ -233,8 +217,34 @@ public class HistogramDataNode {
 		}
 	}
 	
+	private int getQuartileIndex(double value, int bins, double min, double max) {
+		int index = valueToBin(value, bins, min, max);
+		if (index < 0 || index >= bins) {
+			index = IMPOSSIBLE_INDEX;
+		}
+		return index;
+	}
+	
 	private int valueToBin(double value, int bins, double nominalMin, double nominalMax) {
-		int bin = (int)((value - nominalMin) * bins / (nominalMax - nominalMin));
+		int bin;
+		if (nominalMin != nominalMax) {
+			if (value != nominalMax) {
+				// convert in-range values to 0.0..1.0
+				double temp = (value - nominalMin) / (nominalMax - nominalMin);
+				
+				// note multiply by bins, not (bins - 1)
+				// note floor is needed so that small negative values go to -1
+				bin = (int) Math.floor(temp * bins);
+			}
+			else {
+				// value == max, special case, otherwise 1.0 * bins results in bins
+				bin = bins - 1;
+			}
+		}
+		else {
+			// max == min, degenerate case
+			bin = bins / 2;
+		}
 		return bin;
 	}
 

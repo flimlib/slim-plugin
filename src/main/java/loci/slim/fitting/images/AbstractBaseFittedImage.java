@@ -227,8 +227,8 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
      * Recalculates the image histogram and resets the palette.  Called
      * periodically during the fit.  Redisplays the image.
      */
-    public void recalcHistogram() {
-        double[] minMaxLUT = _histogramData.recalcHistogram();
+    public void updateRanges() {
+        double[] minMaxLUT = _histogramData.updateRanges();
 
         if (null != minMaxLUT) {
             redisplay(minMaxLUT);
@@ -245,19 +245,20 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
     }
 
     /**
-     * Redraws the entire image after a masking change.
+     * Redraws the entire image after a masking change.  Mask shows all pixels
+	 * masked by all nodes combined, including this node.
      * 
-     * @param mask 
+     * @param mask
      */
-    public void redraw(Mask mask) {
-        if (mask != _mask) {
+    public void updateMask(Mask mask) {
+
+		if (mask != _mask) {
             _mask = mask;
             
-            if (_histogramData.getAutoRange()) {
-				// autorange to newly masked data
-				recalcHistogram();
-            }
+			// recalculate min/max data/view/LUT
+			updateRanges();
 
+			// redraw the image using the mask
             for (int y = 0; y < _values[0].length; ++y) {
                 for (int x = 0; x < _values.length; ++x) {
                     double value = Double.NaN;
@@ -268,26 +269,17 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
                 }
             }
 
-            //TODO ARG kludge forces redraw
-            //System.out.println("imagePlus.setProcessor etc.");
+            // This forces redisplay:
             _imagePlus.setProcessor(_fittedImage.getImageProcessor().duplicate()); 
         }
     }
-
-    //TODO MASK
-    /**
-     * Redisplays the image after the mask changes.
-     * 
-     * @param mask 
-     */
-    //public void redisplay(Mask mask) {
-    //    for (IColorizedFittedImage fittedImage : _fittedImages) {
-    //        fittedImage.setMask(mask);
-    //    }
-    //    if (null != _fittedImage) {
-    //        _fittedImage.
-    //    }
-    //}
+	
+    private String debugMask(Mask mask) {
+		if (null == mask) {
+			return "NULL";
+		}
+		return "" + mask.getCount();
+	}
 
     /*
      * Redisplay the image with new LUT range.

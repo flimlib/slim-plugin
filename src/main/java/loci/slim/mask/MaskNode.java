@@ -86,9 +86,16 @@ public class MaskNode implements IMaskNode {
     @Override
     public void updateOtherMask(Mask otherMask) {
         _otherMask = otherMask;
-		
-        _listener.updateMasks(_otherMask, getTotalMask());
+
+		_listener.updateMasks(_otherMask, getTotalMask());
     }
+	
+	String debugMask(Mask mask) {
+		if (null == mask) {
+			return "NULL";
+		}
+		return "" + mask.getCount();
+	}
 
     /**
      * Gets the current mask created by all other nodes.

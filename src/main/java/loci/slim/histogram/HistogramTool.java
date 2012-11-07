@@ -524,6 +524,11 @@ public class HistogramTool {
             }
         }
 
+		@Override
+		public void setLogarithmicDisplay(boolean log) {
+			_histogramPanel.setLogarithmicDisplay(log);	
+		}
+
         @Override
         public void setMinMaxLUT(double minLUT, double maxLUT) {
             boolean changed = false;

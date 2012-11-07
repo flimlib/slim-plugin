@@ -35,7 +35,6 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.histogram;
 
 import loci.slim.fitting.images.IFittedImage;
-import loci.slim.mask.IMaskGroup;
 
 /**
  * Keeps an array of HistogramDataNodes for a given image.  Builds the 
@@ -355,24 +354,19 @@ public class HistogramDataGroup {
      * 
      * @return min and max of the LUT
      */
-    //TODO these recalcHistogram events need to be synchronized so that they
+    //TODO these recalculation events need to be synchronized so that they
     // don't step on other ways to change min/maxLUT/View
     // Perhaps this class should have a synch object that also has a getter.
-    public double[] recalcHistogram() {
+    public double[] updateRanges() {
         double minData;
         double maxData;
         double minDataCurrent;
         double maxDataCurrent;
-        double minLUT;
-        double maxLUT;
-        double minView;
-        double maxView;
         double[] minMaxData;
 		
         minData = maxData = 0.0;
         minDataCurrent = maxDataCurrent = 0.0;
-        minLUT = maxLUT = 0.0;
-        minView = maxView = 0.0;
+		
         if (1 < _channel.length && (_displayChannels || _combineChannels)) {
             minData = Double.MAX_VALUE;
             maxData = Double.MIN_VALUE;
@@ -410,17 +404,16 @@ public class HistogramDataGroup {
                 _minLUT = minDataCurrent;
                 _maxLUT = maxDataCurrent;
             }
-        }
-
-        _minView = minData;
-        _maxView = maxData;
-        
+			
+			_minView = minData;
+			_maxView = maxData;
+        }       
         _minData = minData;
         _maxData = maxData;
         
         _minDataCurrent = minDataCurrent;
         _maxDataCurrent = maxDataCurrent;
-
+		
         if (null != _listener) {
             _listener.minMaxChanged(this, _minView, _maxView, _minLUT, _maxLUT);
         }
@@ -446,7 +439,7 @@ public class HistogramDataGroup {
 				bins[i] = 0;
 			}
 			
-            // add all channels
+            // add all channels to histogram
             for (int i = 0; i < _channel.length; ++i) {
                 int[] channelBins = _channel[i].binValues(binCount, _minView, _maxView);
                 for (int j = 0; j < binCount; ++j) {
@@ -455,7 +448,7 @@ public class HistogramDataGroup {
             }
         }
         else {
-            // just show current channel
+            // just show current channel in histogram
             bins = _channel[_channelIndex].binValues(binCount, _minView, _maxView);
 			
 			// figure values for bins

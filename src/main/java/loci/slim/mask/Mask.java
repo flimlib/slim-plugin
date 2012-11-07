@@ -232,6 +232,18 @@ public class Mask implements Cloneable {
         return returnValue;
     }
 	
+	public int getCount() {
+		int count = 0;
+		for (int y = 0; y < _height; ++y) {
+			for (int x = 0; x < _width; ++x) {
+				if (_bits[x][y]) {
+					++count;
+				}
+			}
+		}
+		return count;
+	}
+	
 	public void debug() {
 		if (null == _bits) {
 			System.out.print("NONE");

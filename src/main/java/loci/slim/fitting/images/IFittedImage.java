@@ -104,7 +104,7 @@ public interface IFittedImage {
      * Recalculates the image histogram and resets the palette.  Called 
      * periodically during the fit.
      */
-    public void recalcHistogram();
+    public void updateRanges();
 
     /**
      * Redisplays the image after a LUT change.
@@ -116,7 +116,7 @@ public interface IFittedImage {
      * 
      * @param mask
      */
-    public void redraw(Mask mask);
+    public void updateMask(Mask mask);
 
     /**
      * Given the array of fitted parameters, get the value for this image.

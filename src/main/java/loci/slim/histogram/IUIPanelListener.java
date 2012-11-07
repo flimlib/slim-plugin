@@ -65,6 +65,13 @@ public interface IUIPanelListener {
      * @param displayChannels 
      */
     public void setDisplayChannels(boolean displayChannels);
+	
+	/**
+	 * User has clicked the logarithmic display checkbox.
+	 * 
+	 * @param log
+	 */
+	public void setLogarithmicDisplay(boolean log);
 
     /**
      * User has entered new min/max LUT value.

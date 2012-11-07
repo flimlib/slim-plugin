@@ -1105,7 +1105,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             int[] location = p.getOutputLocation();
 			
 			// check for errors
-			if (Double.NaN == params[0]) {
+			if (Double.isNaN(params[0])) {
 				if (null != errorManager) {
 					int x = location[0];
 					int y = location[1];
@@ -1128,7 +1128,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
 
         if (null != imageColorizer) {
-            imageColorizer.recalcHistogram();
+			// update any fitted images
+            imageColorizer.updateLUTRange();
         }
     }
 	

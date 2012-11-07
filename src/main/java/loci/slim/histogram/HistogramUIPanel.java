@@ -60,6 +60,7 @@ public class HistogramUIPanel extends JPanel {
     private static final String EXCLUDE_PIXELS = "Hide pixels outside range";
     private static final String DISPLAY_CHANNELS = "Display all channels";
     private static final String COMBINE_CHANNELS = "Combine all channels";
+	private static final String LOG_DISPLAY = "Logarithmic";
     
     private static final int DIGITS = 5;
     IUIPanelListener _listener;
@@ -67,12 +68,14 @@ public class HistogramUIPanel extends JPanel {
     JCheckBox _excludePixelsCheckBox;
     JCheckBox _combineChannelsCheckBox;
     JCheckBox _displayChannelsCheckBox;
+	JCheckBox _logarithmicDisplayCheckBox;
     JTextField _minTextField;
     JTextField _maxTextField;
     boolean _autoRange;
     boolean _excludePixels;
     boolean _combineChannels;
     boolean _displayChannels;
+	boolean _logarithmicDisplay;
     double _minLUT;
     double _maxLUT;
 
@@ -85,10 +88,11 @@ public class HistogramUIPanel extends JPanel {
         super();
 
         // initial state
-        _autoRange        = true;
-        _excludePixels    = false;
-        _combineChannels  = false;
-        _displayChannels  = false;
+        _autoRange          = true;
+        _excludePixels      = false;
+        _combineChannels    = false;
+        _displayChannels    = false;
+		_logarithmicDisplay = true;
         _minLUT = _maxLUT = 0.0;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -215,6 +219,21 @@ public class HistogramUIPanel extends JPanel {
         if (true || hasChannels) {
             add(_displayChannelsCheckBox);
         }
+		
+		_logarithmicDisplayCheckBox =
+		    new JCheckBox(LOG_DISPLAY, _logarithmicDisplay);
+		_logarithmicDisplayCheckBox.addItemListener(
+		    new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					_logarithmicDisplay = _logarithmicDisplayCheckBox.isSelected();
+					if (null != _listener) {
+						_listener.setLogarithmicDisplay(_logarithmicDisplay);
+					}
+				}
+			}
+		);
+		add(_logarithmicDisplayCheckBox);
 
         enableUI(_autoRange);
     }
