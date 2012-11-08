@@ -251,7 +251,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
      * @param mask
      */
     public void updateMask(Mask mask) {
-
 		if (mask != _mask) {
             _mask = mask;
             

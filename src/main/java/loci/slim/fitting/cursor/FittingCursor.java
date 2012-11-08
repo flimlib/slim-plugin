@@ -442,11 +442,7 @@ public class FittingCursor {
     public double getPromptBaselineValue() {
         double returnValue = 0.0;
         if (_hasPrompt) {
-            System.out.println("promptBaselineValue is " + _promptBaselineValue);
-            
-            
             returnValue = _fitterEstimator.roundToDecimalPlaces(_promptBaselineValue, DECIMAL_PLACES);
-            System.out.println("returnValue is " + returnValue);
         }
         return returnValue;
     }

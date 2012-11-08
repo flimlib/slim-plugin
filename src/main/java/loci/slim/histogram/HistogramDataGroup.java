@@ -462,8 +462,8 @@ public class HistogramDataGroup {
 			quartileIndices = new int[3];
 			_channel[_channelIndex].findQuartiles(quartiles, quartileIndices,
 					binCount, _minView, _maxView);
-        }	
-
+		}
+		
 		// report results
 		_statistics.setBins(bins);
 		_statistics.setBinValues(binValues);

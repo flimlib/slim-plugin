@@ -142,8 +142,8 @@ public class HistogramDataNode {
      * Creates an array of histogram values based on the current nominal min/max
      * range.
      * 
-     * This histogram array should exclude pixels masked by others but not by
-     * self.
+     * This histogram array should exclude pixels masked out by others but not 
+     * by self.
      * 
      * @param bins number of bins
      * @param nominalMin first value assigned to bin 0
@@ -173,7 +173,8 @@ public class HistogramDataNode {
     }
 
 	/**
-	 * Finds the quartiles of the histogram distribution.
+	 * Finds the quartiles of the histogram distribution.  Uses the total mask,
+	 * ignores any pixels masked out by anyone.
 	 * 
 	 * @param quartiles
 	 * @param quartileIndices
@@ -183,14 +184,15 @@ public class HistogramDataNode {
 	 */
 	public void findQuartiles(double[] quartiles, int[] quartileIndices,
 			int bins, double min, double max) {
-		// create an array copy of the values
+
+		// create an array copy of masked, non-NaN values
 		int width = _values.length;
 		int height = _values[0].length;
 		double[] tmp = new double[width * height];
 		int tmpIndex = 0;
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
-				if (null == _otherMask || _otherMask.test(x, y)) {
+				if (null == _totalMask || _totalMask.test(x, y)) {
 					double value = _values[x][y];
 					if (!Double.isNaN(value)) {
 					    tmp[tmpIndex++] = value;
@@ -199,11 +201,51 @@ public class HistogramDataNode {
 			}
 		}
 
-		// sort the values array and read off quartiles
+		// sort the (partially-filled) values array and calculate quartiles
 		Arrays.sort(tmp, 0, tmpIndex);
-		quartiles[0] = tmp[tmpIndex / 4];
-		quartiles[1] = tmp[tmpIndex / 2];
-		quartiles[2] = tmp[3 * tmpIndex / 4];
+		
+		int lowerTopIndex, upperBottomIndex, index;
+		if (tmpIndex % 2 != 0) {
+			// odd array size
+			
+			// take the middle value
+			lowerTopIndex = upperBottomIndex = tmpIndex / 2;
+			quartiles[1] = tmp[lowerTopIndex];
+		}
+		else {
+			// even array size
+			
+			// take the mean of middle two values
+			lowerTopIndex = tmpIndex / 2;
+			upperBottomIndex = lowerTopIndex + 1;
+			quartiles[1] = (tmp[lowerTopIndex] + tmp[upperBottomIndex]) / 2;
+		}
+		
+		if (lowerTopIndex % 2 != 0) {
+			// odd half size
+			
+			// take the middle values
+			index = lowerTopIndex / 2;
+			quartiles[0] = tmp[index];
+			
+			index = (upperBottomIndex + tmpIndex) / 2;
+			quartiles[2] = tmp[index];
+		}
+		else {
+			// even half size
+			
+			// take the mean of middle two values
+			index = lowerTopIndex / 2;
+			quartiles[0] = (tmp[index] + tmp[index + 1]) / 2;
+			
+			index = (upperBottomIndex + tmpIndex) / 2;
+			quartiles[2] = (tmp[index] + tmp[index + 1]) / 2;
+		}
+
+		// An earlier, simpler approach:
+		//quartiles[0] = tmp[tmpIndex / 4];
+		//quartiles[1] = tmp[tmpIndex / 2];
+		//quartiles[2] = tmp[3 * tmpIndex / 4];
 
 		// get bin indices for quartile values
 		quartileIndices[0] = getQuartileIndex(quartiles[0], bins, min, max);
@@ -216,7 +258,28 @@ public class HistogramDataNode {
 			quartileIndices[0] = quartileIndices[1] = quartileIndices[2] = IMPOSSIBLE_INDEX;
 		}
 	}
-	
+
+	/**
+	 * Given an array and inclusive start/stop indices, computes median value.
+	 * 
+	 * @param values
+	 * @param start
+	 * @param stop
+	 * @return 
+	 */
+	private double getMedian(double[] values, int start, int stop) {
+		return 0.0;
+	}
+
+	/**
+	 * Given a quartile value, looks up the bin index.
+	 * 
+	 * @param value
+	 * @param bins
+	 * @param min
+	 * @param max
+	 * @return 
+	 */
 	private int getQuartileIndex(double value, int bins, double min, double max) {
 		int index = valueToBin(value, bins, min, max);
 		if (index < 0 || index >= bins) {

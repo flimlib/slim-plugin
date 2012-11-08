@@ -1113,7 +1113,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 					if (location.length > 2) {
 						channel = location[2];
 					}
-					System.out.println("Error fitting at " + x + "  " + y);
 					errorManager.noteError(x, y, channel);
 				}
 				//TODO ARG need to draw a NaN here over any prior chunky pixels (when chunky pixels are working right)

@@ -504,6 +504,9 @@ public class HistogramTool {
             synchronized (_synchObject) {
 		        // pass along the changes
 		        _histogramDataGroup.excludePixels(excludePixels);
+				
+				// get updated histogram data and show it
+				_histogramPanel.setStatistics(_histogramDataGroup.getStatistics(WIDTH));
             }
         }
         
