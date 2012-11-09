@@ -220,8 +220,9 @@ public interface IUserInterfacePanel {
      * Sets the parameters of the fit
      *
      * @param parameters
+	 * @param AIC
      */
-    public void setParameters(double parameters[]);
+    public void setParameters(double parameters[], double AIC);
 
     /**
      * Sets the parameters of the fit by function.

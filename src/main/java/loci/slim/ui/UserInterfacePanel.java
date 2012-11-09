@@ -216,6 +216,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JTextField _zParam1;
     JCheckBox _zFix1;
     JTextField _chiSqParam1;
+	JTextField _AICParam1;
 	JLabel _errorLabel1;
     JCheckBox _startParam1;
 
@@ -231,6 +232,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JTextField _zParam2;
     JCheckBox _zFix2;
     JTextField _chiSqParam2;
+	JTextField _AICParam2;
 	JLabel _errorLabel2;
     JCheckBox _startParam2;
 
@@ -250,6 +252,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JTextField _zParam3;
     JCheckBox _zFix3;
     JTextField _chiSqParam3;
+	JTextField _AICParam3;
 	JLabel _errorLabel3;
     JCheckBox _startParam3;
 
@@ -263,6 +266,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JTextField _zParam4;
     JCheckBox _zFix4;
     JTextField _chiSqParam4;
+	JTextField _AICParam4;
 	JLabel _errorLabel4;
     JCheckBox _startParam4;
 
@@ -862,13 +866,22 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         JLabel nullLabel1 = new JLabel("");
         expPanel.add(nullLabel1);
 		
-		JLabel nullLabel1a = new JLabel("");
-		expPanel.add(nullLabel1a);
+		JLabel AICLabel1 = new JLabel("AIC");
+		AICLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
+		expPanel.add(AICLabel1);
+		_AICParam1 = new JTextField(9);
+		_AICParam1.setEditable(false);
+		expPanel.add(_AICParam1);
+		JLabel nullLabel2 = new JLabel("");
+		expPanel.add(nullLabel2);
+		
+		JLabel nullLabel3 = new JLabel("");
+		expPanel.add(nullLabel3);
 		_errorLabel1 = new JLabel(FITTING_ERROR);
 		_errorLabel1.setVisible(false);
 		expPanel.add(_errorLabel1);
-		JLabel nullLabel1b = new JLabel("");
-		expPanel.add(nullLabel1b);
+		JLabel nullLabel4 = new JLabel("");
+		expPanel.add(nullLabel4);
 
         //TODO:
         // SLIMPlotter look & feel:
@@ -880,7 +893,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         //_chiSqParam1.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(expPanel, 5, 3, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(expPanel, 6, 3, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", expPanel);
@@ -961,18 +974,27 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         chiSqLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
         expPanel.add(chiSqLabel2);
         _chiSqParam2 = new JTextField(9);
-        //_chiSqParam2.setEditable(false);
+        _chiSqParam2.setEditable(false);
         expPanel.add(_chiSqParam2);
         JLabel nullLabel2 = new JLabel("");
         expPanel.add(nullLabel2);
-				
-		JLabel nullLabel2a = new JLabel("");
-		expPanel.add(nullLabel2a);
+		
+		JLabel AICLabel2 = new JLabel("AIC");
+		AICLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
+		expPanel.add(AICLabel2);
+		_AICParam2 = new JTextField(9);
+		_AICParam2.setEditable(false);
+		expPanel.add(_AICParam2);
+		JLabel nullLabel3 = new JLabel("");
+		expPanel.add(nullLabel3);
+
+		JLabel nullLabel4 = new JLabel("");
+		expPanel.add(nullLabel4);
 		_errorLabel2 = new JLabel(FITTING_ERROR);
 		_errorLabel2.setVisible(false);
 		expPanel.add(_errorLabel2);
-		JLabel nullLabel2b = new JLabel("");
-		expPanel.add(nullLabel2b);
+		JLabel nullLabel5 = new JLabel("");
+		expPanel.add(nullLabel5);
 
         //TODO:
         // From SLIMPlotter
@@ -986,7 +1008,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         //_chiSqParam2.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(expPanel, 7, 3, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(expPanel, 8, 3, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", expPanel);
@@ -1088,18 +1110,27 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         chiSqLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
         expPanel.add(chiSqLabel3);
         _chiSqParam3 = new JTextField(9);
-        //_chiSqParam3.setEditable(false);
+        _chiSqParam3.setEditable(false);
         expPanel.add(_chiSqParam3);
         JLabel nullLabel3 = new JLabel("");
         expPanel.add(nullLabel3);
 		
-		JLabel nullLabel3a = new JLabel("");
-		expPanel.add(nullLabel3a);
+		JLabel AICLabel3 = new JLabel("AIC");
+		AICLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
+		expPanel.add(AICLabel3);
+		_AICParam3 = new JTextField(9);
+		_AICParam3.setEditable(false);
+		expPanel.add(_AICParam3);
+		JLabel nullLabel4 = new JLabel("");
+		expPanel.add(nullLabel4);
+		
+		JLabel nullLabel5 = new JLabel("");
+		expPanel.add(nullLabel5);
 		_errorLabel3 = new JLabel(FITTING_ERROR);
 		_errorLabel3.setVisible(false);
 		expPanel.add(_errorLabel3);
-		JLabel nullLabel3b = new JLabel("");
-		expPanel.add(nullLabel3b);
+		JLabel nullLabel6 = new JLabel("");
+		expPanel.add(nullLabel6);
 
         //TODO:
         // SLIMPlotter look & feel:
@@ -1115,7 +1146,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         //_chiSqParam3.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(expPanel, 9, 3, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(expPanel, 10, 3, 4, 4, 4, 4);
         
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", expPanel);
@@ -1189,13 +1220,22 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         JLabel nullLabel4 = new JLabel("");
         expPanel.add(nullLabel4);
 		
-		JLabel nullLabel4a = new JLabel("");
-		expPanel.add(nullLabel4a);
+		JLabel AICLabel4 = new JLabel("AIC");
+		AICLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
+		expPanel.add(AICLabel4);
+		_AICParam4 = new JTextField(9);
+		_AICParam4.setEditable(false);
+		expPanel.add(_AICParam4);
+		JLabel nullLabel5 = new JLabel("");
+		expPanel.add(nullLabel5);
+		
+		JLabel nullLabel6 = new JLabel("");
+		expPanel.add(nullLabel6);
 		_errorLabel4 = new JLabel(FITTING_ERROR);
 		_errorLabel4.setVisible(false);
 		expPanel.add(_errorLabel4);
-		JLabel nullLabel4b = new JLabel("");
-		expPanel.add(nullLabel4b);
+		JLabel nullLabel7 = new JLabel("");
+		expPanel.add(nullLabel7);
 
         //TODO:
         // SLIMPlotter look & feel:
@@ -1207,7 +1247,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         //_chiSqParam1.setBackground(floatColor);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(expPanel, 6, 3, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(expPanel, 7, 3, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", expPanel);
@@ -1692,36 +1732,38 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         return parameters;
     }
 
-    public void setParameters(double params[]) {
+    public void setParameters(double params[], double AIC) {
 		// parameters NaN signals error
 		_noFit = Double.isNaN(params[0]);
 		
         String function = (String) _functionComboBox.getSelectedItem();
         if (function.equals(SINGLE_EXPONENTIAL)) {
-			String a, t, z, chiSq;
+			String a, t, z, chiSq, aic;
 			if (_noFit) {
 				// fitted parameters could not be determined
-				a = t = z = chiSq = NO_FIT;
+				a = t = z = chiSq = aic = NO_FIT;
 			}
 			else {
 				a = paramToString(params[2], 3);
 				t = paramToString(params[3], 3);
 				z = paramToString(params[1], 3);
 				chiSq = paramToString(params[0], 6);
+				aic = paramToString(AIC, 6);
 			}
             _aParam1.setText    (a);
             _tParam1.setText    (t);
             _zParam1.setText    (z);
             _chiSqParam1.setText(chiSq);
+			_AICParam1.setText  (aic);
 			
 			// show error message as appropriate
 			_errorLabel1.setVisible(_noFit);
 		}
         else if (function.equals(DOUBLE_EXPONENTIAL)) {
-			String a1, t1, a2, t2, z, chiSq;
+			String a1, t1, a2, t2, z, chiSq, aic;
 			if (_noFit) {
 				// fitted parameters could not be determined
-				a1 = t1 = a2 = t2 = z = chiSq = NO_FIT;
+				a1 = t1 = a2 = t2 = z = chiSq = aic = NO_FIT;
 			}
 			else {
 				a1 = paramToString(params[2], 3);
@@ -1730,6 +1772,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				t2 = paramToString(params[5], 3);
 				z = paramToString(params[1], 3);
 				chiSq = paramToString(params[0], 6);
+				aic = paramToString(AIC, 6);
 			}
 			
             _a1Param2.setText   (a1);
@@ -1738,15 +1781,16 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
             _t2Param2.setText   (t2);
             _zParam2.setText    (z);
             _chiSqParam2.setText(chiSq);
+			_AICParam2.setText  (aic);
 			
 			// show error message as appropriate
 		    _errorLabel2.setVisible(_noFit);
         }
         else if (function.equals(TRIPLE_EXPONENTIAL)) {
-			String a1, t1, a2, t2, a3, t3, z, chiSq;
+			String a1, t1, a2, t2, a3, t3, z, chiSq, aic;
 			if (_noFit) {
 				// fitted parameters could not be determined
-				a1 = t1 = a2 = t2 = a3 = t3 = z = chiSq = NO_FIT;
+				a1 = t1 = a2 = t2 = a3 = t3 = z = chiSq = aic = NO_FIT;
 			}
 			else {
 				a1 = paramToString(params[2], 3);
@@ -1757,6 +1801,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				t3 = paramToString(params[7], 3);
 				z = paramToString(params[1], 3);
 				chiSq = paramToString(params[0], 6);
+				aic = paramToString(AIC, 6);
 			}
             _a1Param3.setText   (a1);
             _t1Param3.setText   (t1);
@@ -1766,13 +1811,16 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
             _t3Param3.setText   (t3);
             _zParam3.setText    (z);
             _chiSqParam3.setText(chiSq);
+			_AICParam3.setText  (aic);
+			
+			// show error message as appropriate
 			_errorLabel3.setVisible(_noFit);
         }
         else if (function.equals(STRETCHED_EXPONENTIAL)) {
-			String a, t, h, z, chiSq;
+			String a, t, h, z, chiSq, aic;
 			if (_noFit) {
 				// fitted parameters could not be determined
-				a = t = h = z = chiSq = NO_FIT;
+				a = t = h = z = chiSq = aic = NO_FIT;
 			}
 			else {
 				a = paramToString(params[2], 3);
@@ -1780,12 +1828,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				h = paramToString(params[4], 3);
 				z = paramToString(params[1], 3);
 				chiSq = paramToString(params[0], 6);
+				aic = paramToString(AIC, 6);
 			}
             _aParam4.setText    (a);
             _tParam4.setText    (t);
             _hParam4.setText    (h);
             _zParam4.setText    (z);
             _chiSqParam4.setText(chiSq);
+			_AICParam4.setText  (aic);
 			
 			// show error message as appropriate
 			_errorLabel4.setVisible(_noFit);

@@ -1239,7 +1239,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		title += _file.substring(0, _file.lastIndexOf('.'));
         showDecayGraph(title, uiPanel, _fittingCursor,
                 dataArray[visibleChannel], photons);
-        uiPanel.setParameters(dataArray[visibleChannel].getParams());
+        uiPanel.setParameters(dataArray[visibleChannel].getParams(), dataArray[visibleChannel].getChiSquare());
 
         // get the results
         int channels = _fitAllChannels ? _channels : 1;
@@ -1363,7 +1363,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         imagePlus.show();  
 
         // update UI parameters
-        uiPanel.setParameters(dataArray[0].getParams()); //TODO, just picked first ROI here!
+        uiPanel.setParameters(dataArray[0].getParams(), dataArray[0].getChiSquare()); //TODO, just picked first ROI here!
 
         // get the results
         int channels = _fitAllChannels ? _channels : 1;
@@ -1487,7 +1487,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 dataArray[visibleChannel], photons); //TODO ARG this s/b the photon count for the appropriate channel; currently it will sum all channels.
 
         // update UI parameters
-        uiPanel.setParameters(dataArray[visibleChannel].getParams());
+        uiPanel.setParameters(dataArray[visibleChannel].getParams(), dataArray[visibleChannel].getChiSquare());
         
         // get the results
         int channels = _fitAllChannels ? _channels : 1;
