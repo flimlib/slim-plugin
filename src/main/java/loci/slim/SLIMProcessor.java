@@ -55,9 +55,13 @@ import javax.swing.JFrame;
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
+import loci.curvefitter.ICurveFitter.FitAlgorithm;
+import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.JaolhoCurveFitter;
 import loci.curvefitter.SLIMCurveFitter;
+
 import loci.formats.FormatException;
 import loci.formats.FormatTools;
 import loci.formats.ImageReader;
@@ -107,10 +111,6 @@ import loci.slim.fitting.images.FittedImageFitter.FittedImageType;
 import loci.slim.heuristics.Estimator;
 import loci.slim.heuristics.IEstimator;
 import loci.slim.histogram.HistogramTool;
-
-import loci.curvefitter.ICurveFitter.FitAlgorithm;
-import loci.curvefitter.ICurveFitter.FitFunction;
-import loci.curvefitter.ICurveFitter.FitRegion;
 
 /**
  * SLIMProcessor is the main class of the SLIM Plugin. It was originally just

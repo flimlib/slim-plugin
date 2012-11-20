@@ -220,10 +220,10 @@ public class ExportToText implements ISLIMAnalyzer {
                 m_fileWriter.write("A\tT\tZ\tX2\n");
                 break;
             case DOUBLE_EXPONENTIAL:
-                m_fileWriter.write("A1\tT1\rA2\tT2\tZ\tX2\n");
+                m_fileWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tZ\tX2\n");
                 break;
             case TRIPLE_EXPONENTIAL:
-                m_fileWriter.write("A1\tT1\tA2\tT2\tA3\tT3\tZ\tX2\n");
+                m_fileWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tA3\tA3_%\tT3\tZ\tX2\n");
                 break;
             case STRETCHED_EXPONENTIAL:
                 m_fileWriter.write("A\tT\tH\tZ\tX2\n");
@@ -234,46 +234,99 @@ public class ExportToText implements ISLIMAnalyzer {
     private void writeParams(FitFunction function, double[] paramArray) throws IOException {
         switch (function) {
             case SINGLE_EXPONENTIAL:
+			{
+				double A  = paramArray[2];
+				double T  = paramArray[3];
+				double Z  = paramArray[1];
+				double X2 = paramArray[0];
+				
                 m_fileWriter.write("" +
-                        showParameter(paramArray[2]) + TAB +  // A
-                        showParameter(paramArray[3]) + TAB +  // T
-                        showParameter(paramArray[1]) + TAB +  // Z
-                        showParameter(paramArray[0]) + EOL    // X2
+                        showParameter(A)  + TAB +
+                        showParameter(T)  + TAB +
+                        showParameter(Z)  + TAB +
+                        showParameter(X2) + EOL
                         );
                 break;
+			}
             case DOUBLE_EXPONENTIAL:
+			{
+				double A1 = paramArray[2];
+				double T1 = paramArray[3];
+				double A2 = paramArray[4];
+				double T2 = paramArray[5];
+				double Z  = paramArray[1];
+				double X2 = paramArray[0];
+
+				// normalize so that A1n + A2n = 100%
+				double A1n = normalize(A1, A1 + A2);
+				double A2n = normalize(A2, A1 + A2);
+				
                 m_fileWriter.write("" +
-                        showParameter(paramArray[2]) + TAB +  // A1
-                        showParameter(paramArray[3]) + TAB +  // T1
-                        showParameter(paramArray[4]) + TAB +  // A2
-                        showParameter(paramArray[5]) + TAB +  // T2
-                        showParameter(paramArray[1]) + TAB +  // Z
-                        showParameter(paramArray[0]) + EOL    // X2
+                        showParameter(A1)  + TAB +
+						showParameter(A1n) + TAB +
+                        showParameter(T1)  + TAB +
+                        showParameter(A2)  + TAB +
+						showParameter(A2n) + TAB +
+                        showParameter(T2)  + TAB +
+                        showParameter(Z)   + TAB +
+                        showParameter(X2)  + EOL
                         );
                 break;
+			}
             case TRIPLE_EXPONENTIAL:
+			{
+				double A1 = paramArray[2];
+				double T1 = paramArray[3];
+				double A2 = paramArray[4];
+				double T2 = paramArray[5];
+				double A3 = paramArray[6];
+				double T3 = paramArray[7];
+				double Z  = paramArray[1];
+				double X2 = paramArray[0];
+				
+				// normalize so that A1n + A2n + A3n = 100%
+				double A1n = normalize(A1, A1 + A2 + A3);
+				double A2n = normalize(A2, A1 + A2 + A3);
+				double A3n = normalize(A3, A1 + A2 + A3);
+				
                 m_fileWriter.write("" +
-                        showParameter(paramArray[2]) + TAB +  // A1
-                        showParameter(paramArray[3]) + TAB +  // T1
-                        showParameter(paramArray[4]) + TAB +  // A2
-                        showParameter(paramArray[5]) + TAB +  // T2
-                        showParameter(paramArray[6]) + TAB +  // A3
-                        showParameter(paramArray[7]) + TAB +  // T3
-                        showParameter(paramArray[1]) + TAB +  // Z
-                        showParameter(paramArray[0]) + EOL    // X2
+                        showParameter(A1)  + TAB +
+						showParameter(A1n) + TAB +
+                        showParameter(T1)  + TAB +
+                        showParameter(A2)  + TAB +
+						showParameter(A2n) + TAB +
+                        showParameter(T2)  + TAB +
+                        showParameter(A3)  + TAB +
+						showParameter(A3n) + TAB +
+                        showParameter(T3)  + TAB +
+                        showParameter(Z)   + TAB +
+                        showParameter(X2)  + EOL
                         );
                 break;
+			}
             case STRETCHED_EXPONENTIAL:
+			{
+				double A = paramArray[2];
+				double T = paramArray[3];
+				double H = paramArray[4];
+				double Z  = paramArray[1];
+				double X2 = paramArray[0];
+				
                 m_fileWriter.write("" +
-                        showParameter(paramArray[2]) + TAB +  // A
-                        showParameter(paramArray[3]) + TAB +  // T
-                        showParameter(paramArray[4]) + TAB +  // H
-                        showParameter(paramArray[1]) + TAB +  // Z
-                        showParameter(paramArray[0]) + EOL    // X2
+                        showParameter(A)  + TAB +
+                        showParameter(T)  + TAB +
+                        showParameter(H)  + TAB +
+                        showParameter(Z)  + TAB +
+                        showParameter(X2) + EOL
                         );
                 break;
+			}
         }
     }
+	
+	private double normalize(double A, double sum) {
+		return (100.0 * A) / sum;
+	}
 
     private void writeROIsHeader() throws IOException {
         m_fileWriter.write("roi\t");
