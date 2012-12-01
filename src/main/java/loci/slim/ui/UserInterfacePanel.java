@@ -152,15 +152,16 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                                 T_H = TAU + " H",
                                 F_UPPER = "F",
                                 F_LOWER = "f",
-                                TAU_MEAN = "" + TAU + "m"; // SUB_M;
+                                TAU_MEAN = "" + TAU + "m", // SUB_M
+								NONE = " ";
 	
 	private static final String FITTING_ERROR = "Fitting Error",
 			                    NO_FIT = "--";
     
-    private static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T },
-                                DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN },
-                                TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN },    
-                                STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T };    
+    private static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, NONE },
+                                DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN, NONE },
+                                TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN, NONE },    
+                                STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, NONE };    
     
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
     

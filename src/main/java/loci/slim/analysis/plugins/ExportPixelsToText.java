@@ -1,5 +1,5 @@
 //
-// ExportToText.java
+// ExportPixelsToText.java
 //
 
 /*
@@ -57,48 +57,37 @@ import mpicbg.imglib.type.numeric.RealType;
 import mpicbg.imglib.type.numeric.real.DoubleType;
 
 /**
- * Exports to text for further analysis of SLIMPlugin results.
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/plugins/ExportToText.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/plugins/ExportToText.java">SVN</a></dd></dl>
+ * Exports pixel values as text for further analysis of SLIMPlugin results.
  *
  * @author Aivar Grislis
  */
-@SLIMAnalyzer(name="Export to Text")
-public class ExportToText implements ISLIMAnalyzer {
-    private static final String FILE_KEY = "export_results_to_text";
+@SLIMAnalyzer(name="Export Pixels to Text")
+public class ExportPixelsToText implements ISLIMAnalyzer {
+    private static final String FILE_KEY = "export_pixels_to_text/file";
+	private static final String APPEND_KEY = "export_pixels_to_text/append";
     private static final int X_INDEX = 0;
     private static final int Y_INDEX = 1;
     private static final int C_INDEX = 2;
     private static final int P_INDEX = 3;
     private static final char TAB = '\t';
     private static final char EOL = '\n';
-    private FileWriter m_fileWriter = null;
-    private MathContext m_context = new MathContext(4, RoundingMode.FLOOR);
+	private String fileName;
+	private boolean append;
+    private FileWriter fileWriter = null;
+    private MathContext context = new MathContext(4, RoundingMode.FLOOR);
 
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
-        String fileName = showFileDialog(getFileFromPreferences());
-        if (null != fileName) {
+        boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences());
+        if (export && null != fileName) {
             saveFileInPreferences(fileName);
-            export(fileName, image, region, function);
+			saveAppendInPreferences(append);
+            export(fileName, append, image, region, function);
         }
     }
 
-    public static enum xFitRegion {
-        SUMMED, ROI, POINT, EACH
-    }
-
-    public static enum xFitAlgorithm { //TODO not really algorithm, usu. LMA
-       JAOLHO, /*AKUTAN,*/ BARBER_RLD, BARBER_LMA, MARKWARDT, BARBER2_RLD, BARBER2_LMA, SLIMCURVE_RLD, SLIMCURVE_LMA, SLIMCURVE_RLD_LMA
-    }
-
-    public static enum xFitFunction {
-        SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL
-    }
-
-
-    public void export(String fileName, Image<DoubleType> image, FitRegion region, FitFunction function) {
+    public void export(String fileName, boolean append, Image<DoubleType> image,
+			FitRegion region, FitFunction function)
+	{
         // get list of current ROIs
         boolean hasRois = false;
         Roi[] rois = {};
@@ -109,14 +98,17 @@ public class ExportToText implements ISLIMAnalyzer {
         }
 
         try {
-            m_fileWriter = new FileWriter(fileName);
+            fileWriter = new FileWriter(fileName, append);
         } catch (IOException e) {
             IJ.log("exception opening file " + fileName);
             IJ.handleException(e);
         }
 
-        if (null != m_fileWriter) {
+        if (null != fileWriter) {
             try {
+				// title this export
+				fileWriter.write("Export Pixels " + image.getName() + EOL + EOL);
+				
                 // look at image dimensions
                 int dimensions[] = image.getDimensions();
                 int width    = dimensions[X_INDEX];
@@ -196,7 +188,8 @@ public class ExportToText implements ISLIMAnalyzer {
 
                 } // c loop
 
-                m_fileWriter.close();
+				fileWriter.write(EOL);
+                fileWriter.close();
             }
             catch (IOException e) {
                 System.out.println("Error writing file " + e.getMessage());
@@ -207,26 +200,26 @@ public class ExportToText implements ISLIMAnalyzer {
     }
 
     private void writeChannelHeader() throws IOException {
-        m_fileWriter.write("c\t");
+        fileWriter.write("c\t");
     }
 
     private void writeChannel(int channel) throws IOException {
-        m_fileWriter.write(channel + TAB);
+        fileWriter.write(channel + TAB);
     }
 
     private void writeHeader(FitFunction function) throws IOException {
         switch (function) {
             case SINGLE_EXPONENTIAL:
-                m_fileWriter.write("A\tT\tZ\tX2\n");
+                fileWriter.write("A\tT\tZ\tX2\n");
                 break;
             case DOUBLE_EXPONENTIAL:
-                m_fileWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tZ\tX2\n");
+                fileWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tZ\tX2\n");
                 break;
             case TRIPLE_EXPONENTIAL:
-                m_fileWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tA3\tA3_%\tT3\tZ\tX2\n");
+                fileWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tA3\tA3_%\tT3\tZ\tX2\n");
                 break;
             case STRETCHED_EXPONENTIAL:
-                m_fileWriter.write("A\tT\tH\tZ\tX2\n");
+                fileWriter.write("A\tT\tH\tZ\tX2\n");
                 break;
         }
     }
@@ -240,7 +233,7 @@ public class ExportToText implements ISLIMAnalyzer {
 				double Z  = paramArray[1];
 				double X2 = paramArray[0];
 				
-                m_fileWriter.write("" +
+                fileWriter.write("" +
                         showParameter(A)  + TAB +
                         showParameter(T)  + TAB +
                         showParameter(Z)  + TAB +
@@ -261,7 +254,7 @@ public class ExportToText implements ISLIMAnalyzer {
 				double A1n = normalize(A1, A1 + A2);
 				double A2n = normalize(A2, A1 + A2);
 				
-                m_fileWriter.write("" +
+                fileWriter.write("" +
                         showParameter(A1)  + TAB +
 						showParameter(A1n) + TAB +
                         showParameter(T1)  + TAB +
@@ -289,7 +282,7 @@ public class ExportToText implements ISLIMAnalyzer {
 				double A2n = normalize(A2, A1 + A2 + A3);
 				double A3n = normalize(A3, A1 + A2 + A3);
 				
-                m_fileWriter.write("" +
+                fileWriter.write("" +
                         showParameter(A1)  + TAB +
 						showParameter(A1n) + TAB +
                         showParameter(T1)  + TAB +
@@ -312,7 +305,7 @@ public class ExportToText implements ISLIMAnalyzer {
 				double Z  = paramArray[1];
 				double X2 = paramArray[0];
 				
-                m_fileWriter.write("" +
+                fileWriter.write("" +
                         showParameter(A)  + TAB +
                         showParameter(T)  + TAB +
                         showParameter(H)  + TAB +
@@ -329,44 +322,56 @@ public class ExportToText implements ISLIMAnalyzer {
 	}
 
     private void writeROIsHeader() throws IOException {
-        m_fileWriter.write("roi\t");
+        fileWriter.write("roi\t");
     }
 
     private void writeROI(int roi) throws IOException {
-        m_fileWriter.write("" + roi + '\t');
+        fileWriter.write("" + roi + '\t');
     }
 
     private void writeXYHeader() throws IOException {
-        m_fileWriter.write("x\ty\t");
+        fileWriter.write("x\ty\t");
     }
 
     private void writeXY(int x, int y) throws IOException {
-        m_fileWriter.write("" + x + '\t' + y + '\t');
+        fileWriter.write("" + x + '\t' + y + '\t');
     }
 
     private String getFileFromPreferences() {
        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-       return prefs.get(FILE_KEY, "");
+       return prefs.get(FILE_KEY, fileName);
     }
 
-    private void saveFileInPreferences(String file) {
+    private void saveFileInPreferences(String fileName) {
         Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-        prefs.put(FILE_KEY, file);
+        prefs.put(FILE_KEY, fileName);
     }
+	
+	private boolean getAppendFromPreferences() {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		return prefs.getBoolean(APPEND_KEY, append);
+	}
+	
+	private void saveAppendInPreferences(boolean append) {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		prefs.putBoolean(APPEND_KEY, append);
+	}
 
-    private String showFileDialog(String defaultFile) {
+    private boolean showFileDialog(String defaultFile, boolean defaultAppend) {
         //TODO shouldn't UI be in separate class?
-        GenericDialog dialog = new GenericDialog("Export Results to Text");
+        GenericDialog dialog = new GenericDialog("Export Pixels to Text");
         dialog.addStringField("Save As:", defaultFile, 24);
+		dialog.addCheckbox("Append", defaultAppend);
         dialog.showDialog();
         if (dialog.wasCanceled()) {
-            return null;
+            return false;
         }
-
-        return dialog.getNextString();
+		fileName = dialog.getNextString();
+		append   = dialog.getNextBoolean();
+		return true;
     }
 
     private String showParameter(double parameter) {
-        return BigDecimal.valueOf(parameter).round(m_context).toEngineeringString();
+        return BigDecimal.valueOf(parameter).round(context).toEngineeringString();
     }
 }

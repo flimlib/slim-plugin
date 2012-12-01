@@ -879,7 +879,13 @@ public class SLIMProcessor <T extends RealType<T>> {
             channels = decayImage.getChannels();
         }
         int parameters = fitInfo.getParameterCount();
-        IFittedImage newImage = new OutputImageWrapper(width, height, channels, parameters);
+		//TODO ARG image names currently coded like "gpl1.sdt [X Y Lifetime]"
+		String title = _image.getName();
+		int index = title.indexOf("[");
+		if (-1 != index) {
+			title = title.substring(0, index);
+		}
+        IFittedImage newImage = new OutputImageWrapper(title, width, height, channels, parameters);
         
         // set up preprocessor chain
         IProcessor processor = decayImage;
