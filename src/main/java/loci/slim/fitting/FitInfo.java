@@ -593,6 +593,25 @@ public class FitInfo {
         }
         return components;
     }
+	
+	public String getFitTitle() {
+        String title = null;
+        switch (_function) {
+            case SINGLE_EXPONENTIAL:
+				title = "Single Exponential";
+				break;
+            case STRETCHED_EXPONENTIAL:
+				title = "Stretched Exponential";
+				break;
+            case DOUBLE_EXPONENTIAL:
+                title = "Double Exponential";
+                break;
+            case TRIPLE_EXPONENTIAL:
+                title = "Triple Exponential";
+                break;
+        }
+        return title;
+	}
     
     /**
      * Gets whether or not this is a stretched exponential fit.

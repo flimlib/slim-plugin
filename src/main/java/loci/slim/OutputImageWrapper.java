@@ -66,7 +66,7 @@ public class OutputImageWrapper implements IFittedImage {
      * @param channels
      * @param parameters 
      */
-    public OutputImageWrapper(String title, int width, int height, int channels, int parameters) {  
+    public OutputImageWrapper(String title, String fitTitle, int width, int height, int channels, int parameters) {  
         _width = width;
         _height = height;
         _channels = channels;
@@ -78,7 +78,7 @@ public class OutputImageWrapper implements IFittedImage {
 
         _image = new ImageFactory<DoubleType>
                 (new DoubleType(),
-                 new PlanarContainerFactory()).createImage(dimensions, title + "Fitted");
+                 new PlanarContainerFactory()).createImage(dimensions, title + " Fitted " + fitTitle);
         
         // fill image with NaNs
         Cursor<DoubleType> cursor = _image.createCursor();

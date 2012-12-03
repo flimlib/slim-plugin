@@ -883,9 +883,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 		String title = _image.getName();
 		int index = title.indexOf("[");
 		if (-1 != index) {
-			title = title.substring(0, index);
+			title = title.substring(0, index - 1);
 		}
-        IFittedImage newImage = new OutputImageWrapper(title, width, height, channels, parameters);
+		String fitTitle = fitInfo.getFitTitle();
+        IFittedImage newImage = new OutputImageWrapper(title, fitTitle, width, height, channels, parameters);
         
         // set up preprocessor chain
         IProcessor processor = decayImage;
