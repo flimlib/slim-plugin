@@ -34,6 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
+import java.util.Stack;
+
 import ij.ImageJ;
 import ij.plugin.PlugIn;
 
@@ -47,10 +49,15 @@ import ij.plugin.PlugIn;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class SLIM_PlugIn implements PlugIn {
+	private static final String ONE = "1";
+	private static final Stack<SLIMProcessor> stack = new Stack<SLIMProcessor>();
+	private static volatile SLIMProcessor instance = null;
 
     public void run(String arg) {
         SLIMProcessor slimProcessor = new SLIMProcessor();
+		stack.push(slimProcessor);
         slimProcessor.process(arg);
+		stack.pop();
     }
 
     public static void main(String [] args)
@@ -60,4 +67,42 @@ public class SLIM_PlugIn implements PlugIn {
         plugIn.run("");
         System.exit(0);
     }
+
+	/**
+	 * Starts up batch processing.
+	 *
+	 * @return whether or not successful
+	 */
+	public static boolean startBatch() {
+		boolean success = false;
+		instance = stack.peek();
+		if (null != instance) {
+		    success = instance.startBatch();
+		}
+		return success;
+	}
+
+	/**
+	 * Processes an input file in batch processing.
+	 * 
+	 * @param input file name
+	 * @param output file name
+	 * @param exportPixels
+	 * @param exportText 
+	 */
+	public static void batch(String input, String output, String exportPixels, String exportText) {
+		if (null != instance) {
+			instance.batch(input, output, ONE.equals(exportPixels), ONE.equals(exportText));
+		}
+	}
+
+	/**
+	 * Ends batch processing.
+	 */
+	public static void endBatch() {
+		if (null != instance) {
+			instance.endBatch();
+		}
+		instance = null;
+	}
 }

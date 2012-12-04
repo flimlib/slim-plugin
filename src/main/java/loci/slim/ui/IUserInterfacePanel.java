@@ -70,6 +70,11 @@ public interface IUserInterfacePanel {
 	 * Sets the threshold listener.
 	 */
 	public void setThresholdListener(IThresholdUpdate thresholdListener);
+	
+	/**
+	 * Disables the UI.
+	 */
+	public void disable();
 
     /**
      * Resets the UI after a fit.

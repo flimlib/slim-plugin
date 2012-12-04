@@ -44,6 +44,7 @@ import ij.process.ImageProcessor;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -66,6 +67,8 @@ import loci.formats.FormatException;
 import loci.formats.FormatTools;
 import loci.formats.ImageReader;
 import loci.slim.analysis.SLIMAnalysis;
+import loci.slim.analysis.plugins.ExportHistogramsToText;
+import loci.slim.analysis.plugins.ExportPixelsToText;
 import loci.slim.fitting.ErrorManager;
 import loci.slim.fitting.IErrorListener;
 import loci.slim.preprocess.ISLIMBinner;
@@ -130,6 +133,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     private FittingCursor _fittingCursor;
 	private int _fittingOrdinal = 0;
     
+	private static final String SDT_SUFFIX = ".sdt";
+	private static final String ICS_SUFFIX = ".ics";
     private static final String X = "X";
     private static final String Y = "Y";
     private static final String LIFETIME = "Lifetime";
@@ -218,6 +223,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 	private int _fitOrdinal = 1;
     private int _debug = 0;
+	
+    private boolean _firstBatch;
 
     public SLIMProcessor() {
         _analysis = new SLIMAnalysis();
@@ -263,6 +270,79 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
     }
 
+	/**
+	 * Start batch processing.
+	 * 
+	 * @return 
+	 */
+	public boolean startBatch() {
+		_uiPanel.disable();
+		_firstBatch = true;
+		IJ.log("start SLIM Plugin batch processing");
+		return true;
+	}
+
+	/**
+	 * Batch process a single file.
+	 * 
+	 * @param input
+	 * @param output
+	 * @param exportPixels
+	 * @param exportHistograms 
+	 */
+	public void batch(String input, String output, boolean exportPixels, boolean exportHistograms) {
+		// first time through, delete extant file
+		if (_firstBatch) {
+			_firstBatch = false;
+			File file = new File(input);
+			file.delete();
+		}
+		
+		if (input.endsWith(SDT_SUFFIX) || input.endsWith(ICS_SUFFIX)) {
+			// close last image
+			if (null != _image) {
+				_image.close();
+			}
+			
+			// load batched image
+			_image = loadImage(input);
+			getImageInfo(_image);
+
+			// fit batched image with current UI settings
+			Image<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
+
+			// export to text
+			if (exportPixels) {
+				ExportPixelsToText exportPixelsToText = new ExportPixelsToText();
+				exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function);
+			}		
+			if (exportHistograms) {
+				ExportHistogramsToText exportHistogramsToText = new ExportHistogramsToText();
+				exportHistogramsToText.export(output, true, fittedImage, _function);
+			}
+			IJ.log(input);
+	    }
+	}
+
+	/**
+	 * End batch processing.
+	 */
+	public void endBatch() {
+		IJ.log("end SLIM Plugin batch processing");
+		
+		// close last image
+		if (null != _image) {
+		    _image.close();
+		}
+		
+		// restore current file
+		_image = loadImage(_path, _file);
+		getImageInfo(_image);
+		
+		// enable UI
+		_uiPanel.reset();
+	}
+
     /**
      * Creates a user interface panel.  Shows a grayscale
      * version of the image.
@@ -291,9 +371,6 @@ public class SLIMProcessor <T extends RealType<T>> {
         _uiPanel = uiPanel; //TODO almost got by having it just be a local variable
         uiPanel.setX(0);
         uiPanel.setY(0);
-        //TODO ARG these estimates s/n/b necessary; use the EstimateCursors class
-        //uiPanel.setStart(estimator.getStart(_bins));
-        //uiPanel.setStop(estimator.getStop(_bins));
         uiPanel.setThreshold(estimator.getThreshold());
         uiPanel.setChiSquareTarget(estimator.getChiSquareTarget());
         uiPanel.setFunctionParameters(0, estimator.getParameters(1, false));
@@ -676,13 +753,17 @@ public class SLIMProcessor <T extends RealType<T>> {
 //        System.out.println("file is " + dialog.getFileName());
         return true;
     }
+	
+	private Image<T> loadImage(String path, String file) {
+		return loadImage(path + file);
+	}
 
-    private Image<T> loadImage(String path, String file) {
+    private Image<T> loadImage(String filePath) {
         boolean threwException = false;
         ImageOpener imageOpener = new ImageOpener();
         Image<T> image = null;
         try {
-            image = imageOpener.openImage(path + file);
+            image = imageOpener.openImage(filePath);
         }
         //catch (java.io.IOException e) { }
         //catch (loci.formats.FormatException e) {
@@ -697,7 +778,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         // Open the file again, just to get metadata
         ImageReader imageReader = new ImageReader();
         try {
-            imageReader.setId(path + file);
+            imageReader.setId(filePath);
             _globalMetadata = imageReader.getGlobalMetadata();
             imageReader.close();
         }
@@ -808,7 +889,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                     break;
                 case EACH:
                     // fit every pixel
-                    fittedImage = fitImage(uiPanel);
+                    fittedImage = fitImage(uiPanel, _grayScaleImage.getChannel(), false);
                     break;
             }
         }
@@ -820,11 +901,11 @@ public class SLIMProcessor <T extends RealType<T>> {
     }
     
     private FitInfo getFitInfo(
-            IGrayScaleImage grayScalePanel,
             IUserInterfacePanel uiPanel,
+			int channel,
             FittingCursor fittingCursor) {
         FitInfo fitInfo = new FitInfo();
-        fitInfo.setChannel(grayScalePanel.getChannel());
+        fitInfo.setChannel(channel);
         fitInfo.setRegion(uiPanel.getRegion());
         fitInfo.setAlgorithm(uiPanel.getAlgorithm());
         fitInfo.setFunction(uiPanel.getFunction());
@@ -853,11 +934,13 @@ public class SLIMProcessor <T extends RealType<T>> {
      * and various globals.
      * 
      * @param uiPanel
+	 * @param channel
+	 * @param batch whether or not batch processing is in effect
      * @return 
      */
-    private Image<DoubleType> fitImage(IUserInterfacePanel uiPanel) {
+    private Image<DoubleType> fitImage(IUserInterfacePanel uiPanel, int channel, boolean batch) {
         // get fit settings from the UI panel
-        FitInfo fitInfo = getFitInfo(_grayScaleImage, uiPanel, _fittingCursor);
+        FitInfo fitInfo = getFitInfo(uiPanel, channel, _fittingCursor);
         fitInfo.setXInc(_timeRange);
         if (_fittingCursor.getHasPrompt() && null != _excitationPanel) {
             int startIndex = _fittingCursor.getPromptStartBin();
@@ -915,7 +998,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         ICurveFitter curveFitter = getCurveFitter(uiPanel); //TODO ARG shouldn't all UI panel info go into FitInfo???
         fittingEngine.setCurveFitter(curveFitter);
         
-        return fitImage(fittingEngine, fitInfo, decayImage, processor, previousImage, newImage);
+        return fitImage(fittingEngine, fitInfo, decayImage, processor, previousImage, newImage, batch);
 
     }
 
@@ -927,6 +1010,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param decayImage contains the decay data
      * @param previousImage previous fit results, may be null
      * @param newImage results of this fit
+	 * @param batch whether or not batch processing is in effect
      * @return 
      */
     private Image<DoubleType> fitImage(
@@ -935,7 +1019,9 @@ public class SLIMProcessor <T extends RealType<T>> {
             IDecayImage decayImage,
             IProcessor processor, //TODO ARG really need both decayImage & processor?  Processor is a poor name
             IFittedImage previousImage,
-            IFittedImage newImage) {
+            IFittedImage newImage,
+			boolean batch)
+	{
  
         // get commonly-used items in local variables
         int width = decayImage.getWidth();
@@ -962,7 +1048,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         int[] dimension = new int[] { width, height, fittedChannels };
         FittedImageFitter fitter = null;
         String outputs = fitInfo.getFittedImages();
-        if (null != outputs) {
+        if (!batch && null != outputs) {
             int components = fitInfo.getComponents();
             boolean stretched = fitInfo.getStretched();
             FittedImageParser parser =
@@ -1012,7 +1098,9 @@ public class SLIMProcessor <T extends RealType<T>> {
                     new ChunkyPixelEffectIterator(chunkyPixelTable, width, height);
             
             while (!fitInfo.getCancel() && pixelIterator.hasNext()) {
-                IJ.showProgress(++pixelCount, totalPixelCount);
+				if (!batch) {
+                    IJ.showProgress(++pixelCount, totalPixelCount);
+				}
                 ChunkyPixel pixel = pixelIterator.next();
 
                 // compute full location information
@@ -1046,7 +1134,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                         ILocalFitParams[] localFitParamsArray = localFitParamsList.toArray(new ILocalFitParams[0]);
                         localFitParamsList.clear();
                         
-                        processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, errorManager, fitter, newImage);
+                        processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, errorManager, fitter, newImage, batch);
                     }
                 }
             }
@@ -1064,7 +1152,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             if (pixelsToProcessCount > 0) {
                 ChunkyPixel[] pixelArray = pixelList.toArray(new ChunkyPixel[0]);
                 ILocalFitParams[] localFitParamsArray = localFitParamsList.toArray(new ILocalFitParams[0]);
-                processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, errorManager, fitter, newImage);
+                processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, errorManager, fitter, newImage, batch);
             }
             if (null != fitter) {
                 fitter.endFit();
@@ -1086,6 +1174,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 * @param errorManager
      * @param imageColorizer
      * @param fittedImage
+	 * @param batch whether or not batch processing is in effect
      */
     private void processPixels(
             IFittingEngine fittingEngine,
@@ -1094,7 +1183,9 @@ public class SLIMProcessor <T extends RealType<T>> {
             ILocalFitParams[] localFitParams,
 			ErrorManager errorManager,
             FittedImageFitter imageColorizer,
-            IFittedImage fittedImage) {
+            IFittedImage fittedImage,
+			boolean batch)
+	{
 
         //TODO use Lists or just arrays? This just converts from array to List.
         List<ILocalFitParams> localFitParamsList = new ArrayList<ILocalFitParams>();
@@ -1113,7 +1204,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			
 			// check for errors
 			if (Double.isNaN(params[0])) {
-				if (null != errorManager) {
+				if (!batch && null != errorManager) {
 					int x = location[0];
 					int y = location[1];
 					int channel = 0;

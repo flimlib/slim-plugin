@@ -422,6 +422,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	public void setThresholdListener(IThresholdUpdate thresholdListener) {
 		_thresholdListener = thresholdListener;
 	}
+	
+	public void disable() {
+		enableAll(false);
+	}
 
     @Override
     public void reset() {
