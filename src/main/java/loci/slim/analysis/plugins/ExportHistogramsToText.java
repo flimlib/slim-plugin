@@ -59,6 +59,8 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
 @SLIMAnalyzer(name="Export Histograms to Text")
 public class ExportHistogramsToText implements ISLIMAnalyzer {
 	private static final int BINS = 256;
+	private static final long MIN_COUNT = 3;
+	private static final String NAN = "NaN";
     private static final String FILE_KEY = "export_histograms_to_text/file";
 	private static final String APPEND_KEY = "export_histograms_to_text/append";
     private static final int X_INDEX = 0;
@@ -129,33 +131,45 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 					}
 					
 					for (int i = 0; i < titles.length; ++i) {
-						fileWriter.write("Parameter" + TAB + titles[i] + EOL);
-						
+						// first statistical pass through the image
 						Statistics1 statistics1 = getStatistics1(image, channel, i);
-						Statistics2 statistics2 = getStatistics2(image, channel, i, statistics1.mean, statistics1.range, BINS);
-
-						// put out statistics
-						fileWriter.write("Min" + TAB + showParameter(statistics1.min) + EOL);
-						fileWriter.write("Max" + TAB + showParameter(statistics1.max) + EOL);
-						fileWriter.write("Count" + TAB + statistics1.count + EOL);
-						fileWriter.write("Mean" + TAB + showParameter(statistics1.mean) + EOL);
-						fileWriter.write("Standard Deviation" + TAB + showParameter(statistics2.standardDeviation) + EOL);
-						fileWriter.write("1st Quartile" + TAB + showParameter(statistics1.quartile[0]) + EOL);
-						fileWriter.write("Median" + TAB + showParameter(statistics1.quartile[1]) + EOL);
-						fileWriter.write("2nd Quartile" + TAB + showParameter(statistics1.quartile[2]) + EOL);
-
-                        // put out histogram
-						fileWriter.write("Histogram" + EOL);
-						fileWriter.write("Bins" + TAB + BINS + EOL);
-						fileWriter.write("Min" + TAB + showParameter(statistics1.range[0]) + EOL);
-						fileWriter.write("Max" + TAB + showParameter(statistics1.range[1]) + EOL);
-						fileWriter.write("Count" + TAB + statistics2.histogramCount + EOL);
 						
-						double[] values = Binning.centerValuesPerBin(BINS, statistics1.range[0], statistics1.range[1]);
-						for (int j = 0; j < statistics2.histogram.length; ++j) {
-							fileWriter.write(showParameter(values[j]) + TAB + statistics2.histogram[j] + EOL);
+						if (statistics1.count < MIN_COUNT) {
+							fileWriter.write("Count" + TAB + statistics1.count + EOL);
+							fileWriter.write("Too few pixels for histograms" + EOL + EOL);
+							
+							// don't process any more parameters; all will have same count
+							break;
 						}
-						
+						else {
+							fileWriter.write("Parameter" + TAB + titles[i] + EOL);
+							
+							// second statistical pass through the image
+							Statistics2 statistics2 = getStatistics2(image, channel, i, statistics1.mean, statistics1.range, BINS);
+													
+							// put out statistics
+							fileWriter.write("Min" + TAB + showParameter(statistics1.min) + EOL);
+							fileWriter.write("Max" + TAB + showParameter(statistics1.max) + EOL);
+							fileWriter.write("Count" + TAB + statistics1.count + EOL);
+							fileWriter.write("Mean" + TAB + showParameter(statistics1.mean) + EOL);
+							fileWriter.write("Standard Deviation" + TAB + showParameter(statistics2.standardDeviation) + EOL);
+							fileWriter.write("1st Quartile" + TAB + showParameter(statistics1.quartile[0]) + EOL);
+							fileWriter.write("Median" + TAB + showParameter(statistics1.quartile[1]) + EOL);
+							fileWriter.write("2nd Quartile" + TAB + showParameter(statistics1.quartile[2]) + EOL);
+
+							// put out histogram
+							fileWriter.write("Histogram" + EOL);
+							fileWriter.write("Bins" + TAB + BINS + EOL);
+							fileWriter.write("Min" + TAB + showParameter(statistics1.range[0]) + EOL);
+							fileWriter.write("Max" + TAB + showParameter(statistics1.range[1]) + EOL);
+							fileWriter.write("Count" + TAB + statistics2.histogramCount + EOL);
+
+							double[] values = Binning.centerValuesPerBin(BINS, statistics1.range[0], statistics1.range[1]);
+							for (int j = 0; j < statistics2.histogram.length; ++j) {
+								fileWriter.write(showParameter(values[j]) + TAB + statistics2.histogram[j] + EOL);
+							}
+						}
+					
 						fileWriter.write(EOL);
 					}
 				}
@@ -181,6 +195,8 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		double min = Double.MAX_VALUE;
 		double max = Double.MIN_VALUE;
 		double sum = 0.0;
+		double[] quartile = null;
+		double[] range = null;
 		int[] dimensions = image.getDimensions();
 		LocalizableByDimCursor<DoubleType> cursor = image.createLocalizableByDimCursor();
 
@@ -190,12 +206,14 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		int[] position = new int[dimensions.length];
 		for (int y = 0; y < dimensions[1]; ++y) {
 			for (int x = 0; x < dimensions[0]; ++x) {
+				// set position
 				position[0] = x;
 				position[1] = y;
 				position[2] = channel;
 				position[3] = parameter;
 				cursor.setPosition(position);
 
+				// account for value
 				double value = cursor.getType().getRealDouble();
 				if (!Double.isNaN(value)) {
 					values[index++] = value;
@@ -210,53 +228,60 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				}
 			}
 		}
+		// sort values to read off quartiles
 		Arrays.sort(values, 0, index);
 		
-		// read off the quartiles
-		double[] quartile = new double[3];
-		int lowerTopHalfIndex, upperBottomHalfIndex;
-		if (index % 2 != 0) {
-			// odd array size
-			
-			// take the middle value
-			lowerTopHalfIndex = upperBottomHalfIndex = index / 2;
-			quartile[1] = values[lowerTopHalfIndex];
+		if (count > MIN_COUNT) {
+			// read off the quartiles
+			quartile = new double[3];
+			int lowerTopHalfIndex, upperBottomHalfIndex;
+			if (index % 2 != 0) {
+				// odd array size
+
+				// take the middle value
+				lowerTopHalfIndex = upperBottomHalfIndex = index / 2;
+				quartile[1] = values[lowerTopHalfIndex];
+			}
+			else {
+				// even array size
+
+				// take the mean of middle two values
+				lowerTopHalfIndex = index / 2;
+				upperBottomHalfIndex = lowerTopHalfIndex - 1;
+				quartile[1] = (values[lowerTopHalfIndex] + values[upperBottomHalfIndex]) / 2;
+			}
+
+			if (upperBottomHalfIndex % 2 == 0) {
+				// even index means odd half sizes
+
+				// take the middle values
+				index = upperBottomHalfIndex / 2;
+				quartile[0] = values[index];
+				index += lowerTopHalfIndex;
+				quartile[2] = values[index];
+			}
+			else {
+				// even half sizes
+
+				// take the mean of middle two values
+				index = upperBottomHalfIndex / 2;
+				quartile[0] = (values[index] + values[index + 1]) / 2;
+
+				index += lowerTopHalfIndex;
+				quartile[2] = (values[index] + values[index + 1]) / 2;
+			}
+
+			// calculate range
+			range = new double[2];
+			double iqr = quartile[2] - quartile[0];
+			range[0] = quartile[1] - 1.5 * iqr;
+			range[1] = quartile[1] + 1.5 * iqr;
 		}
-		else {
-			// even array size
-			
-			// take the mean of middle two values
-			lowerTopHalfIndex = index / 2;
-			upperBottomHalfIndex = lowerTopHalfIndex - 1;
-			quartile[1] = (values[lowerTopHalfIndex] + values[upperBottomHalfIndex]) / 2;
+		else if (0 == count) {
+			// avoid reporting spurious values
+			min = max = Double.NaN;
 		}
-		
-		if (upperBottomHalfIndex % 2 == 0) {
-			// even index means odd half sizes
 			
-			// take the middle values
-			index = upperBottomHalfIndex / 2;
-			quartile[0] = values[index];
-			index += lowerTopHalfIndex;
-			quartile[2] = values[index];
-		}
-		else {
-			// even half sizes
-			
-			// take the mean of middle two values
-			index = upperBottomHalfIndex / 2;
-			quartile[0] = (values[index] + values[index + 1]) / 2;
-			
-			index += lowerTopHalfIndex;
-			quartile[2] = (values[index] + values[index + 1]) / 2;
-		}
-		
-		// calculate range
-		double[] range = new double[2];
-		double iqr = quartile[2] - quartile[0];
-		range[0] = quartile[1] - 1.5 * iqr;
-		range[1] = quartile[1] + 1.5 * iqr;
-		
 		Statistics1 statistics = new Statistics1();
 		statistics.count = count;
 		statistics.min = min;
@@ -293,12 +318,14 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		int[] position = new int[dimensions.length];
 		for (int y = 0; y < dimensions[1]; ++y) {
 			for (int x = 0; x < dimensions[0]; ++x) {
+				// set position
 				position[0] = x;
 				position[1] = y;
 				position[2] = channel;
 				position[3] = parameter;
 				cursor.setPosition(position);
 
+				// account for value
 				double value = cursor.getType().getRealDouble();
 				if (!Double.isNaN(value)) {
 					// compute standard deviation from mean
@@ -377,6 +404,10 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
     }
 
     private String showParameter(double parameter) {
-        return BigDecimal.valueOf(parameter).round(context).toEngineeringString();
+		String returnValue = NAN;
+		if (!Double.isNaN(parameter)) {
+			returnValue = BigDecimal.valueOf(parameter).round(context).toEngineeringString();
+		}
+        return returnValue;
 	}
 }

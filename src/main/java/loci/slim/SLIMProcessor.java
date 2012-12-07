@@ -36,6 +36,7 @@ package loci.slim;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.io.OpenDialog;
 import ij.plugin.frame.RoiManager;
@@ -45,6 +46,7 @@ import ij.process.ImageProcessor;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -225,6 +227,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     private int _debug = 0;
 	
     private boolean _firstBatch;
+	private int _batchBins;
+	private boolean _batchError;
 
     public SLIMProcessor() {
         _analysis = new SLIMAnalysis();
@@ -278,6 +282,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public boolean startBatch() {
 		_uiPanel.disable();
 		_firstBatch = true;
+		_batchError = false;
 		IJ.log("start SLIM Plugin batch processing");
 		return true;
 	}
@@ -291,39 +296,76 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 * @param exportHistograms 
 	 */
 	public void batch(String input, String output, boolean exportPixels, boolean exportHistograms) {
-		// first time through, delete extant file
+		// first time through, delete existing output text file
 		if (_firstBatch) {
 			_firstBatch = false;
-			File file = new File(input);
-			file.delete();
+			_batchBins = _bins;
+			try {
+			    FileWriter fileWriter = new FileWriter(output);
+				fileWriter.close();
+			}
+			catch (IOException e) {
+				GenericDialog dialog = new GenericDialog("Error in Batch Processing");
+				dialog.addMessage("Problem writing to file: " + output);
+				dialog.hideCancelButton();
+				dialog.showDialog();
+				_batchError = true;
+			}
 		}
-		
+
+		// avoid further crashes; error already reported
+		if (_batchError) {
+			return;
+		}
+
 		if (input.endsWith(SDT_SUFFIX) || input.endsWith(ICS_SUFFIX)) {
-			// close last image
-			if (null != _image) {
-				_image.close();
-			}
-			
-			// load batched image
-			_image = loadImage(input);
-			getImageInfo(_image);
+			try {
+				// close last image
+				if (null != _image) {
+					_image.close();
+				}
 
-			// fit batched image with current UI settings
-			Image<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
+				// load batched image
+				_image = loadImage(input);
+				getImageInfo(_image);
+				
+				if (_batchBins != _bins) {
+					GenericDialog dialog = new GenericDialog("Error in Batch Processing");
+					String imageName = input.substring(input.lastIndexOf(File.separatorChar) + 1);
+					dialog.addMessage("Settings are for " + _batchBins + " bins, " + imageName + " has " + _bins + " bins.");
+					dialog.hideCancelButton();
+					dialog.showDialog();
+					if (dialog.wasCanceled()) {
+						// Cancel cancels rest of batch; OK continues
+						_batchError = true;
+					}
+					return;
+				}
 
-			// export to text
-			if (exportPixels) {
-				ExportPixelsToText exportPixelsToText = new ExportPixelsToText();
-				exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function);
-			}		
-			if (exportHistograms) {
-				ExportHistogramsToText exportHistogramsToText = new ExportHistogramsToText();
-				exportHistogramsToText.export(output, true, fittedImage, _function);
+				// fit batched image with current UI settings
+				Image<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
+
+				// export to text
+				if (exportPixels) {
+					ExportPixelsToText exportPixelsToText = new ExportPixelsToText();
+					exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function);
+				}		
+				if (exportHistograms) {
+					ExportHistogramsToText exportHistogramsToText = new ExportHistogramsToText();
+					
+					exportHistogramsToText.export(output, true, fittedImage, _function);
+				}
+				IJ.log(input);
 			}
-			IJ.log(input);
+			catch (Exception e) {
+				IJ.log("Exception: " + e.getMessage() + " " + e.toString());
+				for (StackTraceElement el : e.getStackTrace()) {
+					IJ.log("   " + el.toString());
+				}
+			}
 	    }
 	}
-
+	
 	/**
 	 * End batch processing.
 	 */
@@ -1192,9 +1234,14 @@ public class SLIMProcessor <T extends RealType<T>> {
         for (ILocalFitParams lFP : localFitParams) {
             localFitParamsList.add(lFP);
         }
-        
-        List<IFitResults> resultsList =
-                fittingEngine.fit(globalFitParams, localFitParamsList);
+
+        List<IFitResults> resultsList = new ArrayList<IFitResults>();
+		try {
+                resultsList = fittingEngine.fit(globalFitParams, localFitParamsList);
+		}
+		catch (Exception e) {
+			
+		}
 
         for (int i = 0; i < resultsList.size(); ++i) {
             IFitResults result = resultsList.get(i);

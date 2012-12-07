@@ -36,7 +36,9 @@ package loci.slim;
 
 import java.util.Stack;
 
+import ij.IJ;
 import ij.ImageJ;
+import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
 /**
@@ -75,9 +77,15 @@ public class SLIM_PlugIn implements PlugIn {
 	 */
 	public static boolean startBatch() {
 		boolean success = false;
-		instance = stack.peek();
-		if (null != instance) {
-		    success = instance.startBatch();
+		instance = null;
+		if (stack.empty()) {
+			GenericDialog dialog = new GenericDialog("Error in Batch Processing");
+			dialog.addMessage("SLIM Plugin should be running before invoking batch processing macro.");
+			dialog.showDialog();
+		}
+		else {
+			instance = stack.peek();
+			success = instance.startBatch();
 		}
 		return success;
 	}
