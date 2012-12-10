@@ -231,7 +231,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		// sort values to read off quartiles
 		Arrays.sort(values, 0, index);
 		
-		if (count > MIN_COUNT) {
+		if (count >= MIN_COUNT) {
 			// read off the quartiles
 			quartile = new double[3];
 			int lowerTopHalfIndex, upperBottomHalfIndex;
@@ -332,7 +332,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 					double diff = mean - value;
 					diffSquaredSum += diff * diff;
 					++count;
-
+					
 					int bin = Binning.exclusiveValueToBin(bins, range[0], range[1], value);
 					if (0 <= bin && bin < bins) {
 						++histogram[bin];
