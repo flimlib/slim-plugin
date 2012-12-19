@@ -1,0 +1,33 @@
+dir = getDirectory("Choose Source Directory ");
+Dialog.create("Batch Processing");
+Dialog.addCheckbox("Export Pixels to Text", true);
+Dialog.addCheckbox("Export Histograms to Text", true);
+Dialog.addCheckbox("Export Batch Histogram to Text", true);
+Dialog.addString("Save as", "", 20);
+Dialog.show();
+pixels = Dialog.getCheckbox();
+histos = Dialog.getCheckbox();
+batchHisto = Dialog.getCheckbox();
+output = Dialog.getString();
+if (pixels || histos) {
+	list = getFileList(dir);
+	setBatchMode(true);
+	okay = call("loci.slim.SLIM_PlugIn.startBatch");
+//	if (okay) { // doesn't work
+		for (i = 0; i < list.length; i++) {
+			showProgress(i+1, list.length);
+			call("loci.slim.SLIM_PlugIn.batch", dir + list[i], output, pixels, histos);
+		}
+		call("loci.slim.SLIM_PlugIn.endBatch");
+//	}
+}
+if (batchHisto) {
+	list = getFileList(dir);
+	setBatchMode(true);
+	call("loci.slim.SLIM_PlugIn.startBatchHisto");
+	for (i = 0; i < list.length; ++i) {
+		showProgress(i+1, list.length);
+		call("loci.slim.SLIM_PlugIn.batchHisto", dir + list[i], output);
+	}
+	call("loci.slim.SLIM_PlugIn.endBatchHisto");
+}

@@ -39,6 +39,7 @@ import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -69,11 +70,10 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
     private static final int Y_INDEX = 1;
     private static final int C_INDEX = 2;
     private static final int P_INDEX = 3;
-    private static final char TAB = '\t';
-    private static final char EOL = '\n';
+    private static final String TAB = "\t";
 	private String fileName;
 	private boolean append;
-    private FileWriter fileWriter = null;
+    private BufferedWriter bufferedWriter;
     private MathContext context = new MathContext(4, RoundingMode.FLOOR);
 
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
@@ -98,16 +98,18 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
         }
 
         try {
-            fileWriter = new FileWriter(fileName, append);
+            bufferedWriter = new BufferedWriter(new FileWriter(fileName, append));
         } catch (IOException e) {
             IJ.log("exception opening file " + fileName);
             IJ.handleException(e);
         }
 
-        if (null != fileWriter) {
+        if (null != bufferedWriter) {
             try {
 				// title this export
-				fileWriter.write("Export Pixels " + image.getName() + EOL + EOL);
+				bufferedWriter.write("Export Pixels " + image.getName());
+				bufferedWriter.newLine();
+				bufferedWriter.newLine();
 				
                 // look at image dimensions
                 int dimensions[] = image.getDimensions();
@@ -188,8 +190,8 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 
                 } // c loop
 
-				fileWriter.write(EOL);
-                fileWriter.close();
+				bufferedWriter.newLine();
+                bufferedWriter.close();
             }
             catch (IOException e) {
                 System.out.println("Error writing file " + e.getMessage());
@@ -200,28 +202,29 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
     }
 
     private void writeChannelHeader() throws IOException {
-        fileWriter.write("c\t");
+        bufferedWriter.write("c" + TAB);
     }
 
     private void writeChannel(int channel) throws IOException {
-        fileWriter.write(channel + TAB);
+        bufferedWriter.write("" + channel + TAB);
     }
 
     private void writeHeader(FitFunction function) throws IOException {
         switch (function) {
             case SINGLE_EXPONENTIAL:
-                fileWriter.write("A\tT\tZ\tX2\n");
+				bufferedWriter.write("A\tT\tZ\tX2");
                 break;
             case DOUBLE_EXPONENTIAL:
-                fileWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tZ\tX2\n");
+                bufferedWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tZ\tX2");
                 break;
             case TRIPLE_EXPONENTIAL:
-                fileWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tA3\tA3_%\tT3\tZ\tX2\n");
+                bufferedWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tA3\tA3_%\tT3\tZ\tX2");
                 break;
             case STRETCHED_EXPONENTIAL:
-                fileWriter.write("A\tT\tH\tZ\tX2\n");
+                bufferedWriter.write("A\tT\tH\tZ\tX2");
                 break;
         }
+		bufferedWriter.newLine();
     }
 
     private void writeParams(FitFunction function, double[] paramArray) throws IOException {
@@ -233,12 +236,13 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 				double Z  = paramArray[1];
 				double X2 = paramArray[0];
 				
-                fileWriter.write("" +
+                bufferedWriter.write(
                         showParameter(A)  + TAB +
                         showParameter(T)  + TAB +
                         showParameter(Z)  + TAB +
-                        showParameter(X2) + EOL
+						showParameter(X2)
                         );
+				bufferedWriter.newLine();
                 break;
 			}
             case DOUBLE_EXPONENTIAL:
@@ -254,7 +258,7 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 				double A1n = normalize(A1, A1 + A2);
 				double A2n = normalize(A2, A1 + A2);
 				
-                fileWriter.write("" +
+                bufferedWriter.write(
                         showParameter(A1)  + TAB +
 						showParameter(A1n) + TAB +
                         showParameter(T1)  + TAB +
@@ -262,8 +266,9 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 						showParameter(A2n) + TAB +
                         showParameter(T2)  + TAB +
                         showParameter(Z)   + TAB +
-                        showParameter(X2)  + EOL
+                        showParameter(X2)
                         );
+				bufferedWriter.newLine();
                 break;
 			}
             case TRIPLE_EXPONENTIAL:
@@ -282,7 +287,7 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 				double A2n = normalize(A2, A1 + A2 + A3);
 				double A3n = normalize(A3, A1 + A2 + A3);
 				
-                fileWriter.write("" +
+                bufferedWriter.write(
                         showParameter(A1)  + TAB +
 						showParameter(A1n) + TAB +
                         showParameter(T1)  + TAB +
@@ -293,8 +298,9 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 						showParameter(A3n) + TAB +
                         showParameter(T3)  + TAB +
                         showParameter(Z)   + TAB +
-                        showParameter(X2)  + EOL
+                        showParameter(X2)
                         );
+				bufferedWriter.newLine();
                 break;
 			}
             case STRETCHED_EXPONENTIAL:
@@ -305,13 +311,14 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 				double Z  = paramArray[1];
 				double X2 = paramArray[0];
 				
-                fileWriter.write("" +
+                bufferedWriter.write(
                         showParameter(A)  + TAB +
                         showParameter(T)  + TAB +
                         showParameter(H)  + TAB +
                         showParameter(Z)  + TAB +
-                        showParameter(X2) + EOL
+                        showParameter(X2)
                         );
+				bufferedWriter.newLine();
                 break;
 			}
         }
@@ -322,19 +329,19 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 	}
 
     private void writeROIsHeader() throws IOException {
-        fileWriter.write("roi\t");
+        bufferedWriter.write("roi" + TAB);
     }
 
     private void writeROI(int roi) throws IOException {
-        fileWriter.write("" + roi + '\t');
+        bufferedWriter.write("" + roi + TAB);
     }
 
     private void writeXYHeader() throws IOException {
-        fileWriter.write("x\ty\t");
+        bufferedWriter.write("x" + TAB + "y" + TAB);
     }
 
     private void writeXY(int x, int y) throws IOException {
-        fileWriter.write("" + x + '\t' + y + '\t');
+        bufferedWriter.write("" + x + TAB + y + TAB);
     }
 
     private String getFileFromPreferences() {

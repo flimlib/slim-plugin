@@ -429,9 +429,9 @@ public class HistogramDataGroup {
 		_statistics = new HistogramStatistics();
 		int[] bins = null;
 		double[] binValues = null;
-		double[] quartiles = null;
-		int[] quartileIndices = null;
-
+		double[] quartiles = new double[3];
+		int[] quartileIndices = new int[3];
+		
         if (_displayChannels) {
 			// start new histogram bins           
 			bins = new int[binCount];
@@ -456,13 +456,11 @@ public class HistogramDataGroup {
 			for (int i = 0; i < binCount; ++i) {
 				binValues[i] = _minView + i * (_maxView - _minView) / binCount;
 			}
-			
-			// get median and quartiles
-			quartiles       = new double[3];
-			quartileIndices = new int[3];
-			_channel[_channelIndex].findQuartiles(quartiles, quartileIndices,
-					binCount, _minView, _maxView);
 		}
+		
+		// get median and quartiles of current channel
+		_channel[_channelIndex].findQuartiles(quartiles, quartileIndices,
+				binCount, _minView, _maxView);
 		
 		// report results
 		_statistics.setBins(bins);

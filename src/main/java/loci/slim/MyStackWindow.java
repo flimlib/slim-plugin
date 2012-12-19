@@ -63,7 +63,7 @@ public class MyStackWindow extends StackWindow {
                 new AdjustmentListener() {
                     public void adjustmentValueChanged(AdjustmentEvent e) {
                        if (e.getValue() != m_slice) {
-                           //System.out.println("Show slice " + e.getValue());
+                           System.out.println("Show slice " + e.getValue());
                            m_slice = e.getValue();
                            //TODO this does affect the scrollbar, but not the ImagePlus!
                            showSlice(m_slice);

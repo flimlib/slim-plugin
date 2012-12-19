@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.fitting.images;
 
+import ij.IJ;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
@@ -329,6 +330,10 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 
         // check for channel change
         if (_channel != channel) {
+			
+			if (_channel > channel) {
+				IJ.log("retrograde channel " + _channel + " > " + channel);
+			}
             _channel = channel;
             _stackWindow.showSlice(channel + 1);
             _values = _dataChannels[channel].getValues();

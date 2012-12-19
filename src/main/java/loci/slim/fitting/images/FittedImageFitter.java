@@ -70,6 +70,7 @@ public class FittedImageFitter {
     public void setUpFit(
 			String file,
             FittedImageType[] imageTypes,
+			int channel,
 			int ordinal,
             int[] dimension,
             IndexColorModel indexColorModel,
@@ -93,6 +94,7 @@ public class FittedImageFitter {
                     FittedImageFactory.getInstance().createImage(
 					        file,
                             imageType,
+							channel,
 							ordinal,
                             dimension,
                             indexColorModel,

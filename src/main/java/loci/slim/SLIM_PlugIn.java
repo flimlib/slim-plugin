@@ -113,4 +113,49 @@ public class SLIM_PlugIn implements PlugIn {
 		}
 		instance = null;
 	}
+	
+	
+	//TODO ARG EXPERIMENTAL
+	/**
+	 * Starts up batch processing.
+	 *
+	 * @return whether or not successful
+	 */
+	public static boolean startBatchHisto() {
+		boolean success = false;
+		instance = null;
+		if (stack.empty()) {
+			GenericDialog dialog = new GenericDialog("Error in Batch Processing");
+			dialog.addMessage("SLIM Plugin should be running before invoking batch processing macro.");
+			dialog.showDialog();
+		}
+		else {
+			instance = stack.peek();
+			success = instance.startBatchHisto();
+		}
+		return success;
+	}
+
+	/**
+	 * Processes an input file in batch processing.
+	 * 
+	 * @param input file name
+	 * @param output file name
+	 */
+	public static void batchHisto(String input, String output) {
+		if (null != instance) {
+			instance.batchHisto(input, output);
+		}
+	}
+
+	/**
+	 * Ends batch processing.
+	 */
+	public static void endBatchHisto() {
+		if (null != instance) {
+			instance.endBatchHisto();
+		}
+		instance = null;
+	}
+
 }

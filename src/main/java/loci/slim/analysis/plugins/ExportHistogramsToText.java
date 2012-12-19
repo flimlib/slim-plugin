@@ -36,6 +36,7 @@ package loci.slim.analysis.plugins;
 
 import ij.IJ;
 import ij.gui.GenericDialog;
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -68,10 +69,9 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
     private static final int C_INDEX = 2;
     private static final int P_INDEX = 3;
     private static final char TAB = '\t';
-    private static final char EOL = '\n';
 	private String fileName;
 	private boolean append;
-    private FileWriter fileWriter = null;
+    private BufferedWriter bufferedWriter;
     private MathContext context = new MathContext(4, RoundingMode.FLOOR);
 
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
@@ -90,13 +90,13 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 			FitFunction function)
 	{
         try {
-            fileWriter = new FileWriter(fileName, append);
+            bufferedWriter = new BufferedWriter(new FileWriter(fileName, append));
         } catch (IOException e) {
             IJ.log("exception opening file " + fileName);
             IJ.handleException(e);
         }
 
-        if (null != fileWriter) {
+        if (null != bufferedWriter) {
 			
 			// look at image dimensions
 			int[] dimensions = image.getDimensions();
@@ -123,11 +123,15 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 			
 			try {
 				// title this export
-				fileWriter.write("Export Histograms " + image.getName() + EOL + EOL);
+				bufferedWriter.write("Export Histograms " + image.getName());
+				bufferedWriter.newLine();
+				bufferedWriter.newLine();
 				
 				for (int channel = 0; channel < channels; ++channel) {
 					if (channels > 1) {
-					    fileWriter.write("Channel" + TAB + channel + EOL + EOL);
+					    bufferedWriter.write("Channel" + TAB + channel);
+						bufferedWriter.newLine();
+						bufferedWriter.newLine();
 					}
 					
 					for (int i = 0; i < titles.length; ++i) {
@@ -135,45 +139,63 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 						Statistics1 statistics1 = getStatistics1(image, channel, i);
 						
 						if (statistics1.count < MIN_COUNT) {
-							fileWriter.write("Count" + TAB + statistics1.count + EOL);
-							fileWriter.write("Too few pixels for histograms" + EOL + EOL);
+							bufferedWriter.write("Count" + TAB + statistics1.count);
+							bufferedWriter.newLine();
+							bufferedWriter.write("Too few pixels for histograms");
+							bufferedWriter.newLine();
+							bufferedWriter.newLine();
 							
 							// don't process any more parameters; all will have same count
 							break;
 						}
 						else {
-							fileWriter.write("Parameter" + TAB + titles[i] + EOL);
+							bufferedWriter.write("Parameter" + TAB + titles[i]);
+							bufferedWriter.newLine();
 							
 							// second statistical pass through the image
 							Statistics2 statistics2 = getStatistics2(image, channel, i, statistics1.mean, statistics1.range, BINS);
 													
 							// put out statistics
-							fileWriter.write("Min" + TAB + showParameter(statistics1.min) + EOL);
-							fileWriter.write("Max" + TAB + showParameter(statistics1.max) + EOL);
-							fileWriter.write("Count" + TAB + statistics1.count + EOL);
-							fileWriter.write("Mean" + TAB + showParameter(statistics1.mean) + EOL);
-							fileWriter.write("Standard Deviation" + TAB + showParameter(statistics2.standardDeviation) + EOL);
-							fileWriter.write("1st Quartile" + TAB + showParameter(statistics1.quartile[0]) + EOL);
-							fileWriter.write("Median" + TAB + showParameter(statistics1.quartile[1]) + EOL);
-							fileWriter.write("2nd Quartile" + TAB + showParameter(statistics1.quartile[2]) + EOL);
+							bufferedWriter.write("Min" + TAB + showParameter(statistics1.min));
+							bufferedWriter.newLine();
+							bufferedWriter.write("Max" + TAB + showParameter(statistics1.max));
+							bufferedWriter.newLine();
+							bufferedWriter.write("Count" + TAB + statistics1.count);
+							bufferedWriter.newLine();
+							bufferedWriter.write("Mean" + TAB + showParameter(statistics1.mean));
+							bufferedWriter.newLine();
+							bufferedWriter.write("Standard Deviation" + TAB + showParameter(statistics2.standardDeviation));
+							bufferedWriter.newLine();
+							bufferedWriter.write("1st Quartile" + TAB + showParameter(statistics1.quartile[0]));
+							bufferedWriter.newLine();
+							bufferedWriter.write("Median" + TAB + showParameter(statistics1.quartile[1]));
+							bufferedWriter.newLine();
+							bufferedWriter.write("2nd Quartile" + TAB + showParameter(statistics1.quartile[2]));
+							bufferedWriter.newLine();
 
 							// put out histogram
-							fileWriter.write("Histogram" + EOL);
-							fileWriter.write("Bins" + TAB + BINS + EOL);
-							fileWriter.write("Min" + TAB + showParameter(statistics1.range[0]) + EOL);
-							fileWriter.write("Max" + TAB + showParameter(statistics1.range[1]) + EOL);
-							fileWriter.write("Count" + TAB + statistics2.histogramCount + EOL);
+							bufferedWriter.write("Histogram");
+							bufferedWriter.newLine();
+							bufferedWriter.write("Bins" + TAB + BINS);
+							bufferedWriter.newLine();
+							bufferedWriter.write("Min" + TAB + showParameter(statistics1.range[0]));
+							bufferedWriter.newLine();
+							bufferedWriter.write("Max" + TAB + showParameter(statistics1.range[1]));
+							bufferedWriter.newLine();
+							bufferedWriter.write("Count" + TAB + statistics2.histogramCount);
+							bufferedWriter.newLine();
 
 							double[] values = Binning.centerValuesPerBin(BINS, statistics1.range[0], statistics1.range[1]);
 							for (int j = 0; j < statistics2.histogram.length; ++j) {
-								fileWriter.write(showParameter(values[j]) + TAB + statistics2.histogram[j] + EOL);
+								bufferedWriter.write(showParameter(values[j]) + TAB + statistics2.histogram[j]);
+								bufferedWriter.newLine();
 							}
 						}
 					
-						fileWriter.write(EOL);
+						bufferedWriter.newLine();
 					}
 				}
-				fileWriter.close();
+				bufferedWriter.close();
 			}
 			catch (IOException e) {
 				IJ.log("exception writing file " + e.getMessage());
