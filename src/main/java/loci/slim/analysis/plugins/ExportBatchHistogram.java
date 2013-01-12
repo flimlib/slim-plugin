@@ -31,7 +31,7 @@ public class ExportBatchHistogram {
 	private double stdDev = 0.0;
 	
 	public void start() {
-		
+		double pixels[][] = new double[10][0];
 	}
 	
     public void export(Image<DoubleType> image,

@@ -60,7 +60,12 @@ public interface IUserInterfacePanelListener {
      * Quits running plugin.
      */
     public void quit();
-
+	
+	/**
+	 * Opens new file(s).
+	 */
+	public void openFile();
+	
     /**
      * Loads an excitation curve from file.
      *

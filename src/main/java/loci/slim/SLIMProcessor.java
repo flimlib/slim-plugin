@@ -53,7 +53,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.prefs.Preferences;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.filechooser.FileFilter;
 
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.ICurveFitData;
@@ -158,6 +160,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     private static final Character SUB_1  = '\u2081';
     private static final Character SUB_2  = '\u2082';
     private static final Character SUB_3  = '\u2083';
+	
+	private static final File[] NO_FILES_SELECTED = new File[0];
     
     private IUserInterfacePanel _uiPanel;
 
@@ -257,23 +261,54 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param arg
      */
     public void process(String arg) {
-        boolean success = false;
-        if (showFileDialog(getFileFromPreferences())) {
-            _image = loadImage(_path, _file);
-            if (null == _image) {
-                System.out.println("image is null");
-            }
-            if (getImageInfo(_image)) {
-                savePathAndFileInPreferences(_path, _file);
-                success = true;
-            }
-        }
+		
+		// Load initial image
+		boolean success = false;
+		File[] files = showFileDialog(getPathFromPreferences());
+		if (files.length > 1) {
+			showError("Error in Batch Processing", "Need to fit a sample image first");
+            GenericDialog dialog = new GenericDialog("Error in Batch Processing");
+		}
+		else {
+			String[] pathAndFile = getPathAndFile(files[0]);
+			_path = pathAndFile[0];
+			_file = pathAndFile[1];
+			
+			_image = loadImage(_path, _file);
+			if (null == _image) {
+				showError("Error", "Could not load image");
+			}
+			else {
+				if (getImageInfo(_image)) {
+					savePathInPreferences(_path);
+					success = true;
+				}
+			}
+		}
         
         if (success) {
             // show the UI; do fits
             doFits();
         }
     }
+	
+	static final private void showError(String title, String message) {
+        GenericDialog dialog = new GenericDialog(title);
+        dialog.addMessage(message);
+        dialog.hideCancelButton();
+        dialog.showDialog();
+	}
+	
+	static final private String[] getPathAndFile(File file) {
+        String absolutePath = file.getAbsolutePath();
+		int index = absolutePath.lastIndexOf(File.separator);
+		String pathName = absolutePath.substring(0, index);
+		String fileName = absolutePath.substring(index);
+		if (!pathName.endsWith(File.separator)) {
+		    pathName += File.separator;
+        }
+		return new String[] { pathName, fileName };
+	}
 
 	/**
 	 * Start batch processing.
@@ -558,6 +593,43 @@ public class SLIMProcessor <T extends RealType<T>> {
                 public void quit() {
                     _quit = true;
                 }
+				
+				/**
+				 * Open new file(s).
+				 */
+				@Override
+				public void openFile() {
+                   File[] files = showFileDialog(getPathFromPreferences());
+				   if (files.length > 1) {
+					   showError("BATCH", "BATCH");
+					  // doBatchProcessing(files);
+				   }
+				   else {
+					   String savePath = _path;
+					   String saveFile = _file;
+					   
+					   String[] pathAndFile = getPathAndFile(files[0]);
+			           _path = pathAndFile[0];
+			           _file = pathAndFile[1];
+
+			           _image = loadImage(_path, _file);
+			           if (null == _image) {
+				            showError("Error", "Could not load image");
+			           }
+			           else {
+				            if (getImageInfo(_image)) {
+								savePathInPreferences(_path);
+				            }
+							else {
+								// kludgy way to reset
+								_path = savePath;
+								_file = saveFile;
+								_image = loadImage(_path, _file);
+								getImageInfo(_image);
+							}
+			            }
+				    }
+				}
 
                 /**
                  * Loads an excitation curve from file.
@@ -884,17 +956,44 @@ public class SLIMProcessor <T extends RealType<T>> {
     /**
      * Prompts for a FLIM file.
      *
-     * @param defaultFile
-     * @return
+     * @param default path
+     * @return non-null array of Files
      */
-    private boolean showFileDialog(String[] defaultPathAndFile) {
-        OpenDialog dialog = new OpenDialog("Load Data", _path, _file);
-        _path = dialog.getDirectory();
-        _file = dialog.getFileName();
-//        System.out.println("directory is " + dialog.getDirectory());
-//        System.out.println("file is " + dialog.getFileName());
-        return true;
+    final private File[] showFileDialog(String defaultPath) {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(new java.io.File(defaultPath));
+		chooser.setDialogTitle("Open Lifetime Image(s)");
+		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		chooser.setMultiSelectionEnabled(true);
+		
+		// Filter lifetime files only
+		chooser.setFileFilter(new showFileDialogFilter());
+
+		if (chooser.showOpenDialog(ij.ImageJ.getFrames()[0]) == JFileChooser.APPROVE_OPTION) {
+			return chooser.getSelectedFiles();
+		}
+		return NO_FILES_SELECTED;
     }
+	
+	private class showFileDialogFilter extends FileFilter {
+        @Override		
+		public boolean accept(File f) {
+			if (f.getName().endsWith(".ics")) {
+				return true;
+			}
+		    if (f.getName().endsWith(".sdt")) {
+				return true;
+			}
+			if (f.isDirectory()) {
+				return true;
+			}
+			return false;
+		}
+		@Override
+		public String getDescription() {
+			return "Lifetime .ics & .sdt";
+		}
+	}
 	
 	private Image<T> loadImage(String path, String file) {
 		return loadImage(path + file);
@@ -983,29 +1082,23 @@ public class SLIMProcessor <T extends RealType<T>> {
     }
 
     /**
-     * Restores path and file name from Java Preferences.
+     * Restores path name from Java Preferences.
      *
-     * @return String array with path and file name
+     * @return String with path name
      */
-    private String[] getFileFromPreferences() {
+    private String getPathFromPreferences() {
        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-       String path = prefs.get(PATH_KEY, "");
-       String file = prefs.get(FILE_KEY, "");
-       
-       //System.out.println("path " + path + " file " + file);
-       return new String[] { prefs.get(PATH_KEY, ""), prefs.get(FILE_KEY, "") };
+       return prefs.get(PATH_KEY, "");
     }
 
     /**
-     * Saves the path and file names to Java Preferences.
+     * Saves the path name to Java Preferences.
      *
      * @param path
-     * @param file
      */
-    private void savePathAndFileInPreferences(String path, String file) {
+    private void savePathInPreferences(String path) {
         Preferences prefs = Preferences.userNodeForPackage(this.getClass());
         prefs.put(PATH_KEY, path);
-        prefs.put(FILE_KEY, file);
     }
 
     /*

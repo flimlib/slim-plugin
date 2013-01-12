@@ -271,6 +271,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	JLabel _errorLabel4;
     JCheckBox _startParam4;
 
+	JButton _openButton;
     JButton _quitButton;
     JButton _fitButton;
     String _fitButtonText = FIT_IMAGE;
@@ -347,6 +348,18 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
         buttonPanel.add(Box.createHorizontalGlue());
+		_openButton = new JButton("New File");
+		_openButton.addActionListener(
+		    new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (null != _listener) {
+						_listener.openFile();
+					}
+				}
+		    }
+		);
+		buttonPanel.add(_openButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         _quitButton = new JButton("Quit");
         _quitButton.addActionListener(
             new ActionListener() {
