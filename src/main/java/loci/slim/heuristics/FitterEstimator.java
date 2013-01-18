@@ -5,7 +5,7 @@
 /*
 SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2010, UW-Madison LOCI
+Copyright (c) 2010-2013, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,6 @@ import loci.curvefitter.IFitterEstimator;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class FitterEstimator implements IFitterEstimator {
-    private static final int BINS = 256;
-    private static final boolean oldWay = false;
 
     @Override
     public double getDefaultA() {
@@ -186,20 +184,7 @@ public class FitterEstimator implements IFitterEstimator {
     }
 
     public int endValueToBin(double value, double inc) {
-        int returnValue = 0;
-        if (oldWay) {
-            returnValue = (int) Math.floor(value / inc) + 1;
-            if (returnValue < 0) {
-                System.out.println("endValueToBin bins is negative!!:" + returnValue);
-            }
-            else if (returnValue >= BINS) {
-                System.out.println("endValueToBin bins is >= BINS " + returnValue);
-            }
-        }
-        else {
-            returnValue = roundToNearestInteger(value / inc);
-        }
-        return returnValue;
+        return roundToNearestInteger(value / inc);
     }
 
 
@@ -213,20 +198,7 @@ public class FitterEstimator implements IFitterEstimator {
      */
     @Override
     public int valueToBin(double value, double inc) {
-        int returnValue = 0;
-        if (oldWay) {
-            returnValue = (int) Math.ceil(value / inc);
-            if (returnValue < 0) {
-                System.out.println("valueToBin returnValue is negative!!: " + returnValue);
-            }
-            else if (returnValue >= BINS) {
-                System.out.println("valueToBin returnValue is > bins!!:" + returnValue);
-            }
-        }
-        else {
-            returnValue = roundToNearestInteger(value / inc);
-        }
-        return returnValue;
+        return roundToNearestInteger(value / inc);
     }
 
     /**
@@ -239,14 +211,7 @@ public class FitterEstimator implements IFitterEstimator {
      */
     @Override
     public double binToValue(int bin, double inc) {
-        double returnValue = 0;
-        if (oldWay) {
-            returnValue = bin * inc;
-        }
-        else {
-            returnValue = roundToDecimalPlaces(bin * inc, 4);
-        }
-        return returnValue;
+        return roundToDecimalPlaces(bin * inc, 4);
     }
  
     @Override

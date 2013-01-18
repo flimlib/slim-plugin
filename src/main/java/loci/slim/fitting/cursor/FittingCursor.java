@@ -5,7 +5,7 @@
 /*
 SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2010, UW-Madison LOCI
+Copyright (c) 2010-2013, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,12 +42,8 @@ import java.util.Set;
 import loci.curvefitter.IFitterEstimator;
 
 /**
- * Keeps cursor information.  Note that the actual fit process only deals with
- * bin number indices, but we need to keep the time value to be compatible
- * with TRI2.  Also time value is more meaningful to user looking at graph.
- * 
- * Historically I developed SLIM Plugin using bin indices.  I left the capability
- * to show bins in the UI, but that hasn't been tested exhaustively.
+ * Keeps cursor information.  Cursors mark the sections of the excitation
+ * histogram and the transient histogram that will be used for fitting.
  * 
  * @author Aivar Grislis
  */

@@ -81,6 +81,14 @@ public interface IUserInterfacePanelListener {
      * @return whether successful
      */
     public boolean createExcitation(String fileName);
+	
+    /**
+     * Estimates an excitation curve from current X, Y and saves to file.
+     *
+     * @param fileName
+     * @return whether successful
+     */
+    public boolean estimateExcitation(String fileName);
 
     /**
      * Cancels the current excitation curve, if any.

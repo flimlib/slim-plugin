@@ -666,6 +666,51 @@ public class SLIMProcessor <T extends RealType<T>> {
                 }
 
                 /**
+                 * Estimates an excitation curve from current X, Y and saves to file.
+                 *
+                 * @param fileName
+                 * @return whether successful
+                 */
+                @Override
+                public boolean estimateExcitation(String fileName) {
+					System.out.println("ESTIMATE EXCITATION");
+                    int channel = 0;
+                    if (null != _grayScaleImage) {
+                        channel = _grayScaleImage.getChannel();
+                    }
+                    int x = uiPanel.getX();
+                    int y = uiPanel.getY();
+                    double[] inValues = new double[_bins];
+                    for (int b = 0; b < _bins; ++b) {
+                        inValues[b] = getData(_cursor, channel, x, y, b);
+                    }
+					//TODO EXPERIMENTAL SPC IMAGE STYLE ESTIMATION
+					double peak = Double.MIN_VALUE;
+					int peakBin = 0;
+					for (int b = 0; b < _bins; ++b) {
+						if (inValues[b] > peak) {
+							peak = inValues[b];
+							peakBin = b;
+						}
+					}
+					System.out.println("PEAK VALUE " + peak + " BIN " + peakBin);
+					double[] outValues = new double[_bins];
+					for (int b = 0; b < peakBin; ++b) {
+						outValues[b] = inValues[b + 1] - inValues[b];
+					}
+					for (int b = peakBin; b < _bins; ++b) {
+						outValues[b] = 0.0;
+					}
+					//TODO END EXPERIMENTAL
+					for (double oV : outValues) {
+						System.out.println(" " + oV);
+					}
+					
+                    Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, outValues, _timeRange);
+                    return updateExcitation(uiPanel, excitation);
+                }
+				
+				/**
                  * Cancels the current excitation curve, if any.
                  *
                  */
@@ -1584,6 +1629,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		title += _file.substring(0, _file.lastIndexOf('.'));
         showDecayGraph(title, uiPanel, _fittingCursor,
                 dataArray[visibleChannel], photons);
+		//TODO AIC experimental code; second parameter is actually AIC
         uiPanel.setParameters(dataArray[visibleChannel].getParams(), dataArray[visibleChannel].getChiSquare());
 
         // get the results
@@ -1708,6 +1754,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         imagePlus.show();  
 
         // update UI parameters
+		//TODO AIC experimental code; second parameter is actually AIC
         uiPanel.setParameters(dataArray[0].getParams(), dataArray[0].getChiSquare()); //TODO, just picked first ROI here!
 
         // get the results
@@ -1832,6 +1879,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                 dataArray[visibleChannel], photons); //TODO ARG this s/b the photon count for the appropriate channel; currently it will sum all channels.
 
         // update UI parameters
+		//TODO experimental AIC code; second parameter is actually AIC
         uiPanel.setParameters(dataArray[visibleChannel].getParams(), dataArray[visibleChannel].getChiSquare());
         
         // get the results

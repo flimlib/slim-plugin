@@ -123,7 +123,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
     private static final String EXCITATION_NONE = "None",
                                 EXCITATION_FILE = "Load from File",
-                                EXCITATION_CREATE = "Use current X Y";
+                                EXCITATION_CREATE = "Use current X Y",
+			                    EXCITATION_ESTIMATE = "Estimate from current X Y";
 
     private static final String FIT_IMAGE = "Fit Images",
                                 FIT_PIXEL = "Fit Pixel",
@@ -163,7 +164,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                                 TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN, NONE },    
                                 STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, NONE };    
     
-    private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE };
+    private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE, EXCITATION_ESTIMATE };
     
     private FittingCursorHelper _fittingCursorHelper;
     private IFitterEstimator _fitterEstimator;
@@ -737,6 +738,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                             isExcitationLoaded = _listener.createExcitation(directory + fileName);
                         }
                     }
+					else if (EXCITATION_ESTIMATE.equals(selectedItem)) {
+						SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+						String directory = dialog.getDirectory();
+						String fileName = dialog.getFileName();
+						if (null != fileName && !fileName.equals("") && null != _listener) {
+							isExcitationLoaded = _listener.estimateExcitation(directory + fileName);
+						}
+					}
 
                     if (isExcitationLoaded) {
                         _promptComboBox.setSelectedItem(EXCITATION_FILE);

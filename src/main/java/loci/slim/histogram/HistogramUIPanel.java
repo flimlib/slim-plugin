@@ -92,7 +92,7 @@ public class HistogramUIPanel extends JPanel {
         _excludePixels      = false;
         _combineChannels    = false;
         _displayChannels    = false;
-		_logarithmicDisplay = true;
+		_logarithmicDisplay = false;
         _minLUT = _maxLUT = 0.0;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
