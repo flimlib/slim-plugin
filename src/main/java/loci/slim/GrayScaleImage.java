@@ -244,6 +244,10 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		_maskGroupSet = new HashSet<IMaskGroup>();
     }
 	
+	public void close() {
+		_stackWindow.close();
+	}
+	
 	public void hideCursor() {
 		_cursorRoi.setLocation(-CURSOR_WIDTH, -CURSOR_HEIGHT);
 		_imagePlus.draw();

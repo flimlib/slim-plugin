@@ -52,6 +52,12 @@ import loci.slim.mask.Mask;
  */
 public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate, ICursorListener, IErrorListener, IMaskGroupListener {
 
+	/**
+	 * Closes down the grayscale image window.
+	 * 
+	 */
+	public void close();
+
     /**
      * Sets a listener for when the user clicks on the image.
      *

@@ -619,6 +619,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 			           else {
 				            if (getImageInfo(_image)) {
 								savePathInPreferences(_path);
+
+								// close existing grayscale and hook up a new one
+								_grayScaleImage.close();
+								showGrayScaleAndFit(uiPanel);
 				            }
 							else {
 								// kludgy way to reset
@@ -782,7 +786,54 @@ public class SLIMProcessor <T extends RealType<T>> {
         );
         uiPanel.getFrame().setLocationRelativeTo(null);
         uiPanel.getFrame().setVisible(true);
+		
+		showGrayScaleAndFit(uiPanel);
 
+        // processing loop; waits for UI panel input
+        while (!_quit) {
+            while (!_fitInProgress) {
+                try {
+                    Thread.sleep(1000);
+                }
+                catch (InterruptedException e) {
+
+                }
+                if (_quit) {
+                    hideUIPanel(uiPanel);
+                    return;
+                }
+            }
+
+            //uiPanel.enable(false); //TODO this might be better to be same as grayScalePanel
+            _grayScaleImage.enable(false);
+
+            // get settings of requested fit
+            getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
+
+			if (_refit) {
+				if (_summed) {
+					fitSummed(_uiPanel, _fittingCursor);
+				}
+				else {
+					fitPixel(_uiPanel, _fittingCursor);
+				}
+				_refit = false;
+			}
+			else {
+				// do the fit
+				fitData(uiPanel);
+				_summed = uiPanel.getRegion() == FitRegion.SUMMED;
+			}
+
+            _fitInProgress = false;
+            //uiPanel.enable(true);
+            _grayScaleImage.enable(true);
+            uiPanel.reset();
+        }
+        hideUIPanel(uiPanel);
+    }
+	
+	private void showGrayScaleAndFit(final IUserInterfacePanel uiPanel) {
         // create a grayscale image from the data
         _grayScaleImage = new GrayScaleImage(_image);
         _grayScaleImage.setListener(
@@ -831,50 +882,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         // fit on the brightest pixel
         getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
         fitPixel(uiPanel, _fittingCursor);
-
-        // processing loop; waits for UI panel input
-        while (!_quit) {
-            while (!_fitInProgress) {
-                try {
-                    Thread.sleep(1000);
-                }
-                catch (InterruptedException e) {
-
-                }
-                if (_quit) {
-                    hideUIPanel(uiPanel);
-                    return;
-                }
-            }
-
-            //uiPanel.enable(false); //TODO this might be better to be same as grayScalePanel
-            _grayScaleImage.enable(false);
-
-            // get settings of requested fit
-            getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
-
-			if (_refit) {
-				if (_summed) {
-					fitSummed(_uiPanel, _fittingCursor);
-				}
-				else {
-					fitPixel(_uiPanel, _fittingCursor);
-				}
-				_refit = false;
-			}
-			else {
-				// do the fit
-				fitData(uiPanel);
-				_summed = uiPanel.getRegion() == FitRegion.SUMMED;
-			}
-
-            _fitInProgress = false;
-            //uiPanel.enable(true);
-            _grayScaleImage.enable(true);
-            uiPanel.reset();
-        }
-        hideUIPanel(uiPanel);
-    }
+	}
 
     private void hideUIPanel(IUserInterfacePanel uiPanel) {
         _grayScaleImage.setListener(null);
