@@ -42,7 +42,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.prefs.*;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
@@ -61,18 +63,13 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
 public class ExportHistogramsToText implements ISLIMAnalyzer {
 	private static final int BINS = 256;
 	private static final long MIN_COUNT = 3;
-	private static final String NAN = "NaN";
     private static final String FILE_KEY = "export_histograms_to_text/file";
 	private static final String APPEND_KEY = "export_histograms_to_text/append";
-    private static final int X_INDEX = 0;
-    private static final int Y_INDEX = 1;
-    private static final int C_INDEX = 2;
-    private static final int P_INDEX = 3;
+    private static final int CHANNEL_INDEX = 2;
     private static final char TAB = '\t';
 	private String fileName;
 	private boolean append;
     private BufferedWriter bufferedWriter;
-    private MathContext context = new MathContext(4, RoundingMode.FLOOR);
 
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
 		// need entire fitted image
@@ -85,48 +82,30 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 			}
 		}
     }
-
+	
     public void export(String fileName, boolean append, Image<DoubleType> image,
 			FitFunction function)
 	{
         try {
             bufferedWriter = new BufferedWriter(new FileWriter(fileName, append));
-        } catch (IOException e) {
+        }
+		catch (IOException e) {
             IJ.log("exception opening file " + fileName);
             IJ.handleException(e);
         }
-
-        if (null != bufferedWriter) {
-			
-			// look at image dimensions
-			int[] dimensions = image.getDimensions();
-            int width    = dimensions[X_INDEX];
-            int height   = dimensions[Y_INDEX];
-            int channels = dimensions[C_INDEX];
-
-			// get titles of parameters in parameter order
-			String[] titles = null;
-			switch (function) {
-				case SINGLE_EXPONENTIAL:
-					titles = new String[] { "X2", "Z", "A", "T" };
-					break;
-				case DOUBLE_EXPONENTIAL:
-					titles = new String[] { "X2", "Z", "A1", "T1", "A2", "T2" };
-					break;
-				case TRIPLE_EXPONENTIAL:
-					titles = new String[] { "X2", "Z", "A1", "T1", "A2", "T2", "A3", "T3" };
-					break;
-				case STRETCHED_EXPONENTIAL:
-					titles = new String[] { "X2", "Z", "A", "T", "H" };
-					break;
-			}
-			
+		
+		if (null != bufferedWriter) {
 			try {
 				// title this export
 				bufferedWriter.write("Export Histograms " + image.getName());
 				bufferedWriter.newLine();
 				bufferedWriter.newLine();
 				
+				// look at image dimensions
+				int[] dimensions = image.getDimensions();
+				int channels = dimensions[CHANNEL_INDEX];
+
+				// for all channels
 				for (int channel = 0; channel < channels; ++channel) {
 					if (channels > 1) {
 					    bufferedWriter.write("Channel" + TAB + channel);
@@ -134,75 +113,81 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 						bufferedWriter.newLine();
 					}
 					
-					for (int i = 0; i < titles.length; ++i) {
-						// first statistical pass through the image
-						Statistics1 statistics1 = getStatistics1(image, channel, i);
-						
-						if (statistics1.count < MIN_COUNT) {
-							bufferedWriter.write("Count" + TAB + statistics1.count);
-							bufferedWriter.newLine();
-							bufferedWriter.write("Too few pixels for histograms");
-							bufferedWriter.newLine();
-							bufferedWriter.newLine();
-							
-							// don't process any more parameters; all will have same count
+					HistogramStatistics[] statisticsArray = getStatistics(image,
+							channel, function);
+					
+					for (HistogramStatistics statistics : statisticsArray) {
+						// end early if count is too low
+						if (!statistics.export(bufferedWriter)) {
 							break;
 						}
-						else {
-							bufferedWriter.write("Parameter" + TAB + titles[i]);
-							bufferedWriter.newLine();
-							
-							// second statistical pass through the image
-							Statistics2 statistics2 = getStatistics2(image, channel, i, statistics1.mean, statistics1.range, BINS);
-													
-							// put out statistics
-							bufferedWriter.write("Min" + TAB + showParameter(statistics1.min));
-							bufferedWriter.newLine();
-							bufferedWriter.write("Max" + TAB + showParameter(statistics1.max));
-							bufferedWriter.newLine();
-							bufferedWriter.write("Count" + TAB + statistics1.count);
-							bufferedWriter.newLine();
-							bufferedWriter.write("Mean" + TAB + showParameter(statistics1.mean));
-							bufferedWriter.newLine();
-							bufferedWriter.write("Standard Deviation" + TAB + showParameter(statistics2.standardDeviation));
-							bufferedWriter.newLine();
-							bufferedWriter.write("1st Quartile" + TAB + showParameter(statistics1.quartile[0]));
-							bufferedWriter.newLine();
-							bufferedWriter.write("Median" + TAB + showParameter(statistics1.quartile[1]));
-							bufferedWriter.newLine();
-							bufferedWriter.write("2nd Quartile" + TAB + showParameter(statistics1.quartile[2]));
-							bufferedWriter.newLine();
-
-							// put out histogram
-							bufferedWriter.write("Histogram");
-							bufferedWriter.newLine();
-							bufferedWriter.write("Bins" + TAB + BINS);
-							bufferedWriter.newLine();
-							bufferedWriter.write("Min" + TAB + showParameter(statistics1.range[0]));
-							bufferedWriter.newLine();
-							bufferedWriter.write("Max" + TAB + showParameter(statistics1.range[1]));
-							bufferedWriter.newLine();
-							bufferedWriter.write("Count" + TAB + statistics2.histogramCount);
-							bufferedWriter.newLine();
-
-							double[] values = Binning.centerValuesPerBin(BINS, statistics1.range[0], statistics1.range[1]);
-							for (int j = 0; j < statistics2.histogram.length; ++j) {
-								bufferedWriter.write(showParameter(values[j]) + TAB + statistics2.histogram[j]);
-								bufferedWriter.newLine();
-							}
-						}
-					
-						bufferedWriter.newLine();
 					}
 				}
 				bufferedWriter.close();
 			}
-			catch (IOException e) {
-				IJ.log("exception writing file " + e.getMessage());
-				IJ.handleException(e);
+			catch (IOException exception) {
+				IJ.log("exception writing to file " + fileName);
+				IJ.handleException(exception);
 			}
 		}
-    }
+	}
+	
+	public HistogramStatistics[] getStatistics(Image<DoubleType> image,
+			int channel, FitFunction function)
+	{
+		// get titles of parameters in parameter index order
+		String[] titles = null;
+		switch (function) {
+			case SINGLE_EXPONENTIAL:
+				titles = new String[] { "X2", "Z", "A", "T" };
+				break;
+			case DOUBLE_EXPONENTIAL:
+				titles = new String[] { "X2", "Z", "A1", "T1", "A2", "T2" };
+				break;
+			case TRIPLE_EXPONENTIAL:
+				titles = new String[] { "X2", "Z", "A1", "T1", "A2", "T2", "A3", "T3" };
+				break;
+			case STRETCHED_EXPONENTIAL:
+				titles = new String[] { "X2", "Z", "A", "T", "H" };
+				break;
+		}
+		
+		HistogramStatistics[] statistics = new HistogramStatistics[titles.length];
+		
+		for (int index = 0; index < titles.length; ++index) {
+			statistics[index] = getStatistics(titles[index], image, channel, index);
+			statistics[index].setTitle(titles[index]);
+		}
+		
+		return statistics;
+	}
+	
+	public HistogramStatistics getStatistics(String title,
+			Image<DoubleType> image, int channel, int index)
+	{
+		// first pass through image
+		Statistics1 statistics1 = getStatistics1(image, channel, index);
+		
+		// second statistical pass through the image
+		Statistics2 statistics2 = getStatistics2(image, channel, index, statistics1.mean, statistics1.range, BINS);
+		
+		HistogramStatistics statistics = new HistogramStatistics();
+		statistics.setTitle(title);
+		statistics.setCount(statistics1.count);
+		statistics.setMin(statistics1.min);
+		statistics.setMax(statistics1.max);
+		statistics.setFirstQuartile(statistics1.quartile[0]);
+		statistics.setMedian(statistics1.quartile[1]);
+		statistics.setThirdQuartile(statistics1.quartile[2]);
+		statistics.setMean(statistics1.mean);
+		statistics.setStandardDeviation(statistics2.standardDeviation);
+		statistics.setHistogramCount(statistics2.histogramCount);
+		statistics.setMinRange(statistics1.range[0]);
+		statistics.setMaxRange(statistics1.range[1]);
+		statistics.setHistogram(statistics2.histogram);
+		
+		return statistics;
+	}
 
 	/**
 	 * First pass through the image, gathering statistics.
@@ -424,12 +409,4 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		append   = dialog.getNextBoolean();
 		return true;
     }
-
-    private String showParameter(double parameter) {
-		String returnValue = NAN;
-		if (!Double.isNaN(parameter)) {
-			returnValue = BigDecimal.valueOf(parameter).round(context).toEngineeringString();
-		}
-        return returnValue;
-	}
 }

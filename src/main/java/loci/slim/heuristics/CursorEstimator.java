@@ -253,7 +253,7 @@ public class CursorEstimator {
             returnValue[TRANSIENT_START] = transStartIndex;
             returnValue[DATA_START]      = startt;
             returnValue[TRANSIENT_STOP]  = transEndIndex;
-            endGame(returnValue);
+            checkValues(returnValue);
             return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
         }      
         double[] adjustedPrompt = ExcitationScaler.scale(prompt, startp, endp, baseline, xInc, decay.length);
@@ -321,7 +321,7 @@ public class CursorEstimator {
             returnValue[TRANSIENT_STOP]  = transEndIndex;
             
             --returnValue[TRANSIENT_STOP];
-            endGame(returnValue);
+            checkValues(returnValue);
             
             return returnValue; //TODO do estimate resets/frees???
         }
@@ -340,11 +340,11 @@ public class CursorEstimator {
         returnValue[TRANSIENT_START] = transStartIndex;
         returnValue[DATA_START]      = transFitStartIndex;
         returnValue[TRANSIENT_STOP]  = transEndIndex;
-        endGame(returnValue);
+        checkValues(returnValue);
         return returnValue;
     }
     
-    private static void endGame(double[] value) {
+    private static void checkValues(double[] value) {
         //TODO ARG patches a bug!:
         if (value[DATA_START] < value[TRANSIENT_START]) {
             if (value[DATA_START] < 0.0) {

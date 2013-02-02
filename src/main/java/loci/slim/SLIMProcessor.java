@@ -74,6 +74,7 @@ import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.analysis.plugins.ExportBatchHistogram;
 import loci.slim.analysis.plugins.ExportHistogramsToText;
 import loci.slim.analysis.plugins.ExportPixelsToText;
+import loci.slim.analysis.plugins.ExportSummaryToText;
 import loci.slim.fitting.ErrorManager;
 import loci.slim.fitting.IErrorListener;
 import loci.slim.preprocess.ISLIMBinner;
@@ -178,6 +179,13 @@ public class SLIMProcessor <T extends RealType<T>> {
     private String _file;
     private String _path;
     private Hashtable<String, Object> _globalMetadata;
+	
+	private static final String EXPORT_PIXELS_KEY = "exportpixels";
+	private static final String PIXELS_FILE_KEY = "pixelsfile";
+	private static final String EXPORT_HISTOS_KEY = "exporthistograms";
+	private static final String HISTOS_FILE_KEY = "histogramsfile";
+	private static final String EXPORT_SUMMARY_KEY = "exportsummary";
+	private static final String SUMMARY_FILE_KEY = "summaryfile";
 
     private Image<T> _image;
     private LocalizableByDimCursor<T> _cursor;
@@ -333,7 +341,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 */
 	public void batch(String input, String output, boolean exportPixels, boolean exportHistograms) {
 		// first time through, delete existing output text file
-		if (_firstBatch) {
+		if (_firstBatch) { 
 			_firstBatch = false;
 			_batchBins = _bins;
 			try {
@@ -601,8 +609,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 				public void openFile() {
                    File[] files = showFileDialog(getPathFromPreferences());
 				   if (files.length > 1) {
-					   showError("BATCH", "BATCH");
-					  // doBatchProcessing(files);
+					   batchProcessingWithUI(files);
 				   }
 				   else {
 					   String savePath = _path;
@@ -617,12 +624,14 @@ public class SLIMProcessor <T extends RealType<T>> {
 				            showError("Error", "Could not load image");
 			           }
 			           else {
+						System.out.println("bins was " + _bins);
 				            if (getImageInfo(_image)) {
 								savePathInPreferences(_path);
 
 								// close existing grayscale and hook up a new one
 								_grayScaleImage.close();
 								showGrayScaleAndFit(uiPanel);
+						System.out.println("bins becomes " + _bins);
 				            }
 							else {
 								// kludgy way to reset
@@ -884,6 +893,182 @@ public class SLIMProcessor <T extends RealType<T>> {
         fitPixel(uiPanel, _fittingCursor);
 	}
 
+	/**
+	 * Handles UI for batch processing.  Invokes batch processing.
+	 * 
+	 * @param files 
+	 */
+	private void batchProcessingWithUI(File[] files) {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+
+		boolean exportPixels = prefs.getBoolean(EXPORT_PIXELS_KEY, true);
+		String pixelsFile = prefs.get(PIXELS_FILE_KEY, "pixels");
+		boolean exportHistograms = prefs.getBoolean(EXPORT_HISTOS_KEY, true);
+		String histogramsFile = prefs.get(HISTOS_FILE_KEY, "histograms");
+		boolean exportSummary = prefs.getBoolean(EXPORT_SUMMARY_KEY, true);
+		String summaryFile = prefs.get(SUMMARY_FILE_KEY, "summary");
+		
+		GenericDialog dialog = new GenericDialog("Batch Processing");
+		dialog.addCheckbox("Export pixels", exportPixels);
+		dialog.addStringField("Pixels file", pixelsFile);
+		dialog.addCheckbox("Export histograms", exportHistograms);
+		dialog.addStringField("Histogram file", histogramsFile);
+		dialog.addCheckbox("Export summary histogram", exportSummary);
+		dialog.addStringField("Summary file", summaryFile);
+		dialog.showDialog();
+		if (dialog.wasCanceled()) {
+			return;
+		}
+		
+		exportPixels = dialog.getNextBoolean();
+		pixelsFile = dialog.getNextString();
+		exportHistograms = dialog.getNextBoolean();
+		histogramsFile = dialog.getNextString();
+		exportSummary = dialog.getNextBoolean();
+		summaryFile = dialog.getNextString();
+		
+		prefs.putBoolean(EXPORT_PIXELS_KEY, exportPixels);
+		prefs.put(PIXELS_FILE_KEY, pixelsFile);
+		prefs.putBoolean(EXPORT_HISTOS_KEY, exportHistograms);
+		prefs.put(HISTOS_FILE_KEY, histogramsFile);
+		prefs.putBoolean(EXPORT_SUMMARY_KEY, exportSummary);
+		prefs.put(SUMMARY_FILE_KEY, summaryFile);
+		
+		batchProcessing(exportPixels, pixelsFile,
+				exportHistograms, histogramsFile,
+				exportSummary, summaryFile,
+				files);
+	}
+
+	/**
+	 * Does the batch processing.
+	 * 
+	 * @param exportPixels
+	 * @param pixelsFile
+	 * @param exportHistograms
+	 * @param histogramsFile
+	 * @param exportSummary
+	 * @param summaryFile
+	 * @param files 
+	 */
+	private void batchProcessing(boolean exportPixels, String pixelsFile,
+			boolean exportHistograms, String histogramsFile,
+			boolean exportSummary, String summaryFile,
+			File[] files)
+	{
+		ExportPixelsToText pixels = null;
+		ExportHistogramsToText histograms = null;
+		ExportSummaryToText summary = null;
+		
+		// validate file names
+		if (exportPixels) {
+			if (!checkFileName(pixelsFile)) {
+				return;
+			}
+			pixels = new ExportPixelsToText();
+		}
+		if (exportHistograms) {
+			if (!checkFileName(histogramsFile)) {
+				return;
+			}
+			histograms = new ExportHistogramsToText();
+		}
+		if (exportSummary) {
+			if (!checkFileName(summaryFile)) {
+				return;
+			}
+			summary = new ExportSummaryToText();
+			summary.init(_function);
+		}
+
+		// ugly use of globals, leftover from batch macro kludge
+		_batchBins = _bins;
+		
+		try {
+			for (File file : files) {
+				System.out.println("file " + file);
+				// close last image
+				if (null != _image) {
+					_image.close();
+				}
+
+				// load batched image
+				_image = loadImage(file.getCanonicalPath());
+				getImageInfo(_image);
+				
+				if (_batchBins != _bins) {
+					GenericDialog dialog = new GenericDialog("Error in Batch Processing");
+					String imageName = file.getCanonicalPath();
+					imageName = imageName.substring(imageName.lastIndexOf(File.separatorChar) + 1);
+					dialog.addMessage("Settings are for " + _batchBins + " bins, " + imageName + " has " + _bins + " bins.");
+					//dialog.hideCancelButton();
+					dialog.showDialog();
+					if (dialog.wasCanceled()) {
+						// Cancel cancels rest of batch; OK continues
+						_batchError = true;
+						break;
+					}
+				}
+
+				// fit batched image with current UI settings, channel 1, batch mode
+				Image<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
+				
+				if (exportPixels) {
+					pixels.export(pixelsFile, true, fittedImage, _region, _function);
+				}
+				if (exportHistograms) {
+					histograms.export(histogramsFile, true, fittedImage, _function);
+				}
+				if (exportSummary) {
+					summary.process(fittedImage);
+				}
+			}
+			
+			if (exportSummary) {
+				summary.export(summaryFile);
+			}
+		}
+		catch (Exception e) {
+			IJ.log("Exception: " + e.getMessage() + " " + e.toString());
+			for (StackTraceElement el : e.getStackTrace()) {
+				IJ.log("   " + el.toString());
+			}
+		}
+		
+		// close last image
+		if (null != _image) {
+			_image.close();
+		}
+		
+		// restore current image
+		_image = loadImage(_path, _file);
+		getImageInfo(_image);
+		
+		// enable UI
+		_uiPanel.reset();
+	}
+	
+	private boolean checkFileName(String fileName) {
+		try {
+			// open and truncate
+			FileWriter fileWriter = new FileWriter(fileName, false);
+			fileWriter.flush();
+			fileWriter.close();
+			
+			//TODO
+			File file = new File(fileName);
+			System.out.println("file is " + file.getCanonicalPath());
+			return true;
+		}
+		catch (IOException e) {
+			GenericDialog dialog = new GenericDialog("Error in Batch Processing");
+			dialog.addMessage("Problem writing to file: " + fileName);
+			dialog.hideCancelButton();
+			dialog.showDialog();
+			return false;
+		}
+	}
+
     private void hideUIPanel(IUserInterfacePanel uiPanel) {
         _grayScaleImage.setListener(null);
         //TODO uiPanel is still hooked up as start stop listeners to decay curves!
@@ -1018,12 +1203,26 @@ public class SLIMProcessor <T extends RealType<T>> {
 		chooser.setDialogTitle("Open Lifetime Image(s)");
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		chooser.setMultiSelectionEnabled(true);
-		
-		// Filter lifetime files only
 		chooser.setFileFilter(new showFileDialogFilter());
 
 		if (chooser.showOpenDialog(ij.ImageJ.getFrames()[0]) == JFileChooser.APPROVE_OPTION) {
-			return chooser.getSelectedFiles();
+			File[] files = chooser.getSelectedFiles();
+			List<File> fileList = new ArrayList<File>();
+			for (File file : files) {
+				if (file.isDirectory()) {
+					for (File f : file.listFiles()) {
+						if (f.getName().endsWith(ICS_SUFFIX)
+								|| f.getName().endsWith(SDT_SUFFIX))
+						{
+							fileList.add(f);
+						}
+					}
+				}
+				else {
+					fileList.add(file);
+				}
+			}
+			return fileList.toArray(new File[fileList.size()]);
 		}
 		return NO_FILES_SELECTED;
     }
@@ -1031,10 +1230,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private class showFileDialogFilter extends FileFilter {
         @Override		
 		public boolean accept(File f) {
-			if (f.getName().endsWith(".ics")) {
+			if (f.getName().endsWith(ICS_SUFFIX)) {
 				return true;
 			}
-		    if (f.getName().endsWith(".sdt")) {
+		    if (f.getName().endsWith(SDT_SUFFIX)) {
 				return true;
 			}
 			if (f.isDirectory()) {
