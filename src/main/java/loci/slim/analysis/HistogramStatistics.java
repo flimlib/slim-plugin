@@ -32,8 +32,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.analysis.plugins;
+package loci.slim.analysis;
 
+import loci.slim.analysis.Binning;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.math.BigDecimal;

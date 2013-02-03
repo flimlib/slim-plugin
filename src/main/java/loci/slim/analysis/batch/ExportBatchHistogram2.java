@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package loci.slim.analysis.plugins;
+package loci.slim.analysis.batch;
 
+import loci.slim.analysis.Binning;
 import loci.curvefitter.ICurveFitter;
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
@@ -13,25 +14,22 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  *
  * @author aivar
  */
-public class ExportBatchHistogram {
+public class ExportBatchHistogram2 {
 	private static final int BINS = 10000;
-	private static final double TOTAL_MEAN = 2.845409822318876;
-	private static final double IN_RANGE_MEAN = 1.8612174728965587;
 	private int _paramT = 2;
-	private long[] _histoT = new long[BINS];
+	private HistoBin[] _histoT = new HistoBin[BINS];
 	private long _histoTUnder = 0;
 	private long _histoTOver = 0;
 	private double _histoTMax = 10.0;
 	private double _histoTMin = 0.0;
 	private double totalSum = 0.0;
 	private long totalCount = 0;
-	private double totalStdDev = 0.0;
 	private double sum = 0.0;
 	private long count = 0;
 	private double stdDev = 0.0;
 	
 	public void start() {
-		double pixels[][] = new double[10][0];
+		
 	}
 	
     public void export(Image<DoubleType> image,
@@ -62,13 +60,14 @@ public class ExportBatchHistogram {
 					}
 					else {
 						int bin = Binning.valueToBin(BINS, _histoTMin, _histoTMax, value);
+						HistoBin histoBin = _histoT[bin];
+						histoBin.meanSum += value;
+						histoBin.varianceSum += value * value;
+						++histoBin.count;
 						//System.out.println("--> bin " + bin);
-						++_histoT[bin];
-						stdDev += (IN_RANGE_MEAN - value) * (IN_RANGE_MEAN - value);
 						sum += value;
 						++count;
 					}
-				    totalStdDev += (TOTAL_MEAN - value) * (TOTAL_MEAN - value);
 					totalSum += value;
 					++totalCount;
 				}
@@ -80,12 +79,12 @@ public class ExportBatchHistogram {
 	public void end(String fileName) {
 		System.out.println("actual mean in-range is " + sum / count + " count was " + count);
 		System.out.println("actual mean total is " + totalSum / totalCount + " totalCount was " + totalCount);
-		System.out.println("mean from histo is " + meanFromHisto(_histoT));
+		//System.out.println("mean from histo is " + meanFromHisto(_histoT));
 
 		System.out.println("in-range std dev is " + stdDev / count);
-		System.out.println("total std dev is " + totalStdDev / totalCount);
+		//System.out.println("total std dev is " + totalStdDev / totalCount);
 		
-		System.out.println("std dev from histo is " + standardDeviationFromHisto(_histoT, meanFromHisto(_histoT)));
+		//System.out.println("std dev from histo is " + standardDeviationFromHisto(_histoT, meanFromHisto(_histoT)));
 	}
 	
 	private double meanFromHisto(long[] histo) {
@@ -93,9 +92,9 @@ public class ExportBatchHistogram {
 		long count = 0;
 		long counter;
 		for (int i = 0; i < _histoT.length; ++i) {
-			counter = _histoT[i];
-			sum += counter * Binning.centerValuesPerBin(BINS, _histoTMin, _histoTMax)[i];
-			count += counter;
+			//counter = _histoT[i];
+			//sum += counter * Binning.centerValuesPerBin(BINS, _histoTMin, _histoTMax)[i];
+			//count += counter;
 		}
 		System.out.println("histo count is " + count);
 		return sum / count;
@@ -106,11 +105,17 @@ public class ExportBatchHistogram {
 		long count = 0;
 		long counter;
 		for (int i = 0; i < _histoT.length; ++i) {
-			counter = _histoT[i];
-			double value = Binning.centerValuesPerBin(BINS, _histoTMin, _histoTMax)[i];
-			sum += counter * ((mean - value) * (mean - value));
-			count += counter;
+			//counter = _histoT[i];
+			//double value = Binning.centerValuesPerBin(BINS, _histoTMin, _histoTMax)[i];
+			//sum += counter * ((mean - value) * (mean - value));
+			//count += counter;
 		}
 		return sum / count;
+	}
+	
+	private class HistoBin {
+		public double meanSum;
+		public double varianceSum;
+		long count;
 	}
 }

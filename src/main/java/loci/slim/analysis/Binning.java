@@ -34,7 +34,7 @@
  * #L%
  */
 
-package loci.slim.analysis.plugins;
+package loci.slim.analysis;
 
 /**
  * Static utility methods to convert from a value to a bin, useful for dealing

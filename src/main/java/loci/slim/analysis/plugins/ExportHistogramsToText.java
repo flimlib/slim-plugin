@@ -34,6 +34,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.analysis.plugins;
 
+import loci.slim.analysis.HistogramStatistics;
+import loci.slim.analysis.Binning;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import java.io.BufferedWriter;
