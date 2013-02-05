@@ -39,10 +39,10 @@ import loci.slim.analysis.HistogramStatistics;
 
 /**
  *
- * @author aivar
+ * @author Aivar Grislis grislis @ wisc.edu
  */
 public class BatchHistogram {
-	private static final int BINS = 200000;
+	private static final int BINS = 200000; // 200,000 * 24 bytes ~= 4.8Mb
 	private String title;
 	private int fittedParamIndex;
 	private double minRange; //TODO in statistics
@@ -51,6 +51,8 @@ public class BatchHistogram {
 	private long overMaxCount;
 	private double underMinSum;
 	private double overMaxSum;
+	private double underMinVarianceSum;
+	private double overMaxVarianceSum;
 	private HistogramBin[] bins;
 	private double sum;
 	private long count;
@@ -102,10 +104,13 @@ public class BatchHistogram {
 		if (value < minRange) {
 			++underMinCount;
 			underMinSum += value;
+			underMinVarianceSum += value * value;
+			
 		}
 		else if (value > maxRange) {
 			++overMaxCount;
 			overMaxSum += value;
+			overMaxVarianceSum += value * value;
 		}
 		else {
 			int bin = Binning.valueToBin(BINS, minRange, maxRange, value);
@@ -119,8 +124,6 @@ public class BatchHistogram {
 	public HistogramStatistics getStatistics() {
 		return computeStatistics();
 	}
-	
-	//TODO computeStatistics should also get the ranged, scaled histogram
 
 	/**
 	 * Returns scaled-down 256-bin histogram adjusted to interquartile range.
@@ -138,9 +141,9 @@ public class BatchHistogram {
 	 * @return 
 	 */
 	public long[] getScaledHistogram(int binCount) {
-		if (null == statistics) {
+		//if (null == statistics) {
 			statistics = computeStatistics();
-		}
+		///}
 		
 		
 
@@ -203,7 +206,7 @@ public class BatchHistogram {
 			statistics.setMean(sum / count);
 			
 			// standard deviation
-			statistics.setStandardDeviation(1.0); //TODO fake for now
+			statistics.setStandardDeviation(Double.NaN); //TODO for now
 			
 			// quartiles
 			statistics.setFirstQuartile(countToValue(count / 4));
@@ -217,17 +220,17 @@ public class BatchHistogram {
 			
 			// experimental
 			double meanFromHistogram = 0.0;
-			long count = 0;
+			long counter = 0;
 			double[] centerValues = Binning.centerValuesPerBin(BINS, minRange, maxRange);
 			for (int bin = 0; bin < BINS; ++bin) {
 				meanFromHistogram += centerValues[bin] * bins[bin].count;
-				count += bins[bin].count;
+				counter += bins[bin].count;
 			}
 			meanFromHistogram += underMinSum;
-			count += underMinCount;
+			counter += underMinCount;
 			meanFromHistogram += overMaxSum;
-			count += overMaxCount;
-			meanFromHistogram /= count;
+			counter += overMaxCount;
+			meanFromHistogram /= counter;
 			System.out.println("computeStatistics mean from histogram " + meanFromHistogram);
 		}
 		return statistics;
@@ -261,7 +264,8 @@ public class BatchHistogram {
 		// can't happen
 		throw new RuntimeException("BatchHistogram quartile problem");
 	}
-	
+
+	// 24 bytes
 	private class HistogramBin {
 		public double meanSum;
 		public double varianceSum;

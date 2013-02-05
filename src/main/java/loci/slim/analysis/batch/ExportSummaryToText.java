@@ -44,6 +44,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import loci.curvefitter.ICurveFitter;
+import loci.slim.analysis.batch.ui.BatchHistogramsFrame;
+import loci.slim.analysis.plugins.ExportHistogramsToText;
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.real.DoubleType;
@@ -55,27 +57,34 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  */
 public class ExportSummaryToText {
 	private ICurveFitter.FitFunction function;
-	private List<BatchHistogram> histograms;
+	private BatchHistogram[] histograms;
+	private String[] titles;
+	private int[] indices;
+	private BatchHistogramsFrame frame;
 	
 	public void init(ICurveFitter.FitFunction function) {
 		this.function = function;
-		histograms = new ArrayList<BatchHistogram>();
 		switch (function) {
 			case SINGLE_EXPONENTIAL:
-				histograms.add(new BatchHistogram("T", 3));
+				titles = new String[] { "T" };
+				indices = new int[] { 3 };
 				break;
 			case DOUBLE_EXPONENTIAL:
-				histograms.add(new BatchHistogram("T1", 3));
-				histograms.add(new BatchHistogram("T2", 5));
+				titles = new String[] { "T1", "T2" };
+				indices = new int[] { 3, 5 };
 				break;
 			case TRIPLE_EXPONENTIAL:
-				histograms.add(new BatchHistogram("T1", 3));
-				histograms.add(new BatchHistogram("T2", 5));
-				histograms.add(new BatchHistogram("T3", 7));
+				titles = new String[] { "T1", "T2", "T3" };
+				indices = new int[] { 3, 5, 7 };
 				break;
 			case STRETCHED_EXPONENTIAL:
 				break;
 		}
+		List<BatchHistogram> histogramsList = new ArrayList<BatchHistogram>();
+		for (int i = 0; i < titles.length; ++i) {
+		    histogramsList.add(new BatchHistogram(titles[i], indices[i]));
+		}
+		histograms = histogramsList.toArray(new BatchHistogram[histogramsList.size()]);
 	}
 	
 	public void process(Image<DoubleType> image) {
@@ -102,6 +111,23 @@ public class ExportSummaryToText {
 				}
 			}
 		}
+		List<HistogramStatistics> imageList = new ArrayList<HistogramStatistics>();
+		ExportHistogramsToText export = new ExportHistogramsToText();
+		for (int i = 0; i < titles.length; ++i) {
+		    HistogramStatistics imageStatistics = export.getStatistics(titles[i], image, 0, indices[i]);
+		    imageList.add(imageStatistics);
+		}
+		List<HistogramStatistics> summaryList = new ArrayList<HistogramStatistics>();
+		for (BatchHistogram histogram : histograms) {
+		    HistogramStatistics summaryStatistics = histogram.getStatistics();
+		    summaryList.add(summaryStatistics);
+		}
+		if (null == frame) {
+		    frame = new BatchHistogramsFrame();
+		}
+		frame.update(
+			imageList.toArray(new HistogramStatistics[imageList.size()]), 
+			summaryList.toArray(new HistogramStatistics[summaryList.size()]));
 	}
 	
     public void export(String fileName) {
