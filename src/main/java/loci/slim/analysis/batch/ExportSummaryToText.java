@@ -146,7 +146,7 @@ public class ExportSummaryToText {
 				bufferedWriter.write("Export Summary Histogram");
 				bufferedWriter.newLine();
 				bufferedWriter.newLine();
-				
+							
 				for (BatchHistogram histogram : histograms) {
 					HistogramStatistics statistics = histogram.getStatistics();
 					statistics.export(bufferedWriter);

@@ -319,7 +319,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	}
 
 	/**
-	 * Start batch processing.
+	 * Start batch processing. (vestigial macro code)
 	 * 
 	 * @return 
 	 */
@@ -434,7 +434,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	ExportBatchHistogram _exportBatchHistogram;
 	String _exportOutput;
 	
-	//TODO ARG EXPERIMENTAL:
+	//TODO ARG EXPERIMENTAL: (vestigial macro code)
 	public boolean startBatchHisto() {
 		_uiPanel.disable();
 		IJ.log("start SLIM Plugin batch histogram processing");
@@ -599,6 +599,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                  */
                 @Override
                 public void quit() {
+					_grayScaleImage.close();
                     _quit = true;
                 }
 				
@@ -898,34 +899,34 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 * 
 	 * @param files 
 	 */
-	private void batchProcessingWithUI(File[] files) {
+	private void batchProcessingWithUI(final File[] files) {
 		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 
-		boolean exportPixels = prefs.getBoolean(EXPORT_PIXELS_KEY, true);
-		String pixelsFile = prefs.get(PIXELS_FILE_KEY, "pixels");
-		boolean exportHistograms = prefs.getBoolean(EXPORT_HISTOS_KEY, true);
-		String histogramsFile = prefs.get(HISTOS_FILE_KEY, "histograms");
-		boolean exportSummary = prefs.getBoolean(EXPORT_SUMMARY_KEY, true);
-		String summaryFile = prefs.get(SUMMARY_FILE_KEY, "summary");
+		boolean defExportPixels = prefs.getBoolean(EXPORT_PIXELS_KEY, true);
+		String defPixelsFile = prefs.get(PIXELS_FILE_KEY, "pixels");
+		boolean defExportHistograms = prefs.getBoolean(EXPORT_HISTOS_KEY, true);
+		String defHistogramsFile = prefs.get(HISTOS_FILE_KEY, "histograms");
+		boolean defExportSummary = prefs.getBoolean(EXPORT_SUMMARY_KEY, true);
+		String defSummaryFile = prefs.get(SUMMARY_FILE_KEY, "summary");
 		
 		GenericDialog dialog = new GenericDialog("Batch Processing");
-		dialog.addCheckbox("Export pixels", exportPixels);
-		dialog.addStringField("Pixels file", pixelsFile);
-		dialog.addCheckbox("Export histograms", exportHistograms);
-		dialog.addStringField("Histogram file", histogramsFile);
-		dialog.addCheckbox("Export summary histogram", exportSummary);
-		dialog.addStringField("Summary file", summaryFile);
+		dialog.addCheckbox("Export pixels", defExportPixels);
+		dialog.addStringField("Pixels file", defPixelsFile);
+		dialog.addCheckbox("Export histograms", defExportHistograms);
+		dialog.addStringField("Histogram file", defHistogramsFile);
+		dialog.addCheckbox("Export summary histogram", defExportSummary);
+		dialog.addStringField("Summary file", defSummaryFile);
 		dialog.showDialog();
 		if (dialog.wasCanceled()) {
 			return;
 		}
 		
-		exportPixels = dialog.getNextBoolean();
-		pixelsFile = dialog.getNextString();
-		exportHistograms = dialog.getNextBoolean();
-		histogramsFile = dialog.getNextString();
-		exportSummary = dialog.getNextBoolean();
-		summaryFile = dialog.getNextString();
+		final boolean exportPixels = dialog.getNextBoolean();
+		final String pixelsFile = dialog.getNextString();
+		final boolean exportHistograms = dialog.getNextBoolean();
+		final String histogramsFile = dialog.getNextString();
+		final boolean exportSummary = dialog.getNextBoolean();
+		final String summaryFile = dialog.getNextString();
 		
 		prefs.putBoolean(EXPORT_PIXELS_KEY, exportPixels);
 		prefs.put(PIXELS_FILE_KEY, pixelsFile);
@@ -934,10 +935,14 @@ public class SLIMProcessor <T extends RealType<T>> {
 		prefs.putBoolean(EXPORT_SUMMARY_KEY, exportSummary);
 		prefs.put(SUMMARY_FILE_KEY, summaryFile);
 		
-		batchProcessing(exportPixels, pixelsFile,
-				exportHistograms, histogramsFile,
-				exportSummary, summaryFile,
-				files);
+		new Thread() {
+			public void run() {
+				batchProcessing(exportPixels, pixelsFile,
+						exportHistograms, histogramsFile,
+						exportSummary, summaryFile,
+						files);
+			}
+	    }.start();
 	}
 
 	/**

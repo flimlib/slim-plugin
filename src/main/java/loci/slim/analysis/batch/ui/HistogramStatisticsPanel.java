@@ -13,13 +13,19 @@ import loci.slim.analysis.HistogramStatistics;
  * @author aivar
  */
 public class HistogramStatisticsPanel extends JPanel {
-    private HistogramPanel histogramPanel;
-    private StatisticsPanel statisticsPanel;
-    
-    public HistogramStatisticsPanel(HistogramStatistics histogramStatistics) {
-	BoxLayout boxLayout = new BoxLayout(this, BoxLayout.Y_AXIS);
-	setLayout(boxLayout);
-	histogramPanel = new HistogramPanel(histogramStatistics);
-	statisticsPanel = new StatisticsPanel(histogramStatistics);
-    }
+
+	private HistogramPanel histogramPanel;
+	private StatisticsPanel statisticsPanel;
+
+	public HistogramStatisticsPanel(HistogramStatistics histogramStatistics) {
+		super();
+		BoxLayout boxLayout = new BoxLayout(this, BoxLayout.Y_AXIS);
+		setLayout(boxLayout);
+		histogramPanel = new HistogramPanel(histogramStatistics);
+		add(histogramPanel);
+		statisticsPanel = new StatisticsPanel(histogramStatistics);
+		add(statisticsPanel);
+		validate();
+		repaint();
+	}
 }

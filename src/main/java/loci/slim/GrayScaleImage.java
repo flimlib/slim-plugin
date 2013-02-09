@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.ImageCanvas;
@@ -46,8 +47,11 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.prefs.Preferences;
 
 import loci.slim.mask.IMaskGroup;
 import loci.slim.mask.IMaskNode;
@@ -73,6 +77,7 @@ import mpicbg.imglib.type.numeric.RealType;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
+	private static final String ZOOM_KEY = "zoom";
 	private static final int CURSOR_WIDTH = 11;
 	private static final int CURSOR_HEIGHT = 11;
 	private static final Color CURSOR_COLOR = Color.WHITE;
@@ -201,8 +206,19 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         }
         _imagePlus = new ImagePlus(title, _imageStack);
         _stackWindow = new MyStackWindow(_imagePlus);
+        _stackWindow.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+				float zoomFactor = _stackWindow.getZoomFactor();
+				saveZoomFactorInPreferences(zoomFactor);
+            }
+        });	
+		float zoomFactor = getZoomFactorFromPreferences();
+		while (zoomFactor < _stackWindow.getZoomFactor()) {
+			IJ.run("In");
+		}
         _stackWindow.setVisible(true);
-		
+				
         //System.out.println("minNonZeroPhotonCount is " + _minNonZeroPhotonCount);
 
         //System.out.println("Channel selector " + _stackWindow.getChannelSelector());
@@ -245,7 +261,12 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
     }
 	
 	public void close() {
-		_stackWindow.close();
+		// run once
+		if (null != _stackWindow) {
+			float zoomFactor = _stackWindow.getZoomFactor();
+			saveZoomFactorInPreferences(zoomFactor);
+			_stackWindow = null;
+		}
 	}
 	
 	public void hideCursor() {
@@ -468,4 +489,24 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		}
         _imagePlus.draw();
 	}
+	
+    /**
+     * Restores zoom factor from Java Preferences.
+     *
+     * @return String with path name
+     */
+    private float getZoomFactorFromPreferences() {
+       Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+       return prefs.getFloat(ZOOM_KEY, 1.0f);
+    }
+
+    /**
+     * Saves the zoom factor to Java Preferences.
+     *
+     * @param path
+     */
+    private void saveZoomFactorInPreferences(float zoomFactor) {
+        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+        prefs.putFloat(ZOOM_KEY, zoomFactor);
+    }
 }

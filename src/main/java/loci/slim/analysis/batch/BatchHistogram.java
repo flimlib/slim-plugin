@@ -196,6 +196,9 @@ public class BatchHistogram {
 		// save time if already computed
 		if (null == statistics) {
 			statistics = new HistogramStatistics();
+			
+			// title
+			statistics.setTitle(title);
 
 			// count, min, max
 			statistics.setCount(count);
@@ -217,6 +220,9 @@ public class BatchHistogram {
 			double iqr = statistics.getThirdQuartile() - statistics.getFirstQuartile();
 			statistics.setMinRange(statistics.getFirstQuartile() - 1.5 * iqr);
 			statistics.setMaxRange(statistics.getThirdQuartile() + 1.5 * iqr);
+
+			// the histogram
+			statistics.setHistogram(getScaledHistogram());
 			
 			// experimental
 			double meanFromHistogram = 0.0;

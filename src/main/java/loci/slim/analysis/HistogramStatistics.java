@@ -46,6 +46,8 @@ import java.math.RoundingMode;
  * 
  * @author Aivar Grislis
  */
+//TODO reconcile with loci.slim.histogram.HistogramStatistics
+
 public class HistogramStatistics {
     private static final char TAB = '\t';
 	private static final int MIN_COUNT = 3;
@@ -301,7 +303,7 @@ public class HistogramStatistics {
 			writer.newLine();
 
 			double[] values = Binning.centerValuesPerBin(histo.length, getMinRange(), getMaxRange());
-			for (int j = 0; j < getHistogram().length; ++j) {
+			for (int j = 0; j < histo.length; ++j) {
 				writer.write(showParameter(values[j]) + TAB + histo[j]);
 				writer.newLine();
 			}

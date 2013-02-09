@@ -40,6 +40,8 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
@@ -49,6 +51,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.util.prefs.Preferences;
 import javax.swing.BoxLayout;
 
 
@@ -89,8 +92,12 @@ import org.jfree.ui.RectangleEdge;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
+	static final String WIDTH_KEY = "width";
+	static final String HEIGHT_KEY = "height";
     static final Dimension SIZE = new Dimension(500, 270);
     static final Dimension FRAME_SIZE = new Dimension(450, 450);
+	static final Dimension MAX_SIZE = new Dimension(961, 724); // see getDataArea( ) below
+	static final Dimension MIN_SIZE = new Dimension(313, 266);
     static final String PHOTON_AXIS_LABEL = "Photons";
     static final String TIME_AXIS_LABEL = "Time";
     static final String UNITS_LABEL = "nanoseconds";
@@ -196,8 +203,8 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             // create a frame for the chart
             _frame = new JFrame();
             Container container = _frame.getContentPane();
-            container.setLayout(new BoxLayout(container, BoxLayout.PAGE_AXIS));
-            container.add(layer);
+			container.setLayout(new BorderLayout());
+			container.add(layer, BorderLayout.CENTER);
             
             JPanel miscPane = new JPanel();
             miscPane.setLayout(new FlowLayout());
@@ -222,18 +229,64 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                 }
             });
             miscPane.add(_logCheckBox);
-            container.add(miscPane);
+			container.add(miscPane, BorderLayout.SOUTH);
 
-            _frame.setSize(FRAME_SIZE);
+			System.out.println("size from prefs " + getSizeFromPreferences());
+            //_frame.setSize(getSizeFromPreferences());
+			//_frame.setMaximumSize(MAX_SIZE); // doesn't work; bug in Java
             _frame.pack();
             _frame.setLocationRelativeTo(frame);
             _frame.setVisible(true);
+			_frame.addComponentListener(new ComponentListener() {
+				@Override
+				public void componentHidden(ComponentEvent e) {
+					
+				}
+				@Override
+				public void componentMoved(ComponentEvent e) {
+					
+				}
+				@Override
+				public void componentResized(ComponentEvent e) {
+					// constrain maximum size
+					boolean resize = false;
+					Dimension size = _frame.getSize();
+					System.out.println("COMPONENT RESIZED incoming size " + size);
+					if (size.width > MAX_SIZE.width) {
+						size.width = MAX_SIZE.width;
+						resize = true;
+					}
+					if (size.height > MAX_SIZE.height) {
+						size.height = MAX_SIZE.height;
+						resize = true;
+					}
+					if (size.width < MIN_SIZE.width) {
+						size.width = MIN_SIZE.width;
+						resize = true;
+					}
+					if (size.height < MIN_SIZE.height) {
+						size.height = MIN_SIZE.height;
+						resize = true;
+					}
+					if (resize) {
+						_frame.setSize(size);
+					}
+					System.out.println("save resized " + resize + " size " + size);
+					saveSizeInPreferences(size);
+				}
+				
+				@Override
+				public void componentShown(ComponentEvent e) {
+					
+				}
+			});
 			_frame.addWindowListener(new WindowAdapter() {
 				@Override
 			    public void windowClosing(WindowEvent e) {
 					_cursorListener.hideCursor();
 				}
 			});
+			_frame.setSize(getSizeFromPreferences());
         }
         return _frame;
     }
@@ -488,6 +541,28 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             _residualDataset.addSeries(series4); 
         }
     }
+	
+	/**
+	 * Restores size from Java Preferences.
+	 *
+	 * @return size
+	 */
+	private Dimension getSizeFromPreferences() {
+	   Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	   return new Dimension(prefs.getInt(WIDTH_KEY, FRAME_SIZE.width),
+			   prefs.getInt(HEIGHT_KEY, FRAME_SIZE.height));
+	}
+
+	/**
+	 * Saves the size to Java Preferences.
+	 *
+	 * @param size
+	 */
+	private void saveSizeInPreferences(Dimension size) {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		prefs.putInt(WIDTH_KEY, size.width);
+		prefs.putInt(HEIGHT_KEY, size.height);
+	}	
 
     /**
      * Inner class, UI which allows us to paint on top of the components,
@@ -568,6 +643,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                 _y0 = (int) area.getY();
                 _y1 = (int) (area.getY() + area.getHeight());
                 double width = area.getWidth();
+				System.out.println("x " + area.getX() + " y " + area.getY() + " width " + area.getWidth() + " height " + area.getHeight());
                 _xTransStart = (int) Math.round(x + width * _transStartMarkerProportion)
                         + HORZ_TWEAK;
                 _xDataStart = (int) Math.round(x + width * _dataStartMarkerProportion)
@@ -754,6 +830,9 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 
         /**
          * Gets the area of the chart panel.
+		 * 
+		 * As you resize larger and larger the maximum value returned for height
+		 * is 724 and the maximum width 961.
          *
          * @return 2D rectangle area
          */

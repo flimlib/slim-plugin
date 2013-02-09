@@ -90,7 +90,7 @@ public class HistogramPanel extends JPanel {
         _height = height;
         _bins = null;
 		
-		_log = true;
+		_log = false;
         
         _minCursor = _maxCursor = null;
         
@@ -369,6 +369,10 @@ public class HistogramPanel extends JPanel {
         super.paintComponent(g);
         if (null != _bins) {
             synchronized (_synchObject) {
+
+				// allow resize
+				Dimension size = getSize();
+				_height = size.height;
 				
 				// calculate a nominal height for log of one; actually log one is zero
 				int logOneHeight = 0;

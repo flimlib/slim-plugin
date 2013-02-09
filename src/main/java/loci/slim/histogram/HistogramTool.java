@@ -43,11 +43,17 @@ import ij.plugin.LutLoader;
 import ij.process.LUT;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.prefs.Preferences;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 
 /**
@@ -57,6 +63,12 @@ import javax.swing.JFrame;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class HistogramTool {
+	private final static String WIDTH_KEY = "width";
+	private final static String HEIGHT_KEY = "height";
+	private final static int SET_WIDTH = 263;
+	private final static int SET_HEIGHT = 302;
+	private final static int MAX_HEIGHT = 500;
+	private final static int MIN_HEIGHT = 200;
     private final static int WIDTH = PaletteFix.getSize();
     private final static int INSET = 5;
     private final static int HISTOGRAM_HEIGHT = 140;
@@ -102,12 +114,56 @@ public class HistogramTool {
 			_uiPanel.setListener(new UIPanelListener());
 
 			_frame = new JFrame("Histogram");
-			_frame.setResizable(false);
-			_frame.getContentPane().add(_histogramPanel, BorderLayout.NORTH);
-			_frame.getContentPane().add(_colorBarPanel, BorderLayout.CENTER);
-			_frame.getContentPane().add(_uiPanel, BorderLayout.SOUTH);
+			//_frame.setResizable(false);
+			_frame.setLayout(new BorderLayout());
+			
+			JPanel panel = new JPanel();
+			panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+			panel.add(_colorBarPanel);
+			panel.add(_uiPanel);			
+			_frame.getContentPane().add(_histogramPanel, BorderLayout.CENTER);
+			_frame.getContentPane().add(panel, BorderLayout.SOUTH);
 			_frame.pack();
 			_frame.setVisible(true);
+			System.out.println("initial size " + _frame.getSize());
+			_frame.addComponentListener(new ComponentListener() {
+				@Override
+				public void componentHidden(ComponentEvent e) {
+					
+				}
+				@Override
+				public void componentMoved(ComponentEvent e) {
+					
+				}
+				@Override
+				public void componentResized(ComponentEvent e) {
+					// constrain maximum size
+					boolean resize = false;
+					Dimension size = _frame.getSize();
+					if (size.width != (SET_WIDTH)) {
+						size.width = SET_WIDTH;
+						resize = true;
+					}
+					if (size.height > MAX_HEIGHT) {
+						size.height = MAX_HEIGHT;
+						resize = true;
+					}
+					if (size.height < MIN_HEIGHT) {
+						size.height = MIN_HEIGHT;
+						resize = true;
+					}
+					if (resize) {
+						_frame.setSize(size);
+					}
+					saveSizeInPreferences(size);
+				}
+				
+				@Override
+				public void componentShown(ComponentEvent e) {
+					
+				}
+			});
+            _frame.setSize(getSizeFromPreferences());
 		}
 	}
 
@@ -472,6 +528,29 @@ public class HistogramTool {
             }
         }
     }
+	
+	
+	/**
+	 * Restores size from Java Preferences.
+	 *
+	 * @return size
+	 */
+	private Dimension getSizeFromPreferences() {
+	   Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	   return new Dimension(prefs.getInt(WIDTH_KEY, SET_WIDTH),
+			   prefs.getInt(HEIGHT_KEY, SET_HEIGHT));
+	}
+
+	/**
+	 * Saves the size to Java Preferences.
+	 *
+	 * @param size
+	 */
+	private void saveSizeInPreferences(Dimension size) {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		prefs.putInt(WIDTH_KEY, size.width);
+		prefs.putInt(HEIGHT_KEY, size.height);
+	}	
 
 	/**
 	 * Inner class listens to the UI panel

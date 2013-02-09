@@ -178,11 +178,21 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		statistics.setCount(statistics1.count);
 		statistics.setMin(statistics1.min);
 		statistics.setMax(statistics1.max);
-		statistics.setFirstQuartile(statistics1.quartile[0]);
-		statistics.setMedian(statistics1.quartile[1]);
-		statistics.setThirdQuartile(statistics1.quartile[2]);
-		statistics.setMean(statistics1.mean);
-		statistics.setStandardDeviation(statistics2.standardDeviation);
+		//TODO handle this better
+		if (null == statistics1.quartile) {
+			statistics.setFirstQuartile(0.0);
+			statistics.setMedian(0.0);
+			statistics.setThirdQuartile(0.0);
+			statistics.setMean(0.0);
+			statistics.setStandardDeviation(0.0);
+		}
+		else {
+			statistics.setFirstQuartile(statistics1.quartile[0]);
+			statistics.setMedian(statistics1.quartile[1]);
+			statistics.setThirdQuartile(statistics1.quartile[2]);
+			statistics.setMean(statistics1.mean);
+			statistics.setStandardDeviation(statistics2.standardDeviation);
+		}
 		statistics.setHistogramCount(statistics2.histogramCount);
 		statistics.setMinRange(statistics1.range[0]);
 		statistics.setMaxRange(statistics1.range[1]);
