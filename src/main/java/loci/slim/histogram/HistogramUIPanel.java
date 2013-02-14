@@ -42,8 +42,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import ij.IJ;
@@ -61,6 +64,10 @@ public class HistogramUIPanel extends JPanel {
     private static final String DISPLAY_CHANNELS = "Display all channels";
     private static final String COMBINE_CHANNELS = "Combine all channels";
 	private static final String LOG_DISPLAY = "Logarithmic";
+	private static final String SMOOTHING = "Smoothing";
+	private static final String FAMILY1 = "Family 1";
+	private static final String FAMILY2 = "Family 2";
+	private static final String BANDWIDTH = "Bandwidth:";
     
     private static final int DIGITS = 5;
     IUIPanelListener _listener;
@@ -69,15 +76,24 @@ public class HistogramUIPanel extends JPanel {
     JCheckBox _combineChannelsCheckBox;
     JCheckBox _displayChannelsCheckBox;
 	JCheckBox _logarithmicDisplayCheckBox;
+	JCheckBox _smoothingCheckBox;
+	JRadioButton _family1RadioButton;
+	JRadioButton _family2RadioButton;
+	JRadioButton _bandwidthRadioButton;
     JTextField _minTextField;
     JTextField _maxTextField;
+	JTextField _bandwidthTextField;
     boolean _autoRange;
     boolean _excludePixels;
     boolean _combineChannels;
     boolean _displayChannels;
 	boolean _logarithmicDisplay;
+	boolean _smoothing;
+	boolean _family1;
+	boolean _family2;
     double _minLUT;
     double _maxLUT;
+	double _bandwidth;
 
     /**
      * Constructor.
@@ -93,7 +109,9 @@ public class HistogramUIPanel extends JPanel {
         _combineChannels    = false;
         _displayChannels    = false;
 		_logarithmicDisplay = false;
+		_smoothing          = false;
         _minLUT = _maxLUT = 0.0;
+		_bandwidth = 0.25;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
@@ -234,8 +252,95 @@ public class HistogramUIPanel extends JPanel {
 			}
 		);
 		add(_logarithmicDisplayCheckBox);
-
-        enableUI(_autoRange);
+		
+		JLabel experimentalLabel = new JLabel("Experimental:");
+		add(experimentalLabel);
+		
+		_smoothingCheckBox =
+			new JCheckBox(SMOOTHING, _smoothing);
+		_smoothingCheckBox.addItemListener(
+			new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					_smoothing = _smoothingCheckBox.isSelected();
+					if (null != _listener) {
+						_listener.setSmoothing(_smoothing);
+					}
+				}
+			}
+		);
+		add(_smoothingCheckBox);
+		
+		_family1RadioButton = new JRadioButton(FAMILY1);
+        _family1RadioButton.addActionListener(
+            new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent event) {
+					if (null != _listener) {
+						if (_family1RadioButton.isSelected()) {
+							_listener.setFamilyStyle1(true);
+						}
+					}
+                }
+            }
+        );
+		add(_family1RadioButton);
+		
+		_family2RadioButton = new JRadioButton(FAMILY2);
+        _family2RadioButton.addActionListener(
+            new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent event) {
+					if (null != _listener) {
+						if (_family2RadioButton.isSelected()) {
+							_listener.setFamilyStyle2(true);
+						}
+					}
+                }
+            }
+        );
+		add(_family2RadioButton);
+		
+		_bandwidthRadioButton = new JRadioButton(BANDWIDTH);
+        _bandwidthRadioButton.addActionListener(
+            new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent event) {
+					if (null != _listener) {
+						if (_bandwidthRadioButton.isSelected()) {
+							updateBandwidth();
+						}
+					}
+                }
+            }
+        );
+		add(_bandwidthRadioButton);
+		
+		ButtonGroup group = new ButtonGroup();
+		group.add(_family1RadioButton);
+		group.add(_family2RadioButton);
+		group.add(_bandwidthRadioButton);
+		
+        _bandwidthTextField = new JTextField("" + HistogramPanel.DEFAULT_BANDWIDTH);
+        _bandwidthTextField.addActionListener(
+            new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent event) {
+                    updateBandwidth();
+                }
+            }
+        );
+        _bandwidthTextField.addFocusListener(
+            new FocusAdapter() {
+                @Override
+                public void focusLost(FocusEvent e) {
+                    updateBandwidth();
+                }
+            }
+        );
+        add(_bandwidthTextField);
+		
+		enableUI(_autoRange);
     }
     
     private void updateMin() {
@@ -263,6 +368,20 @@ public class HistogramUIPanel extends JPanel {
             _maxTextField.setText("" + _maxLUT);
         }
     }
+	
+	private void updateBandwidth() {
+		try {
+			_bandwidth = Double.parseDouble(_bandwidthTextField.getText());
+			System.out.println("bandwidth parsed to " + _bandwidth);
+			if (null != _listener) {
+				_listener.setBandwidth(_bandwidth);
+			}
+		}
+		catch (NumberFormatException exception) {
+			// in the event of an error, just revert
+			_bandwidthTextField.setText("" + _bandwidth);
+		}
+	}
 
     /**
      * Sets a listener for this UI panel.  Listener is unique.

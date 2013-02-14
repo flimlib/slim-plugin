@@ -73,6 +73,34 @@ public interface IUIPanelListener {
 	 */
 	public void setLogarithmicDisplay(boolean log);
 
+	/**
+	 * User has clicked the smoothing checkbox.
+	 * 
+	 * @param smooth 
+	 */
+	public void setSmoothing(boolean smooth);
+
+	/**
+	 * User has entered new bandwidth (used for smoothing).
+	 * 
+	 * @param bandwidth 
+	 */
+	public void setBandwidth(double bandwidth);
+	
+	/**
+	 * User has clicked the family style 1 checkbox.
+	 * 
+	 * @param on
+	 */
+	public void setFamilyStyle1(boolean on);
+	
+	/**
+	 * User has clicked the family style 1 checkbox.
+	 * 
+	 * @param on 
+	 */
+	public void setFamilyStyle2(boolean on);
+
     /**
      * User has entered new min/max LUT value.
      *

@@ -2025,6 +2025,9 @@ public class SLIMProcessor <T extends RealType<T>> {
         double yCount[];
         double yFitted[];
         int photons = 0;
+		
+		//SCATTER
+		ICurveFitter curveFitter = getCurveFitter(uiPanel);
 
         // loop over all channels or just the current one
         for (int channel : getChannelIndices(_fitAllChannels, _channel, _channels)) {
@@ -2033,6 +2036,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 
             location[2] = channel;
             yCount = processor.getPixel(location);
+			
+			//SCATTER
+			double scatter = uiPanel.getScatter();
+			if (scatter != 0.0) {
+				System.out.println("scatter " + scatter);
+			    yCount = correctForScatter(yCount, curveFitter.getInstrumentResponse(1), _fittingCursor, scatter);
+			}
             
             curveFitData.setYCount(yCount);
             int transStartIndex = _fittingCursor.getTransientStartBin();
@@ -2062,21 +2072,11 @@ public class SLIMProcessor <T extends RealType<T>> {
             curveFitData.setPixels(1);
             curveFitDataList.add(curveFitData);
         }
-
-		boolean debug = false;
-		if (x == 101 && y == 73) {
-			System.out.println("fit single pixel 101 73");
-			debug = true;
-		}
         
         // do the fit
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
         int returnValue = getCurveFitter(uiPanel).fitData(dataArray);
 		
-		if (debug) {
-			System.out.println("returns " + returnValue);
-		}
-        
         // show decay graph for visible channel
 		int index = _file.lastIndexOf('.');
         String title = "Pixel (" + x + "," + y + ") " + _file.substring(0, index);
@@ -2102,6 +2102,42 @@ public class SLIMProcessor <T extends RealType<T>> {
         setFittedParamsFromData(resultsCursor, dataArray);
         return fittedPixels;
     }
+	
+	private double[] correctForScatter(double[] decay, double[] prompt, FittingCursor fittingCursor, double scatter) {
+		if (null == prompt) {
+			System.out.println("NO PROMPT LOADED");
+			return decay;
+		}
+		double decayPeak = Double.MIN_VALUE;
+		for (int i = 0; i < decay.length; ++i) {
+			if (decay[i] > decayPeak) {
+				decayPeak = decay[i];
+			}
+		}
+		double promptPeak = Double.MIN_VALUE;
+		for (int i = 0; i < prompt.length; ++i) {
+			if (prompt[i] > promptPeak) {
+				promptPeak = prompt[i];
+			}
+		}
+		
+		double factor = scatter * decayPeak / promptPeak;
+		int startIndex = fittingCursor.getPromptStartBin();
+		int stopIndex = fittingCursor.getPromptStopBin();
+		System.out.println("factor is " + factor + " start " + startIndex + " stop " + stopIndex);
+				
+		double[] corrected = new double[decay.length];
+		for (int i = 0; i < decay.length; ++i) {
+			if (startIndex <= i && i <= stopIndex && i < prompt.length) {
+				corrected[i] = decay[i] - factor * prompt[i];
+				System.out.println("" + decay[i] + " -> " + corrected[i] + " factor was " + factor + " prompt was " + prompt[i]);
+			}
+			else {
+				corrected[i] = decay[i];
+			}
+		}
+		return corrected;
+	}
 
     /*
      * Demonstrates a bug with ImgLib:

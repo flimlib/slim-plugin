@@ -293,8 +293,8 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 			// calculate range
 			range = new double[2];
 			double iqr = quartile[2] - quartile[0];
-			range[0] = quartile[1] - 1.5 * iqr;
-			range[1] = quartile[1] + 1.5 * iqr;
+			range[0] = quartile[0] - 1.5 * iqr;
+			range[1] = quartile[2] + 1.5 * iqr;
 		}
 		else if (0 == count) {
 			// avoid reporting spurious values

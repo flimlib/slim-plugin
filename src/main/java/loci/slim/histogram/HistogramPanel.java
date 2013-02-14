@@ -52,6 +52,7 @@ import javax.swing.ToolTipManager;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class HistogramPanel extends JPanel {
+	public static final double DEFAULT_BANDWIDTH = 0.2;
 	private static final double LOG_ONE_FACTOR = Math.log(3) / Math.log(2);
 	private static final int SINGLE_PIXEL = 1;
     private static final int FUDGE_FACTOR = 4;
@@ -68,12 +69,19 @@ public class HistogramPanel extends JPanel {
 	private double[] _binValues;
     private int _maxBinCount;
 	private boolean _log;
+	private boolean _smooth;
+	private boolean _family = true;
+	private boolean _style1 = false;
     private Integer _minCursor;
     private Integer _maxCursor;
     private boolean _draggingMinCursor;
     private boolean _draggingMaxCursor;
 	private double[] _quartiles;
 	private int[] _quartileIndices;
+	private double[] _kernelDensityEstimate;
+	private double[][] _kernelDensityEstimateFamily;
+	private double _bandwidth = DEFAULT_BANDWIDTH;
+	private double[] _bandwidthFamily = new double[] { 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35 };
     
     /**
      * Constructor
@@ -91,6 +99,7 @@ public class HistogramPanel extends JPanel {
         _bins = null;
 		
 		_log = false;
+		_smooth = false;
         
         _minCursor = _maxCursor = null;
         
@@ -265,13 +274,50 @@ public class HistogramPanel extends JPanel {
 		return result / 1000;
 	}
 	
-	public boolean getLog() {
+	public boolean getLogarithmicDisplay() {
 		return _log;
 	}
 	
 	public void setLogarithmicDisplay(boolean log) {
 		_log = log;
 		repaint();
+	}
+	
+	public boolean getSmoothing() {
+		return _smooth;
+	}
+	
+	public void setSmoothing(boolean smooth) {
+		_smooth = smooth;
+		repaint();
+	}
+	
+	public double getBandwidth() {
+		return _bandwidth;
+	}
+	
+	public void setBandwidth(double bandwidth) {
+		System.out.println("bandwidth is " + bandwidth);
+		_family = false;
+		_bandwidth = bandwidth;
+		_kernelDensityEstimate = kernelDensityEstimation(_bins, _maxBinCount, _bandwidth);
+		repaint();
+	}
+	
+	public void setFamily1(boolean on) {
+		if (on) {
+			_family = true;
+			_style1 = true;
+			repaint();
+		}
+	}
+	
+	public void setFamily2(boolean on) {
+		if (on) {
+			_family = true;
+			_style1 = false;
+			repaint();
+		}
 	}
 
     /**
@@ -313,6 +359,20 @@ public class HistogramPanel extends JPanel {
 			_binValues = statistics.getBinValues();
 			_quartileIndices = statistics.getQuartileIndices();
 			_quartiles = statistics.getQuartiles();
+		}
+		int count = 0;
+		for (int i = 0; i < _bins.length; ++i) { //TODO if this stays, incorporate in earlier loop
+			count += _bins[i];
+		}
+		//System.out.println("statistics.getStdDev is " + statistics.getStdDev());
+		System.out.println("Silverman's rule bandwidth is count " + count + " bandwidth " + silvermansRule(0.27, count));
+		System.out.println("estimate " + estimateBandwidth(statistics.getFences()[1] - statistics.getFences()[0], count));
+		_bandwidth = 5 * estimateBandwidth(statistics.getFences()[1] - statistics.getFences()[0], count);
+		_kernelDensityEstimate = kernelDensityEstimation(_bins, _maxBinCount, _bandwidth);
+		
+		_kernelDensityEstimateFamily = new double[_bins.length][_bandwidthFamily.length];
+		for (int i = 0; i < _bandwidthFamily.length; ++i) {
+			_kernelDensityEstimateFamily[i] = kernelDensityEstimation(_bins, _maxBinCount, _bandwidthFamily[i]);
 		}
 		repaint();
 	}
@@ -374,39 +434,99 @@ public class HistogramPanel extends JPanel {
 				Dimension size = getSize();
 				_height = size.height;
 				
-				// calculate a nominal height for log of one; actually log one is zero
-				int logOneHeight = 0;
-				if (_log) {
-					// this is a hack just to get some proportionality
-					double logTwoHeight = (_height * Math.log(2)) / (Math.log(_maxBinCount) + 1);
-					logOneHeight = (int)(LOG_ONE_FACTOR * logTwoHeight);
-				}
-				
-                int height;
-                for (int i = 0; i < _width; ++i) {
-                    if (0 == _bins[i]) {
-                        height = 0;
-                    }
-					else if (_log) {
-						if (1 == _bins[i]) {
-							height = logOneHeight;
+				if (_smooth) {
+					if (_family) {
+						g.setColor(Color.DARK_GRAY);
+						double max = Double.MIN_VALUE;
+						if (_style1) {
+							for (double[] kernelDensityEstimate : _kernelDensityEstimateFamily) {
+								for (int x = 0; x < kernelDensityEstimate.length; ++x) {
+									if (kernelDensityEstimate[x] > max) {
+										max = kernelDensityEstimate[x];
+									}
+								}
+							}
 						}
-						else {
-							height = (int)((_height - logOneHeight) * Math.log(_bins[i]) / Math.log(_maxBinCount)) + logOneHeight;
+						for (double[] kernelDensityEstimate : _kernelDensityEstimateFamily) {
+							if (!_style1) {
+								max = Double.MIN_VALUE;
+								for (int x = 0; x < kernelDensityEstimate.length; ++x) {
+									if (kernelDensityEstimate[x] > max) {
+										max = kernelDensityEstimate[x];
+									}
+								}
+							}
+							int prevX = 0;
+							int prevY = 0;
+							boolean firstPixel = true;
+							for (int x = 0; x < kernelDensityEstimate.length; ++x) {
+								int y = _height - 1 - (int) ((kernelDensityEstimate[x] * _height) / max);
+								if (firstPixel) {
+									g.drawLine(_inset + x, y, _inset + x, y);
+								}
+								else {
+									g.drawLine(_inset + prevX, prevY, _inset + x, y);
+								}
+								firstPixel = false;
+								prevX = x;
+								prevY = y;
+							}
 						}
 					}
 					else {
-						// make sure values of one show at least a single pixel
-						height = (int)((_height - SINGLE_PIXEL) * _bins[i] / _maxBinCount) + SINGLE_PIXEL;
+						if (null != _kernelDensityEstimate) {
+							double max = Double.MIN_VALUE;
+							for (int x = 0; x < _kernelDensityEstimate.length; ++x) {
+								if (_kernelDensityEstimate[x] > max) {
+									max = _kernelDensityEstimate[x];
+								}
+							}
+							for (int x = 0; x < _kernelDensityEstimate.length; ++x) {
+								int y = _height - 1 - (int) ((_kernelDensityEstimate[x] * _height) / max);
+								g.setColor(Color.WHITE);
+								g.drawLine(_inset + x, 0, _inset + x, y);
+								g.setColor(Color.DARK_GRAY);
+								g.drawLine(_inset + x, y, _inset + x, _height);
+							}
+						}
 					}
-                    if (height > _height) {
-                        height = _height;
-                    }
-                    g.setColor(Color.WHITE);
-                    g.drawLine(_inset + i, 0, _inset + i, _height - height);
-                    g.setColor(Color.DARK_GRAY);
-                    g.drawLine(_inset + i, _height - height, _inset + i, _height);
-                }
+
+				}
+				else {
+					// calculate a nominal height for log of one; actually log one is zero
+					int logOneHeight = 0;
+					if (_log) {
+						// this is a hack just to get some proportionality
+						double logTwoHeight = (_height * Math.log(2)) / (Math.log(_maxBinCount) + 1);
+						logOneHeight = (int)(LOG_ONE_FACTOR * logTwoHeight);
+					}
+
+					int height;
+					for (int i = 0; i < _width; ++i) {
+						if (0 == _bins[i]) {
+							height = 0;
+						}
+						else if (_log) {
+							if (1 == _bins[i]) {
+								height = logOneHeight;
+							}
+							else {
+								height = (int)((_height - logOneHeight) * Math.log(_bins[i]) / Math.log(_maxBinCount)) + logOneHeight;
+							}
+						}
+						else {
+							// make sure values of one show at least a single pixel
+							height = (int)((_height - SINGLE_PIXEL) * _bins[i] / _maxBinCount) + SINGLE_PIXEL;
+						}
+						if (height > _height) {
+							height = _height;
+						}
+						g.setColor(Color.WHITE);
+						g.drawLine(_inset + i, 0, _inset + i, _height - height);
+						g.setColor(Color.DARK_GRAY);
+						g.drawLine(_inset + i, _height - height, _inset + i, _height);
+					}
+				}
                 
                 if (null != _minCursor && null != _maxCursor) {
                     g.setXORMode(Color.MAGENTA);
@@ -429,5 +549,32 @@ public class HistogramPanel extends JPanel {
 			int yEnding = Math.min(y + 2, y1);
 			g.drawLine(x, y, x, yEnding);
 		}
+	}
+	
+	private double[] kernelDensityEstimation(int[] bins, int maxCount, double bandwidth) {
+		double[] fitted = new double[bins.length];
+		for (int i = 0; i < fitted.length; ++i) {
+			fitted[i] = 0.0;
+		}
+		for (int center = 0; center < bins.length; ++center) {
+			int count = bins[center];
+			for (int x = 0; x < bins.length; ++x) {
+				fitted[x] += gaussian(count, center, bandwidth, x);
+			}
+		}
+		return fitted;
+	}
+	
+	private double gaussian(double a, double b, double c, double x) {
+		return a * Math.exp(-(x - b) * (x - b) / 2 * c * c);
+	}
+	
+	private double silvermansRule(double standardDeviation, int n) {
+		return (1.06 * standardDeviation / Math.pow(n, 0.20));
+	}
+	
+	private double estimateBandwidth(double range, int n) {
+		System.out.println("range is " + range + " count " + n);
+		return range / Math.sqrt(n);
 	}
 }

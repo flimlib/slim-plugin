@@ -610,6 +610,26 @@ public class HistogramTool {
 		public void setLogarithmicDisplay(boolean log) {
 			_histogramPanel.setLogarithmicDisplay(log);	
 		}
+		
+		@Override
+		public void setSmoothing(boolean smooth) {
+			_histogramPanel.setSmoothing(smooth);
+		}
+		
+		@Override
+		public void setBandwidth(double bandwidth) {
+			_histogramPanel.setBandwidth(bandwidth);
+		}
+		
+		@Override
+		public void setFamilyStyle1(boolean on) {
+			_histogramPanel.setFamily1(on);
+		}
+		
+		@Override
+		public void setFamilyStyle2(boolean on) {
+			_histogramPanel.setFamily2(on);
+		}
 
         @Override
         public void setMinMaxLUT(double minLUT, double maxLUT) {

@@ -204,6 +204,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JTextField _thresholdField;
     JTextField _chiSqTargetField;
     JComboBox _binningComboBox;
+	JTextField _scatterField; //SCATTER experiment
 
     // parameter panel
     JPanel _paramPanel;
@@ -762,6 +763,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                             _listener.cancelExcitation();
                         }
                     }
+					_listener.reFit();
                 }
             }
         );
@@ -833,9 +835,16 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _binningComboBox = new JComboBox(binningChoices);
 		refitUponStateChange(_binningComboBox);
         controlPanel.add(_binningComboBox);
+		
+		JLabel scatterLabel = new JLabel("Scatter"); //SCATTER
+		scatterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		controlPanel.add(scatterLabel);
+		_scatterField = new JTextField(9);
+		refitUponStateChange(_scatterField);
+		controlPanel.add(_scatterField);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(controlPanel, 5, 2, 4, 4, 4, 4);
+        SpringUtilities.makeCompactGrid(controlPanel, 6, 2, 4, 4, 4, 4); //SCATTER 5 -> 6
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", controlPanel);
@@ -1672,6 +1681,17 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     public void setChiSquareTarget(double chiSqTarget) {
         _chiSqTargetField.setText("" + chiSqTarget);
     }
+	
+	public double getScatter() { //SCATTER
+		double scatter = 0.0;
+		try {
+			scatter = Double.valueOf(_scatterField.getText());
+		}
+		catch (NumberFormatException e) {
+			_scatterField.setText("" + scatter);
+		}
+		return scatter;
+	}
 
     public int getParameterCount() {
         int count = 0;

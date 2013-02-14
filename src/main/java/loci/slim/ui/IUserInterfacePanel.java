@@ -250,4 +250,13 @@ public interface IUserInterfacePanel {
      * @return
      */
     public boolean getRefineFit();
+
+	/**
+	 * Experimental: gets a scatter factor from UI.  SPC Image can fit an
+	 * additional scatter parameter; this is an attempt to see if scatter
+	 * correction helps the fit.
+	 * 
+	 * @return 
+	 */
+	public double getScatter();
 }

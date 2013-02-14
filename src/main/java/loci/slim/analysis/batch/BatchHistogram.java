@@ -223,6 +223,13 @@ public class BatchHistogram {
 
 			// the histogram
 			statistics.setHistogram(getScaledHistogram());
+
+			long totalCount = 0;
+			long[] histogram = statistics.getHistogram();
+			for (int bin = 0; bin < histogram.length; ++bin) {
+				totalCount += histogram[bin];
+			}
+			statistics.setHistogramCount(totalCount);
 			
 			// experimental
 			double meanFromHistogram = 0.0;
@@ -231,7 +238,7 @@ public class BatchHistogram {
 			for (int bin = 0; bin < BINS; ++bin) {
 				meanFromHistogram += centerValues[bin] * bins[bin].count;
 				counter += bins[bin].count;
-			}
+			}		
 			meanFromHistogram += underMinSum;
 			counter += underMinCount;
 			meanFromHistogram += overMaxSum;
