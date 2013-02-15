@@ -212,7 +212,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 	private Statistics1 getStatistics1(Image<DoubleType> image, int channel, int parameter) {
 		long count = 0;
 		double min = Double.MAX_VALUE;
-		double max = Double.MIN_VALUE;
+		double max = -Double.MAX_VALUE;
 		double sum = 0.0;
 		double[] quartile = null;
 		double[] range = null;

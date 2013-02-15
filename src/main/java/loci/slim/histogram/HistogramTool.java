@@ -217,7 +217,7 @@ public class HistogramTool {
      */
     public static LUT getLUT() {
         IndexColorModel colorModel = getIndexColorModel();
-        LUT lut = new LUT(colorModel, Double.MIN_VALUE, Double.MAX_VALUE);
+        LUT lut = new LUT(colorModel, -Double.MAX_VALUE, Double.MAX_VALUE);
         return lut;
     }
 

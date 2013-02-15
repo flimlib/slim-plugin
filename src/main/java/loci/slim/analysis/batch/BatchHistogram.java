@@ -69,7 +69,7 @@ public class BatchHistogram {
 		maxRange = 20.0;
 		
 		minValue = Double.MAX_VALUE;
-		maxValue = Double.MIN_VALUE;
+		maxValue = -Double.MAX_VALUE;
 		bins = new HistogramBin[BINS];
 		for (int bin = 0; bin < BINS; ++bin) {
 			bins[bin] = new HistogramBin();

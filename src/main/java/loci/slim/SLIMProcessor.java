@@ -699,7 +699,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                         inValues[b] = getData(_cursor, channel, x, y, b);
                     }
 					//TODO EXPERIMENTAL SPC IMAGE STYLE ESTIMATION
-					double peak = Double.MIN_VALUE;
+					double peak = -Double.MAX_VALUE;
 					int peakBin = 0;
 					for (int b = 0; b < _bins; ++b) {
 						if (inValues[b] > peak) {
@@ -1920,7 +1920,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
         // show the decay graphs
         double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
+        double max = -Double.MAX_VALUE;
         int roiNumber = 1;
         for (Roi roi: getRois()) {
             int nominalChannel = _fitAllChannels ? _channel : 0;
@@ -2108,13 +2108,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 			System.out.println("NO PROMPT LOADED");
 			return decay;
 		}
-		double decayPeak = Double.MIN_VALUE;
+		double decayPeak = -Double.MAX_VALUE;
 		for (int i = 0; i < decay.length; ++i) {
 			if (decay[i] > decayPeak) {
 				decayPeak = decay[i];
 			}
 		}
-		double promptPeak = Double.MIN_VALUE;
+		double promptPeak = -Double.MAX_VALUE;
 		for (int i = 0; i < prompt.length; ++i) {
 			if (prompt[i] > promptPeak) {
 				promptPeak = prompt[i];

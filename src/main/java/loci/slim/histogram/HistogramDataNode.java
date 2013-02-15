@@ -114,7 +114,7 @@ public class HistogramDataNode {
      */
     public double[] findMinMax() {
         double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
+        double max = -Double.MAX_VALUE;
 		
         for (int y = 0; y < _values[0].length; ++y) {
             for (int x = 0; x < _values.length; ++x) {

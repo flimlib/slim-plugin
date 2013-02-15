@@ -437,7 +437,7 @@ public class HistogramPanel extends JPanel {
 				if (_smooth) {
 					if (_family) {
 						g.setColor(Color.DARK_GRAY);
-						double max = Double.MIN_VALUE;
+						double max = -Double.MAX_VALUE;
 						if (_style1) {
 							for (double[] kernelDensityEstimate : _kernelDensityEstimateFamily) {
 								for (int x = 0; x < kernelDensityEstimate.length; ++x) {
@@ -449,7 +449,7 @@ public class HistogramPanel extends JPanel {
 						}
 						for (double[] kernelDensityEstimate : _kernelDensityEstimateFamily) {
 							if (!_style1) {
-								max = Double.MIN_VALUE;
+								max = -Double.MAX_VALUE;
 								for (int x = 0; x < kernelDensityEstimate.length; ++x) {
 									if (kernelDensityEstimate[x] > max) {
 										max = kernelDensityEstimate[x];
@@ -475,7 +475,7 @@ public class HistogramPanel extends JPanel {
 					}
 					else {
 						if (null != _kernelDensityEstimate) {
-							double max = Double.MIN_VALUE;
+							double max = -Double.MAX_VALUE;
 							for (int x = 0; x < _kernelDensityEstimate.length; ++x) {
 								if (_kernelDensityEstimate[x] > max) {
 									max = _kernelDensityEstimate[x];

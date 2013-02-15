@@ -478,7 +478,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         XYSeries series4 = new XYSeries("Residuals");
 
         // show transient data; find the maximum transient data in this pass
-        double yDataMax = Double.MIN_VALUE;
+        double yDataMax = -Double.MAX_VALUE;
         double xCurrent = 0.0;
         for (int i = 0; i < bins; ++i) {
             // show transient data

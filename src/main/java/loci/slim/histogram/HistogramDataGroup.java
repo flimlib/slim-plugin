@@ -369,7 +369,7 @@ public class HistogramDataGroup {
 		
         if (1 < _channel.length && (_displayChannels || _combineChannels)) {
             minData = Double.MAX_VALUE;
-            maxData = Double.MIN_VALUE;
+            maxData = -Double.MAX_VALUE;
                 
             // calculate actual minimum and maximum for all channels
             for (int i = 0; i < _channel.length; ++i) {
