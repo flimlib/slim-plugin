@@ -186,6 +186,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private static final String HISTOS_FILE_KEY = "histogramsfile";
 	private static final String EXPORT_SUMMARY_KEY = "exportsummary";
 	private static final String SUMMARY_FILE_KEY = "summaryfile";
+	
+	private static final String GAUSSIAN_A_KEY = "a";
+	private static final String GAUSSIAN_B_KEY = "b";
+	private static final String GAUSSIAN_C_KEY = "c";
 
     private Image<T> _image;
     private LocalizableByDimCursor<T> _cursor;
@@ -687,7 +691,7 @@ public class SLIMProcessor <T extends RealType<T>> {
                  */
                 @Override
                 public boolean estimateExcitation(String fileName) {
-					System.out.println("ESTIMATE EXCITATION");
+					// get the data
                     int channel = 0;
                     if (null != _grayScaleImage) {
                         channel = _grayScaleImage.getChannel();
@@ -698,7 +702,8 @@ public class SLIMProcessor <T extends RealType<T>> {
                     for (int b = 0; b < _bins; ++b) {
                         inValues[b] = getData(_cursor, channel, x, y, b);
                     }
-					//TODO EXPERIMENTAL SPC IMAGE STYLE ESTIMATION
+					
+					// find the peak value and bin
 					double peak = -Double.MAX_VALUE;
 					int peakBin = 0;
 					for (int b = 0; b < _bins; ++b) {
@@ -707,22 +712,74 @@ public class SLIMProcessor <T extends RealType<T>> {
 							peakBin = b;
 						}
 					}
-					System.out.println("PEAK VALUE " + peak + " BIN " + peakBin);
-					double[] outValues = new double[_bins];
+					
+					double maxSlope = -Double.MAX_VALUE;
+					int maxSlopeBin = 0;
+					double[] firstDerivative = new double[_bins];
 					for (int b = 0; b < peakBin; ++b) {
-						outValues[b] = inValues[b + 1] - inValues[b];
+						firstDerivative[b] = inValues[b + 1] - inValues[b];
+						if (firstDerivative[b] > maxSlope) {
+							maxSlope = firstDerivative[b];
+							maxSlopeBin = b;
+						}
 					}
-					for (int b = peakBin; b < _bins; ++b) {
-						outValues[b] = 0.0;
+					
+					_fittingCursor = null;
+					
+					double a = peak;
+					double b = (double) peakBin;
+					double c = (double) (peakBin - maxSlopeBin) / 2;
+					
+					System.out.println("max slope estimated GAUSSIAN a " + a + " b " + b + " c " + c);
+					
+					double[] outValues = new double[_bins];
+					for (int i = 0; i < _bins; ++i) {
+						outValues[i] = gaussian(a, b, c, i);
 					}
+					
+					System.out.println("PEAK VALUE " + peak + " BIN " + peakBin);
+					System.out.println("MAX SLOPE " + maxSlope + " BIN " + maxSlopeBin);
+					System.out.println("GAUSSIAN a " + a + " b " + b + " c " + c);
 					//TODO END EXPERIMENTAL
 					for (double oV : outValues) {
-						System.out.println(" " + oV);
+						if (0.0 != oV) System.out.println(" " + oV);
 					}
 					
                     Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, outValues, _timeRange);
                     return updateExcitation(uiPanel, excitation);
                 }
+
+				@Override
+				public boolean gaussianExcitation(String fileName) {
+					Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+					double a = prefs.getDouble(GAUSSIAN_A_KEY, 30.0);
+					double b = prefs.getDouble(GAUSSIAN_B_KEY, 20.0);
+					double c = prefs.getDouble(GAUSSIAN_C_KEY, 2.0);
+					
+					GenericDialog dialog = new GenericDialog("Gaussian Excitation");
+					dialog.addNumericField("height", a, 5);
+					dialog.addNumericField("position", b, 5);
+					dialog.addNumericField("width", c, 5);
+					dialog.showDialog();
+					if (dialog.wasCanceled()) {
+						return false;
+					}
+					a = dialog.getNextNumber();
+					b = dialog.getNextNumber();
+					c = dialog.getNextNumber();
+					
+					prefs.putDouble(GAUSSIAN_A_KEY, a);
+					prefs.putDouble(GAUSSIAN_B_KEY, b);
+					prefs.putDouble(GAUSSIAN_C_KEY, c);
+					
+					double[] outValues = new double[_bins];
+					for (int i = 0; i < _bins; ++i) {
+						outValues[i] = gaussian(a, b, c, i);
+					}
+					
+					Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, outValues, _timeRange);
+					return updateExcitation(uiPanel, excitation);
+				}
 				
 				/**
                  * Cancels the current excitation curve, if any.
@@ -842,6 +899,17 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
         hideUIPanel(uiPanel);
     }
+	
+	private double gaussian(double a, double b, double c, double x) {
+		//return a * Math.exp(-((x - b) * (x - b) / (2 * c * c)));
+		double tmp = (x - b) / c;
+		//return a * Math.exp(-(tmp * tmp) / 2);
+		double mean = b;
+		double stdDeviation = c;
+		double variance = stdDeviation * stdDeviation;
+		
+        return a * Math.pow(Math.exp(-(((x - mean) * (x - mean)) / ((2 * variance)))), 1 / (stdDeviation * Math.sqrt(2 * Math.PI))); 
+	}
 	
 	private void showGrayScaleAndFit(final IUserInterfacePanel uiPanel) {
         // create a grayscale image from the data
@@ -2451,12 +2519,10 @@ public class SLIMProcessor <T extends RealType<T>> {
         curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
         if (null != _excitationPanel) {
             double[] excitation = null;
-            if (null != _excitationPanel) {
-                int startIndex = _fittingCursor.getPromptStartBin();
-                int stopIndex  = _fittingCursor.getPromptStopBin();
-                double base  = _fittingCursor.getPromptBaselineValue();
-                excitation = _excitationPanel.getValues(startIndex, stopIndex, base);
-            }            
+            int startIndex = _fittingCursor.getPromptStartBin();
+            int stopIndex  = _fittingCursor.getPromptStopBin();
+            double base    = _fittingCursor.getPromptBaselineValue();
+            excitation = _excitationPanel.getValues(startIndex, stopIndex, base);          
             curveFitter.setInstrumentResponse(excitation);
         }
         return curveFitter;
@@ -2529,7 +2595,15 @@ public class SLIMProcessor <T extends RealType<T>> {
         double dataStart  = fittingCursor.getDataStartValue();
         double transStop  = fittingCursor.getTransientStopValue();
         decayGraph.setStartStop(transStart, dataStart, transStop);
-        decayGraph.setData(data);
+		double[] prompt = null;
+		int startIndex = 0;
+		if (null != _excitationPanel) {
+            startIndex = _fittingCursor.getPromptStartBin();
+            int stopIndex  = _fittingCursor.getPromptStopBin();
+            double base  = _fittingCursor.getPromptBaselineValue();
+			prompt = _excitationPanel.getValues(startIndex, stopIndex, base);
+		}
+        decayGraph.setData(startIndex, prompt, data);
         decayGraph.setPhotons(photons);
     }
     

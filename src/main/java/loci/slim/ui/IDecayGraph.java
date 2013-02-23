@@ -70,10 +70,11 @@ public interface IDecayGraph {
     /**
      * Changes (or initializes) all of the charted data.
      *
-     * @param irf
+	 * @param startIndex
+     * @param prompt
      * @param data
      */
-    public void setData(ICurveFitData data);
+    public void setData(int startIndex, double[] prompt, ICurveFitData data);
     
     /**
      * Sets number of photons in fit.

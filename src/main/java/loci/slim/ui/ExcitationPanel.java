@@ -34,8 +34,11 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.ui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.BorderLayout;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -59,7 +62,7 @@ public class ExcitationPanel extends JFrame {
     private int _bins;
     private double _timeInc;
 
-    public ExcitationPanel(Excitation excitation, FittingCursor fittingCursor) {
+    public ExcitationPanel(Excitation excitation, final FittingCursor fittingCursor) {
 
         _excitation = excitation;
 
@@ -79,6 +82,47 @@ public class ExcitationPanel extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", createTopPanel());
         panel.add("Center", excitationGraph.getComponent());
+		
+		// DEBUGGING AIDS
+		if (false) {
+		JPanel panelX = new JPanel();
+		JLabel label = new JLabel("EXPERIMENTAL:");
+		panelX.add(label);
+		
+		JButton button1 = new JButton("Square IRF");
+		button1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int start = fittingCursor.getPromptStartBin();
+				int stop = fittingCursor.getPromptStopBin();
+				double baseline = fittingCursor.getPromptBaselineValue();
+				System.out.println("start " + start + " stop " + stop + " baseline " + baseline);
+				double[] values = new double[_bins];
+				for (int i = 0; i < _bins; ++i) {
+					if (i < start || i > stop) {
+						values[i] = 0.0;
+					}
+					else {
+						values[i] = baseline;
+					}
+				}
+				_excitation = new Excitation("Square", values, _timeInc);
+			}});
+		panelX.add(button1);
+		
+		JButton button2 = new JButton("Gaussian IRF");
+		button2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int start = fittingCursor.getPromptStartBin();
+				int stop = fittingCursor.getPromptStopBin();
+				double baseline = fittingCursor.getPromptBaselineValue();
+				System.out.println("start " + start + " stop " + stop + " baseline " + baseline);
+				double[] values = null;
+				_excitation = new Excitation("Gaussian", values, _timeInc);
+			}});
+		panelX.add(button2);
+		
+		panel.add("South", panelX);
+		}
 
         this.getContentPane().add(panel);
 

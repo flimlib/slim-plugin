@@ -54,7 +54,6 @@ import java.awt.FlowLayout;
 import java.util.prefs.Preferences;
 import javax.swing.BoxLayout;
 
-
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -105,6 +104,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     static final int DECAY_WEIGHT = 4;
     static final int RESIDUAL_WEIGHT = 1;
     static final int HORZ_TWEAK = 1;
+	static final Color PROMPT_COLOR = Color.GRAY.brighter();
     static final Color DECAY_COLOR = Color.GRAY.darker();
     static final Color FITTED_COLOR = Color.RED;
     static final Color BACK_COLOR = Color.WHITE;
@@ -320,11 +320,12 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     /**
      * Changes (or initializes) all of the charted data.
      *
-     * @param irf
+	 * @param promptIndex
+     * @param prompt
      * @param data
      */
-    public void setData(ICurveFitData data) {
-        createDatasets(_bins, _timeInc, data);
+    public void setData(int promptIndex, double[] prompt, ICurveFitData data) {
+        createDatasets(_bins, _timeInc, promptIndex, prompt, data);
 
     }
 
@@ -423,13 +424,15 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             photonAxis = new NumberAxis(PHOTON_AXIS_LABEL);
         }
         XYSplineRenderer decayRenderer = new XYSplineRenderer();
-        decayRenderer.setSeriesShapesVisible(0, false);
-        decayRenderer.setSeriesLinesVisible(1, false);
+		decayRenderer.setSeriesShapesVisible(0, false);
+        decayRenderer.setSeriesShapesVisible(1, false);
+        decayRenderer.setSeriesLinesVisible(2, false);
         decayRenderer.setSeriesShape
-                (1, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f, 2.0f));
+                (2, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f, 2.0f));
 
-        decayRenderer.setSeriesPaint(0, FITTED_COLOR);
-        decayRenderer.setSeriesPaint(1, DECAY_COLOR);
+		decayRenderer.setSeriesPaint(0, PROMPT_COLOR);
+        decayRenderer.setSeriesPaint(1, FITTED_COLOR);
+        decayRenderer.setSeriesPaint(2, DECAY_COLOR);
 
         _decaySubPlot = new XYPlot
                 (_decayDataset, null, photonAxis, decayRenderer);
@@ -469,17 +472,21 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
      *
      * @param bins number of time bins
      * @param timeInc time increment per time bin
+	 * @param promptIndex starting bin of prompt
+	 * @param prompt prompt curve
      * @param data from the fit
      */
-    private void createDatasets(int bins, double timeInc, ICurveFitData data)
+    private void createDatasets(int bins, double timeInc, int promptIndex, double[] prompt, ICurveFitData data)
     {
+		XYSeries series1 = new XYSeries("Prompt");
         XYSeries series2 = new XYSeries("Fitted");
         XYSeries series3 = new XYSeries("Data");
         XYSeries series4 = new XYSeries("Residuals");
-
+		double xCurrent;
+		
         // show transient data; find the maximum transient data in this pass
         double yDataMax = -Double.MAX_VALUE;
-        double xCurrent = 0.0;
+        xCurrent = 0.0;
         for (int i = 0; i < bins; ++i) {
             // show transient data
             double yData = data.getTransient()[i];
@@ -494,6 +501,42 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             
             xCurrent += timeInc;
         }
+		
+		// show prompt if any
+		if (null != prompt) {// debugging
+
+			double yPromptMax = -Double.MAX_VALUE;
+			for (int i = 0; i < prompt.length; ++i) {
+				// debugging
+				System.out.println(" " + prompt[i]);
+				
+				// find max
+				if (prompt[i] > yPromptMax) {
+					yPromptMax = prompt[i];
+				}
+			}
+			
+			// add prompt data
+			xCurrent = 0.0;
+			for (int i = 0; i < bins; ++i) {
+				Double value = null;
+				if (null != prompt) {
+					if (i >= promptIndex) {
+						if (i - promptIndex < prompt.length) {
+							// logarithmic plots can't handle <= 0
+							if (prompt[i - promptIndex] > 0.0) {
+								value = prompt[i - promptIndex];
+								value = yDataMax * value / yPromptMax;
+							}
+						}
+					}
+				}
+				series1.add(xCurrent, value);
+				xCurrent += timeInc;
+			}
+		}
+
+		
         
         int transStart = data.getTransStartIndex();
         int dataStart  = data.getDataStartIndex();
@@ -534,6 +577,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 
         synchronized (_synchObject) {
             _decayDataset.removeAllSeries();
+			_decayDataset.addSeries(series1);
             _decayDataset.addSeries(series2);
             _decayDataset.addSeries(series3);
 

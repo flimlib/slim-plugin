@@ -566,7 +566,7 @@ public class HistogramPanel extends JPanel {
 	}
 	
 	private double gaussian(double a, double b, double c, double x) {
-		return a * Math.exp(-(x - b) * (x - b) / 2 * c * c);
+		return a * Math.exp(-(x - b) * (x - b) / (2 * c * c));
 	}
 	
 	private double silvermansRule(double standardDeviation, int n) {

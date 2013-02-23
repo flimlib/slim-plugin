@@ -89,6 +89,14 @@ public interface IUserInterfacePanelListener {
      * @return whether successful
      */
     public boolean estimateExcitation(String fileName);
+	
+	/**
+	 * Creates excitation curve from gaussian.
+	 * 
+	 * @param fileName
+	 * @return whether successful
+	 */
+	public boolean gaussianExcitation(String fileName);
 
     /**
      * Cancels the current excitation curve, if any.

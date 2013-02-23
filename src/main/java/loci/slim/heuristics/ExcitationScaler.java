@@ -32,8 +32,13 @@ public class ExcitationScaler {
         double[] values = new double[stopIndex - startIndex];
         double scaling = 0.0;
         for (int i = 0; i < values.length; ++i) {
-            values[i] = Math.max(decay[startIndex + i] - base, 0.0);
-            scaling += values[i];
+			if (startIndex + i < decay.length) {
+				values[i] = Math.max(decay[startIndex + i] - base, 0.0);
+				scaling += values[i];
+			}
+			else {
+				values[i] = 0.0;
+			}
         }
         
         if (0.0 == scaling) {
