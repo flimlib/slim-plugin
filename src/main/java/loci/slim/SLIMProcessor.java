@@ -77,6 +77,7 @@ import loci.slim.analysis.plugins.ExportPixelsToText;
 import loci.slim.analysis.batch.ExportSummaryToText;
 import loci.slim.fitting.ErrorManager;
 import loci.slim.fitting.IErrorListener;
+import loci.slim.fitting.RapidLifetimeDetermination;
 import loci.slim.preprocess.ISLIMBinner;
 import loci.slim.preprocess.RoiProcessor;
 import loci.slim.preprocess.SLIMBinning;
@@ -2142,7 +2143,15 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
         
         // do the fit
+		
+		//TODO TEST CODE FOR RLD FITTING
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
+		RapidLifetimeDetermination rld = new RapidLifetimeDetermination();
+		System.out.println("***TRI2 COMPATIBLE****");
+		rld.rldFit(curveFitter, dataArray[0]);
+		System.out.println("****TRIAL*****");
+		rld.trialRldFit(curveFitter, dataArray[0]);
+		
         int returnValue = getCurveFitter(uiPanel).fitData(dataArray);
 		
         // show decay graph for visible channel
