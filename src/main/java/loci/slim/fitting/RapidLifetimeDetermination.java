@@ -318,7 +318,14 @@ public class RapidLifetimeDetermination {
 		}
 		return 0;
 	}
-	
+
+	/**
+	 * Invokes java version of SLIMCurve C code.
+	 * 
+	 * @param fitter
+	 * @param data
+	 * @return 
+	 */
 	public int rldFit(ICurveFitter fitter, ICurveFitData data) {
 		double chiSquareDelta = 0.01;
 		double[] chisquare = new double[1];
@@ -407,9 +414,9 @@ public class RapidLifetimeDetermination {
 		System.out.println("p " + p + " = d1 " + d1 + " * d2 " + d2 + " + d3 " + d3 + " * d0 " + d0);
 		double q = d2 * d2 - d3 * d1;
 		System.out.println("q " + q + " = d2 " + d2 + " * d2 " + d2 + " - d3 " + d3 + " * d1 " + d1);
-		double disc = p * p - 4.0f * r * q;
-		System.out.println("disc " + disc + " = p " + p + " * p " + p + " - 4.0f * r " + r + " * q " + q);
-		double sqrtDisc = (double) Math.sqrt(disc);
+		double disc = p * p - 4.0 * r * q;
+		System.out.println("disc " + disc + " = p " + p + " * p " + p + " - 4.0 * r " + r + " * q " + q);
+		double sqrtDisc = Math.sqrt(disc);
 		System.out.println("sqrt disc " + sqrtDisc + " = Math.sqrt disc " + disc);
 		double x = (-p - sqrtDisc) / (2 * r);
 		System.out.println("x " + x + " = (-p " + p + " - sqrtDisc " + sqrtDisc + ") / (2 * r " + r + ")");
@@ -423,8 +430,8 @@ public class RapidLifetimeDetermination {
 		System.out.println("delta T is " + deltaT + " y squared is " + (y * y) + " x squared is " + (x * x));
 		
 		// compute taus (26)-(27)
-		double t1 = -deltaT / (double) Math.log(y * y);
-		double t2 = -deltaT / (double) Math.log(x * x);
+		double t1 = -deltaT / Math.log(y * y);
+		double t2 = -deltaT / Math.log(x * x);
 		System.out.println("RLD overlapping T1 is " + t1 + " T2 is " + t2);
 		return 0;
 	}
@@ -472,7 +479,7 @@ public class RapidLifetimeDetermination {
 		double q = d2 * d2 - d3 * d1;
 		System.out.println("q " + q + " = d2 " + d2 + " * d2 " + d2 + " - d3 " + d3 + " * d1 " + d1);
 		double disc = p * p - 4.0 * r * q;
-		System.out.println("disc " + disc + " = p " + p + " * p " + p + " - 4.0f * r " + r + " * q " + q);
+		System.out.println("disc " + disc + " = p " + p + " * p " + p + " - 4.0 * r " + r + " * q " + q);
 		double sqrtDisc = Math.sqrt(disc);
 		System.out.println("sqrt disc " + sqrtDisc + " = Math.sqrt disc " + disc);
 		double x = (-p - sqrtDisc) / (2 * r);
@@ -491,9 +498,55 @@ public class RapidLifetimeDetermination {
 		System.out.println("deltaT " + deltaT + " = 2 * fourthWidth " + fourthWidth + " * xinc " + xinc);
 		
 		// compute taus (22)-(23)
-		double t1 = -deltaT / (double) Math.log(y);
-		double t2 = -deltaT / (double) Math.log(x);
+		double t1 = -deltaT / Math.log(y);
+		double t2 = -deltaT / Math.log(x);
 		System.out.println("RLD T1 is " + t1 + " T2 is " + t2);
+		return 0;
+	}
+
+	/**
+	 * See "4.1 Resolution of a biexponential decay by Prony's method in the time domain", page 5, equations 6..8 of 
+	 * _A DSP-based measuring system for temperature compensated fiberoptical oxygen sensors_, Stehing and Holst.
+	 * 
+	 * @param offset
+	 * @param decay
+	 * @param xinc
+	 * @param start
+	 * @param stop
+	 * @return 
+	 */
+	private int testPronysMethod(double offset, double[] decay, double xinc, int start, int stop) {
+		int width = stop - start; // start here is exclusive
+		
+		// split decay up into fourths
+		int width4Divisible = (width / 4) * 4;
+		int fourthWidth = width4Divisible / 4;
+
+		System.out.println("width " + width + " width4Divisible " + width4Divisible + " fourthWidth " + fourthWidth);
+		
+		double f0 = decay[0] - offset;
+		double f1 = decay[fourthWidth] - offset;
+		double f2 = decay[2 * fourthWidth] - offset;
+		double f3 = decay[3 * fourthWidth] - offset;
+		
+		// try  this
+		/*f0 = decay[fourthWidth];
+		f1 = decay[2 * fourthWidth];
+		f2 = decay[3 * fourthWidth];
+		f3 = decay[4 * fourthWidth];*/
+		
+		
+		double alpha1 = (f3 * f0 - f2 * f1) / (f1 * f1 - f2 * f0);
+		double alpha2 = (f3 * f1 - f2 * f2) / (f0 * f2 - f1 * f1); //TODO eq 7 actually has f0 * f2 * f2 - f1 * f1 as the denominator
+		//alpha2 = (f3 * f1 - f2 * f2) / (f0 * f2 * f2 - f1 * f1); //TODO, okay try that, to no avail
+		double tau1 = -alpha1 / 2 + Math.sqrt((alpha1 * alpha1 / 4 - alpha2));
+		double tau2 = -alpha1 / 2 - Math.sqrt((alpha1 * alpha1 / 4 - alpha2));
+		
+		System.out.println("f0 " + f0 + " f1 " + f1 + " f2 " + f2 + " f3 " + f3);
+		System.out.println("alpha1 " + alpha1 + " alpha2 " + alpha2);
+		System.out.println("tau1 " + tau1 + " tau2 " + tau2);
+		// typically tau2 and alpha2 come out negative
+		
 		return 0;
 	}
 	
@@ -534,6 +587,8 @@ public class RapidLifetimeDetermination {
 		testDoubleRLDFitOverlapping(offset, trans, xinc, start, stop);
 		System.out.println("*************************************");
 		testDoubleRLDFit(offset, trans, xinc, start, stop);
+		System.out.println("=====================================");
+		testPronysMethod(offset, trans, xinc, start, stop);
 		
 		return 0;
 	}

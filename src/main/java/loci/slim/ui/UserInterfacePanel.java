@@ -61,11 +61,17 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.JSpinner.NumberEditor;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import ij.io.OpenDialog;
 import ij.io.SaveDialog;
@@ -120,7 +126,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                                 POISSON_DATA = "Poisson Data",
                                 MAXIMUM_LIKELIHOOD = "Max. Likelihood Est.";
 
-    private static final String CHI_SQ_TARGET = "" + CHI + SQUARE + " Target";
+    private static final String CHI_SQ_TARGET = "" + CHI + SQUARE + SUB_R + " Target";
 
     private static final String EXCITATION_NONE = "None",
                                 EXCITATION_FILE = "Load from File",
@@ -167,7 +173,32 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                                 STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, NONE };    
     
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE, EXCITATION_ESTIMATE, EXCITATION_GAUSSIAN };
-    
+	
+	private static final int X_VALUE = 0,
+							 X_MAX = 64000,
+							 X_MIN = 0,
+							 X_INC = 1;
+	
+	private static final int Y_VALUE = 0,
+							 Y_MAX = 64000,
+							 Y_MIN = 0,
+							 Y_INC = 1;
+	
+	private static final int THRESH_VALUE = 0,
+							 THRESH_MAX = 64000,
+							 THRESH_MIN = 0,
+							 THRESH_INC = 1;
+	
+	private static final double CHISQ_VALUE = 1.5,
+								CHISQ_MAX = 5.0,
+								CHISQ_MIN = 1.0,
+								CHISQ_INC = 0.25;
+	
+	private static final double SCATTER_VALUE = 0.0,
+								SCATTER_MAX = 2.0,
+								SCATTER_MIN = 0.0,
+								SCATTER_INC = 0.001;
+	
     private FittingCursorHelper _fittingCursorHelper;
     private IFitterEstimator _fitterEstimator;
     
@@ -201,12 +232,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JButton _estimateCursorsButton;
     
     // fit settings
-    JTextField _xField;
-    JTextField _yField;
-    JTextField _thresholdField;
-    JTextField _chiSqTargetField;
+	JSpinner _xSpinner;
+	JSpinner _ySpinner;
+	JSpinner _thresholdSpinner;
+	JSpinner _chiSqTargetSpinner;
     JComboBox _binningComboBox;
-	JTextField _scatterField; //SCATTER experiment
+	JSpinner _scatterSpinner; // scatter experiment
 
     // parameter panel
     JPanel _paramPanel;
@@ -814,30 +845,30 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         JLabel xLabel = new JLabel("X");
         xLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(xLabel);
-        _xField = new JTextField(9);
-		refitUponStateChange(_xField);
-        controlPanel.add(_xField);
+		_xSpinner = new JSpinner(new SpinnerNumberModel(X_VALUE, X_MIN, X_MAX, X_INC));
+		refitUponStateChange(_xSpinner);
+        controlPanel.add(_xSpinner);
 
         JLabel yLabel = new JLabel("Y");
         yLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(yLabel);
-        _yField = new JTextField(9);
-		refitUponStateChange(_yField);
-        controlPanel.add(_yField);
+		_ySpinner = new JSpinner(new SpinnerNumberModel(Y_VALUE, Y_MIN, Y_MAX, Y_INC));
+		refitUponStateChange(_ySpinner);
+        controlPanel.add(_ySpinner);
 
         JLabel thresholdLabel = new JLabel("Threshold");
         thresholdLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(thresholdLabel);
-        _thresholdField = new JTextField(9);
-		updateThresholdChange(_thresholdField);
-        controlPanel.add(_thresholdField);
+		_thresholdSpinner = new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX, THRESH_INC));
+		updateThresholdChange(_thresholdSpinner);;
+        controlPanel.add(_thresholdSpinner);;
 
         JLabel chiSqTargetLabel = new JLabel(CHI_SQ_TARGET);
         chiSqTargetLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(chiSqTargetLabel);
-        _chiSqTargetField = new JTextField(9);
-		refitUponStateChange(_chiSqTargetField);
-        controlPanel.add(_chiSqTargetField);
+		_chiSqTargetSpinner = new JSpinner(new SpinnerNumberModel(CHISQ_VALUE, CHISQ_MIN, CHISQ_MAX, CHISQ_INC));
+		refitUponStateChange(_chiSqTargetSpinner);
+		controlPanel.add(_chiSqTargetSpinner);
 
         JLabel binningLabel = new JLabel("Bin");
         binningLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -849,9 +880,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		JLabel scatterLabel = new JLabel("Scatter"); //SCATTER
 		scatterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(scatterLabel);
-		_scatterField = new JTextField(9);
-		refitUponStateChange(_scatterField);
-		controlPanel.add(_scatterField);
+		_scatterSpinner = new JSpinner();
+		// see http://implementsblog.com/2012/11/26/java-gotcha-jspinner-preferred-size/
+		Dimension size = _scatterSpinner.getPreferredSize();
+		SpinnerNumberModel model = new SpinnerNumberModel(SCATTER_VALUE, SCATTER_MIN, SCATTER_MAX, SCATTER_INC);
+		_scatterSpinner.setModel(model);
+		_scatterSpinner.setPreferredSize(size);
+		refitUponStateChange(_scatterSpinner);
+		controlPanel.add(_scatterSpinner);
 
         // rows, cols, initX, initY, xPad, yPad
         SpringUtilities.makeCompactGrid(controlPanel, 6, 2, 4, 4, 4, 4); //SCATTER 5 -> 6
@@ -1390,44 +1426,49 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				}
 			});
 	}
-	
-	private void updateThresholdChange(final JTextField textField) {
-		textField.addActionListener(
-			new ActionListener() {
+
+	/**
+	 * Triggers refit if spinner value changes.
+	 * 
+	 * @param spinner 
+	 */
+	private void refitUponStateChange(final JSpinner spinner) {
+		spinner.addChangeListener(
+			new ChangeListener() {
 				@Override
-				public void actionPerformed(ActionEvent e) {
-					// trigger if just edited text
-					updateThreshold(textField.getText());
-				}
-			});
-		textField.addFocusListener(
-			new FocusListener() {
-				private String _text;
-				
-				@Override
-				public void focusGained(FocusEvent e) {
-					_text = textField.getText();
-				}
-				
-				@Override
-				public void focusLost(FocusEvent e) {
-					if (!_text.equals(textField.getText())) {
-						// trigger if just edited text
-						updateThreshold(textField.getText());
+				public void stateChanged(ChangeEvent e) {
+					if (null != _listener) {
+						_listener.reFit();
 					}
 				}
 			});
 	}
-	
-	private void updateThreshold(String text) {
-        try {
-			int threshold = Integer.parseInt(text);
-			_thresholdListener.updateThreshold(threshold);
-			_listener.reFit();
-		}
-		catch (NumberFormatException e) {
-			
-		}
+
+	/**
+	 * Propagates a threshold spinner value change.
+	 * 
+	 * @param thresholdSpinner 
+	 */
+	private void updateThresholdChange(final JSpinner thresholdSpinner) {
+		thresholdSpinner.addChangeListener(
+			new ChangeListener() {
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					SpinnerModel spinnerModel = thresholdSpinner.getModel();
+					if (spinnerModel instanceof SpinnerNumberModel) {
+						int threshold = (Integer)((SpinnerNumberModel) spinnerModel).getValue();
+						if (null != _thresholdListener) {
+							_thresholdListener.updateThreshold(threshold);
+						}
+						if (null != _listener) {
+							if (FitRegion.SUMMED == getRegion()) {
+								// threshold affects a summed fit
+								_listener.reFit();
+							}
+						}
+					}
+				}
+			});
 	}
 
     /*
@@ -1461,10 +1502,11 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _promptComboBox.setEnabled(enable);
 
         // fit control settings
-        _xField.setEditable(enable);
-        _yField.setEditable(enable);
-        _thresholdField.setEditable(enable);
-        _chiSqTargetField.setEditable(enable);
+		_xSpinner.setEnabled(enable);
+		_ySpinner.setEnabled(enable);
+		_thresholdSpinner.setEnabled(enable);
+		_scatterSpinner.setEnabled(enable);
+        _chiSqTargetSpinner.setEnabled(enable);
         _binningComboBox.setEnabled(enable);
 
         // single exponent fit
@@ -1649,27 +1691,27 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     }
 
     public int getX() {
-        return parseInt(_xField);
+        return (Integer) _xSpinner.getValue();
     }
 
     public void setX(int x) {
-        _xField.setText("" + x);
+        _xSpinner.setValue(x);
     }
 
     public int getY() {
-        return parseInt(_yField);
+        return (Integer) _ySpinner.getValue();
     }
 
     public void setY(int y) {
-        _yField.setText("" + y);
+        _ySpinner.setValue(y);
     }
 
     public int getThreshold() {
-        return parseInt(_thresholdField);
+		return (Integer) _thresholdSpinner.getValue();
     }
 
     public void setThreshold(int threshold) {
-        _thresholdField.setText("" + threshold);
+		_thresholdSpinner.setValue(threshold);
     }
 
     public String getBinning() {
@@ -1678,29 +1720,15 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     }
 
     public double getChiSquareTarget() {
-		double chiSqTarget = 1.5;
-		try {
-			chiSqTarget = Double.valueOf(_chiSqTargetField.getText());
-		}
-		catch (NumberFormatException e) {
-			_chiSqTargetField.setText("" + chiSqTarget);
-		}
-        return chiSqTarget;
+		return (Double) _chiSqTargetSpinner.getValue();
     }
     
     public void setChiSquareTarget(double chiSqTarget) {
-        _chiSqTargetField.setText("" + chiSqTarget);
+		_chiSqTargetSpinner.setValue(chiSqTarget);
     }
 	
-	public double getScatter() { //SCATTER
-		double scatter = 0.0;
-		try {
-			scatter = Double.valueOf(_scatterField.getText());
-		}
-		catch (NumberFormatException e) {
-			_scatterField.setText("" + scatter);
-		}
-		return scatter;
+	public double getScatter() {
+		return (Double) _scatterSpinner.getValue();
 	}
 
     public int getParameterCount() {

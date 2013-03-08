@@ -91,6 +91,14 @@ import org.jfree.ui.RectangleEdge;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
+	// Unicode special characters
+    private static final Character CHI    = '\u03c7',
+                                   SQUARE = '\u00b2',
+                                   TAU    = '\u03c4',
+                                   SUB_1  = '\u2081',
+                                   SUB_2  = '\u2082',
+                                   SUB_3  = '\u2083',
+								   SUB_R  = '\u1d63';
 	static final String WIDTH_KEY = "width";
 	static final String HEIGHT_KEY = "height";
     static final Dimension SIZE = new Dimension(500, 270);
@@ -101,6 +109,9 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     static final String TIME_AXIS_LABEL = "Time";
     static final String UNITS_LABEL = "nanoseconds";
     static final String RESIDUAL_AXIS_LABEL = "Residual";
+	static final String CHI_SQUARE = "" + CHI + SQUARE + SUB_R;
+	static final String PHOTON_COUNT = "Photons";
+	static final String LOGARITHMIC = "Logarithmic";
     static final int DECAY_WEIGHT = 4;
     static final int RESIDUAL_WEIGHT = 1;
     static final int HORZ_TWEAK = 1;
@@ -134,6 +145,10 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     XYSeriesCollection _decayDataset;
     XYSeriesCollection _residualDataset;
 
+	JTextField _tau1TextField;
+	JTextField _tau2TextField;
+	JTextField _tau3TextField;
+	JTextField _chiSqTextField;
     JTextField _photonTextField;
     JCheckBox _logCheckBox;
 	
@@ -208,12 +223,17 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
             
             JPanel miscPane = new JPanel();
             miscPane.setLayout(new FlowLayout());
-            JLabel label = new JLabel("Photon count:");
-            miscPane.add(label);
+			JLabel label1 = new JLabel(CHI_SQUARE);
+			miscPane.add(label1);
+			_chiSqTextField = new JTextField(7);
+			_chiSqTextField.setEditable(false);
+			miscPane.add(_chiSqTextField);
+            JLabel label2 = new JLabel(PHOTON_COUNT);
+            miscPane.add(label2);
             _photonTextField = new JTextField(7);
             _photonTextField.setEditable(false);
             miscPane.add(_photonTextField);
-            _logCheckBox = new JCheckBox("Logarithmic");
+            _logCheckBox = new JCheckBox(LOGARITHMIC);
             _logCheckBox.setSelected(_logarithmic);
             _logCheckBox.addItemListener(new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
@@ -328,6 +348,16 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
         createDatasets(_bins, _timeInc, promptIndex, prompt, data);
 
     }
+
+	/**
+	 * Sets the reduced chi square.
+	 * 
+	 * @param chiSquare 
+	 */
+	public void setChiSquare(double chiSquare) {
+		String text = "" + roundToDecimalPlaces(chiSquare, 6);
+		_chiSqTextField.setText(text);
+	}
 
     /**
      * Sets the displayed photon count.
@@ -606,7 +636,14 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putInt(WIDTH_KEY, size.width);
 		prefs.putInt(HEIGHT_KEY, size.height);
-	}	
+	}
+
+    private double roundToDecimalPlaces(double value, int decimalPlaces) {
+        double decimalTerm = Math.pow(10.0, decimalPlaces);
+        int tmp = (int) Math.round(value * decimalTerm);
+        double rounded = (double) tmp / decimalTerm;
+        return rounded;
+    }
 
     /**
      * Inner class, UI which allows us to paint on top of the components,

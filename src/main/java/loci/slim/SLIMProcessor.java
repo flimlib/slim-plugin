@@ -529,6 +529,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		_image = loadImage(_path, _file);
 		getImageInfo(_image);
 		
+		IJ.showProgress(0, 0);
+		
 		// enable UI
 		_uiPanel.reset();
 	}
@@ -549,6 +551,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         IFitterEstimator fitterEstimator = new FitterEstimator();
         
         // cursor support
+		System.out.println("doFits opens new FittingCursor");
         _fittingCursor = new FittingCursor(_timeRange, _bins, fitterEstimator);
         _fittingCursor.addListener(new FittingCursorListener());
         
@@ -725,7 +728,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 						}
 					}
 					
-					_fittingCursor = null;
+					//TODO WHY? _fittingCursor = null;
 					
 					double a = peak;
 					double b = (double) peakBin;
@@ -1059,13 +1062,14 @@ public class SLIMProcessor <T extends RealType<T>> {
 		_batchBins = _bins;
 		
 		try {
-			for (File file : files) {
-				System.out.println("file " + file);
+			for (int i = 0; i < files.length; ++i) {
+				File file = files[i];
+
 				// close last image
 				if (null != _image) {
 					_image.close();
 				}
-
+				
 				// load batched image
 				_image = loadImage(file.getCanonicalPath());
 				getImageInfo(_image);
@@ -1096,6 +1100,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 				if (exportSummary) {
 					summary.process(fittedImage);
 				}
+				
+				// show progress bar
+				IJ.showProgress(i, files.length);
 			}
 			
 			if (exportSummary) {
@@ -1117,7 +1124,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		// restore current image
 		_image = loadImage(_path, _file);
 		getImageInfo(_image);
-		
+			
 		// enable UI
 		_uiPanel.reset();
 	}
@@ -1226,6 +1233,9 @@ public class SLIMProcessor <T extends RealType<T>> {
                     (_timeRange, excitation.getValues(), decay, chiSqTarget);
             
             // want all the fitting cursor listeners to get everything at once
+			if (null == _fittingCursor) {
+				System.out.println("fittingCursor is null");
+			}
             _fittingCursor.suspendNotifications();
             _fittingCursor.setHasPrompt(true);
             _fittingCursor.setPromptStartBin   ((int) results[CursorEstimator.PROMPT_START]);
@@ -2152,7 +2162,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		System.out.println("****TRIAL*****");
 		rld.trialRldFit(curveFitter, dataArray[0]);
 		
-        int returnValue = getCurveFitter(uiPanel).fitData(dataArray);
+        int returnValue = getCurveFitter(uiPanel).fitData(dataArray); 
 		
         // show decay graph for visible channel
 		int index = _file.lastIndexOf('.');
@@ -2613,6 +2623,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			prompt = _excitationPanel.getValues(startIndex, stopIndex, base);
 		}
         decayGraph.setData(startIndex, prompt, data);
+		decayGraph.setChiSquare(data.getParams()[0]);
         decayGraph.setPhotons(photons);
     }
     

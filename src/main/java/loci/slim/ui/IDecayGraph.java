@@ -75,6 +75,13 @@ public interface IDecayGraph {
      * @param data
      */
     public void setData(int startIndex, double[] prompt, ICurveFitData data);
+
+	/**
+	 * Sets reduced chi square of fit.
+	 * 
+	 * @param chiSquare 
+	 */
+	public void setChiSquare(double chiSquare);
     
     /**
      * Sets number of photons in fit.
