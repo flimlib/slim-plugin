@@ -49,5 +49,5 @@ public interface IGrayScalePixelValue {
      * @param y
      * @return unsigned byte expressed as an integer, 0...255
      */
-    public int getPixel(int channel, int x, int y);
+    public int getGrayValue(int channel, int x, int y);
 }

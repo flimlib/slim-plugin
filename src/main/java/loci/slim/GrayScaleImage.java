@@ -88,16 +88,13 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	private static final int THRESHOLD_TRANSPARENCY = 0xa0;
 	private static final int HIDDEN_TRANSPARENCY = 0xa0;
 	private static final int ERROR_TRANSPARENCY = 0xff;
-	//TODO ARG 10/3/12 was formerly using a ByteProcessor, switch to ShortProcessor; _8bit switch temporary for backward compatibility
-	private boolean _8bit = false;
     private int _width;
     private int _height;
 	private ImagePlus _imagePlus;
     private ImageStack _imageStack;
     private MyStackWindow _stackWindow;
     private ISelectListener _listener;
-    private byte[][] _saveOutPixels;
-	private short[][] _saveOutPixels2;
+	private short[][] _saveOutPixels;
     private double _minNonZeroPhotonCount;
 	private double _maxTotalPhotons;
     private int[] _brightestPoint;
@@ -129,24 +126,19 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 
         // building an image stack
         _imageStack = new ImageStack(_width, _height);
-		if (_8bit) {
-            _saveOutPixels = new byte[channels][];
-		}
-		else {
-            _saveOutPixels2 = new short[channels][];
-        }
+        _saveOutPixels = new short[channels][];
 
         LocalizableByDimCursor cursor = image.createLocalizableByDimCursor();
         double[][] pixels = new double[_width][_height];
         int[] position = (channels > 1) ? new int[4] : new int[3];
 
+		// keep track of minimum count; usually 1.0 but can be 10.0, etc.
         _minNonZeroPhotonCount = Double.MAX_VALUE;
         for (int c = 0; c < channels; ++c) {
             if (channels > 1) {
                 position[3] = c;
             }
-            byte[] outPixels = new byte[_width * _height];
-			short[] outPixels2 = new short[_width * _height];
+			short[] outPixels = new short[_width * _height];
 
             // sum photon counts
             double maxPixel = 0.0;
@@ -178,31 +170,19 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                 }
             }
 		
-			if (_8bit) {
-				// convert to grayscale
-				for (int x = 0; x < _width; ++x) {
-					for (int y = 0; y < _height; ++y) {
-						outPixels[y * _width + x] = (byte) (pixels[x][y] * 255 / maxPixel);
+			// convert to short
+			for (int x = 0; x < _width; ++x) {
+				for (int y = 0; y < _height; ++y) {
+					int value = (int) (pixels[x][y] / _minNonZeroPhotonCount);
+					if (value > Short.MAX_VALUE) {
+						value = Short.MAX_VALUE;
 					}
+					outPixels[y * _width + x] = (short) value;
 				}
-				// add a slice
-				// _imageStack.addSlice("" + c, true, outPixels); // stopped working 12/1/10
-				_imageStack.addSlice("" + c, outPixels);
-				_saveOutPixels[c] = outPixels;
 			}
-			else {
-				// convert to short
-				for (int x = 0; x < _width; ++x) {
-					for (int y = 0; y < _height; ++y) {
-						outPixels2[y * _width + x] = (short) (pixels[x][y] / _minNonZeroPhotonCount);
-					}
-				}
-				// add a slice
-				_imageStack.addSlice("" + c, outPixels2);
-				_saveOutPixels2[c] = outPixels2;
-			}
-
-
+			// add a slice
+			_imageStack.addSlice("" + c, outPixels);
+			_saveOutPixels[c] = outPixels;
         }
         _imagePlus = new ImagePlus(title, _imageStack);
         _stackWindow = new MyStackWindow(_imagePlus);
@@ -383,24 +363,13 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
      * @return unsigned byte expressed as an integer, 0...255
      */
     @Override
-    public int getPixel(int channel, int x, int y) {
-        int returnValue = 0;
-		if (_8bit) {
-			//TODO this consistently results in "OutOfMemoryError: Java heap space"
-			// getPixels calls getProcessor.
-			// byte pixels[] = (byte [])_imageStack.getPixels(channel + 1);
-			byte pixels[] = _saveOutPixels[channel];
-			returnValue |= pixels[y * _width + x] & 0xff;
+    public int getGrayValue(int channel, int x, int y) {
+		// (a * 255 / b) is 255 only when a == b, so we need to multiply by 256
+        int returnValue = _saveOutPixels[channel][y * _width + x] * 256 / (int) getMaxTotalPhotons();
+		if (returnValue > 255) {
+			returnValue = 255;
 		}
-		else {
-			// a * 255 / b == 255 only when a == b, so we need to multiply by 256
-			returnValue = _saveOutPixels2[channel][y * _width + x] * 256 / (int) getMaxTotalPhotons();
-			if (returnValue > 255) {
-				returnValue = 255;
-			}
-			returnValue &= 0xff;
-		}
-        return returnValue;
+		return returnValue &= 0xff;
     }
     
     @Override
@@ -428,7 +397,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		for (int y = 0; y < _height; ++y) {
 		    for (int x = 0; x < _width; ++x) {
 			   int alpha = TRANSPARENT;
-               if (_saveOutPixels2[getChannel()][y * _width + x] < threshold) {
+               if (_saveOutPixels[getChannel()][y * _width + x] < threshold) {
 				   alpha = THRESHOLD_TRANSPARENCY;
 			   }
 			   _thresholdImage.setRGB(x, y, getColor(THRESHOLD_COLOR, alpha));

@@ -77,7 +77,7 @@ public class ColorizedFittedImage implements IFittedImageSlice {
         _colorProcessor = new ColorProcessor(width, height);
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
-                int grayValue = _grayScalePixelValue.getPixel(channel, x, y);
+                int grayValue = _grayScalePixelValue.getGrayValue(channel, x, y);
                 Color gray = getGrayColor(grayValue);
                 _colorProcessor.setColor(gray);
                 _colorProcessor.drawPixel(x, y);   
@@ -105,7 +105,7 @@ public class ColorizedFittedImage implements IFittedImageSlice {
             for (int y = 0; y < _height; ++y) {
                 for (int x = 0; x < _width; ++x) {
                     Color color = null;
-                    int grayValue = _grayScalePixelValue.getPixel(_channel, x, y);
+                    int grayValue = _grayScalePixelValue.getGrayValue(_channel, x, y);
                     double value = _values[x][y];
                     if (min <= value && value <= max) {
                         color = getColorizedGrayColor(grayValue, value);
@@ -122,7 +122,7 @@ public class ColorizedFittedImage implements IFittedImageSlice {
 
     @Override
     public void draw(int x, int y, double value) {
-        int grayValue = _grayScalePixelValue.getPixel(_channel, x, y);
+        int grayValue = _grayScalePixelValue.getGrayValue(_channel, x, y);
         Color colorizedGray = getColorizedGrayColor(grayValue, value);
         _colorProcessor.setColor(colorizedGray);
         _colorProcessor.drawPixel(x, y);
