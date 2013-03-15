@@ -152,24 +152,29 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     private static final String A_T_Z_X2 = "A " + TAU + " Z " + CHI + SQUARE,
                                 A_T_X2 = "A " + TAU + " " + CHI + SQUARE,
                                 A_T = "A " + TAU,
-                                T_X2 = TAU + " " + CHI + SQUARE,
+								F_UPPER_T_Z_X2 = "F " + TAU + " Z " + CHI + SQUARE,
+								F_UPPER_T_X2 = "F " + TAU + " " + CHI + SQUARE,
+								F_UPPER_T = "F " + TAU,
+								F_LOWER_T_Z_X2 = "f " + TAU + " Z " + CHI + SQUARE,
+								F_LOWER_T_X2 = "f " + TAU + " " + CHI + SQUARE,
+			                    F_LOWER_T = "f " + TAU,
+			                    T_X2 = TAU + " " + CHI + SQUARE,
                                 T = "" + TAU,
-                                A_T_H_Z_X2 = "A " + TAU + " H Z " + CHI + SQUARE,
+								TAU_MEAN_X2 = TAU + "m " + CHI + SQUARE,
+								TAU_MEAN = TAU + "m",
+								A_T_H_Z_X2 = "A " + TAU + " H Z " + CHI + SQUARE,
                                 A_T_H_X2 = "A " + TAU + " H " + CHI + SQUARE,
                                 A_T_H = "A " + TAU + " H",
                                 T_H_X2 = TAU + " H " + CHI + SQUARE,
                                 T_H = TAU + " H",
-                                F_UPPER = "F",
-                                F_LOWER = "f",
-                                TAU_MEAN = "" + TAU + "m", // SUB_M
 								NONE = " ";
 	
 	private static final String FITTING_ERROR = "Fitting Error",
 			                    NO_FIT = "--";
     
     private static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, NONE },
-                                DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN, NONE },
-                                TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, F_UPPER, F_LOWER, TAU_MEAN, NONE },    
+                                DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, F_UPPER_T_Z_X2, F_UPPER_T_X2, F_UPPER_T, F_LOWER_T_Z_X2, F_LOWER_T_X2, F_LOWER_T, T_X2, T, TAU_MEAN_X2, TAU_MEAN, NONE },
+                                TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, F_UPPER_T_Z_X2, F_UPPER_T_X2, F_UPPER_T, F_LOWER_T_Z_X2, F_LOWER_T_X2, F_LOWER_T, T_X2, T, TAU_MEAN_X2, TAU_MEAN, NONE },    
                                 STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, NONE };    
     
     private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE, EXCITATION_ESTIMATE, EXCITATION_GAUSSIAN };
@@ -480,6 +485,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         enableAll(true);
         setFitButtonState(true);
     }
+	
+	public void disableButtons() {
+		enableButtons(false);
+	}
+	
+	public void resetButtons() {
+		enableButtons(true);
+	}
 
     private JPanel createFitPanel(String[] analysisChoices) {
         JPanel fitPanel = new JPanel();
@@ -489,6 +502,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         JLabel regionLabel = new JLabel("Region");
         regionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         fitPanel.add(regionLabel);
+		//TODO all these comboboxes are problematical:
+		//  if you click on the containing window & move it the combo list
+		//  doesn't close and remains active & drawn in original spot.
+		// See:
+		// http://stackoverflow.com/questions/10982273/swt-awt-new-frame-jcombobox-never-lose-focus-when-window-is-moved
+		// (but in that case problem was mixing SWT/AWT/Swing; this is just a JComboBox in a JPanel in a JTabbedPane.)
         _regionComboBox = new JComboBox(REGION_ITEMS);
         _regionComboBox.setSelectedItem(ALL_REGION);
         _regionComboBox.addItemListener(
@@ -1559,6 +1578,17 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
             reconcileStartParam();
         }
     }
+
+	/**
+	 * Disables and enables buttons.
+	 * 
+	 * @param enable 
+	 */
+	private void enableButtons(boolean enable) {
+		_openButton.setEnabled(enable);
+		_quitButton.setEnabled(enable);
+		_fitButton.setEnabled(enable);
+	}
 
     public FitRegion getRegion() {
         FitRegion region = null;

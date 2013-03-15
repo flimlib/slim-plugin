@@ -72,6 +72,7 @@ import loci.formats.FormatTools;
 import loci.formats.ImageReader;
 import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.analysis.batch.ExportBatchHistogram;
+import loci.slim.analysis.batch.ui.BatchHistogramListener;
 import loci.slim.analysis.plugins.ExportHistogramsToText;
 import loci.slim.analysis.plugins.ExportPixelsToText;
 import loci.slim.analysis.batch.ExportSummaryToText;
@@ -633,14 +634,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 				            showError("Error", "Could not load image");
 			           }
 			           else {
-						System.out.println("bins was " + _bins);
 				            if (getImageInfo(_image)) {
 								savePathInPreferences(_path);
 
 								// close existing grayscale and hook up a new one
 								_grayScaleImage.close();
 								showGrayScaleAndFit(uiPanel);
-						System.out.println("bins becomes " + _bins);
 				            }
 							else {
 								// kludgy way to reset
@@ -1037,6 +1036,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 		ExportHistogramsToText histograms = null;
 		ExportSummaryToText summary = null;
 		
+		_uiPanel.disable();
+		_uiPanel.disableButtons();
+		
 		// validate file names
 		if (exportPixels) {
 			if (!checkFileName(pixelsFile)) {
@@ -1055,7 +1057,34 @@ public class SLIMProcessor <T extends RealType<T>> {
 				return;
 			}
 			summary = new ExportSummaryToText();
-			summary.init(_function);
+			BatchHistogramListener listener = new BatchHistogramListener() {
+				@Override
+				public void swapImage(String filePath) {
+					// load image
+					_image = loadImage(filePath);
+					
+					// get metadata
+					getImageInfo(_image);
+
+					// save new path and file names
+					int index = filePath.lastIndexOf(File.separator);
+					_path = filePath.substring(0, index);
+					_file = filePath.substring(index + 1);
+					
+					// turn off old threshold listener
+					_uiPanel.setThresholdListener(null);
+					
+					// close existing grayscale image
+					_grayScaleImage.close();
+					
+					// show new grayscale and fit brightest
+					showGrayScaleAndFit(_uiPanel);
+					
+					// set up new threshold listener
+					_uiPanel.setThresholdListener(_grayScaleImage);
+				}
+			};
+			summary.init(_function, listener);
 		}
 
 		// ugly use of globals, leftover from batch macro kludge
@@ -1064,11 +1093,16 @@ public class SLIMProcessor <T extends RealType<T>> {
 		try {
 			for (int i = 0; i < files.length; ++i) {
 				File file = files[i];
+				
+				//TODO if (i > 0) break; //TODO just process a single image
 
 				// close last image
 				if (null != _image) {
 					_image.close();
 				}
+				
+				// show progress bar
+				IJ.showProgress(i, (files.length + 1));
 				
 				// load batched image
 				_image = loadImage(file.getCanonicalPath());
@@ -1092,20 +1126,21 @@ public class SLIMProcessor <T extends RealType<T>> {
 				Image<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
 				
 				if (exportPixels) {
+					//System.out.println("Export pixels");
 					pixels.export(pixelsFile, true, fittedImage, _region, _function);
 				}
 				if (exportHistograms) {
+					//System.out.println("Export histograms");
 					histograms.export(histogramsFile, true, fittedImage, _function);
 				}
 				if (exportSummary) {
-					summary.process(fittedImage);
+					//System.out.println("Export summary");
+					summary.process(file.getCanonicalPath(), fittedImage);
 				}
-				
-				// show progress bar
-				IJ.showProgress(i, files.length);
 			}
 			
 			if (exportSummary) {
+				// export summary to text file
 				summary.export(summaryFile);
 			}
 		}
@@ -1124,9 +1159,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 		// restore current image
 		_image = loadImage(_path, _file);
 		getImageInfo(_image);
+		
+		IJ.showProgress(0,0);
 			
 		// enable UI
 		_uiPanel.reset();
+		_uiPanel.resetButtons();
 	}
 	
 	private boolean checkFileName(String fileName) {

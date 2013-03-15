@@ -245,6 +245,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		if (null != _stackWindow) {
 			float zoomFactor = _stackWindow.getZoomFactor();
 			saveZoomFactorInPreferences(zoomFactor);
+			_stackWindow.close();
 			_stackWindow = null;
 		}
 	}

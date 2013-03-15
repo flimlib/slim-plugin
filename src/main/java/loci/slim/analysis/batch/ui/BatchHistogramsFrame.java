@@ -22,8 +22,10 @@ import loci.slim.analysis.HistogramStatistics;
  * @author aivar
  */
 public class BatchHistogramsFrame extends JFrame {
+	public static final String SUMMARY = "Summary";
     private static final String TITLE = "Batch Histograms";
 	private static final int SCROLLBAR_WIDTH = ((Integer) UIManager.get("ScrollBar.width")).intValue();
+	private BatchHistogramListener listener;
 	private BorderLayout layout;
 	private JPanel viewPanel;
 	private JScrollPane scrollPane;
@@ -32,13 +34,13 @@ public class BatchHistogramsFrame extends JFrame {
 	private HistogramStatisticsRowPanel summaryStatisticsRow;
 
 	/**
-	 * Constructor with the first image histogram and the summary histogram.
+	 * Constructor of invisible frame.
 	 *
-	 * @param imageHistogramPanel
-	 * @param summaryHistogramPanel
+	 * @param listener
 	 */
-	public BatchHistogramsFrame() {
+	public BatchHistogramsFrame(BatchHistogramListener listener) {
 		super(TITLE);
+		this.listener = listener;
 		layout = new BorderLayout();
 		setLayout(layout);
 		viewPanel = new JPanel();
@@ -50,12 +52,12 @@ public class BatchHistogramsFrame extends JFrame {
 		setVisible(false);
 	}
 
-	public void update(HistogramStatistics[] imageStatistics, HistogramStatistics[] summaryStatistics) {
-		HistogramStatisticsRowPanel imageStatisticsRow = new HistogramStatisticsRowPanel(imageStatistics);
+	public void update(String fileName, HistogramStatistics[] imageStatistics, HistogramStatistics[] summaryStatistics) {
+		HistogramStatisticsRowPanel imageStatisticsRow = new HistogramStatisticsRowPanel(fileName, imageStatistics, listener);
 		viewPanel.add(imageStatisticsRow);
 		viewPanel.revalidate();
 		viewPanel.repaint();
-		HistogramStatisticsRowPanel summaryStatisticsRow = new HistogramStatisticsRowPanel(summaryStatistics);
+		HistogramStatisticsRowPanel summaryStatisticsRow = new HistogramStatisticsRowPanel(SUMMARY, summaryStatistics, null);
 		this.summaryStatisticsRow = summaryStatisticsRow;
 		Component component = layout.getLayoutComponent(BorderLayout.SOUTH);
         if (null != component) {

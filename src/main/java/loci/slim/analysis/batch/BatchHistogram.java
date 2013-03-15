@@ -76,16 +76,21 @@ public class BatchHistogram {
 		}
 	}
 	
-	public String getTitle() {
+	public String getTitle() { // 0 usages
 		return title;
 	}
 	
 	public int getFittedParamIndex() {
 		return fittedParamIndex;
 	}
-	
+
+	/**
+	 * Account for a given value in the histogram.
+	 * 
+	 * @param value 
+	 */
 	public void process(double value) {
-		// check for count overflow; this will overflow before everything else
+		// check for count overflow
 		if (count == Long.MAX_VALUE) {
 			throw new RuntimeException("BatchHistogram count overflow");
 		}
@@ -114,14 +119,22 @@ public class BatchHistogram {
 		}
 		else {
 			int bin = Binning.valueToBin(BINS, minRange, maxRange, value);
-			System.out.println("value was " + value + " bin is " + bin + " BINS " + BINS);
+			//System.out.println("value was " + value + " bin is " + bin + " BINS " + BINS);
 			++bins[bin].count;
 			bins[bin].meanSum += value;
 			bins[bin].varianceSum += value * value;
 		}
 	}
-	
+
+	/**
+	 * Called periodically to get current statistics.
+	 * 
+	 * @return 
+	 */
 	public HistogramStatistics getStatistics() {
+		// build fresh statistics
+		statistics = null;
+		
 		return computeStatistics();
 	}
 
@@ -141,16 +154,12 @@ public class BatchHistogram {
 	 * @return 
 	 */
 	public long[] getScaledHistogram(int binCount) {
-		//if (null == statistics) {
-			statistics = computeStatistics();
-		///}
-		
-		
+		statistics = computeStatistics();
 
 		double iqr = statistics.getThirdQuartile() - statistics.getFirstQuartile();
 		double minSubRange = statistics.getMedian() - 1.5 * iqr;
 		double maxSubRange = statistics.getMedian() + 1.5 * iqr;
-		System.out.println("getScaledHistogram new range " + minSubRange + " " + maxSubRange);
+		//System.out.println("getScaledHistogram new range " + minSubRange + " " + maxSubRange);
 		
 		int minBin = Binning.valueToBin(BINS, minRange, maxRange, minSubRange);
 		int maxBin = Binning.valueToBin(BINS, minRange, maxRange, maxSubRange);
@@ -189,11 +198,12 @@ public class BatchHistogram {
 	
 	public double[] getScaledCenterValues(int binCount) {
 		statistics = computeStatistics();
+		
 		return Binning.centerValuesPerBin(binCount, statistics.getMinRange(), statistics.getMaxRange());
 	}
 	
 	private HistogramStatistics computeStatistics() {
-		// save time if already computed
+		// only compute if not already computed
 		if (null == statistics) {
 			statistics = new HistogramStatistics();
 			
@@ -208,8 +218,25 @@ public class BatchHistogram {
 			// mean
 			statistics.setMean(sum / count);
 			
-			// standard deviation
-			statistics.setStandardDeviation(Double.NaN); //TODO for now
+			// calculate running standard deviation
+			// https://en.wikipedia.org/wiki/Standard_deviation#Rapid_calculation_methods
+			double s0 = 0.0;
+			double s1 = 0.0;
+			double s2 = 0.0;
+			for (HistogramBin histogramBin : bins) {
+				s0 += histogramBin.count;
+				s1 += histogramBin.meanSum;
+				s2 += histogramBin.varianceSum;
+			}
+			s0 += underMinCount;
+			s0 += overMaxCount;
+			s1 += underMinSum;
+			s1 += overMaxSum;
+			s2 += underMinVarianceSum;
+			s2 += overMaxVarianceSum;
+			//System.out.println("s0 " + s0 + " (count " + count + ") s1 " + s1 + " s2 " + s2);
+			double standardDeviation = Math.sqrt(s0 * s2 - s1 * s1) / count;
+			statistics.setStandardDeviation(standardDeviation);
 			
 			// quartiles
 			statistics.setFirstQuartile(countToValue(count / 4));
@@ -244,7 +271,7 @@ public class BatchHistogram {
 			meanFromHistogram += overMaxSum;
 			counter += overMaxCount;
 			meanFromHistogram /= counter;
-			System.out.println("computeStatistics mean from histogram " + meanFromHistogram);
+			//System.out.println("computeStatistics mean from histogram " + meanFromHistogram);
 		}
 		return statistics;
 	}
@@ -259,9 +286,11 @@ public class BatchHistogram {
 	private double countToValue(long n) {
 		// make sure that the bin for this count is within range
 		if (n < underMinCount) {
+			System.out.println("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
 			throw new RuntimeException("BatchHistogram quartile underflow");
 		}
 		if (n > count - overMaxCount) {
+			System.out.println("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
 			throw new RuntimeException("BatchHistogram quartile overflow");
 		}
 
@@ -278,7 +307,11 @@ public class BatchHistogram {
 		throw new RuntimeException("BatchHistogram quartile problem");
 	}
 
-	// 24 bytes
+	/*
+	 * Inner class to keep track of count and also some sums.
+	 * 
+	 * 24 bytes in size.
+	 */
 	private class HistogramBin {
 		public double meanSum;
 		public double varianceSum;

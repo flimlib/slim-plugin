@@ -45,6 +45,7 @@ import java.util.List;
 
 import loci.curvefitter.ICurveFitter;
 import loci.slim.analysis.batch.ui.BatchHistogramsFrame;
+import loci.slim.analysis.batch.ui.BatchHistogramListener;
 import loci.slim.analysis.plugins.ExportHistogramsToText;
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
@@ -57,13 +58,20 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  */
 public class ExportSummaryToText {
 	private ICurveFitter.FitFunction function;
+	private BatchHistogramListener listener;
 	private BatchHistogram[] histograms;
 	private String[] titles;
 	private int[] indices;
 	private BatchHistogramsFrame frame;
-	
-	public void init(ICurveFitter.FitFunction function) {
+
+	/**
+	 * Initializes for given fitting function.
+	 * 
+	 * @param function 
+	 */
+	public void init(ICurveFitter.FitFunction function, BatchHistogramListener listener) {
 		this.function = function;
+		this.listener = listener;
 		switch (function) {
 			case SINGLE_EXPONENTIAL:
 				titles = new String[] { "T" };
@@ -86,11 +94,19 @@ public class ExportSummaryToText {
 		}
 		histograms = histogramsList.toArray(new BatchHistogram[histogramsList.size()]);
 	}
-	
-	public void process(Image<DoubleType> image) {
+
+	/**
+	 * Processes each image in batch job.
+	 * 
+	 * @param fileName
+	 * @param image 
+	 */
+	public void process(String fileName, Image<DoubleType> image) {
+		System.out.println("process " + image.getName());
 		int[] dimensions = image.getDimensions();
 		LocalizableByDimCursor<DoubleType> cursor = image.createLocalizableByDimCursor();
 
+		// traverse all pixels
 		int[] position = new int[dimensions.length];
 		for (int y = 0; y < dimensions[1]; ++y) {
 			for (int x = 0; x < dimensions[0]; ++x) {
@@ -98,7 +114,8 @@ public class ExportSummaryToText {
 				position[0] = x;
 				position[1] = y;
 				// non-xy dimensions remain at zero
-				
+
+				// update all batch histograms
 				for (BatchHistogram histogram : histograms) {
 					int fittedParamIndex = histogram.getFittedParamIndex();
 					position[3] = fittedParamIndex;
@@ -111,25 +128,36 @@ public class ExportSummaryToText {
 				}
 			}
 		}
+		// build list of histogram statistics for this new image
 		List<HistogramStatistics> imageList = new ArrayList<HistogramStatistics>();
 		ExportHistogramsToText export = new ExportHistogramsToText();
 		for (int i = 0; i < titles.length; ++i) {
 		    HistogramStatistics imageStatistics = export.getStatistics(titles[i], image, 0, indices[i]);
 		    imageList.add(imageStatistics);
 		}
+		// build list of summarized histogram statistics
 		List<HistogramStatistics> summaryList = new ArrayList<HistogramStatistics>();
 		for (BatchHistogram histogram : histograms) {
 		    HistogramStatistics summaryStatistics = histogram.getStatistics();
 		    summaryList.add(summaryStatistics);
 		}
+		
+		// lazy instantiation of frame
 		if (null == frame) {
-		    frame = new BatchHistogramsFrame();
+		    frame = new BatchHistogramsFrame(listener);
 		}
+		// show new image statistics and update summary
 		frame.update(
+			fileName,
 			imageList.toArray(new HistogramStatistics[imageList.size()]), 
 			summaryList.toArray(new HistogramStatistics[summaryList.size()]));
 	}
-	
+
+	/**
+	 * Exports the summary to a file.
+	 * 
+	 * @param fileName 
+	 */
     public void export(String fileName) {
 		BufferedWriter bufferedWriter = null;
 		try {

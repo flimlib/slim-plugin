@@ -81,6 +81,16 @@ public interface IUserInterfacePanel {
      */
     public void reset();
 
+	/**
+	 * Disables the UI buttons.
+	 */
+	public void disableButtons();
+	
+	/**
+	 * Resets the UI buttons after a fit.
+	 */
+	public void resetButtons();
+
     /**
      * Gets region the fit applies to.
      *

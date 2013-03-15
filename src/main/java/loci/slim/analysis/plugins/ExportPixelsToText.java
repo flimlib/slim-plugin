@@ -215,10 +215,10 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 				bufferedWriter.write("A\tT\tZ\tX2");
                 break;
             case DOUBLE_EXPONENTIAL:
-                bufferedWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tZ\tX2");
+                bufferedWriter.write("A1\tF1\tT1\tA2\tF2\tT2\tZ\tX2");
                 break;
             case TRIPLE_EXPONENTIAL:
-                bufferedWriter.write("A1\tA1_%\tT1\tA2\tA2_%\tT2\tA3\tA3_%\tT3\tZ\tX2");
+                bufferedWriter.write("A1\tF1\tT1\tA2\tF2\tT2\tA3\tF3\tT3\tZ\tX2");
                 break;
             case STRETCHED_EXPONENTIAL:
                 bufferedWriter.write("A\tT\tH\tZ\tX2");
@@ -237,9 +237,9 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 				double X2 = paramArray[0];
 				
                 bufferedWriter.write(
-                        showParameter(A)  + TAB +
-                        showParameter(T)  + TAB +
-                        showParameter(Z)  + TAB +
+                        showParameter(A) + TAB +
+                        showParameter(T) + TAB +
+                        showParameter(Z) + TAB +
 						showParameter(X2)
                         );
 				bufferedWriter.newLine();
@@ -254,18 +254,19 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 				double Z  = paramArray[1];
 				double X2 = paramArray[0];
 
-				// normalize so that A1n + A2n = 100%
-				double A1n = normalize(A1, A1 + A2);
-				double A2n = normalize(A2, A1 + A2);
+				// normalize so that F1 + F2 = 100%
+				double sum = A1 + A2;
+				double F1 = normalize(A1, sum);
+				double F2 = normalize(A2, sum);
 				
                 bufferedWriter.write(
-                        showParameter(A1)  + TAB +
-						showParameter(A1n) + TAB +
-                        showParameter(T1)  + TAB +
-                        showParameter(A2)  + TAB +
-						showParameter(A2n) + TAB +
-                        showParameter(T2)  + TAB +
-                        showParameter(Z)   + TAB +
+                        showParameter(A1) + TAB +
+						showParameter(F1) + TAB +
+                        showParameter(T1) + TAB +
+                        showParameter(A2) + TAB +
+						showParameter(F2) + TAB +
+                        showParameter(T2) + TAB +
+                        showParameter(Z)  + TAB +
                         showParameter(X2)
                         );
 				bufferedWriter.newLine();
@@ -282,22 +283,23 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 				double Z  = paramArray[1];
 				double X2 = paramArray[0];
 				
-				// normalize so that A1n + A2n + A3n = 100%
-				double A1n = normalize(A1, A1 + A2 + A3);
-				double A2n = normalize(A2, A1 + A2 + A3);
-				double A3n = normalize(A3, A1 + A2 + A3);
+				// normalize so that F1 + F2 + F3 = 100%
+				double sum = A1 + A2 + A3;
+				double F1 = normalize(A1, sum);
+				double F2 = normalize(A2, sum);
+				double F3 = normalize(A3, sum);
 				
                 bufferedWriter.write(
-                        showParameter(A1)  + TAB +
-						showParameter(A1n) + TAB +
-                        showParameter(T1)  + TAB +
-                        showParameter(A2)  + TAB +
-						showParameter(A2n) + TAB +
-                        showParameter(T2)  + TAB +
-                        showParameter(A3)  + TAB +
-						showParameter(A3n) + TAB +
-                        showParameter(T3)  + TAB +
-                        showParameter(Z)   + TAB +
+                        showParameter(A1) + TAB +
+						showParameter(F1) + TAB +
+                        showParameter(T1) + TAB +
+                        showParameter(A2) + TAB +
+						showParameter(F2) + TAB +
+                        showParameter(T2) + TAB +
+                        showParameter(A3) + TAB +
+						showParameter(F3) + TAB +
+                        showParameter(T3) + TAB +
+                        showParameter(Z)  + TAB +
                         showParameter(X2)
                         );
 				bufferedWriter.newLine();

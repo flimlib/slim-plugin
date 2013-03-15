@@ -157,5 +157,5 @@ public class SLIM_PlugIn implements PlugIn {
 		}
 		instance = null;
 	}
-
+	
 }
