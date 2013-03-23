@@ -76,7 +76,10 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
     private BufferedWriter bufferedWriter;
     private MathContext context = new MathContext(4, RoundingMode.FLOOR);
 
-    public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
+    public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
+		//TODO
+		System.out.println("ExportPixelsToText.analyze(..., " + parameters + ")");
+		
         boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences());
         if (export && null != fileName) {
             saveFileInPreferences(fileName);

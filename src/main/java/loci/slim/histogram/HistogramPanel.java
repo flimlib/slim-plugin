@@ -365,8 +365,8 @@ public class HistogramPanel extends JPanel {
 			count += _bins[i];
 		}
 		//System.out.println("statistics.getStdDev is " + statistics.getStdDev());
-		System.out.println("Silverman's rule bandwidth is count " + count + " bandwidth " + silvermansRule(0.27, count));
-		System.out.println("estimate " + estimateBandwidth(statistics.getFences()[1] - statistics.getFences()[0], count));
+		//System.out.println("Silverman's rule bandwidth is count " + count + " bandwidth " + silvermansRule(0.27, count));
+		//System.out.println("estimate " + estimateBandwidth(statistics.getFences()[1] - statistics.getFences()[0], count));
 		_bandwidth = 5 * estimateBandwidth(statistics.getFences()[1] - statistics.getFences()[0], count);
 		_kernelDensityEstimate = kernelDensityEstimation(_bins, _maxBinCount, _bandwidth);
 		

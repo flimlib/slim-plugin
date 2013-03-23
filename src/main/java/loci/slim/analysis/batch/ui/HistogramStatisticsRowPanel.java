@@ -30,11 +30,14 @@ public class HistogramStatisticsRowPanel extends JPanel {
 		
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		statisticsPanels = new HistogramStatisticsPanel[statistics.length];
-		for (int i = 0; i < statistics.length; ++i) {
-			statisticsPanels[i] = new HistogramStatisticsPanel(statistics[i]);
-			panel.add(statisticsPanels[i]);
+		if (null != statistics) {
+			statisticsPanels = new HistogramStatisticsPanel[statistics.length];
+			for (int i = 0; i < statistics.length; ++i) {
+				statisticsPanels[i] = new HistogramStatisticsPanel(statistics[i]);
+				panel.add(statisticsPanels[i]);
+			}
 		}
+
 		this.add(panel);
 		
 		this.addMouseListener(new MouseListener() {

@@ -96,9 +96,10 @@ public class SLIMAnalysis {
      * @param name
      * @param image
      * @param region
-     * @param function 
+     * @param function
+	 * @param parameters
      */
-    public void doAnalysis(String name, Image<DoubleType> image, FitRegion region, FitFunction function) {
+    public void doAnalysis(String name, Image<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
         
         // find selected plugin
         IndexItem<SLIMAnalyzer, ISLIMAnalyzer> selectedPlugin = null;
@@ -120,7 +121,7 @@ public class SLIMAnalysis {
             }
 
             if (null != instance) {
-                instance.analyze(image, region, function);
+                instance.analyze(image, region, function, parameters);
             }
         }
     }

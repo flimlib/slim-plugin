@@ -73,7 +73,10 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 	private boolean append;
     private BufferedWriter bufferedWriter;
 
-    public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
+    public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
+		//TODO
+		System.out.println("ExportHistogramsToText.analyze(..., " + parameters + ")");
+		
 		// need entire fitted image
 		if (FitRegion.EACH == region) {
 			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences());
@@ -134,7 +137,17 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		}
 	}
 	
-	public HistogramStatistics[] getStatistics(Image<DoubleType> image,
+	/**
+	 * Used internally; builds array of statistics going from array of titles and
+	 * corresponding parameter indices.
+	 * 
+	 * @param image
+	 * @param channel
+	 * @param function
+	 * @return 
+	 */
+	
+	/*public*/ HistogramStatistics[] getStatistics(Image<DoubleType> image,
 			int channel, FitFunction function)
 	{
 		// get titles of parameters in parameter index order
@@ -163,7 +176,16 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		
 		return statistics;
 	}
-	
+
+	/**
+	 * Called internally from above method.
+	 * 
+	 * @param title
+	 * @param image
+	 * @param channel
+	 * @param index
+	 * @return 
+	 */
 	public HistogramStatistics getStatistics(String title,
 			Image<DoubleType> image, int channel, int index)
 	{

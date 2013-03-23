@@ -76,6 +76,8 @@ import loci.slim.analysis.batch.ui.BatchHistogramListener;
 import loci.slim.analysis.plugins.ExportHistogramsToText;
 import loci.slim.analysis.plugins.ExportPixelsToText;
 import loci.slim.analysis.batch.ExportSummaryToText;
+import loci.slim.fitted.FittedValue;
+import loci.slim.fitted.FittedValueFactory;
 import loci.slim.fitting.ErrorManager;
 import loci.slim.fitting.IErrorListener;
 import loci.slim.fitting.RapidLifetimeDetermination;
@@ -618,10 +620,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 				@Override
 				public void openFile() {
                    File[] files = showFileDialog(getPathFromPreferences());
-				   if (files.length > 1) {
+				   // were multiple files opened?
+				   if (1 < files.length) {
 					   batchProcessingWithUI(files);
 				   }
-				   else {
+				   // was a single file opened? (skip cancellations)
+				   else if (1 == files.length) {
 					   String savePath = _path;
 					   String saveFile = _file;
 					   
@@ -638,7 +642,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 								savePathInPreferences(_path);
 
 								// close existing grayscale and hook up a new one
+								_uiPanel.setThresholdListener(null);
 								_grayScaleImage.close();
+								_grayScaleImage = null;
 								showGrayScaleAndFit(uiPanel);
 				            }
 							else {
@@ -1076,6 +1082,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 					
 					// close existing grayscale image
 					_grayScaleImage.close();
+					_grayScaleImage = null;
 					
 					// show new grayscale and fit brightest
 					showGrayScaleAndFit(_uiPanel);
@@ -1084,7 +1091,23 @@ public class SLIMProcessor <T extends RealType<T>> {
 					_uiPanel.setThresholdListener(_grayScaleImage);
 				}
 			};
-			summary.init(_function, listener);
+			int components = 0;
+			switch (_function) {
+				case SINGLE_EXPONENTIAL:
+					components = 1;
+					break;
+				case DOUBLE_EXPONENTIAL:
+					components = 2;
+					break;
+				case TRIPLE_EXPONENTIAL:
+					components = 3;
+					break;
+				case STRETCHED_EXPONENTIAL:
+					components = 1;
+					break;
+			}
+			FittedValue[] values = FittedValueFactory.createFittedValues(_uiPanel.getFittedImages(), components);
+			summary.init(values, _function, listener);
 		}
 
 		// ugly use of globals, leftover from batch macro kludge
@@ -1418,6 +1441,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         catch (NullPointerException e) {
             System.out.println("image.getDimensions throws NullPointerException " + e.getMessage());
             System.out.println("can't detect channels");
+			return false;
         }
         Integer xIndex, yIndex, lifetimeIndex, channelIndex;
         _width = ImageUtils.getWidth(image);
@@ -1504,7 +1528,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
         if (null != fittedImage) {
             for (String analysis : uiPanel.getAnalysisList()) {
-                _analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction()); //TODO get from uiPanel or get from global?  re-evaluate approach here
+                _analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction(), uiPanel.getFittedImages());
             }
         }
     }

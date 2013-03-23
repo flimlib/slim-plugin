@@ -1,11 +1,11 @@
 //
-// ISLIMAnalyzer.java
+// TFittedValue.java
 //
 
 /*
 SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2010, UW-Madison LOCI
+Copyright (c) 2013, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,23 +32,37 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim.analysis;
+package loci.slim.fitted;
 
-import loci.curvefitter.ICurveFitter.FitFunction;
-import loci.curvefitter.ICurveFitter.FitRegion;
+import loci.slim.fitted.FittedValue;
+import loci.slim.fitted.AbstractFittedValue;
 
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.real.DoubleType;
 
 /**
- * An interface for analyzing the results of a SLIM Plugin fit.
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/ISLIMAnalyzer.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/ISLIMAnalyzer.java">SVN</a></dd></dl>
- *
- * @author Aivar Grislis grislis at wisc dot edu
+ * Extracts T fitted values.
+ * 
+ * @author Aivar Grislis
  */
-public interface ISLIMAnalyzer {
-    public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function, String parameters);
+public class TFittedValue extends AbstractFittedValue implements FittedValue {
+	private int fittedParamIndex;
+	
+	public void init(String title, int component) {
+		setTitle(title);
+		switch (component) {
+			case 1:
+				fittedParamIndex = FittedValue.T1_INDEX;
+				break;
+			case 2:
+				fittedParamIndex = FittedValue.T2_INDEX;
+				break;
+			case 3:
+				fittedParamIndex = FittedValue.T3_INDEX;
+				break;
+		}
+	}
+
+	@Override
+	public double getValue(double[] values) {
+		return values[fittedParamIndex];
+	}
 }

@@ -1,0 +1,215 @@
+//
+// FittedValueFactory.java
+//
+
+/*
+SLIMPlugin for combined spectral-lifetime image analysis.
+
+Copyright (c) 2013, UW-Madison LOCI
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the UW-Madison LOCI nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
+
+package loci.slim.fitted;
+
+import loci.slim.fitted.AFittedValue;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Creates FittedValues.
+ * 
+ * @author Aivar Grislis
+ */
+public class FittedValueFactory {
+	
+	/**
+	 * Creates array of FittedValue from String descriptor.
+	 * 
+	 * @param fittedValueDescriptor
+	 * @param components
+	 * @return 
+	 */
+	public static FittedValue[] createFittedValues(String fittedValueDescriptor, int components) {
+		List<FittedValue> fittedValues = new ArrayList<FittedValue>();
+		String[] descriptors = fittedValueDescriptor.split(" ");
+		for (String descriptor : descriptors) {
+			System.out.println("descriptor>" + descriptor + "<");
+			if (FittedValue.CHI_SQ.equals(descriptor)) {
+				System.out.println("CHI SQUARE FITTED VALUE");
+				ChiSqFittedValue fittedValue = new ChiSqFittedValue();
+				fittedValue.init(FittedValue.CHI_SQ);
+				fittedValues.add(fittedValue);
+			}
+			else if (FittedValue.Z.equals(descriptor)) {
+				ZFittedValue fittedValue = new ZFittedValue();
+				fittedValue.init(FittedValue.Z);
+				fittedValues.add(fittedValue);
+			}
+			else if (FittedValue.A.equals(descriptor)) {
+				switch (components) {
+					case 1:
+					{
+						AFittedValue fittedValue = new AFittedValue();
+						fittedValue.init(FittedValue.A, 1);
+						fittedValues.add(fittedValue);
+						break;
+					}
+					case 2:
+					{
+						AFittedValue fittedValue1 = new AFittedValue();
+						fittedValue1.init(FittedValue.A1, 1);
+						fittedValues.add(fittedValue1);
+						AFittedValue fittedValue2 = new AFittedValue();
+						fittedValue2.init(FittedValue.A2, 2);
+						fittedValues.add(fittedValue2);
+						break;
+					}
+					case 3:
+					{
+						AFittedValue fittedValue1 = new AFittedValue();
+						fittedValue1.init(FittedValue.A1, 1);
+						fittedValues.add(fittedValue1);
+						AFittedValue fittedValue2 = new AFittedValue();
+						fittedValue2.init(FittedValue.A2, 2);
+						fittedValues.add(fittedValue2);
+						AFittedValue fittedValue3 = new AFittedValue();
+						fittedValue2.init(FittedValue.A3, 3);
+						fittedValues.add(fittedValue3);
+						break;
+					}
+				}
+			}
+			else if (FittedValue.T.equals(descriptor)) {
+				switch (components) {
+					case 1:
+					{
+						TFittedValue fittedValue = new TFittedValue();
+						fittedValue.init(FittedValue.T, 1);
+						fittedValues.add(fittedValue);
+						break;
+					}
+					case 2:
+					{
+						TFittedValue fittedValue1 = new TFittedValue();
+						fittedValue1.init(FittedValue.T1, 1);
+						fittedValues.add(fittedValue1);
+						TFittedValue fittedValue2 = new TFittedValue();
+						fittedValue2.init(FittedValue.T2, 2);
+						fittedValues.add(fittedValue2);
+						break;
+					}
+					case 3:
+					{
+						TFittedValue fittedValue1 = new TFittedValue();
+						fittedValue1.init(FittedValue.T1, 1);
+						fittedValues.add(fittedValue1);
+						TFittedValue fittedValue2 = new TFittedValue();
+						fittedValue2.init(FittedValue.T2, 2);
+						fittedValues.add(fittedValue2);
+						TFittedValue fittedValue3 = new TFittedValue();
+						fittedValue2.init(FittedValue.T3, 3);
+						fittedValues.add(fittedValue3);
+						break;
+					}
+				}
+			}
+			else if (FittedValue.F_INT.equals(descriptor)) {
+				switch (components) {
+					case 1:
+					{
+						FractionalIntensityFittedValue fittedValue = new FractionalIntensityFittedValue();
+						fittedValue.init(FittedValue.F_INT, 1, components);
+						fittedValues.add(fittedValue);
+						break;
+					}
+					case 2:
+					{
+						FractionalIntensityFittedValue fittedValue1 = new FractionalIntensityFittedValue();
+						fittedValue1.init(FittedValue.F_INT1, 1, components);
+						fittedValues.add(fittedValue1);
+						FractionalIntensityFittedValue fittedValue2 = new FractionalIntensityFittedValue();
+						fittedValue2.init(FittedValue.F_INT2, 2, components);
+						fittedValues.add(fittedValue2);
+						break;
+					}
+					case 3:
+					{
+						FractionalIntensityFittedValue fittedValue1 = new FractionalIntensityFittedValue();
+						fittedValue1.init(FittedValue.F_INT1, 1, components);
+						fittedValues.add(fittedValue1);
+						FractionalIntensityFittedValue fittedValue2 = new FractionalIntensityFittedValue();
+						fittedValue2.init(FittedValue.F_INT2, 2, components);
+						fittedValues.add(fittedValue2);
+						FractionalIntensityFittedValue fittedValue3 = new FractionalIntensityFittedValue();
+						fittedValue2.init(FittedValue.F_INT3, 3, components);
+						fittedValues.add(fittedValue3);
+						break;
+					}
+				}
+			}
+			else if (FittedValue.F_CONT.equals(descriptor)) {
+				switch (components) {
+					case 1:
+					{
+						FractionalContributionFittedValue fittedValue = new FractionalContributionFittedValue();
+						fittedValue.init(FittedValue.F_CONT, 1, components);
+						fittedValues.add(fittedValue);
+						break;
+					}
+					case 2:
+					{
+						FractionalContributionFittedValue fittedValue1 = new FractionalContributionFittedValue();
+						fittedValue1.init(FittedValue.F_CONT1, 1, components);
+						fittedValues.add(fittedValue1);
+						FractionalContributionFittedValue fittedValue2 = new FractionalContributionFittedValue();
+						fittedValue2.init(FittedValue.F_CONT2, 2, components);
+						fittedValues.add(fittedValue2);
+						break;
+					}
+					case 3:
+					{
+						FractionalContributionFittedValue fittedValue1 = new FractionalContributionFittedValue();
+						fittedValue1.init(FittedValue.F_CONT1, 1, components);
+						fittedValues.add(fittedValue1);
+						FractionalContributionFittedValue fittedValue2 = new FractionalContributionFittedValue();
+						fittedValue2.init(FittedValue.F_CONT2, 2, components);
+						fittedValues.add(fittedValue2);
+						FractionalContributionFittedValue fittedValue3 = new FractionalContributionFittedValue();
+						fittedValue2.init(FittedValue.F_CONT3, 3, components);
+						fittedValues.add(fittedValue3);
+						break;
+					}
+				}
+			}
+			else if (FittedValue.T_MEAN.equals(descriptor)) {
+				TMeanFittedValue fittedValue = new TMeanFittedValue();
+				fittedValue.init(FittedValue.T_MEAN, components);
+				fittedValues.add(fittedValue);
+			}
+		}
+		return fittedValues.toArray(new FittedValue[fittedValues.size()]);
+	}
+}
