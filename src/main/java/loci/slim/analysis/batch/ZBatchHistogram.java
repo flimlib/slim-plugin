@@ -21,9 +21,9 @@ public class ZBatchHistogram extends AbstractBatchHistogram implements BatchHist
 		int totalBins = 100000;
 		setTotalBins(totalBins);
 		
-		// expect z values from -50.0..+50.0
-		double minRange = -50.0;
-		double maxRange = 50.0;
+		// expect z values from -10.0..+10.0
+		double minRange = -10.0;
+		double maxRange = 10.0;
 		setMinMaxRange(minRange, maxRange);
 	}
 }

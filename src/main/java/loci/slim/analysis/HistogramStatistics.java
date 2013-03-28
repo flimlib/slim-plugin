@@ -311,9 +311,195 @@ public class HistogramStatistics {
 			return true;
 		}
 	}
+
+	/**
+	 * Exports a set of histograms.
+	 * 
+	 * @param statistics
+	 * @param writer
+	 * @return
+	 * @throws IOException 
+	 */
+	public static boolean export(HistogramStatistics[] statistics, BufferedWriter writer) throws IOException {
+		// check for degenerate case
+		long count = statistics[0].getCount();
+		if (count < MIN_COUNT) {
+			writer.write("Count" + TAB + count);
+			writer.newLine();	
+			writer.write("Too few pixels for histograms");
+			writer.newLine();
+			writer.newLine();
+							
+			// don't process any more parameters; all will have same count
+			return false;
+		}
+		
+		boolean firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Parameter" + TAB + statistic.getTitle());
+		}
+		writer.newLine();
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Min" + TAB + showParameter(statistic.getMin()));
+		}
+		writer.newLine();
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Max" + TAB + showParameter(statistic.getMax()));
+		}
+		writer.newLine();
+		
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Count" + TAB + statistic.getCount());
+		}
+		writer.newLine();
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Mean" + TAB + showParameter(statistic.getMean()));
+		}
+		writer.newLine();
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Standard Deviation" + TAB + showParameter(statistic.getStandardDeviation()));
+		}
+		writer.newLine();
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("1st Quartile" + TAB + showParameter(statistic.getFirstQuartile()));
+		}
+		writer.newLine();
+		
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Median" + TAB + showParameter(statistic.getMedian()));
+		}
+		writer.newLine();
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("3rd Quartile" + TAB + showParameter(statistic.getThirdQuartile()));
+		}
+		writer.newLine();
+
+		// get all of the histograms into memory
+		int maxHistosLength = Integer.MIN_VALUE;
+		long[][] histos = new long[statistics.length][];
+		double[][] centers = new double[statistics.length][];
+		for (int i = 0; i < statistics.length; ++i) {
+			histos[i] = statistics[i].getHistogram();
+			if (histos[i].length > maxHistosLength) {
+				maxHistosLength = histos[i].length;
+			}
+			centers[i] = Binning.centerValuesPerBin(histos[i].length, statistics[i].getMinRange(), statistics[i].getMaxRange());
+		}
+		
+		firstTime = true;
+		for (long[] histo : histos) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Histogram Bins" + TAB + histo.length);
+		}
+		writer.newLine();
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Histogram Min" + TAB + showParameter(statistic.getMinRange()));
+		}
+		writer.newLine();
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Histogram Max" + TAB + showParameter(statistic.getMaxRange()));
+		}
+		writer.newLine();
+		
+		firstTime = true;
+		for (HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(TAB);
+			}
+			firstTime = false;
+			writer.write("Histogram Count" + TAB + statistic.getHistogramCount());
+		}		
+		writer.newLine();
+		
+        for (int bin = 0; bin < maxHistosLength; ++bin) {
+			firstTime = true;
+			for (int i = 0; i < histos.length; ++i) {
+				if (!firstTime) {
+					writer.write(TAB);
+				}
+				firstTime = false;
+				if (bin < histos[i].length) {
+					writer.write("" + showParameter(centers[i][bin]) + TAB + histos[i][bin]);
+				}
+				else {
+					writer.write(TAB);
+				}
+			}
+			writer.newLine();
+		}
+		
+		return true;
+	}
 	
 
-    private String showParameter(double parameter) {
+    private static String showParameter(double parameter) {
 		String returnValue = NAN;
 		if (!Double.isNaN(parameter)) {
 			returnValue = BigDecimal.valueOf(parameter).round(context).toEngineeringString();

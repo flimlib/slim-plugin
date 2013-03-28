@@ -400,12 +400,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 				// export to text
 				if (exportPixels) {
 					ExportPixelsToText exportPixelsToText = new ExportPixelsToText();
-					exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function);
+					exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function, _uiPanel.getFittedImages());
 				}		
 				if (exportHistograms) {
 					ExportHistogramsToText exportHistogramsToText = new ExportHistogramsToText();
 					
-					exportHistogramsToText.export(output, true, fittedImage, _function);
+					exportHistogramsToText.export(output, true, fittedImage, _function, _uiPanel.getFittedImages());
 				}
 				IJ.log(input);
 			}
@@ -1107,7 +1107,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 					break;
 			}
 			FittedValue[] values = FittedValueFactory.createFittedValues(_uiPanel.getFittedImages(), components);
-			summary.init(values, _function, listener);
+			summary.init(_function, values, listener);
 		}
 
 		// ugly use of globals, leftover from batch macro kludge
@@ -1150,11 +1150,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 				
 				if (exportPixels) {
 					//System.out.println("Export pixels");
-					pixels.export(pixelsFile, true, fittedImage, _region, _function);
+					pixels.export(pixelsFile, true, fittedImage, _region, _function, _uiPanel.getFittedImages());
 				}
 				if (exportHistograms) {
 					//System.out.println("Export histograms");
-					histograms.export(histogramsFile, true, fittedImage, _function);
+					histograms.export(histogramsFile, true, fittedImage, _function, _uiPanel.getFittedImages());
 				}
 				if (exportSummary) {
 					//System.out.println("Export summary");

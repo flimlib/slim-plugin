@@ -21,9 +21,9 @@ public class ChiSqBatchHistogram extends AbstractBatchHistogram implements Batch
 		int totalBins = 100000;
 		setTotalBins(totalBins);
 		
-		// expect chisquare values from -50.0..+50.0
-		double minRange = -50.0;
-		double maxRange = 50.0;
+		// expect chisquare values from 0.0..2.0
+		double minRange = 0.0;
+		double maxRange = 2.0;
 		setMinMaxRange(minRange, maxRange);
 	}
 }

@@ -289,7 +289,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			}
 			statistics.setHistogramCount(totalCount);
 			
-			// experimental
+			//TODO experimental
 			double meanFromHistogram = 0.0;
 			long counter = 0;
 			double[] centerValues = Binning.centerValuesPerBin(totalBins, minRange, maxRange);
@@ -302,7 +302,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			meanFromHistogram += overMaxSum;
 			counter += overMaxCount;
 			meanFromHistogram /= counter;
-			//System.out.println("computeStatistics mean from histogram " + meanFromHistogram);
+			System.out.println("computeStatistics mean from histogram " + meanFromHistogram);
 		}
 		return statistics;
 	}

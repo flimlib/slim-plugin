@@ -34,19 +34,17 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.analysis.batch;
 
-import loci.slim.analysis.HistogramStatistics;
-import loci.slim.analysis.batch.AbstractBatchHistogram;
-import ij.IJ;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import ij.IJ;
 import loci.curvefitter.ICurveFitter;
+import loci.slim.analysis.HistogramStatistics;
 import loci.slim.analysis.batch.ui.BatchHistogramsFrame;
 import loci.slim.analysis.batch.ui.BatchHistogramListener;
-import loci.slim.analysis.plugins.ExportHistogramsToText;
 import loci.slim.fitted.AFittedValue;
 import loci.slim.fitted.ChiSqFittedValue;
 import loci.slim.fitted.FittedValue;
@@ -67,10 +65,12 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
 public class ExportSummaryToText {
 	private ICurveFitter.FitFunction function;
 	private BatchHistogramListener listener;
+	private FittedValue[] parameters;
 	private BatchHistogram[] histograms;
 	private String[] titles;
 	private int[] indices;
 	private BatchHistogramsFrame frame;
+	private boolean tabbed = true;
 
 	/**
 	 * Initializes for given fitting function.
@@ -79,43 +79,12 @@ public class ExportSummaryToText {
 	 * @param function 
 	 * @param listener
 	 */
-	public void init(FittedValue[] parameters, ICurveFitter.FitFunction function, BatchHistogramListener listener) {
+	public void init(ICurveFitter.FitFunction function, FittedValue[] parameters, BatchHistogramListener listener) {
 		this.function = function;
 		this.listener = listener;
-
-		List<BatchHistogram> histogramsList = new ArrayList<BatchHistogram>();
-		for (FittedValue parameter : parameters) {
-			BatchHistogram histogram = null;
-			
-			if (parameter instanceof ChiSqFittedValue) {
-				histogram = new ChiSqBatchHistogram();
-			}
-			else if (parameter instanceof ZFittedValue) {
-				histogram = new ZBatchHistogram();
-			}
-			else if (parameter instanceof AFittedValue) {
-				histogram = new ABatchHistogram();
-			}
-			else if (parameter instanceof FractionalContributionFittedValue) {
-				histogram = new FractionalContribBatchHistogram();
-			}
-			else if (parameter instanceof FractionalIntensityFittedValue) {
-				histogram = new FractionalIntensityBatchHistogram();
-			}
-			else if (parameter instanceof TFittedValue) {
-				histogram = new TauBatchHistogram();
-			}
-			else if (parameter instanceof TMeanFittedValue) {
-				//TODO
-			}
-			
-			if (null != histogram) {
-				histogram.init(parameter);
-				histogramsList.add(histogram);
-			}
-		}
+		this.parameters = parameters;
 		
-		histograms = histogramsList.toArray(new BatchHistogram[histogramsList.size()]);
+		histograms = buildBatchHistograms(parameters);
 	}
 
 	/**
@@ -125,11 +94,12 @@ public class ExportSummaryToText {
 	 * @param image 
 	 */
 	public void process(String fileName, Image<DoubleType> image) {
-		System.out.println("process " + image.getName());
 		int[] dimensions = image.getDimensions();
 		int fittedParameters = dimensions[3];
-		System.out.println("process fittedparams is " + fittedParameters);
 		LocalizableByDimCursor<DoubleType> cursor = image.createLocalizableByDimCursor();
+
+		// build array of BatchHistogram for this image
+		BatchHistogram[] imageHistograms = buildBatchHistograms(parameters);
 
 		// traverse all pixels
 		int[] position = new int[dimensions.length];
@@ -147,6 +117,11 @@ public class ExportSummaryToText {
 					cursor.setPosition(position);
 					values[i] = cursor.getType().getRealDouble();
 				}
+				
+				// update histograms for this image
+				for (BatchHistogram histogram : imageHistograms) {
+					histogram.process(values);
+				}
 
 				// update all batch histograms
 				for (BatchHistogram histogram : histograms) {
@@ -156,14 +131,12 @@ public class ExportSummaryToText {
 		}
 		
 		
-		// build list of histogram statistics for this new image
-/*		List<HistogramStatistics> imageList = new ArrayList<HistogramStatistics>();
-		ExportHistogramsToText export = new ExportHistogramsToText();
-		for (int i = 0; i < titles.length; ++i) {
-		    HistogramStatistics imageStatistics = export.getStatistics(titles[i], image, 0, indices[i]);
-		    imageList.add(imageStatistics);
-		} //TODO this works only if titles/indices initialized; need a new mechanism for ExportHistogramsToText to work
-		*/
+		// build list of histogram statistics for the current image
+		List<HistogramStatistics> imageList = new ArrayList<HistogramStatistics>();
+		for (BatchHistogram histogram : imageHistograms) {
+			HistogramStatistics imageStatistics = histogram.getStatistics();
+			imageList.add(imageStatistics);
+		}
 		
 		// build list of summarized histogram statistics
 		List<HistogramStatistics> summaryList = new ArrayList<HistogramStatistics>();
@@ -179,7 +152,7 @@ public class ExportSummaryToText {
 		// show new image statistics and update summary
 		frame.update(
 			fileName,
-			null, //imageList.toArray(new HistogramStatistics[imageList.size()]), 
+			imageList.toArray(new HistogramStatistics[imageList.size()]), 
 			summaryList.toArray(new HistogramStatistics[summaryList.size()]));
 	}
 
@@ -204,11 +177,21 @@ public class ExportSummaryToText {
 				bufferedWriter.write("Export Summary Histogram");
 				bufferedWriter.newLine();
 				bufferedWriter.newLine();
-							
-				for (BatchHistogram histogram : histograms) {
-					HistogramStatistics statistics = histogram.getStatistics();
-					statistics.export(bufferedWriter);
+
+				if (tabbed) {
+					HistogramStatistics[] statistics = new HistogramStatistics[histograms.length];
+					for (int i = 0; i < statistics.length; ++i) {
+						statistics[i] = histograms[i].getStatistics();
+					}
+					HistogramStatistics.export(statistics, bufferedWriter);
 				}
+				else {
+					for (BatchHistogram histogram : histograms) {
+						HistogramStatistics statistics = histogram.getStatistics();
+						statistics.export(bufferedWriter);
+					}
+				}
+
 				bufferedWriter.close();
 			}
 			catch (IOException exception) {
@@ -216,5 +199,49 @@ public class ExportSummaryToText {
 				IJ.handleException(exception);
 			}
 		}
+	}
+
+	/**
+	 * Given an array of FittedValue creates a corresponding array of BatchHistogram.
+	 * 
+	 * @param parameters
+	 * @return 
+	 */
+	private BatchHistogram[] buildBatchHistograms(FittedValue[] parameters) {
+		// go through list of fitted values and build corresponding batch histograms
+		List<BatchHistogram> histogramsList = new ArrayList<BatchHistogram>();
+		for (FittedValue parameter : parameters) {
+			BatchHistogram histogram = null;
+			
+			if (parameter instanceof ChiSqFittedValue) {
+				histogram = new ChiSqBatchHistogram();
+			}
+			else if (parameter instanceof ZFittedValue) {
+				histogram = new ZBatchHistogram();
+			}
+			else if (parameter instanceof AFittedValue) {
+				histogram = new ABatchHistogram();
+			}
+			else if (parameter instanceof FractionalContributionFittedValue) {
+				histogram = new FractionalContribBatchHistogram();
+			}
+			else if (parameter instanceof FractionalIntensityFittedValue) {
+				histogram = new FractionalIntensityBatchHistogram();
+			}
+			else if (parameter instanceof TFittedValue) {
+				histogram = new TauBatchHistogram();
+			}
+			else if (parameter instanceof TMeanFittedValue) {
+				histogram = new TauBatchHistogram();
+			}
+			//TODO 'h' parameter for stretched
+			
+			if (null != histogram) {
+				histogram.init(parameter);
+				histogramsList.add(histogram);
+			}
+		}
+		
+		return histogramsList.toArray(new BatchHistogram[histogramsList.size()]);
 	}
 }

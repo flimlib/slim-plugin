@@ -52,6 +52,8 @@ import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
+import loci.slim.fitted.FittedValue;
+import loci.slim.fitted.FittedValueFactory;
 import mpicbg.imglib.cursor.LocalizableByDimCursor;
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.real.DoubleType;
@@ -74,23 +76,43 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
     private BufferedWriter bufferedWriter;
 
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
-		//TODO
-		System.out.println("ExportHistogramsToText.analyze(..., " + parameters + ")");
-		
 		// need entire fitted image
 		if (FitRegion.EACH == region) {
 			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences());
 			if (export && null != fileName) {
 				saveFileInPreferences(fileName);
 				saveAppendInPreferences(append);
-				export(fileName, append, image, function);
+				export(fileName, append, image, function, parameters);
 			}
 		}
     }
 	
     public void export(String fileName, boolean append, Image<DoubleType> image,
-			FitFunction function)
+			FitFunction function, String parameters)
 	{
+		int params = 0;
+		int components = 0;
+		switch (function) {
+			case SINGLE_EXPONENTIAL:
+				params = 4;
+				components = 1;
+				break;
+			case DOUBLE_EXPONENTIAL:
+				params = 6;
+				components = 2;
+				break;
+			case TRIPLE_EXPONENTIAL:
+				params = 8;
+				components = 3;
+				break;
+			case STRETCHED_EXPONENTIAL:
+				params = 5;
+				
+				//TODO fix stretched; how many components?
+				break;
+		}
+		FittedValue[] fittedValues = FittedValueFactory.createFittedValues(parameters, components);
+		
         try {
             bufferedWriter = new BufferedWriter(new FileWriter(fileName, append));
         }
@@ -117,9 +139,11 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 						bufferedWriter.newLine();
 						bufferedWriter.newLine();
 					}
-					
-					HistogramStatistics[] statisticsArray = getStatistics(image,
-							channel, function);
+
+					HistogramStatistics[] statisticsArray = new HistogramStatistics[fittedValues.length];
+					for (int i = 0; i < fittedValues.length; ++i) {
+						statisticsArray[i] = getStatistics(image, channel, params, fittedValues[i]);
+					}
 					
 					for (HistogramStatistics statistics : statisticsArray) {
 						// end early if count is too low
@@ -136,67 +160,25 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 			}
 		}
 	}
-	
-	/**
-	 * Used internally; builds array of statistics going from array of titles and
-	 * corresponding parameter indices.
-	 * 
-	 * @param image
-	 * @param channel
-	 * @param function
-	 * @return 
-	 */
-	
-	/*public*/ HistogramStatistics[] getStatistics(Image<DoubleType> image,
-			int channel, FitFunction function)
-	{
-		// get titles of parameters in parameter index order
-		String[] titles = null;
-		switch (function) {
-			case SINGLE_EXPONENTIAL:
-				titles = new String[] { "X2", "Z", "A", "T" };
-				break;
-			case DOUBLE_EXPONENTIAL:
-				titles = new String[] { "X2", "Z", "A1", "T1", "A2", "T2" };
-				break;
-			case TRIPLE_EXPONENTIAL:
-				titles = new String[] { "X2", "Z", "A1", "T1", "A2", "T2", "A3", "T3" };
-				break;
-			case STRETCHED_EXPONENTIAL:
-				titles = new String[] { "X2", "Z", "A", "T", "H" };
-				break;
-		}
-		
-		HistogramStatistics[] statistics = new HistogramStatistics[titles.length];
-		
-		for (int index = 0; index < titles.length; ++index) {
-			statistics[index] = getStatistics(titles[index], image, channel, index);
-			statistics[index].setTitle(titles[index]);
-		}
-		
-		return statistics;
-	}
 
 	/**
-	 * Called internally from above method.
+	 * Builds statistics from image and single FittedValue.
 	 * 
-	 * @param title
 	 * @param image
 	 * @param channel
-	 * @param index
+	 * @param params
+	 * @param fittedValue
 	 * @return 
 	 */
-	public HistogramStatistics getStatistics(String title,
-			Image<DoubleType> image, int channel, int index)
-	{
+	public HistogramStatistics getStatistics(Image<DoubleType> image, int channel, int params, FittedValue fittedValue) {
 		// first pass through image
-		Statistics1 statistics1 = getStatistics1(image, channel, index);
+		Statistics1 statistics1 = getStatistics1(image, channel, params, fittedValue);
 		
-		// second statistical pass through the image
-		Statistics2 statistics2 = getStatistics2(image, channel, index, statistics1.mean, statistics1.range, BINS);
+		// second pass through the image
+		Statistics2 statistics2 = getStatistics2(image, channel, params, fittedValue, statistics1.mean, statistics1.range, BINS);
 		
 		HistogramStatistics statistics = new HistogramStatistics();
-		statistics.setTitle(title);
+		statistics.setTitle(fittedValue.getTitle());
 		statistics.setCount(statistics1.count);
 		statistics.setMin(statistics1.min);
 		statistics.setMax(statistics1.max);
@@ -228,10 +210,11 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 	 * 
 	 * @param image
 	 * @param channel
-	 * @param parameter
+	 * @param params
+	 * @param fittedValue
 	 * @return container of various statistics
 	 */
-	private Statistics1 getStatistics1(Image<DoubleType> image, int channel, int parameter) {
+	private Statistics1 getStatistics1(Image<DoubleType> image, int channel, int params, FittedValue fittedValue) {
 		long count = 0;
 		double min = Double.MAX_VALUE;
 		double max = -Double.MAX_VALUE;
@@ -251,11 +234,18 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				position[0] = x;
 				position[1] = y;
 				position[2] = channel;
-				position[3] = parameter;
-				cursor.setPosition(position);
 
-				// account for value
-				double value = cursor.getType().getRealDouble();
+				// grab all fitted parameters
+				double[] fittedParameters = new double[params];
+				for (int p = 0; p < params; ++p) {
+					position[3] = p;
+					cursor.setPosition(position);
+					double value = cursor.getType().getRealDouble();
+					fittedParameters[p] = value;
+				}
+				
+				// get value for this fitted parameter & account for it
+				double value = fittedValue.getValue(fittedParameters);	
 				if (!Double.isNaN(value)) {
 					values[index++] = value;
 					if (value < min) {
@@ -338,13 +328,14 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 	 * 
 	 * @param image
 	 * @param channel
-	 * @param parameter
+	 * @param params
+	 * @param fittedValue
 	 * @param mean
 	 * @param range
 	 * @param bins
 	 * @return container of various statistics
 	 */
-	private Statistics2 getStatistics2(Image<DoubleType> image, int channel, int parameter, double mean, double[] range, int bins) {
+	private Statistics2 getStatistics2(Image<DoubleType> image, int channel, int params, FittedValue fittedValue, double mean, double[] range, int bins) {
 		double diffSquaredSum = 0.0;
 		long count = 0;
 		long histogramCount = 0;
@@ -353,7 +344,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		int[] dimensions = image.getDimensions();
 		LocalizableByDimCursor<DoubleType> cursor = image.createLocalizableByDimCursor();
 
-		// collect & sort non-NaN values
+		// collect & histogram non-NaN values
 		double[] values = new double[dimensions[0] * dimensions[1]];
 		int index = 0;
 		int[] position = new int[dimensions.length];
@@ -363,11 +354,18 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				position[0] = x;
 				position[1] = y;
 				position[2] = channel;
-				position[3] = parameter;
-				cursor.setPosition(position);
 
-				// account for value
-				double value = cursor.getType().getRealDouble();
+				// grab all fitted parameters
+				double[] fittedParameters = new double[params];
+				for (int p = 0; p < params; ++p) {
+					position[3] = p;
+					cursor.setPosition(position);
+					double value = cursor.getType().getRealDouble();
+					fittedParameters[p] = value;
+				}
+				
+				// get value for this fitted parameter & account for it
+				double value = fittedValue.getValue(fittedParameters);	
 				if (!Double.isNaN(value)) {
 					// compute standard deviation from mean
 					double diff = mean - value;

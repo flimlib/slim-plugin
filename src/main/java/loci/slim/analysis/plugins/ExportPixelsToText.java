@@ -49,6 +49,8 @@ import java.util.prefs.*;
 
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
+import loci.slim.fitted.FittedValue;
+import loci.slim.fitted.FittedValueFactory;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 
@@ -77,20 +79,34 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
     private MathContext context = new MathContext(4, RoundingMode.FLOOR);
 
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
-		//TODO
-		System.out.println("ExportPixelsToText.analyze(..., " + parameters + ")");
-		
         boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences());
         if (export && null != fileName) {
             saveFileInPreferences(fileName);
 			saveAppendInPreferences(append);
-            export(fileName, append, image, region, function);
+            export(fileName, append, image, region, function, parameters);
         }
     }
 
     public void export(String fileName, boolean append, Image<DoubleType> image,
-			FitRegion region, FitFunction function)
+			FitRegion region, FitFunction function, String parameters)
 	{
+		int components = 0;
+		switch (function) {
+			case SINGLE_EXPONENTIAL:
+				components = 1;
+				break;
+			case DOUBLE_EXPONENTIAL:
+				components = 2;
+				break;
+			case TRIPLE_EXPONENTIAL:
+				components = 3;
+				break;
+			case STRETCHED_EXPONENTIAL:
+				//TODO fix stretched; how many components?
+				break;
+		}
+		FittedValue[] fittedValues = FittedValueFactory.createFittedValues(parameters, components);
+		
         // get list of current ROIs
         boolean hasRois = false;
         Roi[] rois = {};
@@ -128,15 +144,15 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
                 switch (region) {
                     case SUMMED:
                     case POINT:
-                        writeHeader(function);
+                        writeHeader(fittedValues);
                         break;
                     case ROI:
                         writeROIsHeader();
-                        writeHeader(function);
+                        writeHeader(fittedValues);
                         break;
                     case EACH:
                         writeXYHeader();
-                        writeHeader(function);
+                        writeHeader(fittedValues);
                         break;
                 }
 
@@ -174,15 +190,15 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
                                 switch (region) {
                                     case SUMMED:
                                     case POINT:
-                                        writeParams(function, paramArray);
+                                        writeParams(paramArray, fittedValues);
                                         break;
                                     case ROI:
                                         writeROI(x + 1);
-                                        writeParams(function, paramArray);
+                                        writeParams(paramArray, fittedValues);
                                         break;
                                     case EACH:
                                         writeXY(x, y);
-                                        writeParams(function, paramArray);
+                                        writeParams(paramArray, fittedValues);
                                         break;
                                 }
                             }
@@ -212,121 +228,32 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
         bufferedWriter.write("" + channel + TAB);
     }
 
-    private void writeHeader(FitFunction function) throws IOException {
-        switch (function) {
-            case SINGLE_EXPONENTIAL:
-				bufferedWriter.write("A\tT\tZ\tX2");
-                break;
-            case DOUBLE_EXPONENTIAL:
-                bufferedWriter.write("A1\tF1\tT1\tA2\tF2\tT2\tZ\tX2");
-                break;
-            case TRIPLE_EXPONENTIAL:
-                bufferedWriter.write("A1\tF1\tT1\tA2\tF2\tT2\tA3\tF3\tT3\tZ\tX2");
-                break;
-            case STRETCHED_EXPONENTIAL:
-                bufferedWriter.write("A\tT\tH\tZ\tX2");
-                break;
-        }
+    private void writeHeader(FittedValue[] fittedValues) throws IOException {
+		boolean firstTime = true;
+		for (FittedValue fittedValue : fittedValues) {
+			if (firstTime) {
+				firstTime = false;
+			}
+			else {
+				bufferedWriter.write(TAB);
+			}
+			bufferedWriter.write(fittedValue.getTitle());
+		}
 		bufferedWriter.newLine();
     }
 
-    private void writeParams(FitFunction function, double[] paramArray) throws IOException {
-        switch (function) {
-            case SINGLE_EXPONENTIAL:
-			{
-				double A  = paramArray[2];
-				double T  = paramArray[3];
-				double Z  = paramArray[1];
-				double X2 = paramArray[0];
-				
-                bufferedWriter.write(
-                        showParameter(A) + TAB +
-                        showParameter(T) + TAB +
-                        showParameter(Z) + TAB +
-						showParameter(X2)
-                        );
-				bufferedWriter.newLine();
-                break;
+    private void writeParams(double[] paramArray, FittedValue[] fittedValues) throws IOException {
+		boolean firstTime = true;
+		for (FittedValue fittedValue : fittedValues) {
+			if (firstTime) {
+				firstTime = false;
 			}
-            case DOUBLE_EXPONENTIAL:
-			{
-				double A1 = paramArray[2];
-				double T1 = paramArray[3];
-				double A2 = paramArray[4];
-				double T2 = paramArray[5];
-				double Z  = paramArray[1];
-				double X2 = paramArray[0];
-
-				// normalize so that F1 + F2 = 100%
-				double sum = A1 + A2;
-				double F1 = normalize(A1, sum);
-				double F2 = normalize(A2, sum);
-				
-                bufferedWriter.write(
-                        showParameter(A1) + TAB +
-						showParameter(F1) + TAB +
-                        showParameter(T1) + TAB +
-                        showParameter(A2) + TAB +
-						showParameter(F2) + TAB +
-                        showParameter(T2) + TAB +
-                        showParameter(Z)  + TAB +
-                        showParameter(X2)
-                        );
-				bufferedWriter.newLine();
-                break;
+			else {
+				bufferedWriter.write(TAB);
 			}
-            case TRIPLE_EXPONENTIAL:
-			{
-				double A1 = paramArray[2];
-				double T1 = paramArray[3];
-				double A2 = paramArray[4];
-				double T2 = paramArray[5];
-				double A3 = paramArray[6];
-				double T3 = paramArray[7];
-				double Z  = paramArray[1];
-				double X2 = paramArray[0];
-				
-				// normalize so that F1 + F2 + F3 = 100%
-				double sum = A1 + A2 + A3;
-				double F1 = normalize(A1, sum);
-				double F2 = normalize(A2, sum);
-				double F3 = normalize(A3, sum);
-				
-                bufferedWriter.write(
-                        showParameter(A1) + TAB +
-						showParameter(F1) + TAB +
-                        showParameter(T1) + TAB +
-                        showParameter(A2) + TAB +
-						showParameter(F2) + TAB +
-                        showParameter(T2) + TAB +
-                        showParameter(A3) + TAB +
-						showParameter(F3) + TAB +
-                        showParameter(T3) + TAB +
-                        showParameter(Z)  + TAB +
-                        showParameter(X2)
-                        );
-				bufferedWriter.newLine();
-                break;
-			}
-            case STRETCHED_EXPONENTIAL:
-			{
-				double A = paramArray[2];
-				double T = paramArray[3];
-				double H = paramArray[4];
-				double Z  = paramArray[1];
-				double X2 = paramArray[0];
-				
-                bufferedWriter.write(
-                        showParameter(A)  + TAB +
-                        showParameter(T)  + TAB +
-                        showParameter(H)  + TAB +
-                        showParameter(Z)  + TAB +
-                        showParameter(X2)
-                        );
-				bufferedWriter.newLine();
-                break;
-			}
-        }
+			bufferedWriter.write("" + fittedValue.getValue(paramArray));
+		}
+		bufferedWriter.newLine();
     }
 	
 	private double normalize(double A, double sum) {
