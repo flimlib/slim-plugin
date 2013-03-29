@@ -235,6 +235,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JCheckBox _showBins;
     JComboBox _promptComboBox;
     JButton _estimateCursorsButton;
+	
+	// cursor settings
+	JSpinner _promptBaselineSpinner;
+	JSpinner _transientStartSpinner;
+	JSpinner _dataStartSpinner;
+	JSpinner _transientStopSpinner;
+	JSpinner _promptDelaySpinner;
+	JSpinner _promptWidthSpinner;
     
     // fit settings
 	JSpinner _xSpinner;
@@ -916,6 +924,11 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
         return panel;
     }
+	
+	//TODO the fitted parameter UI could have a JSpinner that only shows up when
+	// you fix a parameter.
+	// See: https://forums.oracle.com/forums/thread.jspa?threadID=1357061
+	// It's quite hacky though.
 
     /*
      * Creates panel for the single exponential version of the fit parameters.

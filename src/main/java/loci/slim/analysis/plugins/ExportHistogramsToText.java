@@ -69,26 +69,46 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 	private static final long MIN_COUNT = 3;
     private static final String FILE_KEY = "export_histograms_to_text/file";
 	private static final String APPEND_KEY = "export_histograms_to_text/append";
+	private static final String CSV_KEY = "export_histograms_to_text/csv";
     private static final int CHANNEL_INDEX = 2;
     private static final char TAB = '\t';
+	private static final char COMMA = ',';
+	private static final String TSV_SUFFIX = ".tsv";
+	private static final String CSV_SUFFIX = ".csv";
 	private String fileName;
 	private boolean append;
+	private boolean csv;
     private BufferedWriter bufferedWriter;
+	private boolean combined = true;
 
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
 		// need entire fitted image
 		if (FitRegion.EACH == region) {
-			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences());
+			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
 			if (export && null != fileName) {
+				char separator;
+				if (csv) {
+					separator = COMMA;
+					if (!fileName.endsWith(CSV_SUFFIX)) {
+						fileName += CSV_SUFFIX;
+					}
+				}
+				else {
+					separator = TAB;
+					if (!fileName.endsWith(TSV_SUFFIX)) {
+						fileName += TSV_SUFFIX;
+					}
+				}
 				saveFileInPreferences(fileName);
 				saveAppendInPreferences(append);
-				export(fileName, append, image, function, parameters);
+				saveCSVInPreferences(csv);
+				export(fileName, append, image, function, parameters, separator);
 			}
 		}
     }
 	
     public void export(String fileName, boolean append, Image<DoubleType> image,
-			FitFunction function, String parameters)
+			FitFunction function, String parameters, char separator)
 	{
 		int params = 0;
 		int components = 0;
@@ -124,7 +144,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		if (null != bufferedWriter) {
 			try {
 				// title this export
-				bufferedWriter.write("Export Histograms " + image.getName());
+				bufferedWriter.write("Export Histograms" + separator + image.getName());
 				bufferedWriter.newLine();
 				bufferedWriter.newLine();
 				
@@ -135,7 +155,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				// for all channels
 				for (int channel = 0; channel < channels; ++channel) {
 					if (channels > 1) {
-					    bufferedWriter.write("Channel" + TAB + channel);
+					    bufferedWriter.write("Channel" + separator + channel);
 						bufferedWriter.newLine();
 						bufferedWriter.newLine();
 					}
@@ -145,13 +165,19 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 						statisticsArray[i] = getStatistics(image, channel, params, fittedValues[i]);
 					}
 					
-					for (HistogramStatistics statistics : statisticsArray) {
-						// end early if count is too low
-						if (!statistics.export(bufferedWriter)) {
-							break;
+					if (combined) {
+						HistogramStatistics.export(statisticsArray, bufferedWriter, separator);
+					}
+					else {
+						for (HistogramStatistics statistics : statisticsArray) {
+							// end early if count is too low
+							if (!statistics.export(bufferedWriter, separator)) {
+								break;
+							}
 						}
 					}
 				}
+				bufferedWriter.newLine();
 				bufferedWriter.close();
 			}
 			catch (IOException exception) {
@@ -428,17 +454,29 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putBoolean(APPEND_KEY, append);
 	}
+	
+	private boolean getCSVFromPreferences() {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		return prefs.getBoolean(CSV_KEY, csv);
+	}
+	
+	private void saveCSVInPreferences(boolean csv) {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		prefs.putBoolean(CSV_KEY, csv);
+	}
 
-    private boolean showFileDialog(String defaultFile, boolean defaultAppend) {
+    private boolean showFileDialog(String defaultFile, boolean defaultAppend, boolean defaultCSV) {
         GenericDialog dialog = new GenericDialog("Export Histograms to Text");
         dialog.addStringField("Save As:", defaultFile, 24);
 		dialog.addCheckbox("Append", defaultAppend);
+		dialog.addCheckbox("Comma Separated", defaultCSV);
         dialog.showDialog();
         if (dialog.wasCanceled()) {
             return false;
         }
 		fileName = dialog.getNextString();
 		append   = dialog.getNextBoolean();
+		csv      = dialog.getNextBoolean();
 		return true;
     }
 }

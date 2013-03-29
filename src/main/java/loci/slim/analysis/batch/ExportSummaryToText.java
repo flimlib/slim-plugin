@@ -70,7 +70,8 @@ public class ExportSummaryToText {
 	private String[] titles;
 	private int[] indices;
 	private BatchHistogramsFrame frame;
-	private boolean tabbed = true;
+	// combine histograms in horizontal columns
+	private boolean combined = true;
 
 	/**
 	 * Initializes for given fitting function.
@@ -159,9 +160,10 @@ public class ExportSummaryToText {
 	/**
 	 * Exports the summary to a file.
 	 * 
-	 * @param fileName 
+	 * @param fileName
+	 * @param separator
 	 */
-    public void export(String fileName) {
+    public void export(String fileName, char separator) {
 		BufferedWriter bufferedWriter = null;
 		try {
             bufferedWriter = new BufferedWriter(new FileWriter(fileName, true));
@@ -178,20 +180,21 @@ public class ExportSummaryToText {
 				bufferedWriter.newLine();
 				bufferedWriter.newLine();
 
-				if (tabbed) {
+				if (combined) {
 					HistogramStatistics[] statistics = new HistogramStatistics[histograms.length];
 					for (int i = 0; i < statistics.length; ++i) {
 						statistics[i] = histograms[i].getStatistics();
 					}
-					HistogramStatistics.export(statistics, bufferedWriter);
+					HistogramStatistics.export(statistics, bufferedWriter, separator);
 				}
 				else {
 					for (BatchHistogram histogram : histograms) {
 						HistogramStatistics statistics = histogram.getStatistics();
-						statistics.export(bufferedWriter);
+						statistics.export(bufferedWriter, separator);
 					}
 				}
 
+				bufferedWriter.newLine();
 				bufferedWriter.close();
 			}
 			catch (IOException exception) {

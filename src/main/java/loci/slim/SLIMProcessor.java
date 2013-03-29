@@ -145,6 +145,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     
 	private static final String SDT_SUFFIX = ".sdt";
 	private static final String ICS_SUFFIX = ".ics";
+	private static final String CSV_SUFFIX = ".csv";
+	private static final String TSV_SUFFIX = ".tsv";
     private static final String X = "X";
     private static final String Y = "Y";
     private static final String LIFETIME = "Lifetime";
@@ -190,10 +192,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private static final String HISTOS_FILE_KEY = "histogramsfile";
 	private static final String EXPORT_SUMMARY_KEY = "exportsummary";
 	private static final String SUMMARY_FILE_KEY = "summaryfile";
+	private static final String CSV_KEY = "csv";
 	
 	private static final String GAUSSIAN_A_KEY = "a";
 	private static final String GAUSSIAN_B_KEY = "b";
 	private static final String GAUSSIAN_C_KEY = "c";
+	
+	private static final char TAB = '\t';
 
     private Image<T> _image;
     private LocalizableByDimCursor<T> _cursor;
@@ -400,12 +405,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 				// export to text
 				if (exportPixels) {
 					ExportPixelsToText exportPixelsToText = new ExportPixelsToText();
-					exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function, _uiPanel.getFittedImages());
+					exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function, _uiPanel.getFittedImages(), TAB);
 				}		
 				if (exportHistograms) {
 					ExportHistogramsToText exportHistogramsToText = new ExportHistogramsToText();
 					
-					exportHistogramsToText.export(output, true, fittedImage, _function, _uiPanel.getFittedImages());
+					exportHistogramsToText.export(output, true, fittedImage, _function, _uiPanel.getFittedImages(), TAB);
 				}
 				IJ.log(input);
 			}
@@ -985,25 +990,33 @@ public class SLIMProcessor <T extends RealType<T>> {
 		String defHistogramsFile = prefs.get(HISTOS_FILE_KEY, "histograms");
 		boolean defExportSummary = prefs.getBoolean(EXPORT_SUMMARY_KEY, true);
 		String defSummaryFile = prefs.get(SUMMARY_FILE_KEY, "summary");
+		boolean defCSV = prefs.getBoolean(CSV_KEY, false);
 		
 		GenericDialog dialog = new GenericDialog("Batch Processing");
-		dialog.addCheckbox("Export pixels", defExportPixels);
-		dialog.addStringField("Pixels file", defPixelsFile);
-		dialog.addCheckbox("Export histograms", defExportHistograms);
-		dialog.addStringField("Histogram file", defHistogramsFile);
-		dialog.addCheckbox("Export summary histogram", defExportSummary);
-		dialog.addStringField("Summary file", defSummaryFile);
+		dialog.addCheckbox("Export Pixels", defExportPixels);
+		dialog.addStringField("Pixels File", defPixelsFile);
+		dialog.addCheckbox("Export Histograms", defExportHistograms);
+		dialog.addStringField("Histogram File", defHistogramsFile);
+		dialog.addCheckbox("Export Summary Histogram", defExportSummary);
+		dialog.addStringField("Summary File", defSummaryFile);
+		dialog.addCheckbox("Comma Separated", defCSV);
 		dialog.showDialog();
 		if (dialog.wasCanceled()) {
 			return;
 		}
 		
 		final boolean exportPixels = dialog.getNextBoolean();
-		final String pixelsFile = dialog.getNextString();
+		String tmpPixelsFile = dialog.getNextString();
 		final boolean exportHistograms = dialog.getNextBoolean();
-		final String histogramsFile = dialog.getNextString();
+		String tmpHistogramsFile = dialog.getNextString();
 		final boolean exportSummary = dialog.getNextBoolean();
-		final String summaryFile = dialog.getNextString();
+		String tmpSummaryFile = dialog.getNextString();
+		final boolean csv = dialog.getNextBoolean();
+
+		// make sure output file suffix is appropriate
+		final String pixelsFile = checkSuffix(tmpPixelsFile, csv);
+		final String histogramsFile = checkSuffix(tmpHistogramsFile, csv);
+		final String summaryFile = checkSuffix(tmpSummaryFile, csv);
 		
 		prefs.putBoolean(EXPORT_PIXELS_KEY, exportPixels);
 		prefs.put(PIXELS_FILE_KEY, pixelsFile);
@@ -1017,9 +1030,25 @@ public class SLIMProcessor <T extends RealType<T>> {
 				batchProcessing(exportPixels, pixelsFile,
 						exportHistograms, histogramsFile,
 						exportSummary, summaryFile,
-						files);
+						files, csv);
 			}
 	    }.start();
+	}
+
+	/**
+	 * Use appropriate file name suffix for comma- and tab-separated values.
+	 */
+	private String checkSuffix(String file, boolean csv) {
+		String suffix = csv ? CSV_SUFFIX : TSV_SUFFIX;
+		String otherSuffix = csv ? TSV_SUFFIX : CSV_SUFFIX;
+		if (!file.endsWith(suffix)) {
+			if (file.endsWith(otherSuffix)) {
+				int i = file.indexOf(otherSuffix);
+				file = file.substring(0, i);
+			}
+			file += suffix;
+		}
+		return file;
 	}
 
 	/**
@@ -1031,12 +1060,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 * @param histogramsFile
 	 * @param exportSummary
 	 * @param summaryFile
-	 * @param files 
+	 * @param files
+	 * @param csv
 	 */
 	private void batchProcessing(boolean exportPixels, String pixelsFile,
 			boolean exportHistograms, String histogramsFile,
 			boolean exportSummary, String summaryFile,
-			File[] files)
+			File[] files, boolean csv)
 	{
 		ExportPixelsToText pixels = null;
 		ExportHistogramsToText histograms = null;
@@ -1114,6 +1144,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 		_batchBins = _bins;
 		
 		try {
+			char separator = '\t';
+			if (csv) {
+				separator = ',';
+			}
+			
 			for (int i = 0; i < files.length; ++i) {
 				File file = files[i];
 				
@@ -1150,11 +1185,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 				
 				if (exportPixels) {
 					//System.out.println("Export pixels");
-					pixels.export(pixelsFile, true, fittedImage, _region, _function, _uiPanel.getFittedImages());
+					pixels.export(pixelsFile, true, fittedImage, _region, _function, _uiPanel.getFittedImages(), separator);
 				}
 				if (exportHistograms) {
 					//System.out.println("Export histograms");
-					histograms.export(histogramsFile, true, fittedImage, _function, _uiPanel.getFittedImages());
+					histograms.export(histogramsFile, true, fittedImage, _function, _uiPanel.getFittedImages(), separator);
 				}
 				if (exportSummary) {
 					//System.out.println("Export summary");
@@ -1164,7 +1199,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 			
 			if (exportSummary) {
 				// export summary to text file
-				summary.export(summaryFile);
+				System.out.println("exportSummary time in SP.java and sep is " + separator);
+				summary.export(summaryFile, separator);
 			}
 		}
 		catch (Exception e) {

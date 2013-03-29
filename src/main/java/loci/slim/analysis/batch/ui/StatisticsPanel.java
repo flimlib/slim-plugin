@@ -20,10 +20,11 @@ import loci.slim.analysis.HistogramStatistics;
 public class StatisticsPanel extends JPanel {
 	private static final String NAN = "NaN";
     private static final MathContext context = new MathContext(4, RoundingMode.FLOOR);
-	private static final Font LABEL_FONT = new Font("Sans Serif", Font.PLAIN, 11);
+	private static final Font LABEL_FONT = new Font("Sans Serif", Font.PLAIN, 10);
 	
     public StatisticsPanel(HistogramStatistics histogramStatistics) {
 		super();
+		/** Three column layout
 		setLayout(new GridLayout(0, 3));
 
 		// column 0 row 0
@@ -84,8 +85,58 @@ public class StatisticsPanel extends JPanel {
 		// column 2 row 4
 		JLabel histoCountLabel = new Label("count: " + histogramStatistics.getHistogramCount());
 		add(histoCountLabel);
+		*/
+
+		// two column layout
+		setLayout(new GridLayout(0, 2));
+
+		// column 0 row 0
+		JLabel titleLabel = new Label("" + histogramStatistics.getTitle() + " count: " + histogramStatistics.getCount());
+		add(titleLabel);
 		
-		revalidate();
+		// column 1 row 0
+		JLabel histoLabel = new Label("histogram count: " + histogramStatistics.getHistogramCount());
+		add(histoLabel);
+		
+		// column 0 row 1
+		JLabel minLabel = new Label("min: " + showParameter(histogramStatistics.getMin()));
+		add(minLabel);
+				
+		// column 1 row 1
+		JLabel histoMinLabel = new Label("min: " + showParameter(histogramStatistics.getMinRange()));
+		add(histoMinLabel);
+		
+		// column 0 row 2
+		JLabel maxLabel = new Label("max: " + showParameter(histogramStatistics.getMax()));
+		add(maxLabel);
+		
+		// column 1 row 2
+		JLabel histoMaxLabel = new Label("max: " + showParameter(histogramStatistics.getMaxRange()));
+		add(histoMaxLabel);
+		
+		// column 0 row 3
+		JLabel medianLabel = new Label("median: " + showParameter(histogramStatistics.getMedian()));
+		add(medianLabel);
+		
+		// column 1 row 3
+		JLabel histoBinsLabel = new Label("bins: " + histogramStatistics.getHistogram().length);
+		add(histoBinsLabel);
+		
+		// column 0 row 4
+		JLabel meanLabel = new Label("mean: " + showParameter(histogramStatistics.getMean()));
+		add(meanLabel);
+		
+		// column 1 row 4
+		add(new JLabel(""));
+				
+		// column 0 row 5
+		JLabel stdDevLabel = new Label("std dev: " + showParameter(histogramStatistics.getStandardDeviation()));
+		add(stdDevLabel);
+		
+		// column 1 row 5
+		add(new JLabel(""));
+		
+		revalidate();	
     }
 
 	private String showParameter(double parameter) {

@@ -318,11 +318,11 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		// make sure that the bin for this count is within range
 		if (n < underMinCount) {
 			System.out.println("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
-			throw new RuntimeException("BatchHistogram quartile underflow");
+			throw new RuntimeException("BatchHistogram quartile underflow " + getTitle());
 		}
 		if (n > count - overMaxCount) {
 			System.out.println("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
-			throw new RuntimeException("BatchHistogram quartile overflow");
+			throw new RuntimeException("BatchHistogram quartile overflow " + getTitle());
 		}
 
 		// look for appropriate bin
@@ -335,7 +335,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			}
 		}
 		// can't happen
-		throw new RuntimeException("BatchHistogram quartile problem");
+		throw new RuntimeException("BatchHistogram quartile problem " + getTitle());
 	}
 
 	/*

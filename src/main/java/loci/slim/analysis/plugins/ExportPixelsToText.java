@@ -68,27 +68,46 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
 public class ExportPixelsToText implements ISLIMAnalyzer {
     private static final String FILE_KEY = "export_pixels_to_text/file";
 	private static final String APPEND_KEY = "export_pixels_to_text/append";
+	private static final String CSV_KEY = "export_pixels_to_text/csv";
     private static final int X_INDEX = 0;
     private static final int Y_INDEX = 1;
     private static final int C_INDEX = 2;
     private static final int P_INDEX = 3;
-    private static final String TAB = "\t";
+    private static final char TAB = '\t';
+	private static final char COMMA = ',';
+	private static final String TSV_SUFFIX = ".tsv";
+	private static final String CSV_SUFFIX = ".csv";
 	private String fileName;
 	private boolean append;
+	private boolean csv;
     private BufferedWriter bufferedWriter;
     private MathContext context = new MathContext(4, RoundingMode.FLOOR);
 
     public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
-        boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences());
+        boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
         if (export && null != fileName) {
+			char separator;
+			if (csv) {
+				separator = COMMA;
+				if (!fileName.endsWith(CSV_SUFFIX)) {
+					fileName += CSV_SUFFIX;
+				}
+			}
+			else {
+				separator = TAB;
+				if (!fileName.endsWith(TSV_SUFFIX)) {
+					fileName += TSV_SUFFIX;
+				}
+			}
             saveFileInPreferences(fileName);
 			saveAppendInPreferences(append);
-            export(fileName, append, image, region, function, parameters);
+			saveCSVInPreferences(csv);
+            export(fileName, append, image, region, function, parameters, separator);
         }
     }
 
     public void export(String fileName, boolean append, Image<DoubleType> image,
-			FitRegion region, FitFunction function, String parameters)
+			FitRegion region, FitFunction function, String parameters, char separator)
 	{
 		int components = 0;
 		switch (function) {
@@ -126,7 +145,7 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
         if (null != bufferedWriter) {
             try {
 				// title this export
-				bufferedWriter.write("Export Pixels " + image.getName());
+				bufferedWriter.write("Export Pixels" + separator + image.getName());
 				bufferedWriter.newLine();
 				bufferedWriter.newLine();
 				
@@ -139,20 +158,20 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 
                 // write headers
                 if (channels > 2) { //TODO s/b 1; workaround for ImgLib bug -> always get 2 channels
-                    writeChannelHeader();
+                    writeChannelHeader(separator);
                 }
                 switch (region) {
                     case SUMMED:
                     case POINT:
-                        writeHeader(fittedValues);
+                        writeHeader(fittedValues, separator);
                         break;
                     case ROI:
-                        writeROIsHeader();
-                        writeHeader(fittedValues);
+                        writeROIsHeader(separator);
+                        writeHeader(fittedValues, separator);
                         break;
                     case EACH:
-                        writeXYHeader();
-                        writeHeader(fittedValues);
+                        writeXYHeader(separator);
+                        writeHeader(fittedValues, separator);
                         break;
                 }
 
@@ -184,21 +203,21 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
                             //TODO distinguish between not fitted and error in fit!
                             if (!Double.isNaN(paramArray[0])) {
                                 if (channels > 2) { //TODO see above; this is a hacky workaround for a bug; s/b " > 1"
-                                    writeChannel(c + 1);
+                                    writeChannel(c + 1, separator);
                                 }
 
                                 switch (region) {
                                     case SUMMED:
                                     case POINT:
-                                        writeParams(paramArray, fittedValues);
+                                        writeParams(paramArray, fittedValues, separator);
                                         break;
                                     case ROI:
-                                        writeROI(x + 1);
-                                        writeParams(paramArray, fittedValues);
+                                        writeROI(x + 1, separator);
+                                        writeParams(paramArray, fittedValues, separator);
                                         break;
                                     case EACH:
-                                        writeXY(x, y);
-                                        writeParams(paramArray, fittedValues);
+                                        writeXY(x, y, separator);
+                                        writeParams(paramArray, fittedValues, separator);
                                         break;
                                 }
                             }
@@ -220,36 +239,36 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
         }
     }
 
-    private void writeChannelHeader() throws IOException {
-        bufferedWriter.write("c" + TAB);
+    private void writeChannelHeader(char separator) throws IOException {
+        bufferedWriter.write("c" + separator);
     }
 
-    private void writeChannel(int channel) throws IOException {
-        bufferedWriter.write("" + channel + TAB);
+    private void writeChannel(int channel, char separator) throws IOException {
+        bufferedWriter.write("" + channel + separator);
     }
 
-    private void writeHeader(FittedValue[] fittedValues) throws IOException {
+    private void writeHeader(FittedValue[] fittedValues, char separator) throws IOException {
 		boolean firstTime = true;
 		for (FittedValue fittedValue : fittedValues) {
 			if (firstTime) {
 				firstTime = false;
 			}
 			else {
-				bufferedWriter.write(TAB);
+				bufferedWriter.write(separator);
 			}
 			bufferedWriter.write(fittedValue.getTitle());
 		}
 		bufferedWriter.newLine();
     }
 
-    private void writeParams(double[] paramArray, FittedValue[] fittedValues) throws IOException {
+    private void writeParams(double[] paramArray, FittedValue[] fittedValues, char separator) throws IOException {
 		boolean firstTime = true;
 		for (FittedValue fittedValue : fittedValues) {
 			if (firstTime) {
 				firstTime = false;
 			}
 			else {
-				bufferedWriter.write(TAB);
+				bufferedWriter.write(separator);
 			}
 			bufferedWriter.write("" + fittedValue.getValue(paramArray));
 		}
@@ -260,20 +279,20 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 		return (100.0 * A) / sum;
 	}
 
-    private void writeROIsHeader() throws IOException {
-        bufferedWriter.write("roi" + TAB);
+    private void writeROIsHeader(char separator) throws IOException {
+        bufferedWriter.write("roi" + separator);
     }
 
-    private void writeROI(int roi) throws IOException {
-        bufferedWriter.write("" + roi + TAB);
+    private void writeROI(int roi, char separator) throws IOException {
+        bufferedWriter.write("" + roi + separator);
     }
 
-    private void writeXYHeader() throws IOException {
-        bufferedWriter.write("x" + TAB + "y" + TAB);
+    private void writeXYHeader(char separator) throws IOException {
+        bufferedWriter.write("x" + separator + "y" + separator);
     }
 
-    private void writeXY(int x, int y) throws IOException {
-        bufferedWriter.write("" + x + TAB + y + TAB);
+    private void writeXY(int x, int y, char separator) throws IOException {
+        bufferedWriter.write("" + x + separator + y + separator);
     }
 
     private String getFileFromPreferences() {
@@ -295,18 +314,30 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putBoolean(APPEND_KEY, append);
 	}
+	
+	private boolean getCSVFromPreferences() {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		return prefs.getBoolean(CSV_KEY, csv);
+	}
+	
+	private void saveCSVInPreferences(boolean csv) {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		prefs.putBoolean(CSV_KEY, csv);
+	}
 
-    private boolean showFileDialog(String defaultFile, boolean defaultAppend) {
+    private boolean showFileDialog(String defaultFile, boolean defaultAppend, boolean defaultCSV) {
         //TODO shouldn't UI be in separate class?
         GenericDialog dialog = new GenericDialog("Export Pixels to Text");
         dialog.addStringField("Save As:", defaultFile, 24);
 		dialog.addCheckbox("Append", defaultAppend);
+		dialog.addCheckbox("Comma Separated", defaultCSV);
         dialog.showDialog();
         if (dialog.wasCanceled()) {
             return false;
         }
 		fileName = dialog.getNextString();
 		append   = dialog.getNextBoolean();
+		csv      = dialog.getNextBoolean();
 		return true;
     }
 
