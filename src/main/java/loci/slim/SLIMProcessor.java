@@ -567,8 +567,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         FittingCursorHelper fittingCursorHelper = new FittingCursorHelper();
         fittingCursorHelper.setFittingCursor(_fittingCursor);
         final IUserInterfacePanel uiPanel = new UserInterfacePanel(TABBED,
-                USE_TAU, _analysis.getChoices(), _binning.getChoices(),
-                fittingCursorHelper, fitterEstimator);
+                USE_TAU, _bins, _timeRange, _analysis.getChoices(),
+				_binning.getChoices(), fittingCursorHelper, fitterEstimator);
         _uiPanel = uiPanel; //TODO almost got by having it just be a local variable
         uiPanel.setX(0);
         uiPanel.setY(0);
@@ -2251,14 +2251,15 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
         
         // do the fit
-		
-		//TODO TEST CODE FOR RLD FITTING
         ICurveFitData dataArray[] = curveFitDataList.toArray(new ICurveFitData[0]);
+		
+		//TODO some test code for RLD fitting experiments:
+		/*
 		RapidLifetimeDetermination rld = new RapidLifetimeDetermination();
 		System.out.println("***TRI2 COMPATIBLE****");
 		rld.rldFit(curveFitter, dataArray[0]);
 		System.out.println("****TRIAL*****");
-		rld.trialRldFit(curveFitter, dataArray[0]);
+		rld.trialRldFit(curveFitter, dataArray[0]); */
 		
         int returnValue = getCurveFitter(uiPanel).fitData(dataArray); 
 		
@@ -2770,11 +2771,14 @@ public class SLIMProcessor <T extends RealType<T>> {
                 _promptStop     = promptStop;
                 _promptBaseline = promptBaseline;
 
-				if (_summed) {
-					fitSummed(_uiPanel, _fittingCursor);
-				}
-				else {
-					fitPixel(_uiPanel, _fittingCursor);
+				if (null == _uiPanel) System.out.println("UI PANEL IS NULL");
+				if (null != _uiPanel) { // initial update comes during UI construction
+					if (_summed) {
+						fitSummed(_uiPanel, _fittingCursor);
+					}
+					else {
+						fitPixel(_uiPanel, _fittingCursor);
+					}
 				}
             }
         }

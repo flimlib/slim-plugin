@@ -724,7 +724,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
                 _y0 = (int) area.getY();
                 _y1 = (int) (area.getY() + area.getHeight());
                 double width = area.getWidth();
-				System.out.println("x " + area.getX() + " y " + area.getY() + " width " + area.getWidth() + " height " + area.getHeight());
+				//System.out.println("x " + area.getX() + " y " + area.getY() + " width " + area.getWidth() + " height " + area.getHeight());
                 _xTransStart = (int) Math.round(x + width * _transStartMarkerProportion)
                         + HORZ_TWEAK;
                 _xDataStart = (int) Math.round(x + width * _dataStartMarkerProportion)

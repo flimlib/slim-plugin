@@ -206,6 +206,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	
     private FittingCursorHelper _fittingCursorHelper;
     private IFitterEstimator _fitterEstimator;
+	private int _maxBin;
+	private double _xInc;
     
     private IUserInterfacePanelListener _listener;
 	private IThresholdUpdate _thresholdListener;
@@ -237,11 +239,17 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     JButton _estimateCursorsButton;
 	
 	// cursor settings
+	SpinnerNumberModel _promptBaselineModel;
 	JSpinner _promptBaselineSpinner;
+	SpinnerNumberModel _transientStartModel;
 	JSpinner _transientStartSpinner;
+	SpinnerNumberModel _dataStartModel;
 	JSpinner _dataStartSpinner;
+	SpinnerNumberModel _transientStopModel;
 	JSpinner _transientStopSpinner;
+	SpinnerNumberModel _promptDelayModel;
 	JSpinner _promptDelaySpinner;
+	SpinnerNumberModel _promptWidthModel;
 	JSpinner _promptWidthSpinner;
     
     // fit settings
@@ -325,6 +333,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     String _fitButtonText = FIT_IMAGE;
 
     public UserInterfacePanel(boolean tabbed, boolean showTau,
+			int maxBin, double xInc,
             String[] analysisChoices, String[] binningChoices,
             FittingCursorHelper fittingCursorHelper,
             IFitterEstimator fitterEstimator)
@@ -333,6 +342,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         
         _fittingCursorHelper = fittingCursorHelper;
         _fitterEstimator = fitterEstimator;
+		_maxBin = maxBin;
+		_xInc = xInc;
         
         _frame = new JFrame(TITLE);
 
@@ -664,7 +675,89 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         cursorPanel.setLayout(new SpringLayout());
 
         // emulating TRI2 cursor listing order here
-        JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
+		JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
+        excitationBaselineLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(excitationBaselineLabel);
+		_promptBaselineModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001);
+		_promptBaselineSpinner = new JSpinner(_promptBaselineModel);
+		_promptBaselineSpinner.addChangeListener(new ChangeListener() {
+			boolean goop = true;
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (goop) {
+					goop = false; return;
+				}
+				_fittingCursorHelper.setPromptBaseline(getPromptBaseline());
+			}
+		});
+		cursorPanel.add(_promptBaselineSpinner);
+
+		JLabel transStartLabel = new JLabel("Transient Start");
+        transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(transStartLabel);
+		_transientStartModel = new SpinnerNumberModel(0.0, 0.0, _maxBin * _xInc, _xInc);
+		_transientStartSpinner = new JSpinner(_transientStartModel);
+		_transientStartSpinner.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				_fittingCursorHelper.setTransientStart(getTransientStart());
+			}
+		});
+		cursorPanel.add(_transientStartSpinner);
+		
+        JLabel dataStartLabel = new JLabel("Data Start");
+        dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(dataStartLabel);
+		_dataStartModel = new SpinnerNumberModel(0.0, 0.0, _maxBin * _xInc, _xInc);
+		_dataStartSpinner = new JSpinner(_dataStartModel);
+		_dataStartSpinner.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				_fittingCursorHelper.setDataStart(getDataStart());
+			}
+		});
+		cursorPanel.add(_dataStartSpinner);
+		
+        JLabel transStopLabel = new JLabel("Transient End");
+        transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(transStopLabel);
+		_transientStopModel = new SpinnerNumberModel(0.0, 0.0, _maxBin * _xInc, _xInc);
+		_transientStopSpinner = new JSpinner(_transientStopModel);
+		_transientStopSpinner.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				_fittingCursorHelper.setTransientStop(getTransientStop());
+			}
+		});
+		cursorPanel.add(_transientStopSpinner);
+		
+        JLabel excitationStartLabel = new JLabel("Excitation Delay");
+        excitationStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(excitationStartLabel);
+		_promptDelayModel = new SpinnerNumberModel(0.0, 0.0, _maxBin * _xInc, _xInc);
+		_promptDelaySpinner = new JSpinner(_promptDelayModel);
+		_promptDelaySpinner.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				_fittingCursorHelper.setPromptDelay(getPromptDelay());
+			}
+		});
+		cursorPanel.add(_promptDelaySpinner);
+		
+        JLabel excitationStopLabel = new JLabel("Excitation Width");
+        excitationStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        cursorPanel.add(excitationStopLabel);
+		_promptWidthModel = new SpinnerNumberModel(0.0, 0.0, _maxBin * _xInc, _xInc);
+		_promptWidthSpinner = new JSpinner(_promptWidthModel);
+		_promptWidthSpinner.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				_fittingCursorHelper.setPromptWidth(getPromptWidth());
+			}
+		});
+		cursorPanel.add(_promptWidthSpinner);
+		
+        /*JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
         excitationBaselineLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         cursorPanel.add(excitationBaselineLabel);
         _promptBaselineField = new JTextField(9);
@@ -758,7 +851,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                 _fittingCursorHelper.setPromptWidth(_promptWidthField.getText());
             }
         });
-        cursorPanel.add(_promptWidthField);
+        cursorPanel.add(_promptWidthField);*/
         
         JLabel dummyLabel = new JLabel("");
         dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -768,10 +861,34 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
             new ItemListener() {
                 public void itemStateChanged(ItemEvent e) {
                     boolean showBins = e.getStateChange() == ItemEvent.SELECTED;
+					//TODO 4/2/13
+					/**
+					 * I tried having two models, one for bins and one for time
+					 * values and swapping them here.  Crashes when one model has
+					 * integer values and the other doubles.  So, switch to doubles
+					 * for all, but still doesn't work.  Same thing having a single
+					 * model that gets different min/max/inc.  In 'bins' mode I
+					 * could never get the spinner to work, or even type in new
+					 * values.
+					 * 
+					 * Therefore, for now, just disable these spinners altogether
+					 * when in 'bins' mode.
+					 */
+					_transientStartSpinner.setEnabled(!showBins);
+					_dataStartSpinner.setEnabled(!showBins);
+					_transientStopSpinner.setEnabled(!showBins);
+					_promptDelaySpinner.setEnabled(!showBins);
+					_promptWidthSpinner.setEnabled(!showBins);
                     _fittingCursorHelper.setShowBins(showBins);
                 }
             }
         );
+		//TODO 4/2/13
+		// Swapping models doesn't work correctly.
+		// Failing that, I could either remove the JSpinner from cursor fields or else
+		// just disable the model swap.
+		// Let's go with the latter; we lose the ability to show the underlying bins
+		// unfortunately.
         cursorPanel.add(_showBins);
         
         JLabel excitationLabel = new JLabel("Excitation");
@@ -822,10 +939,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
                     }
                     else {
                         _promptComboBox.setSelectedItem(EXCITATION_NONE);
-                        String text = _fittingCursorHelper.getShowBins() ? "0" : "0.0";
+						_promptDelaySpinner.setValue(0);
+						_promptWidthSpinner.setValue(0);
+						_promptBaselineSpinner.setValue(0);
+						
+                       /* String text = _fittingCursorHelper.getShowBins() ? "0" : "0.0";
                         _promptDelayField.setText(text);
                         _promptWidthField.setText(text);
-                        _promptBaselineField.setText("0.0");
+                        _promptBaselineField.setText("0.0"); */
                         enablePromptCursors(false);
                         if (null != _listener) {
                             _listener.cancelExcitation();
@@ -1522,9 +1643,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _fitAllChannels.setEnabled(enable);
         
         // cursors settings
-        _transientStartField.setEditable(enable);
-        _dataStartField.setEditable(enable);
-        _transientStopField.setEditable(enable);
+		_transientStartSpinner.setEnabled(enable);
+		_dataStartSpinner.setEnabled(enable);
+		_transientStopSpinner.setEnabled(enable);
         boolean promptEnable = enable;
         if (enable) {
             // do we have a prompt?
@@ -2082,7 +2203,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @return 
      */
     public String getTransientStart() {
-        return _transientStartField.getText();  
+        return _transientStartSpinner.getValue().toString();
     }
   
     /**
@@ -2091,7 +2212,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @param transientStart 
      */
     public void setTransientStart(String transientStart) {
-        _transientStartField.setText(transientStart);
+        _transientStartSpinner.setValue(Double.parseDouble(transientStart));
     }
     
     /**
@@ -2099,7 +2220,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @return 
      */ 
     public String getDataStart() {
-        return _dataStartField.getText();
+        return _dataStartSpinner.getValue().toString();
     }
     
     /**
@@ -2107,7 +2228,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @return 
      */
     public void setDataStart(String dataStart) {
-        _dataStartField.setText(dataStart);
+        _dataStartSpinner.setValue(Double.parseDouble(dataStart));
     }
 
     /**
@@ -2116,7 +2237,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @return 
      */
     public String getTransientStop() {
-        return _transientStopField.getText();
+        return _transientStopSpinner.getValue().toString();
     }
 
     /**
@@ -2125,7 +2246,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @param transientStop 
      */
     public void setTransientStop(String transientStop) {
-        _transientStopField.setText(transientStop);
+        _transientStopSpinner.setValue(Double.parseDouble(transientStop));
     }
 
     /**
@@ -2134,7 +2255,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @return 
      */
     public String getPromptDelay() {
-        return _promptDelayField.getText();
+        return _promptDelaySpinner.getValue().toString();
     }
 
     /**
@@ -2143,7 +2264,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @param promptStart 
      */
     public void setPromptDelay(String promptDelay) {
-        _promptDelayField.setText(promptDelay);
+        _promptDelaySpinner.setValue(Double.parseDouble(promptDelay));
     }
 
     /**
@@ -2151,7 +2272,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @return 
      */
     public String getPromptWidth() {
-        return _promptWidthField.getText();
+        return _promptWidthSpinner.getValue().toString();
     }
 
     /**
@@ -2160,7 +2281,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @param promptWidth 
      */
     public void setPromptWidth(String promptWidth) {
-        _promptWidthField.setText(promptWidth);
+        _promptWidthSpinner.setValue(Double.parseDouble(promptWidth));
     }
 
     /**
@@ -2169,7 +2290,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @return 
      */
     public String getPromptBaseline() {
-        return _promptBaselineField.getText();
+        return _promptBaselineSpinner.getValue().toString();
     }
 
     /**
@@ -2178,7 +2299,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @param promptBaseline 
      */
     public void setPromptBaseline(String promptBaseline) {
-        _promptBaselineField.setText(promptBaseline);
+		_promptBaselineSpinner.setValue(Double.parseDouble(promptBaseline));
     }
 
     private int parseInt(JTextField field) {
@@ -2198,9 +2319,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
      * @param enable 
      */
     private void enablePromptCursors(boolean enable) {
-        _promptDelayField.setEditable(enable);
-        _promptWidthField.setEditable(enable);
-        _promptBaselineField.setEditable(enable);
+        _promptDelaySpinner.setEnabled(enable);
+        _promptWidthSpinner.setEnabled(enable);
+        _promptBaselineSpinner.setEnabled(enable);
     }
     
     /**
