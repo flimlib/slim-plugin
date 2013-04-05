@@ -681,12 +681,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_promptBaselineModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001);
 		_promptBaselineSpinner = new JSpinner(_promptBaselineModel);
 		_promptBaselineSpinner.addChangeListener(new ChangeListener() {
-			boolean goop = true;
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				if (goop) {
-					goop = false; return;
-				}
 				_fittingCursorHelper.setPromptBaseline(getPromptBaseline());
 			}
 		});
