@@ -144,20 +144,10 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		axes[2] = new CustomAxisType("Z");
 		TupleImageSet imageSet = new TupleImageSet(datasetService, combined, type, dimensions, "Test", axes, list);
 		
-		for (Dataset d : imageSet.getDatasets()) {
-		
+		List<Dataset> datasetList = imageSet.getDatasets();
+		for (Dataset d : datasetList) {
+			displayService.createDisplay(d);
 		}
-		
-		
-		//TupleImageSet imageSet = new TupleImageSet(datasetService, combined, type, dimensions, "TEST", axes, list);
-		//private TupleImageSet(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, List<TupleDimensionIndex> indices) {
-	
-		//TupleImageSet.TupleFormula formula1 = new TupleImageSet.TupleFormula();
-		//TupleImageSet.TupleDimensionIndex index = new TupleImageSet.TupleDimensionIndex();
-		
-	//public TupleImageSet create(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, List<TupleImageSet.TupleDimensionIndex> indices) {
-		//return new TupleImageSet(datasetService, combined, type, dimensions, name, axes, indices);
-
 		//TODO end experimental
 
 		// done clicking on the grayscale version
