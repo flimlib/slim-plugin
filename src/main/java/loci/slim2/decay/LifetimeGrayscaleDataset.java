@@ -44,6 +44,7 @@ import net.imglib2.type.numeric.RealType;
  */
 public class LifetimeGrayscaleDataset {
     private final Dataset grayscaleDataset;
+	private final long[] maxPosition;
 
 	/**
 	 * Constructor.
@@ -51,7 +52,7 @@ public class LifetimeGrayscaleDataset {
 	 * @param datasetService
 	 * @param lifetimeDatasetWrapper 
 	 */
-	public LifetimeGrayscaleDataset(DatasetService datasetService, LifetimeDatasetWrapper lifetimeDatasetWrapper) {
+	public LifetimeGrayscaleDataset(DatasetService datasetService, LifetimeDatasetWrapper lifetimeDatasetWrapper, int bins) {
 		// create grayscale image
 		final long[] dimensions = lifetimeDatasetWrapper.getDims();
 		final String name = lifetimeDatasetWrapper.getDataset().getName();
@@ -65,16 +66,55 @@ public class LifetimeGrayscaleDataset {
 		final ImgPlus imgPlus = grayscaleDataset.getImgPlus();
 		final Cursor<? extends RealType<?>> grayscaleCursor = imgPlus.localizingCursor();
 		final long[] position = new long[dimensions.length];
+		int maxSummed = Integer.MIN_VALUE;
+		maxPosition = new long[dimensions.length];
 		while (grayscaleCursor.hasNext()) {
 			grayscaleCursor.fwd();
 			grayscaleCursor.localize(position);
 			
-			final int summed = lifetimeDatasetWrapper.getSummedDecay(position);
+			final int summed = lifetimeDatasetWrapper.getSummedDecay(position, bins);
 			grayscaleCursor.get().setReal(summed);
+
+			// keep track of brightest pixel
+			if (inFirstPlane(position)) {
+				if (summed > maxSummed) {
+					maxSummed = summed;
+					System.arraycopy(position, 0, maxPosition, 0, position.length);
+				}
+			}
 		}
 	}
-	
+
+	/**
+	 * Gets the associated dataset.
+	 * 
+	 * @return 
+	 */
 	public Dataset getDataset() {
 		return grayscaleDataset;
+	}
+
+	/**
+	 * Reports the position of the brightest pixel in the first XY plane.
+	 * 
+	 * @return 
+	 */
+	public long[] getBrightestPixel() {
+		return maxPosition;
+	}
+
+	/**
+	 * Reports whether this position is in the first XY plane.
+	 * 
+	 * @param position
+	 * @return 
+	 */
+	private boolean inFirstPlane(long[] position) {
+		for (int i = 2; i < position.length; ++i) {
+			if (0L != position[i]) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

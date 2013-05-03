@@ -35,8 +35,6 @@ import imagej.command.Command;
 import imagej.command.DynamicCommand;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
-import imagej.data.operator.CalculatorOp;
-import imagej.data.operator.CalculatorService;
 import imagej.display.Display;
 import imagej.display.DisplayService;
 import imagej.menu.MenuConstants;
