@@ -14,7 +14,7 @@ import net.imglib2.type.numeric.RealType;
  * @author Aivar Grislis
  */
 	/**
-	 * Class that describes a single tuple dimension.
+	 * Class that describes a single index of the tuple dimension.
 	 * 
 	 * @param <T> type of the values
 	 * 
@@ -24,11 +24,18 @@ import net.imglib2.type.numeric.RealType;
 		private final int POST_XY_INDEX = 2;
 		private final String label;
 		private final int index;
-		private final TupleFormula formula;
+		private final TupleFormula<T> formula;
 		private boolean combined;
 		private RandomAccess<T> randomAccess;
-		
-		public TupleDimensionIndex(String label, int index, TupleFormula formula) {
+
+		/**
+		 * Constructor.
+		 * 
+		 * @param label name of this index value
+		 * @param index index in output (for combined images)
+		 * @param formula used to derive index value
+		 */
+		public TupleDimensionIndex(String label, int index, TupleFormula<T> formula) {
 			this.label = label;
 			this.index = index;
 			this.formula = formula;
@@ -55,7 +62,7 @@ import net.imglib2.type.numeric.RealType;
 		}
 		
 		public void setPixelValue(List<T> values, long[] position, int[] chunkyPixelSize) {
-			T value = (T) formula.compute(values);
+			T value = formula.compute(values);
 			long x = position[0];
 			long y = position[1];
 			for (int i = 0; i < chunkyPixelSize[0]; ++i) {
@@ -68,12 +75,13 @@ import net.imglib2.type.numeric.RealType;
 		}
 		
 		public void setPixelValue(List<T> values, long[] position) {
-			T value = (T) formula.compute(values); //TODO ARG get rid of (T)?
+			T value = formula.compute(values);
 			setPixelValue(value, position);
 		}
 		
 		public void setPixelValue(T value, long[] position) {
 			if (combined) {
+				// adjust position for combined stack
 				position = expandPosition(position, POST_XY_INDEX);
 				position[POST_XY_INDEX] = index;
 			}

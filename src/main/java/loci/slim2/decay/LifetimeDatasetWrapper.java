@@ -50,7 +50,7 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
 
 /**
- * Wraps a Dataset that has lifetime information.
+ * Wraps a {@link Dataset} that has lifetime information.
  * 
  * @author Aivar Grislis
  */
@@ -123,7 +123,7 @@ public class LifetimeDatasetWrapper {
 	}
 
 	/**
-	 * Return wrapped Dataset.
+	 * Return wrapped {@link Dataset}.
 	 * 
 	 * @return 
 	 */
@@ -285,9 +285,10 @@ public class LifetimeDatasetWrapper {
 	}
 
 	/**
-	 * Inner cache class.  Binning is very slow without caching.  However this 
-	 * cache only works if you are accessing pixels sequentially, such as
-	 * creating a binned version of the entire grayscale.
+	 * Inner cache class.
+	 * 
+	 * Binning is very slow without caching.  However this cache only works well
+	 * if you are accessing pixels sequentially.
 	 * 
 	 * Thanks to Tino at:
 	 * http://www.java-blog.com/creating-simple-cache-java-linkedhashmap-anonymous-class

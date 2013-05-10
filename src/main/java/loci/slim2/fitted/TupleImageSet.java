@@ -55,8 +55,10 @@ import net.imglib2.type.numeric.RealType;
  * @author Aivar Grislis
  */
 //TODO ARG need a better name than tuple!!
+//TODO ARG a lot of this could be done with Views hyperslice and addDimension
 public class TupleImageSet <T extends RealType<T> & NativeType<T>> {
 	private static final int POST_XY_DIMENSION = 2;
+	private static final String DIMENSION_LABEL = "parameters";
 	private String name;
 	private boolean combined;
 	private long[] dimensions;
@@ -64,7 +66,131 @@ public class TupleImageSet <T extends RealType<T> & NativeType<T>> {
 	private List<Dataset> list;
 
 	/**
-	 * Creates an images set.
+	 * Creates an images set.  This variant uses {@link TupleDimensionIndex}
+	 * which allows deriving values from a formula.
+	 * 
+	 * @param datasetService or null if display not required
+	 * @param combined is true if images should be in a stack
+	 * @param type underlying Type of images
+	 * @param dimensions
+	 * @param name
+	 * @param axes
+	 * @param indices list of information per output index
+	 */
+	public TupleImageSet(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, List<TupleDimensionIndex> indices) {
+		init(datasetService, combined, type, dimensions, name, axes, indices);
+	}
+
+	/**
+	 * Creates an images set.  This variant uses an array of value labels.  The
+	 * index of the label is also used to derive the value.
+	 * 
+	 * @param datasetService or null if display not required
+	 * @param combined is true if images should be in a stack
+	 * @param type underlying Type of images
+	 * @param dimensions
+	 * @param name
+	 * @param axes
+	 * @param labels array of names per output index
+	 */
+	public TupleImageSet(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, String[] labels) {
+		init(datasetService, combined, type, dimensions, name, axes, labels);
+	}
+
+	/**
+	 * Creates a set of images.
+	 * 
+	 * @param datasetService or null if display not required
+	 * @param combined is true if images should be in a stack
+	 * @param type underlying {@link Type} of images
+	 * @param dataset sample Dataset of same dimensionality as outputs
+	 * @param labels array of names
+	 */
+	//TODO ARG can't you infer T type from the Dataset??
+	public TupleImageSet(DatasetService datasetService, boolean combined, T type, Dataset dataset, String[] labels) {
+		long[] dimensions = dataset.getDims();
+		String name = dataset.getName();
+		AxisType[] axes = dataset.getAxes();
+		init(datasetService, combined, type, dimensions, name, axes, labels);
+	}
+
+	/**
+	 * Creates a set of images.
+	 * 
+	 * @param datasetService or null if display not required
+	 * @param combined is true if images should be in a stack
+	 * @param type underlying {@link Type} of images
+	 * @param dataset sample {@link Dataset} of same dimensionality as output
+	 * @param indices list of information per output index
+	 */
+	public TupleImageSet(DatasetService datasetService, boolean combined, T type, Dataset dataset, List<TupleDimensionIndex> indices) {
+		long[] dimensions = dataset.getDims();
+		String name = dataset.getName();
+		AxisType[] axes = dataset.getAxes();
+		init(datasetService, combined, type, dimensions, name, axes, indices);
+	}
+	
+	/**
+	 * Gets list of datasets.
+	 * 
+	 * @return 
+	 */
+	public List<Dataset> getDatasets() {
+		return list;
+	}
+
+	/**
+	 * Sets the input tuple values for a given pixel position.
+	 * 
+	 * @param values
+	 * @param position 
+	 */
+	public void setPixelValue(List<T> values, long[] position) {
+		for (TupleDimensionIndex index : indices) {
+			index.setPixelValue(values, position);
+		}
+	}
+
+	/**
+	 * Sets the input tuple values for a given pixel position.
+	 * 
+	 * This variant allows drawing fat pixels.  In this scheme pixels are drawn
+	 * very coarsely and sparsely initially but in increasingly finer detail.
+	 * Should only be used when outputs are displayed and process is very time
+	 * consuming.
+	 * 
+	 * @param values
+	 * @param position
+	 * @param chunkySize 
+	 */
+	public void setPixelValue(List<T> values, long[] position, int[] chunkySize) {
+		for (TupleDimensionIndex index : indices) {
+			index.setPixelValue(values, position, chunkySize);
+		}
+	}
+
+	/**
+	 * Initialization method with array of labels.
+	 * 
+	 * @param datasetService
+	 * @param combined
+	 * @param type
+	 * @param dimensions
+	 * @param name
+	 * @param axes
+	 * @param labels 
+	 */
+	private void init(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, String[] labels) {
+		List<TupleDimensionIndex> indices = new ArrayList<TupleDimensionIndex>();
+		for (int i = 0; i < labels.length; ++i) {
+			TupleDimensionIndex tupleIndex = new TupleDimensionIndex(labels[i], i, new IndexedTupleFormula(i) );
+			indices.add(tupleIndex);
+		}
+		init(datasetService, combined, type, dimensions, name, axes, indices);
+	}
+
+	/**
+	 * Initialization method with list of indices.
 	 * 
 	 * @param datasetService
 	 * @param combined
@@ -74,7 +200,7 @@ public class TupleImageSet <T extends RealType<T> & NativeType<T>> {
 	 * @param axes
 	 * @param indices 
 	 */
-	public TupleImageSet(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, List<TupleDimensionIndex> indices) {
+	private void init(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, List<TupleDimensionIndex> indices) {
 		this.combined = combined;
 		this.dimensions = dimensions;
 		this.name = name;
@@ -88,6 +214,14 @@ public class TupleImageSet <T extends RealType<T> & NativeType<T>> {
 				Dataset dataset = datasetService.create(type, dimensions, subName, axes);
 				list.add(dataset);
 				index.setRandomAccess(dataset.getImgPlus().randomAccess());
+
+				//TODO ARG scribble on a hundred pixels
+				Cursor cursor = dataset.getImgPlus().cursor();
+				for (int n = 0; n < 100; ++n) {
+					cursor.fwd();
+					RealType t = (RealType) cursor.get();
+					t.setReal(0.5);
+				}
 			}
 		}
 		// combine into one dataset
@@ -103,7 +237,7 @@ public class TupleImageSet <T extends RealType<T> & NativeType<T>> {
 	}
 
 	/**
-	 * Adds a new dimension when combining images into one.
+	 * Adds a new dimension when combining datasets into one.
 	 * 
 	 * @param dimensions
 	 * @param dimension
@@ -138,44 +272,12 @@ public class TupleImageSet <T extends RealType<T> & NativeType<T>> {
 				combinedAxes[i] = axes[i];
 			}
 			else if (POST_XY_DIMENSION == i) {
-				combinedAxes[i] = new CustomAxisType("parameters");
+				combinedAxes[i] = new CustomAxisType(DIMENSION_LABEL);
 			}
 			else {
 				combinedAxes[i] = axes[i - 1];
 			}
 		}
 		return combinedAxes;
-	}
-
-	/**
-	 * Factory method to create set of images.
-	 * 
-	 * @param dimensions
-	 * @param indices
-	 * @return 
-	 */
-	public TupleImageSet create(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, List<TupleDimensionIndex> indices) {
-		return new TupleImageSet(datasetService, combined, type, dimensions, name, axes, indices);
-	}
-
-	/**
-	 * Gets list of datasets.
-	 * 
-	 * @return 
-	 */
-	public List<Dataset> getDatasets() {
-		return list;
-	}
-	
-	private void setPixelValue(List<T> values, long[] position) {
-		for (TupleDimensionIndex index : indices) {
-			index.setPixelValue(values, position);
-		}
-	}
-		
-	private void setPixelValue(List<T> values, long[] position, int[] chunkySize) {
-		for (TupleDimensionIndex index : indices) {
-			index.setPixelValue(values, position, chunkySize);
-		}
 	}
 }

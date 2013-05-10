@@ -124,7 +124,7 @@ public class DecayDatasetUtility {
 	}
 
 	/**
-	 * Deletes an AxisType at given dimensional index.
+	 * Deletes an {@link AxisType} at given dimensional index.
 	 * 
 	 * @param axes
 	 * @param dimension

@@ -51,11 +51,13 @@ import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
 import loci.slim2.fitted.CustomAxisType;
 import loci.slim2.fitted.IndexedTupleFormula;
+import loci.slim2.fitted.RampGenerator;
 import loci.slim2.fitted.TupleDimensionIndex;
 import loci.slim2.fitted.TupleImageSet;
 
 import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
+import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 
 import net.imglib2.ops.pointset.HyperVolumePointSet;
@@ -110,9 +112,29 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 
 			// display grayscale version
 			Display<?> display = displayService.createDisplay(lifetimeGrayscaleDataset.getDataset());
-			//TODO ARG how to draw on top of this display???
+			//TODO ARG how to draw overlays on top of this display???
 			context.setGrayscaleDisplay(display);
+			
+			AxisType[] axes = dataset.getAxes();
+			for (AxisType axis : axes) {
+				System.out.println("AXIS: " + axis.getLabel());
+			}
+			
+			
+		//TODO ARG draw on the grayscale
+			Dataset grayscaleDatasets = lifetimeGrayscaleDataset.getDataset();
+			net.imglib2.Cursor c = grayscaleDatasets.getImgPlus().cursor();
+			for (int i = 0; i < 100; ++i) {
+				c.fwd();
+				net.imglib2.type.numeric.RealType t = (net.imglib2.type.numeric.RealType) c.get();
+				t.setReal(99.0);
+			}
+			display.update();
+
+			
 		}
+		
+
 
 		// allow clicking on the grayscale version
 		showTool();
@@ -122,32 +144,94 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		
 		//TODO experimental
 		List<TupleDimensionIndex> list = new ArrayList<TupleDimensionIndex>();
-		int idx1 = 2;
-		IndexedTupleFormula formula1 = new IndexedTupleFormula(0);
-		TupleDimensionIndex index1 = new TupleDimensionIndex<T>("ONE", idx1, formula1);
+		int inputIndex;
+		int outputIndex;
+		inputIndex = 0;
+		outputIndex = 5;
+		IndexedTupleFormula formula1 = new IndexedTupleFormula(inputIndex);
+		TupleDimensionIndex index1 = new TupleDimensionIndex<T>("X2", outputIndex, formula1);
 		list.add(index1);
-		int idx2 = 1;
-		IndexedTupleFormula formula2 = new IndexedTupleFormula(1);
-		TupleDimensionIndex index2 = new TupleDimensionIndex<T>("TWO", idx2, formula2);
+		inputIndex = 1;
+		outputIndex = 4;
+		IndexedTupleFormula formula2 = new IndexedTupleFormula(inputIndex);
+		TupleDimensionIndex index2 = new TupleDimensionIndex<T>("A1", outputIndex, formula2);
 		list.add(index2);
-		int idx3 = 0;
-		IndexedTupleFormula formula3 = new IndexedTupleFormula(2);
-		TupleDimensionIndex index3 = new TupleDimensionIndex<T>("THREE", idx3, formula3);
+		inputIndex = 2;
+		outputIndex = 3;
+		IndexedTupleFormula formula3 = new IndexedTupleFormula(inputIndex);
+		TupleDimensionIndex index3 = new TupleDimensionIndex<T>("T1", outputIndex, formula3);
 		list.add(index3);
+		inputIndex = 3;
+		outputIndex = 2;
+		IndexedTupleFormula formula4 = new IndexedTupleFormula(inputIndex);
+		TupleDimensionIndex index4 = new TupleDimensionIndex<T>("A2", outputIndex, formula3);
+		list.add(index3);
+		inputIndex = 4;
+		outputIndex = 1;
+		IndexedTupleFormula formula5 = new IndexedTupleFormula(inputIndex);
+		TupleDimensionIndex index5 = new TupleDimensionIndex<T>("T2", outputIndex, formula3);
+		list.add(index3);		
+		inputIndex = 5;
+		outputIndex = 0;
+		IndexedTupleFormula formula6 = new IndexedTupleFormula(inputIndex);
+		TupleDimensionIndex index6 = new TupleDimensionIndex<T>("Z", outputIndex, formula3);
+		list.add(index3);		
+		
 		
 		boolean combined = false;
-		ByteType type = new ByteType();
-		long[] dimensions = new long[] { 400, 300, 5 };
+		DoubleType type = new DoubleType();
+		long[] dimensions = new long[] { 400, 300, 5 }; // x y z
 		AxisType[] axes = new AxisType[3];
-		axes[0] = new CustomAxisType("X");
-		axes[1] = new CustomAxisType("Y");
-		axes[2] = new CustomAxisType("Z");
+		axes[0] = Axes.X;
+		axes[1] = Axes.Y;
+		axes[2] = Axes.Z;
 		TupleImageSet imageSet = new TupleImageSet(datasetService, combined, type, dimensions, "Test", axes, list);
 		
 		List<Dataset> datasetList = imageSet.getDatasets();
 		for (Dataset d : datasetList) {
 			displayService.createDisplay(d);
 		}
+
+		// slightly easier way to create similar sets
+		combined = !combined; // try the other variant also
+		TupleImageSet imageSet2 = new TupleImageSet(datasetService, combined, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
+		List<Dataset> datasetList2 = imageSet2.getDatasets();
+		for (Dataset d : datasetList2) {
+			displayService.createDisplay(d);
+		}
+		
+		// do some drawing
+		long width = dimensions[0];
+		long height = dimensions[1];
+		RampGenerator[] inputs = new RampGenerator[] {
+			new RampGenerator(RampGenerator.RampType.UPPER_LEFT, width, height),
+			new RampGenerator(RampGenerator.RampType.BOTTOM, width, height),
+			new RampGenerator(RampGenerator.RampType.LOWER_RIGHT, width, height),
+			new RampGenerator(RampGenerator.RampType.LEFT, width, height),
+			new RampGenerator(RampGenerator.RampType.UPPER_RIGHT, width, height),
+			new RampGenerator(RampGenerator.RampType.LOWER_LEFT, width, height)
+		};
+		List<DoubleType> valuesList = new ArrayList<DoubleType>();
+		double[] inputValues = new double[inputs.length];
+		for (long y = 0; y < height; ++y) {
+			for (long x = 0; x < width; ++x) {
+				valuesList.clear();
+				for (int i = 0; i < inputs.length; ++i) {
+					valuesList.add(new DoubleType(inputs[i].getValue(x, y)));
+					inputValues[i] = inputs[i].getValue(x, y);
+				}
+				for (long z = 0; z < dimensions[2]; ++z) {
+					long[] position = new long[] { x, y, z };
+					imageSet2.setPixelValue(valuesList, position);
+				}
+			}
+		}
+		
+		Dataset dataset2 = (Dataset) imageSet2.getDatasets().get(0);
+		dataset2.setDirty(true);
+		System.out.println("FINIS");
+		
+		
 		//TODO end experimental
 
 		// done clicking on the grayscale version
