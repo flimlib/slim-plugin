@@ -73,6 +73,17 @@ import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
+import imagej.ImageJ;
+import imagej.data.Dataset;
+import imagej.display.DisplayService;
+import imagej.io.IOService;
+import java.io.File;
+import net.imglib2.Cursor;
+import net.imglib2.img.ImgPlus;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+
 /**
  * A command used to analyze time-based lifetime images.
  * 
@@ -83,6 +94,9 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	private static final String LIFETIME = "Lifetime";
 	private LifetimeDatasetWrapper lifetimeDatasetWrapper;
 	private LifetimeGrayscaleDataset lifetimeGrayscaleDataset;
+	
+	@Parameter
+	private IOService ioService;
 	
 	@Parameter
 	private DatasetService datasetService;
@@ -98,22 +112,45 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	
 	@Override
 	public void run() {
-		FittingContext context = new FittingContext();
+		
+		//TODO ARG load and scribble
+        final File file = new File("/Users/aivar/Desktop/clown.jpg");
+ 
+        // load the dataset
+		Dataset dataset0 = null;
+		try {
+			dataset0 = ioService.loadDataset(file.getAbsolutePath());
+		}
+        catch (Exception e) {
+			
+		}
+		
+        Display<?> display0 = displayService.createDisplay(dataset0);
+		
+		Cursor cursor0 = dataset0.getImgPlus().cursor();		
+		for (int i = 0; i < 10000; ++i) {
+			cursor0.fwd();
+			((UnsignedByteType) cursor0.get()).set(i);
+		}
+		
+		//display0.update();
+		
+		FittingContext fittingContext = new FittingContext(); //TODO ARG "Fitting" is not quite right here
 		
 		Dataset dataset = getLifetimeDataset();
 		if (null != dataset) {
 			// wrap the dataset for lifetime information
 			lifetimeDatasetWrapper = new LifetimeDatasetWrapper(dataset);
-			context.setDatasetWrapper(lifetimeDatasetWrapper);
+			fittingContext.setDatasetWrapper(lifetimeDatasetWrapper);
 			
 			// make a grayscale version of lifetime dataset
 			lifetimeGrayscaleDataset = new LifetimeGrayscaleDataset(datasetService, lifetimeDatasetWrapper, bins);
-			context.setGrayscaleDataset(lifetimeGrayscaleDataset);
+			fittingContext.setGrayscaleDataset(lifetimeGrayscaleDataset);
 
 			// display grayscale version
 			Display<?> display = displayService.createDisplay(lifetimeGrayscaleDataset.getDataset());
 			//TODO ARG how to draw overlays on top of this display???
-			context.setGrayscaleDisplay(display);
+			fittingContext.setGrayscaleDisplay(display);
 			
 			AxisType[] axes = dataset.getAxes();
 			for (AxisType axis : axes) {
@@ -122,14 +159,15 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			
 			
 		//TODO ARG draw on the grayscale
-			Dataset grayscaleDatasets = lifetimeGrayscaleDataset.getDataset();
-			net.imglib2.Cursor c = grayscaleDatasets.getImgPlus().cursor();
-			for (int i = 0; i < 100; ++i) {
+			Dataset grayscaleDataset = lifetimeGrayscaleDataset.getDataset();
+			ImgPlus<IntType> ip = (ImgPlus<IntType>) grayscaleDataset.getImgPlus(); // created as 32 bit integer
+			
+			Cursor<IntType> c = ip.cursor();
+			for (int i = 0; i < 10000; ++i) {
 				c.fwd();
-				net.imglib2.type.numeric.RealType t = (net.imglib2.type.numeric.RealType) c.get();
-				t.setReal(99.0);
+				c.get().set(i);
 			}
-			display.update();
+			//display.update(); not necessary to see results
 
 			
 		}
@@ -178,7 +216,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		list.add(index3);		
 		
 		
-		boolean combined = false;
+		boolean combined = true; // create a stack
 		DoubleType type = new DoubleType();
 		long[] dimensions = new long[] { 400, 300, 5 }; // x y z
 		AxisType[] axes = new AxisType[3];
@@ -188,15 +226,30 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		TupleImageSet imageSet = new TupleImageSet(datasetService, combined, type, dimensions, "Test", axes, list);
 		
 		List<Dataset> datasetList = imageSet.getDatasets();
-		for (Dataset d : datasetList) {
+		Display display = null;
+		if (true) for (Dataset d : datasetList) {
+			display = displayService.createDisplay(d);
+		}
+		
+		Dataset d999 = datasetList.get(0);
+		System.out.println("scribble on " + d999.getName());
+		ImgPlus<DoubleType> ip999 = (ImgPlus<DoubleType>) d999.getImgPlus();
+		Cursor<DoubleType> c999 = ip999.cursor();
+		for (int i = 0; i < 10000; ++i) {
+			c999.fwd();
+			c999.get().set(i);
+		}
+		display.update();
+		
+		if (false) for (Dataset d : datasetList) {
 			displayService.createDisplay(d);
 		}
-
+		
 		// slightly easier way to create similar sets
-		combined = !combined; // try the other variant also
+		combined = !combined; // try the other variant also (stack vs separate images)
 		TupleImageSet imageSet2 = new TupleImageSet(datasetService, combined, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
 		List<Dataset> datasetList2 = imageSet2.getDatasets();
-		for (Dataset d : datasetList2) {
+		if (false) for (Dataset d : datasetList2) {
 			displayService.createDisplay(d);
 		}
 		
@@ -226,11 +279,18 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				}
 			}
 		}
+
+		if (true) for (Dataset d : datasetList2) {
+			displayService.createDisplay(d);
+		}
 		
 		Dataset dataset2 = (Dataset) imageSet2.getDatasets().get(0);
 		dataset2.setDirty(true);
 		System.out.println("FINIS");
 		
+		
+		// one more time; see if there's a timing issue with updates
+		display.update();
 		
 		//TODO end experimental
 

@@ -146,6 +146,7 @@ public class TupleImageSet <T extends RealType<T> & NativeType<T>> {
 	 * @param position 
 	 */
 	public void setPixelValue(List<T> values, long[] position) {
+		//TODO ARG System.out.println("TupleImageSet setPixelValue values size " + values.size() + " first " + values.get(0) + " last " + values.get(5) + " position " + position[0] + " " + position[1] + " " + position[2]);
 		for (TupleDimensionIndex index : indices) {
 			index.setPixelValue(values, position);
 		}

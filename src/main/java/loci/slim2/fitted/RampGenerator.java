@@ -4,6 +4,7 @@
  */
 package loci.slim2.fitted;
 
+//TODO ARG this class exists only for testing
 /**
  *
  * @author Aivar Grislis
@@ -59,7 +60,8 @@ public class RampGenerator {
 				j = height;
 				break;
 		}
-		return i / j;
+		//return i / j;
+		return x + y; //TODO ARG bug otherwise -- all zeros!
 	}
 	
 	private long getDiagonal(long width, long height) {

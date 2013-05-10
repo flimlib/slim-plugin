@@ -58,7 +58,7 @@ public class LifetimeGrayscaleDataset {
 		final String name = lifetimeDatasetWrapper.getDataset().getName();
 		final AxisType[] axes = lifetimeDatasetWrapper.getAxes();
 		final int bpp = 32;
-		final boolean signed = false;
+		final boolean signed = true;
 		final boolean floating = false;
 		grayscaleDataset = datasetService.create(dimensions, name, axes, bpp, signed, floating);
 		
