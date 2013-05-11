@@ -2,11 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package loci.slim2.fitted;
+package loci.slim2.outputset.temp;
 
 import net.imglib2.meta.AxisType;
 
-//TODO ARG copied from Axes.java in ImgLib2 Core Library
+//TODO ARG copied from Axes.java in ImgLib2 Core Library, here for now only
 
 /**
  * A custom dimensional axis type, for describing the dimensional axes of a

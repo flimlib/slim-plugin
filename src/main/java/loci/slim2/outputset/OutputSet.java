@@ -28,8 +28,9 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim2.fitted;
+package loci.slim2.outputset;
 
+import loci.slim2.outputset.temp.CustomAxisType;
 import imagej.ImageJ;
 import imagej.data.DatasetService;
 import java.util.ArrayList;
@@ -47,15 +48,13 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
 /**
- * Builds a set of tuple images.
- * 
- * In this context a 'tuple' is just a set of values of type T that each
- * describe a different aspect of the same pixel.
+ * Builds a set of related images.  In these images corresponding pixels
+ * describe different attributes measured or computed at the same pixel position.
  * 
  * @author Aivar Grislis
  */
-//TODO ARG need a better name than tuple!!
-//TODO ARG a lot of this could be done with Views hyperslice and addDimension
+//TODO ARG Views hyperslice and addDimension are similar, but I don't want shared data
+//TODO ARG recursive generic not appropriate, just want some kind of RealType, don't all have to be the same Type
 public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	private static final int POST_XY_DIMENSION = 2;
 	private static final String DIMENSION_LABEL = "parameters";
@@ -66,8 +65,8 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	private List<Dataset> list;
 
 	/**
-	 * Creates an images set.  This variant uses {@link TupleDimensionIndex}
-	 * which allows deriving values from a formula.
+	 * Creates an images set.  This variant uses {@link MemberFormula} which
+	 * allows deriving values from a formula.
 	 * 
 	 * @param datasetService or null if display not required
 	 * @param combined is true if images should be in a stack
@@ -82,8 +81,8 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	}
 
 	/**
-	 * Creates an images set.  This variant uses an array of value labels.  The
-	 * index of the label is also used to derive the value.
+	 * Creates a set of images.  This variant uses an array of value labels.
+	 * The index of the label is also used to derive the value.
 	 * 
 	 * @param datasetService or null if display not required
 	 * @param combined is true if images should be in a stack
@@ -106,7 +105,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param dataset sample Dataset of same dimensionality as outputs
 	 * @param labels array of names
 	 */
-	//TODO ARG can't you infer T type from the Dataset??
+	//TODO ARG can't you get T type from the Dataset somehow??
 	public OutputSet(DatasetService datasetService, boolean combined, T type, Dataset dataset, String[] labels) {
 		long[] dimensions = dataset.getDims();
 		String name = dataset.getName();
@@ -140,25 +139,26 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	}
 
 	/**
-	 * Sets the input tuple values for a given pixel position.
+	 * Inputs a list of values at a given position.  These values are then used
+	 * singly or in some combining formula to yield the output set images pixel
+	 * values.
 	 * 
 	 * @param values
 	 * @param position 
 	 */
 	public void setPixelValue(List<T> values, long[] position) {
-		//TODO ARG System.out.println("TupleImageSet setPixelValue values size " + values.size() + " first " + values.get(0) + " last " + values.get(5) + " position " + position[0] + " " + position[1] + " " + position[2]);
 		for (OutputSetMember index : indices) {
 			index.setPixelValue(values, position);
 		}
 	}
 
 	/**
-	 * Sets the input tuple values for a given pixel position.
-	 * 
-	 * This variant allows drawing fat pixels.  In this scheme pixels are drawn
-	 * very coarsely and sparsely initially but in increasingly finer detail.
-	 * Should only be used when outputs are displayed and process is very time
-	 * consuming.
+	 * Inputs a list of values at a given position.
+	 * <p>
+	 * This variant allows drawing fat pixels.  With this scheme pixels are
+	 * drawn very coarse and sparse initially but later in increasingly finer
+	 * detail.  This is for use when outputs are displayed and the process is
+	 * very time-consuming.
 	 * 
 	 * @param values
 	 * @param position
@@ -184,7 +184,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	private void init(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, String[] labels) {
 		List<OutputSetMember> indices = new ArrayList<OutputSetMember>();
 		for (int i = 0; i < labels.length; ++i) {
-			OutputSetMember tupleIndex = new OutputSetMember(labels[i], i, new IndexedOutputSetMemberFormula(i) );
+			OutputSetMember tupleIndex = new OutputSetMember(labels[i], i, new IndexedMemberFormula(i) );
 			indices.add(tupleIndex);
 		}
 		init(datasetService, combined, type, dimensions, name, axes, indices);
@@ -215,14 +215,6 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 				Dataset dataset = datasetService.create(type, dimensions, subName, axes);
 				list.add(dataset);
 				index.setRandomAccess(dataset.getImgPlus().randomAccess());
-
-				//TODO ARG scribble on a hundred pixels
-				Cursor cursor = dataset.getImgPlus().cursor();
-				for (int n = 0; n < 100; ++n) {
-					cursor.fwd();
-					RealType t = (RealType) cursor.get();
-					t.setReal(0.5);
-				}
 			}
 		}
 		// combine into one dataset

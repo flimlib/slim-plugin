@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package loci.slim2.fitted;
+package loci.slim2.outputset;
 
 import java.util.List;
 import net.imglib2.RandomAccess;
@@ -14,7 +14,7 @@ import net.imglib2.type.numeric.RealType;
  * @author Aivar Grislis
  */
 	/**
-	 * Class that describes a single index of the tuple dimension.
+	 * Class that describes a single member of the output set.
 	 * 
 	 * @param <T> type of the values
 	 * 
@@ -24,7 +24,7 @@ import net.imglib2.type.numeric.RealType;
 		private final int POST_XY_INDEX = 2; //TODO ARG find Y index constant somewhere in Imglib2, + 1; also, is Z s'posed to be 2???
 		private final String label;
 		private final int index;
-		private final OutputSetMemberFormula<T> formula;
+		private final MemberFormula<T> formula;
 		private boolean combined;
 		private RandomAccess<T> randomAccess;
 
@@ -35,7 +35,7 @@ import net.imglib2.type.numeric.RealType;
 		 * @param index index in output (used for combined images)
 		 * @param formula used to derive index value
 		 */
-		public OutputSetMember(String label, int index, OutputSetMemberFormula<T> formula) {
+		public OutputSetMember(String label, int index, MemberFormula<T> formula) {
 			this.label = label;
 			this.index = index;
 			this.formula = formula;
@@ -49,7 +49,7 @@ import net.imglib2.type.numeric.RealType;
 			return index;
 		}
 		
-		public OutputSetMemberFormula getFormula() {
+		public MemberFormula getFormula() {
 			return formula;
 		}
 		

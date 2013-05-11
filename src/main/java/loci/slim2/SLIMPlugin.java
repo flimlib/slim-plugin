@@ -49,11 +49,11 @@ import java.util.List;
 import loci.slim2.decay.DecayDatasetUtility;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
-import loci.slim2.fitted.CustomAxisType;
-import loci.slim2.fitted.IndexedOutputSetMemberFormula;
-import loci.slim2.fitted.RampGenerator;
-import loci.slim2.fitted.OutputSetMember;
-import loci.slim2.fitted.OutputSet;
+import loci.slim2.outputset.temp.CustomAxisType;
+import loci.slim2.outputset.IndexedMemberFormula;
+import loci.slim2.outputset.temp.RampGenerator;
+import loci.slim2.outputset.OutputSetMember;
+import loci.slim2.outputset.OutputSet;
 
 import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
@@ -113,29 +113,6 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	@Override
 	public void run() {
 		
-		//TODO ARG load and scribble
-        final File file = new File("/Users/aivar/Desktop/clown.jpg");
- 
-        // load the dataset
-		//Dataset dataset0 = null;
-		try {
-			Dataset dataset0 = ioService.loadDataset(file.getAbsolutePath());
-			
-			
-			Display<?> display0 = displayService.createDisplay(dataset0);
-
-			Cursor cursor0 = dataset0.getImgPlus().cursor();		
-			for (int i = 0; i < 10000; ++i) {
-				cursor0.fwd();
-				((UnsignedByteType) cursor0.get()).set(i);
-			}
-
-		}
-        catch (Exception e) {
-		}
-		
-		//display0.update();
-		
 		FittingContext fittingContext = new FittingContext(); //TODO ARG "Fitting" is not quite right here
 		
 		Dataset dataset = getLifetimeDataset();
@@ -152,28 +129,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			Display<?> display = displayService.createDisplay(lifetimeGrayscaleDataset.getDataset());
 			//TODO ARG how to draw overlays on top of this display???
 			fittingContext.setGrayscaleDisplay(display);
-			
-			AxisType[] axes = dataset.getAxes();
-			for (AxisType axis : axes) {
-				System.out.println("AXIS: " + axis.getLabel());
-			}
-			
-			
-		//TODO ARG draw on the grayscale
-			Dataset grayscaleDataset = lifetimeGrayscaleDataset.getDataset();
-			ImgPlus<IntType> ip = (ImgPlus<IntType>) grayscaleDataset.getImgPlus(); // created as 32 bit integer
-			
-			Cursor<IntType> c = ip.cursor();
-			for (int i = 0; i < 10000; ++i) {
-				c.fwd();
-				c.get().set(i);
-			}
-			//display.update(); not necessary to see results
-
-			
 		}
-		
-
 
 		// allow clicking on the grayscale version
 		showTool();
@@ -187,32 +143,32 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		int outputIndex;
 		inputIndex = 0;
 		outputIndex = 5;
-		IndexedOutputSetMemberFormula formula1 = new IndexedOutputSetMemberFormula(inputIndex);
+		IndexedMemberFormula formula1 = new IndexedMemberFormula(inputIndex);
 		OutputSetMember index1 = new OutputSetMember<T>("X2", outputIndex, formula1);
 		list.add(index1);
 		inputIndex = 1;
 		outputIndex = 4;
-		IndexedOutputSetMemberFormula formula2 = new IndexedOutputSetMemberFormula(inputIndex);
+		IndexedMemberFormula formula2 = new IndexedMemberFormula(inputIndex);
 		OutputSetMember index2 = new OutputSetMember<T>("A1", outputIndex, formula2);
 		list.add(index2);
 		inputIndex = 2;
 		outputIndex = 3;
-		IndexedOutputSetMemberFormula formula3 = new IndexedOutputSetMemberFormula(inputIndex);
+		IndexedMemberFormula formula3 = new IndexedMemberFormula(inputIndex);
 		OutputSetMember index3 = new OutputSetMember<T>("T1", outputIndex, formula3);
 		list.add(index3);
 		inputIndex = 3;
 		outputIndex = 2;
-		IndexedOutputSetMemberFormula formula4 = new IndexedOutputSetMemberFormula(inputIndex);
+		IndexedMemberFormula formula4 = new IndexedMemberFormula(inputIndex);
 		OutputSetMember index4 = new OutputSetMember<T>("A2", outputIndex, formula3);
 		list.add(index3);
 		inputIndex = 4;
 		outputIndex = 1;
-		IndexedOutputSetMemberFormula formula5 = new IndexedOutputSetMemberFormula(inputIndex);
+		IndexedMemberFormula formula5 = new IndexedMemberFormula(inputIndex);
 		OutputSetMember index5 = new OutputSetMember<T>("T2", outputIndex, formula3);
 		list.add(index3);		
 		inputIndex = 5;
 		outputIndex = 0;
-		IndexedOutputSetMemberFormula formula6 = new IndexedOutputSetMemberFormula(inputIndex);
+		IndexedMemberFormula formula6 = new IndexedMemberFormula(inputIndex);
 		OutputSetMember index6 = new OutputSetMember<T>("Z", outputIndex, formula3);
 		list.add(index3);		
 		
@@ -227,22 +183,8 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		
 		List<Dataset> datasetList = imageSet.getDatasets();
 		Display display = null;
-		if (true) for (Dataset d : datasetList) {
+		for (Dataset d : datasetList) {
 			display = displayService.createDisplay(d);
-		}
-		
-		Dataset d999 = datasetList.get(0);
-		System.out.println("scribble on " + d999.getName());
-		ImgPlus<DoubleType> ip999 = (ImgPlus<DoubleType>) d999.getImgPlus();
-		Cursor<DoubleType> c999 = ip999.cursor();
-		for (int i = 0; i < 10000; ++i) {
-			c999.fwd();
-			c999.get().set(i);
-		}
-		display.update();
-		
-		if (false) for (Dataset d : datasetList) {
-			displayService.createDisplay(d);
 		}
 		
 		// slightly easier way to create similar sets
@@ -250,7 +192,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		OutputSet imageSet2 = new OutputSet(datasetService, combined, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
 		List<Dataset> datasetList2 = imageSet2.getDatasets();
 		if (false) for (Dataset d : datasetList2) {
-			displayService.createDisplay(d);
+			display = displayService.createDisplay(d);
 		}
 		
 		// do some drawing
@@ -280,9 +222,13 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			}
 		}
 
+		//TODO ARG big problem here!
+		// I should be able to createDisplay up above and just update here
 		if (true) for (Dataset d : datasetList2) {
 			displayService.createDisplay(d);
 		}
+		
+		display.update();
 		
 		Dataset dataset2 = (Dataset) imageSet2.getDatasets().get(0);
 		dataset2.setDirty(true);
