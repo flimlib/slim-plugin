@@ -50,10 +50,10 @@ import loci.slim2.decay.DecayDatasetUtility;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
 import loci.slim2.fitted.CustomAxisType;
-import loci.slim2.fitted.IndexedTupleFormula;
+import loci.slim2.fitted.IndexedOutputSetMemberFormula;
 import loci.slim2.fitted.RampGenerator;
-import loci.slim2.fitted.TupleDimensionIndex;
-import loci.slim2.fitted.TupleImageSet;
+import loci.slim2.fitted.OutputSetMember;
+import loci.slim2.fitted.OutputSet;
 
 import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
@@ -117,20 +117,21 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
         final File file = new File("/Users/aivar/Desktop/clown.jpg");
  
         // load the dataset
-		Dataset dataset0 = null;
+		//Dataset dataset0 = null;
 		try {
-			dataset0 = ioService.loadDataset(file.getAbsolutePath());
+			Dataset dataset0 = ioService.loadDataset(file.getAbsolutePath());
+			
+			
+			Display<?> display0 = displayService.createDisplay(dataset0);
+
+			Cursor cursor0 = dataset0.getImgPlus().cursor();		
+			for (int i = 0; i < 10000; ++i) {
+				cursor0.fwd();
+				((UnsignedByteType) cursor0.get()).set(i);
+			}
+
 		}
         catch (Exception e) {
-			
-		}
-		
-        Display<?> display0 = displayService.createDisplay(dataset0);
-		
-		Cursor cursor0 = dataset0.getImgPlus().cursor();		
-		for (int i = 0; i < 10000; ++i) {
-			cursor0.fwd();
-			((UnsignedByteType) cursor0.get()).set(i);
 		}
 		
 		//display0.update();
@@ -181,49 +182,48 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		// else prompt for image.
 		
 		//TODO experimental
-		List<TupleDimensionIndex> list = new ArrayList<TupleDimensionIndex>();
+		List<OutputSetMember> list = new ArrayList<OutputSetMember>();
 		int inputIndex;
 		int outputIndex;
 		inputIndex = 0;
 		outputIndex = 5;
-		IndexedTupleFormula formula1 = new IndexedTupleFormula(inputIndex);
-		TupleDimensionIndex index1 = new TupleDimensionIndex<T>("X2", outputIndex, formula1);
+		IndexedOutputSetMemberFormula formula1 = new IndexedOutputSetMemberFormula(inputIndex);
+		OutputSetMember index1 = new OutputSetMember<T>("X2", outputIndex, formula1);
 		list.add(index1);
 		inputIndex = 1;
 		outputIndex = 4;
-		IndexedTupleFormula formula2 = new IndexedTupleFormula(inputIndex);
-		TupleDimensionIndex index2 = new TupleDimensionIndex<T>("A1", outputIndex, formula2);
+		IndexedOutputSetMemberFormula formula2 = new IndexedOutputSetMemberFormula(inputIndex);
+		OutputSetMember index2 = new OutputSetMember<T>("A1", outputIndex, formula2);
 		list.add(index2);
 		inputIndex = 2;
 		outputIndex = 3;
-		IndexedTupleFormula formula3 = new IndexedTupleFormula(inputIndex);
-		TupleDimensionIndex index3 = new TupleDimensionIndex<T>("T1", outputIndex, formula3);
+		IndexedOutputSetMemberFormula formula3 = new IndexedOutputSetMemberFormula(inputIndex);
+		OutputSetMember index3 = new OutputSetMember<T>("T1", outputIndex, formula3);
 		list.add(index3);
 		inputIndex = 3;
 		outputIndex = 2;
-		IndexedTupleFormula formula4 = new IndexedTupleFormula(inputIndex);
-		TupleDimensionIndex index4 = new TupleDimensionIndex<T>("A2", outputIndex, formula3);
+		IndexedOutputSetMemberFormula formula4 = new IndexedOutputSetMemberFormula(inputIndex);
+		OutputSetMember index4 = new OutputSetMember<T>("A2", outputIndex, formula3);
 		list.add(index3);
 		inputIndex = 4;
 		outputIndex = 1;
-		IndexedTupleFormula formula5 = new IndexedTupleFormula(inputIndex);
-		TupleDimensionIndex index5 = new TupleDimensionIndex<T>("T2", outputIndex, formula3);
+		IndexedOutputSetMemberFormula formula5 = new IndexedOutputSetMemberFormula(inputIndex);
+		OutputSetMember index5 = new OutputSetMember<T>("T2", outputIndex, formula3);
 		list.add(index3);		
 		inputIndex = 5;
 		outputIndex = 0;
-		IndexedTupleFormula formula6 = new IndexedTupleFormula(inputIndex);
-		TupleDimensionIndex index6 = new TupleDimensionIndex<T>("Z", outputIndex, formula3);
+		IndexedOutputSetMemberFormula formula6 = new IndexedOutputSetMemberFormula(inputIndex);
+		OutputSetMember index6 = new OutputSetMember<T>("Z", outputIndex, formula3);
 		list.add(index3);		
 		
-		
-		boolean combined = true; // create a stack
+		boolean combined = false; //true; // create a stack
 		DoubleType type = new DoubleType();
 		long[] dimensions = new long[] { 400, 300, 5 }; // x y z
 		AxisType[] axes = new AxisType[3];
 		axes[0] = Axes.X;
 		axes[1] = Axes.Y;
 		axes[2] = Axes.Z;
-		TupleImageSet imageSet = new TupleImageSet(datasetService, combined, type, dimensions, "Test", axes, list);
+		OutputSet imageSet = new OutputSet(datasetService, combined, type, dimensions, "Test", axes, list);
 		
 		List<Dataset> datasetList = imageSet.getDatasets();
 		Display display = null;
@@ -247,7 +247,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		
 		// slightly easier way to create similar sets
 		combined = !combined; // try the other variant also (stack vs separate images)
-		TupleImageSet imageSet2 = new TupleImageSet(datasetService, combined, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
+		OutputSet imageSet2 = new OutputSet(datasetService, combined, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
 		List<Dataset> datasetList2 = imageSet2.getDatasets();
 		if (false) for (Dataset d : datasetList2) {
 			displayService.createDisplay(d);

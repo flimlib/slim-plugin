@@ -12,10 +12,10 @@ import net.imglib2.type.numeric.RealType;
  *
  * @author Aivar Grislis
  */
-public class IndexedTupleFormula <T extends RealType<T> & NativeType<T>> extends AbstractTupleFormula<T> implements TupleFormula<T> {
+public class IndexedOutputSetMemberFormula <T extends RealType<T> & NativeType<T>> extends AbstractOutputSetMemberFormula<T> implements OutputSetMemberFormula<T> {
 	private long index;
 	
-	public IndexedTupleFormula(int index) {
+	public IndexedOutputSetMemberFormula(int index) {
 		this.index = index;
 	}
 	@Override

@@ -12,7 +12,7 @@ import net.imglib2.type.numeric.RealType;
  *
  * @author Aivar Grislis
  */
-public abstract class AbstractTupleFormula <T extends RealType<T> & NativeType<T>> implements TupleFormula<T> {
+public abstract class AbstractOutputSetMemberFormula <T extends RealType<T> & NativeType<T>> implements OutputSetMemberFormula<T> {
 	
 	/**
 	 * Formula for calculating a value for this tuple dimension.

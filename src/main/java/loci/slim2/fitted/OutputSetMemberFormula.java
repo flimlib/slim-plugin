@@ -13,7 +13,7 @@ import net.imglib2.type.numeric.RealType;
  *
  * @author Aivar Grislis
  */
-public interface TupleFormula <T extends RealType<T> & NativeType<T>> {
+public interface OutputSetMemberFormula <T extends RealType<T> & NativeType<T>> {
 	
 	/**
 	 * Formula for calculating a value for this tuple dimension.

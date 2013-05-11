@@ -35,13 +35,13 @@ public class RampGenerator {
 				i = getDiagonal(x, y);
 				break;
 			case UPPER_RIGHT:
-				i = getDiagonal(width - x, y);
+				i = getDiagonal(width - x - 1, y);
 				break;
 			case LOWER_LEFT:
-				i = getDiagonal(x, height - y);
+				i = getDiagonal(x, height - y - 1);
 				break;
 			case LOWER_RIGHT:
-				i = getDiagonal(width - x, height - y);
+				i = getDiagonal(width - x - 1, height - y - 1);
 				break;
 			case TOP:
 				i = y;
@@ -52,19 +52,20 @@ public class RampGenerator {
 				j = width;
 				break;
 			case RIGHT:
-				i = width - x;
+				i = width - x - 1;
 				j = width;
 				break;
 			case BOTTOM:
-				i = height - y;
+				i = height - y - 1;
 				j = height;
 				break;
 		}
-		//return i / j;
-		return x + y; //TODO ARG bug otherwise -- all zeros!
+		return ((double) i) / j;
 	}
 	
 	private long getDiagonal(long width, long height) {
-		return (long) Math.sqrt(width * width + height * height);
+		long returnValue = (long) Math.sqrt(width * width + height * height);
+		//System.out.println("width " + width + " HEIGHt " + height + " returnValue " + returnValue);
+		return returnValue;
 	}
 }

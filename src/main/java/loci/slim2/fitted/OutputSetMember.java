@@ -20,11 +20,11 @@ import net.imglib2.type.numeric.RealType;
 	 * 
 	 * @author Aivar Grislis
 	 */
-	public class TupleDimensionIndex <T extends RealType<T> & NativeType<T>> {
-		private final int POST_XY_INDEX = 2;
+	public class OutputSetMember <T extends RealType<T> & NativeType<T>> {
+		private final int POST_XY_INDEX = 2; //TODO ARG find Y index constant somewhere in Imglib2, + 1; also, is Z s'posed to be 2???
 		private final String label;
 		private final int index;
-		private final TupleFormula<T> formula;
+		private final OutputSetMemberFormula<T> formula;
 		private boolean combined;
 		private RandomAccess<T> randomAccess;
 
@@ -32,10 +32,10 @@ import net.imglib2.type.numeric.RealType;
 		 * Constructor.
 		 * 
 		 * @param label name of this index value
-		 * @param index index in output (for combined images)
+		 * @param index index in output (used for combined images)
 		 * @param formula used to derive index value
 		 */
-		public TupleDimensionIndex(String label, int index, TupleFormula<T> formula) {
+		public OutputSetMember(String label, int index, OutputSetMemberFormula<T> formula) {
 			this.label = label;
 			this.index = index;
 			this.formula = formula;
@@ -49,7 +49,7 @@ import net.imglib2.type.numeric.RealType;
 			return index;
 		}
 		
-		public TupleFormula getFormula() {
+		public OutputSetMemberFormula getFormula() {
 			return formula;
 		}
 		
@@ -91,7 +91,7 @@ import net.imglib2.type.numeric.RealType;
 		
 		private long[] expandPosition(long[] position, int index) {
 			long[] expandedPosition = new long[position.length + 1];
-			for (int i = 0; i < position.length; ++i) {
+			for (int i = 0; i < expandedPosition.length; ++i) {
 				if (i < index) {
 					expandedPosition[i] = position[i];
 				}
