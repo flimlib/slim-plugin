@@ -49,6 +49,8 @@ import java.util.List;
 import loci.slim2.decay.DecayDatasetUtility;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
+import loci.slim2.outputset.temp.ChunkyPixel;
+import loci.slim2.outputset.temp.ChunkyPixelIterator;
 import loci.slim2.outputset.temp.CustomAxisType;
 import loci.slim2.outputset.IndexedMemberFormula;
 import loci.slim2.outputset.temp.RampGenerator;
@@ -191,8 +193,10 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		combined = !combined; // try the other variant also (stack vs separate images)
 		OutputSet imageSet2 = new OutputSet(datasetService, combined, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
 		List<Dataset> datasetList2 = imageSet2.getDatasets();
-		if (false) for (Dataset d : datasetList2) {
-			display = displayService.createDisplay(d);
+		Display<?>[] displays = new Display<?>[datasetList2.size()];
+		int index = 0;
+		if (true) for (Dataset d : datasetList2) {
+			displays[index++] = displayService.createDisplay(d);
 		}
 		
 		// do some drawing
@@ -208,6 +212,26 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		};
 		List<DoubleType> valuesList = new ArrayList<DoubleType>();
 		double[] inputValues = new double[inputs.length];
+		
+		long time = System.currentTimeMillis();
+		ChunkyPixelIterator iterator = new ChunkyPixelIterator(dimensions);
+		while (iterator.hasNext()) {
+			ChunkyPixel chunkyPixel = iterator.next();
+			long[] position = chunkyPixel.getPosition();
+			long x = position[0];
+			long y = position[1];
+			valuesList.clear();
+			for (int i = 0; i < inputs.length; ++i) {
+				valuesList.add(new DoubleType(inputs[i].getValue(x, y)));
+				inputValues[i] = inputs[i].getValue(x, y);
+			}
+			for (long z = 0; z < dimensions[2]; ++z) {
+				imageSet2.setPixelValue(valuesList, position);
+			}
+		}
+		System.out.println("Elapsed chunky pixel overhead time " + (System.currentTimeMillis() - time));
+		/*
+		// previous, non-chunky drawing code:
 		for (long y = 0; y < height; ++y) {
 			for (long x = 0; x < width; ++x) {
 				valuesList.clear();
@@ -221,14 +245,30 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				}
 			}
 		}
+		*/
 
 		//TODO ARG big problem here!
 		// I should be able to createDisplay up above and just update here
-		if (true) for (Dataset d : datasetList2) {
-			displayService.createDisplay(d);
+		//Display<?>[] displays = new Display<?>[datasetList2.size()];
+		//int index = 0;
+		//if (false) for (Dataset d : datasetList2) {
+		//	displays[index++] = displayService.createDisplay(d);
+		//}
+		
+		for (Display d : displays) {
+			d.update();
 		}
 		
-		display.update();
+		//displays[0].
+		
+		//display.update();
+		
+	//private void setMinMax(final double min, final double max) {
+	//	view.setChannelRanges(min, max);
+	//	view.getProjector().map();
+	//	view.update();
+	//}		
+		
 		
 		Dataset dataset2 = (Dataset) imageSet2.getDatasets().get(0);
 		dataset2.setDirty(true);
