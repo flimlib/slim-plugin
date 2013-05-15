@@ -36,6 +36,8 @@ import imagej.command.Command;
 import imagej.command.DynamicCommand;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
+import imagej.data.display.DataView;
+import imagej.data.display.DefaultImageDisplay;
 import imagej.display.Display;
 import imagej.display.DisplayService;
 import imagej.menu.MenuConstants;
@@ -186,6 +188,10 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		List<Dataset> datasetList = imageSet.getDatasets();
 		Display display = null;
 		for (Dataset d : datasetList) {
+			d.getImgPlus().setChannelMinimum(0, 0.0); //TODO ARG just to see if this works; set min/max
+			d.getImgPlus().setChannelMaximum(0, 1.0);
+			d.setDirty(true);
+			//d.getImgPlus().getImg().
 			display = displayService.createDisplay(d);
 		}
 		
@@ -196,6 +202,9 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		Display<?>[] displays = new Display<?>[datasetList2.size()];
 		int index = 0;
 		if (true) for (Dataset d : datasetList2) {
+			d.getImgPlus().setChannelMinimum(0, 0.0);
+			d.getImgPlus().setChannelMaximum(0, 1.0);
+			d.setDirty(true);
 			displays[index++] = displayService.createDisplay(d);
 		}
 		
@@ -216,6 +225,12 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		long time = System.currentTimeMillis();
 		ChunkyPixelIterator iterator = new ChunkyPixelIterator(dimensions);
 		while (iterator.hasNext()) {
+			try {
+				Thread.sleep(1);
+			}
+			catch (Exception e) {
+				
+			}
 			ChunkyPixel chunkyPixel = iterator.next();
 			long[] position = chunkyPixel.getPosition();
 			long x = position[0];
@@ -226,10 +241,18 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				inputValues[i] = inputs[i].getValue(x, y);
 			}
 			for (long z = 0; z < dimensions[2]; ++z) {
-				imageSet2.setPixelValue(valuesList, position);
+				imageSet2.setPixelValue(valuesList, position); //TODO ARG how does this work?  why iterate over z when nothing changes within the loop????
 			}
 		}
 		System.out.println("Elapsed chunky pixel overhead time " + (System.currentTimeMillis() - time));
+		
+		Dataset dd = datasetList2.get(0);
+		System.out.println("dd name is " + dd.getName());
+		dd.getImgPlus().setChannelMaximum(0, 1.0);
+		dd.getImgPlus().setChannelMinimum(0, 0.0);
+		dd.setDirty(true);
+		dd.update();
+		
 		/*
 		// previous, non-chunky drawing code:
 		for (long y = 0; y < height; ++y) {
@@ -256,7 +279,13 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		//}
 		
 		for (Display d : displays) {
-			d.update();
+			if (d instanceof DefaultImageDisplay) {
+				DefaultImageDisplay defaultImageDisplay = (DefaultImageDisplay) d;
+				DataView dataView = defaultImageDisplay.getActiveView();
+				dataView.update();
+				dataView.rebuild();
+			}
+			d.update(); // just monkeys with the axes
 		}
 		
 		//displays[0].
