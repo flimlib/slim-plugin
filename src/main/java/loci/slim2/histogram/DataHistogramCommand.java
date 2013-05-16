@@ -38,8 +38,11 @@ package loci.slim2.histogram;
 import imagej.command.Command;
 import imagej.core.commands.display.interactive.InteractiveCommand;
 import imagej.data.Dataset;
+import imagej.data.DatasetService;
 import imagej.data.display.DatasetView;
+import imagej.display.DisplayService;
 import imagej.menu.MenuConstants;
+import imagej.render.RenderingService;
 import imagej.widget.NumberWidget;
 import net.imglib2.algorithm.stats.ComputeMinMax;
 import net.imglib2.img.ImgPlus;
@@ -55,18 +58,15 @@ import org.scijava.plugin.Plugin;
  * the same min/max for each channel.
  * 
  * Based on {@link imagej.core.commands.display.interactive.BrightnessContrast}
- * by
- * @author Curtis Rueden
- * @author Grant Harris
+ * by Curtis Rueden & Grant Harris.
  */
 @Plugin(type = Command.class, menu = {
-	@Menu(label = MenuConstants.IMAGE_LABEL, weight = MenuConstants.IMAGE_WEIGHT,
-		mnemonic = MenuConstants.IMAGE_MNEMONIC),
-	@Menu(label = "Adjust"),
-	@Menu(label = "Histogram Visualization...", accelerator = "control shift C",
-		weight = 0) }, iconPath = "/icons/commands/contrast.png", headless = true,
+	@Menu(label = MenuConstants.ANALYZE_LABEL, weight = MenuConstants.ANALYZE_WEIGHT,
+		mnemonic = MenuConstants.ANALYZE_MNEMONIC),
+	@Menu(label = "Data Histogram...", //accelerator = "control shift C",
+		weight = 0) }, iconPath = "/icons/commands/contrast.png", headless = true, //TODO ARG use 'normal.png' on my Desktop
 	initializer = "initValues")
-public class HistogramTool extends InteractiveCommand {
+public class DataHistogramCommand extends InteractiveCommand {
 
 	private static final int SLIDER_MIN = 0;
 	private static final int SLIDER_MAX = 100;
@@ -80,6 +80,15 @@ public class HistogramTool extends InteractiveCommand {
 	 * at minimum contrast.
 	 */
 	private static final int MAX_POWER = 4;
+	
+	@Parameter
+	private DisplayService displayService;
+	
+	@Parameter
+	private DatasetService datasetService;
+	
+	@Parameter
+	private RenderingService renderingService;
 
 	@Parameter(type = ItemIO.BOTH, callback = "viewChanged")
 	private DatasetView view;
@@ -97,15 +106,32 @@ public class HistogramTool extends InteractiveCommand {
 	@Parameter(callback = "brightnessContrastChanged", persist = false,
 		style = NumberWidget.SCROLL_BAR_STYLE, min = S_MIN, max = S_MAX)
 	private int contrast;
+	
+	@Parameter(label = "Show full range", persist = true,
+		callback = "rangeChanged")
+	private boolean showFullRange;
+	
+	@Parameter(label = "Logarithmic", persist = true,
+		callback = "logarithmicChanged")
+	private boolean logarithmic;
+	
+	@Parameter(label = "Show single counts", persist = true,
+		callback = "showSingleCountsChanged")
+	private boolean showSingleCounts;
 
 	/** The minimum and maximum values of the data itself. */
 	private double dataMin, dataMax;
 
 	/** The initial minimum and maximum values of the data view. */
 	private double initialMin, initialMax;
+	
+	private final HistogramGraph histogramGraph;
 
-	public HistogramTool() {
+	public DataHistogramCommand() {
 		super("view");
+		histogramGraph = new HistogramGraph(datasetService, renderingService);
+		Dataset dataset = histogramGraph.getDataset();
+		displayService.createDisplay(dataset);
 	}
 
 	// -- Runnable methods --
@@ -185,6 +211,21 @@ public class HistogramTool extends InteractiveCommand {
 	/** Called when brightness or contrast changes. Updates min and max. */
 	protected void brightnessContrastChanged() {
 		computeMinMax();
+	}
+	
+	/** Called when show full range changes. */
+	protected void rangeChanged() {
+		System.out.println("RANGE CHANGED");
+	}
+	
+	/** Called when logarithmic changes. */
+	protected void logarithmicChanged() {
+		System.out.println("LOG CHANGED");
+	}
+
+	/** Called when show single counts changes. */
+	protected void showSingleCountsChanged() {
+		System.out.println("SINGLE COUNTS CHANGED");
 	}
 
 	// -- Helper methods --
