@@ -40,7 +40,6 @@ import imagej.core.commands.display.interactive.InteractiveCommand;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import imagej.data.display.DatasetView;
-import imagej.display.DisplayService;
 import imagej.menu.MenuConstants;
 import imagej.render.RenderingService;
 import imagej.widget.NumberWidget;
@@ -96,9 +95,6 @@ public class DataHistogramCommand extends InteractiveCommand {
 	
 	@Parameter
 	private imagej.io.IOService ioService;
-	
-	@Parameter
-	private DisplayService displayService;
 	
 	@Parameter
 	private imagej.console.ConsoleService consoleService;
@@ -162,7 +158,6 @@ public class DataHistogramCommand extends InteractiveCommand {
 		histogramGraph = new HistogramGraph(datasetService, renderingService);
 		Dataset dataset = histogramGraph.getDataset();
 		
-		displayService = context.getService(DisplayService.class);
 		displayService.createDisplay(dataset);
 		
 		
