@@ -34,60 +34,35 @@ package loci.slim2;
 import imagej.ImageJ;
 import imagej.command.Command;
 import imagej.command.CommandService;
-import imagej.command.DynamicCommand;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import imagej.data.display.DataView;
 import imagej.data.display.DefaultImageDisplay;
 import imagej.display.Display;
 import imagej.display.DisplayService;
-import imagej.menu.MenuConstants;
-import imagej.module.DefaultModuleItem;
+import imagej.io.IOService;
 import imagej.tool.Tool;
 import imagej.tool.ToolService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import loci.slim2.decay.DecayDatasetUtility;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
+import loci.slim2.outputset.IndexedMemberFormula;
+import loci.slim2.outputset.OutputSet;
+import loci.slim2.outputset.OutputSetMember;
 import loci.slim2.outputset.temp.ChunkyPixel;
 import loci.slim2.outputset.temp.ChunkyPixelIterator;
-import loci.slim2.outputset.temp.CustomAxisType;
-import loci.slim2.outputset.IndexedMemberFormula;
 import loci.slim2.outputset.temp.RampGenerator;
-import loci.slim2.outputset.OutputSetMember;
-import loci.slim2.outputset.OutputSet;
-
-import net.imglib2.RandomAccess;
-import net.imglib2.img.Img;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
-
-import net.imglib2.ops.pointset.HyperVolumePointSet;
-import net.imglib2.ops.pointset.PointSetIterator;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
-import net.imglib2.util.ValuePair;
 
-import org.scijava.ItemIO;
-import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-
-import imagej.ImageJ;
-import imagej.data.Dataset;
-import imagej.display.DisplayService;
-import imagej.io.IOService;
-import java.io.File;
-import net.imglib2.Cursor;
-import net.imglib2.img.ImgPlus;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 
 /**
  * A command used to analyze time-based lifetime images.
