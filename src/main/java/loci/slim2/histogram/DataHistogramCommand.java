@@ -40,7 +40,7 @@ import imagej.core.commands.display.interactive.InteractiveCommand;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import imagej.data.display.DatasetView;
-import imagej.data.display.ImageDisplayService;
+import imagej.display.DisplayService;
 import imagej.menu.MenuConstants;
 import imagej.render.RenderingService;
 import imagej.widget.NumberWidget;
@@ -48,6 +48,7 @@ import net.imglib2.algorithm.stats.ComputeMinMax;
 import net.imglib2.img.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
+import org.scijava.Context;
 import org.scijava.ItemIO;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
@@ -82,11 +83,26 @@ public class DataHistogramCommand extends InteractiveCommand {
 	private static final int MAX_POWER = 4;
 	
 	@Parameter
-	private ImageDisplayService displayService; //TODO ARG tried a DisplayService, as used in B&C plugin; neither gets filled-in, remains null
+	private Context context;
+		
+	@Parameter
+	private org.scijava.object.ObjectService objectService;
 	
 	@Parameter
-	private DatasetService datasetService;
+	private DatasetService datasetService;	
 	
+	@Parameter
+	private imagej.text.TextService textService;
+	
+	@Parameter
+	private imagej.io.IOService ioService;
+	
+	@Parameter
+	private DisplayService displayService;
+	
+	@Parameter
+	private imagej.console.ConsoleService consoleService;
+
 	@Parameter
 	private RenderingService renderingService;
 
@@ -117,7 +133,7 @@ public class DataHistogramCommand extends InteractiveCommand {
 	
 	@Parameter(label = "Show single counts", persist = true,
 		callback = "showSingleCountsChanged")
-	private boolean showSingleCounts;
+	private boolean showSingleCounts;	
 
 	/** The minimum and maximum values of the data itself. */
 	private double dataMin, dataMax;
@@ -136,12 +152,18 @@ public class DataHistogramCommand extends InteractiveCommand {
 	@Override
 	public void run() {
 		System.out.println("in DataHistogramCommand.run");
+		System.out.println("ObjectService is " + objectService);
+		System.out.println("DatasetService is " + datasetService);	
+		System.out.println("TextService is " + textService);
+		System.out.println("IOService is " + ioService);
 		System.out.println("DisplayService is " + displayService);
-		System.out.println("DatasetService is " + datasetService);
+		System.out.println("ConsoleService is " + consoleService);
 		System.out.println("RenderingService is " + renderingService);
 		histogramGraph = new HistogramGraph(datasetService, renderingService);
 		Dataset dataset = histogramGraph.getDataset();
-		displayService.createDataView(dataset);
+		
+		displayService = context.getService(DisplayService.class);
+		displayService.createDisplay(dataset);
 		
 		
 		
