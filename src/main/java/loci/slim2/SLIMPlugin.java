@@ -33,6 +33,7 @@ package loci.slim2;
 
 import imagej.ImageJ;
 import imagej.command.Command;
+import imagej.command.CommandService;
 import imagej.command.DynamicCommand;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
@@ -100,6 +101,9 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	private LifetimeGrayscaleDataset lifetimeGrayscaleDataset;
 	
 	@Parameter
+	private CommandService commandService;
+	
+	@Parameter
 	private IOService ioService;
 	
 	@Parameter
@@ -116,7 +120,10 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	
 	@Override
 	public void run() {
-		
+		System.out.println("!!! WTF");
+				System.out.println("!!! commandService is " + commandService);
+		System.out.println("!!! datasetService is " + datasetService);
+
 		FittingContext fittingContext = new FittingContext(); //TODO ARG "Fitting" is not quite right here
 		
 		Dataset dataset = getLifetimeDataset();
@@ -183,7 +190,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		axes[0] = Axes.X;
 		axes[1] = Axes.Y;
 		axes[2] = Axes.Z;
-		OutputSet imageSet = new OutputSet(datasetService, combined, type, dimensions, "Test", axes, list);
+		OutputSet imageSet = new OutputSet(commandService, datasetService, combined, type, dimensions, "Test", axes, list);
 		
 		List<Dataset> datasetList = imageSet.getDatasets();
 		Display display = null;
@@ -197,7 +204,9 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		
 		// slightly easier way to create similar sets
 		combined = !combined; // try the other variant also (stack vs separate images)
-		OutputSet imageSet2 = new OutputSet(datasetService, combined, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
+		System.out.println("!!! commandService is " + commandService);
+		System.out.println("!!! datasetService is " + datasetService);
+		OutputSet imageSet2 = new OutputSet(commandService, datasetService, combined, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
 		List<Dataset> datasetList2 = imageSet2.getDatasets();
 		Display<?>[] displays = new Display<?>[datasetList2.size()];
 		int index = 0;

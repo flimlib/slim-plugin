@@ -40,7 +40,7 @@ import imagej.core.commands.display.interactive.InteractiveCommand;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import imagej.data.display.DatasetView;
-import imagej.display.DisplayService;
+import imagej.data.display.ImageDisplayService;
 import imagej.menu.MenuConstants;
 import imagej.render.RenderingService;
 import imagej.widget.NumberWidget;
@@ -82,7 +82,7 @@ public class DataHistogramCommand extends InteractiveCommand {
 	private static final int MAX_POWER = 4;
 	
 	@Parameter
-	private DisplayService displayService;
+	private ImageDisplayService displayService; //TODO ARG tried a DisplayService, as used in B&C plugin; neither gets filled-in, remains null
 	
 	@Parameter
 	private DatasetService datasetService;
@@ -125,19 +125,27 @@ public class DataHistogramCommand extends InteractiveCommand {
 	/** The initial minimum and maximum values of the data view. */
 	private double initialMin, initialMax;
 	
-	private final HistogramGraph histogramGraph;
+	private /*final*/ HistogramGraph histogramGraph;
 
 	public DataHistogramCommand() {
 		super("view");
-		histogramGraph = new HistogramGraph(datasetService, renderingService);
-		Dataset dataset = histogramGraph.getDataset();
-		displayService.createDisplay(dataset);
 	}
 
 	// -- Runnable methods --
 
 	@Override
 	public void run() {
+		System.out.println("in DataHistogramCommand.run");
+		System.out.println("DisplayService is " + displayService);
+		System.out.println("DatasetService is " + datasetService);
+		System.out.println("RenderingService is " + renderingService);
+		histogramGraph = new HistogramGraph(datasetService, renderingService);
+		Dataset dataset = histogramGraph.getDataset();
+		displayService.createDataView(dataset);
+		
+		
+		
+		
 		updateDisplay();
 	}
 
@@ -194,6 +202,8 @@ public class DataHistogramCommand extends InteractiveCommand {
 	/** Called when view changes. Updates everything to match. */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void viewChanged() {
+	//TODO ARG getting a NPE
+		if (null != view) {
 		final Dataset dataset = view.getData();
 		final ImgPlus img = dataset.getImgPlus();
 		computeDataMinMax(img);
@@ -201,6 +211,7 @@ public class DataHistogramCommand extends InteractiveCommand {
 		if (Double.isNaN(min)) min = initialMin;
 		if (Double.isNaN(max)) max = initialMax;
 		computeBrightnessContrast();
+		}
 	}
 
 	/** Called when min or max changes. Updates brightness and contrast. */

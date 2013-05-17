@@ -30,8 +30,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim2.outputset;
 
+import loci.slim2.histogram.DataHistogramCommand;
 import loci.slim2.outputset.temp.CustomAxisType;
 import imagej.ImageJ;
+import imagej.command.CommandService;
 import imagej.data.DatasetService;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +70,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * Creates an images set.  This variant uses {@link MemberFormula} which
 	 * allows deriving values from a formula.
 	 * 
+	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined is true if images should be in a stack
 	 * @param type underlying Type of images
@@ -76,14 +79,15 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param axes
 	 * @param indices list of information per output index
 	 */
-	public OutputSet(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, List<OutputSetMember> indices) {
-		init(datasetService, combined, type, dimensions, name, axes, indices);
+	public OutputSet(CommandService commandService, DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, List<OutputSetMember> indices) {
+		init(commandService, datasetService, combined, type, dimensions, name, axes, indices);
 	}
 
 	/**
 	 * Creates a set of images.  This variant uses an array of value labels.
 	 * The index of the label is also used to derive the value.
 	 * 
+	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined is true if images should be in a stack
 	 * @param type underlying Type of images
@@ -92,13 +96,14 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param axes
 	 * @param labels array of names per output index
 	 */
-	public OutputSet(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, String[] labels) {
-		init(datasetService, combined, type, dimensions, name, axes, labels);
+	public OutputSet(CommandService commandService, DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, String[] labels) {
+		init(commandService, datasetService, combined, type, dimensions, name, axes, labels);
 	}
 
 	/**
 	 * Creates a set of images.
 	 * 
+	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined is true if images should be in a stack
 	 * @param type underlying {@link Type} of images
@@ -106,27 +111,28 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param labels array of names
 	 */
 	//TODO ARG can't you get T type from the Dataset somehow??
-	public OutputSet(DatasetService datasetService, boolean combined, T type, Dataset dataset, String[] labels) {
+	public OutputSet(CommandService commandService, DatasetService datasetService, boolean combined, T type, Dataset dataset, String[] labels) {
 		long[] dimensions = dataset.getDims();
 		String name = dataset.getName();
 		AxisType[] axes = dataset.getAxes();
-		init(datasetService, combined, type, dimensions, name, axes, labels);
+		init(commandService, datasetService, combined, type, dimensions, name, axes, labels);
 	}
 
 	/**
 	 * Creates a set of images.
 	 * 
+	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined is true if images should be in a stack
 	 * @param type underlying {@link Type} of images
 	 * @param dataset sample {@link Dataset} of same dimensionality as output
 	 * @param indices list of information per output index
 	 */
-	public OutputSet(DatasetService datasetService, boolean combined, T type, Dataset dataset, List<OutputSetMember> indices) {
+	public OutputSet(CommandService commandService, DatasetService datasetService, boolean combined, T type, Dataset dataset, List<OutputSetMember> indices) {
 		long[] dimensions = dataset.getDims();
 		String name = dataset.getName();
 		AxisType[] axes = dataset.getAxes();
-		init(datasetService, combined, type, dimensions, name, axes, indices);
+		init(commandService, datasetService, combined, type, dimensions, name, axes, indices);
 	}
 	
 	/**
@@ -173,6 +179,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	/**
 	 * Initialization method with array of labels.
 	 * 
+	 * @param commandService
 	 * @param datasetService
 	 * @param combined
 	 * @param type
@@ -181,18 +188,19 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param axes
 	 * @param labels 
 	 */
-	private void init(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, String[] labels) {
+	private void init(CommandService commandService, DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, String[] labels) {
 		List<OutputSetMember> indices = new ArrayList<OutputSetMember>();
 		for (int i = 0; i < labels.length; ++i) {
 			OutputSetMember tupleIndex = new OutputSetMember(labels[i], i, new IndexedMemberFormula(i) );
 			indices.add(tupleIndex);
 		}
-		init(datasetService, combined, type, dimensions, name, axes, indices);
+		init(commandService, datasetService, combined, type, dimensions, name, axes, indices);
 	}
 
 	/**
 	 * Initialization method with list of indices.
 	 * 
+	 * @param commandService
 	 * @param datasetService
 	 * @param combined
 	 * @param type
@@ -201,7 +209,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param axes
 	 * @param indices 
 	 */
-	private void init(DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, List<OutputSetMember> indices) {
+	private void init(CommandService commandService, DatasetService datasetService, boolean combined, T type, long[] dimensions, String name, AxisType[] axes, List<OutputSetMember> indices) {
 		this.combined = combined;
 		this.dimensions = dimensions;
 		this.name = name;
@@ -227,6 +235,9 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 				index.setRandomAccess(dataset.getImgPlus().randomAccess());
 			}
 		}
+		
+		// pop up a data histogram tool
+		commandService.run(DataHistogramCommand.class); //TODO ARG I'm getting "No such input" anyhow: "DatasetService", datasetService);
 	}
 
 	/**
