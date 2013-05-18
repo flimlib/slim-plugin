@@ -30,36 +30,13 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim2.decay;
 
-import imagej.ImageJ;
-import imagej.command.Command;
-import imagej.command.DynamicCommand;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
-import imagej.display.Display;
-import imagej.display.DisplayService;
-import imagej.menu.MenuConstants;
-import imagej.module.DefaultModuleItem;
-import imagej.tool.Tool;
-import imagej.tool.ToolService;
-
-import java.util.List;
-import loci.poi.util.ArrayUtil;
-
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
-import net.imglib2.img.Img;
 import net.imglib2.img.ImgPlus;
 import net.imglib2.meta.AxisType;
-
-import net.imglib2.ops.pointset.HyperVolumePointSet;
-import net.imglib2.ops.pointset.PointSetIterator;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.DoubleType;
-
-import org.scijava.ItemIO;
-import org.scijava.plugin.Menu;
-import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
 
 /**
  * Utility class to convert lifetime images to grayscale by summing the photons.
