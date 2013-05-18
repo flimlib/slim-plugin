@@ -62,6 +62,7 @@ import org.scijava.plugin.Plugin;
  */
 //TODO ARG I thought perhaps there was an image realm for histograms and a data one,
 //  with the latter if you have enough measurements the distribution tends to normal
+//  then I found normalizing the histogram is a good image technique
 
 @Plugin(type = Command.class, menu = {
 	@Menu(label = MenuConstants.ANALYZE_LABEL, weight = MenuConstants.ANALYZE_WEIGHT,
@@ -129,16 +130,22 @@ public class DataHistogramCommand extends InteractiveCommand {
 
 	public DataHistogramCommand() {
 		super("view");
+		logarithmic = false;
+		showSingleCounts = false;
 	}
 
 	// -- Runnable methods --
 
 	@Override
 	public void run() {
-		histogramGraph = new HistogramGraph(datasetService, renderingService);
-		Dataset dataset = histogramGraph.getDataset();
-		displayService.createDisplay(dataset);
-		
+		if (null == histogramGraph) {
+			histogramGraph = new HistogramGraph(datasetService, renderingService);
+			Dataset dataset = histogramGraph.getDataset();
+			displayService.createDisplay(dataset);
+		}
+		else {
+			System.out.println("DHC run and histo was not null");
+		}
 		updateDisplay();
 	}
 
@@ -224,12 +231,18 @@ public class DataHistogramCommand extends InteractiveCommand {
 	
 	/** Called when logarithmic changes. */
 	protected void logarithmicChanged() {
-		System.out.println("LOG CHANGED");
+		System.out.println("LOG CHANGED " + logarithmic);
+		if (null != histogramGraph) {
+			histogramGraph.setLogarithmic(logarithmic);
+		}
 	}
 
 	/** Called when show single counts changes. */
 	protected void showSingleCountsChanged() {
-		System.out.println("SINGLE COUNTS CHANGED");
+		System.out.println("SINGLE PIXEL CHANGED " + showSingleCounts);
+		if (null != histogramGraph) {
+			histogramGraph.setDistinguishNonZero(showSingleCounts);
+		}
 	}
 
 	// -- Helper methods --

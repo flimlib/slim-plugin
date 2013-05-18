@@ -22,12 +22,14 @@ import net.imglib2.meta.AxisType;
 
 /**
  *
- * @author aivar
+ * @author Aivar Grislis
  */
 public class HistogramGraph {
 	private static final String DEFAULT_TITLE = "Histogram";
-	private static final long DEFAULT_WIDTH = 326;
-	private static final long DEFAULT_HEIGHT = 188;
+	private static final int DEFAULT_WIDTH = 256;
+	private static final int DEFAULT_HEIGHT = 128;
+	private static final int X_MARGIN = 30;
+	private static final int Y_MARGIN = 20;
 	private static final ChannelCollection WHITE_CHANNELS = new ChannelCollection(Colors.WHITE);
 	private static final ChannelCollection BLACK_CHANNELS = new ChannelCollection(Colors.BLACK);
 	private static final ChannelCollection GRAY_CHANNELS = new ChannelCollection(Colors.DARKGRAY);
@@ -35,65 +37,103 @@ public class HistogramGraph {
 	private final DatasetService datasetService;
 	private final RenderingService renderingService;
 	private final String title;
-	private final long width;
-	private final long height;
+	private final int width;
+	private final int height;
+	private final int totalWidth;
+	private final int totalHeight;
 	private final Dataset dataset;
-	private long[] histogram = new long[] { 1, 0, 0, 2, 4, 6, 7, 11, 22, 42, 55, 33, 20, 18, 11, 3, 4, 0 };
-	private boolean logarithmic = true;
+	private long[] histogram = new long[] { 1, 0, 0, 2, 4, 6, 7, 11, 22, 42, 55, 33, 20, 18, 11, 3, 4, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1 };
+	private boolean logarithmic;
 	private boolean distinguishNonZero;
-	
+
+	/**
+	 * Constructor
+	 * 
+	 * @param datasetService
+	 * @param renderingService 
+	 */
 	public HistogramGraph(DatasetService datasetService, RenderingService renderingService) {
 		this.datasetService = datasetService;
 		this.renderingService = renderingService;
 		title = DEFAULT_TITLE;
 		width = DEFAULT_WIDTH;
 		height = DEFAULT_HEIGHT;
-		dataset = createDataset();
+		totalWidth = width + 2 * X_MARGIN;
+		totalHeight = height + 3 * Y_MARGIN;
+		logarithmic = false;
+		distinguishNonZero = false;
+		dataset = createHistogramDataset();
 		repaint();
 	}
-	
+
+	/**
+	 * Gets the histogram graph dataset.
+	 * 
+	 * @return 
+	 */
 	public Dataset getDataset() {
 		return dataset;
 	}
-	
+
+	/**
+	 * Sets whether to graph logarithms.
+	 * 
+	 * @param logarithmic 
+	 */
 	public void setLogarithmic(boolean logarithmic) {
 		this.logarithmic = logarithmic;
+		repaint();
 	}
-	
+
+	/**
+	 * Sets whether or not to emphasize single or low counts so they can be
+	 * distinguished from a zero count.
+	 * 
+	 * @param distinguishNonZero 
+	 */
 	public void setDistinguishNonZero(boolean distinguishNonZero) {
 		this.distinguishNonZero = distinguishNonZero;
 		repaint();
 	}
-	
+
+	/**
+	 * Updates the histogram data.
+	 * 
+	 * @param histogram 
+	 */
+	//TODO ARG histogram could just be live
+	//TODO ARG still need a way to swap active image
 	public void updateHistogram(long[] histogram) {
 		this.histogram = histogram;
 		repaint();
 	}
-	
-	private Dataset createDataset() {
-		long[] dims = new long[] { width, height, 3 };
+
+	/**
+	 * Creates a {@link Dataset} to use for histogram graph.
+	 * @return 
+	 */
+	private Dataset createHistogramDataset() {
+		long[] dims = new long[] { totalWidth, totalHeight, 3 };
 		AxisType[] axes = new AxisType[] { Axes.X, Axes.Y, Axes.CHANNEL };
 		int bitsPerPixel = 8;
 		boolean signed = false;
 		boolean floating = false;
-		return datasetService.create(dims, title, axes, bitsPerPixel, signed, floating);
+		Dataset ds = datasetService.create(dims, title, axes, bitsPerPixel, signed, floating);
+		ds.setRGBMerged(true);
+		return ds;
 	}
-	
+
+	/**
+	 * Redraws the histogram graph.
+	 */
 	private void repaint() {
 		DrawingTool tool = new DrawingTool(dataset, renderingService);		
-		int xMargin = 35;
-		int yMargin = 20;
-		int width = 256;
-		int height = 128;		
-		int x, y, x1, y1, x2, y2;
-		int imageWidth = width + 2*xMargin;
-		int imageHeight = height + 3*yMargin;
 		
 		// draw background and frame
 		tool.setChannels(WHITE_CHANNELS);
-		tool.fillRect(0, 0, imageWidth, imageHeight);
+		tool.fillRect(0, 0, totalWidth, totalHeight);
 		tool.setChannels(BLACK_CHANNELS);
-		tool.drawRect(xMargin, yMargin, width, height);
+		tool.drawRect(X_MARGIN, Y_MARGIN, width, height + 1); //TODO ARG fudge factor
 		
 		// draw histogram
 		if (null != histogram) {
@@ -102,12 +142,20 @@ public class HistogramGraph {
 			// draw bars
 			tool.setChannels(GRAY_CHANNELS);
 			for (int i = 0; i < barHeights.length; ++i) {
-				tool.moveTo(xMargin + i, yMargin + height);
-				tool.lineTo(xMargin + i, yMargin + height - barHeights[i]);
+				tool.moveTo(X_MARGIN + i, Y_MARGIN + height);
+				tool.lineTo(X_MARGIN + i, Y_MARGIN + height - barHeights[i]);
 			}
 		}
 	}
-	
+
+	/**
+	 * Calculates the histogram bar heights according to the current display
+	 * scheme.
+	 * 
+	 * @param width
+	 * @param height
+	 * @return 
+	 */
 	private int[] getBarHeights(int width, int height) {
 		int[] barHeights = new int[histogram.length];
 		
