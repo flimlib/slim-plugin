@@ -237,7 +237,8 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 		}
 		
 		// pop up a data histogram tool
-		commandService.run(DataHistogramCommand.class); //TODO ARG I'm getting "No such input" anyhow: "DatasetService", datasetService);
+		System.out.println("init Z");
+		commandService.run(DataHistogramCommand.class);
 	}
 
 	/**

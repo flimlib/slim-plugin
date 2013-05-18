@@ -60,6 +60,9 @@ import org.scijava.plugin.Plugin;
  * Based on {@link imagej.core.commands.display.interactive.BrightnessContrast}
  * by Curtis Rueden & Grant Harris.
  */
+//TODO ARG I thought perhaps there was an image realm for histograms and a data one,
+//  with the latter if you have enough measurements the distribution tends to normal
+
 @Plugin(type = Command.class, menu = {
 	@Menu(label = MenuConstants.ANALYZE_LABEL, weight = MenuConstants.ANALYZE_WEIGHT,
 		mnemonic = MenuConstants.ANALYZE_MNEMONIC),
@@ -80,24 +83,9 @@ public class DataHistogramCommand extends InteractiveCommand {
 	 * at minimum contrast.
 	 */
 	private static final int MAX_POWER = 4;
-	
-	@Parameter
-	private Context context;
 		
 	@Parameter
-	private org.scijava.object.ObjectService objectService;
-	
-	@Parameter
 	private DatasetService datasetService;	
-	
-	@Parameter
-	private imagej.text.TextService textService;
-	
-	@Parameter
-	private imagej.io.IOService ioService;
-	
-	@Parameter
-	private imagej.console.ConsoleService consoleService;
 
 	@Parameter
 	private RenderingService renderingService;
@@ -147,21 +135,9 @@ public class DataHistogramCommand extends InteractiveCommand {
 
 	@Override
 	public void run() {
-		System.out.println("in DataHistogramCommand.run");
-		System.out.println("ObjectService is " + objectService);
-		System.out.println("DatasetService is " + datasetService);	
-		System.out.println("TextService is " + textService);
-		System.out.println("IOService is " + ioService);
-		System.out.println("DisplayService is " + displayService);
-		System.out.println("ConsoleService is " + consoleService);
-		System.out.println("RenderingService is " + renderingService);
 		histogramGraph = new HistogramGraph(datasetService, renderingService);
 		Dataset dataset = histogramGraph.getDataset();
-		
 		displayService.createDisplay(dataset);
-		
-		
-		
 		
 		updateDisplay();
 	}

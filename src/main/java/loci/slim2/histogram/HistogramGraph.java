@@ -6,6 +6,7 @@
  */
 package loci.slim2.histogram;
 
+import imagej.data.ChannelCollection;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import imagej.data.DrawingTool;
@@ -27,13 +28,19 @@ public class HistogramGraph {
 	private static final String DEFAULT_TITLE = "Histogram";
 	private static final long DEFAULT_WIDTH = 326;
 	private static final long DEFAULT_HEIGHT = 188;
+	private static final ChannelCollection WHITE_CHANNELS = new ChannelCollection(Colors.WHITE);
+	private static final ChannelCollection BLACK_CHANNELS = new ChannelCollection(Colors.BLACK);
+	private static final ChannelCollection GRAY_CHANNELS = new ChannelCollection(Colors.DARKGRAY);
+	private static final double LOG_ONE_FACTOR = Math.log(3) / Math.log(2);
 	private final DatasetService datasetService;
 	private final RenderingService renderingService;
 	private final String title;
 	private final long width;
 	private final long height;
 	private final Dataset dataset;
-	private long[] histogram;
+	private long[] histogram = new long[] { 1, 0, 0, 2, 4, 6, 7, 11, 22, 42, 55, 33, 20, 18, 11, 3, 4, 0 };
+	private boolean logarithmic = true;
+	private boolean distinguishNonZero;
 	
 	public HistogramGraph(DatasetService datasetService, RenderingService renderingService) {
 		this.datasetService = datasetService;
@@ -42,10 +49,20 @@ public class HistogramGraph {
 		width = DEFAULT_WIDTH;
 		height = DEFAULT_HEIGHT;
 		dataset = createDataset();
+		repaint();
 	}
 	
 	public Dataset getDataset() {
 		return dataset;
+	}
+	
+	public void setLogarithmic(boolean logarithmic) {
+		this.logarithmic = logarithmic;
+	}
+	
+	public void setDistinguishNonZero(boolean distinguishNonZero) {
+		this.distinguishNonZero = distinguishNonZero;
+		repaint();
 	}
 	
 	public void updateHistogram(long[] histogram) {
@@ -59,11 +76,81 @@ public class HistogramGraph {
 		int bitsPerPixel = 8;
 		boolean signed = false;
 		boolean floating = false;
-		Dataset dataset = datasetService.create(dims, title, axes, bitsPerPixel, signed, floating);
-		return dataset;
+		return datasetService.create(dims, title, axes, bitsPerPixel, signed, floating);
 	}
 	
 	private void repaint() {
+		DrawingTool tool = new DrawingTool(dataset, renderingService);		
+		int xMargin = 35;
+		int yMargin = 20;
+		int width = 256;
+		int height = 128;		
+		int x, y, x1, y1, x2, y2;
+		int imageWidth = width + 2*xMargin;
+		int imageHeight = height + 3*yMargin;
 		
+		// draw background and frame
+		tool.setChannels(WHITE_CHANNELS);
+		tool.fillRect(0, 0, imageWidth, imageHeight);
+		tool.setChannels(BLACK_CHANNELS);
+		tool.drawRect(xMargin, yMargin, width, height);
+		
+		// draw histogram
+		if (null != histogram) {
+			int[] barHeights = getBarHeights(width, height);
+			
+			// draw bars
+			tool.setChannels(GRAY_CHANNELS);
+			for (int i = 0; i < barHeights.length; ++i) {
+				tool.moveTo(xMargin + i, yMargin + height);
+				tool.lineTo(xMargin + i, yMargin + height - barHeights[i]);
+			}
+		}
+	}
+	
+	private int[] getBarHeights(int width, int height) {
+		int[] barHeights = new int[histogram.length];
+		
+		// find maximum count
+		long maxBinCount = Long.MIN_VALUE;
+		for (long binCount : histogram) {
+			if (binCount > maxBinCount) {
+				maxBinCount = binCount;
+			}
+		}
+
+		// calculate the bar heights
+		if (logarithmic) {
+			int logOneHeight = 0;
+			if (distinguishNonZero) {
+				// calculate a nominal height for log of one; actual the log of
+				//  one is zero.
+				// this is just a hacky way to get some proportionality
+				double logTwoHeight = (height * Math.log(2)) / (Math.log(maxBinCount) + 1);
+				logOneHeight = (int)(LOG_ONE_FACTOR * logTwoHeight);
+			}
+	
+			double logMaxBinCount = Math.log(maxBinCount);
+			for (int i =0; i < histogram.length; ++i) {
+				if (0 == histogram[i]) {
+					barHeights[i] = 0;
+				}
+				else if (1 == histogram[i]) {
+					barHeights[i] = logOneHeight;
+				}
+				else {
+					barHeights[i] = (int)((height - logOneHeight) * Math.log(histogram[i]) / logMaxBinCount) + logOneHeight;
+				}
+			}
+			
+		}
+		else {
+			int extraPixel = distinguishNonZero ? 1 : 0;
+			for (int i =0; i < histogram.length; ++i) {
+				// if selected, make sure values of one show at least a single pixel
+				barHeights[i] = (int)((height - extraPixel) * histogram[i] / maxBinCount) + extraPixel;
+			}	
+		}
+		return barHeights;
 	}
 }

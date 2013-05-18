@@ -120,10 +120,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	
 	@Override
 	public void run() {
-		System.out.println("!!! WTF");
-				System.out.println("!!! commandService is " + commandService);
-		System.out.println("!!! datasetService is " + datasetService);
-
+		
 		FittingContext fittingContext = new FittingContext(); //TODO ARG "Fitting" is not quite right here
 		
 		Dataset dataset = getLifetimeDataset();
