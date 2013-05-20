@@ -100,14 +100,14 @@ public class DataHistogramCommand extends InteractiveCommand {
 	@Parameter(label = "Maximum", persist = false, callback = "minMaxChanged")
 	private double max = Double.NaN;
 
-	@Parameter(callback = "brightnessContrastChanged", persist = false,
-		style = NumberWidget.SCROLL_BAR_STYLE, min = S_MIN, max = S_MAX)
+	//TODO ARG@Parameter(callback = "brightnessContrastChanged", persist = false,
+	//TODO ARG	style = NumberWidget.SCROLL_BAR_STYLE, min = S_MIN, max = S_MAX)
 	private int brightness;
 
-	@Parameter(callback = "brightnessContrastChanged", persist = false,
-		style = NumberWidget.SCROLL_BAR_STYLE, min = S_MIN, max = S_MAX)
+	//TODO ARG@Parameter(callback = "brightnessContrastChanged", persist = false,
+	//TODO ARG	style = NumberWidget.SCROLL_BAR_STYLE, min = S_MIN, max = S_MAX)
 	private int contrast;
-	
+
 	@Parameter(label = "Show full range", persist = true,
 		callback = "rangeChanged")
 	private boolean showFullRange;
@@ -127,26 +127,35 @@ public class DataHistogramCommand extends InteractiveCommand {
 	private double initialMin, initialMax;
 	
 	private /*final*/ HistogramGraph histogramGraph;
+	
+	private volatile boolean running;
 
 	public DataHistogramCommand() {
 		super("view");
+		System.out.println("DataHistogramCommand, view is " + view);
 		logarithmic = false;
 		showSingleCounts = false;
+		running = false;
 	}
 
 	// -- Runnable methods --
 
 	@Override
 	public void run() {
-		if (null == histogramGraph) {
-			histogramGraph = new HistogramGraph(datasetService, renderingService);
-			Dataset dataset = histogramGraph.getDataset();
-			displayService.createDisplay(dataset);
+		if (!running) {
+			running = true;
+			if (null == histogramGraph) {
+				histogramGraph = new HistogramGraph(datasetService, renderingService);
+				Dataset dataset = histogramGraph.getDataset();
+				displayService.createDisplay(dataset);
+			}
+			else {
+				System.out.println("DHC run and histo was not null");
+			}
+			updateDisplay();
+			System.out.println("DONE");
+			running = false;
 		}
-		else {
-			System.out.println("DHC run and histo was not null");
-		}
-		updateDisplay();
 	}
 
 	// -- BrightnessContrast methods --

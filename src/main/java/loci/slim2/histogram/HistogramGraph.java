@@ -30,9 +30,11 @@ public class HistogramGraph {
 	private static final int DEFAULT_HEIGHT = 128;
 	private static final int X_MARGIN = 30;
 	private static final int Y_MARGIN = 20;
+	private static final int FRAME_WIDTH = 1;
+	private static final int FRAME_HEIGHT = 1;
 	private static final ChannelCollection WHITE_CHANNELS = new ChannelCollection(Colors.WHITE);
 	private static final ChannelCollection BLACK_CHANNELS = new ChannelCollection(Colors.BLACK);
-	private static final ChannelCollection GRAY_CHANNELS = new ChannelCollection(Colors.DARKGRAY);
+	private static final ChannelCollection GRAY_CHANNELS = new ChannelCollection(Colors.BLACK); //TODO ARG default contrast shows this as white 5/20/13 Colors.DARKGRAY);
 	private static final double LOG_ONE_FACTOR = Math.log(3) / Math.log(2);
 	private final DatasetService datasetService;
 	private final RenderingService renderingService;
@@ -42,7 +44,7 @@ public class HistogramGraph {
 	private final int totalWidth;
 	private final int totalHeight;
 	private final Dataset dataset;
-	private long[] histogram = new long[] { 1, 0, 0, 2, 4, 6, 7, 11, 22, 42, 55, 33, 20, 18, 11, 3, 4, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1 };
+	private long[] histogram;
 	private boolean logarithmic;
 	private boolean distinguishNonZero;
 
@@ -58,8 +60,8 @@ public class HistogramGraph {
 		title = DEFAULT_TITLE;
 		width = DEFAULT_WIDTH;
 		height = DEFAULT_HEIGHT;
-		totalWidth = width + 2 * X_MARGIN;
-		totalHeight = height + 3 * Y_MARGIN;
+		totalWidth = width + 2 * X_MARGIN + 2 * FRAME_WIDTH;
+		totalHeight = height + 3 * Y_MARGIN + 2 * FRAME_HEIGHT;
 		logarithmic = false;
 		distinguishNonZero = false;
 		dataset = createHistogramDataset();
@@ -133,17 +135,23 @@ public class HistogramGraph {
 		tool.setChannels(WHITE_CHANNELS);
 		tool.fillRect(0, 0, totalWidth, totalHeight);
 		tool.setChannels(BLACK_CHANNELS);
-		tool.drawRect(X_MARGIN, Y_MARGIN, width, height + 1); //TODO ARG fudge factor
+		tool.drawRect(X_MARGIN, Y_MARGIN, width + 2 * FRAME_WIDTH, height + 2 * FRAME_HEIGHT);
+		System.out.println("drawRect " + (X_MARGIN) + " " + (Y_MARGIN) + " " + (width + 2 * FRAME_WIDTH) + " " + (height + 2 * FRAME_HEIGHT));
 		
 		// draw histogram
 		if (null != histogram) {
 			int[] barHeights = getBarHeights(width, height);
 			
+			System.out.println("barHeights " + barHeights[0] + " " + barHeights[1] + " " + barHeights[2] + " " + barHeights[3]);
+			
 			// draw bars
 			tool.setChannels(GRAY_CHANNELS);
 			for (int i = 0; i < barHeights.length; ++i) {
-				tool.moveTo(X_MARGIN + i, Y_MARGIN + height);
-				tool.lineTo(X_MARGIN + i, Y_MARGIN + height - barHeights[i]);
+				if (0 != barHeights[i]) {
+					tool.moveTo(X_MARGIN + FRAME_WIDTH + i, Y_MARGIN + FRAME_HEIGHT + height - 1);
+					tool.lineTo(X_MARGIN + FRAME_WIDTH + i, Y_MARGIN + FRAME_HEIGHT + height - barHeights[i]);
+				}
+				System.out.println("draw at x " + (X_MARGIN + FRAME_WIDTH + i) + "  y " + (Y_MARGIN + FRAME_HEIGHT + height - 1) + " to " + (Y_MARGIN + FRAME_HEIGHT + height - barHeights[i]));
 			}
 		}
 	}
