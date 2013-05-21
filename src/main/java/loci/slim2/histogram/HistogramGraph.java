@@ -136,13 +136,13 @@ public class HistogramGraph {
 		tool.fillRect(0, 0, totalWidth, totalHeight);
 		tool.setChannels(BLACK_CHANNELS);
 		tool.drawRect(X_MARGIN, Y_MARGIN, width + 2 * FRAME_WIDTH, height + 2 * FRAME_HEIGHT);
-		System.out.println("drawRect " + (X_MARGIN) + " " + (Y_MARGIN) + " " + (width + 2 * FRAME_WIDTH) + " " + (height + 2 * FRAME_HEIGHT));
+		//TODO ARG System.out.println("drawRect " + (X_MARGIN) + " " + (Y_MARGIN) + " " + (width + 2 * FRAME_WIDTH) + " " + (height + 2 * FRAME_HEIGHT));
 		
 		// draw histogram
 		if (null != histogram) {
 			int[] barHeights = getBarHeights(width, height);
 			
-			System.out.println("barHeights " + barHeights[0] + " " + barHeights[1] + " " + barHeights[2] + " " + barHeights[3]);
+			//TODO ARG System.out.println("barHeights " + barHeights[0] + " " + barHeights[1] + " " + barHeights[2] + " " + barHeights[3]);
 			
 			// draw bars
 			tool.setChannels(GRAY_CHANNELS);
@@ -151,7 +151,7 @@ public class HistogramGraph {
 					tool.moveTo(X_MARGIN + FRAME_WIDTH + i, Y_MARGIN + FRAME_HEIGHT + height - 1);
 					tool.lineTo(X_MARGIN + FRAME_WIDTH + i, Y_MARGIN + FRAME_HEIGHT + height - barHeights[i]);
 				}
-				System.out.println("draw at x " + (X_MARGIN + FRAME_WIDTH + i) + "  y " + (Y_MARGIN + FRAME_HEIGHT + height - 1) + " to " + (Y_MARGIN + FRAME_HEIGHT + height - barHeights[i]));
+				//TODO ARG System.out.println("draw at x " + (X_MARGIN + FRAME_WIDTH + i) + "  y " + (Y_MARGIN + FRAME_HEIGHT + height - 1) + " to " + (Y_MARGIN + FRAME_HEIGHT + height - barHeights[i]));
 			}
 		}
 	}

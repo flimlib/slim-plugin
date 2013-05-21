@@ -36,9 +36,9 @@
 package loci.slim2.histogram;
 
 import imagej.command.Command;
-import imagej.core.commands.display.interactive.InteractiveCommand;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
+import imagej.data.command.InteractiveImageCommand;
 import imagej.data.display.DatasetView;
 import imagej.menu.MenuConstants;
 import imagej.render.RenderingService;
@@ -47,7 +47,6 @@ import net.imglib2.algorithm.stats.ComputeMinMax;
 import net.imglib2.img.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
-import org.scijava.Context;
 import org.scijava.ItemIO;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
@@ -67,10 +66,10 @@ import org.scijava.plugin.Plugin;
 @Plugin(type = Command.class, menu = {
 	@Menu(label = MenuConstants.ANALYZE_LABEL, weight = MenuConstants.ANALYZE_WEIGHT,
 		mnemonic = MenuConstants.ANALYZE_MNEMONIC),
-	@Menu(label = "Data Histogram...", //accelerator = "control shift C",
+	@Menu(label = "Data Histogram...", accelerator = "control shift C",
 		weight = 0) }, iconPath = "/icons/commands/contrast.png", headless = true, //TODO ARG use 'normal.png' on my Desktop
-	initializer = "initValues")
-public class DataHistogramCommand extends InteractiveCommand {
+		initializer = "initValues")
+public class DataHistogramCommand extends InteractiveImageCommand {
 
 	private static final int SLIDER_MIN = 0;
 	private static final int SLIDER_MAX = 100;
@@ -92,7 +91,7 @@ public class DataHistogramCommand extends InteractiveCommand {
 	private RenderingService renderingService;
 
 	@Parameter(type = ItemIO.BOTH, callback = "viewChanged")
-	private DatasetView view;
+	private DatasetView view; // get "[WARNING] No widget found for input: view"
 
 	@Parameter(label = "Minimum", persist = false, callback = "minMaxChanged")
 	private double min = Double.NaN;
@@ -130,18 +129,19 @@ public class DataHistogramCommand extends InteractiveCommand {
 	
 	private volatile boolean running;
 
-	public DataHistogramCommand() {
+	public DataHistogramCommand() { // sometimes runs, sometimes get java.lang.VerifyError ... Constructor must call super() or this()
 		super("view");
-		System.out.println("DataHistogramCommand, view is " + view);
-		logarithmic = false;
-		showSingleCounts = false;
-		running = false;
+		//System.out.println("DataHistogramCommand, view is " + view);
+		//logarithmic = false;
+		//showSingleCounts = false;
+		//running = false;
 	}
 
 	// -- Runnable methods --
 
 	@Override
 	public void run() {
+		System.out.println("DHG.run, view is " + view);
 		if (!running) {
 			running = true;
 			if (null == histogramGraph) {
