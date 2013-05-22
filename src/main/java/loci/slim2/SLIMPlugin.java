@@ -155,7 +155,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		OutputSetMember index6 = new OutputSetMember<T>("Z", outputIndex, formula3);
 		list.add(index3);		
 		
-		boolean combined = false; //true; // create a stack
+		boolean combined = true; //false; //true; // create a stack
 		DoubleType type = new DoubleType();
 		long[] dimensions = new long[] { 400, 300, 5 }; // x y z
 		AxisType[] axes = new AxisType[3];

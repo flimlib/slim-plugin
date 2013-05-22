@@ -238,7 +238,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 		
 		// pop up a data histogram tool
 		System.out.println("init Z");
-		commandService.run(DataHistogramCommand.class, null);
+		commandService.run(DataHistogramCommand.class);
 	}
 
 	/**

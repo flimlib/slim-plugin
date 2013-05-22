@@ -44,6 +44,8 @@ import imagej.menu.MenuConstants;
 import imagej.render.RenderingService;
 import imagej.widget.NumberWidget;
 import net.imglib2.algorithm.stats.ComputeMinMax;
+import net.imglib2.Binning;
+import net.imglib2.Cursor;
 import net.imglib2.img.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
@@ -67,7 +69,7 @@ import org.scijava.plugin.Plugin;
 	@Menu(label = MenuConstants.ANALYZE_LABEL, weight = MenuConstants.ANALYZE_WEIGHT,
 		mnemonic = MenuConstants.ANALYZE_MNEMONIC),
 	@Menu(label = "Data Histogram...", accelerator = "control shift C",
-		weight = 0) }, iconPath = "/icons/commands/contrast.png", headless = true, //TODO ARG use 'normal.png' on my Desktop
+		weight = 0) }, iconPath = "/icons/commands/contrast.png", headless = true, //TODO ARG use 'normal.png', which is on my Desktop
 		initializer = "initValues")
 public class DataHistogramCommand extends InteractiveImageCommand {
 
@@ -91,7 +93,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	private RenderingService renderingService;
 
 	@Parameter(type = ItemIO.BOTH, callback = "viewChanged")
-	private DatasetView view; // get "[WARNING] No widget found for input: view"
+	private DatasetView view; // get "[WARNING] No widget found for input: view" unless a file has been loaded ahead of time
 
 	@Parameter(label = "Minimum", persist = false, callback = "minMaxChanged")
 	private double min = Double.NaN;
@@ -129,19 +131,20 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	
 	private volatile boolean running;
 
-	public DataHistogramCommand() { // sometimes runs, sometimes get java.lang.VerifyError ... Constructor must call super() or this()
+	public DataHistogramCommand() {
 		super("view");
-		//System.out.println("DataHistogramCommand, view is " + view);
-		//logarithmic = false;
-		//showSingleCounts = false;
-		//running = false;
+		System.out.println("DataHistogramCommand ctor, view is " + view);
+		logarithmic = false;
+		showSingleCounts = false;
+		running = false;
 	}
 
 	// -- Runnable methods --
 
 	@Override
 	public void run() {
-		System.out.println("DHG.run, view is " + view);
+		System.out.println("DataHistogramCommand.run, view is " + view);
+		// 'run' gets called again after every UI change
 		if (!running) {
 			running = true;
 			if (null == histogramGraph) {
@@ -211,14 +214,17 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	/** Called when view changes. Updates everything to match. */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void viewChanged() {
+		System.out.println("view has changed! " + view);
 	//TODO ARG getting a NPE
 		if (null != view) {
 		final Dataset dataset = view.getData();
 		final ImgPlus img = dataset.getImgPlus();
+		updateHistogram(img);
 		computeDataMinMax(img);
 		computeInitialMinMax();
 		if (Double.isNaN(min)) min = initialMin;
 		if (Double.isNaN(max)) max = initialMax;
+		System.out.println("data min " + dataMin + " max " + dataMax + " min " + min + " max " + max);
 		computeBrightnessContrast();
 		}
 	}
@@ -255,6 +261,20 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	}
 
 	// -- Helper methods --
+	
+	private <T extends RealType<T>> void updateHistogram(final ImgPlus<T> img) {
+		long[] histogram = new long[256];
+		Cursor<T> cursor = img.cursor();
+		while (cursor.hasNext()) {
+			cursor.fwd();
+			double value = cursor.get().getRealDouble();
+			if (min <= value && value <= max) {
+				int index = Binning.exclusiveValueToBin(256, min, max, value);
+				++histogram[index];
+			}
+		}
+		histogramGraph.updateHistogram(histogram);
+	}
 
 	private <T extends RealType<T>> void computeDataMinMax(final ImgPlus<T> img) {
 		// FIXME: Reconcile this with DefaultDatasetView.autoscale(int). There is
