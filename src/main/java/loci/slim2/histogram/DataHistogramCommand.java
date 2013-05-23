@@ -214,29 +214,32 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	/** Called when view changes. Updates everything to match. */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void viewChanged() {
-		System.out.println("view has changed! " + view);
+		System.out.print("view has changed! " + view);
+		if (null != view) {
+			System.out.print(" " + view.getData().getName());
+		}
+		System.out.println();
+		
 	//TODO ARG getting a NPE
 		if (null != view) {
-		final Dataset dataset = view.getData();
-		final ImgPlus img = dataset.getImgPlus();
-		updateHistogram(img);
-		computeDataMinMax(img);
-		computeInitialMinMax();
-		if (Double.isNaN(min)) min = initialMin;
-		if (Double.isNaN(max)) max = initialMax;
-		System.out.println("data min " + dataMin + " max " + dataMax + " min " + min + " max " + max);
-		computeBrightnessContrast();
+			final Dataset dataset = view.getData();
+			final ImgPlus img = dataset.getImgPlus();
+			updateHistogram(img);
+			System.out.println("data min " + dataMin + " max " + dataMax + " min " + min + " max " + max);
 		}
 	}
 
+	//TODO ARG having default min/max increments is not ideal; also no upper/lower limits
 	/** Called when min or max changes. Updates brightness and contrast. */
 	protected void minMaxChanged() {
-		computeBrightnessContrast();
-	}
-
-	/** Called when brightness or contrast changes. Updates min and max. */
-	protected void brightnessContrastChanged() {
-		computeMinMax();
+		System.out.println("min max changed " + min + " " + max);
+		if (null != view) {
+			final Dataset dataset = view.getData();
+			final ImgPlus img = dataset.getImgPlus();
+			updateHistogram(img);
+			updateDisplay();
+			// etc?? see above
+		}
 	}
 	
 	/** Called when show full range changes. */
@@ -263,17 +266,38 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	// -- Helper methods --
 	
 	private <T extends RealType<T>> void updateHistogram(final ImgPlus<T> img) {
-		long[] histogram = new long[256];
-		Cursor<T> cursor = img.cursor();
-		while (cursor.hasNext()) {
-			cursor.fwd();
-			double value = cursor.get().getRealDouble();
-			if (min <= value && value <= max) {
-				int index = Binning.exclusiveValueToBin(256, min, max, value);
-				++histogram[index];
+		//TODO ARG use statistics service
+		if (null != histogramGraph) {
+			long[] histogram = new long[256];
+			Cursor<T> cursor = img.cursor();
+			while (cursor.hasNext()) {
+				cursor.fwd();
+				double value = cursor.get().getRealDouble();
+				if (min <= value && value <= max) {
+					int index = Binning.exclusiveValueToBin(256, min, max, value);
+					++histogram[index];
+				}
 			}
+			long maxHistoCount = -1;
+			int maxHistoIndex = 0;
+			for (int i = 0; i < histogram.length; ++i) {
+				if (histogram[i] > maxHistoCount) {
+					maxHistoCount = histogram[i];
+					maxHistoIndex = i;
+				}
+			}
+			boolean allZero = true;
+			for (int i = 0; i < histogram.length; ++i) {
+				if (i != maxHistoIndex) {
+					if (histogram[i] != 0) {
+						System.out.println("count at " + i + " is " + histogram[i]);
+						allZero = false;
+					}
+				}
+			}
+			System.out.println(" max is " + maxHistoCount + " at index " + maxHistoIndex + " " + (allZero ? " rest all zeros " : " rest not all zeros"));
+			histogramGraph.updateHistogram(histogram);
 		}
-		histogramGraph.updateHistogram(histogram);
 	}
 
 	private <T extends RealType<T>> void computeDataMinMax(final ImgPlus<T> img) {
@@ -299,7 +323,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	}
 
 	/** Computes min and max from brightness and contrast. */
-	private void computeMinMax() {
+	private void computeMinMaxX() {
 		// normalize brightness and contrast to [0, 1]
 		final double bUnit =
 			(double) (brightness - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
@@ -328,7 +352,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	}
 
 	/** Computes brightness and contrast from min and max. */
-	private void computeBrightnessContrast() {
+	private void computeBrightnessContrastX() {
 		// normalize min and max to [0, 1]
 		final double minUnit = (min - dataMin) / (dataMax - dataMin);
 		final double maxUnit = (max - dataMin) / (dataMax - dataMin);
@@ -359,6 +383,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 
 	/** Updates the displayed min/max range to match min and max values. */
 	private void updateDisplay() {
+		System.out.println("updateDisplay min " + min + " max " + max);
 		view.setChannelRanges(min, max);
 		view.getProjector().map();
 		view.update();

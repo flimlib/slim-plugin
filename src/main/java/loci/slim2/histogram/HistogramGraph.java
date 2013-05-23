@@ -44,7 +44,7 @@ public class HistogramGraph {
 	private final int totalWidth;
 	private final int totalHeight;
 	private final Dataset dataset;
-	private long[] histogram;
+	private long[] histogram = new long[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 	private boolean logarithmic;
 	private boolean distinguishNonZero;
 
@@ -106,6 +106,18 @@ public class HistogramGraph {
 	//TODO ARG histogram could just be live
 	//TODO ARG still need a way to swap active image
 	public void updateHistogram(long[] histogram) {
+		int nonZeros = 0;
+		for (int i = 0; i < histogram.length; ++i) {
+			if (histogram[i] != 0) {
+				++nonZeros;
+			}
+		}
+		if (nonZeros > 0) {
+			System.out.println(" " + nonZeros + " non-zeros");
+			if (nonZeros > 100) {
+				histogram = new long[] { 1, 3, 4, 5, 6, 7, 8, 456, 456, 456, 43, 345, 34, 344, 0 };
+			}
+		}
 		this.histogram = histogram;
 		repaint();
 	}
@@ -142,8 +154,6 @@ public class HistogramGraph {
 		if (null != histogram) {
 			int[] barHeights = getBarHeights(width, height);
 			
-			//TODO ARG System.out.println("barHeights " + barHeights[0] + " " + barHeights[1] + " " + barHeights[2] + " " + barHeights[3]);
-			
 			// draw bars
 			tool.setChannels(GRAY_CHANNELS);
 			for (int i = 0; i < barHeights.length; ++i) {
@@ -151,7 +161,6 @@ public class HistogramGraph {
 					tool.moveTo(X_MARGIN + FRAME_WIDTH + i, Y_MARGIN + FRAME_HEIGHT + height - 1);
 					tool.lineTo(X_MARGIN + FRAME_WIDTH + i, Y_MARGIN + FRAME_HEIGHT + height - barHeights[i]);
 				}
-				//TODO ARG System.out.println("draw at x " + (X_MARGIN + FRAME_WIDTH + i) + "  y " + (Y_MARGIN + FRAME_HEIGHT + height - 1) + " to " + (Y_MARGIN + FRAME_HEIGHT + height - barHeights[i]));
 			}
 		}
 	}
@@ -175,37 +184,45 @@ public class HistogramGraph {
 			}
 		}
 
-		// calculate the bar heights
-		if (logarithmic) {
-			int logOneHeight = 0;
-			if (distinguishNonZero) {
-				// calculate a nominal height for log of one; actual the log of
-				//  one is zero.
-				// this is just a hacky way to get some proportionality
-				double logTwoHeight = (height * Math.log(2)) / (Math.log(maxBinCount) + 1);
-				logOneHeight = (int)(LOG_ONE_FACTOR * logTwoHeight);
+		if (0 == maxBinCount) {
+			// all bins are zeros
+			for (int i = 0; i < barHeights.length; ++i) {
+				barHeights[i] = 0;
 			}
-	
-			double logMaxBinCount = Math.log(maxBinCount);
-			for (int i =0; i < histogram.length; ++i) {
-				if (0 == histogram[i]) {
-					barHeights[i] = 0;
-				}
-				else if (1 == histogram[i]) {
-					barHeights[i] = logOneHeight;
-				}
-				else {
-					barHeights[i] = (int)((height - logOneHeight) * Math.log(histogram[i]) / logMaxBinCount) + logOneHeight;
-				}
-			}
-			
 		}
 		else {
-			int extraPixel = distinguishNonZero ? 1 : 0;
-			for (int i =0; i < histogram.length; ++i) {
-				// if selected, make sure values of one show at least a single pixel
-				barHeights[i] = (int)((height - extraPixel) * histogram[i] / maxBinCount) + extraPixel;
-			}	
+			// calculate the bar heights
+			if (logarithmic) {
+				int logOneHeight = 0;
+				if (distinguishNonZero) {
+					// calculate a nominal height for log of one; actually the log of
+					//  one is zero.
+					// this is just a hacky way to get some proportionality
+					double logTwoHeight = (height * Math.log(2)) / (Math.log(maxBinCount) + 1);
+					logOneHeight = (int)(LOG_ONE_FACTOR * logTwoHeight);
+				}
+
+				double logMaxBinCount = Math.log(maxBinCount);
+				for (int i =0; i < histogram.length; ++i) {
+					if (0 == histogram[i]) {
+						barHeights[i] = 0;
+					}
+					else if (1 == histogram[i]) {
+						barHeights[i] = logOneHeight;
+					}
+					else {
+						barHeights[i] = (int)((height - logOneHeight) * Math.log(histogram[i]) / logMaxBinCount) + logOneHeight;
+					}
+				}
+
+			}
+			else {
+				int extraPixel = distinguishNonZero ? 1 : 0;
+				for (int i =0; i < histogram.length; ++i) {
+					// if option selected, make sure values of one show at least a single pixel
+					barHeights[i] = (int)((height - extraPixel) * histogram[i] / maxBinCount) + extraPixel;
+				}	
+			}
 		}
 		return barHeights;
 	}
