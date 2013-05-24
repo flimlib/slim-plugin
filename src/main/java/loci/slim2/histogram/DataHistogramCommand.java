@@ -47,6 +47,7 @@ import net.imglib2.algorithm.stats.ComputeMinMax;
 import net.imglib2.Binning;
 import net.imglib2.Cursor;
 import net.imglib2.img.ImgPlus;
+import net.imglib2.meta.Axes;
 import net.imglib2.type.numeric.RealType;
 
 import org.scijava.ItemIO;
@@ -72,19 +73,6 @@ import org.scijava.plugin.Plugin;
 		weight = 0) }, iconPath = "/icons/commands/contrast.png", headless = true, //TODO ARG use 'normal.png', which is on my Desktop
 		initializer = "initValues")
 public class DataHistogramCommand extends InteractiveImageCommand {
-
-	private static final int SLIDER_MIN = 0;
-	private static final int SLIDER_MAX = 100;
-
-	private static final String S_MIN = "" + SLIDER_MIN;
-	private static final String S_MAX = "" + SLIDER_MAX;
-
-	/**
-	 * The exponential power used for computing contrast. The greater this number,
-	 * the steeper the slope will be at maximum contrast, and flatter it will be
-	 * at minimum contrast.
-	 */
-	private static final int MAX_POWER = 4;
 		
 	@Parameter
 	private DatasetService datasetService;	
@@ -129,6 +117,8 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	
 	private /*final*/ HistogramGraph histogramGraph;
 	
+	private DatasetView saveView;
+	
 	private volatile boolean running;
 
 	public DataHistogramCommand() {
@@ -137,6 +127,9 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		logarithmic = false;
 		showSingleCounts = false;
 		running = false;
+		//TODO ARG
+		min = 0;
+		max = 1;
 	}
 
 	// -- Runnable methods --
@@ -144,7 +137,8 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	@Override
 	public void run() {
 		System.out.println("DataHistogramCommand.run, view is " + view);
-		// 'run' gets called again after every UI change
+		// 'run' gets called again after every UI change.  This plugin stays
+		//   active all the time.
 		if (!running) {
 			running = true;
 			if (null == histogramGraph) {
@@ -169,6 +163,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 
 	public void setView(final DatasetView view) {
 		this.view = view;
+		saveView = view;
 	}
 
 	public double getMinimum() {
@@ -206,7 +201,9 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	// -- Initializers --
 
 	protected void initValues() {
-		viewChanged();
+		if (null != view) {
+			viewChanged();
+		}
 	}
 
 	// -- Callback methods --
@@ -214,18 +211,35 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	/** Called when view changes. Updates everything to match. */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void viewChanged() {
-		System.out.print("view has changed! " + view);
-		if (null != view) {
-			System.out.print(" " + view.getData().getName());
-		}
-		System.out.println();
-		
-	//TODO ARG getting a NPE
-		if (null != view) {
+		// did view really change?
+		if (saveView == null || view != saveView) {
+			saveView = view;
+			System.out.println("new view " + view);
+			
 			final Dataset dataset = view.getData();
 			final ImgPlus img = dataset.getImgPlus();
+			System.out.println("Dataset is " + dataset.getName());
+			System.out.println("ImgPlus is " + img.getName());
+			
+			//TODO ARG just autorange it for now
+			computeDataMinMax(img);
+			min = dataMin;
+			max = dataMax;
+			System.out.println("viewChanged, autorange min/max to " + min + " " + max);
+			
+			System.out.println("updateHistogram from viewChanged");
 			updateHistogram(img);
+
+			long[] dims = dataset.getDims();
+			long channels = 1;
+			if (dims.length > Axes.CHANNEL.ordinal()) {
+				channels = dims[Axes.CHANNEL.ordinal()];
+			}
+			for (int c = 0; c < channels; ++c) {
+				System.out.println("channel " + c + " min " + dataset.getChannelMinimum(c) + " max " + dataset.getChannelMaximum(c));
+			}
 			System.out.println("data min " + dataMin + " max " + dataMax + " min " + min + " max " + max);
+			updateDisplay();
 		}
 	}
 
@@ -236,6 +250,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		if (null != view) {
 			final Dataset dataset = view.getData();
 			final ImgPlus img = dataset.getImgPlus();
+			System.out.println("updateHistogram from minMaxChanged");
 			updateHistogram(img);
 			updateDisplay();
 			// etc?? see above
@@ -266,6 +281,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	// -- Helper methods --
 	
 	private <T extends RealType<T>> void updateHistogram(final ImgPlus<T> img) {
+		System.out.println("in updateHistogram and min max are " + min + " " + max);
 		//TODO ARG use statistics service
 		if (null != histogramGraph) {
 			long[] histogram = new long[256];
@@ -273,8 +289,9 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 			while (cursor.hasNext()) {
 				cursor.fwd();
 				double value = cursor.get().getRealDouble();
-				if (min <= value && value <= max) {
-					int index = Binning.exclusiveValueToBin(256, min, max, value);
+				// 'exclusive' means don't count values outside the min/max range
+				int index = Binning.exclusiveValueToBin(256, min, max, value);
+				if (index >= 0 && index < histogram.length) {
 					++histogram[index];
 				}
 			}
@@ -289,7 +306,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 			boolean allZero = true;
 			for (int i = 0; i < histogram.length; ++i) {
 				if (i != maxHistoIndex) {
-					if (histogram[i] != 0) {
+					if (i == 0 || histogram[i] != 0) {
 						System.out.println("count at " + i + " is " + histogram[i]);
 						allZero = false;
 					}
@@ -307,6 +324,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		// the metadata, and if they aren't there, then compute them. Probably
 		// Dataset (not DatasetView) is a good place for it, because it is metadata
 		// independent of the visualization settings.
+		//TODO ARG we need 2 versions of min/max: one for the entire channel, one for current plane of channel
 		final ComputeMinMax<T> computeMinMax = new ComputeMinMax<T>(img);
 		computeMinMax.process();
 		dataMin = computeMinMax.getMin().getRealDouble();
@@ -320,65 +338,6 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		initialMax = view.getChannelMax(0);
 		log.debug("computeInitialMinMax: initialMin=" + initialMin +
 			", initialMax=" + initialMax);
-	}
-
-	/** Computes min and max from brightness and contrast. */
-	private void computeMinMaxX() {
-		// normalize brightness and contrast to [0, 1]
-		final double bUnit =
-			(double) (brightness - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
-		final double cUnit =
-			(double) (contrast - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
-
-		// convert brightness to offset [-1, 1]
-		final double b = 2 * bUnit - 1;
-
-		// convert contrast to slope [e^-n, e^n]
-		final double m = Math.exp(2 * MAX_POWER * cUnit - MAX_POWER);
-
-		// y = m*x + b
-		// minUnit is x at y=0
-		// maxUnit is x at y=1
-		final double minUnit = -b / m;
-		final double maxUnit = (1 - b) / m;
-
-		// convert unit min/max to actual min/max
-		min = (dataMax - dataMin) * minUnit + dataMin;
-		max = (dataMax - dataMin) * maxUnit + dataMin;
-
-		log.debug("computeMinMax: bUnit=" + bUnit + ", cUnit=" + cUnit + ", b=" + b +
-			", m=" + m + ", minUnit=" + minUnit + ", maxUnit=" + maxUnit + ", min=" +
-			min + ", max=" + max);
-	}
-
-	/** Computes brightness and contrast from min and max. */
-	private void computeBrightnessContrastX() {
-		// normalize min and max to [0, 1]
-		final double minUnit = (min - dataMin) / (dataMax - dataMin);
-		final double maxUnit = (max - dataMin) / (dataMax - dataMin);
-
-		// y = m*x + b
-		// minUnit is x at y=0
-		// maxUnit is x at y=1
-		// b = y - m*x = -m * minUnit = 1 - m * maxUnit
-		// m * maxUnit - m * minUnit = 1
-		// m = 1 / (maxUnit - minUnit)
-		final double m = 1 / (maxUnit - minUnit);
-		final double b = -m * minUnit;
-
-		// convert offset to normalized brightness
-		final double bUnit = (b + 1) / 2;
-
-		// convert slope to normalized contrast
-		final double cUnit = (Math.log(m) + MAX_POWER) / (2 * MAX_POWER);
-
-		// convert unit brightness/contrast to actual brightness/contrast
-		brightness = (int) ((SLIDER_MAX - SLIDER_MIN) * bUnit + SLIDER_MIN + 0.5);
-		contrast = (int) ((SLIDER_MAX - SLIDER_MIN) * cUnit + SLIDER_MIN + 0.5);
-
-		log.debug("computeBrightnessContrast: minUnit=" + minUnit + ", maxUnit=" +
-			maxUnit + ", m=" + m + ", b=" + b + ", bUnit=" + bUnit + ", cUnit=" +
-			cUnit + ", brightness=" + brightness + ", contrast=" + contrast);
 	}
 
 	/** Updates the displayed min/max range to match min and max values. */
