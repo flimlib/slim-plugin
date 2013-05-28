@@ -113,11 +113,12 @@ public class HistogramGraph {
 			}
 		}
 		if (nonZeros > 0) {
-			System.out.println(" " + nonZeros + " non-zeros");
-			if (nonZeros > 100) {
-				histogram = new long[] { 1, 3, 4, 5, 6, 7, 8, 456, 456, 456, 43, 345, 34, 344, 0 };
+			System.out.println("updateHistogram " + nonZeros + " non-zeros");
+			if (nonZeros < 10) {
+				histogram = new long[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
 			}
 		}
+		else System.out.println("updateHistogram: all zeroes");
 		this.histogram = histogram;
 		repaint();
 	}
@@ -163,6 +164,10 @@ public class HistogramGraph {
 				}
 			}
 		}
+		dataset.setDirty(true);
+		dataset.update();
+		//TODO ARG forces the update:
+		dataset.setImgPlus(dataset.getImgPlus());
 	}
 
 	/**
