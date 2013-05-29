@@ -1,37 +1,32 @@
 /*
- * #%L
- * ImageJ software for multidimensional image processing and analysis.
- * %%
- * Copyright (C) 2009 - 2013 Board of Regents of the University of
- * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
- * Institute of Molecular Cell Biology and Genetics.
- * %%
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * 
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of any organization.
- * #L%
- */
+SLIMPlugin for combined spectral-lifetime image analysis.
+
+Copyright (c) 2010-2013, UW-Madison LOCI
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    * Neither the name of the UW-Madison LOCI nor the
+      names of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
 
 package loci.slim2.histogram;
 
@@ -42,7 +37,6 @@ import imagej.data.command.InteractiveImageCommand;
 import imagej.data.display.DatasetView;
 import imagej.menu.MenuConstants;
 import imagej.render.RenderingService;
-import imagej.widget.NumberWidget;
 import net.imglib2.algorithm.stats.ComputeMinMax;
 import net.imglib2.Binning;
 import net.imglib2.Cursor;
@@ -89,14 +83,6 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	@Parameter(label = "Maximum", persist = false, callback = "minMaxChanged")
 	private double max = Double.NaN;
 
-	//TODO ARG@Parameter(callback = "brightnessContrastChanged", persist = false,
-	//TODO ARG	style = NumberWidget.SCROLL_BAR_STYLE, min = S_MIN, max = S_MAX)
-	private int brightness;
-
-	//TODO ARG@Parameter(callback = "brightnessContrastChanged", persist = false,
-	//TODO ARG	style = NumberWidget.SCROLL_BAR_STYLE, min = S_MIN, max = S_MAX)
-	private int contrast;
-
 	@Parameter(label = "Show full range", persist = true,
 		callback = "rangeChanged")
 	private boolean showFullRange;
@@ -115,7 +101,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	/** The initial minimum and maximum values of the data view. */
 	private double initialMin, initialMax;
 	
-	private /*final*/ HistogramGraph histogramGraph;
+	private HistogramGraph histogramGraph;
 	
 	private DatasetView saveView;
 	
@@ -127,9 +113,6 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		logarithmic = false;
 		showSingleCounts = false;
 		running = false;
-		//TODO ARG
-		min = 0;
-		max = 1;
 	}
 
 	// -- Runnable methods --
@@ -137,8 +120,9 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	@Override
 	public void run() {
 		System.out.println("DataHistogramCommand.run, view is " + view);
-		// 'run' gets called again after every UI change.  This plugin stays
-		//   active all the time.
+		//TODO ARG
+		// 'run' gets called again after every UI change.  This plugin should
+		// stay active all the time.
 		if (!running) {
 			running = true;
 			if (null == histogramGraph) {
@@ -155,7 +139,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		}
 	}
 
-	// -- BrightnessContrast methods --
+	// -- DataHistogramCommand methods --
 
 	public DatasetView getView() {
 		return view;
@@ -182,22 +166,6 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		this.max = max;
 	}
 
-	public int getBrightness() {
-		return brightness;
-	}
-
-	public void setBrightness(final int brightness) {
-		this.brightness = brightness;
-	}
-
-	public int getContrast() {
-		return contrast;
-	}
-
-	public void setContrast(final int contrast) {
-		this.contrast = contrast;
-	}
-
 	// -- Initializers --
 
 	protected void initValues() {
@@ -211,6 +179,13 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	/** Called when view changes. Updates everything to match. */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void viewChanged() {
+		// ignore clicks on the histogram graph itself
+		if (null != view && null != histogramGraph && view.getData() == histogramGraph.getDataset()) {
+			// restore previous view
+			view = saveView;
+			return;
+		}
+		
 		// did view really change?
 		if (saveView == null || view != saveView) {
 			saveView = view;
@@ -218,16 +193,12 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 			
 			final Dataset dataset = view.getData();
 			final ImgPlus img = dataset.getImgPlus();
-			System.out.println("Dataset is " + dataset.getName());
-			System.out.println("ImgPlus is " + img.getName());
 			
 			//TODO ARG just autorange it for now
 			computeDataMinMax(img);
 			min = dataMin;
 			max = dataMax;
-			System.out.println("viewChanged, autorange min/max to " + min + " " + max);
 			
-			System.out.println("updateHistogram from viewChanged");
 			updateHistogram(img);
 
 			long[] dims = dataset.getDims();
@@ -243,17 +214,16 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		}
 	}
 
-	//TODO ARG having default min/max increments is not ideal; also no upper/lower limits
+	//TODO ARG having default min/max increments is not ideal for all min/max values; also no upper/lower limits on values
 	/** Called when min or max changes. Updates brightness and contrast. */
 	protected void minMaxChanged() {
 		System.out.println("min max changed " + min + " " + max);
 		if (null != view) {
 			final Dataset dataset = view.getData();
 			final ImgPlus img = dataset.getImgPlus();
-			System.out.println("updateHistogram from minMaxChanged");
 			updateHistogram(img);
 			updateDisplay();
-			// etc?? see above
+			//TODO ARG etc?? see above
 		}
 	}
 	
@@ -275,6 +245,12 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		System.out.println("SINGLE PIXEL CHANGED " + showSingleCounts);
 		if (null != histogramGraph) {
 			histogramGraph.setDistinguishNonZero(showSingleCounts);
+			long[] histogram = histogramGraph.getHistogram();
+			int i = 0;
+			for (long h : histogram) {
+				System.out.print(" " + h);
+				if (i++ % 10 == 0) System.out.println();
+			}
 		}
 	}
 
@@ -297,24 +273,6 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 					}
 				}
 			}
-			long maxHistoCount = -1;
-			int maxHistoIndex = 0;
-			for (int i = 0; i < histogram.length; ++i) {
-				if (histogram[i] > maxHistoCount) {
-					maxHistoCount = histogram[i];
-					maxHistoIndex = i;
-				}
-			}
-			boolean allZero = true;
-			for (int i = 0; i < histogram.length; ++i) {
-				if (i != maxHistoIndex) {
-					if (i == 0 || histogram[i] != 0) {
-						System.out.println("count at " + i + " is " + histogram[i]);
-						allZero = false;
-					}
-				}
-			}
-			System.out.println(" max is " + maxHistoCount + " at index " + maxHistoIndex + " " + (allZero ? " rest all zeros " : " rest not all zeros"));
 			histogramGraph.updateHistogram(histogram);
 		}
 	}
@@ -326,20 +284,12 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		// the metadata, and if they aren't there, then compute them. Probably
 		// Dataset (not DatasetView) is a good place for it, because it is metadata
 		// independent of the visualization settings.
-		//TODO ARG we need 2 versions of min/max: one for the entire channel, one for current plane of channel
+		//TODO ARG we need 2 versions/options of min/max: one for the entire channel, one for current plane of channel
 		final ComputeMinMax<T> computeMinMax = new ComputeMinMax<T>(img);
 		computeMinMax.process();
 		dataMin = computeMinMax.getMin().getRealDouble();
 		dataMax = computeMinMax.getMax().getRealDouble();
 		log.debug("computeDataMinMax: dataMin=" + dataMin + ", dataMax=" + dataMax);
-	}
-
-	private void computeInitialMinMax() {
-		// use only first channel, for now
-		initialMin = view.getChannelMin(0);
-		initialMax = view.getChannelMax(0);
-		log.debug("computeInitialMinMax: initialMin=" + initialMin +
-			", initialMax=" + initialMax);
 	}
 
 	/** Updates the displayed min/max range to match min and max values. */
