@@ -106,19 +106,6 @@ public class HistogramGraph {
 	//TODO ARG histogram could just be live
 	//TODO ARG still need a way to swap active image
 	public void updateHistogram(long[] histogram) {
-		int nonZeros = 0;
-		for (int i = 0; i < histogram.length; ++i) {
-			if (histogram[i] != 0) {
-				++nonZeros;
-			}
-		}
-		if (nonZeros > 0) {
-			System.out.println("updateHistogram " + nonZeros + " non-zeros");
-			if (nonZeros < 10) {
-				histogram = new long[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 };
-			}
-		}
-		else System.out.println("updateHistogram: all zeroes");
 		this.histogram = histogram;
 		repaint();
 	}

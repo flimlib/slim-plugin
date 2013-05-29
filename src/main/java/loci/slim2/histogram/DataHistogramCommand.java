@@ -289,10 +289,12 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 			while (cursor.hasNext()) {
 				cursor.fwd();
 				double value = cursor.get().getRealDouble();
-				// 'exclusive' means don't count values outside the min/max range
-				int index = Binning.exclusiveValueToBin(256, min, max, value);
-				if (index >= 0 && index < histogram.length) {
-					++histogram[index];
+				if (!Double.isNaN(value)) {
+					// 'exclusive' means don't count values outside the min/max range
+					int index = Binning.exclusiveValueToBin(256, min, max, value);
+					if (index >= 0 && index < histogram.length) {
+						++histogram[index];
+					}
 				}
 			}
 			long maxHistoCount = -1;

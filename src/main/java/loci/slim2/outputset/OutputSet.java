@@ -221,6 +221,11 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 				// create separate dataset for index
 				String subName = index.getLabel() + " " + name;
 				Dataset dataset = datasetService.create(type, dimensions, subName, axes);
+				Cursor<? extends RealType> cursor = dataset.getImgPlus().cursor();
+				while (cursor.hasNext()) {
+					cursor.fwd();
+					cursor.get().setReal(Double.NaN);
+				}
 				list.add(dataset);
 				index.setRandomAccess(dataset.getImgPlus().randomAccess());
 			}
