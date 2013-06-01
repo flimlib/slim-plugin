@@ -232,9 +232,10 @@ public class LifetimeDatasetWrapper {
 	}
 
 	/**
-	 * Gets summed decay histogram at given location.
+	 * Gets summed decay histogram at given location, with binning.
 	 * 
 	 * @param position
+	 * @param bins for binning
 	 * @return 
 	 */
 	public int getSummedDecay(long[] position, int bins) {

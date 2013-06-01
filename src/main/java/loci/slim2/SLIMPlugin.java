@@ -43,9 +43,18 @@ import imagej.display.DisplayService;
 import imagej.io.IOService;
 import imagej.tool.Tool;
 import imagej.tool.ToolService;
+import imagej.ui.DialogPrompt;
+import imagej.ui.UIService;
+import java.io.File;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.prefs.Preferences;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import loci.slim.SLIMProcessor;
 
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
@@ -55,6 +64,11 @@ import loci.slim2.outputset.OutputSetMember;
 import loci.slim2.outputset.temp.ChunkyPixel;
 import loci.slim2.outputset.temp.ChunkyPixelIterator;
 import loci.slim2.outputset.temp.RampGenerator;
+import loci.slim2.process.BatchProcessor;
+import loci.slim2.process.FitSettings;
+import loci.slim2.process.InteractiveProcessor;
+import loci.slim2.process.batch.DefaultBatchProcessor;
+import loci.slim2.process.interactive.DefaultInteractiveProcessor;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import net.imglib2.type.NativeType;
@@ -71,9 +85,14 @@ import org.scijava.plugin.Plugin;
  */
 @Plugin(type = Command.class, menuPath = "Analyze>Lifetime>Spectral Lifetime Analysis (IJ2)") //TODO ARG rename w/o IJ2
 public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Command {
+	private static final String PATH_KEY = "path";
 	private static final String LIFETIME = "Lifetime";
-	private LifetimeDatasetWrapper lifetimeDatasetWrapper;
-	private LifetimeGrayscaleDataset lifetimeGrayscaleDataset;
+	private static final String SDT_SUFFIX = ".sdt";
+	private static final String ICS_SUFFIX = ".ics";
+	private InteractiveProcessor interactiveProcessor;
+	//TODOprivate Map<Dataset, List<FittingContext>> map = new HashMap<Dataset, List<FittingContext>>();
+	private Dataset activeDataset;
+	private volatile boolean quit = false;
 	
 	@Parameter
 	private CommandService commandService;
@@ -90,37 +109,199 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	@Parameter
 	private ToolService toolService;
 	
-	@Parameter(min = "0")
-	private int bins = 0;
+	@Parameter
+	private UIService uiService;
 	
 	@Override
 	public void run() {
 		System.out.println("SLIMPlugin.run " + this);
-		
-		FittingContext fittingContext = new FittingContext(); //TODO ARG "Fitting" is not quite right here
-		
-		Dataset dataset = getLifetimeDataset();
-		if (null != dataset) {
-			// wrap the dataset for lifetime information
-			lifetimeDatasetWrapper = new LifetimeDatasetWrapper(dataset);
-			fittingContext.setDatasetWrapper(lifetimeDatasetWrapper);
-			
-			// make a grayscale version of lifetime dataset
-			lifetimeGrayscaleDataset = new LifetimeGrayscaleDataset(datasetService, lifetimeDatasetWrapper, bins);
-			fittingContext.setGrayscaleDataset(lifetimeGrayscaleDataset);
 
-			// display grayscale version
-			Display<?> display = displayService.createDisplay(lifetimeGrayscaleDataset.getDataset());
-			//TODO ARG how to draw overlays on top of this display???
-			fittingContext.setGrayscaleDisplay(display);
-		}
-
-		// allow clicking on the grayscale version
+		// allow clicking on the grayscale version during this session
 		showTool();
+
+		// special case first time through
+		boolean firstTime = true;
+		do {
+			// new lifetime dataset
+			Dataset dataset = null;
+			
+			if (firstTime) {
+				// look for an already open LT image
+				dataset = getLifetimeDataset();	
+			}
+
+			// none found?
+			if (null == dataset) {
+				// prompt for dataset
+                File[] files = showFileDialog(getPathFromPreferences());
+				if (null == files) {
+					// dialog cancelled
+					if (null == activeDataset) {
+						// cancel the whole plugin
+						quit = true;
+					}
+					else {
+						// reload previous
+						dataset = activeDataset;
+					}
+				}
+				else {
+					// save source directory for next time
+					savePathInPreferences(files[0].getParent());
+
+					if (files.length > 1) {
+						if (null != interactiveProcessor) {
+							// do some batch processing
+							final BatchProcessor batchProcessor = new DefaultBatchProcessor();
+							batchProcessor.process(files, interactiveProcessor.getFitSettings());
+						}
+						else {
+							// error; no settings available yet
+							showWarning("Manually process a single image before doing batch processing.");
+						}
+						
+						// reload previous
+						dataset = activeDataset;
+					}
+					else {
+						// load the dataset
+						try {
+							dataset = ioService.loadDataset(files[0].getAbsolutePath());
+						}
+						catch (Exception e) {
+							showError("Problem loading file '" + files[0].getAbsolutePath() + "' " + e.getMessage());
+						}
+					}
+				}
+			}
+			
+			if (null != dataset) {
+				// keep track of current dataset
+				activeDataset = dataset;
+
+				// create processor first time through
+				if (null == interactiveProcessor) {
+					interactiveProcessor = new DefaultInteractiveProcessor(datasetService, displayService);
+				}
+				
+				// gives up control to load a new dataset or when done
+				quit = interactiveProcessor.process(dataset);
+			}
+			
+			// one shot
+			firstTime = false;
+		}
+		while (!quit);
+
+		/*
+		 * System.out.println("BEGIN TEST>>>>>>");
+		test();
+		System.out.println("<<<<<<<END TEST");
+		* */
+
+		// done clicking on the grayscale version
+		hideTool();
+	}
+
+	/**
+	 * Throws up a warning message dialog.
+	 *
+	 * @param message
+	 */
+	private void showWarning(String message) {
+		uiService.showDialog(message, DialogPrompt.MessageType.WARNING_MESSAGE);
+	}
+
+	/**
+	 * Throws up an error message dialog.
+	 * 
+	 * @param message 
+	 */
+	private void showError(String message) {
+		uiService.showDialog(message, DialogPrompt.MessageType.ERROR_MESSAGE);
+	}
+	
+    /**
+     * Restores path name from Java Preferences.
+     *
+     * @return String with path name
+     */
+    private String getPathFromPreferences() {
+       Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+       return prefs.get(PATH_KEY, "");
+    }
+
+    /**
+     * Saves the path name to Java Preferences.
+     *
+     * @param path
+     */
+    private void savePathInPreferences(String path) {
+        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+        prefs.put(PATH_KEY, path);
+    }
+	
+    /**
+     * Prompts for a FLIM file.
+     *
+     * @param default path
+     * @return null or array of Files
+     */
+    private File[] showFileDialog(String defaultPath) {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(new File(defaultPath));
+		chooser.setDialogTitle("Open Lifetime Image(s)");
+		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		chooser.setMultiSelectionEnabled(true);
+		chooser.setFileFilter(new ShowFileDialogFilter());
+
+		if (chooser.showOpenDialog(ij.ImageJ.getFrames()[0]) == JFileChooser.APPROVE_OPTION) {
+			File[] files = chooser.getSelectedFiles();
+			List<File> fileList = new ArrayList<File>();
+			for (File file : files) {
+				if (file.isDirectory()) {
+					for (File f : file.listFiles()) {
+						if (f.getName().endsWith(ICS_SUFFIX)
+								|| f.getName().endsWith(SDT_SUFFIX))
+						{
+							fileList.add(f);
+						}
+					}
+				}
+				else {
+					fileList.add(file);
+				}
+			}
+			return fileList.toArray(new File[fileList.size()]);
+		}
+		// no files selected
+		return null;
+    }
+	
+	private class ShowFileDialogFilter extends FileFilter {
+		private static final String DESCRIPTION = "Lifetime .ics & .sdt";
 		
-		// if a LT image is displayed, use it
-		// else prompt for image.
+        @Override		
+		public boolean accept(File file) {
+			if (file.getName().endsWith(ICS_SUFFIX)) {
+				return true;
+			}
+		    if (file.getName().endsWith(SDT_SUFFIX)) {
+				return true;
+			}
+			if (file.isDirectory()) {
+				return true;
+			}
+			return false;
+		}
 		
+		@Override
+		public String getDescription() {
+			return DESCRIPTION;
+		}
+	}
+
+	private void test() {
 		//TODO experimental
 		List<OutputSetMember> list = new ArrayList<OutputSetMember>();
 		int inputIndex;
@@ -157,13 +338,14 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		list.add(index3);		
 		
 		boolean combined = false; //true; // create a stack
+		boolean useChannelDimension = false;
 		DoubleType type = new DoubleType();
 		long[] dimensions = new long[] { 400, 300, 5 }; // x y z
 		AxisType[] axes = new AxisType[3];
 		axes[0] = Axes.X;
 		axes[1] = Axes.Y;
 		axes[2] = Axes.Z;
-		OutputSet imageSet = new OutputSet(commandService, datasetService, combined, type, dimensions, "Test", axes, list);
+		OutputSet imageSet = new OutputSet(commandService, datasetService, combined, useChannelDimension, type, dimensions, "Test", axes, list);
 		
 		List<Dataset> datasetList = imageSet.getDatasets();
 		Display display = null;
@@ -179,7 +361,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		combined = !combined; // try the other variant also (stack vs separate images)
 		System.out.println("!!! commandService is " + commandService);
 		System.out.println("!!! datasetService is " + datasetService);
-		OutputSet imageSet2 = new OutputSet(commandService, datasetService, combined, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
+		OutputSet imageSet2 = new OutputSet(commandService, datasetService, combined, useChannelDimension, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
 		List<Dataset> datasetList2 = imageSet2.getDatasets();
 		Display<?>[] displays = new Display<?>[datasetList2.size()];
 		int index = 0;
@@ -290,11 +472,13 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		display.update();
 		
 		//TODO end experimental
-
-		// done clicking on the grayscale version
-		hideTool();
 	}
-	
+
+	/**
+	 * Shows special lifetime tool in IJ toolbar.
+	 * <p>
+	 * Tool allows user to click on grayscale image to fit pixels.
+	 */
 	private void showTool() {
 		Tool tool = getTool();
 		if (null != tool) {
@@ -302,7 +486,10 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			//TODO
 		}
 	}
-	
+
+	/**
+	 * Hides lifetime tool in IJ toolbar.
+	 */
 	private void hideTool() {
 		Tool tool = getTool();
 		if (null != tool) {
@@ -310,7 +497,12 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			//TODO
 		}
 	}
-	
+
+	/**
+	 * Gets the lifetime tool from IJ toolbar.
+	 * 
+	 * @return 
+	 */
 	private Tool getTool() {
 		return toolService.getTool("aivar"); //TODO
 	}

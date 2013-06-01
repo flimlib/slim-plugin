@@ -91,9 +91,9 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		callback = "logarithmicChanged")
 	private boolean logarithmic;
 	
-	@Parameter(label = "Show single counts", persist = true,
-		callback = "showSingleCountsChanged")
-	private boolean showSingleCounts;	
+	@Parameter(label = "Show low counts", persist = true,
+		callback = "showLowCountsChanged")
+	private boolean showLowCounts;	
 
 	/** The minimum and maximum values of the data itself. */
 	private double dataMin, dataMax;
@@ -111,7 +111,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		super("view");
 		System.out.println("DataHistogramCommand ctor, view is " + view);
 		logarithmic = false;
-		showSingleCounts = false;
+		showLowCounts = false;
 		running = false;
 	}
 
@@ -240,11 +240,11 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		}
 	}
 
-	/** Called when show single counts changes. */
-	protected void showSingleCountsChanged() {
-		System.out.println("SINGLE PIXEL CHANGED " + showSingleCounts);
+	/** Called when show low counts changes. */
+	protected void showLowCountsChanged() {
+		System.out.println("LOW COUNTS CHANGED " + showLowCounts);
 		if (null != histogramGraph) {
-			histogramGraph.setDistinguishNonZero(showSingleCounts);
+			histogramGraph.setDistinguishNonZero(showLowCounts);
 			long[] histogram = histogramGraph.getHistogram();
 			int i = 0;
 			for (long h : histogram) {
