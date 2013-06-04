@@ -181,9 +181,10 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 
 				// create processor first time through
 				if (null == interactiveProcessor) {
-					interactiveProcessor = new DefaultInteractiveProcessor(datasetService, displayService);
+					interactiveProcessor = new DefaultInteractiveProcessor();
+					interactiveProcessor.init(datasetService, displayService);
 				}
-				
+
 				// gives up control to load a new dataset or when done
 				quit = interactiveProcessor.process(dataset);
 			}

@@ -5,12 +5,22 @@
 package loci.slim2.process;
 
 import imagej.data.Dataset;
+import imagej.data.DatasetService;
+import imagej.display.DisplayService;
 
 /**
  *
  * @author Aivar Grislis
  */
 public interface InteractiveProcessor {
+	
+	/**
+	 * Initializes with required services.
+	 * 
+	 * @param datasetService
+	 * @param displayService 
+	 */
+	public void init(DatasetService datasetService, DisplayService displayService);
 	
 	/**
 	 * Gets current fit settings.
@@ -28,11 +38,9 @@ public interface InteractiveProcessor {
 
 	/**
 	 * Processes a {@link Dataset}.
-	 * <p>
-	 * Returns to load a new {@link Dataset} or to quit.
 	 * 
 	 * @param dataset 
-	 * @return whether to quit
+	 * @return whether to quit (true) or load new Dataset (false)
 	 */
 	public boolean process(Dataset dataset);
 }

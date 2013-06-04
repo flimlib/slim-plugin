@@ -34,16 +34,18 @@ import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
  * @author Aivar Grislis
  */
 public class DefaultInteractiveProcessor implements InteractiveProcessor {
-	private final DatasetService datasetService;
-	private final DisplayService displayService;
+	private DatasetService datasetService;
+	private DisplayService displayService;
 	private LifetimeDatasetWrapper lifetimeDatasetWrapper;
 	private LifetimeGrayscaleDataset lifetimeGrayscaleDataset;
 	private int bins;
 	private double timeRange;
 	private UserInterfacePanel uiPanel;
+	private volatile boolean quit;
+	private volatile boolean openFile;
 
-	//TODO ARG passing in services to constructor is crappy
-	public DefaultInteractiveProcessor(DatasetService datasetService, DisplayService displayService) {
+	@Override
+	public void init(DatasetService datasetService, DisplayService displayService) {
 		this.datasetService = datasetService;
 		this.displayService = displayService;
 	}
@@ -59,7 +61,9 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	}
 	
 	@Override
-	public boolean process(Dataset dataset) {
+	public boolean process(final Dataset dataset) {
+		quit = openFile = false;
+		
 		// create the clickable grayscale representation
 		createGrayscale(dataset);
 		
@@ -117,9 +121,9 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
                  */
                 @Override
                 public void quit() {
-					/*_grayScaleImage.close();
-                    _quit = true;*/
-					System.out.println("quit");
+					// hide the UI, quit
+					uiPanel.getFrame().setVisible(false);
+					quit = true;
                 }
 				
 				/**
@@ -127,44 +131,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 				 */
 				@Override
 				public void openFile() {
-                   /*File[] files = showFileDialog(getPathFromPreferences());
-				   // were multiple files opened?
-				   if (1 < files.length) {
-					   batchProcessingWithUI(files);
-				   }
-				   // was a single file opened? (skip cancellations)
-				   else if (1 == files.length) {
-					   String savePath = _path;
-					   String saveFile = _file;
-					   
-					   String[] pathAndFile = getPathAndFile(files[0]);
-			           _path = pathAndFile[0];
-			           _file = pathAndFile[1];
-
-			           _image = loadImage(_path, _file);
-			           if (null == _image) {
-				            showError("Error", "Could not load image");
-			           }
-			           else {
-				            if (getImageInfo(_image)) {
-								savePathInPreferences(_path);
-
-								// close existing grayscale and hook up a new one
-								_uiPanel.setThresholdListener(null);
-								_grayScaleImage.close();
-								_grayScaleImage = null;
-								showGrayScaleAndFit(uiPanel);
-				            }
-							else {
-								// kludgy way to reset
-								_path = savePath;
-								_file = saveFile;
-								_image = loadImage(_path, _file);
-								getImageInfo(_image);
-							}
-			            }
-				    }*/
-					System.out.println("openFile");
+					// open a different file
+					openFile = true;
 				}
 
                 /**
@@ -382,10 +350,23 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         );
         uiPanel.getFrame().setLocationRelativeTo(null);
         uiPanel.getFrame().setVisible(true);
-		
+
+		//TODO ARG loop and handle fits, refits, cancellations
 		
 		System.out.println(" " + dataset);
-		return true;
+		do {
+			System.out.println("quit is " + quit + " openFile is " + openFile);
+			try {
+				Thread.sleep(1000);
+			}
+			catch (InterruptedException e) {
+				
+			}
+		}
+		while (!quit && !openFile);
+		
+		// return whether to quit
+		return(quit);
 	}
 	
 	private void createGrayscale(Dataset dataset) {
