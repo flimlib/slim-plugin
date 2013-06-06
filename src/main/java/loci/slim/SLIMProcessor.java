@@ -102,7 +102,6 @@ import mpicbg.imglib.image.ImageFactory;
 import mpicbg.imglib.io.ImageOpener;
 import mpicbg.imglib.type.numeric.RealType;
 import mpicbg.imglib.type.numeric.real.DoubleType;
-
 // Kludge in the new stuff:
 import loci.slim.fitting.IDecayImage;
 import loci.slim.fitting.IFittedImage;

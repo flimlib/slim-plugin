@@ -99,6 +99,18 @@
       <version>2.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
+<!-- Imglib2 needed until ioservice uses bioformats.jar again -->
+      <groupId>net.imglib2</groupId>
+      <artifactId>imglib2-io</artifactId>
+      <version>2.0.0-SNAPSHOT</version>
+    </dependency>
+	<dependency>
+<!-- ome.scifio.common.StatusReporter et al needed until ioservice fixed, see above -->
+		<groupId>loci</groupId>
+		<artifactId>scifio-devel</artifactId>
+		<version>4.5-SNAPSHOT</version>
+	</dependency>
+    <dependency>
       <groupId>net.java.sezpoz</groupId>
       <artifactId>sezpoz</artifactId>
       <version>1.9</version>

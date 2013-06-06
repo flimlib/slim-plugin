@@ -42,9 +42,9 @@ import net.imglib2.display.CompositeXYProjector;
 import net.imglib2.display.RealLUTConverter;
 import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.ImgPlus;
-import net.imglib2.io.ImgIOException;
-import net.imglib2.io.ImgIOUtils;
-import net.imglib2.io.ImgOpener;
+import io.scif.io.img.ImgIOException;
+import io.scif.io.img.ImgIOUtils;
+import io.scif.io.img.ImgOpener;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
@@ -68,6 +68,7 @@ public class LifetimeDatasetWrapper {
 	private final int bins;
 	private final int factor;
 	private double inc;
+	private boolean fuckedUp = true; //TODO ARG until ioservice uses bioformats and can read SDT
 
 	/**
 	 * Constructor.
@@ -85,12 +86,20 @@ public class LifetimeDatasetWrapper {
 		externalAxes = new AxisType[axes.length - 1];
 		int i = 0;
 		for (int j = 0; j < axes.length; ++j) {
+			if (fuckedUp) {
+				if ("Unknown".equals(axes[j].getLabel())) {
+					lifetimeDimension = j;
+				}
+				else {
+					externalAxes[i++] = axes[j];
+				}
+			} else {
 			if (LIFETIME.equals(axes[j].getLabel())) {
 				lifetimeDimension = j;
 			}
 			else {
 				externalAxes[i++] = axes[j];
-			}
+			} }
 		}
 		assert IMPOSSIBLE_INDEX != lifetimeDimension;
  

@@ -69,11 +69,17 @@ import loci.slim2.process.FitSettings;
 import loci.slim2.process.InteractiveProcessor;
 import loci.slim2.process.batch.DefaultBatchProcessor;
 import loci.slim2.process.interactive.DefaultInteractiveProcessor;
+import net.imglib2.img.Img;
+import net.imglib2.img.ImgPlus;
+import net.imglib2.io.ImgIOException;
+import net.imglib2.io.ImgOpener;
+import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
+import net.imglib2.type.numeric.real.FloatType;
 
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -93,6 +99,10 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	//TODOprivate Map<Dataset, List<FittingContext>> map = new HashMap<Dataset, List<FittingContext>>();
 	private Dataset activeDataset;
 	private volatile boolean quit = false;
+	private boolean fuckedUp = true;
+	
+	@Parameter
+	private org.scijava.Context context;
 	
 	@Parameter
 	private CommandService commandService;
@@ -165,11 +175,33 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 					}
 					else {
 						// load the dataset
-						try {
-							dataset = ioService.loadDataset(files[0].getAbsolutePath());
+						
+						if (fuckedUp) {
+							// open file with Imglib2
+							try {
+								Img<T> img = new ImgOpener().openImg(files[0].getAbsolutePath());
+								System.out.println("Img opened " + img.toString());
+
+								ImgPlus<T> imgPlus = new ImgPlus(img);
+
+								// pass in Context and ImgPlus
+								dataset = new imagej.data.DefaultDataset(context, imgPlus);
+							}
+							catch (Exception e) {
+								System.out.println("problem reading " + files[0].getAbsolutePath() + " " + e.getMessage());
+
+							}
 						}
-						catch (Exception e) {
+						else {
+						try {
+							//TODO ARG latest ImgOpener moved to scifio and drops support for Bioformats format extensions (i.e. .sdt)
+							dataset = ioService.loadDataset(files[0].getAbsolutePath());
+							
+						}
+						catch (Throwable e) {
+							// typically run out of memory here
 							showError("Problem loading file '" + files[0].getAbsolutePath() + "' " + e.getMessage());
+						}
 						}
 					}
 				}
