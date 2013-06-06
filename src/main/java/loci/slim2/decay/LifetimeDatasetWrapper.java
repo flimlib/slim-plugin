@@ -31,23 +31,13 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.decay;
 
 import imagej.data.Dataset;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.AxisType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.display.ARGBScreenImage;
-import net.imglib2.display.CompositeXYProjector;
-import net.imglib2.display.RealLUTConverter;
-import net.imglib2.exception.IncompatibleTypeException;
-import net.imglib2.img.ImgPlus;
-import io.scif.io.img.ImgIOException;
-import io.scif.io.img.ImgIOUtils;
-import io.scif.io.img.ImgOpener;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.view.Views;
 
 /**
  * Wraps a {@link Dataset} that has lifetime information.
