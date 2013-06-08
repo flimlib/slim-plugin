@@ -31,71 +31,59 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.process;
 
 /**
- * Holds basic FLIM fit settings.
- * <p>
- * The intention here is to provide a basic set of fit settings that every
- * FLIM fitting implementation ought to need.  If some settings are irrelevant
- * to a given fitting implementation they can simply be ignored.
+ * Horizontal decay cursor.  Divides decay into two regions for fitting.
  * 
  * @author Aivar Grislis
  */
-public interface FitSettings {
+public class HorzCursor {
+	private final double timeInc;
+	private int bin;
+	private double time;
 
 	/**
-	 * Get number of bins in time histogram.
+	 * Constructor, specifies time increment per bin.
+	 * 
+	 * @param timeInc 
+	 */
+	public HorzCursor(double timeInc) {
+		this.timeInc = timeInc;
+	}
+
+	/**
+	 * Get bin number.
 	 * 
 	 * @return 
 	 */
-	public int getBins();
+	public int getBin() {
+		return bin;
+	}
 
 	/**
-	 * Get time increment per time bin.
+	 * Set bin number.
+	 * 
+	 * @param bin 
+	 */
+	public void setBin(int bin) {
+		this.bin = bin;
+		time = bin * timeInc;
+	}
+
+	/**
+	 * Get time value.
 	 * 
 	 * @return 
 	 */
-	public double getTimeInc();
+	public double getTime() {
+		return time;
+	}
 
 	/**
-	 * Get excitation decay values.
+	 * Set time value.
 	 * 
-	 * @return 
+	 * @param time 
 	 */
-	public double[] getExcitation();
-	
-	/**
-	 * Gets horizontal cursor positions on excitation decay.
-	 * 
-	 * @return null or array of cursors
-	 */
-	public HorzCursor[] getExcitationHorzCursors();
-
-	/**
-	 * Gets vertical cursor position on excitation decay.
-	 * 
-	 * @return null or cursor
-	 */
-	public VertCursor getExcitationVertCursor();
-
-	/**
-	 * Gets horizontal cursor positions on decay.
-	 * 
-	 * @return null or array of cursors
-	 */
-	public HorzCursor[] getDecayHorzCursors();
-
-	/**
-	 * Gets vertical cursor position on decay.
-	 * 
-	 * @return null or cursor
-	 */
-	public VertCursor getDecayVertCursor();
-	
-	/**
-	 * Gets binning factor.
-	 * <p>
-	 * 0=no binning, 1=3x3, 2=5x5, etc.
-	 * 
-	 * @return binning factor
-	 */
-	public int getBinningFactor();
+	public void setTime(double time) {
+		this.time = time;
+		bin = (int) (time / timeInc);
+	}
 }

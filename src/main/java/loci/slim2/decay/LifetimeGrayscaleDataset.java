@@ -50,9 +50,10 @@ public class LifetimeGrayscaleDataset {
 	 * Constructor.
 	 * 
 	 * @param datasetService
-	 * @param lifetimeDatasetWrapper 
+	 * @param lifetimeDatasetWrapper
+	 * @param bins
 	 */
-	public LifetimeGrayscaleDataset(DatasetService datasetService, LifetimeDatasetWrapper lifetimeDatasetWrapper, int bins) {
+	public LifetimeGrayscaleDataset(DatasetService datasetService, LifetimeDatasetWrapper lifetimeDatasetWrapper) {
 		// create grayscale image
 		final long[] dimensions = lifetimeDatasetWrapper.getDims();
 		final String name = lifetimeDatasetWrapper.getDataset().getName();
@@ -68,11 +69,12 @@ public class LifetimeGrayscaleDataset {
 		final long[] position = new long[dimensions.length];
 		int maxSummed = Integer.MIN_VALUE;
 		maxPosition = new long[dimensions.length];
+		int binSize = 0;
 		while (grayscaleCursor.hasNext()) {
 			grayscaleCursor.fwd();
 			grayscaleCursor.localize(position);
 			
-			final int summed = lifetimeDatasetWrapper.getSummedDecay(position, bins);
+			final int summed = lifetimeDatasetWrapper.getSummedDecay(binSize, position);
 			grayscaleCursor.get().setReal(summed);
 
 			// keep track of brightest pixel
@@ -95,7 +97,7 @@ public class LifetimeGrayscaleDataset {
 	}
 
 	/**
-	 * Reports the position of the brightest pixel in the first XY plane.
+	 * Reports the full position of the brightest pixel in the first XY plane.
 	 * 
 	 * @return 
 	 */

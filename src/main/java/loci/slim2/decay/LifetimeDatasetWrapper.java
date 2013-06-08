@@ -195,7 +195,7 @@ public class LifetimeDatasetWrapper {
 	}
 
 	/**
-	 * Bins up the decay from surrounding pixels.
+	 * Gets decay histogram at given location. Bins up the decay from surrounding pixels.
 	 * 
 	 * @param binSize 0=no binning, 1=3x3, 2=5x5, etc.
 	 * @param position
@@ -205,40 +205,31 @@ public class LifetimeDatasetWrapper {
 		if (0 == binSize) {
 			return getDecay(position);
 		}
-		//TODO ARG experimental
-		//DecayCache cache = new DecayCache(this, 1000);
-		double[] summedDecay = new double[bins];
-		for (int i = 0; i < bins; ++i) {
-			summedDecay[i] = 0.0;
-		}
 		final long xAnchor = position[0];
-		final long yAnchor = position[1];
-		double[] decay;
-		for (long x = xAnchor - binSize; x < xAnchor + binSize; ++x) {
-			for (long y = yAnchor - binSize; y < yAnchor + binSize; ++y) {
-				if (x >= 0 && x < getDims()[0]
-						&& y >= 0 && y < getDims()[1]) {
-					position[0] = x;
-					position[1] = y;
-					decay = cache.getDecay(position);
-					for (int i = 0; i < bins; ++i) {
-						summedDecay[i] += decay[i];
-					}
-				}
-			}
-		}
-		return summedDecay;
+		final long yAnchor = position[1];		
+		return combineDecay(
+				xAnchor - binSize, xAnchor + binSize,
+				yAnchor - binSize, yAnchor + binSize,
+				position);
+	}
+	
+	public double[] getCombinedPlaneDecay(long[] position) {
+		long x0 = 0;
+		long x1 = getDims()[0];
+		long y0 = 0;
+		long y1 = getDims()[1];
+		return combineDecay(x0, x1, y0, y1, position);
 	}
 
 	/**
 	 * Gets summed decay histogram at given location, with binning.
 	 * 
+	 * @param binSize 0=no binning, 1=3x3, 2=5x5, etc.
 	 * @param position
-	 * @param bins for binning
 	 * @return 
 	 */
-	public int getSummedDecay(long[] position, int bins) {
-		double[] decay = getBinnedDecay(bins, position); //getDecay(position);
+	public int getSummedDecay(int binSize, long[] position) {
+		double[] decay = getBinnedDecay(binSize, position);
 		long sum = 0;
 		for (double d : decay) {
 			sum += d;
@@ -248,6 +239,38 @@ public class LifetimeDatasetWrapper {
 			sum = Integer.MAX_VALUE;
 		}
 		return (int) sum;
+	}
+
+	/**
+	 * Helper routine, creates combined decay from planar, rectangular area of pixels.
+	 * 
+	 * @param x0
+	 * @param x1
+	 * @param y0
+	 * @param y1
+	 * @param position
+	 * @return 
+	 */
+	private double[] combineDecay(long x0, long x1, long y0, long y1, long[] position) {
+		double[] combinedDecay = new double[bins];
+		for (int i = 0; i < bins; ++i) {
+			combinedDecay[i] = 0.0;
+		}
+		double[] decay;
+		for (long x = x0; x < x1; ++x) {
+			for (long y = y0; y < y1; ++y) {
+				if (x >= 0 && x < getDims()[0]
+						&& y >= 0 && y < getDims()[1]) {
+					position[0] = x;
+					position[1] = y;
+					decay = cache.getDecay(position);
+					for (int i = 0; i < bins; ++i) {
+						combinedDecay[i] += decay[i];
+					}
+				}
+			}
+		}
+		return combinedDecay;
 	}
 
 	/**

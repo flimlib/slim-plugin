@@ -31,71 +31,31 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.process;
 
 /**
- * Holds basic FLIM fit settings.
+ * Vertical decay cursor.
  * <p>
- * The intention here is to provide a basic set of fit settings that every
- * FLIM fitting implementation ought to need.  If some settings are irrelevant
- * to a given fitting implementation they can simply be ignored.
+ * Could be used to specify a 'Z' level or vertically 
+ * truncate an excitation.
  * 
  * @author Aivar Grislis
  */
-public interface FitSettings {
+public class VertCursor {
+	private double photons;
 
 	/**
-	 * Get number of bins in time histogram.
+	 * Gets vertical cursor position.
 	 * 
 	 * @return 
 	 */
-	public int getBins();
+	public double getPhotons() {
+		return photons;
+	}
 
 	/**
-	 * Get time increment per time bin.
+	 * Sets vertical cursor position.
 	 * 
-	 * @return 
+	 * @param photons 
 	 */
-	public double getTimeInc();
-
-	/**
-	 * Get excitation decay values.
-	 * 
-	 * @return 
-	 */
-	public double[] getExcitation();
-	
-	/**
-	 * Gets horizontal cursor positions on excitation decay.
-	 * 
-	 * @return null or array of cursors
-	 */
-	public HorzCursor[] getExcitationHorzCursors();
-
-	/**
-	 * Gets vertical cursor position on excitation decay.
-	 * 
-	 * @return null or cursor
-	 */
-	public VertCursor getExcitationVertCursor();
-
-	/**
-	 * Gets horizontal cursor positions on decay.
-	 * 
-	 * @return null or array of cursors
-	 */
-	public HorzCursor[] getDecayHorzCursors();
-
-	/**
-	 * Gets vertical cursor position on decay.
-	 * 
-	 * @return null or cursor
-	 */
-	public VertCursor getDecayVertCursor();
-	
-	/**
-	 * Gets binning factor.
-	 * <p>
-	 * 0=no binning, 1=3x3, 2=5x5, etc.
-	 * 
-	 * @return binning factor
-	 */
-	public int getBinningFactor();
+	public void setPhotons(double photons) {
+		this.photons = photons;
+	}
 }

@@ -41,9 +41,14 @@ import imagej.data.display.DefaultImageDisplay;
 import imagej.display.DisplayService;
 import java.io.File;
 import java.util.prefs.Preferences;
+import javax.swing.JFrame;
+import loci.curvefitter.ICurveFitData;
 import loci.slim.Excitation;
 import loci.slim.ExcitationFileHandler;
+import loci.slim.fitting.cursor.FittingCursor;
 import loci.slim.heuristics.CursorEstimator;
+import loci.slim.ui.DecayGraph;
+import loci.slim.ui.IDecayGraph;
 import loci.slim.ui.IUserInterfacePanel;
 import loci.slim.ui.IUserInterfacePanelListener;
 import loci.slim2.FittingContext;
@@ -69,6 +74,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private UserInterfacePanel uiPanel;
 	private volatile boolean quit;
 	private volatile boolean openFile;
+	private long[] position;
 
 	@Override
 	public void init(DatasetService datasetService, DisplayService displayService) {
@@ -128,6 +134,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 					_fitInProgress = true;
 					_refit = true;*/
 					System.out.println("reFit");
+					fitPixel();
 				}
 
                 /**
@@ -376,6 +383,11 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         );
         uiPanel.getFrame().setLocationRelativeTo(null);
         uiPanel.getFrame().setVisible(true);
+		
+		// fit the brightest pixel
+		position = lifetimeGrayscaleDataset.getBrightestPixel();
+		System.out.println("brightest pixel is " + position[0] + " " + position[1]);
+		fitPixel(position);
 
 		//TODO ARG loop and handle fits, refits, cancellations
 		
@@ -401,12 +413,110 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		//fittingContext.setDatasetWrapper(lifetimeDatasetWrapper);
 		
 		// make a grayscale version of lifetime dataset
-		lifetimeGrayscaleDataset = new LifetimeGrayscaleDataset(datasetService, lifetimeDatasetWrapper, 1); //TODO ARG why pass in binning #??
+		lifetimeGrayscaleDataset = new LifetimeGrayscaleDataset(datasetService, lifetimeDatasetWrapper);
 		//fittingContext.setGrayscaleDataset(lifetimeGrayscaleDataset);
 		
 		// display grayscale version
 		Display<?> display = displayService.createDisplay(lifetimeGrayscaleDataset.getDataset());
+		//TODO ARG no way of getting current position from Display; can get by w/o it
 		//TODO ARG how to draw overlays on top of this display???
 		//fittingContext.setGrayscaleDisplay(display);
 	}
+
+	/**
+	 * This version handles pixel fits driven by changing X, Y in the UI Panel
+	 * or by changing some other fit settings that require refit.
+	 */
+	private void fitPixel() {
+		// update last position with current X, Y from UI Panel
+		position[0] = uiPanel.getX();
+		position[1] = uiPanel.getY();
+
+		// fit pixel at position
+		fitPixel(position);
+	}
+
+	/**
+	 * Pixel fitting.
+	 * 
+	 * @param position
+	 */
+	private void fitPixel(long[] position) {
+		// make sure displayed UI panel X Y is up to date
+        uiPanel.setX((int) position[0]);
+        uiPanel.setY((int) position[1]);
+		
+		// update grayscale cursor
+		//TODO ARG how to paint a cursor on the grayscale version?
+
+		int binSize = 0; // no binning for now
+		double[] decay = lifetimeDatasetWrapper.getBinnedDecay(binSize, position);
+		for (int i = 0; i < 12; ++i) {
+			System.out.print(" " + decay[i]);
+		}
+		System.out.println();
+		
+		// pop up the decay graph
+		
+		// do the fit
+		//TODO ARG get settings from ui panel
+		//  settings 
+		
+		// display fitted results
+	}
+
+	/**
+	 * Combined decay fitting, per plane.
+	 *
+	 * @param position X & Y are ignored
+	 */
+	private void fitCombined(long[] position) {
+		double[] decay = lifetimeDatasetWrapper.getCombinedPlaneDecay(position);
+		double[] fittedParams = fitDecay(decay, null);
+		
+	}
+	
+	private double[] fitDecay(double[] decay, FitSettings settings) {
+		for (double d : decay) {
+			System.out.print(" " + d);
+		}
+		System.out.println();
+		return null;
+	}
+	
+    /*
+     * Helper function for the fit.  Shows the decay curve.
+     *
+     * @param title
+     * @param uiPanel gets updates on dragged/start stop
+     * @param data fitted data
+     */
+    private void showDecayGraph(final String title,
+            final IUserInterfacePanel uiPanel,
+            final FittingCursor fittingCursor,
+            final ICurveFitData data,
+            int photons)
+    {
+        IDecayGraph decayGraph = DecayGraph.getInstance();
+       //TODO ARG JFrame frame = decayGraph.init(uiPanel.getFrame(), _bins, _timeRange, _grayScaleImage);
+        decayGraph.setTitle(title);
+        decayGraph.setFittingCursor(fittingCursor);
+        double transStart = fittingCursor.getTransientStartValue();
+        double dataStart  = fittingCursor.getDataStartValue();
+        double transStop  = fittingCursor.getTransientStopValue();
+        decayGraph.setStartStop(transStart, dataStart, transStop);
+		double[] prompt = null;
+		int startIndex = 0;
+		//TODO ARG
+		/*
+		if (null != _excitationPanel) {
+            startIndex = _fittingCursor.getPromptStartBin();
+            int stopIndex  = _fittingCursor.getPromptStopBin();
+            double base  = _fittingCursor.getPromptBaselineValue();
+			prompt = _excitationPanel.getValues(startIndex, stopIndex, base);
+		}*/
+        decayGraph.setData(startIndex, prompt, data);
+		decayGraph.setChiSquare(data.getParams()[0]);
+        decayGraph.setPhotons(photons);
+    }
 }
