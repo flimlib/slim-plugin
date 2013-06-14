@@ -1,7 +1,7 @@
 /*
-SLIMPlugin for combined spectral-lifetime image analysis.
+Combined spectral-lifetime image analysis plugin.
 
-Copyright (c) 2010-2013, UW-Madison LOCI
+Copyright (c) 2011, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -30,78 +30,72 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim2.process.interactive.ui;
 
+import javax.swing.JFrame;
+
+import loci.curvefitter.ICurveFitData;
+import loci.slim2.cursor.FittingCursor;
+import loci.slim2.process.interactive.ui.PixelPicker;
+
 /**
- * Listens to UI panel.
+ * Interface for a decay chart.
  * 
  * @author Aivar Grislis
  */
-public interface UserInterfacePanelListener {
-
+public interface DecayGraph {
+    
     /**
-     * Triggers a fit, creating fitted images.
-     */
-    public void fitImages();
-	
-	/**
-	 * Triggers a fitSingleDecay of pixel or summed.
-	 */
-	public void fitSingleDecay(boolean summed);
-
-    /**
-     * Cancels ongoing fitted image creation.
-     */
-    public void cancelFit();
-
-    /**
-     * Quits running plugin.
-     */
-    public void quit();
-	
-	/**
-	 * Opens new file(s).
-	 */
-	public void openFile();
-	
-    /**
-     * Loads an excitation curve from file.
+     * Initialize the graph and returns the containing JFrame.
      *
-     * @param fileName
-     * @return whether successful
+     * @param bins
+     * @param timeInc
+	 * @param grayScale
+     * @return frame
      */
-    public boolean loadExcitation(String fileName);
+    public JFrame init(final JFrame frame, final int bins, final double timeInc, PixelPicker pixelPicker);
 
     /**
-     * Creates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
+     * Changes (or initializes) the cursor (start/stop bins/values) for the fit.
+     * 
+     * @param fittingCursor 
      */
-    public boolean createExcitation(String fileName);
-	
+    public void setFittingCursor(FittingCursor fittingCursor);
+
     /**
-     * Estimates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
+     * Changes (or initializes) the title of the graph.
+     * 
+     * @param title 
      */
-    public boolean estimateExcitation(String fileName);
-	
+    public void setTitle(final String title);
+
+    /**
+     * Changes (or initializes) all of the charted data.
+     *
+	 * @param startIndex
+     * @param prompt
+     * @param data
+     */
+    public void setData(int startIndex, double[] prompt, ICurveFitData data);
+
 	/**
-	 * Creates excitation curve from gaussian.
+	 * Sets reduced chi square of fit.
 	 * 
-	 * @param fileName
-	 * @return whether successful
+	 * @param chiSquare 
 	 */
-	public boolean gaussianExcitation(String fileName);
-
+	public void setChiSquare(double chiSquare);
+    
     /**
-     * Cancels the current excitation curve, if any.
+     * Sets number of photons in fit.
+     * 
+     * @param photons
      */
-    public void cancelExcitation();
-
+    public void setPhotons(int photons);
+    
     /**
-     * Estimates the prompt and decay cursors.
+     * Changes (or initializes) the start and stop vertical bars.
+     *
+     * @param transientStart
+     * @param dataStart
+     * @param transientStop
      */
-    public void estimateCursors();
+    public void setStartStop(double transientStart, double dataStart, double transientStop);
 }
-

@@ -31,28 +31,52 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.outputset.temp;
 
 /**
- *
- * @author aivar
+ * Used to draw large but increasingly smaller pixels, to provide better 
+ * feedback during a slow process.
+ * 
+ * @author Aivar Grislis
  */
 public class ChunkyPixel {
 	private final long[] position;
 	private final long width;
 	private final long height;
-	
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param position
+	 * @param width
+	 * @param height 
+	 */
 	public ChunkyPixel(long[] position, long width, long height) {
 		this.position = position;
 		this.width = width;
 		this.height = height;
 	}
-	
+
+	/**
+	 * Gets position of upper left pixel.
+	 * 
+	 * @return 
+	 */
 	public long[] getPosition() {
 		return position;
 	}
-	
+
+	/**
+	 * Gets width of pixel.
+	 * 
+	 * @return 
+	 */
 	public long getWidth() {
 		return width;
 	}
-	
+
+	/**
+	 * Gets height of pixel.
+	 * 
+	 * @return 
+	 */
 	public long getHeight() {
 		return height;
 	}

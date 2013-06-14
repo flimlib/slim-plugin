@@ -1,7 +1,7 @@
 /*
 SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2010-2013, UW-Madison LOCI
+Copyright (c) 2010, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -28,80 +28,52 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim2.process.interactive.ui;
+package loci.slim2.heuristics;
 
 /**
- * Listens to UI panel.
+ * Interface for a class with estimates and rules of thumb.
  * 
  * @author Aivar Grislis
  */
-public interface UserInterfacePanelListener {
+public interface Estimator {
 
     /**
-     * Triggers a fit, creating fitted images.
+     * Get a decay start estimate.
+     * 
+     * @param bins
+     * @return 
      */
-    public void fitImages();
-	
-	/**
-	 * Triggers a fitSingleDecay of pixel or summed.
-	 */
-	public void fitSingleDecay(boolean summed);
+    int getStart(int bins);
 
     /**
-     * Cancels ongoing fitted image creation.
+     * Get a decay stop estimate.
+     * 
+     * @param bins
+     * @return 
      */
-    public void cancelFit();
+    int getStop(int bins);
 
     /**
-     * Quits running plugin.
+     * Get a default threshold amount.
+     * 
+     * @return 
      */
-    public void quit();
-	
-	/**
-	 * Opens new file(s).
-	 */
-	public void openFile();
-	
-    /**
-     * Loads an excitation curve from file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean loadExcitation(String fileName);
+    int getThreshold();
 
     /**
-     * Creates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
+     * Get a default chi square target.
+     * 
+     * @return 
      */
-    public boolean createExcitation(String fileName);
-	
-    /**
-     * Estimates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean estimateExcitation(String fileName);
-	
-	/**
-	 * Creates excitation curve from gaussian.
-	 * 
-	 * @param fileName
-	 * @return whether successful
-	 */
-	public boolean gaussianExcitation(String fileName);
+    double getChiSquareTarget();
 
     /**
-     * Cancels the current excitation curve, if any.
+     * Gets default parameters for given number of components or stretched
+     * exponential.
+     * 
+     * @param components
+     * @param stretched
+     * @return 
      */
-    public void cancelExcitation();
-
-    /**
-     * Estimates the prompt and decay cursors.
-     */
-    public void estimateCursors();
+    double[] getParameters(int components, boolean stretched);
 }
-

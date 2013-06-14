@@ -34,8 +34,8 @@ package loci.slim2.process;
  * Holds basic FLIM fit settings.
  * <p>
  * The intention here is to provide a basic set of fit settings that every
- * FLIM fitting implementation ought to need.  If some settings are irrelevant
- * to a given fitting implementation they can simply be ignored.
+ * FLIM fitting implementation ought to need.  If it turns out some settings are
+ * irrelevant to a given fitting implementation they can simply be ignored.
  * 
  * @author Aivar Grislis
  */

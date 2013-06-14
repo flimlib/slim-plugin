@@ -99,7 +99,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	//TODOprivate Map<Dataset, List<FittingContext>> map = new HashMap<Dataset, List<FittingContext>>();
 	private Dataset activeDataset;
 	private volatile boolean quit = false;
-	private boolean fuckedUp = true;
+	private boolean tempWorkAround = true;
 	
 	@Parameter
 	private org.scijava.Context context;
@@ -176,7 +176,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 					else {
 						// load the dataset
 						
-						if (fuckedUp) {
+						if (tempWorkAround) {
 							// open file with Imglib2
 							try {
 								Img<T> img = new ImgOpener().openImg(files[0].getAbsolutePath());

@@ -33,8 +33,6 @@ package loci.slim2.process.interactive.ui;
 //TODO ARG copied wholesale from IJ1 version; imports and methods may be off
 import javax.swing.JFrame;
 import loci.curvefitter.ICurveFitter;
-import loci.slim.IThresholdUpdate;
-import loci.slim.ui.IUserInterfacePanelListener;
 
 /**
  * UI Panel interface.
@@ -53,12 +51,12 @@ public interface UserInterfacePanel {
     /**
      * Sets the listener
      */
-    public void setListener(IUserInterfacePanelListener listener);
+    public void setListener(UserInterfacePanelListener listener);
 
 	/**
 	 * Sets the threshold listener.
 	 */
-	public void setThresholdListener(IThresholdUpdate thresholdListener);
+	public void setThresholdListener(ThresholdUpdate thresholdListener);
 	
 	/**
 	 * Disables the UI.

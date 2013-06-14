@@ -1,5 +1,5 @@
 /*
-SLIMPlugin for combined spectral-lifetime image analysis.
+Combined spectral-lifetime image analysis plugin.
 
 Copyright (c) 2010-2013, UW-Madison LOCI
 All rights reserved.
@@ -31,77 +31,21 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.process.interactive.ui;
 
 /**
- * Listens to UI panel.
- * 
+ * Interface for the UI to pick a pixel to fit.  Shows/hides a crosshair cursor.
  * @author Aivar Grislis
  */
-public interface UserInterfacePanelListener {
+public interface PixelPicker {
 
-    /**
-     * Triggers a fit, creating fitted images.
-     */
-    public void fitImages();
-	
 	/**
-	 * Triggers a fitSingleDecay of pixel or summed.
-	 */
-	public void fitSingleDecay(boolean summed);
-
-    /**
-     * Cancels ongoing fitted image creation.
-     */
-    public void cancelFit();
-
-    /**
-     * Quits running plugin.
-     */
-    public void quit();
-	
-	/**
-	 * Opens new file(s).
-	 */
-	public void openFile();
-	
-    /**
-     * Loads an excitation curve from file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean loadExcitation(String fileName);
-
-    /**
-     * Creates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean createExcitation(String fileName);
-	
-    /**
-     * Estimates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean estimateExcitation(String fileName);
-	
-	/**
-	 * Creates excitation curve from gaussian.
+	 * Show the cursor at fitted point.
 	 * 
-	 * @param fileName
-	 * @return whether successful
+	 * @param x
+	 * @param y 
 	 */
-	public boolean gaussianExcitation(String fileName);
+	public void showCursor(int x, int y);
 
-    /**
-     * Cancels the current excitation curve, if any.
-     */
-    public void cancelExcitation();
-
-    /**
-     * Estimates the prompt and decay cursors.
-     */
-    public void estimateCursors();
+	/**
+	 * Hide the cursor.
+	 */
+	public void hideCursor();
 }
-

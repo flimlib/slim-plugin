@@ -11,7 +11,7 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the UW-Madison LOCI nor the
+    * Neither the names of the ImageJDev.org developers nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -28,80 +28,19 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim2.process.interactive.ui;
+package loci.slim2.cursor;
 
 /**
- * Listens to UI panel.
+ * Listener interface for fitting cursor changes.
  * 
  * @author Aivar Grislis
  */
-public interface UserInterfacePanelListener {
+public interface FittingCursorListener {
 
     /**
-     * Triggers a fit, creating fitted images.
+     * Callback when the cursor changes.
+     * 
+     * @param cursor 
      */
-    public void fitImages();
-	
-	/**
-	 * Triggers a fitSingleDecay of pixel or summed.
-	 */
-	public void fitSingleDecay(boolean summed);
-
-    /**
-     * Cancels ongoing fitted image creation.
-     */
-    public void cancelFit();
-
-    /**
-     * Quits running plugin.
-     */
-    public void quit();
-	
-	/**
-	 * Opens new file(s).
-	 */
-	public void openFile();
-	
-    /**
-     * Loads an excitation curve from file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean loadExcitation(String fileName);
-
-    /**
-     * Creates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean createExcitation(String fileName);
-	
-    /**
-     * Estimates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean estimateExcitation(String fileName);
-	
-	/**
-	 * Creates excitation curve from gaussian.
-	 * 
-	 * @param fileName
-	 * @return whether successful
-	 */
-	public boolean gaussianExcitation(String fileName);
-
-    /**
-     * Cancels the current excitation curve, if any.
-     */
-    public void cancelExcitation();
-
-    /**
-     * Estimates the prompt and decay cursors.
-     */
-    public void estimateCursors();
+    public void cursorChanged(FittingCursor cursor);
 }
-

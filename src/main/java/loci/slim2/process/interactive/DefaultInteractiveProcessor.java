@@ -43,20 +43,21 @@ import java.io.File;
 import java.util.prefs.Preferences;
 import javax.swing.JFrame;
 import loci.curvefitter.ICurveFitData;
-import loci.slim.Excitation;
-import loci.slim.ExcitationFileHandler;
-import loci.slim.fitting.cursor.FittingCursor;
-import loci.slim.heuristics.CursorEstimator;
-import loci.slim.ui.DecayGraph;
-import loci.slim.ui.IDecayGraph;
-import loci.slim.ui.IUserInterfacePanel;
-import loci.slim.ui.IUserInterfacePanelListener;
+import loci.curvefitter.ICurveFitter;
+import loci.slim.Excitation; //TODO ARG move to slim2
+import loci.slim.ExcitationFileHandler; //TODO ARG move to slim2
+import loci.slim2.cursor.FittingCursor;
+import loci.slim2.process.interactive.ui.DecayGraph;
+import loci.slim2.process.interactive.ui.DefaultDecayGraph;
+import loci.slim2.process.interactive.ui.UserInterfacePanel;
+import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
 import loci.slim2.FittingContext;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
 import loci.slim2.process.FitSettings;
 import loci.slim2.process.InteractiveProcessor;
 import loci.slim2.process.interactive.ui.DefaultUserInterfacePanel;
+import loci.slim2.process.interactive.ui.ThresholdUpdate;
 import loci.slim2.process.interactive.ui.UserInterfacePanel;
 import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
 
@@ -69,13 +70,18 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private DisplayService displayService;
 	private LifetimeDatasetWrapper lifetimeDatasetWrapper;
 	private LifetimeGrayscaleDataset lifetimeGrayscaleDataset;
+	private DecayGraph decayGraph;
 	private int bins;
-	private double timeRange;
+	private double timeInc;
 	private UserInterfacePanel uiPanel;
+	private long[] position;
 	private volatile boolean quit;
 	private volatile boolean openFile;
-	private long[] position;
-
+	private volatile boolean fitImages;
+	private volatile boolean cancel;
+	private volatile boolean fitPixel;
+	private volatile boolean fitSummed;
+	
 	@Override
 	public void init(DatasetService datasetService, DisplayService displayService) {
 		this.datasetService = datasetService;
@@ -84,26 +90,36 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	
 	@Override
 	public FitSettings getFitSettings() {
-		return null;
+		return null; //TODO ARG
 	}
 
 	@Override
 	public void setFitSettings(FitSettings fitSettings) {
-		
+		//TODO ARG
 	}
 	
 	@Override
 	public boolean process(final Dataset dataset) {
-		quit = openFile = false;
+		quit = openFile = fitImages = cancel = fitPixel = fitSummed = false;
 		
 		// create the clickable grayscale representation
 		createGrayscale(dataset);
+		bins = lifetimeDatasetWrapper.getBins();
+		timeInc = lifetimeDatasetWrapper.getTimeIncrement();
+		
+		//TODO ARG 6/13/13
+		//  need bins & timeRange (sic!!)
+		// need to create a 'FittingCursor'
+		// if you look at this top-down there is not much info about the dataset yet
+		//  we just know it has a lifetime dimension (b/c of workarounds, not nec. "Lifetime")
 		
 		// display the UI
 		if (null == uiPanel) {
+			System.out.println(">>>>>>>bins is " + bins + " <<<<<<<<<<<");
 			boolean tabbed = false;
 			boolean showTau = false;
-			uiPanel = new DefaultUserInterfacePanel(tabbed, showTau, bins, timeRange, new String[] { "one", "two" }, new String[] { "alpha", "beta" }, null, null);
+			String[] binning = new String[] { "none", "3x3", "5x5", "7x7", "9x9", "11x11" };
+			uiPanel = new DefaultUserInterfacePanel(tabbed, showTau, bins, timeInc, new String[] { "one", "two" }, binning, null, null);
 		}
         uiPanel.setX(0);
         uiPanel.setY(0);
@@ -113,28 +129,47 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
        // uiPanel.setFunctionParameters(1, estimator.getParameters(2, false));
        // uiPanel.setFunctionParameters(2, estimator.getParameters(3, false));
        // uiPanel.setFunctionParameters(3, estimator.getParameters(0, true));
+		uiPanel.setThresholdListener(
+			new ThresholdUpdate() {
+				
+				@Override
+				public int estimateThreshold() {
+					System.out.println("ESTIMATE THRESHOLD!");
+					return 120;
+				}
+				
+				@Override
+				public void updateThreshold(int threshold){
+					System.out.println("UPDATE THRESHOLD " + threshold);
+				}
+			}
+		);
+
         uiPanel.setListener(
-            new IUserInterfacePanelListener() {
+            new UserInterfacePanelListener() {
                 /**
-                 * Triggers a fit.
+                 * Triggers a fit, creating fitted images.
                  */
                 @Override
-                public void doFit() {
-                    /*_cancel = false;
-                    _fitInProgress = true;*/
-					System.out.println("doFit");
+                public void fitImages() {
+					fitImages = true;
+					cancel = false;
+					System.out.println("fitImages");
                 }
 				
 				/**
-				 * Triggers a refit.
+				 * Triggers a fitSingleDecay.
 				 */
 				@Override
-				public void reFit() {
-					/*_cancel = false;
-					_fitInProgress = true;
-					_refit = true;*/
-					System.out.println("reFit");
-					fitPixel();
+				public void fitSingleDecay(boolean summed) {
+					if (summed) {
+						fitSummed = true;
+					}
+					else {
+						fitPixel = true;
+					}
+					cancel = false;
+					System.out.println("refit " + summed);
 				}
 
                 /**
@@ -142,11 +177,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
                  */
                 @Override
                 public void cancelFit() {
-                    /*_cancel = true;
-                    if (null != _fitInfo) {
-                        _fitInfo.setCancel(true);
-                    }*/
-					System.out.println("cancelFit");
+                    cancel = true;
+					System.out.println("cancelFit, cancel now " + cancel);
                 }
                 
                 /**
@@ -389,20 +421,50 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		System.out.println("brightest pixel is " + position[0] + " " + position[1]);
 		fitPixel(position);
 
-		//TODO ARG loop and handle fits, refits, cancellations
+		System.out.println("fitImages " + fitImages + " cancel " + cancel + " quit " + quit + " refitPixel " + fitPixel + " refitSummed " + fitSummed);
 		
-		System.out.println(" " + dataset);
 		do {
-			System.out.println("quit is " + quit + " openFile is " + openFile);
-			try {
-				Thread.sleep(1000);
+			// wait for user input
+			while (!fitImages && !fitPixel && !fitSummed && !quit && !openFile) {
+				try {
+					System.out.println("sleep while idle");
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e) {
+
+				}
 			}
-			catch (InterruptedException e) {
-				
+			
+		System.out.println("in loop, fitImages " + fitImages + " cancel " + cancel + " quit " + quit + " refitPixel " + fitPixel + " refitSummed " + fitSummed);
+		
+			if (cancel) {
+				System.out.println("CANCEL");
+				cancel = false;
+				fitImages = false;
+			}
+			else if (fitImages) {
+				System.out.println("FIT IMAGES");
+				try {
+					Thread.sleep(1000);
+				}
+				catch (InterruptedException e) {
+					
+				}
+			}
+			else if (fitPixel) {
+				System.out.println("REFIT PIXEL");
+				fitPixel();
+				fitPixel = false;
+			}
+			else if (fitSummed) {
+				System.out.println("REFIT SUMMED");
+				// uses last known position for which plane to sum
+				fitSummed(position);
+				fitSummed = false;
 			}
 		}
 		while (!quit && !openFile);
-		
+
 		// return whether to quit
 		return(quit);
 	}
@@ -425,7 +487,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 
 	/**
 	 * This version handles pixel fits driven by changing X, Y in the UI Panel
-	 * or by changing some other fit settings that require refit.
+	 * or by changing some other fit settings that require fitSingleDecay.
 	 */
 	private void fitPixel() {
 		// update last position with current X, Y from UI Panel
@@ -451,31 +513,31 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 
 		int binSize = 0; // no binning for now
 		double[] decay = lifetimeDatasetWrapper.getBinnedDecay(binSize, position);
+		double[] fittedParams = fitDecay(decay, null);
+		
+		//TODO ARG there is more coming out of the fit than just fittedParams nowadays
+		//  the IJ1 plugin already has two different ways of doing this!! why hatch a third?
+		
 		for (int i = 0; i < 12; ++i) {
 			System.out.print(" " + decay[i]);
 		}
 		System.out.println();
 		
-		// pop up the decay graph
-		
-		// do the fit
-		//TODO ARG get settings from ui panel
-		//  settings 
-		
-		// display fitted results
+		showDecayGraph("TITLE", uiPanel, null, null, 123); // 1st null is fittingcursor
 	}
 
 	/**
-	 * Combined decay fitting, per plane.
+	 * Combined, summed decay fitting, per plane.
 	 *
 	 * @param position X & Y are ignored
 	 */
-	private void fitCombined(long[] position) {
+	private void fitSummed(long[] position) {
 		double[] decay = lifetimeDatasetWrapper.getCombinedPlaneDecay(position);
 		double[] fittedParams = fitDecay(decay, null);
-		
+
 	}
-	
+
+	//TODO ARG a stand-in for some basic fitting method elsewhere
 	private double[] fitDecay(double[] decay, FitSettings settings) {
 		for (double d : decay) {
 			System.out.print(" " + d);
@@ -492,13 +554,15 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
      * @param data fitted data
      */
     private void showDecayGraph(final String title,
-            final IUserInterfacePanel uiPanel,
+            final UserInterfacePanel uiPanel,
             final FittingCursor fittingCursor,
             final ICurveFitData data,
             int photons)
     {
-        IDecayGraph decayGraph = DecayGraph.getInstance();
-       //TODO ARG JFrame frame = decayGraph.init(uiPanel.getFrame(), _bins, _timeRange, _grayScaleImage);
+		if (null == decayGraph) {
+			decayGraph = new DefaultDecayGraph();
+		}
+        JFrame frame = decayGraph.init(uiPanel.getFrame(), bins, timeInc, null); //TODO ARG need grayscale image as 'pixel picker'
         decayGraph.setTitle(title);
         decayGraph.setFittingCursor(fittingCursor);
         double transStart = fittingCursor.getTransientStartValue();

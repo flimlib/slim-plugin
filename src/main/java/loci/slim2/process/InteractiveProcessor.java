@@ -35,7 +35,8 @@ import imagej.data.DatasetService;
 import imagej.display.DisplayService;
 
 /**
- *
+ * Interface for FLIM processing with interactive UI.
+ * 
  * @author Aivar Grislis
  */
 public interface InteractiveProcessor {

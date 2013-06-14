@@ -1,7 +1,7 @@
 /*
 SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2010-2013, UW-Madison LOCI
+Copyright (c) 2010, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -31,77 +31,23 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.process.interactive.ui;
 
 /**
- * Listens to UI panel.
+ * An interface to allow updated threshold values to be communicated.
  * 
  * @author Aivar Grislis
  */
-public interface UserInterfacePanelListener {
-
-    /**
-     * Triggers a fit, creating fitted images.
-     */
-    public void fitImages();
+public interface ThresholdUpdate {
 	
 	/**
-	 * Triggers a fitSingleDecay of pixel or summed.
-	 */
-	public void fitSingleDecay(boolean summed);
-
-    /**
-     * Cancels ongoing fitted image creation.
-     */
-    public void cancelFit();
-
-    /**
-     * Quits running plugin.
-     */
-    public void quit();
-	
-	/**
-	 * Opens new file(s).
-	 */
-	public void openFile();
-	
-    /**
-     * Loads an excitation curve from file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean loadExcitation(String fileName);
-
-    /**
-     * Creates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean createExcitation(String fileName);
-	
-    /**
-     * Estimates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean estimateExcitation(String fileName);
-	
-	/**
-	 * Creates excitation curve from gaussian.
+	 * Gets an initial threshold estimate.
 	 * 
-	 * @param fileName
-	 * @return whether successful
+	 * @return 
 	 */
-	public boolean gaussianExcitation(String fileName);
-
-    /**
-     * Cancels the current excitation curve, if any.
-     */
-    public void cancelExcitation();
-
-    /**
-     * Estimates the prompt and decay cursors.
-     */
-    public void estimateCursors();
+	public int estimateThreshold();
+	
+	/**
+	 * Update the threshold value.
+	 * 
+	 * @param threshold 
+	 */
+	public void updateThreshold(int threshold);
 }
-
