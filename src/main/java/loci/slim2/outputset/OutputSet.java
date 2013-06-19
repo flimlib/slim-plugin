@@ -32,21 +32,17 @@ package loci.slim2.outputset;
 
 import loci.slim2.histogram.DataHistogramCommand;
 import loci.slim2.outputset.temp.CustomAxisType;
-import imagej.ImageJ;
+
 import imagej.command.CommandService;
-import imagej.data.DatasetService;
-import java.util.ArrayList;
-import java.util.List;
-import loci.slim2.SLIMPlugin;
-import net.imglib2.meta.AxisType;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import net.imglib2.Cursor;
-import net.imglib2.RandomAccess;
-import net.imglib2.img.ImgPlus;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
-
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 

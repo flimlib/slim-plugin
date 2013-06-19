@@ -28,19 +28,29 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim2.cursor;
+package loci.slim2.fitting;
 
 /**
- * Listener interface for fitting cursor changes.
+ * Interface for container for the local fitting parameters, i.e. those valid
+ * for the current pixel.
  * 
  * @author Aivar Grislis
  */
-public interface FittingCursorListener {
-
-    /**
-     * Callback when the cursor changes.
-     * 
-     * @param cursor 
-     */
-    public void cursorChanged(FittingCursor cursor);
+public interface LocalFitParams {
+    
+    public void setY(double[] y);
+    
+    public double[] getY();
+    
+    public void setSig(double[] sig);
+    
+    public double[] getSig();
+    
+    public void setParams(double[] params);
+    
+    public double[] getParams();
+    
+    public void setYFitted(double[] yFitted); //TODO ARG not really a fit param
+    
+    public double[] getYFitted(); //TODO ARG not really a fit param
 }

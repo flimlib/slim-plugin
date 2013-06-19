@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.outputset;
 
 import java.util.List;
+
 import net.imglib2.RandomAccess;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;

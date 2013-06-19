@@ -33,7 +33,7 @@ package loci.slim2.process.interactive.ui;
 import javax.swing.JFrame;
 
 import loci.curvefitter.ICurveFitData;
-import loci.slim2.cursor.FittingCursor;
+import loci.slim2.process.interactive.cursor.FittingCursor;
 import loci.slim2.process.interactive.ui.PixelPicker;
 
 /**

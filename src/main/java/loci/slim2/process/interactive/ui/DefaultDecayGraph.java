@@ -57,8 +57,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import loci.curvefitter.ICurveFitData;
-import loci.slim2.cursor.FittingCursor;
-import loci.slim2.cursor.FittingCursorListener;
+import loci.slim2.process.interactive.cursor.FittingCursor;
+import loci.slim2.process.interactive.cursor.FittingCursorListener;
 
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
@@ -282,6 +282,7 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
 
 	@Override
     public void setFittingCursor(FittingCursor fittingCursor) {
+		System.out.println("DefaultDecayGraph.setFittingCursor " + fittingCursor);
         if (null == this.fittingCursor) {
             fittingCursorListener = new FittingCursorListenerImpl();
         }
@@ -445,6 +446,9 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
         XYSeries series3 = new XYSeries("Data");
         XYSeries series4 = new XYSeries("Residuals");
 		double xCurrent;
+		
+		//TODO ARG
+		if (null == data) return;
 		
         // show transient data; find the maximum transient data in this pass
         double yDataMax = -Double.MAX_VALUE;

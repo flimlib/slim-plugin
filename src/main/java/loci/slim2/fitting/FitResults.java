@@ -11,7 +11,7 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the UW-Madison LOCI nor the
+    * Neither the names of the ImageJDev.org developers nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -28,60 +28,54 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim2.outputset.temp;
+package loci.slim2.fitting;
 
 /**
- * Used to draw large but increasingly smaller "chunky pixels", to provide better 
- * feedback during a slow process.
- * <p>
- * When a "chunky pixel" is drawn oversize only the upper left pixel is drawn
- * with the correct, final value.  All other pixels will be redrawn during
- * processing as further detail is filled in.
+ * Interface for container for local fitted results for current pixel.
  * 
  * @author Aivar Grislis
  */
-public class ChunkyPixel {
-	private final long[] position;
-	private final long width;
-	private final long height;
+public interface FitResults {
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param position
-	 * @param width
-	 * @param height 
-	 */
-	public ChunkyPixel(long[] position, long width, long height) {
-		this.position = position;
-		this.width = width;
-		this.height = height;
-	}
+    /**
+     * Sets fitted chi square result.
+     * 
+     * @param chiSquare 
+     */
+    public void setChiSquare(double chiSquare);
 
-	/**
-	 * Gets position of upper left pixel.
-	 * 
-	 * @return 
-	 */
-	public long[] getPosition() {
-		return position;
-	}
+    /**
+     * Gets fitted chi square result.
+     * 
+     * @return 
+     */
+    public double getChiSquare();
 
-	/**
-	 * Gets width of pixel.
-	 * 
-	 * @return 
-	 */
-	public long getWidth() {
-		return width;
-	}
+    /**
+     * Sets fitted parameters.
+     * 
+     * @param params or null
+     */
+    public void setParams(double[] params);
 
-	/**
-	 * Gets height of pixel.
-	 * 
-	 * @return 
-	 */
-	public long getHeight() {
-		return height;
-	}
+    /**
+     * Gets fitted parameters.
+     * 
+     * @return null or fitted params
+     */
+    public double[] getParams();
+
+    /**
+     * Sets fitted curve.
+     * 
+     * @param yFitted 
+     */
+    public void setYFitted(double[] yFitted);
+
+    /**
+     * Gets fitted curve.
+     * 
+     * @return 
+     */
+    public double[] getYFitted();
 }

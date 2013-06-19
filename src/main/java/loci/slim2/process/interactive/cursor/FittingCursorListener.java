@@ -11,7 +11,7 @@ modification, are permitted provided that the following conditions are met:
     * Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    * Neither the name of the UW-Madison LOCI nor the
+    * Neither the names of the ImageJDev.org developers nor the
       names of its contributors may be used to endorse or promote products
       derived from this software without specific prior written permission.
 
@@ -28,60 +28,21 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim2.outputset.temp;
+package loci.slim2.process.interactive.cursor;
+
+import loci.slim2.process.interactive.cursor.FittingCursor;
 
 /**
- * Used to draw large but increasingly smaller "chunky pixels", to provide better 
- * feedback during a slow process.
- * <p>
- * When a "chunky pixel" is drawn oversize only the upper left pixel is drawn
- * with the correct, final value.  All other pixels will be redrawn during
- * processing as further detail is filled in.
+ * Listener interface for fitting cursor changes.
  * 
  * @author Aivar Grislis
  */
-public class ChunkyPixel {
-	private final long[] position;
-	private final long width;
-	private final long height;
+public interface FittingCursorListener {
 
-	/**
-	 * Constructor.
-	 * 
-	 * @param position
-	 * @param width
-	 * @param height 
-	 */
-	public ChunkyPixel(long[] position, long width, long height) {
-		this.position = position;
-		this.width = width;
-		this.height = height;
-	}
-
-	/**
-	 * Gets position of upper left pixel.
-	 * 
-	 * @return 
-	 */
-	public long[] getPosition() {
-		return position;
-	}
-
-	/**
-	 * Gets width of pixel.
-	 * 
-	 * @return 
-	 */
-	public long getWidth() {
-		return width;
-	}
-
-	/**
-	 * Gets height of pixel.
-	 * 
-	 * @return 
-	 */
-	public long getHeight() {
-		return height;
-	}
+    /**
+     * Callback when the cursor changes.
+     * 
+     * @param cursor 
+     */
+    public void cursorChanged(FittingCursor cursor);
 }

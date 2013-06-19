@@ -68,14 +68,14 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.IFitterEstimator;
-import loci.slim.fitting.cursor.FittingCursorHelper; //TODO ARG move to slim2
-import loci.slim.fitting.cursor.IFittingCursorUI; //TODO ARG move to slim2
+import loci.slim2.process.interactive.cursor.FittingCursorHelper;
+import loci.slim2.process.interactive.cursor.FittingCursorUI;
 
 /**
  *
  * @author Aivar Grislis
  */
-public class DefaultUserInterfacePanel implements UserInterfacePanel, IFittingCursorUI {
+public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCursorUI {
 	private static final String TITLE = "SLIM Plugin";
 	
     // Unicode special characters

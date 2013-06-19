@@ -30,32 +30,25 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim2.process.interactive;
 
-import ij.gui.GenericDialog;
-import imagej.data.Dataset;
-import imagej.data.DatasetService;
 import imagej.display.Display;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
-import imagej.data.display.DataView;
-import imagej.data.display.DefaultImageDisplay;
 import imagej.display.DisplayService;
-import java.io.File;
-import java.util.prefs.Preferences;
+
 import javax.swing.JFrame;
+
 import loci.curvefitter.ICurveFitData;
-import loci.curvefitter.ICurveFitter;
-import loci.slim.Excitation; //TODO ARG move to slim2
-import loci.slim.ExcitationFileHandler; //TODO ARG move to slim2
-import loci.slim2.cursor.FittingCursor;
-import loci.slim2.process.interactive.ui.DecayGraph;
-import loci.slim2.process.interactive.ui.DefaultDecayGraph;
-import loci.slim2.process.interactive.ui.UserInterfacePanel;
-import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
-import loci.slim2.FittingContext;
+import loci.curvefitter.IFitterEstimator;
+
+import loci.slim2.process.interactive.cursor.FittingCursor;
+import loci.slim2.process.interactive.cursor.FittingCursorHelper;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
+import loci.slim2.heuristics.DefaultFitterEstimator;
 import loci.slim2.process.FitSettings;
 import loci.slim2.process.InteractiveProcessor;
+import loci.slim2.process.interactive.ui.DecayGraph;
+import loci.slim2.process.interactive.ui.DefaultDecayGraph;
 import loci.slim2.process.interactive.ui.DefaultUserInterfacePanel;
 import loci.slim2.process.interactive.ui.ThresholdUpdate;
 import loci.slim2.process.interactive.ui.UserInterfacePanel;
@@ -68,6 +61,8 @@ import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
 public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private DatasetService datasetService;
 	private DisplayService displayService;
+	private FittingCursor fittingCursor;
+	private FittingCursorHelper fittingCursorHelper;
 	private LifetimeDatasetWrapper lifetimeDatasetWrapper;
 	private LifetimeGrayscaleDataset lifetimeGrayscaleDataset;
 	private DecayGraph decayGraph;
@@ -106,6 +101,10 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		createGrayscale(dataset);
 		bins = lifetimeDatasetWrapper.getBins();
 		timeInc = lifetimeDatasetWrapper.getTimeIncrement();
+		IFitterEstimator fitterEstimator = new DefaultFitterEstimator();
+		fittingCursor = new FittingCursor(timeInc, bins, fitterEstimator);
+		fittingCursorHelper = new FittingCursorHelper();
+		fittingCursorHelper.setFittingCursor(fittingCursor);
 		
 		//TODO ARG 6/13/13
 		//  need bins & timeRange (sic!!)
@@ -119,7 +118,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 			boolean tabbed = false;
 			boolean showTau = false;
 			String[] binning = new String[] { "none", "3x3", "5x5", "7x7", "9x9", "11x11" };
-			uiPanel = new DefaultUserInterfacePanel(tabbed, showTau, bins, timeInc, new String[] { "one", "two" }, binning, null, null);
+			uiPanel = new DefaultUserInterfacePanel(tabbed, showTau, bins, timeInc, new String[] { "one", "two" }, binning, fittingCursorHelper, fitterEstimator);
 		}
         uiPanel.setX(0);
         uiPanel.setY(0);
@@ -518,12 +517,9 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		//TODO ARG there is more coming out of the fit than just fittedParams nowadays
 		//  the IJ1 plugin already has two different ways of doing this!! why hatch a third?
 		
-		for (int i = 0; i < 12; ++i) {
-			System.out.print(" " + decay[i]);
-		}
-		System.out.println();
-		
-		showDecayGraph("TITLE", uiPanel, null, null, 123); // 1st null is fittingcursor
+		ICurveFitData data = null;
+		int photons = 123;
+		showDecayGraph("TITLE", uiPanel, fittingCursor, data, photons);
 	}
 
 	/**
@@ -559,10 +555,12 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
             final ICurveFitData data,
             int photons)
     {
+		System.out.println("showDecayGraph " + title);
 		if (null == decayGraph) {
 			decayGraph = new DefaultDecayGraph();
 		}
         JFrame frame = decayGraph.init(uiPanel.getFrame(), bins, timeInc, null); //TODO ARG need grayscale image as 'pixel picker'
+		frame.toFront();
         decayGraph.setTitle(title);
         decayGraph.setFittingCursor(fittingCursor);
         double transStart = fittingCursor.getTransientStartValue();
@@ -580,7 +578,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 			prompt = _excitationPanel.getValues(startIndex, stopIndex, base);
 		}*/
         decayGraph.setData(startIndex, prompt, data);
-		decayGraph.setChiSquare(data.getParams()[0]);
+//TODO ARG added (temp) test for null data
+		if (null != data) decayGraph.setChiSquare(data.getParams()[0]);
         decayGraph.setPhotons(photons);
     }
 }
