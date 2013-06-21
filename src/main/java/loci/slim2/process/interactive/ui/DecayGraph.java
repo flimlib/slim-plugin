@@ -32,7 +32,7 @@ package loci.slim2.process.interactive.ui;
 
 import javax.swing.JFrame;
 
-import loci.curvefitter.ICurveFitData;
+import loci.slim2.fitting.FitResults;
 import loci.slim2.process.interactive.cursor.FittingCursor;
 import loci.slim2.process.interactive.ui.PixelPicker;
 
@@ -72,9 +72,9 @@ public interface DecayGraph {
      *
 	 * @param startIndex
      * @param prompt
-     * @param data
+     * @param fitResults
      */
-    public void setData(int startIndex, double[] prompt, ICurveFitData data);
+    public void setData(int startIndex, double[] prompt, FitResults fitResults);
 
 	/**
 	 * Sets reduced chi square of fit.

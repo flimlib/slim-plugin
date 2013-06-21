@@ -31,36 +31,108 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.fitting;
 
 /**
- * Interface for container for local fitted results for current pixel.
+ * Container for local fitted results for current pixel.
  * 
  * @author Aivar Grislis
  */
 public class DefaultFitResults implements FitResults {
+	int errorCode;
     double chiSquare;
     double[] params;
     double[] yFitted;
-    
+	double[] trans;
+	int photonCount;
+	int transStart;
+	int dataStart;
+	int transStop;
+
+	@Override
+	public void setErrorCode(int errorCode) {
+		this.errorCode = errorCode;
+	}
+	
+	@Override	
+	public int getErrorCode() {
+		return errorCode;
+	}
+	
+	@Override    
     public void setChiSquare(double chiSquare) {
         this.chiSquare = chiSquare;
     }
-    
+	
+	@Override    
     public double getChiSquare() {
         return chiSquare;
     }
-    
+	
+	@Override    
     public void setParams(double[] params) {
         this.params = params;
     }
-    
+	
+	@Override    
     public double[] getParams() {
         return params;
     }
-    
+	
+	@Override    
     public void setYFitted(double[] yFitted) {
         this.yFitted = yFitted;
     }
-    
+	
+	@Override    
     public double[] getYFitted() {
         return yFitted;
     }
+	
+	@Override
+	public void setTransient(double[] trans) {
+		this.trans = trans;
+	}
+	
+	@Override
+	public double[] getTransient() {
+		return trans;
+	}
+	
+	@Override
+	public void setPhotonCount(int photonCount) {
+		this.photonCount = photonCount;
+	}
+
+	@Override
+	public int getPhotonCount() {
+		return photonCount;
+	}
+
+	@Override
+	public void setTransStart(int transStart) {
+		this.transStart = transStart;
+	}
+
+	@Override
+	public int getTransStart() {
+		return transStart;
+	}
+
+	@Override
+	public void setDataStart(int dataStart) {
+		this.dataStart = dataStart;
+	}
+
+	@Override
+	public int getDataStart() {
+		return dataStart;
+	}
+
+	@Override
+	public void setTransStop(int transStop) {
+		this.transStop = transStop;
+	}
+
+	@Override
+	public int getTransStop() {
+		return transStop;
+	}
 }

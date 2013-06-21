@@ -163,11 +163,11 @@ public interface UserInterfacePanel {
     public void setChiSquareTarget(double chiSqTarget);   
 
     /**
-     * Gets binning plugin name.
+     * Gets binning index.
      *
-     * @return binning plugin name
+     * @return binning index
      */
-    public String getBinning();
+    public int getBinning();
 
     /**
      * Gets pixel x.

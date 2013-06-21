@@ -57,6 +57,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import loci.curvefitter.ICurveFitData;
+import loci.slim2.fitting.FitResults;
 import loci.slim2.process.interactive.cursor.FittingCursor;
 import loci.slim2.process.interactive.cursor.FittingCursorListener;
 
@@ -299,8 +300,8 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
     }
 
     @Override
-    public void setData(int promptIndex, double[] prompt, ICurveFitData data) {
-        createDatasets(bins, timeInc, promptIndex, prompt, data);
+    public void setData(int promptIndex, double[] prompt, FitResults fitResults) {
+        createDatasets(bins, timeInc, promptIndex, prompt, fittingCursor, fitResults);
 
     }
 
@@ -437,9 +438,10 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
      * @param timeInc time increment per time bin
 	 * @param promptIndex starting bin of prompt
 	 * @param prompt prompt curve
-     * @param data from the fit
+	 * @param fittingCursor cursor information
+     * @param fitResults from the fit
      */
-    private void createDatasets(int bins, double timeInc, int promptIndex, double[] prompt, ICurveFitData data)
+    private void createDatasets(int bins, double timeInc, int promptIndex, double[] prompt, FittingCursor fittingCursor, FitResults fitResults)
     {
 		XYSeries series1 = new XYSeries("Prompt");
         XYSeries series2 = new XYSeries("Fitted");
@@ -447,16 +449,13 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
         XYSeries series4 = new XYSeries("Residuals");
 		double xCurrent;
 		
-		//TODO ARG
-		if (null == data) return;
-		
         // show transient data; find the maximum transient data in this pass
         double yDataMax = -Double.MAX_VALUE;
         xCurrent = 0.0;
         for (int i = 0; i < bins; ++i) {
             // show transient data
-            double yData = data.getTransient()[i];
-            
+            double yData = fitResults.getTransient()[i];
+
             // keep track of maximum
             if (yData > yDataMax) {
                 yDataMax = yData;
@@ -502,9 +501,14 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
 			}
 		}
        
-        int transStart = data.getTransStartIndex();
-        int dataStart  = data.getDataStartIndex();
-        int transEnd   = data.getTransEndIndex();
+        int transStart = fittingCursor.getTransientStartBin();
+        int dataStart  = fittingCursor.getDataStartBin();
+        int transEnd   = fittingCursor.getTransientStopBin();
+		
+		System.out.println("graphing cursors indices are " + transStart + " " + dataStart + " " + transEnd);
+		if (0 == transStart && 0 == dataStart && 0 == transEnd) {
+			transEnd = bins - 1;
+		}
 
         // show fitted & residuals
         xCurrent = 0.0;
@@ -512,7 +516,7 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
             // only within cursors
             if (transStart <= i && i <= transEnd) {
                 // from transStart..transEnd show fitted
-                double yFitted = data.getYFitted()[i - transStart];
+                double yFitted = fitResults.getYFitted()[i - transStart];
  
                 // don't allow fitted to grow the chart downward or upward
                 if (1.0 <= yFitted && yFitted <= yDataMax) {
@@ -524,7 +528,7 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
                 
                 // from dataStart..transEnd show residuals
                 if (dataStart <= i && 0.0 < yFitted) {
-                    double yData = data.getTransient()[i];
+                    double yData = fitResults.getTransient()[i];
                     series4.add(xCurrent, yData - yFitted);
                 }
                 else {

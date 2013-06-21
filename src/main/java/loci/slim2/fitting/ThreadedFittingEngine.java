@@ -30,12 +30,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim2.fitting;
 
-import loci.curvefitter.ICurveFitter;
-
+import imagej.thread.ThreadPool;
 import java.util.ArrayList;
 import java.util.List;
-
-import imagej.thread.ThreadPool;
+import loci.curvefitter.ICurveFitter;
 
 /**
  * Fitting engine that uses a thread pool.
@@ -43,8 +41,6 @@ import imagej.thread.ThreadPool;
  * @author Aivar Grislis
  */
 public class ThreadedFittingEngine implements FittingEngine {
-    private static int THREADS = 4;
-    private int threads = THREADS;
     private ThreadPool<FitResults> threadPool;
     private ICurveFitter curveFitter;
     
@@ -52,55 +48,30 @@ public class ThreadedFittingEngine implements FittingEngine {
         threadPool = new ThreadPool<FitResults>();
     }
  
-    /**
-     * Cancel fit or done fitting.
-     */
+    @Override
     public void shutdown() {
         threadPool.shutdown();
     }
     
-    /**
-     * Sets number of threads to use.
-     * 
-     * @param threads 
-     */
+    @Override
     public synchronized void setThreads(int threads) {
         threadPool.setThreads(threads);
     }
     
-    /**
-     * Sets curve fitter to use.
-     * 
-     * @param curve fitter 
-     */
+    @Override
     public synchronized void setCurveFitter(ICurveFitter curveFitter) {
-        curveFitter = curveFitter;
+        this.curveFitter = curveFitter;
     }
     
-    /**
-     * Fits a single pixel with given parameters.
-     * 
-     * Nothing to parallelize, doesn't use the ThreadPool.
-     * 
-     * @param params
-     * @param data
-     * @return results
-     */
+    @Override
     public synchronized FitResults fit
             (final GlobalFitParams params, final LocalFitParams data) {
-        FittingCallable callable
-                = null; //TODO ARG Configuration.getInstance().newFittingEngineCallable();
+        FittingCallable callable = new DefaultFittingCallable();
         callable.setup(curveFitter, params, data);
 		return callable.call();
     }
     
-    /**
-     * Fit one or more pixels with given parameters.
-     * 
-     * @param params given parameters
-     * @param data one or more pixels data
-     * @return results one or more pixels results
-     */
+    @Override
     public synchronized List<FitResults> fit
             (final GlobalFitParams params, final List<LocalFitParams> dataList) {
         
@@ -108,8 +79,7 @@ public class ThreadedFittingEngine implements FittingEngine {
                 = new ArrayList<FittingCallable>();
         
         for (LocalFitParams data : dataList) {
-            FittingCallable callable = null;
-                    //TODO ARG = Configuration.getInstance().newFittingEngineCallable();
+            FittingCallable callable = new DefaultFittingCallable();
             callable.setup(curveFitter, params, data);
             callableList.add(callable);
         }

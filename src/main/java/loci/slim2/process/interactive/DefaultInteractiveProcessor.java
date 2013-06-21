@@ -38,8 +38,20 @@ import imagej.display.DisplayService;
 import javax.swing.JFrame;
 
 import loci.curvefitter.ICurveFitData;
+import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.IFitterEstimator;
+import loci.curvefitter.JaolhoCurveFitter;
+import loci.curvefitter.SLIMCurveFitter;
+import loci.slim.heuristics.FitterEstimator;
+import loci.slim.ui.IUserInterfacePanel;
 
+import loci.slim2.fitting.DefaultGlobalFitParams;
+import loci.slim2.fitting.DefaultLocalFitParams;
+import loci.slim2.fitting.FitResults;
+import loci.slim2.fitting.FittingEngine;
+import loci.slim2.fitting.GlobalFitParams;
+import loci.slim2.fitting.LocalFitParams;
+import loci.slim2.fitting.ThreadedFittingEngine;
 import loci.slim2.process.interactive.cursor.FittingCursor;
 import loci.slim2.process.interactive.cursor.FittingCursorHelper;
 import loci.slim2.decay.LifetimeDatasetWrapper;
@@ -61,6 +73,8 @@ import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
 public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private DatasetService datasetService;
 	private DisplayService displayService;
+	private FittingEngine fittingEngine;
+	private IFitterEstimator fitterEstimator;
 	private FittingCursor fittingCursor;
 	private FittingCursorHelper fittingCursorHelper;
 	private LifetimeDatasetWrapper lifetimeDatasetWrapper;
@@ -101,7 +115,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		createGrayscale(dataset);
 		bins = lifetimeDatasetWrapper.getBins();
 		timeInc = lifetimeDatasetWrapper.getTimeIncrement();
-		IFitterEstimator fitterEstimator = new DefaultFitterEstimator();
+		fitterEstimator = new DefaultFitterEstimator();
 		fittingCursor = new FittingCursor(timeInc, bins, fitterEstimator);
 		fittingCursorHelper = new FittingCursorHelper();
 		fittingCursorHelper.setFittingCursor(fittingCursor);
@@ -123,7 +137,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         uiPanel.setX(0);
         uiPanel.setY(0);
         uiPanel.setThreshold(10); //estimator.getThreshold());
-        uiPanel.setChiSquareTarget(1.25); //estimator.getChiSquareTarget());
+        uiPanel.setChiSquareTarget(1.5); //estimator.getChiSquareTarget());
        // uiPanel.setFunctionParameters(0, estimator.getParameters(1, false));
        // uiPanel.setFunctionParameters(1, estimator.getParameters(2, false));
        // uiPanel.setFunctionParameters(2, estimator.getParameters(3, false));
@@ -507,41 +521,173 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         uiPanel.setX((int) position[0]);
         uiPanel.setY((int) position[1]);
 		
+		System.out.println("fitPixel(" + position[0] + "," + position[1] + ")");
+		
 		// update grayscale cursor
 		//TODO ARG how to paint a cursor on the grayscale version?
 
-		int binSize = 0; // no binning for now
+		int binSize = uiPanel.getBinning();
 		double[] decay = lifetimeDatasetWrapper.getBinnedDecay(binSize, position);
-		double[] fittedParams = fitDecay(decay, null);
-		
-		//TODO ARG there is more coming out of the fit than just fittedParams nowadays
-		//  the IJ1 plugin already has two different ways of doing this!! why hatch a third?
-		
-		ICurveFitData data = null;
-		int photons = 123;
-		showDecayGraph("TITLE", uiPanel, fittingCursor, data, photons);
+		FitResults fitResults = fitDecay(decay);
+
+		showDecayGraph("TITLE", uiPanel, fittingCursor, fitResults);
 	}
 
 	/**
-	 * Combined, summed decay fitting, per plane.
+	 * Combined, summed decay fitting, per plane. //TODO ARG should there be option to sum all planes???
 	 *
 	 * @param position X & Y are ignored
+	 * @return fit results
 	 */
 	private void fitSummed(long[] position) {
 		double[] decay = lifetimeDatasetWrapper.getCombinedPlaneDecay(position);
-		double[] fittedParams = fitDecay(decay, null);
-
+		FitResults fitResults = fitDecay(decay);
+		
+		showDecayGraph("SUMMED", uiPanel, fittingCursor, fitResults);
 	}
 
-	//TODO ARG a stand-in for some basic fitting method elsewhere
-	private double[] fitDecay(double[] decay, FitSettings settings) {
-		for (double d : decay) {
-			System.out.print(" " + d);
-		}
-		System.out.println();
-		return null;
+	private FitResults fitDecay(double[] decay) {
+		GlobalFitParams params = getGlobalFitParams(uiPanel);
+		
+		LocalFitParams data = new DefaultLocalFitParams();
+		data.setY(decay);
+		data.setSig(null);
+		data.setParams(uiPanel.getParameters());
+		double[] yFitted = new double[bins];
+		data.setYFitted(yFitted);
+		
+		return getFittingEngine(uiPanel).fit(params, data);
 	}
 	
+	private GlobalFitParams getGlobalFitParams(UserInterfacePanel ui) {
+		GlobalFitParams params = new DefaultGlobalFitParams();
+		params.setEstimator(fitterEstimator);
+		params.setFitAlgorithm(ui.getAlgorithm());
+		params.setFitFunction(ui.getFunction());
+		params.setNoiseModel(ui.getNoiseModel());
+		params.setXInc(timeInc);
+		params.setPrompt(null); //TODO
+		params.setChiSquareTarget(ui.getChiSquareTarget());
+		params.setFree(translateFree(ui.getFunction(), ui.getFree())); //TODO ARG this is already set up in ICurveFitter; redundant
+		params.setStartPrompt(0); //TODO rest
+		params.setStopPrompt(0);
+		params.setTransientStart(23); //TODO ARG values from IJ1 run on this same brightest pixel for gpl1.sdt!
+		params.setDataStart(27);
+		params.setTransientStop(57);
+		return params;
+	}
+	
+	private FittingEngine getFittingEngine(UserInterfacePanel ui) {
+		if (null == fittingEngine) {
+			fittingEngine = new ThreadedFittingEngine();
+		}
+		fittingEngine.setCurveFitter(getCurveFitter(ui));
+		uiPanel.getAlgorithm();
+		return fittingEngine;
+	}
+	
+    /*
+     * Gets the appropriate curve fitter for the current fit.
+     *
+     * @param uiPanel has curve fitter selection
+     */
+    private ICurveFitter getCurveFitter(UserInterfacePanel ui) {
+        ICurveFitter curveFitter = null;
+        switch (ui.getAlgorithm()) {
+            case JAOLHO:
+                curveFitter = new JaolhoCurveFitter();
+                break;
+            case SLIMCURVE_RLD:
+                curveFitter = new SLIMCurveFitter();
+                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.SLIMCURVE_RLD);
+                break;
+            case SLIMCURVE_LMA:
+                curveFitter = new SLIMCurveFitter();
+                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.SLIMCURVE_LMA);
+                break;
+            case SLIMCURVE_RLD_LMA:
+                curveFitter = new SLIMCurveFitter();
+                curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.SLIMCURVE_RLD_LMA);
+                break;
+        }
+        ICurveFitter.FitFunction fitFunction = null;
+        switch (ui.getFunction()) {
+            case SINGLE_EXPONENTIAL:
+                fitFunction = ICurveFitter.FitFunction.SINGLE_EXPONENTIAL;
+                break;
+            case DOUBLE_EXPONENTIAL:
+                fitFunction = ICurveFitter.FitFunction.DOUBLE_EXPONENTIAL;
+                break;
+            case TRIPLE_EXPONENTIAL:
+                fitFunction = ICurveFitter.FitFunction.TRIPLE_EXPONENTIAL;
+                break;
+            case STRETCHED_EXPONENTIAL:
+                fitFunction = ICurveFitter.FitFunction.STRETCHED_EXPONENTIAL;
+                break;
+        }
+        curveFitter.setEstimator(new FitterEstimator());
+        curveFitter.setFitFunction(fitFunction);
+        curveFitter.setNoiseModel(ui.getNoiseModel());
+        curveFitter.setXInc(timeInc);
+        curveFitter.setFree(translateFree(ui.getFunction(), ui.getFree()));
+		//TODO ARG get prompt working again:
+        /* if (null != _excitationPanel) {
+            double[] excitation = null;
+            int startIndex = _fittingCursor.getPromptStartBin();
+            int stopIndex  = _fittingCursor.getPromptStopBin();
+            double base    = _fittingCursor.getPromptBaselineValue();
+            excitation = _excitationPanel.getValues(startIndex, stopIndex, base);          
+            curveFitter.setInstrumentResponse(excitation);
+        } */
+        return curveFitter;
+    }
+	
+    /*
+     * Handles reordering the array that describes which fit parameters are
+     * free (vs. fixed).
+     */
+    private boolean[] translateFree(ICurveFitter.FitFunction fitFunction, boolean free[]) {
+        boolean translated[] = new boolean[free.length];
+        switch (fitFunction) {
+            case SINGLE_EXPONENTIAL:
+                // incoming UI order is A, T, Z
+                // SLIMCurve wants Z, A, T
+                translated[0] = free[2];
+                translated[1] = free[0];
+                translated[2] = free[1];
+                break;
+            case DOUBLE_EXPONENTIAL:
+                // incoming UI order is A1 T1 A2 T2 Z
+                // SLIMCurve wants Z A1 T1 A2 T2
+                translated[0] = free[4];
+                translated[1] = free[0];
+                translated[2] = free[1];
+                translated[3] = free[2];
+                translated[4] = free[3];
+                break;
+            case TRIPLE_EXPONENTIAL:
+                // incoming UI order is A1 T1 A2 T2 A3 T3 Z
+                // SLIMCurve wants Z A1 T1 A2 T2 A3 T3
+                translated[0] = free[6];
+                translated[1] = free[0];
+                translated[2] = free[1];
+                translated[3] = free[2];
+                translated[4] = free[3];
+                translated[5] = free[4];
+                translated[6] = free[5];
+                break;
+            case STRETCHED_EXPONENTIAL:
+                // incoming UI order is A T H Z
+                // SLIMCurve wants Z A T H
+                translated[0] = free[3];
+                translated[1] = free[0];
+                translated[2] = free[1];
+                translated[3] = free[2];
+                break;
+        }
+        return translated;
+    }
+
     /*
      * Helper function for the fit.  Shows the decay curve.
      *
@@ -551,9 +697,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
      */
     private void showDecayGraph(final String title,
             final UserInterfacePanel uiPanel,
-            final FittingCursor fittingCursor,
-            final ICurveFitData data,
-            int photons)
+			final FittingCursor fittingCursor,
+			final FitResults fitResults)
     {
 		System.out.println("showDecayGraph " + title);
 		if (null == decayGraph) {
@@ -566,6 +711,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         double transStart = fittingCursor.getTransientStartValue();
         double dataStart  = fittingCursor.getDataStartValue();
         double transStop  = fittingCursor.getTransientStopValue();
+		
+		System.out.println("transStart " + transStart + " dataStart " + dataStart + " transStop " + transStop);
         decayGraph.setStartStop(transStart, dataStart, transStop);
 		double[] prompt = null;
 		int startIndex = 0;
@@ -577,9 +724,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
             double base  = _fittingCursor.getPromptBaselineValue();
 			prompt = _excitationPanel.getValues(startIndex, stopIndex, base);
 		}*/
-        decayGraph.setData(startIndex, prompt, data);
-//TODO ARG added (temp) test for null data
-		if (null != data) decayGraph.setChiSquare(data.getParams()[0]);
-        decayGraph.setPhotons(photons);
+        decayGraph.setData(startIndex, prompt, fitResults);
+		decayGraph.setChiSquare(fitResults.getParams()[0]);
+        decayGraph.setPhotons(fitResults.getPhotonCount());
     }
 }

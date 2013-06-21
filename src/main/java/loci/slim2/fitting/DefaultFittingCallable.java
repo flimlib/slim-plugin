@@ -75,22 +75,20 @@ public class DefaultFittingCallable implements FittingCallable {
         curveFitData.setParams(localParams.getParams().clone()); // params is overwritten
         curveFitData.setYFitted(localParams.getYFitted());
         
-        ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData };
+        ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData }; //TODO refactor to non-array
 		
         int returnValue = curveFitter.fitData(curveFitDataArray);
 
         result = new DefaultFitResults();
+		result.setErrorCode(returnValue);
+		result.setChiSquare(curveFitData.getChiSquare());
 		result.setParams(curveFitData.getParams());
-		if (returnValue >= 0) {
-			// success
-			result.setChiSquare(curveFitData.getChiSquare());
-			result.setYFitted(curveFitData.getYFitted());
-		}
-		else {
-			// failed to fit
-			result.setChiSquare(0.0);
-			result.setYFitted(new double[] { });
-		}
+		result.setYFitted(curveFitData.getYFitted());
+		result.setPhotonCount(123);
+		result.setTransient(localParams.getY());
+		result.setTransStart(globalParams.getTransientStart());
+		result.setDataStart(globalParams.getDataStart());
+		result.setTransStop(globalParams.getTransientStop());
  
         return result;
     }   

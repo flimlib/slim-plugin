@@ -1887,9 +1887,8 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
 		thresholdSpinner.setValue(threshold);
     }
 
-    public String getBinning() {
-        String selected = (String) binningComboBox.getSelectedItem();
-        return selected;
+    public int getBinning() {
+		return binningComboBox.getSelectedIndex();
     }
 
     public double getChiSquareTarget() {
