@@ -39,11 +39,10 @@ import javax.swing.JFrame;
 
 import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
+import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.JaolhoCurveFitter;
 import loci.curvefitter.SLIMCurveFitter;
-import loci.slim.heuristics.FitterEstimator;
-import loci.slim.ui.IUserInterfacePanel;
 
 import loci.slim2.fitting.DefaultGlobalFitParams;
 import loci.slim2.fitting.DefaultLocalFitParams;
@@ -52,13 +51,15 @@ import loci.slim2.fitting.FittingEngine;
 import loci.slim2.fitting.GlobalFitParams;
 import loci.slim2.fitting.LocalFitParams;
 import loci.slim2.fitting.ThreadedFittingEngine;
-import loci.slim2.process.interactive.cursor.FittingCursor;
-import loci.slim2.process.interactive.cursor.FittingCursorHelper;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
+import loci.slim2.heuristics.CursorEstimator;
 import loci.slim2.heuristics.DefaultFitterEstimator;
 import loci.slim2.process.FitSettings;
 import loci.slim2.process.InteractiveProcessor;
+import loci.slim2.process.interactive.cursor.FittingCursor;
+import loci.slim2.process.interactive.cursor.FittingCursorHelper;
+import loci.slim2.process.interactive.cursor.FittingCursorListener;
 import loci.slim2.process.interactive.ui.DecayGraph;
 import loci.slim2.process.interactive.ui.DefaultDecayGraph;
 import loci.slim2.process.interactive.ui.DefaultUserInterfacePanel;
@@ -99,7 +100,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	
 	@Override
 	public FitSettings getFitSettings() {
-		return null; //TODO ARG
+		return null; //TODO ARG might be defunct; fit settings is a way to save/restore all settings
 	}
 
 	@Override
@@ -113,30 +114,79 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		
 		// create the clickable grayscale representation
 		createGrayscale(dataset);
+		
+		// create cursor
 		bins = lifetimeDatasetWrapper.getBins();
 		timeInc = lifetimeDatasetWrapper.getTimeIncrement();
 		fitterEstimator = new DefaultFitterEstimator();
+		System.out.println("timeInc is " + timeInc);
 		fittingCursor = new FittingCursor(timeInc, bins, fitterEstimator);
+		fittingCursor.addListener(
+			new FittingCursorListener() {
+				private Integer saveTransStart    = null;
+				private Integer saveDataStart     = null;
+				private Integer saveTransStop     = null;
+				private Integer savePromptStart   = null;
+				private Integer savePromptStop    = null;
+				private Double savePromptBaseline = null;
+				
+				@Override
+				public void cursorChanged(FittingCursor cursor) {
+					// get current cursor values
+					int transStart        = cursor.getTransientStartBin();
+					int dataStart         = cursor.getDataStartBin();
+					int transStop         = cursor.getTransientStopBin();
+					int promptStart       = cursor.getPromptStartBin();
+					int promptStop        = cursor.getPromptStopBin();
+					double promptBaseline = cursor.getPromptBaselineValue();
+					
+					// look for changes, current vs. saved cursor values
+					if (null == saveTransStart
+							|| null == saveDataStart
+							|| null == saveTransStop
+							|| null == savePromptStart
+							|| null == savePromptStop
+							|| null == savePromptBaseline
+							|| transStart     != saveTransStart
+							|| dataStart      != saveDataStart
+							|| transStop      != saveTransStop
+							|| promptStart    != savePromptStart
+							|| promptStop     != savePromptStop
+							|| promptBaseline != savePromptBaseline) {
+						
+						// update saved cursor values for next time
+						saveTransStart     = transStart;
+						saveDataStart      = dataStart;
+						saveTransStop      = transStop;
+						savePromptStart    = promptStart;
+						savePromptStop     = promptStop;
+						savePromptBaseline = promptBaseline;
+						
+						if (null != uiPanel) {
+							if (FitRegion.SUMMED == uiPanel.getRegion()) {
+								fitSummed(position);
+							}
+							else {
+								fitPixel(position);
+							}
+						}
+					}
+				}
+			}
+		);
 		fittingCursorHelper = new FittingCursorHelper();
 		fittingCursorHelper.setFittingCursor(fittingCursor);
 		
-		//TODO ARG 6/13/13
-		//  need bins & timeRange (sic!!)
-		// need to create a 'FittingCursor'
-		// if you look at this top-down there is not much info about the dataset yet
-		//  we just know it has a lifetime dimension (b/c of workarounds, not nec. "Lifetime")
-		
 		// display the UI
 		if (null == uiPanel) {
-			System.out.println(">>>>>>>bins is " + bins + " <<<<<<<<<<<");
 			boolean tabbed = false;
-			boolean showTau = false;
+			boolean showTau = true;
 			String[] binning = new String[] { "none", "3x3", "5x5", "7x7", "9x9", "11x11" };
 			uiPanel = new DefaultUserInterfacePanel(tabbed, showTau, bins, timeInc, new String[] { "one", "two" }, binning, fittingCursorHelper, fitterEstimator);
 		}
         uiPanel.setX(0);
         uiPanel.setY(0);
-        uiPanel.setThreshold(10); //estimator.getThreshold());
+        uiPanel.setThreshold(10); //estimator.getThreshold()); //TODO ARG use command to get initial threshold estimate
         uiPanel.setChiSquareTarget(1.5); //estimator.getChiSquareTarget());
        // uiPanel.setFunctionParameters(0, estimator.getParameters(1, false));
        // uiPanel.setFunctionParameters(1, estimator.getParameters(2, false));
@@ -148,7 +198,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 				@Override
 				public int estimateThreshold() {
 					System.out.println("ESTIMATE THRESHOLD!");
-					return 120;
+					return 120; //TODO ARG
 				}
 				
 				@Override
@@ -429,8 +479,15 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         uiPanel.getFrame().setLocationRelativeTo(null);
         uiPanel.getFrame().setVisible(true);
 		
-		// fit the brightest pixel
+		// get the brightest pixel decay, current plane
 		position = lifetimeGrayscaleDataset.getBrightestPixel();
+		int binSize = uiPanel.getBinning();
+		double[] decay = lifetimeDatasetWrapper.getBinnedDecay(binSize, position);
+		
+		// initial cursor estimate
+		initCursors(decay);
+		
+		// fit brightest pixel
 		System.out.println("brightest pixel is " + position[0] + " " + position[1]);
 		fitPixel(position);
 
@@ -481,6 +538,25 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		// return whether to quit
 		return(quit);
 	}
+
+	/**
+	 * Does initial estimate of cursors.
+	 * 
+	 * @param decay 
+	 */
+	private void initCursors(double[] decay) {
+        int[] results = CursorEstimator.estimateDecayCursors(timeInc, decay);
+        int transientStart = results[CursorEstimator.TRANSIENT_START];
+        int dataStart = results[CursorEstimator.DATA_START];
+        int transientStop = results[CursorEstimator.TRANSIENT_STOP];
+
+        // want to batch all of the fitting cursor notifications to listeners
+        fittingCursor.suspendNotifications();
+        fittingCursor.setTransientStartBin(transientStart);
+        fittingCursor.setDataStartBin(dataStart);
+        fittingCursor.setTransientStopBin(transientStop);
+        fittingCursor.sendNotifications();
+	}
 	
 	private void createGrayscale(Dataset dataset) {
 		// wrap the dataset for lifetime information
@@ -518,19 +594,24 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	 */
 	private void fitPixel(long[] position) {
 		// make sure displayed UI panel X Y is up to date
-        uiPanel.setX((int) position[0]);
-        uiPanel.setY((int) position[1]);
-		
-		System.out.println("fitPixel(" + position[0] + "," + position[1] + ")");
+		int x = (int) position[0];
+		int y = (int) position[1];
+        uiPanel.setX(x);
+        uiPanel.setY(y);
 		
 		// update grayscale cursor
 		//TODO ARG how to paint a cursor on the grayscale version?
 
+		// do the fit
 		int binSize = uiPanel.getBinning();
 		double[] decay = lifetimeDatasetWrapper.getBinnedDecay(binSize, position);
 		FitResults fitResults = fitDecay(decay);
 
-		showDecayGraph("TITLE", uiPanel, fittingCursor, fitResults);
+		// show fitted parameters
+		uiPanel.setParameters(fitResults.getParams(), fitResults.getChiSquare());
+
+		// show decay, fitted, and residuals
+		showDecayGraph("Pixel " + x + " " + y, uiPanel, fittingCursor, fitResults);
 	}
 
 	/**
@@ -542,12 +623,22 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private void fitSummed(long[] position) {
 		double[] decay = lifetimeDatasetWrapper.getCombinedPlaneDecay(position);
 		FitResults fitResults = fitDecay(decay);
-		
-		showDecayGraph("SUMMED", uiPanel, fittingCursor, fitResults);
+
+		// show fitted parameters
+		uiPanel.setParameters(fitResults.getParams(), fitResults.getChiSquare());
+
+		// show decay, fitted, and residuals
+		showDecayGraph("Summed Pixels", uiPanel, fittingCursor, fitResults);
 	}
 
+	/**
+	 * Helper routine to do the fit.
+	 * 
+	 * @param decay
+	 * @return 
+	 */
 	private FitResults fitDecay(double[] decay) {
-		GlobalFitParams params = getGlobalFitParams(uiPanel);
+		GlobalFitParams params = getGlobalFitParams(uiPanel, fittingCursor);
 		
 		LocalFitParams data = new DefaultLocalFitParams();
 		data.setY(decay);
@@ -558,8 +649,16 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		
 		return getFittingEngine(uiPanel).fit(params, data);
 	}
-	
-	private GlobalFitParams getGlobalFitParams(UserInterfacePanel ui) {
+
+	//TODO ARG PROMPT!!
+	/**
+	 * Helper routine to get fit parameters for a group of pixels.
+	 * 
+	 * @param ui
+	 * @param fittingCursor
+	 * @return 
+	 */
+	private GlobalFitParams getGlobalFitParams(UserInterfacePanel ui, FittingCursor fittingCursor) {
 		GlobalFitParams params = new DefaultGlobalFitParams();
 		params.setEstimator(fitterEstimator);
 		params.setFitAlgorithm(ui.getAlgorithm());
@@ -568,15 +667,21 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		params.setXInc(timeInc);
 		params.setPrompt(null); //TODO
 		params.setChiSquareTarget(ui.getChiSquareTarget());
-		params.setFree(translateFree(ui.getFunction(), ui.getFree())); //TODO ARG this is already set up in ICurveFitter; redundant
+		params.setFree(translateFree(ui.getFunction(), ui.getFree()));
 		params.setStartPrompt(0); //TODO rest
 		params.setStopPrompt(0);
-		params.setTransientStart(23); //TODO ARG values from IJ1 run on this same brightest pixel for gpl1.sdt!
-		params.setDataStart(27);
-		params.setTransientStop(57);
+		params.setTransientStart(fittingCursor.getTransientStartBin());
+		params.setDataStart(fittingCursor.getDataStartBin());
+		params.setTransientStop(fittingCursor.getTransientStopBin());
 		return params;
 	}
-	
+
+	/**
+	 * Helper routine to get and set up fitting engine.
+	 * 
+	 * @param ui
+	 * @return 
+	 */
 	private FittingEngine getFittingEngine(UserInterfacePanel ui) {
 		if (null == fittingEngine) {
 			fittingEngine = new ThreadedFittingEngine();
@@ -625,12 +730,12 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
                 fitFunction = ICurveFitter.FitFunction.STRETCHED_EXPONENTIAL;
                 break;
         }
-        curveFitter.setEstimator(new FitterEstimator());
+        curveFitter.setEstimator(new DefaultFitterEstimator());
         curveFitter.setFitFunction(fitFunction);
         curveFitter.setNoiseModel(ui.getNoiseModel());
         curveFitter.setXInc(timeInc);
         curveFitter.setFree(translateFree(ui.getFunction(), ui.getFree()));
-		//TODO ARG get prompt working again:
+		//TODO ARG PROMPT get prompt working again:
         /* if (null != _excitationPanel) {
             double[] excitation = null;
             int startIndex = _fittingCursor.getPromptStartBin();
@@ -689,7 +794,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
     }
 
     /*
-     * Helper function for the fit.  Shows the decay curve.
+     * Shows the decay curve graph, with fitted results and residuals.
      *
      * @param title
      * @param uiPanel gets updates on dragged/start stop
@@ -700,7 +805,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 			final FittingCursor fittingCursor,
 			final FitResults fitResults)
     {
-		System.out.println("showDecayGraph " + title);
 		if (null == decayGraph) {
 			decayGraph = new DefaultDecayGraph();
 		}
@@ -712,11 +816,10 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         double dataStart  = fittingCursor.getDataStartValue();
         double transStop  = fittingCursor.getTransientStopValue();
 		
-		System.out.println("transStart " + transStart + " dataStart " + dataStart + " transStop " + transStop);
         decayGraph.setStartStop(transStart, dataStart, transStop);
 		double[] prompt = null;
 		int startIndex = 0;
-		//TODO ARG
+		//TODO ARG PROMPT
 		/*
 		if (null != _excitationPanel) {
             startIndex = _fittingCursor.getPromptStartBin();

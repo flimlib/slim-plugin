@@ -72,10 +72,11 @@ import loci.slim2.process.interactive.cursor.FittingCursorHelper;
 import loci.slim2.process.interactive.cursor.FittingCursorUI;
 
 /**
- *
+ * Default implementation of main UI panel.
+ * 
  * @author Aivar Grislis
  */
-public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCursorUI {
+public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	private static final String TITLE = "SLIM Plugin";
 	
     // Unicode special characters
@@ -195,6 +196,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
     
     private UserInterfacePanelListener listener;
 	private ThresholdUpdate thresholdListener;
+	private FittingCursorListener fittingCursorListener;
     int fittedParameterCount = 0;
 
     // UI panel
@@ -479,7 +481,8 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
         enablePromptCursors(false);
 
         // set up and show initial cursors
-        //TODO ARG currently null!!: fittingCursorHelper.setFittingCursorUI(this);
+		fittingCursorListener = new FittingCursorListener();
+        fittingCursorHelper.setFittingCursorUI(fittingCursorListener);
     }
 
     @Override
@@ -684,7 +687,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
 		promptBaselineSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptBaseline(getPromptBaseline());
+				fittingCursorHelper.setPromptBaseline(fittingCursorListener.getPromptBaseline());
 			}
 		});
 		cursorPanel.add(promptBaselineSpinner);
@@ -697,7 +700,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
 		transientStartSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setTransientStart(getTransientStart());
+				fittingCursorHelper.setTransientStart(fittingCursorListener.getTransientStart());
 			}
 		});
 		cursorPanel.add(transientStartSpinner);
@@ -710,7 +713,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
 		dataStartSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setDataStart(getDataStart());
+				fittingCursorHelper.setDataStart(fittingCursorListener.getDataStart());
 			}
 		});
 		cursorPanel.add(dataStartSpinner);
@@ -723,7 +726,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
 		transientStopSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setTransientStop(getTransientStop());
+				fittingCursorHelper.setTransientStop(fittingCursorListener.getTransientStop());
 			}
 		});
 		cursorPanel.add(transientStopSpinner);
@@ -736,7 +739,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
 		promptDelaySpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptDelay(getPromptDelay());
+				fittingCursorHelper.setPromptDelay(fittingCursorListener.getPromptDelay());
 			}
 		});
 		cursorPanel.add(promptDelaySpinner);
@@ -749,7 +752,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
 		promptWidthSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptWidth(getPromptWidth());
+				fittingCursorHelper.setPromptWidth(fittingCursorListener.getPromptWidth());
 			}
 		});
 		cursorPanel.add(promptWidthSpinner);
@@ -2204,111 +2207,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
         }
         return !checkBox.isSelected();
     }
-    
-    /**
-     * Gets the transient start cursor.
-     * 
-     * @return 
-     */
-    public String getTransientStart() {
-        return transientStartSpinner.getValue().toString();
-    }
-  
-    /**
-     * Sets the transient start cursor.
-     * 
-     * @param transientStart 
-     */
-    public void setTransientStart(String transientStart) {
-        transientStartSpinner.setValue(Double.parseDouble(transientStart));
-    }
-    
-    /**
-     * Gets the data start cursor.
-     * @return 
-     */ 
-    public String getDataStart() {
-        return dataStartSpinner.getValue().toString();
-    }
-    
-    /**
-     * Sets the data start cursor.
-     * @return 
-     */
-    public void setDataStart(String dataStart) {
-        dataStartSpinner.setValue(Double.parseDouble(dataStart));
-    }
-
-    /**
-     * Gets the transient end cursor.
-     * 
-     * @return 
-     */
-    public String getTransientStop() {
-        return transientStopSpinner.getValue().toString();
-    }
-
-    /**
-     * Sets the transient end cursor.
-     * 
-     * @param transientStop 
-     */
-    public void setTransientStop(String transientStop) {
-        transientStopSpinner.setValue(Double.parseDouble(transientStop));
-    }
-
-    /**
-     * Gets the excitation delay cursor.
-     * 
-     * @return 
-     */
-    public String getPromptDelay() {
-        return promptDelaySpinner.getValue().toString();
-    }
-
-    /**
-     * Sets the excitation delay cursor.
-     * 
-     * @param promptStart 
-     */
-    public void setPromptDelay(String promptDelay) {
-        promptDelaySpinner.setValue(Double.parseDouble(promptDelay));
-    }
-
-    /**
-     * Gets the excitation width cursor.
-     * @return 
-     */
-    public String getPromptWidth() {
-        return promptWidthSpinner.getValue().toString();
-    }
-
-    /**
-     * Sets the excitation width cursor.
-     * 
-     * @param promptWidth 
-     */
-    public void setPromptWidth(String promptWidth) {
-        promptWidthSpinner.setValue(Double.parseDouble(promptWidth));
-    }
-
-    /**
-     * Gets the excitation baseline.
-     * 
-     * @return 
-     */
-    public String getPromptBaseline() {
-        return promptBaselineSpinner.getValue().toString();
-    }
-
-    /**
-     * Sets the excitation baseline.
-     * 
-     * @param promptBaseline 
-     */
-    public void setPromptBaseline(String promptBaseline) {
-		promptBaselineSpinner.setValue(Double.parseDouble(promptBaseline));
-    }
 
     private int parseInt(JTextField field) {
         int value = 0;
@@ -2355,4 +2253,67 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel, FittingCur
         OpenDialog dialog = new OpenDialog(title, "");
         return dialog.getDirectory() + dialog.getFileName();
     }
+	
+	private class FittingCursorListener implements FittingCursorUI {
+		
+		@Override
+		public String getTransientStart() {
+			return transientStartSpinner.getValue().toString();
+		}
+  
+		@Override
+		public void setTransientStart(String transientStart) {
+			transientStartSpinner.setValue(Double.parseDouble(transientStart));
+		}
+    
+		@Override
+		public String getDataStart() {
+			return dataStartSpinner.getValue().toString();
+		}
+
+		@Override
+		public void setDataStart(String dataStart) {
+			dataStartSpinner.setValue(Double.parseDouble(dataStart));
+		}
+
+		@Override
+		public String getTransientStop() {
+			return transientStopSpinner.getValue().toString();
+		}
+
+		@Override
+		public void setTransientStop(String transientStop) {
+			transientStopSpinner.setValue(Double.parseDouble(transientStop));
+		}
+
+		@Override
+		public String getPromptDelay() {
+			return promptDelaySpinner.getValue().toString();
+		}
+
+		@Override
+		public void setPromptDelay(String promptDelay) {
+			promptDelaySpinner.setValue(Double.parseDouble(promptDelay));
+		}
+
+		@Override
+		public String getPromptWidth() {
+			return promptWidthSpinner.getValue().toString();
+		}
+
+		@Override
+		public void setPromptWidth(String promptWidth) {
+			promptWidthSpinner.setValue(Double.parseDouble(promptWidth));
+		}
+
+		@Override
+		public String getPromptBaseline() {
+			return promptBaselineSpinner.getValue().toString();
+		}
+
+		@Override
+		public void setPromptBaseline(String promptBaseline) {
+			promptBaselineSpinner.setValue(Double.parseDouble(promptBaseline));
+		}
+	}
 }

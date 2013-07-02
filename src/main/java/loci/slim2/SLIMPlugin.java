@@ -184,7 +184,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 							}
 						}
 						else {
-						try {
+					/*	try {
 							//TODO ARG latest ImgOpener moved to scifio and drops support for Bioformats format extensions (i.e. .sdt)
 							dataset = ioService.loadDataset(files[0].getAbsolutePath());
 							
@@ -193,8 +193,10 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 							// typically run out of memory here
 							showError("Problem loading file '" + files[0].getAbsolutePath() + "' " + e.getMessage());
 						}
+						*/
 						}
 					}
+					//TODO ARG 7/1/13 cannot find symbol, method loadDataset
 				}
 			}
 			
@@ -217,7 +219,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		}
 		while (!quit);
 
-	 System.out.println("BEGIN TEST>>>>>>");
+	 System.out.println("BEGIN TEST>>>>>>"); //TODO ARG this test just throws up dummy fitted images
 		test();
 		System.out.println("<<<<<<<END TEST");
 
@@ -526,7 +528,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	 * @return 
 	 */
 	private Tool getTool() {
-		return toolService.getTool("aivar"); //TODO
+		return toolService.getTool("aivar"); //TODO ARG find instance of LifetimeTool
 	}
 
 	/**

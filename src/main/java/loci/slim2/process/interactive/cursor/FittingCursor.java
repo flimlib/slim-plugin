@@ -743,11 +743,11 @@ public class FittingCursor {
                     synchronized (listeners) {
                         for (FittingCursorListener listener : listeners) {
 							if (null == listener) {
-								listener.cursorChanged(this);
+								System.out.println("null listener for FC");
 							}
 							else {
-								//TODO ARG listener sometimes null; not sure why...
-								System.out.println("null listener");
+								System.out.println("notify listener " + listener);
+								listener.cursorChanged(this);
 							}
                         }
                     }

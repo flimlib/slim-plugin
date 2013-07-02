@@ -59,12 +59,13 @@ public class FittingCursorHelper implements FittingCursorUI {
      * @param fittingCursor 
      */
     public void setFittingCursor(FittingCursor fittingCursor) {
-        if (null == fittingCursor) {
-			// create inner class listener
+        if (null == this.fittingCursor) {
+			// first time, create inner class listener
             fittingCursorListener = new CursorListener();
         }
-        else if (fittingCursor != fittingCursor) {
-            fittingCursor.removeListener(fittingCursorListener);
+        else if (this.fittingCursor != fittingCursor) {
+			// new fitting cursor, remove old listener
+            this.fittingCursor.removeListener(fittingCursorListener);
         }
         this.fittingCursor = fittingCursor;
         fittingCursor.addListener(fittingCursorListener);

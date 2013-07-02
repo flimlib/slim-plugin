@@ -285,9 +285,11 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
     public void setFittingCursor(FittingCursor fittingCursor) {
 		System.out.println("DefaultDecayGraph.setFittingCursor " + fittingCursor);
         if (null == this.fittingCursor) {
+			// first time, create a listener
             fittingCursorListener = new FittingCursorListenerImpl();
         }
         else if (this.fittingCursor != fittingCursor) {
+			// fitting cursor changed, remove listener from old version
             this.fittingCursor.removeListener(fittingCursorListener);
         }
         this.fittingCursor = fittingCursor;
@@ -350,7 +352,7 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
             dataStart  = dataStartCalc;
             transStop  = transStopCalc;
             
-            if (null != fittingCursor) {
+            if (null != fittingCursor) {		
                 fittingCursor.setTransientStartValue(transStart);
                 fittingCursor.setDataStartValue(dataStart);
                 fittingCursor.setTransientStopValue(transStop);
