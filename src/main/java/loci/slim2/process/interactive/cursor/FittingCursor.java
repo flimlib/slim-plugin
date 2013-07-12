@@ -90,7 +90,9 @@ public class FittingCursor {
      * @param listener 
      */
     public void addListener(FittingCursorListener listener) {
-		if (null == listener) System.out.println("FittingCursor.addListener is null"); //TODO ARG
+		if (null == listener) { System.out.println("FittingCursor.addListener is null"); //TODO ARG
+		 throw new RuntimeException("blah blah");
+		}
         synchronized (listeners) {
             if (!listeners.contains(listener)) {
                 listeners.add(listener);
@@ -158,7 +160,7 @@ public class FittingCursor {
      * 
      * @return 
      */
-    public boolean getHasPrompt() {
+    public boolean hasPrompt() {
         return hasPrompt;
     }
 
@@ -169,6 +171,7 @@ public class FittingCursor {
      * @param promptDelay 
      */
     public void setPromptDelay(String promptDelay) {
+		System.out.println("promptDelay " + promptDelay);
         Double promptDelayValue = null;
         if (showBins) {
             Integer parsedInteger = getIntegerValue(promptDelay);
@@ -179,16 +182,20 @@ public class FittingCursor {
         else {
             promptDelayValue = getDoubleValue(promptDelay);
         }
+		System.out.println("promptDelayValue " + promptDelayValue);
         if (null != promptDelayValue) {
             // convert delay to start
             double promptStartValue = promptDelayValue + transientStartValue;
+			System.out.println("promptStartValue " + promptStartValue);
             
             // some very rudimentary error-checking
             if (0.0 < promptStartValue && promptStartValue < transientStopValue) {
-                double diff = promptStartValue - promptStartValue;
-                promptStartValue += diff;
+                double diff = promptStartValue - this.promptStartValue;
+                this.promptStartValue += diff;
                 promptStopValue  += diff;
+				System.out.println("diff " + diff + " promptStartValue " + promptStartValue + " promptStopValue " + promptStopValue);
             }
+			else System.out.println("rejected");
         }
         // either update others with new valid value or undo our invalid value
         notifyListeners();

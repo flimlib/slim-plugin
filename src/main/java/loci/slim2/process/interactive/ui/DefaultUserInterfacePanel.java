@@ -62,6 +62,7 @@ import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -198,6 +199,8 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	private ThresholdUpdate thresholdListener;
 	private FittingCursorListener fittingCursorListener;
     int fittedParameterCount = 0;
+	String promptSelection;
+	volatile boolean promptSelectionLock;
 
     // UI panel
     JPanel COMPONENT;
@@ -682,7 +685,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
         excitationBaselineLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         cursorPanel.add(excitationBaselineLabel);
-		promptBaselineModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.001);
+		promptBaselineModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1);
 		promptBaselineSpinner = new JSpinner(promptBaselineModel);
 		promptBaselineSpinner.addChangeListener(new ChangeListener() {
 			@Override
@@ -734,7 +737,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         JLabel excitationStartLabel = new JLabel("Excitation Delay");
         excitationStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         cursorPanel.add(excitationStartLabel);
-		promptDelayModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
+		promptDelayModel = new SpinnerNumberModel(0.0, -maxBin * xInc, maxBin * xInc, xInc);
 		promptDelaySpinner = new JSpinner(promptDelayModel);
 		promptDelaySpinner.addChangeListener(new ChangeListener() {
 			@Override
@@ -874,11 +877,19 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 					 * Therefore, for now, just disable these spinners altogether
 					 * when in 'bins' mode.
 					 */
+					System.out.println("showBins is " + showBins);
 					transientStartSpinner.setEnabled(!showBins);
 					dataStartSpinner.setEnabled(!showBins);
 					transientStopSpinner.setEnabled(!showBins);
 					promptDelaySpinner.setEnabled(!showBins);
 					promptWidthSpinner.setEnabled(!showBins);
+					System.out.println("spinners set, sleeping");
+					try {
+						Thread.sleep(10000);
+					}
+					catch (Exception exc) {
+						
+					}
                     fittingCursorHelper.setShowBins(showBins);
                 }
             }
@@ -898,63 +909,22 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         promptComboBox.addActionListener(
             new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    String selectedItem = (String) promptComboBox.getSelectedItem();
-                    boolean isExcitationLoaded = false;
-                    if (EXCITATION_FILE.equals(selectedItem)) {
-                        OpenDialog dialog = new OpenDialog("Load Excitation File", "");
-                        String directory = dialog.getDirectory();
-                        String fileName = dialog.getFileName();
-                        if (null != fileName && !fileName.equals("") && null != listener) {
-                            isExcitationLoaded = listener.loadExcitation(directory + fileName);
-                        }
-                    }
-                    else if (EXCITATION_CREATE.equals(selectedItem)) {
-                        SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
-                        String directory = dialog.getDirectory();
-                        String fileName = dialog.getFileName();
-                        if (null != fileName && !fileName.equals("") && null != listener) {
-                            isExcitationLoaded = listener.createExcitation(directory + fileName);
-                        }
-                    }
-					else if (EXCITATION_ESTIMATE.equals(selectedItem)) {
-						SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
-						String directory = dialog.getDirectory();
-						String fileName = dialog.getFileName();
-						if (null != fileName && !fileName.equals("") && null != listener) {
-							isExcitationLoaded = listener.estimateExcitation(directory + fileName);
+                    final String selectedItem = (String) promptComboBox.getSelectedItem();
+					if (null == promptSelection || promptSelection != selectedItem) {
+						promptSelection = selectedItem;
+						if (!promptSelectionLock) {
+							promptSelectionLock = true;
+							SwingUtilities.invokeLater(
+								new Runnable() {
+									@Override
+									public void run() {
+										updatePrompt(selectedItem);
+									}
+								}
+							);
 						}
 					}
-					else if (EXCITATION_GAUSSIAN.equals(selectedItem)) {
-						SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
-						String directory = dialog.getDirectory();
-						String fileName = dialog.getFileName();
-						if (null != fileName && !fileName.equals("") && null != listener) {
-							isExcitationLoaded = listener.gaussianExcitation(directory + fileName);
-						}
-					}
-
-                    if (isExcitationLoaded) {
-                        promptComboBox.setSelectedItem(EXCITATION_FILE);
-                        enablePromptCursors(true);
-                    }
-                    else {
-                        promptComboBox.setSelectedItem(EXCITATION_NONE);
-						promptDelaySpinner.setValue(0);
-						promptWidthSpinner.setValue(0);
-						promptBaselineSpinner.setValue(0);
-						
-                       /* String text = fittingCursorHelper.getShowBins() ? "0" : "0.0";
-                        promptDelayField.setText(text);
-                        promptWidthField.setText(text);
-                        promptBaselineField.setText("0.0"); */
-                        enablePromptCursors(false);
-                        if (null != listener) {
-                            listener.cancelExcitation();
-                        }
-                    }
-					boolean summed = false;
-					listener.fitSingleDecay(summed);
-                }
+				}
             }
         );
         cursorPanel.add(promptComboBox);
@@ -982,6 +952,69 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 
         return panel;
     }
+
+	/**
+	 * Update prompt based on new selection.
+	 * 
+	 * @param selectedItem 
+	 */
+	private void updatePrompt(String selectedItem) {
+		boolean isExcitationLoaded = false;
+		if (EXCITATION_FILE.equals(selectedItem)) {
+			OpenDialog dialog = new OpenDialog("Load Excitation File", "");
+			String directory = dialog.getDirectory();
+			String fileName = dialog.getFileName();
+			if (null != fileName && !fileName.equals("") && null != listener) {
+				isExcitationLoaded = listener.loadExcitation(directory + fileName);
+			}
+		}
+		else if (EXCITATION_CREATE.equals(selectedItem)) {
+			SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+			String directory = dialog.getDirectory();
+			String fileName = dialog.getFileName();
+			if (null != fileName && !fileName.equals("") && null != listener) {
+				isExcitationLoaded = listener.createExcitation(directory + fileName);
+			}
+		}
+		else if (EXCITATION_ESTIMATE.equals(selectedItem)) {
+			SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+			String directory = dialog.getDirectory();
+			String fileName = dialog.getFileName();
+			if (null != fileName && !fileName.equals("") && null != listener) {
+				isExcitationLoaded = listener.estimateExcitation(directory + fileName);
+			}
+		}
+		else if (EXCITATION_GAUSSIAN.equals(selectedItem)) {
+			SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+			String directory = dialog.getDirectory();
+			String fileName = dialog.getFileName();
+			if (null != fileName && !fileName.equals("") && null != listener) {
+				isExcitationLoaded = listener.gaussianExcitation(directory + fileName);
+			}
+		}
+			
+		if (isExcitationLoaded) {
+			System.out.println("excitation is loaded");
+			promptComboBox.setSelectedItem(EXCITATION_FILE);
+			enablePromptCursors(true);
+		}
+		else {
+			System.out.println("failed to load excitation");
+			promptComboBox.setSelectedItem(EXCITATION_NONE);
+			promptDelaySpinner.setValue(0);
+			promptWidthSpinner.setValue(0);
+			promptBaselineSpinner.setValue(0);
+			enablePromptCursors(false);
+			if (null != listener) {
+				listener.cancelExcitation();
+			}
+		}
+		boolean summed = false;
+		listener.fitSingleDecay(summed);
+		
+		// done
+		promptSelectionLock = false;
+	}
 
     /*
      * Creates a panel that has some settings that control the fit.

@@ -57,6 +57,11 @@ public class DefaultFittingCallable implements FittingCallable {
  
     @Override
     public FitResults call() {
+		int dataStart;
+		int transientStop;
+		int photonCount;
+		double[] decay;
+		
         curveFitter.setEstimator(globalParams.getEstimator());
         curveFitter.setFitAlgorithm(globalParams.getFitAlgorithm());
         curveFitter.setFitFunction(globalParams.getFitFunction());
@@ -67,10 +72,13 @@ public class DefaultFittingCallable implements FittingCallable {
        
         ICurveFitData curveFitData = new CurveFitData(); 
         curveFitData.setChiSquareTarget(globalParams.getChiSquareTarget());
-        curveFitData.setYCount(localParams.getY());
+		decay = localParams.getY();
+        curveFitData.setYCount(decay);
         curveFitData.setTransStartIndex(globalParams.getTransientStart());
-        curveFitData.setDataStartIndex(globalParams.getDataStart());
-        curveFitData.setTransEndIndex(globalParams.getTransientStop());        
+		dataStart = globalParams.getDataStart();
+        curveFitData.setDataStartIndex(dataStart);
+		transientStop = globalParams.getTransientStop();
+        curveFitData.setTransEndIndex(transientStop);        
         curveFitData.setSig(localParams.getSig());
         curveFitData.setParams(localParams.getParams().clone()); // params is overwritten
         curveFitData.setYFitted(localParams.getYFitted());
@@ -84,7 +92,11 @@ public class DefaultFittingCallable implements FittingCallable {
 		result.setChiSquare(curveFitData.getChiSquare());
 		result.setParams(curveFitData.getParams());
 		result.setYFitted(curveFitData.getYFitted());
-		result.setPhotonCount(123);
+		photonCount = 0;
+		for (int c = dataStart; c < transientStop; ++c) {
+			photonCount += decay[c];
+		}
+		result.setPhotonCount(photonCount);
 		result.setTransient(localParams.getY());
 		result.setTransStart(globalParams.getTransientStart());
 		result.setDataStart(globalParams.getDataStart());

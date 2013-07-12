@@ -38,6 +38,7 @@ import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import imagej.data.display.DataView;
 import imagej.data.display.DefaultImageDisplay;
+import imagej.data.threshold.ThresholdService;
 import imagej.display.Display;
 import imagej.display.DisplayService;
 import imagej.io.IOService;
@@ -112,6 +113,9 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	
 	@Parameter
 	private UIService uiService;
+	
+	@Parameter
+	private ThresholdService thresholdService;
 	
 	@Override
 	public void run() {
@@ -207,7 +211,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				// create processor first time through
 				if (null == interactiveProcessor) {
 					interactiveProcessor = new DefaultInteractiveProcessor();
-					interactiveProcessor.init(datasetService, displayService);
+					interactiveProcessor.init(datasetService, displayService, thresholdService);
 				}
 
 				// gives up control to load a new dataset or when done
@@ -301,7 +305,10 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		// no files selected
 		return null;
     }
-	
+
+	/**
+	 * File filter for lifetime files.
+	 */
 	private class ShowFileDialogFilter extends FileFilter {
 		private static final String DESCRIPTION = "Lifetime .ics & .sdt";
 		

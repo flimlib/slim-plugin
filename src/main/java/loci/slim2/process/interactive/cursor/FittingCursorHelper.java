@@ -105,7 +105,7 @@ public class FittingCursorHelper implements FittingCursorUI {
      * @return 
      */
     public boolean getPrompt() {
-        return fittingCursor.getHasPrompt();
+        return fittingCursor.hasPrompt();
     }
     
     /**
