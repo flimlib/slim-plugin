@@ -31,91 +31,132 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.process.interactive.cursor;
 
 /**
- *  This is an interface to get/set transient and prompt cursors as strings.
+ *  This is an interface to get/set transient and prompt cursors values.
  * 
- * @author Aivar Grislis grislis at wisc dot edu
+ * @author Aivar Grislis
  */
 public interface FittingCursorUI {
     
     /**
-     * Gets the transient start cursor.
+     * Gets the transient start cursor index.
      * 
      * @return 
      */
-    public String getTransientStart();
-  
+    public int getTransientStartIndex();
+	
+    /**
+     * Gets the transient start cursor time.
+     * 
+     * @return 
+     */
+    public double getTransientStartTime();
+	
     /**
      * Sets the transient start cursor.
      * 
-     * @param transientStart 
+     * @param index
+	 * @param time
      */
-    public void setTransientStart(String transientStart);
+    public void setTransientStart(int index, double time);
     
     /**
-     * Gets the data start cursor.
+     * Gets the data start cursor index.
+	 * 
      * @return 
      */ 
-    public String getDataStart();
+    public int getDataStartIndex();
     
     /**
+     * Gets the data start cursor time.
+	 * 
+     * @return 
+     */ 
+    public double getDataStartTime(); 
+	
+    /**
      * Sets the data start cursor.
+	 * 
      * @return 
      */
-    public void setDataStart(String dataStart);
+    public void setDataStart(int index, double time);
 
     /**
-     * Gets the transient end cursor.
+     * Gets the transient end cursor index.
      * 
      * @return 
      */
-    public String getTransientStop();
+    public int getTransientStopIndex();
+
+    /**
+     * Gets the transient end cursor time.
+     * 
+     * @return 
+     */
+    public double getTransientStopTime();
 
     /**
      * Sets the transient end cursor.
      * 
-     * @param transientStop 
+     * @param index
+	 * @param time
      */
-    public void setTransientStop(String transientStop);
+    public void setTransientStop(int index, double time);
     
     /**
-     * Gets the prompt delay cursor.
+     * Gets the prompt delay cursor index.
      * 
      * @return 
      */
-    public String getPromptDelay();
-  
+    public int getPromptDelayIndex();
+    
+    /**
+     * Gets the prompt delay cursor time.
+     * 
+     * @return 
+     */
+    public double getPromptDelayTime();
+	
     /**
      * Sets the prompt delay cursor.
      * 
-     * @param promptDelay 
+     * @param index
+	 * @param time
      */
-    public void setPromptDelay(String promptDelay);
+    public void setPromptDelay(int index, double time);
+
+    /**
+     * Gets the prompt width cursor index.
+     * 
+     * @return 
+     */
+    public int getPromptWidthIndex();
 
     /**
      * Gets the prompt width cursor.
      * 
      * @return 
      */
-    public String getPromptWidth();
-
+    public double getPromptWidthTime();
+	
     /**
      * Sets the prompt width cursor.
      * 
-     * @param promptWidth 
+     * @param index
+	 * @param time
      */
-    public void setPromptWidth(String promptWidth);
+    public void setPromptWidth(int index, double time);
     
     /**
      * Gets the prompt baseline cursor.
      * 
      * @return 
      */
-    public String getPromptBaseline();
+    public double getPromptBaseline();
 
     /**
      * Sets the prompt baseline cursor.
      * 
      * @param promptBaseline 
      */
-    public void setPromptBaseline(String promptBaseline);
+    public void setPromptBaseline(double promptBaseline);
 }

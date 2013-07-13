@@ -131,6 +131,9 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		timeInc = lifetimeDatasetWrapper.getTimeIncrement();
 		fitterEstimator = new DefaultFitterEstimator();
 		System.out.println("timeInc is " + timeInc);
+		//TODO ARG just for testing; the 'timeInc' for gpl1.sdt
+		timeInc = 0.156;
+		System.out.println("timeInc changed for testing to :" + timeInc);
 		fittingCursor = new FittingCursor(timeInc, bins, fitterEstimator);
 		fittingCursor.addListener(
 			new FittingCursorListener() {

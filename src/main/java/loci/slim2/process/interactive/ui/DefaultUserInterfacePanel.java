@@ -190,6 +190,9 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 								SCATTER_MIN = 0.0,
 								SCATTER_INC = 0.001;
 	
+	private static final String CURSOR_TIME = "Time",
+	                            CURSOR_BINS = "Bins";
+	
     private FittingCursorHelper fittingCursorHelper;
     private IFitterEstimator fitterEstimator;
 	private int maxBin;
@@ -216,31 +219,25 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
     JCheckBox[] analysisCheckBoxList;
     JCheckBox fitAllChannels;
     
-    // cursor settings
-    JTextField promptBaselineField;
-    JTextField transientStartField;
-    JTextField dataStartField;
-    JTextField transientStopField;
-    JTextField promptDelayField;
-    JTextField promptWidthField;
+	// cursor settings
+	//   model A - time increments
+	JSpinner promptBaselineSpinnerA;
+	JSpinner transientStartSpinnerA;
+	JSpinner dataStartSpinnerA;
+	JSpinner transientStopSpinnerA;
+	JSpinner promptDelaySpinnerA;
+	JSpinner promptWidthSpinnerA;
+	//  model B - bin index increments
+	JSpinner promptBaselineSpinnerB;
+	JSpinner transientStartSpinnerB;
+	JSpinner dataStartSpinnerB;
+	JSpinner transientStopSpinnerB;
+	JSpinner promptDelaySpinnerB;
+	JSpinner promptWidthSpinnerB;
     JCheckBox showBins;
     JComboBox promptComboBox;
     JButton estimateCursorsButton;
 	
-	// cursor settings
-	SpinnerNumberModel promptBaselineModel;
-	JSpinner promptBaselineSpinner;
-	SpinnerNumberModel transientStartModel;
-	JSpinner transientStartSpinner;
-	SpinnerNumberModel dataStartModel;
-	JSpinner dataStartSpinner;
-	SpinnerNumberModel transientStopModel;
-	JSpinner transientStopSpinner;
-	SpinnerNumberModel promptDelayModel;
-	JSpinner promptDelaySpinner;
-	SpinnerNumberModel promptWidthModel;
-	JSpinner promptWidthSpinner;
-    
     // fit settings
 	JSpinner xSpinner;
 	JSpinner ySpinner;
@@ -679,186 +676,20 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
     private JPanel createCursorPanel() {
         JPanel cursorPanel = new JPanel();
         cursorPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
-        cursorPanel.setLayout(new SpringLayout());
+        cursorPanel.setLayout(new BoxLayout(cursorPanel, BoxLayout.Y_AXIS));
 
-        // emulating TRI2 cursor listing order here
-		JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
-        excitationBaselineLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(excitationBaselineLabel);
-		promptBaselineModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1);
-		promptBaselineSpinner = new JSpinner(promptBaselineModel);
-		promptBaselineSpinner.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptBaseline(fittingCursorListener.getPromptBaseline());
-			}
-		});
-		cursorPanel.add(promptBaselineSpinner);
-
-		JLabel transStartLabel = new JLabel("Transient Start");
-        transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(transStartLabel);
-		transientStartModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
-		transientStartSpinner = new JSpinner(transientStartModel);
-		transientStartSpinner.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setTransientStart(fittingCursorListener.getTransientStart());
-			}
-		});
-		cursorPanel.add(transientStartSpinner);
+		final CardLayout cursorCardLayout = new CardLayout();
+		final JPanel cardsPanel = new JPanel(cursorCardLayout);
+		JPanel subPanelA = createCursorSubPanelA();
+		cardsPanel.add(subPanelA, CURSOR_TIME);
+		JPanel subPanelB = createCursorSubPanelB();
+		cardsPanel.add(subPanelB, CURSOR_BINS);
+		cursorPanel.add(cardsPanel);
 		
-        JLabel dataStartLabel = new JLabel("Data Start");
-        dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(dataStartLabel);
-		dataStartModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
-		dataStartSpinner = new JSpinner(dataStartModel);
-		dataStartSpinner.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setDataStart(fittingCursorListener.getDataStart());
-			}
-		});
-		cursorPanel.add(dataStartSpinner);
-		
-        JLabel transStopLabel = new JLabel("Transient End");
-        transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(transStopLabel);
-		transientStopModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
-		transientStopSpinner = new JSpinner(transientStopModel);
-		transientStopSpinner.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setTransientStop(fittingCursorListener.getTransientStop());
-			}
-		});
-		cursorPanel.add(transientStopSpinner);
-		
-        JLabel excitationStartLabel = new JLabel("Excitation Delay");
-        excitationStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(excitationStartLabel);
-		promptDelayModel = new SpinnerNumberModel(0.0, -maxBin * xInc, maxBin * xInc, xInc);
-		promptDelaySpinner = new JSpinner(promptDelayModel);
-		promptDelaySpinner.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptDelay(fittingCursorListener.getPromptDelay());
-			}
-		});
-		cursorPanel.add(promptDelaySpinner);
-		
-        JLabel excitationStopLabel = new JLabel("Excitation Width");
-        excitationStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(excitationStopLabel);
-		promptWidthModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
-		promptWidthSpinner = new JSpinner(promptWidthModel);
-		promptWidthSpinner.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptWidth(fittingCursorListener.getPromptWidth());
-			}
-		});
-		cursorPanel.add(promptWidthSpinner);
-		
-        /*JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
-        excitationBaselineLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(excitationBaselineLabel);
-        _promptBaselineField = new JTextField(9);
-        _promptBaselineField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                fittingCursorHelper.setPromptBaseline(_promptBaselineField.getText());
-            }
-        });
-        _promptBaselineField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                fittingCursorHelper.setPromptBaseline(_promptBaselineField.getText());
-            }
-        });
-        
-        cursorPanel.add(_promptBaselineField); 
-        JLabel transStartLabel = new JLabel("Transient Start");
-        transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(transStartLabel);
-        _transientStartField = new JTextField(9);
-        _transientStartField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                fittingCursorHelper.setTransientStart(_transientStartField.getText());
-            }
-        });
-        _transientStartField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                fittingCursorHelper.setTransientStart(_transientStartField.getText());
-            }
-        });
-        cursorPanel.add(_transientStartField);
-        
-        JLabel dataStartLabel = new JLabel("Data Start");
-        dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(dataStartLabel);
-        _dataStartField = new JTextField(9);
-        _dataStartField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                fittingCursorHelper.setDataStart(_dataStartField.getText());
-            }
-        });
-        _dataStartField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                fittingCursorHelper.setDataStart(_dataStartField.getText());
-            }
-        });
-        cursorPanel.add(_dataStartField);
-
-        JLabel transStopLabel = new JLabel("Transient End");
-        transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(transStopLabel);
-        _transientStopField = new JTextField(9);
-        _transientStopField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                fittingCursorHelper.setTransientStop(_transientStopField.getText());
-            }
-        });
-        _transientStopField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                fittingCursorHelper.setTransientStop(_transientStopField.getText());
-            }
-        });
-        cursorPanel.add(_transientStopField);
-
-        JLabel excitationStartLabel = new JLabel("Excitation Delay");
-        excitationStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(excitationStartLabel);
-        _promptDelayField = new JTextField(9);
-        _promptDelayField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                fittingCursorHelper.setPromptDelay(_promptDelayField.getText());
-            }
-        });
-        _promptDelayField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                fittingCursorHelper.setPromptDelay(_promptDelayField.getText());
-            }
-        });
-        cursorPanel.add(_promptDelayField);       
-        
-        JLabel excitationStopLabel = new JLabel("Excitation Width");
-        excitationStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(excitationStopLabel);
-        _promptWidthField = new JTextField(9);
-        _promptWidthField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                fittingCursorHelper.setPromptWidth(_promptWidthField.getText());
-            }
-        });
-        _promptWidthField.addFocusListener(new FocusAdapter() {
-            public void focusLost(FocusEvent e) {
-                fittingCursorHelper.setPromptWidth(_promptWidthField.getText());
-            }
-        });
-        cursorPanel.add(_promptWidthField);*/
-        
+		JPanel lowerPanel = new JPanel(new SpringLayout());
         JLabel dummyLabel = new JLabel("");
         dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(dummyLabel);
+        lowerPanel.add(dummyLabel);
         showBins = new JCheckBox("Display as indices");
         showBins.addItemListener(
             new ItemListener() {
@@ -878,18 +709,9 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 					 * when in 'bins' mode.
 					 */
 					System.out.println("showBins is " + showBins);
-					transientStartSpinner.setEnabled(!showBins);
-					dataStartSpinner.setEnabled(!showBins);
-					transientStopSpinner.setEnabled(!showBins);
-					promptDelaySpinner.setEnabled(!showBins);
-					promptWidthSpinner.setEnabled(!showBins);
-					System.out.println("spinners set, sleeping");
-					try {
-						Thread.sleep(10000);
-					}
-					catch (Exception exc) {
-						
-					}
+					
+					cursorCardLayout.show(cardsPanel, showBins ? CURSOR_BINS : CURSOR_TIME);
+					
                     fittingCursorHelper.setShowBins(showBins);
                 }
             }
@@ -900,11 +722,11 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		// just disable the model swap.
 		// Let's go with the latter; we lose the ability to show the underlying bins
 		// unfortunately.
-        cursorPanel.add(showBins);
+        lowerPanel.add(showBins);
         
         JLabel excitationLabel = new JLabel("Excitation");
         excitationLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(excitationLabel);
+        lowerPanel.add(excitationLabel);
         promptComboBox = new JComboBox(EXCITATION_ITEMS);
         promptComboBox.addActionListener(
             new ActionListener() {
@@ -927,11 +749,11 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 				}
             }
         );
-        cursorPanel.add(promptComboBox);
+        lowerPanel.add(promptComboBox);
         
         JLabel dummyLabel2 = new JLabel("");
         dummyLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
-        cursorPanel.add(dummyLabel2);
+        lowerPanel.add(dummyLabel2);
         estimateCursorsButton = new JButton("Estimate Cursors");
         estimateCursorsButton.addActionListener(
             new ActionListener() {
@@ -942,17 +764,199 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
                 }
             }
         );
-        cursorPanel.add(estimateCursorsButton);
-
+        lowerPanel.add(estimateCursorsButton);
+		
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(cursorPanel, 9, 2, 4, 4, 4, 4);
-
+		SpringUtilities.makeCompactGrid(lowerPanel, 3, 2, 4, 4, 4, 4);
+		
+		cursorPanel.add(lowerPanel);
+		
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", cursorPanel);
 
         return panel;
     }
+	
+	private JPanel createCursorSubPanelA() {
+        JPanel subPanelA = new JPanel();
+        //subPanelB.setBorder(new EmptyBorder(0, 0, 8, 8));
+        subPanelA.setLayout(new SpringLayout());
 
+        // emulating TRI2 cursor listing order here
+		JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
+        excitationBaselineLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelA.add(excitationBaselineLabel);
+		SpinnerNumberModel promptBaselineModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1);
+		promptBaselineSpinnerA = new JSpinner(promptBaselineModel);
+		promptBaselineSpinnerA.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setPromptBaseline(fittingCursorListener.getPromptBaseline());
+			}
+		});
+		subPanelA.add(promptBaselineSpinnerA);
+
+		JLabel transStartLabel = new JLabel("Transient Start");
+        transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelA.add(transStartLabel);
+		SpinnerNumberModel transientStartModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
+		transientStartSpinnerA = new JSpinner(transientStartModel);
+		transientStartSpinnerA.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setTransientStart(fittingCursorListener.getTransientStart());
+			}
+		});
+		subPanelA.add(transientStartSpinnerA);
+		
+        JLabel dataStartLabel = new JLabel("Data Start");
+        dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelA.add(dataStartLabel);
+		SpinnerNumberModel dataStartModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
+		dataStartSpinnerA = new JSpinner(dataStartModel);
+		dataStartSpinnerA.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setDataStart(fittingCursorListener.getDataStart());
+			}
+		});
+		subPanelA.add(dataStartSpinnerA);
+		
+        JLabel transStopLabel = new JLabel("Transient End");
+        transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelA.add(transStopLabel);
+		SpinnerNumberModel transientStopModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
+		transientStopSpinnerA = new JSpinner(transientStopModel);
+		transientStopSpinnerA.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setTransientStop(fittingCursorListener.getTransientStop());
+			}
+		});
+		subPanelA.add(transientStopSpinnerA);
+		
+        JLabel excitationStartLabel = new JLabel("Excitation Delay");
+        excitationStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelA.add(excitationStartLabel);
+		SpinnerNumberModel promptDelayModel = new SpinnerNumberModel(0.0, -maxBin * xInc, maxBin * xInc, xInc);
+		promptDelaySpinnerA = new JSpinner(promptDelayModel);
+		promptDelaySpinnerA.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setPromptDelay(fittingCursorListener.getPromptDelay());
+			}
+		});
+		subPanelA.add(promptDelaySpinnerA);
+		
+        JLabel excitationStopLabel = new JLabel("Excitation Width");
+        excitationStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelA.add(excitationStopLabel);
+		SpinnerNumberModel promptWidthModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
+		promptWidthSpinnerA = new JSpinner(promptWidthModel);
+		promptWidthSpinnerA.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setPromptWidth(fittingCursorListener.getPromptWidth());
+			}
+		});
+		subPanelA.add(promptWidthSpinnerA);
+		
+        // rows, cols, initX, initY, xPad, yPad
+		SpringUtilities.makeCompactGrid(subPanelA, 6, 2, 4, 4, 4, 4);
+		
+		return subPanelA;
+	}
+
+	private JPanel createCursorSubPanelB() {
+        JPanel subPanelB = new JPanel();
+        //subPanelA.setBorder(new EmptyBorder(0, 0, 8, 8));
+        subPanelB.setLayout(new SpringLayout());
+
+        // emulating TRI2 cursor listing order here
+		JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
+        excitationBaselineLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelB.add(excitationBaselineLabel);
+		SpinnerNumberModel promptBaselineModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1);
+		promptBaselineSpinnerB = new JSpinner(promptBaselineModel);
+		promptBaselineSpinnerB.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setPromptBaseline(fittingCursorListener.getPromptBaseline());
+			}
+		});
+		subPanelB.add(promptBaselineSpinnerB);
+
+		JLabel transStartLabel = new JLabel("Transient Start");
+        transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelB.add(transStartLabel);
+		SpinnerNumberModel transientStartModel = new SpinnerNumberModel(0, 0, maxBin, 1);
+		transientStartSpinnerB = new JSpinner(transientStartModel);
+		transientStartSpinnerB.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setTransientStart(fittingCursorListener.getTransientStart());
+			}
+		});
+		subPanelB.add(transientStartSpinnerB);
+		
+        JLabel dataStartLabel = new JLabel("Data Start");
+        dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelB.add(dataStartLabel);
+		SpinnerNumberModel dataStartModel = new SpinnerNumberModel(0, 0, maxBin, 1);
+		dataStartSpinnerB = new JSpinner(dataStartModel);
+		dataStartSpinnerB.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setDataStart(fittingCursorListener.getDataStart());
+			}
+		});
+		subPanelB.add(dataStartSpinnerB);
+		
+        JLabel transStopLabel = new JLabel("Transient End");
+        transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelB.add(transStopLabel);
+		SpinnerNumberModel transientStopModel = new SpinnerNumberModel(0, 0, maxBin, 1);
+		transientStopSpinnerB = new JSpinner(transientStopModel);
+		transientStopSpinnerB.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setTransientStop(fittingCursorListener.getTransientStop());
+			}
+		});
+		subPanelB.add(transientStopSpinnerB);
+		
+        JLabel excitationStartLabel = new JLabel("Excitation Delay");
+        excitationStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelB.add(excitationStartLabel);
+		SpinnerNumberModel promptDelayModel = new SpinnerNumberModel(0, -maxBin, maxBin, 1);
+		promptDelaySpinnerB = new JSpinner(promptDelayModel);
+		promptDelaySpinnerB.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setPromptDelay(fittingCursorListener.getPromptDelay());
+			}
+		});
+		subPanelB.add(promptDelaySpinnerB);
+		
+        JLabel excitationStopLabel = new JLabel("Excitation Width");
+        excitationStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        subPanelB.add(excitationStopLabel);
+		SpinnerNumberModel promptWidthModel = new SpinnerNumberModel(0, 0, maxBin, 1);
+		promptWidthSpinnerB = new JSpinner(promptWidthModel);
+		promptWidthSpinnerB.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				fittingCursorHelper.setPromptWidth(fittingCursorListener.getPromptWidth());
+			}
+		});
+		subPanelB.add(promptWidthSpinnerB);
+		
+        // rows, cols, initX, initY, xPad, yPad
+		SpringUtilities.makeCompactGrid(subPanelB, 6, 2, 4, 4, 4, 4);
+		
+		return subPanelB;
+	}
+	
 	/**
 	 * Update prompt based on new selection.
 	 * 
@@ -1001,9 +1005,12 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		else {
 			System.out.println("failed to load excitation");
 			promptComboBox.setSelectedItem(EXCITATION_NONE);
-			promptDelaySpinner.setValue(0);
-			promptWidthSpinner.setValue(0);
-			promptBaselineSpinner.setValue(0);
+			promptDelaySpinnerA.setValue(0);
+			promptDelaySpinnerB.setValue(0);
+			promptWidthSpinnerA.setValue(0);
+			promptWidthSpinnerB.setValue(0);
+			promptBaselineSpinnerA.setValue(0);
+			promptBaselineSpinnerB.setValue(0);
 			enablePromptCursors(false);
 			if (null != listener) {
 				listener.cancelExcitation();
@@ -1686,14 +1693,17 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         fitAllChannels.setEnabled(enable);
         
         // cursors settings
-		transientStartSpinner.setEnabled(enable);
-		dataStartSpinner.setEnabled(enable);
-		transientStopSpinner.setEnabled(enable);
+		transientStartSpinnerA.setEnabled(enable);
+		transientStartSpinnerB.setEnabled(enable);
+		dataStartSpinnerA.setEnabled(enable);
+		dataStartSpinnerB.setEnabled(enable);
+		transientStopSpinnerA.setEnabled(enable);
+		transientStopSpinnerB.setEnabled(enable);
         boolean promptEnable = enable;
         if (enable) {
             // do we have a prompt?
 			if (null != fittingCursorHelper) {
-				promptEnable = fittingCursorHelper.getPrompt();
+				promptEnable = fittingCursorHelper.hasPrompt();
 			}
         }
         enablePromptCursors(promptEnable);
@@ -2258,9 +2268,12 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
      * @param enable 
      */
     private void enablePromptCursors(boolean enable) {
-        promptDelaySpinner.setEnabled(enable);
-        promptWidthSpinner.setEnabled(enable);
-        promptBaselineSpinner.setEnabled(enable);
+        promptDelaySpinnerA.setEnabled(enable);
+		promptDelaySpinnerB.setEnabled(enable);
+        promptWidthSpinnerA.setEnabled(enable);
+		promptWidthSpinnerB.setEnabled(enable);
+        promptBaselineSpinnerA.setEnabled(enable);
+		promptBaselineSpinnerB.setEnabled(enable);
     }
     
     /**
@@ -2286,67 +2299,68 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         OpenDialog dialog = new OpenDialog(title, "");
         return dialog.getDirectory() + dialog.getFileName();
     }
-	
+
+	//TODO ARG this won't work well with new CardLayout technique
 	private class FittingCursorListener implements FittingCursorUI {
 		
 		@Override
 		public String getTransientStart() {
-			return transientStartSpinner.getValue().toString();
+			return transientStartSpinnerA.getValue().toString();
 		}
   
 		@Override
 		public void setTransientStart(String transientStart) {
-			transientStartSpinner.setValue(Double.parseDouble(transientStart));
+			transientStartSpinnerA.setValue(Double.parseDouble(transientStart));
 		}
     
 		@Override
 		public String getDataStart() {
-			return dataStartSpinner.getValue().toString();
+			return dataStartSpinnerA.getValue().toString();
 		}
 
 		@Override
 		public void setDataStart(String dataStart) {
-			dataStartSpinner.setValue(Double.parseDouble(dataStart));
+			dataStartSpinnerA.setValue(Double.parseDouble(dataStart));
 		}
 
 		@Override
 		public String getTransientStop() {
-			return transientStopSpinner.getValue().toString();
+			return transientStopSpinnerA.getValue().toString();
 		}
 
 		@Override
 		public void setTransientStop(String transientStop) {
-			transientStopSpinner.setValue(Double.parseDouble(transientStop));
+			transientStopSpinnerA.setValue(Double.parseDouble(transientStop));
 		}
 
 		@Override
 		public String getPromptDelay() {
-			return promptDelaySpinner.getValue().toString();
+			return promptDelaySpinnerA.getValue().toString();
 		}
 
 		@Override
 		public void setPromptDelay(String promptDelay) {
-			promptDelaySpinner.setValue(Double.parseDouble(promptDelay));
+			promptDelaySpinnerA.setValue(Double.parseDouble(promptDelay));
 		}
 
 		@Override
 		public String getPromptWidth() {
-			return promptWidthSpinner.getValue().toString();
+			return promptWidthSpinnerA.getValue().toString();
 		}
 
 		@Override
 		public void setPromptWidth(String promptWidth) {
-			promptWidthSpinner.setValue(Double.parseDouble(promptWidth));
+			promptWidthSpinnerA.setValue(Double.parseDouble(promptWidth));
 		}
 
 		@Override
 		public String getPromptBaseline() {
-			return promptBaselineSpinner.getValue().toString();
+			return promptBaselineSpinnerA.getValue().toString();
 		}
 
 		@Override
 		public void setPromptBaseline(String promptBaseline) {
-			promptBaselineSpinner.setValue(Double.parseDouble(promptBaseline));
+			promptBaselineSpinnerA.setValue(Double.parseDouble(promptBaseline));
 		}
 	}
 }

@@ -43,8 +43,7 @@ public class FittingCursorHelper implements FittingCursorUI {
     private FittingCursorUI fittingCursorUI;
     
     /**
-     * Sets the UI source and destination of fitting cursor strings, e.g. a
-     * wrapper around some JTextField.
+     * Sets the UI source and destination of fitting cursor values.
      * 
      * @param promptCursorUI 
      */
@@ -104,64 +103,97 @@ public class FittingCursorHelper implements FittingCursorUI {
      * 
      * @return 
      */
-    public boolean getPrompt() {
+    public boolean hasPrompt() {
         return fittingCursor.hasPrompt();
     }
     
     /**
-     * Gets the transient start cursor.
+     * Gets the transient start cursor index.
      * 
      * @return 
      */
     @Override
-    public String getTransientStart() {
-        return fittingCursorUI.getTransientStart();
+    public int getTransientStartIndex() {
+        return fittingCursorUI.getTransientStartIndex();
     }
+
+	/**
+	 * Gets the transient start cursor time.
+	 * 
+	 * @return 
+	 */
+	@Override
+	public double getTransientStartTime() {
+		return fittingCursorUI.getTransientStartTime();
+	}
   
     /**
      * Sets the transient start cursor.
      * 
-     * @param transientStart 
+     * @param index
+	 * @param time
      */
     @Override
-    public void setTransientStart(String transientStart) {
-        fittingCursor.setTransientStart(transientStart);
+    public void setTransientStart(int index, double time) {
+        fittingCursor.setTransientStart(index, time);
     }
     
     /**
-     * Gets the data start cursor.
+     * Gets the data start cursor index.
      * 
      * @return 
      */
     @Override
-    public String getDataStart() {
-        return fittingCursorUI.getDataStart();
+    public int getDataStartIndex() {
+        return fittingCursorUI.getDataStartIndex();
     }
-
+    
+    /**
+     * Gets the data start cursor time.
+     * 
+     * @return 
+     */
+    @Override
+    public String getDataStartTime() {
+        return fittingCursorUI.getDataStartTime();
+    }
+	
     /**
      * Sets the data start cursor.
      * 
-     * @param transientBaseline 
+     * @param index
+	 * @param time
      */
     @Override
-    public void setDataStart(String dataStart) {
-        fittingCursor.setDataStart(dataStart);
+    public void setDataStart(int index, double time) {
+        fittingCursor.setDataStart(index, time);
     }
     
     /**
-     * Gets the transient end cursor.
+     * Gets the transient end cursor index.
      * 
      * @return 
      */
     @Override
-    public String getTransientStop() {
-        return fittingCursorUI.getTransientStop();
+    public int getTransientStopIndex() {
+        return fittingCursorUI.getTransientStopIndex();
     }
-
+    
+    /**
+     * Gets the transient end cursor time.
+     * 
+     * @return 
+     */
+    @Override
+    public double getTransientStopTime() {
+        return fittingCursorUI.getTransientStopTime();
+    }
+	
     /**
      * Sets the transient end cursor.
      * 
-     * @param transientStop 
+     * @param index
+	 * @param time
      */
     @Override
     public void setTransientStop(String transientStop) {
@@ -169,23 +201,34 @@ public class FittingCursorHelper implements FittingCursorUI {
     }
     
     /**
-     * Gets the prompt delay cursor.
+     * Gets the prompt delay cursor index.
      * 
      * @return 
      */
     @Override
-    public String getPromptDelay() {
-        return fittingCursorUI.getPromptDelay();
+    public String getPromptDelayIndex() {
+        return fittingCursorUI.getPromptDelayIndex();
     }
-  
+     
     /**
-     * Sets the prompt delay cursor.
+     * Gets the prompt delay cursor time.
      * 
-     * @param promptStart 
+     * @return 
      */
     @Override
-    public void setPromptDelay(String promptDelay) {
-        fittingCursor.setPromptDelay(promptDelay);
+    public String getPromptDelayTime() {
+        return fittingCursorUI.getPromptDelayTime();
+    }
+	
+	/**
+     * Sets the prompt delay cursor.
+     * 
+     * @param index
+	 * @param time
+     */
+    @Override
+    public void setPromptDelay(int index, double time) {
+        fittingCursor.setPromptDelay(index, time);
     }
 
     /**
@@ -232,11 +275,21 @@ public class FittingCursorHelper implements FittingCursorUI {
      */
     private void showFittingCursor() {
         if (null != fittingCursorUI) {
-            fittingCursorUI.setTransientStart(fittingCursor.getTransientStart());
-            fittingCursorUI.setDataStart(fittingCursor.getDataStart());
-            fittingCursorUI.setTransientStop(fittingCursor.getTransientStop());
-            fittingCursorUI.setPromptDelay(fittingCursor.getPromptDelay());
-            fittingCursorUI.setPromptWidth(fittingCursor.getPromptWidth());
+			fittingCursorUI.setTransientStart(
+					fittingCursor.getTransientStartIndex(),
+					fittingCursor.getTransientStartTime());
+			fittingCursorUI.setDataStart(
+					fittingCursor.getDataStartIndex(),
+					fittingCursor.getDataStartTime());	
+			fittingCursorUI.setTransientStop(
+					fittingCursor.getTransientStopIndex(),
+					fittingCursor.getTransientStopTime());
+            fittingCursorUI.setPromptDelay(
+					fittingCursor.getPromptDelayIndex(),
+					fittingCursor.getPromptDelayTime());
+            fittingCursorUI.setPromptWidth(
+					fittingCursor.getPromptWidthIndex(),
+					fittingCursor.getPromptWidthTime());
             fittingCursorUI.setPromptBaseline(fittingCursor.getPromptBaseline()); 
         }
     }

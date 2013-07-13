@@ -55,8 +55,6 @@ public class FittingCursor {
     private boolean showBins;
     private volatile boolean suspend;
     private boolean hasPrompt;
-    private int promptStartBin;
-    private int promptStopBin;
     private int transientStartBin;
     private int dataStartBin;
     private int transientStopBin;
@@ -164,105 +162,72 @@ public class FittingCursor {
         return hasPrompt;
     }
 
-    /**
-     * Sets the start of the prompt based on a prompt delay string.  Handles
-     * bins or time values.
-     * 
-     * @param promptDelay 
-     */
-    public void setPromptDelay(String promptDelay) {
-		System.out.println("promptDelay " + promptDelay);
-        Double promptDelayValue = null;
-        if (showBins) {
-            Integer parsedInteger = getIntegerValue(promptDelay);
-            if (null != parsedInteger) {              
-                promptDelayValue = fitterEstimator.binToValue(parsedInteger, inc);
-            }
-        }
-        else {
-            promptDelayValue = getDoubleValue(promptDelay);
-        }
-		System.out.println("promptDelayValue " + promptDelayValue);
-        if (null != promptDelayValue) {
-            // convert delay to start
-            double promptStartValue = promptDelayValue + transientStartValue;
-			System.out.println("promptStartValue " + promptStartValue);
+	/**
+	 * Sets the prompt delay as a bin index.
+	 * 
+	 * @param promptDelay 
+	 */
+	public void setPromptDelayIndex(int promptDelay) {
+		setPromptDelayTime(fitterEstimator.binToValue(promptDelay, inc));
+	}
+
+	/**
+	 * Sets the prompt delay as a time value.
+	 * 
+	 * @param promptDelayTime 
+	 */
+	public void setPromptDelayTime(double promptDelayTime) {
+		// convert delay to start
+		double promptStartTime = promptDelayTime + transientStartValue;
+		System.out.println("promptStartTime " + promptStartTime);
             
-            // some very rudimentary error-checking
-            if (0.0 < promptStartValue && promptStartValue < transientStopValue) {
-                double diff = promptStartValue - this.promptStartValue;
-                this.promptStartValue += diff;
-                promptStopValue  += diff;
-				System.out.println("diff " + diff + " promptStartValue " + promptStartValue + " promptStopValue " + promptStopValue);
-            }
-			else System.out.println("rejected");
-        }
+		// some very rudimentary error-checking
+		if (0.0 < promptStartTime && promptStartTime < transientStopValue) {
+			double diff = promptStartTime - promptStartValue;
+			promptStartValue += diff;
+			promptStopValue  += diff;
+			System.out.println("diff " + diff + " promptStartValue " + promptStartValue + " promptStopValue " + promptStopValue);
+		}
+		else System.out.println("rejected");
+			
         // either update others with new valid value or undo our invalid value
         notifyListeners();
-    }
- 
-    /**
-     * Gets the start of the prompt as a string showing prompt delay.  Handles
-     * bins or time values.
+	}
+	
+	/**
+     * Gets the start of the prompt as a bin index.
      * 
      * @return 
-     */
-    public String getPromptDelay() {
-        StringBuilder returnValue = new StringBuilder();
-        if (showBins) {
-            if (hasPrompt) {
-                int delay = getPromptStartBin() - getTransientStartBin();
-                returnValue.append(delay);
-            }
-            else {
-                returnValue.append(INTEGER_ZERO_STRING);
-            }
-        }
-        else {
-            if (hasPrompt) {
-                double delay = getPromptStartValue() - getTransientStartValue();
-                delay = fitterEstimator.roundToDecimalPlaces(delay, DECIMAL_PLACES); 
-                returnValue.append(delay);
-            }
-            else {
-                returnValue.append(DOUBLE_ZERO_STRING);
-            }
-        }
-        return returnValue.toString();
-    }
+     */	
+	public int getPromptDelayIndex() {
+		int returnValue = 0;
+		if (hasPrompt) {
+			returnValue = getPromptStartIndex() - getTransientStartIndex();
+		}
+		return returnValue;
+	}
+	/**
+     * Gets the start of the prompt as a time value.
+     * 
+     * @return 
+     */	
+	public double getPromptDelayTime() {
+		double returnValue = 0.0;
+		if (hasPrompt) {
+			returnValue = getPromptStartValue() - getTransientStartValue();
+			returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
+		}
+		return returnValue;
+	}
 
     /**
-     * Sets the start of the prompt as a bin number.
+     * Sets the start of the prompt as a bin index.
      * 
-     * @param bin 
+     * @param index
      */
-    public void setPromptStartBin(int bin) {
-        promptStartValue = fitterEstimator.binToValue(bin, inc);
+    public void setPromptStartIndex(int index) {
+        promptStartValue = fitterEstimator.binToValue(index, inc);
         notifyListeners();
-    }
-
-    /**
-     * Gets the start of the prompt as a bin number.
-     * 
-     * @return 
-     */
-    public int getPromptStartBin() {
-        int returnValue  = 0;
-        if (hasPrompt) {
-            returnValue = fitterEstimator.valueToBin(promptStartValue, inc);
-            
-            /*int tmp = (int) Math.ceil(promptStartValue / inc);
-            
-            if (returnValue != tmp) {
-                System.out.println("*******getPromptStartBin********");
-                System.out.println("SP " + returnValue + " TRI2 " + tmp);
-                if (kludge) {
-                    System.out.println("go with " + tmp);
-                    returnValue = tmp;
-                }
-            }*/
-        }
-        return returnValue;
     }
 
     /**
@@ -270,10 +235,24 @@ public class FittingCursor {
      * 
      * @param value 
      */
-    public void setPromptStartValue(double value) {
+    public void setPromptStartTime(double value) {
         promptStartValue = value;
         notifyListeners();
     }
+	
+    /**
+     * Gets the start of the prompt as a bin index.
+     * 
+     * @return 
+     */
+    public int getPromptStartIndex() {
+        int returnValue  = 0;
+        if (hasPrompt) {
+            returnValue = fitterEstimator.valueToBin(promptStartValue, inc);
+        }
+        return returnValue;
+    }
+
 
     /**
      * Gets the start of the prompt as a time value.
@@ -289,13 +268,12 @@ public class FittingCursor {
     }
  
     /**
-     * Sets the end of the prompt based on a prompt width string.  Handles bins
-     * or time values (that's why we are parsing a string vs taking an int or
-     * float parameter).
+     * Sets the end of the prompt based on a prompt width bin index.
      * 
      * @param promptWidth 
      */
-    public void setPromptWidth(String promptWidth) {
+    public void setPromptWidth(int promptWidth) {
+		
         Double promptWidthValue = null;
         if (showBins) {
             Integer parsedInteger = getIntegerValue(promptWidth);
