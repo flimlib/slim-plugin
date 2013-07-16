@@ -353,9 +353,9 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
             transStop  = transStopCalc;
             
             if (null != fittingCursor) {		
-                fittingCursor.setTransientStartValue(transStart);
-                fittingCursor.setDataStartValue(dataStart);
-                fittingCursor.setTransientStopValue(transStop);
+                fittingCursor.setTransientStartTime(transStart);
+                fittingCursor.setDataStartTime(dataStart);
+                fittingCursor.setTransientStopTime(transStop);
             }
         }
     }
@@ -503,9 +503,9 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
 			}
 		}
        
-        int transStart = fittingCursor.getTransientStartBin();
-        int dataStart  = fittingCursor.getDataStartBin();
-        int transEnd   = fittingCursor.getTransientStopBin();
+        int transStart = fittingCursor.getTransientStartIndex();
+        int dataStart  = fittingCursor.getDataStartIndex();
+        int transEnd   = fittingCursor.getTransientStopIndex();
 		
 		System.out.println("graphing cursors indices are " + transStart + " " + dataStart + " " + transEnd);
 		if (0 == transStart && 0 == dataStart && 0 == transEnd) {
@@ -879,9 +879,9 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
     private class FittingCursorListenerImpl implements FittingCursorListener {
         @Override
         public void cursorChanged(FittingCursor cursor) {
-            double transStart = cursor.getTransientStartValue();
-            double dataStart  = cursor.getDataStartValue();
-            double transStop  = cursor.getTransientStopValue();
+            double transStart = cursor.getTransientStartTime();
+            double dataStart  = cursor.getDataStartTime();
+            double transStop  = cursor.getTransientStopTime();
             setStartStop(transStart, dataStart, transStop);
             frame.repaint();
         }

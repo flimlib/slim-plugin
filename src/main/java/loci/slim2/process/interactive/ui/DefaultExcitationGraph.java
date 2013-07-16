@@ -182,8 +182,8 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
             base  = newBase;
             
             if (null != fittingCursor) {
-                fittingCursor.setPromptStartValue(start);
-                fittingCursor.setPromptStopValue(stop);
+                fittingCursor.setPromptStartTime(start);
+                fittingCursor.setPromptStopTime(stop);
                 fittingCursor.setPromptBaselineValue(base);
             }
         }
@@ -545,8 +545,8 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
     private class FittingCursorListenerImpl implements FittingCursorListener {
         @Override
         public void cursorChanged(FittingCursor cursor) {
-            double promptStart    = cursor.getPromptStartValue();
-            double promptStop     = cursor.getPromptStopValue();
+            double promptStart    = cursor.getPromptStartTime();
+            double promptStop     = cursor.getPromptStopTime();
             double promptBaseline = cursor.getPromptBaselineValue();
             startStopBaseDraggingUI.setStartStopBaseValues(promptStart, promptStop, promptBaseline);
             layer.repaint();

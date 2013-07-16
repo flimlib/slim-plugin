@@ -55,15 +55,17 @@ public class FittingCursor {
     private boolean showBins;
     private volatile boolean suspend;
     private boolean hasPrompt;
-    private int transientStartBin;
-    private int dataStartBin;
-    private int transientStopBin;
-    private double promptStartValue;
-    private double promptStopValue;
+	private int promptStartIndex;
+	private int promptStopIndex;
+    private int transientStartIndex;
+    private int dataStartIndex;
+    private int transientStopIndex;
+    private double promptStartTime;
+    private double promptStopTime;
     private double promptBaselineValue;
-    private double transientStartValue;
-    private double dataStartValue;
-    private double transientStopValue;
+    private double transientStartTime;
+    private double dataStartTime;
+    private double transientStopTime;
 
     /**
      * Constructor
@@ -89,9 +91,10 @@ public class FittingCursor {
      */
     public void addListener(FittingCursorListener listener) {
 		if (null == listener) { System.out.println("FittingCursor.addListener is null"); //TODO ARG
-		 throw new RuntimeException("blah blah");
+		 throw new RuntimeException("blah blah"); //TODO ARG just to show up bad listeners during development
 		}
         synchronized (listeners) {
+			// avoid duplicates
             if (!listeners.contains(listener)) {
                 listeners.add(listener);
             }
@@ -107,6 +110,25 @@ public class FittingCursor {
         synchronized (listeners) {
             listeners.remove(listener);
         }
+    }
+	
+    /**
+     * Temporarily suspends listener notifications.  Used when several cursors
+     * change at the same time.  Call suspendNotifications followed by cursor
+     * changes followed by sendNotifications.
+	 * <p>
+	 * Also suspends checking for cursor consistency.
+     */
+    public void suspendNotifications() {
+        suspend = true;
+    }
+
+    /**
+     * Used to send listener notifications after a batched change.
+     */
+    public void sendNotifications() {
+        suspend = false;
+        notifyListeners();
     }
 
     /**
@@ -125,23 +147,6 @@ public class FittingCursor {
      */
     public boolean getShowBins() {
         return showBins;
-    }
-
-    /**
-     * Temporarily suspends listener notifications.  Used when several cursors
-     * change at the same time.  Call suspendNotifications followed by cursor
-     * changes followed by sendNotifications.
-     */
-    public void suspendNotifications() {
-        suspend = true;
-    }
-
-    /**
-     * Used to send listener notifications after a batched change.
-     */
-    public void sendNotifications() {
-        suspend = false;
-        notifyListeners();
     }
 
     /**
@@ -167,8 +172,11 @@ public class FittingCursor {
 	 * 
 	 * @param promptDelay 
 	 */
-	public void setPromptDelayIndex(int promptDelay) {
-		setPromptDelayTime(fitterEstimator.binToValue(promptDelay, inc));
+	public void setPromptDelayIndex(int promptDelayIndex) {
+		double promptDelayTime = fitterEstimator.binToValue(promptDelayIndex, inc);
+
+		// validate & notify
+		checkPromptDelay(promptDelayIndex, promptDelayTime);
 	}
 
 	/**
@@ -177,21 +185,25 @@ public class FittingCursor {
 	 * @param promptDelayTime 
 	 */
 	public void setPromptDelayTime(double promptDelayTime) {
+		int promptDelayIndex = fitterEstimator.valueToBin(promptDelayTime, inc);
+
+		// validate & notify
+		checkPromptDelay(promptDelayIndex, promptDelayTime);
+	}
+
+	/**
+	 * Validate & notify prompt delay changes.
+	 * 
+	 * @param promptDelayIndex
+	 * @param promptDelayTime 
+	 */
+	private void checkPromptDelay(int promptDelayIndex, double promptDelayTime) {
 		// convert delay to start
-		double promptStartTime = promptDelayTime + transientStartValue;
-		System.out.println("promptStartTime " + promptStartTime);
-            
-		// some very rudimentary error-checking
-		if (0.0 < promptStartTime && promptStartTime < transientStopValue) {
-			double diff = promptStartTime - promptStartValue;
-			promptStartValue += diff;
-			promptStopValue  += diff;
-			System.out.println("diff " + diff + " promptStartValue " + promptStartValue + " promptStopValue " + promptStopValue);
-		}
-		else System.out.println("rejected");
-			
-        // either update others with new valid value or undo our invalid value
-        notifyListeners();
+		double promptStartTime = promptDelayTime + transientStartTime;
+		int promptStartIndex = promptDelayIndex + transientStartIndex;
+		
+		// validate & notify
+		checkPromptStart(promptStartIndex, promptStartTime);
 	}
 	
 	/**
@@ -214,7 +226,7 @@ public class FittingCursor {
 	public double getPromptDelayTime() {
 		double returnValue = 0.0;
 		if (hasPrompt) {
-			returnValue = getPromptStartValue() - getTransientStartValue();
+			returnValue = getPromptStartTime() - getTransientStartTime();
 			returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
 		}
 		return returnValue;
@@ -225,9 +237,9 @@ public class FittingCursor {
      * 
      * @param index
      */
-    public void setPromptStartIndex(int index) {
-        promptStartValue = fitterEstimator.binToValue(index, inc);
-        notifyListeners();
+    public void setPromptStartIndex(int promptStartIndex) {
+		double promptStartTime = fitterEstimator.binToValue(promptStartIndex, inc);
+        checkPromptStart(promptStartIndex, promptStartTime);
     }
 
     /**
@@ -235,10 +247,31 @@ public class FittingCursor {
      * 
      * @param value 
      */
-    public void setPromptStartTime(double value) {
-        promptStartValue = value;
+    public void setPromptStartTime(double promptStartTime) {
+        this.promptStartTime = promptStartTime;
         notifyListeners();
     }
+
+	/**
+	 * Validate & notify start of prompt changes.
+	 * 
+	 * @param promptStartIndex
+	 * @param promptStartTime 
+	 */
+	private void checkPromptStart(int promptStartIndex, double promptStartTime) {
+		// some very rudimentary error-checking
+		if (suspend || (0.0 < promptStartTime && promptStartTime < transientStopTime)) {
+			double diffTime = promptStartTime - this.promptStartTime;
+			this.promptStartTime += diffTime;
+			promptStopTime       += diffTime;
+			int diffIndex = promptStartIndex - this.promptStartIndex;
+			this.promptStartIndex += diffIndex;
+			promptStopIndex       += diffIndex;
+		}
+		
+        // either update others with new valid value or undo our invalid value
+        notifyListeners();
+	}
 	
     /**
      * Gets the start of the prompt as a bin index.
@@ -248,21 +281,21 @@ public class FittingCursor {
     public int getPromptStartIndex() {
         int returnValue  = 0;
         if (hasPrompt) {
-            returnValue = fitterEstimator.valueToBin(promptStartValue, inc);
+            returnValue = promptStartIndex;
         }
         return returnValue;
     }
-
 
     /**
      * Gets the start of the prompt as a time value.
      * 
      * @return 
      */
-    public double getPromptStartValue() {
+    public double getPromptStartTime() {
         double returnValue = 0.0;
         if (hasPrompt) {
-            returnValue = promptStartValue;
+            returnValue = promptStartTime;
+			returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
         }
         return returnValue;
     }
@@ -272,90 +305,122 @@ public class FittingCursor {
      * 
      * @param promptWidth 
      */
-    public void setPromptWidth(int promptWidth) {
+    public void setPromptWidthIndex(int promptWidthIndex) {
+		double promptWidthTime = fitterEstimator.binToValue(promptWidthIndex, inc);
 		
-        Double promptWidthValue = null;
-        if (showBins) {
-            Integer parsedInteger = getIntegerValue(promptWidth);
-            if (null != parsedInteger) {
-                promptWidthValue = inc * parsedInteger;
-            }
-        }
-        else {
-            promptWidthValue = getDoubleValue(promptWidth);
-        }
-        if (null != promptWidthValue) {
-            double promptStopValue = getPromptStartValue() + promptWidthValue;
-            if (promptStopValue >= promptStartValue &&
-                    promptStopValue <= bins * inc) {
-                this.promptStopValue = promptStopValue;
-            }
-        }
+		// validate & notify
+		checkPromptWidth(promptWidthIndex, promptWidthTime);
+    }
+
+	/**
+	 * Sets the end of the prompt based on a prompt width time.
+	 * 
+	 * @param promptWidthTime 
+	 */
+	public void setPromptWidthTime(double promptWidthTime) {
+		int promptWidthIndex = fitterEstimator.valueToBin(promptWidthTime, inc);
+		
+		// validate & notify
+		checkPromptWidth(promptWidthIndex, promptWidthTime);
+	}
+
+	/**
+	 * Validate & notify prompt width changes.
+	 * 
+	 * @param promptWidthIndex
+	 * @param promptWidthTime 
+	 */
+	private void checkPromptWidth(int promptWidthIndex, double promptWidthTime) {
+		int promptStopIndex = getPromptStartIndex() + promptWidthIndex;
+		double promptStopTime = getPromptStartTime() + promptWidthTime;
+		
+        if (suspend || (promptStopTime > 0.0 && promptStopTime < bins * inc)) {
+			this.promptStopIndex = promptStopIndex;
+			this.promptStopTime  = promptStopTime;
+		}
+		
         // either update others with new valid value or undo our invalid value
         notifyListeners();
-    }
+	}
 
     /**
-     * Gets the end of the prompt as a string showing prompt width.  Handles
-     * bins or time values.
+     * Gets the width of the prompt as an index.
      * 
      * @return 
      */
-    public String getPromptWidth() {
-        StringBuilder returnValue = new StringBuilder();
-        if (showBins) {
-            if (hasPrompt) {
-                int width = getPromptStopBin() - getPromptStartBin();
-                returnValue.append(width);
-            }
-            else {
-                returnValue.append(INTEGER_ZERO_STRING);
-            }
-        }
-        else {
-            if (hasPrompt) {
-                double width = getPromptStopValue() - getPromptStartValue();
-                width = fitterEstimator.roundToDecimalPlaces(width, DECIMAL_PLACES);                
-                returnValue.append(width);
-            }
-            else {
-                returnValue.append(DOUBLE_ZERO_STRING);
-            }
-        }
-        return returnValue.toString();
+    public int getPromptWidthIndex() {
+		int returnValue = 0;
+		if (hasPrompt) {
+			returnValue = getPromptStopIndex() - getPromptStartIndex();
+		}
+		return returnValue;
     }
 
-    /**
-     * Sets the end of the prompt as a bin number.
-     * 
-     * @param bin 
-     */
-    public void setPromptStopBin(int bin) {
-        promptStopValue = fitterEstimator.binToValue(bin, inc);
-        notifyListeners();
-    }
+	/**
+	 * Gets the width of the prompt as a time.
+	 * 
+	 * @return 
+	 */
+	public double getPromptWidthTime() {
+		double returnValue = 0;
+		if (hasPrompt) {
+			returnValue = getPromptStopTime() - getPromptStartTime();
+			returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
+		}
+		return returnValue;
+	}
 
     /**
-     * Gets the end of the prompt as a bin number.
+     * Sets the end of the prompt as an index.
      * 
-     * @return 
+     * @param promptStopIndex 
      */
-    public int getPromptStopBin() {
-        int returnValue = 0;
-        if (hasPrompt) {
-            returnValue = ((DefaultFitterEstimator) fitterEstimator).valueToBin(promptStopValue, inc);
-        }
-        return returnValue;
+    public void setPromptStopIndex(int promptStopIndex) {
+		double promptStopTime = fitterEstimator.binToValue(promptStopIndex, inc);
+
+		// validate & notify
+        checkPromptStop(promptStopIndex, promptStopTime);
     }
 
     /**
      * Sets the end of the prompt as a time value.
      * 
-     * @param value 
+     * @param promptStopTime 
      */
-    public void setPromptStopValue(double value) {
-        promptStopValue = value;
+    public void setPromptStopTime(double promptStopTime) {
+		int promptStopIndex = fitterEstimator.valueToBin(promptStopTime, inc);
+
+		// validate & notify
+		checkPromptStop(promptStopIndex, promptStopTime);
+    }
+
+	/**
+	 * Validate & notify end of prompt changes.
+	 * 
+	 * @param promptStopIndex
+	 * @param promptStopTime 
+	 */
+	private void checkPromptStop(int promptStopIndex, double promptStopTime) {
+		if (suspend || (promptStopTime > getPromptStartTime() && promptStopTime < bins * inc)) {
+			this.promptStopIndex = promptStopIndex;
+			this.promptStopTime  = promptStopTime;
+		}
+		
+        // either update others with new valid value or undo our invalid value
         notifyListeners();
+	}
+
+    /**
+     * Gets the end of the prompt as an index.
+     * 
+     * @return 
+     */
+    public int getPromptStopIndex() {
+        int returnValue = 0;
+        if (hasPrompt) {
+            returnValue = ((DefaultFitterEstimator) fitterEstimator).valueToBin(promptStopTime, inc);
+        }
+        return returnValue;
     }
 
     /**
@@ -363,359 +428,193 @@ public class FittingCursor {
      * 
      * @return 
      */
-    public double getPromptStopValue() {
+    public double getPromptStopTime() {
         double returnValue = 0.0;
         if (hasPrompt) {
-            returnValue = promptStopValue;
-        }
-        return returnValue;
-    }
-
-    /**
-     * Sets the baseline of the prompt based on a string.
-     * 
-     * @param promptBaseline 
-     */
-    public void setPromptBaseline(String promptBaseline) {
-        Double promptBaselineValue = getDoubleValue(promptBaseline);
-        if (null != promptBaselineValue) {
-            this.promptBaselineValue = promptBaselineValue;
-        }
-        // either update others with new valid value or undo our invalid value
-        notifyListeners();
-    }
- 
-    /**
-     * Gets the baseline of the prompt based on a string.
-     * 
-     * @return 
-     */
-    public String getPromptBaseline() {
-        String returnValue = DOUBLE_ZERO_STRING;
-        if (hasPrompt) {
-            returnValue = "" + getPromptBaselineValue();
+            returnValue = promptStopTime;
+			returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
         }
         return returnValue;
     }
  
     /**
-     * Sets the baseline of the prompt as a value.
+     * Sets the baseline of the prompt.
      * 
      * Note that this value is actually a photon count and not based on bins or
      * time values.
      * 
-     * @param value 
+     * @param promptBaselineValue 
      */
-    public void setPromptBaselineValue(double value) {
-        promptBaselineValue = value;
+    public void setPromptBaselineValue(double promptBaselineValue) {
+        this.promptBaselineValue = promptBaselineValue;
         notifyListeners();
     }
 
     /**
-     * Gets the baseline of the prompt as a value.
+     * Gets the baseline of the prompt.
      * 
      * @return
      */
     public double getPromptBaselineValue() {
         double returnValue = 0.0;
         if (hasPrompt) {
-            returnValue = fitterEstimator.roundToDecimalPlaces(promptBaselineValue, DECIMAL_PLACES);
+			returnValue = promptBaselineValue;
+            returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
         }
         return returnValue;
     }
  
     /**
-     * Sets the start of the transient based on a string.  Handles bins or time
-     * values.
+     * Sets the start of the transient as an index.
      * 
-     * @param transientStart 
+     * @param transientStartIndex
      */
-    public void setTransientStart(String transientStart) {
-        if (showBins) {
-            Integer bin = getIntegerValue(transientStart);
-            if (null != bin) {
-                if (bin <= dataStartBin && bin >= 0) {
-                    transientStartBin = bin;
-                    transientStartValue = fitterEstimator.binToValue(bin, inc);
-                }
-            }
-        }
-        else {
-            Double value = getDoubleValue(transientStart);
-            if (null != value) {
-                if (value <= dataStartValue && value >= 0.0) {
-                    transientStartValue = value;
-                    transientStartBin = fitterEstimator.valueToBin(value, inc);
-                }
-            }
-        }
+    public void setTransientStartIndex(int transientStartIndex) {
+		double transientStartTime = fitterEstimator.binToValue(transientStartIndex, inc);
+		
+		checkTransientStart(transientStartIndex, transientStartTime);
+    }
+	
+	public void setTransientStartTime(double transientStartTime) {
+		int transientStartIndex = fitterEstimator.valueToBin(transientStartTime, inc);
+		
+		checkTransientStart(transientStartIndex, transientStartTime);
+	}
 
+	/**
+	 * Validate & notify start of transient changes.
+	 * 
+	 * @param transientStartIndex
+	 * @param transientStartTime 
+	 */
+	private void checkTransientStart(int transientStartIndex, double transientStartTime) {
+		if (suspend || (0 <= transientStartTime && transientStartTime <= getDataStartTime())) {
+			this.transientStartIndex = transientStartIndex;
+			this.transientStartTime = transientStartTime;
+		}
+		
         // either update others with new valid value or undo our invalid value
         notifyListeners();
-    }
+	}
 
  
     /**
-     * Gets the start of the transient as a string.  Handles bins or time values.
+     * Gets the start of the transient as an index.
      * 
      * @return 
      */
-    public String getTransientStart() {
-        StringBuilder returnValue = new StringBuilder();
-        if (showBins) {
-            returnValue.append(getTransientStartBin());
-        }
-        else {
-            returnValue.append(getTransientStartValue());
-        }
-        return returnValue.toString();
+    public int getTransientStartIndex() {
+		return transientStartIndex;
+	}
+	
+	/**
+     * Gets the start of the transient as a time.
+     * 
+     * @return 
+     */
+    public double getTransientStartTime() {
+        return transientStartTime;
     }
 
-    /**
-     * Sets the start of the transient as a bin number.
-     * 
-     * @param bin 
-     */
-    public void setTransientStartBin(int bin) {
-        transientStartBin = bin;
-        transientStartValue = fitterEstimator.binToValue(bin, inc);
+	/**
+	 * Set start of data as an index.
+	 * 
+	 * @param dataStartIndex 
+	 */
+	public void setDataStartIndex(int dataStartIndex) {
+		double dataStartTime = fitterEstimator.binToValue(dataStartIndex, inc);
+		
+		// validate & notify
+		checkDataStart(dataStartIndex, dataStartTime);
+	}
 
+	/**
+	 * Sets start of data as a time.
+	 * 
+	 * @param dataStartTime 
+	 */
+	public void setDataStartTime(double dataStartTime) {
+		int dataStartIndex = fitterEstimator.valueToBin(dataStartTime, inc);
+		
+		// validate & notify
+		checkDataStart(dataStartIndex, dataStartTime);
+	}
+
+	/**
+	 * Validate & notify start of data changes.
+	 * 
+	 * @param dataStartIndex
+	 * @param dataStartTime 
+	 */
+	private void checkDataStart(int dataStartIndex, double dataStartTime) {
+		if (suspend || (transientStartTime <= dataStartTime && dataStartTime < transientStopTime)) {
+			this.dataStartIndex = dataStartIndex;
+			this.dataStartTime  = dataStartTime;
+		}
+		
+        // either update others with new valid value or undo our invalid value
         notifyListeners();
-    }
+	}
 
-    /**
-     * Gets the start of the transient as a bin number.
-     * 
-     * @return 
-     */
-    public int getTransientStartBin() {
-        return transientStartBin;
-    }
+	/**
+	 * Gets start of data as an index.
+	 * 
+	 * @return 
+	 */
+	public int getDataStartIndex() {
+		return dataStartIndex;
+	}
 
-    /**
-     * Sets the start of the transient as a time value.
-     * 
-     * @param value 
-     */
-    public void setTransientStartValue(double value) {
-        transientStartValue = fitterEstimator.roundToDecimalPlaces(value, DECIMAL_PLACES);
-        transientStartBin = fitterEstimator.valueToBin(value, inc);
-        
+	/**
+	 * Gets start of data as a time.
+	 * 
+	 * @return 
+	 */
+	public double getDataStartTime() {
+		return dataStartTime; //TODO ARG round it?
+	}
+
+	/**
+	 * Sets end of data as an index.
+	 * 
+	 * @param transientStopIndex 
+	 */
+	public void setTransientStopIndex(int transientStopIndex) {
+		double transientStopTime = fitterEstimator.binToValue(transientStopIndex, inc);
+		
+		// validate & notify
+		checkTransientStop(transientStopIndex, transientStopTime);
+	}
+
+	/**
+	 * Sets end of data as a time.
+	 * 
+	 * @param transientStopTime 
+	 */
+	public void setTransientStopTime(double transientStopTime) {
+		int transientStopIndex = fitterEstimator.valueToBin(transientStopTime, inc);
+		
+		// validate & notify
+		checkTransientStop(transientStopIndex, transientStopTime);
+	}
+	
+	private void checkTransientStop(int transientStopIndex, double transientStopTime) {
+		if (suspend || (getDataStartTime() <= transientStopTime && transientStopTime < bins * inc)) {
+			this.transientStopIndex = transientStopIndex;
+			this.transientStopTime  = transientStopTime;
+		}
+		
+        // either update others with new valid value or undo our invalid value
         notifyListeners();
-    }
-
-    /**
-     * Gets the start of the transient as a time value.
-     * 
-     * @return 
-     */
-    public double getTransientStartValue() {
-        return transientStartValue;
-    }
-    
-    /**
-     * Sets the start of the data based on a string.  Handles bins or time
-     * values.
-     * 
-     * @param dataStart 
-     */    
-    public void setDataStart(String dataStart) {
-        if (showBins) {
-            Integer bin = getIntegerValue(dataStart);
-            if (null != bin) {
-                if (bin >= transientStartBin && bin <= transientStopBin) {
-                    dataStartBin = bin;
-                    dataStartValue = fitterEstimator.binToValue(bin, inc);
-                }
-            }
-        }
-        else {
-            Double value = getDoubleValue(dataStart);
-            if (null != value) {
-                if (value >= transientStartValue && value <= transientStopValue) {
-                    dataStartValue = value;
-                    dataStartBin = fitterEstimator.valueToBin(value, inc);
-                }
-            }
-        }        
-        
-        // either update with new valid values or undo invalid values
-        notifyListeners();
-    }
-
-    /**
-     * Gets the start of the data as a string.  Handles bins or time values.
-     * 
-     * @return 
-     */
-    public String getDataStart() {
-        StringBuilder returnValue = new StringBuilder();
-        if (showBins) {
-            returnValue.append(getDataStartBin());
-        }
-        else {
-            returnValue.append(getDataStartValue());
-        }
-        return returnValue.toString();
-    }
-
-    /**
-     * Sets the start of the data as a bin number.
-     * 
-     * @param bin 
-     */
-    public void setDataStartBin(int bin) {
-        dataStartBin = bin;
-        dataStartValue = fitterEstimator.binToValue(bin, inc);
-        notifyListeners();
-    }
-
-    /**
-     * Gets the start of the data as a bin number.
-     * 
-     * @return 
-     */
-    public int getDataStartBin() {
-        return dataStartBin;
-    }
-
-    /**
-     * Sets the start of the data as a time value.
-     * 
-     * @param value 
-     */
-    public void setDataStartValue(double value) {
-        dataStartValue = fitterEstimator.roundToDecimalPlaces(value, DECIMAL_PLACES);
-        dataStartBin = fitterEstimator.valueToBin(value, inc);
-        notifyListeners();
-    }
-
-    /**
-     * Gets the start of the data as a time value.
-     * 
-     * @return 
-     */
-    public double getDataStartValue() {
-        return dataStartValue;
-    }
-    
-    /**
-     * Sets the end of the transient based on a string.  Handles bins or time
-     * values.
-     * 
-     * @param transientStop 
-     */
-    public void setTransientStop(String transientStop) {
-        if (showBins) {
-            Integer bin = getIntegerValue(transientStop);
-            if (null != bin) {
-                if (bin >= dataStartBin && bin < bins) {
-                    transientStopBin = bin;
-                    transientStopValue = fitterEstimator.binToValue(bin, inc);
-                }
-            }
-        }
-        else {
-            Double value = getDoubleValue(transientStop);
-            if (null != value) {
-                if (value >= dataStartValue && value <= inc * bins) {
-                    transientStopValue = value;
-                    transientStopBin = ((DefaultFitterEstimator) fitterEstimator).endValueToBin(value, inc);
-                }
-            }
-        }
-
-        // either update with new valid values or undo invalid values
-        notifyListeners();
-    }
-
-    /**
-     * Gets the end of the transient as a string.  Handles bins or time values.
-     * 
-     * @return 
-     */
-    public String getTransientStop() {
-        StringBuilder returnValue = new StringBuilder();
-        if (showBins) {
-            returnValue.append(getTransientStopBin());
-        }
-        else {
-            returnValue.append(getTransientStopValue());
-        }
-        return returnValue.toString();
-    }
-
-    /**
-     * Sets the end of the transient as a bin number.
-     * 
-     * @param bin 
-     */
-    public void setTransientStopBin(int bin) {
-        transientStopBin = bin;
-        transientStopValue = fitterEstimator.binToValue(bin, inc);
-        notifyListeners();
-    }
-
-    /**
-     * Gets the end of the transient as a bin number.
-     * 
-     * @return 
-     */
-    public int getTransientStopBin() {
-        return transientStopBin;
-    }
-
-    /**
-     * Sets the end of the transient as a time value.
-     * 
-     * @param value 
-     */
-    public void setTransientStopValue(double value) {
-        transientStopValue = fitterEstimator.roundToDecimalPlaces(value, DECIMAL_PLACES);
-        transientStopBin = ((DefaultFitterEstimator) fitterEstimator).endValueToBin(value, inc);
-        notifyListeners();
-    }
-
-    /**
-     * Gets the end of the transient as a time value.
-     * 
-     * @return 
-     */
-    public double getTransientStopValue() {
-        return transientStopValue;
-    }
- 
-    /**
-     * Helper function to extract integers from strings.
-     * 
-     * @param string
-     * @return integer or null
-     */
-    private Integer getIntegerValue(String string) {
-        Integer value = null;
-        try {
-            value = Integer.parseInt(string);
-        }
-        catch (NumberFormatException e) {
-        }
-        return value;
-    }
- 
-    /**
-     * Helper function to extract doubles from strings.
-     * 
-     * @param string
-     * @return integer or null
-     */
-    private Double getDoubleValue(String string) {
-        Double value = null;
-        try {
-            value = Double.parseDouble(string);
-        }
-        catch (NumberFormatException e) {
-        }
-        return value;
-    }
+	}
+	
+	public int getTransientStopIndex() {
+		return transientStopIndex;
+	}
+	
+	public double getTransientStopTime() {
+		return transientStopTime;
+	}
 
     /**
      * Notifies all listeners of a change.
@@ -728,10 +627,9 @@ public class FittingCursor {
                     synchronized (listeners) {
                         for (FittingCursorListener listener : listeners) {
 							if (null == listener) {
-								System.out.println("null listener for FC");
+								System.out.println("null listener for FC"); //TODO ARG error checking during development
 							}
 							else {
-								System.out.println("notify listener " + listener);
 								listener.cursorChanged(this);
 							}
                         }

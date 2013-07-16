@@ -62,7 +62,6 @@ import loci.slim2.process.ExcitationFileUtility;
 import loci.slim2.process.FitSettings;
 import loci.slim2.process.InteractiveProcessor;
 import loci.slim2.process.interactive.cursor.FittingCursor;
-import loci.slim2.process.interactive.cursor.FittingCursorHelper;
 import loci.slim2.process.interactive.cursor.FittingCursorListener;
 import loci.slim2.process.interactive.ui.DecayGraph;
 import loci.slim2.process.interactive.ui.DefaultDecayGraph;
@@ -85,7 +84,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private FittingEngine fittingEngine;
 	private IFitterEstimator fitterEstimator;
 	private FittingCursor fittingCursor;
-	private FittingCursorHelper fittingCursorHelper;
 	private LifetimeDatasetWrapper lifetimeDatasetWrapper;
 	private LifetimeGrayscaleDataset lifetimeGrayscaleDataset;
 	private DecayGraph decayGraph;
@@ -147,11 +145,11 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 				@Override
 				public void cursorChanged(FittingCursor cursor) {
 					// get current cursor values
-					int transStart        = cursor.getTransientStartBin();
-					int dataStart         = cursor.getDataStartBin();
-					int transStop         = cursor.getTransientStopBin();
-					int promptStart       = cursor.getPromptStartBin();
-					int promptStop        = cursor.getPromptStopBin();
+					int transStart        = cursor.getTransientStartIndex();
+					int dataStart         = cursor.getDataStartIndex();
+					int transStop         = cursor.getTransientStopIndex();
+					int promptStart       = cursor.getPromptStartIndex();
+					int promptStop        = cursor.getPromptStopIndex();
 					double promptBaseline = cursor.getPromptBaselineValue();
 					
 					// look for changes, current vs. saved cursor values
@@ -188,15 +186,13 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 				}
 			}
 		);
-		fittingCursorHelper = new FittingCursorHelper();
-		fittingCursorHelper.setFittingCursor(fittingCursor);
 		
 		// display the UI
 		if (null == uiPanel) {
 			boolean tabbed = false;
 			boolean showTau = true;
 			String[] binning = new String[] { "none", "3x3", "5x5", "7x7", "9x9", "11x11" };
-			uiPanel = new DefaultUserInterfacePanel(tabbed, showTau, bins, timeInc, new String[] { "one", "two" }, binning, fittingCursorHelper, fitterEstimator);
+			uiPanel = new DefaultUserInterfacePanel(tabbed, showTau, bins, timeInc, new String[] { "one", "two" }, binning, fittingCursor, fitterEstimator);
 		}
         uiPanel.setX(0);
         uiPanel.setY(0);
@@ -445,17 +441,17 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
                         // want all the fitting cursor listeners to get everything at once
                         fittingCursor.suspendNotifications();
                         fittingCursor.setHasPrompt(true);
-                        fittingCursor.setPromptStartBin
+                        fittingCursor.setPromptStartIndex
                                 ((int) results[CursorEstimator.PROMPT_START]);
-                        fittingCursor.setPromptStopBin
+                        fittingCursor.setPromptStopIndex
                                 ((int) results[CursorEstimator.PROMPT_STOP]);
                         fittingCursor.setPromptBaselineValue
                                 (results[CursorEstimator.PROMPT_BASELINE]);
-                        fittingCursor.setTransientStartBin
+                        fittingCursor.setTransientStartIndex
                                 ((int) results[CursorEstimator.TRANSIENT_START]);
-                        fittingCursor.setDataStartBin
+                        fittingCursor.setDataStartIndex
                                 ((int) results[CursorEstimator.DATA_START]);
-                        fittingCursor.setTransientStopBin
+                        fittingCursor.setTransientStopIndex
                                 ((int) results[CursorEstimator.TRANSIENT_STOP]);
                         fittingCursor.sendNotifications();
                     }
@@ -467,9 +463,9 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
                         // want all the fitting cursor listeners to get everything at once
                         fittingCursor.suspendNotifications();
                         fittingCursor.setHasPrompt(false);
-                        fittingCursor.setTransientStartBin(results[CursorEstimator.TRANSIENT_START]);
-                        fittingCursor.setDataStartBin(results[CursorEstimator.DATA_START]);
-                        fittingCursor.setTransientStopBin(results[CursorEstimator.TRANSIENT_STOP]);
+                        fittingCursor.setTransientStartIndex(results[CursorEstimator.TRANSIENT_START]);
+                        fittingCursor.setDataStartIndex(results[CursorEstimator.DATA_START]);
+                        fittingCursor.setTransientStopIndex(results[CursorEstimator.TRANSIENT_STOP]);
                         fittingCursor.sendNotifications();
                     }
                 }
@@ -550,12 +546,12 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
             // want all the fitting cursor listeners to get everything at once
             fittingCursor.suspendNotifications();
             fittingCursor.setHasPrompt(true);
-            fittingCursor.setPromptStartBin   ((int) results[CursorEstimator.PROMPT_START]);
-            fittingCursor.setPromptStopBin    ((int) results[CursorEstimator.PROMPT_STOP]);
-            fittingCursor.setPromptBaselineValue    (results[CursorEstimator.PROMPT_BASELINE]);
-            fittingCursor.setTransientStartBin((int) results[CursorEstimator.TRANSIENT_START]);
-            fittingCursor.setDataStartBin     ((int) results[CursorEstimator.DATA_START]);
-            fittingCursor.setTransientStopBin ((int) results[CursorEstimator.TRANSIENT_STOP]);
+            fittingCursor.setPromptStartIndex   ((int) results[CursorEstimator.PROMPT_START]);
+            fittingCursor.setPromptStopIndex    ((int) results[CursorEstimator.PROMPT_STOP]);
+            fittingCursor.setPromptBaselineValue      (results[CursorEstimator.PROMPT_BASELINE]);
+            fittingCursor.setTransientStartIndex((int) results[CursorEstimator.TRANSIENT_START]);
+            fittingCursor.setDataStartIndex     ((int) results[CursorEstimator.DATA_START]);
+            fittingCursor.setTransientStopIndex ((int) results[CursorEstimator.TRANSIENT_STOP]);
             fittingCursor.sendNotifications();
 
             excitationPanel = new ExcitationPanel(excitation, fittingCursor); //TODO ARG excitation cursor change refit problem here; get new values before excitation ready for refit
@@ -581,9 +577,9 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 
         // want to batch all of the fitting cursor notifications to listeners
         fittingCursor.suspendNotifications();
-        fittingCursor.setTransientStartBin(transientStart);
-        fittingCursor.setDataStartBin(dataStart);
-        fittingCursor.setTransientStopBin(transientStop);
+        fittingCursor.setTransientStartIndex(transientStart);
+        fittingCursor.setDataStartIndex(dataStart);
+        fittingCursor.setTransientStopIndex(transientStop);
         fittingCursor.sendNotifications();
 	}
 	
@@ -695,19 +691,19 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		params.setXInc(timeInc);
 		double[] promptValues = null;
         if (fittingCursor.hasPrompt() && null != excitationPanel) {
-            int startIndex = fittingCursor.getPromptStartBin();
-            int stopIndex  = fittingCursor.getPromptStopBin();
+            int startIndex = fittingCursor.getPromptStartIndex();
+            int stopIndex  = fittingCursor.getPromptStopIndex();
             double base  = fittingCursor.getPromptBaselineValue();   
             promptValues = excitationPanel.getValues(startIndex, stopIndex, base);
 		}
 		params.setPrompt(promptValues);
 		params.setChiSquareTarget(ui.getChiSquareTarget());
 		params.setFree(translateFree(ui.getFunction(), ui.getFree()));
-		params.setStartPrompt(fittingCursor.getPromptStartBin());
-		params.setStopPrompt(fittingCursor.getPromptStopBin());
-		params.setTransientStart(fittingCursor.getTransientStartBin());
-		params.setDataStart(fittingCursor.getDataStartBin());
-		params.setTransientStop(fittingCursor.getTransientStopBin());
+		params.setStartPrompt(fittingCursor.getPromptStartIndex());
+		params.setStopPrompt(fittingCursor.getPromptStopIndex());
+		params.setTransientStart(fittingCursor.getTransientStartIndex());
+		params.setDataStart(fittingCursor.getDataStartIndex());
+		params.setTransientStop(fittingCursor.getTransientStopIndex());
 		return params;
 	}
 
@@ -847,9 +843,9 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		frame.toFront();
         decayGraph.setTitle(title);
         decayGraph.setFittingCursor(fittingCursor);
-        double transStart = fittingCursor.getTransientStartValue();
-        double dataStart  = fittingCursor.getDataStartValue();
-        double transStop  = fittingCursor.getTransientStopValue();
+        double transStart = fittingCursor.getTransientStartTime();
+        double dataStart  = fittingCursor.getDataStartTime();
+        double transStop  = fittingCursor.getTransientStopTime();
 		
         decayGraph.setStartStop(transStart, dataStart, transStop);
 		double[] prompt = null;

@@ -69,8 +69,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.IFitterEstimator;
-import loci.slim2.process.interactive.cursor.FittingCursorHelper;
-import loci.slim2.process.interactive.cursor.FittingCursorUI;
+import loci.slim2.process.interactive.cursor.FittingCursor;
+import loci.slim2.process.interactive.cursor.FittingCursorListener;
 
 /**
  * Default implementation of main UI panel.
@@ -193,14 +193,14 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	private static final String CURSOR_TIME = "Time",
 	                            CURSOR_BINS = "Bins";
 	
-    private FittingCursorHelper fittingCursorHelper;
+    private FittingCursor fittingCursor;
+	private FittingCursorListener fittingCursorListener;
     private IFitterEstimator fitterEstimator;
 	private int maxBin;
 	private double xInc;
     
     private UserInterfacePanelListener listener;
 	private ThresholdUpdate thresholdListener;
-	private FittingCursorListener fittingCursorListener;
     int fittedParameterCount = 0;
 	String promptSelection;
 	volatile boolean promptSelectionLock;
@@ -321,12 +321,12 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
     public DefaultUserInterfacePanel(boolean tabbed, boolean showTau,
 			int maxBin, double xInc,
             String[] analysisChoices, String[] binningChoices,
-            FittingCursorHelper fittingCursorHelper,
+            FittingCursor fittingCursor,
             IFitterEstimator fitterEstimator)
     {
         String lifetimeLabel = "" + (showTau ? TAU : LAMBDA);
         
-        this.fittingCursorHelper = fittingCursorHelper;
+        this.fittingCursor = fittingCursor;
         this.fitterEstimator = fitterEstimator;
 		this.maxBin = maxBin;
 		this.xInc = xInc;
@@ -481,8 +481,8 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         enablePromptCursors(false);
 
         // set up and show initial cursors
-		fittingCursorListener = new FittingCursorListener();
-        fittingCursorHelper.setFittingCursorUI(fittingCursorListener);
+		fittingCursorListener = new FittingCursorListenerImpl();
+		fittingCursor.addListener(fittingCursorListener);
     }
 
     @Override
@@ -712,7 +712,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 					
 					cursorCardLayout.show(cardsPanel, showBins ? CURSOR_BINS : CURSOR_TIME);
 					
-                    fittingCursorHelper.setShowBins(showBins);
+                    fittingCursor.setShowBins(showBins);
                 }
             }
         );
@@ -791,7 +791,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		promptBaselineSpinnerA.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptBaseline(fittingCursorListener.getPromptBaseline());
+				fittingCursor.setPromptBaselineValue((Double) promptBaselineSpinnerA.getValue());
 			}
 		});
 		subPanelA.add(promptBaselineSpinnerA);
@@ -804,7 +804,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		transientStartSpinnerA.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setTransientStart(fittingCursorListener.getTransientStart());
+				fittingCursor.setTransientStartTime((Double) transientStartSpinnerA.getValue());
 			}
 		});
 		subPanelA.add(transientStartSpinnerA);
@@ -817,7 +817,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		dataStartSpinnerA.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setDataStart(fittingCursorListener.getDataStart());
+				fittingCursor.setDataStartTime((Double) dataStartSpinnerA.getValue());
 			}
 		});
 		subPanelA.add(dataStartSpinnerA);
@@ -830,7 +830,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		transientStopSpinnerA.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setTransientStop(fittingCursorListener.getTransientStop());
+				fittingCursor.setTransientStopTime((Double) transientStopSpinnerA.getValue());
 			}
 		});
 		subPanelA.add(transientStopSpinnerA);
@@ -843,7 +843,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		promptDelaySpinnerA.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptDelay(fittingCursorListener.getPromptDelay());
+				fittingCursor.setPromptDelayTime((Double) promptDelaySpinnerA.getValue());
 			}
 		});
 		subPanelA.add(promptDelaySpinnerA);
@@ -856,7 +856,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		promptWidthSpinnerA.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptWidth(fittingCursorListener.getPromptWidth());
+				fittingCursor.setPromptWidthTime((Double) promptWidthSpinnerA.getValue());
 			}
 		});
 		subPanelA.add(promptWidthSpinnerA);
@@ -881,7 +881,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		promptBaselineSpinnerB.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptBaseline(fittingCursorListener.getPromptBaseline());
+				fittingCursor.setPromptBaselineValue((Double) promptBaselineSpinnerB.getValue());
 			}
 		});
 		subPanelB.add(promptBaselineSpinnerB);
@@ -894,7 +894,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		transientStartSpinnerB.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setTransientStart(fittingCursorListener.getTransientStart());
+				fittingCursor.setTransientStartIndex((Integer) transientStartSpinnerB.getValue());
 			}
 		});
 		subPanelB.add(transientStartSpinnerB);
@@ -907,7 +907,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		dataStartSpinnerB.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setDataStart(fittingCursorListener.getDataStart());
+				fittingCursor.setDataStartIndex((Integer) dataStartSpinnerB.getValue());
 			}
 		});
 		subPanelB.add(dataStartSpinnerB);
@@ -920,7 +920,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		transientStopSpinnerB.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setTransientStop(fittingCursorListener.getTransientStop());
+				fittingCursor.setTransientStopIndex((Integer) transientStopSpinnerB.getValue());
 			}
 		});
 		subPanelB.add(transientStopSpinnerB);
@@ -933,7 +933,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		promptDelaySpinnerB.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptDelay(fittingCursorListener.getPromptDelay());
+				fittingCursor.setPromptDelayIndex((Integer) promptDelaySpinnerB.getValue());
 			}
 		});
 		subPanelB.add(promptDelaySpinnerB);
@@ -946,7 +946,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		promptWidthSpinnerB.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				fittingCursorHelper.setPromptWidth(fittingCursorListener.getPromptWidth());
+				fittingCursor.setPromptWidthIndex((Integer) promptWidthSpinnerB.getValue());
 			}
 		});
 		subPanelB.add(promptWidthSpinnerB);
@@ -998,19 +998,17 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		}
 			
 		if (isExcitationLoaded) {
-			System.out.println("excitation is loaded");
 			promptComboBox.setSelectedItem(EXCITATION_FILE);
 			enablePromptCursors(true);
 		}
 		else {
-			System.out.println("failed to load excitation");
 			promptComboBox.setSelectedItem(EXCITATION_NONE);
-			promptDelaySpinnerA.setValue(0);
+			promptDelaySpinnerA.setValue(0.0);
 			promptDelaySpinnerB.setValue(0);
-			promptWidthSpinnerA.setValue(0);
+			promptWidthSpinnerA.setValue(0.0);
 			promptWidthSpinnerB.setValue(0);
-			promptBaselineSpinnerA.setValue(0);
-			promptBaselineSpinnerB.setValue(0);
+			promptBaselineSpinnerA.setValue(0.0);
+			promptBaselineSpinnerB.setValue(0.0); // baseline is double in both cases
 			enablePromptCursors(false);
 			if (null != listener) {
 				listener.cancelExcitation();
@@ -1702,8 +1700,8 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         boolean promptEnable = enable;
         if (enable) {
             // do we have a prompt?
-			if (null != fittingCursorHelper) {
-				promptEnable = fittingCursorHelper.hasPrompt();
+			if (null != fittingCursor) {
+				promptEnable = fittingCursor.hasPrompt();
 			}
         }
         enablePromptCursors(promptEnable);
@@ -2300,67 +2298,23 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         return dialog.getDirectory() + dialog.getFileName();
     }
 
-	//TODO ARG this won't work well with new CardLayout technique
-	private class FittingCursorListener implements FittingCursorUI {
-		
-		@Override
-		public String getTransientStart() {
-			return transientStartSpinnerA.getValue().toString();
-		}
-  
-		@Override
-		public void setTransientStart(String transientStart) {
-			transientStartSpinnerA.setValue(Double.parseDouble(transientStart));
-		}
-    
-		@Override
-		public String getDataStart() {
-			return dataStartSpinnerA.getValue().toString();
-		}
+	private class FittingCursorListenerImpl implements FittingCursorListener {
 
 		@Override
-		public void setDataStart(String dataStart) {
-			dataStartSpinnerA.setValue(Double.parseDouble(dataStart));
-		}
-
-		@Override
-		public String getTransientStop() {
-			return transientStopSpinnerA.getValue().toString();
-		}
-
-		@Override
-		public void setTransientStop(String transientStop) {
-			transientStopSpinnerA.setValue(Double.parseDouble(transientStop));
-		}
-
-		@Override
-		public String getPromptDelay() {
-			return promptDelaySpinnerA.getValue().toString();
-		}
-
-		@Override
-		public void setPromptDelay(String promptDelay) {
-			promptDelaySpinnerA.setValue(Double.parseDouble(promptDelay));
-		}
-
-		@Override
-		public String getPromptWidth() {
-			return promptWidthSpinnerA.getValue().toString();
-		}
-
-		@Override
-		public void setPromptWidth(String promptWidth) {
-			promptWidthSpinnerA.setValue(Double.parseDouble(promptWidth));
-		}
-
-		@Override
-		public String getPromptBaseline() {
-			return promptBaselineSpinnerA.getValue().toString();
-		}
-
-		@Override
-		public void setPromptBaseline(String promptBaseline) {
-			promptBaselineSpinnerA.setValue(Double.parseDouble(promptBaseline));
+		public void cursorChanged(FittingCursor cursor) {
+			transientStartSpinnerA.setValue(cursor.getTransientStartTime());
+			transientStartSpinnerB.setValue(cursor.getTransientStartIndex());
+			dataStartSpinnerA.setValue(cursor.getDataStartTime());
+			dataStartSpinnerB.setValue(cursor.getDataStartIndex());
+			transientStopSpinnerA.setValue(cursor.getTransientStopTime());
+			transientStopSpinnerB.setValue(cursor.getTransientStopIndex());
+			
+			promptDelaySpinnerA.setValue(cursor.getPromptDelayTime());
+			promptDelaySpinnerB.setValue(cursor.getPromptDelayIndex());
+			promptWidthSpinnerA.setValue(cursor.getPromptWidthTime());
+			promptWidthSpinnerB.setValue(cursor.getPromptWidthIndex());
+			promptBaselineSpinnerA.setValue(cursor.getPromptBaselineValue());
+			promptBaselineSpinnerB.setValue(cursor.getPromptBaselineValue());
 		}
 	}
 }

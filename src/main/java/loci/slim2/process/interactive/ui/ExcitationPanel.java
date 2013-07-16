@@ -60,8 +60,8 @@ public class ExcitationPanel extends JFrame {
 
         setTitle(TITLE);
         
-        double start = fittingCursor.getPromptStartValue();
-        double stop  = fittingCursor.getPromptStopValue();
+        double start = fittingCursor.getPromptStartTime();
+        double stop  = fittingCursor.getPromptStopTime();
         double base = fittingCursor.getPromptBaselineValue();
 
         double[] values = excitation.getValues();
@@ -85,8 +85,8 @@ public class ExcitationPanel extends JFrame {
 			JButton button1 = new JButton("Square IRF");
 			button1.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					int start = fittingCursor.getPromptStartBin();
-					int stop = fittingCursor.getPromptStopBin();
+					int start = fittingCursor.getPromptStartIndex();
+					int stop = fittingCursor.getPromptStopIndex();
 					double baseline = fittingCursor.getPromptBaselineValue();
 					System.out.println("start " + start + " stop " + stop + " baseline " + baseline);
 					double[] values = new double[bins];
@@ -105,8 +105,8 @@ public class ExcitationPanel extends JFrame {
 			JButton button2 = new JButton("Gaussian IRF");
 			button2.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					int start = fittingCursor.getPromptStartBin();
-					int stop = fittingCursor.getPromptStopBin();
+					int start = fittingCursor.getPromptStartIndex();
+					int stop = fittingCursor.getPromptStopIndex();
 					double baseline = fittingCursor.getPromptBaselineValue();
 					System.out.println("start " + start + " stop " + stop + " baseline " + baseline);
 					double[] values = null;
