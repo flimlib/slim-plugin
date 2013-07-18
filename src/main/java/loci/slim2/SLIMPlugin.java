@@ -54,6 +54,8 @@ import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
+import loci.slim2.heuristics.DefaultEstimator;
+import loci.slim2.heuristics.Estimator;
 import loci.slim2.outputset.IndexedMemberFormula;
 import loci.slim2.outputset.OutputSet;
 import loci.slim2.outputset.OutputSetMember;
@@ -210,8 +212,9 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 
 				// create processor first time through
 				if (null == interactiveProcessor) {
+					Estimator estimator = new DefaultEstimator();
 					interactiveProcessor = new DefaultInteractiveProcessor();
-					interactiveProcessor.init(datasetService, displayService, thresholdService);
+					interactiveProcessor.init(datasetService, displayService, estimator);
 				}
 
 				// gives up control to load a new dataset or when done

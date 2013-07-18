@@ -1650,7 +1650,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 					if (spinnerModel instanceof SpinnerNumberModel) {
 						int threshold = (Integer)((SpinnerNumberModel) spinnerModel).getValue();
 						if (null != thresholdListener) {
-							thresholdListener.updateThreshold(threshold);
+							thresholdListener.updateThreshold(threshold, fitSummed());
 						}
 						if (null != listener) {
 							if (fitSummed()) {

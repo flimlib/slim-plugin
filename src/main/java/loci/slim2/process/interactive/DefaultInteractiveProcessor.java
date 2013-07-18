@@ -57,6 +57,7 @@ import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
 import loci.slim2.heuristics.CursorEstimator;
 import loci.slim2.heuristics.DefaultFitterEstimator;
+import loci.slim2.heuristics.Estimator;
 import loci.slim2.process.Excitation;
 import loci.slim2.process.ExcitationFileUtility;
 import loci.slim2.process.FitSettings;
@@ -80,7 +81,7 @@ import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
 public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private DatasetService datasetService;
 	private DisplayService displayService;
-	private ThresholdService thresholdService;
+	private Estimator estimator;
 	private FittingEngine fittingEngine;
 	private IFitterEstimator fitterEstimator;
 	private FittingCursor fittingCursor;
@@ -93,6 +94,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private double timeInc;
 	private UserInterfacePanel uiPanel;
 	private long[] position;
+	private int threshold;
 	private volatile boolean quit;
 	private volatile boolean openFile;
 	private volatile boolean fitImages;
@@ -101,10 +103,10 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private volatile boolean fitSummed;
 	
 	@Override
-	public void init(DatasetService datasetService, DisplayService displayService, ThresholdService thresholdService) {
+	public void init(DatasetService datasetService, DisplayService displayService, Estimator estimator) {
 		this.datasetService = datasetService;
 		this.displayService = displayService;
-		this.thresholdService = thresholdService;
+		this.estimator      = estimator;
 	}
 	
 	@Override
@@ -194,29 +196,21 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 			String[] binning = new String[] { "none", "3x3", "5x5", "7x7", "9x9", "11x11" };
 			uiPanel = new DefaultUserInterfacePanel(tabbed, showTau, bins, timeInc, new String[] { "one", "two" }, binning, fittingCursor, fitterEstimator);
 		}
-        uiPanel.setX(0);
-        uiPanel.setY(0);
-        uiPanel.setThreshold(10); //estimator.getThreshold()); //TODO ARG use command to get initial threshold estimate
-        uiPanel.setChiSquareTarget(1.5); //estimator.getChiSquareTarget());
+        uiPanel.setThreshold(estimator.getThreshold());
+        uiPanel.setChiSquareTarget(estimator.getChiSquareTarget());
        // uiPanel.setFunctionParameters(0, estimator.getParameters(1, false));
        // uiPanel.setFunctionParameters(1, estimator.getParameters(2, false));
        // uiPanel.setFunctionParameters(2, estimator.getParameters(3, false));
        // uiPanel.setFunctionParameters(3, estimator.getParameters(0, true));
 		uiPanel.setThresholdListener(
 			new ThresholdUpdate() {
-				
 				@Override
-				public int estimateThreshold() {
-					ThresholdMethod thresholdMethod
-							= (ThresholdMethod) thresholdService.getThresholdMethods().values().toArray()[0];
-					//thresholdMethod. TODO ARG old IJ had ImageProcessor.getAutoThreshold, a simple way to get number I wanted
-					System.out.println("ESTIMATE THRESHOLD!");
-					return 120; //TODO ARG
-				}
-				
-				@Override
-				public void updateThreshold(int threshold){
-					System.out.println("UPDATE THRESHOLD " + threshold);
+				public void updateThreshold(int newThreshold, boolean summed){
+					threshold = newThreshold;
+					if (summed) {
+						fitSummed = true;
+						cancel = false;
+					}
 				}
 			}
 		);
@@ -646,7 +640,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	 * @return fit results
 	 */
 	private void fitSummed(long[] position) {
-		double[] decay = lifetimeDatasetWrapper.getCombinedPlaneDecay(position);
+		double[] decay = lifetimeDatasetWrapper.getCombinedPlaneDecay(threshold, position);
 		FitResults fitResults = fitDecay(decay);
 
 		// show fitted parameters

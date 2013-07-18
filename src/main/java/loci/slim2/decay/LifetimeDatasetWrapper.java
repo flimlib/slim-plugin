@@ -208,17 +208,24 @@ public class LifetimeDatasetWrapper {
 		final long xAnchor = position[0];
 		final long yAnchor = position[1];		
 		return combineDecay(
+				0,
 				xAnchor - binSize, xAnchor + binSize,
 				yAnchor - binSize, yAnchor + binSize,
 				position);
 	}
-	
-	public double[] getCombinedPlaneDecay(long[] position) {
+
+	/**
+	 * Gets decay histogram summed for the whole plane.
+	 * 
+	 * @param position
+	 * @return 
+	 */
+	public double[] getCombinedPlaneDecay(int threshold,  long[] position) {
 		long x0 = 0;
 		long x1 = getDims()[0];
 		long y0 = 0;
 		long y1 = getDims()[1];
-		return combineDecay(x0, x1, y0, y1, position);
+		return combineDecay(threshold, x0, x1, y0, y1, position);
 	}
 
 	/**
@@ -244,14 +251,16 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Helper routine, creates combined decay from planar, rectangular area of pixels.
 	 * 
+	 * @param threshold
 	 * @param x0
 	 * @param x1
 	 * @param y0
 	 * @param y1
-	 * @param position
+	 * @param pos
 	 * @return 
 	 */
-	private double[] combineDecay(long x0, long x1, long y0, long y1, long[] position) {
+	private double[] combineDecay(int threshold, long x0, long x1, long y0, long y1, long[] pos) {
+		long[] position = pos.clone(); // preserve incoming position
 		double[] combinedDecay = new double[bins];
 		for (int i = 0; i < bins; ++i) {
 			combinedDecay[i] = 0.0;
@@ -264,8 +273,10 @@ public class LifetimeDatasetWrapper {
 					position[0] = x;
 					position[1] = y;
 					decay = cache.getDecay(position);
-					for (int i = 0; i < bins; ++i) {
-						combinedDecay[i] += decay[i];
+					if (0 == threshold || withinThreshold(threshold, decay)) {
+						for (int i = 0; i < bins; ++i) {
+							combinedDecay[i] += decay[i];
+						}
 					}
 				}
 			}
@@ -294,10 +305,11 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Gets the decay histogram at given location.
 	 * 
-	 * @param position
+	 * @param pos
 	 * @return 
 	 */
-	private double[] getDecayFromInternalPosition(long[] position) {
+	private double[] getDecayFromInternalPosition(long[] pos) {
+		long[] position = pos.clone(); // preserve incoming position
 		double[] decay = new double[bins];
 		for (int i = 0; i < bins; ++i) {
 			position[lifetimeDimension] = i;
@@ -305,6 +317,21 @@ public class LifetimeDatasetWrapper {
 			decay[i] = randomAccess.get().getRealDouble() / factor;
 		}
 		return decay;
+	}
+
+	/**
+	 * Checks if decay is within threshold amount.
+	 * 
+	 * @param threshold
+	 * @param decay
+	 * @return 
+	 */
+	private boolean withinThreshold(int threshold, double[] decay) {
+		double sum = 0.0;
+		for (double d : decay) {
+			sum += d;
+		}
+		return sum > threshold;
 	}
 
 	/**
