@@ -34,8 +34,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.fitting;
 
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.real.DoubleType;
+import net.imglib2.img.ImgPlus;
+import net.imglib2.type.numeric.real.DoubleType;
+
 
 /**
  *
@@ -99,5 +100,5 @@ public interface IFittedImage {
      * 
      * @return 
      */
-    public Image<DoubleType> getImage();   
+    public ImgPlus<DoubleType> getImage();
 }

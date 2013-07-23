@@ -36,15 +36,12 @@ package loci.slim.analysis.plugins;
 
 import ij.IJ;
 import ij.ImagePlus;
-
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
-import loci.slim.analysis.ISLIMAnalyzer;
-import loci.slim.analysis.SLIMAnalyzer;
+import net.imglib2.img.ImgPlus;
+import net.imglib2.img.display.imagej.ImageJFunctions;
+import net.imglib2.type.numeric.real.DoubleType;
 
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.image.display.imagej.ImageJFunctions;
-import mpicbg.imglib.type.numeric.real.DoubleType;
 
 /**
  * Runs the VisADPlugin to analyze SLIMPlugin results.
@@ -61,9 +58,9 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
 //@SLIMAnalyzer(name="VisAD")
 public class VisADAnalysisPlugin /*implements ISLIMAnalyzer*/ {
     //@Override
-		public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function) {
-    		ImagePlus imp = ImageJFunctions.displayAsVirtualStack(image);
-    		imp.setTitle("Fitted results");
+    public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function) {
+        ImagePlus imp = ImageJFunctions.show(image);
+        imp.setTitle("Fitted results");
         IJ.runPlugIn(imp, "imagej.visad.VisADPlugin", "");
     }
 }

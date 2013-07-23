@@ -31,7 +31,6 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.outputset;
 
 import loci.slim2.histogram.DataHistogramCommand;
-import loci.slim2.outputset.temp.CustomAxisType;
 
 import imagej.command.CommandService;
 import imagej.data.Dataset;
@@ -290,7 +289,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 					combinedAxes[i] = Axes.CHANNEL;
 				}
 				else {
-					combinedAxes[i] = new CustomAxisType(DIMENSION_LABEL);
+					combinedAxes[i] = Axes.get(DIMENSION_LABEL);
 				}
 			}
 			else {

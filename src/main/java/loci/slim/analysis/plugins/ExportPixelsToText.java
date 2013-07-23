@@ -45,19 +45,19 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.util.prefs.*;
+import java.util.prefs.Preferences;
 
+import loci.curvefitter.ICurveFitter.FitFunction;
+import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
-import loci.curvefitter.ICurveFitter.FitFunction;
-import loci.curvefitter.ICurveFitter.FitRegion;
+import net.imglib2.RandomAccess;
+import net.imglib2.img.ImgPlus;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.real.DoubleType;
 
-import mpicbg.imglib.cursor.LocalizableByDimCursor;
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.RealType;
-import mpicbg.imglib.type.numeric.real.DoubleType;
 
 /**
  * Exports pixel values as text for further analysis of SLIMPlugin results.
@@ -83,7 +83,7 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
     private BufferedWriter bufferedWriter;
     private MathContext context = new MathContext(4, RoundingMode.FLOOR);
 
-    public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
+    public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
         boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
         if (export && null != fileName) {
 			char separator;
@@ -106,7 +106,7 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
         }
     }
 
-    public void export(String fileName, boolean append, Image<DoubleType> image,
+    public void export(String fileName, boolean append, ImgPlus<DoubleType> image,
 			FitRegion region, FitFunction function, String parameters, char separator)
 	{
 		int components = 0;
@@ -150,11 +150,12 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 				bufferedWriter.newLine();
 				
                 // look at image dimensions
-                int dimensions[] = image.getDimensions();
-                int width    = dimensions[X_INDEX];
-                int height   = dimensions[Y_INDEX];
-                int channels = dimensions[C_INDEX];
-                int params   = dimensions[P_INDEX];
+                long dimensions[] = new long[image.numDimensions()];
+                image.dimensions(dimensions);
+                int width    = (int) dimensions[X_INDEX];
+                int height   = (int) dimensions[Y_INDEX];
+                int channels = (int) dimensions[C_INDEX];
+                int params   = (int) dimensions[P_INDEX];
 
                 // write headers
                 if (channels > 2) { //TODO s/b 1; workaround for ImgLib bug -> always get 2 channels
@@ -176,7 +177,7 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
                 }
 
                 // traverse the image
-                final LocalizableByDimCursor<?> cursor = image.createLocalizableByDimCursor();
+                final RandomAccess<?> cursor = image.randomAccess();
                 int dimForCursor[] = new int[4];
                 double paramArray[] = new double[params];
 
@@ -195,8 +196,8 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
                                 dimForCursor[P_INDEX] = p;
 
                                 // get the fitted parameter
-                                cursor.moveTo(dimForCursor);
-                                paramArray[p] = ((RealType) cursor.getType()).getRealFloat();
+                                cursor.setPosition(dimForCursor);
+                                paramArray[p] = ((RealType) cursor.get()).getRealFloat();
                             }
 
                             // if point has been fitted

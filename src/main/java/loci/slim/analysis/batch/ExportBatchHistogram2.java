@@ -4,11 +4,11 @@
  */
 package loci.slim.analysis.batch;
 
-import loci.slim.analysis.Binning;
+import net.imglib2.RandomAccess;
+import net.imglib2.img.ImgPlus;
+import net.imglib2.type.numeric.real.DoubleType;
 import loci.curvefitter.ICurveFitter;
-import mpicbg.imglib.cursor.LocalizableByDimCursor;
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.real.DoubleType;
+import loci.slim.analysis.Binning;
 
 /**
  *
@@ -32,10 +32,11 @@ public class ExportBatchHistogram2 {
 		
 	}
 	
-    public void export(Image<DoubleType> image,
+    public void export(ImgPlus<DoubleType> image,
 			ICurveFitter.FitFunction function) {
-		int[] dimensions = image.getDimensions();
-		LocalizableByDimCursor<DoubleType> cursor = image.createLocalizableByDimCursor();
+		long[] dimensions = new long[image.numDimensions()];
+		image.dimensions(dimensions);
+		RandomAccess<DoubleType> cursor = image.randomAccess();
 
 		int index = 0;
 		int[] position = new int[dimensions.length];
@@ -49,7 +50,7 @@ public class ExportBatchHistogram2 {
 				cursor.setPosition(position);
 
 				// account for value
-				double value = cursor.getType().getRealDouble();
+				double value = cursor.get().getRealDouble();
 				//System.out.println("value is " + value);
 				if (!Double.isNaN(value)) {
 					if (value < _histoTMin) {
