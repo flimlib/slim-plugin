@@ -77,7 +77,7 @@ public class LifetimeGrayscaleDataset {
 			final int summed = lifetimeDatasetWrapper.getSummedDecay(binSize, position);
 			grayscaleCursor.get().setReal(summed);
 
-			// keep track of brightest pixel
+			// keep track of brightest pixel in first plane
 			if (inFirstPlane(position)) {
 				if (summed > maxSummed) {
 					maxSummed = summed;

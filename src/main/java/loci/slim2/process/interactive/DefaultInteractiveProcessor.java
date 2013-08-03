@@ -64,6 +64,7 @@ import loci.slim2.process.FitSettings;
 import loci.slim2.process.InteractiveProcessor;
 import loci.slim2.process.interactive.cursor.FittingCursor;
 import loci.slim2.process.interactive.cursor.FittingCursorListener;
+import loci.slim2.process.interactive.grayscale.GrayscaleDisplay;
 import loci.slim2.process.interactive.ui.DecayGraph;
 import loci.slim2.process.interactive.ui.DefaultDecayGraph;
 import loci.slim2.process.interactive.ui.DefaultUserInterfacePanel;
@@ -72,6 +73,7 @@ import loci.slim2.process.interactive.ui.ExcitationPanel;
 import loci.slim2.process.interactive.ui.ThresholdUpdate;
 import loci.slim2.process.interactive.ui.UserInterfacePanel;
 import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
+import org.scijava.Context;
 
 /**
  * Fits FLIM data in an interactive manner.
@@ -79,6 +81,7 @@ import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
  * @author Aivar Grislis
  */
 public class DefaultInteractiveProcessor implements InteractiveProcessor {
+	private Context context;
 	private DatasetService datasetService;
 	private DisplayService displayService;
 	private Estimator estimator;
@@ -87,6 +90,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private FittingCursor fittingCursor;
 	private LifetimeDatasetWrapper lifetimeDatasetWrapper;
 	private LifetimeGrayscaleDataset lifetimeGrayscaleDataset;
+	private GrayscaleDisplay grayscaleDisplay;
 	private DecayGraph decayGraph;
 	private ExcitationGraph excitationGraph;
 	private ExcitationPanel excitationPanel;
@@ -103,7 +107,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private volatile boolean fitSummed;
 	
 	@Override
-	public void init(DatasetService datasetService, DisplayService displayService, Estimator estimator) {
+	public void init(Context context, DatasetService datasetService, DisplayService displayService, Estimator estimator) {
+		this.context        = context;
 		this.datasetService = datasetService;
 		this.displayService = displayService;
 		this.estimator      = estimator;
@@ -196,7 +201,16 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 			String[] binning = new String[] { "none", "3x3", "5x5", "7x7", "9x9", "11x11" };
 			uiPanel = new DefaultUserInterfacePanel(tabbed, showTau, bins, timeInc, new String[] { "one", "two" }, binning, fittingCursor, fitterEstimator);
 		}
-        uiPanel.setThreshold(estimator.getThreshold());
+		threshold = estimator.getThreshold();
+		double[] t = grayscaleDisplay.getThreshold();
+		System.out.println("threshold " + t[0] + " " + t[1]);
+		
+		t = grayscaleDisplay.estimateThreshold();
+		System.out.println("estimate as " + t[0] + " " + t[1]);
+		
+		
+		////TODO ARG is this making it go all red?  grayscaleDisplay.setThreshold(threshold);
+        uiPanel.setThreshold(threshold);
         uiPanel.setChiSquareTarget(estimator.getChiSquareTarget());
        // uiPanel.setFunctionParameters(0, estimator.getParameters(1, false));
        // uiPanel.setFunctionParameters(1, estimator.getParameters(2, false));
@@ -207,6 +221,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 				@Override
 				public void updateThreshold(int newThreshold, boolean summed){
 					threshold = newThreshold;
+					grayscaleDisplay.setThreshold(threshold);
 					if (summed) {
 						fitSummed = true;
 						cancel = false;
@@ -588,6 +603,9 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		
 		// display grayscale version
 		Display<?> display = displayService.createDisplay(lifetimeGrayscaleDataset.getDataset());
+		
+		grayscaleDisplay = new GrayscaleDisplay(context, lifetimeGrayscaleDataset.getDataset(), display);
+		
 		//TODO ARG no way of getting current position from Display; can get by w/o it
 		//TODO ARG how to draw overlays on top of this display???
 		//fittingContext.setGrayscaleDisplay(display);

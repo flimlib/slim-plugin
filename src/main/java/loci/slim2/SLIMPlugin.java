@@ -75,6 +75,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
+import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -96,7 +97,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	private boolean tempWorkAround = true;
 	
 	@Parameter
-	private org.scijava.Context context;
+	private Context context;
 	
 	@Parameter
 	private CommandService commandService;
@@ -122,7 +123,11 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	@Override
 	public void run() {
 		System.out.println("SLIMPlugin.run " + this);
-
+		
+		loci.slim2.experimental.EnderleinErdmann.fit(loci.slim2.experimental.EnderleinErdmann.SINGLE, null, null);
+		loci.slim2.experimental.EnderleinErdmann.fit(loci.slim2.experimental.EnderleinErdmann.DOUBLE, null, null);		
+		loci.slim2.experimental.EnderleinErdmann.fit(loci.slim2.experimental.EnderleinErdmann.TRIPLE, null, null);
+		
 		// allow clicking on the grayscale version during this session
 		showTool();
 
@@ -214,7 +219,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				if (null == interactiveProcessor) {
 					Estimator estimator = new DefaultEstimator();
 					interactiveProcessor = new DefaultInteractiveProcessor();
-					interactiveProcessor.init(datasetService, displayService, estimator);
+					interactiveProcessor.init(context, datasetService, displayService, estimator);
 				}
 
 				// gives up control to load a new dataset or when done

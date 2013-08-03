@@ -37,6 +37,8 @@ import imagej.display.DisplayService;
 
 import loci.slim2.heuristics.Estimator;
 
+import org.scijava.Context;
+
 /**
  * Interface for lifetime processing with interactive UI.
  * 
@@ -47,11 +49,12 @@ public interface InteractiveProcessor {
 	/**
 	 * Initializes with required services.
 	 * 
+	 * @param context
 	 * @param datasetService
 	 * @param displayService
 	 * @param estimator
 	 */
-	public void init(DatasetService datasetService, DisplayService displayService, Estimator estimator);
+	public void init(Context context, DatasetService datasetService, DisplayService displayService, Estimator estimator);
 	
 	/**
 	 * Gets current fit settings.
