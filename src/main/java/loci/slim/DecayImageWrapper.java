@@ -6,27 +6,26 @@ package loci.slim;
 
 import loci.slim.fitting.IDecayImage;
 import loci.slim.preprocess.IProcessor;
-
-import mpicbg.imglib.cursor.LocalizableByDimCursor;
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.RealType;
+import net.imglib2.RandomAccess;
+import net.imglib2.img.ImgPlus;
+import net.imglib2.type.numeric.RealType;
 
 /**
  * This class wraps an image that has a decay curve for each pixel.
  * 
  * @author Aivar Grislis
  */
-public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
-    private Image<T> _image;
+public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T> {
+    private ImgPlus<T> _image;
     private int _width;
     private int _height;
     private int _channels;
     private int _bins;
     private int _binIndex;
     private int _increment;
-    private LocalizableByDimCursor<T> _cursor;
+    private RandomAccess<T> _cursor;
     
-    public DecayImageWrapper(Image<T> image, int width, int height,
+    public DecayImageWrapper(ImgPlus<T> image, int width, int height,
             int channels, int bins, int binIndex, int increment) {
         _image    = image;
         _width    = width;
@@ -36,7 +35,7 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
         _binIndex = binIndex;
         _increment = increment;
 
-        _cursor = image.createLocalizableByDimCursor();
+        _cursor = image.randomAccess();
     }
     
     /**
@@ -109,8 +108,8 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
 
         for (int i = 0; i < _bins; ++i) {
             innerLocation[_binIndex] = i;
-            _cursor.moveTo(innerLocation);
-            decay[i] = _cursor.getType().getRealFloat() / _increment;
+            _cursor.setPosition(innerLocation);
+            decay[i] = _cursor.get().getRealFloat() / _increment;
         }
         return decay;
     }
@@ -119,7 +118,7 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage {
      * Gets underlying image.
      */
     @Override
-    public Image<T> getImage() {
+    public ImgPlus<T> getImage() {
         return _image;
     }
 }

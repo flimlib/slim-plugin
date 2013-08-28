@@ -46,11 +46,13 @@ import imagej.tool.Tool;
 import imagej.tool.ToolService;
 import imagej.ui.DialogPrompt;
 import imagej.ui.UIService;
-import java.io.File;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
+
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
@@ -66,9 +68,6 @@ import loci.slim2.process.BatchProcessor;
 import loci.slim2.process.InteractiveProcessor;
 import loci.slim2.process.batch.DefaultBatchProcessor;
 import loci.slim2.process.interactive.DefaultInteractiveProcessor;
-import net.imglib2.img.Img;
-import net.imglib2.img.ImgPlus;
-import net.imglib2.io.ImgOpener;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import net.imglib2.type.NativeType;
@@ -179,19 +178,12 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 						// load the dataset
 						
 						if (tempWorkAround) {
-							// open file with Imglib2
 							try {
-								Img<T> img = new ImgOpener().openImg(files[0].getAbsolutePath());
-								System.out.println("Img opened " + img.toString());
-
-								ImgPlus<T> imgPlus = new ImgPlus(img);
-
-								// pass in Context and ImgPlus
-								dataset = new imagej.data.DefaultDataset(context, imgPlus);
+								dataset = datasetService.open(files[0].getAbsolutePath());
 							}
-							catch (Exception e) {
+							catch (IOException e) {
 								System.out.println("problem reading " + files[0].getAbsolutePath() + " " + e.getMessage());
-
+								e.printStackTrace();
 							}
 						}
 						else {
