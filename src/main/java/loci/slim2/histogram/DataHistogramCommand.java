@@ -35,13 +35,14 @@ import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import imagej.data.command.InteractiveImageCommand;
 import imagej.data.display.DatasetView;
+import imagej.display.DisplayService;
 import imagej.menu.MenuConstants;
 import imagej.render.RenderingService;
-import net.imglib2.algorithm.stats.ComputeMinMax;
 import net.imglib2.Binning;
 import net.imglib2.Cursor;
-import net.imglib2.img.ImgPlus;
+import net.imglib2.algorithm.stats.ComputeMinMax;
 import net.imglib2.meta.Axes;
+import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
 import org.scijava.ItemIO;
@@ -67,9 +68,12 @@ import org.scijava.plugin.Plugin;
 		weight = 0) }, iconPath = "/icons/commands/contrast.png", headless = true, //TODO ARG use 'normal.png', which is on my Desktop
 		initializer = "initValues")
 public class DataHistogramCommand extends InteractiveImageCommand {
-		
+
 	@Parameter
-	private DatasetService datasetService;	
+	private DisplayService displayService;
+	
+	@Parameter
+	private DatasetService datasetService;
 
 	@Parameter
 	private RenderingService renderingService;
@@ -201,13 +205,14 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 			
 			updateHistogram(img);
 
-			long[] dims = dataset.getDims();
+			long[] dims = new long[img.numDimensions()];
+			img.dimensions(dims);
 			long channels = 1;
 			if (dims.length > Axes.CHANNEL.ordinal()) {
 				channels = dims[Axes.CHANNEL.ordinal()];
 			}
 			for (int c = 0; c < channels; ++c) {
-				System.out.println("channel " + c + " min " + dataset.getChannelMinimum(c) + " max " + dataset.getChannelMaximum(c));
+				System.out.println("channel " + c + " min " + img.getChannelMinimum(c) + " max " + img.getChannelMaximum(c));
 			}
 			System.out.println("data min " + dataMin + " max " + dataMax + " min " + min + " max " + max);
 			updateDisplay();
@@ -289,7 +294,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		computeMinMax.process();
 		dataMin = computeMinMax.getMin().getRealDouble();
 		dataMax = computeMinMax.getMax().getRealDouble();
-		log.debug("computeDataMinMax: dataMin=" + dataMin + ", dataMax=" + dataMax);
+		log().debug("computeDataMinMax: dataMin=" + dataMin + ", dataMax=" + dataMax);
 	}
 
 	/** Updates the displayed min/max range to match min and max values. */

@@ -37,6 +37,7 @@ import java.util.Map;
 
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.AxisType;
+import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
 /**
@@ -72,23 +73,23 @@ public class LifetimeDatasetWrapper {
 		
 		// find lifetime axis
 		lifetimeDimension = IMPOSSIBLE_INDEX;
-		AxisType[] axes = dataset.getAxes();
-		externalAxes = new AxisType[axes.length - 1];
+		ImgPlus img = dataset.getImgPlus();
+		externalAxes = new AxisType[img.numDimensions() - 1];
 		int i = 0;
-		for (int j = 0; j < axes.length; ++j) {
+		for (int j = 0; j < img.numDimensions(); ++j) {
 			if (fuckedUp) {
-				if ("Unknown".equals(axes[j].getLabel())) {
+				if ("Unknown".equals(img.axis(j).type().getLabel())) {
 					lifetimeDimension = j;
 				}
 				else {
-					externalAxes[i++] = axes[j];
+					externalAxes[i++] = img.axis(j).type();
 				}
 			} else {
-			if (LIFETIME.equals(axes[j].getLabel())) {
+			if (LIFETIME.equals(img.axis(j).type().getLabel())) {
 				lifetimeDimension = j;
 			}
 			else {
-				externalAxes[i++] = axes[j];
+				externalAxes[i++] = img.axis(j).type();
 			} }
 		}
 		assert IMPOSSIBLE_INDEX != lifetimeDimension;
@@ -106,7 +107,8 @@ public class LifetimeDatasetWrapper {
      //     Views.interval( randomAccess, new long[] { 0, 0,1 }, new long[]{ randomAccess.dimension(0), randomAccess.dimension(1),1 } );		
 
 		// get internal (with lifetime) and external (no lifetime) dimensions
-		internalDimensions = dataset.getDims();
+		internalDimensions = new long[img.numDimensions()];
+		img.dimensions(internalDimensions);;
 		externalDimensions = new long[internalDimensions.length - 1];
 		i = 0;
 		for (int j = 0; j < internalDimensions.length; ++j) {

@@ -55,7 +55,7 @@ import loci.slim.fitted.TFittedValue;
 import loci.slim.fitted.TMeanFittedValue;
 import loci.slim.fitted.ZFittedValue;
 import net.imglib2.RandomAccess;
-import net.imglib2.img.ImgPlus;
+import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
 /**

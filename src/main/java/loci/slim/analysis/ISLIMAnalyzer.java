@@ -34,10 +34,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.analysis;
 
-import net.imglib2.img.ImgPlus;
-import net.imglib2.type.numeric.real.DoubleType;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.real.DoubleType;
 
 
 /**
