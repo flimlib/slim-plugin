@@ -34,10 +34,10 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
+import net.imglib2.img.ImgPlus;
 import net.imglib2.img.planar.PlanarImgs;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
 /**
@@ -87,7 +87,7 @@ public class ImageUtils {
 	private static long getDimSize(final ImgPlus<?> img, final AxisType axisType,
 		final int defaultIndex)
 	{
-		final int axisIndex = img.dimensionIndex(axisType);
+		final int axisIndex = img.getAxisIndex(axisType);
 		return axisIndex < 0 ? defaultIndex : img.dimension(axisIndex);
 	}
 

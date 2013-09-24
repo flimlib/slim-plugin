@@ -52,7 +52,7 @@ import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.ImgPlus;
+import net.imglib2.img.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
 /**

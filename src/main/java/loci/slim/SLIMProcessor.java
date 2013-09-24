@@ -41,7 +41,7 @@ import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-import io.scif.img.ImgOpener;
+import imagej.ImageJ;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -112,8 +112,8 @@ import loci.slim.ui.IUserInterfacePanelListener;
 import loci.slim.ui.UserInterfacePanel;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
+import net.imglib2.img.ImgPlus;
 import net.imglib2.meta.Axes;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
@@ -1396,13 +1396,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 		return loadImage(path + file);
 	}
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-		private ImgPlus loadImage(String filePath) {
+    private ImgPlus<T> loadImage(String filePath) {
         boolean threwException = false;
-        ImgOpener imgOpener = new ImgOpener();
-        ImgPlus image = null;
+        ImageJ ij = new ImageJ(); // FIXME: Reuse existing context!
+        ImgPlus<T> image = null;
         try {
-            image = imgOpener.openImg(filePath);
+            image = (ImgPlus) ij.dataset().open(filePath).getImgPlus();
         }
         //catch (java.io.IOException e) { }
         //catch (loci.formats.FormatException e) {

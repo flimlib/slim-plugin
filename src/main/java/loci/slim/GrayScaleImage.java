@@ -58,7 +58,7 @@ import loci.slim.mask.IMaskNodeListener;
 import loci.slim.mask.Mask;
 import loci.slim.mask.MaskNode;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.ImgPlus;
+import net.imglib2.img.ImgPlus;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.RealType;
 

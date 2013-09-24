@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.outputset;
 
 import loci.slim2.histogram.DataHistogramCommand;
+
 import imagej.command.CommandService;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
@@ -41,8 +42,6 @@ import java.util.List;
 import net.imglib2.Cursor;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
-import net.imglib2.meta.CalibratedAxis;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
@@ -113,12 +112,9 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 */
 	//TODO ARG can't you get T type from the Dataset somehow??
 	public OutputSet(CommandService commandService, DatasetService datasetService, boolean combined, boolean useChannelDimension, T type, Dataset dataset, String[] labels) {
-		ImgPlus img = dataset.getImgPlus();
-		long[] dimensions = new long[img.numDimensions()];
-		img.dimensions(dimensions);
+		long[] dimensions = dataset.getDims();
 		String name = dataset.getName();
-		AxisType[] axes = new AxisType[img.numDimensions()];
-		for (int i=0; i<axes.length; i++) axes[i] = img.axis(i).type();
+		AxisType[] axes = dataset.getAxes();
 		init(commandService, datasetService, combined, useChannelDimension, type, dimensions, name, axes, labels);
 	}
 
@@ -133,15 +129,12 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param indices list of information per output index
 	 */
 	public OutputSet(CommandService commandService, DatasetService datasetService, boolean combined, boolean useChannelDimension, T type, Dataset dataset, List<OutputSetMember> indices) {
-		ImgPlus img = dataset.getImgPlus();
-		long[] dimensions = new long[img.numDimensions()];
-		img.dimensions(dimensions);
+		long[] dimensions = dataset.getDims();
 		String name = dataset.getName();
-		AxisType[] axes = new AxisType[img.numDimensions()];
-		for (int i=0; i<axes.length; i++) axes[i] = img.axis(i).type();
+		AxisType[] axes = dataset.getAxes();
 		init(commandService, datasetService, combined, useChannelDimension, type, dimensions, name, axes, indices);
 	}
-
+	
 	/**
 	 * Gets list of datasets.
 	 * 

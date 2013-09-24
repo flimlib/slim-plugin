@@ -70,7 +70,6 @@ import loci.slim2.process.batch.DefaultBatchProcessor;
 import loci.slim2.process.interactive.DefaultInteractiveProcessor;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -545,11 +544,12 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	 * @return null or lifetime Dataset
 	 */
 	private Dataset getLifetimeDataset() {
+		Display<?> display = displayService.getActiveDisplay();
 		List<Dataset> datasets = datasetService.getDatasets();
 		for (Dataset dataset : datasets) {
-			ImgPlus img = dataset.getImgPlus();
-			for (int i = 0; i < img.numDimensions(); ++i) {
-				if (LIFETIME.equals(img.axis(i).type().getLabel())) {
+			AxisType[] axisTypes = dataset.getAxes();
+			for (int i = 0; i < axisTypes.length; ++i) {
+				if (LIFETIME.equals(axisTypes[i].getLabel())) {
 					return dataset;
 				}
 			}

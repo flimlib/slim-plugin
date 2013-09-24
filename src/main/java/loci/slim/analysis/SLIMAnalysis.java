@@ -41,7 +41,7 @@ import java.util.List;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
-import net.imglib2.meta.ImgPlus;
+import net.imglib2.img.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 import net.java.sezpoz.Index;
 import net.java.sezpoz.IndexItem;

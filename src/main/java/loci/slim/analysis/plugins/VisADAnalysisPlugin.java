@@ -38,8 +38,8 @@ import ij.IJ;
 import ij.ImagePlus;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
+import net.imglib2.img.ImgPlus;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
 
