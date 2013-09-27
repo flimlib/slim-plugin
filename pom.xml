@@ -26,6 +26,7 @@
   </licenses>
 
   <dependencies>
+<!-- loci/scifio/4.4.8 (really just loci.format.*) used to load main file for SLIM Plugin 1 & excitation file for 1 & 2 -->
     <dependency>
       <groupId>${bio-formats.groupId}</groupId>
       <artifactId>scifio</artifactId>
@@ -87,12 +88,20 @@
       <version>3.0.4</version>
     </dependency>
 
-    <dependency>
+<!-- "scifio-bf-compat and the 4.4.X line aren't intended to be used together" -->
+    <!-- dependency>
       <groupId>${scifio.groupId}</groupId>
       <artifactId>scifio-bf-compat</artifactId>
       <version>1.0.0</version>
       <scope>runtime</scope>
-    </dependency>
+    </dependency -->
+<!-- so instead: -->
+	<dependency>
+		<groupId>loci</groupId>
+		<artifactId>bio-formats</artifactId>
+		<version>4.4.8</version>
+		<scope>runtime</scope>
+	</dependency>
 
     <dependency>
       <groupId>junit</groupId>

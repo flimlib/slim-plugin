@@ -179,9 +179,15 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 						
 						if (tempWorkAround) {
 							try {
+								// Use this technique for pom-loci 1.8:
 								dataset = datasetService.open(files[0].getAbsolutePath());
+								
+								// prior to pom-loci 1.8:
+								//dataset = ioService.loadDataset(files[0].getAbsolutePath());
 							}
 							catch (IOException e) {
+							// prior to pom-loci 1.8:
+							//catch (Exception e) {
 								System.out.println("problem reading " + files[0].getAbsolutePath() + " " + e.getMessage());
 								e.printStackTrace();
 							}

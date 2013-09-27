@@ -1401,7 +1401,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         ImageJ ij = new ImageJ(); // FIXME: Reuse existing context!
         ImgPlus<T> image = null;
         try {
-            image = (ImgPlus) ij.dataset().open(filePath).getImgPlus();
+			//TODO ARG This is using an IJ2 call within a IJ1 plugin, so for now:
+        //    image = (ImgPlus) ij.dataset().open(filePath).getImgPlus();
         }
         //catch (java.io.IOException e) { }
         //catch (loci.formats.FormatException e) {
