@@ -50,6 +50,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import ij.IJ;
+import java.util.prefs.Preferences;
 
 /**
  * This class holds the text fields that show the current minimum and maximum
@@ -70,6 +71,10 @@ public class HistogramUIPanel extends JPanel {
 	private static final String BANDWIDTH = "Bandwidth:";
     
     private static final int DIGITS = 5;
+	
+	private Preferences userPreferences = Preferences.userNodeForPackage(this.getClass());
+	private static final String EXPERIMENTAL = "experimental";
+	
     IUIPanelListener _listener;
     JCheckBox _autoRangeCheckBox;
     JCheckBox _excludePixelsCheckBox;
@@ -253,92 +258,96 @@ public class HistogramUIPanel extends JPanel {
 		);
 		add(_logarithmicDisplayCheckBox);
 		
-		JLabel experimentalLabel = new JLabel("Experimental:");
-		add(experimentalLabel);
-		
-		_smoothingCheckBox =
-			new JCheckBox(SMOOTHING, _smoothing);
-		_smoothingCheckBox.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					_smoothing = _smoothingCheckBox.isSelected();
-					if (null != _listener) {
-						_listener.setSmoothing(_smoothing);
+		boolean experimental = userPreferences.getBoolean(EXPERIMENTAL, false);
+		userPreferences.putBoolean(EXPERIMENTAL, experimental);
+		if (experimental) {
+			JLabel experimentalLabel = new JLabel("Experimental:");
+			add(experimentalLabel);
+
+			_smoothingCheckBox =
+				new JCheckBox(SMOOTHING, _smoothing);
+			_smoothingCheckBox.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						_smoothing = _smoothingCheckBox.isSelected();
+						if (null != _listener) {
+							_listener.setSmoothing(_smoothing);
+						}
 					}
 				}
-			}
-		);
-		add(_smoothingCheckBox);
-		
-		_family1RadioButton = new JRadioButton(FAMILY1);
-        _family1RadioButton.addActionListener(
-            new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent event) {
-					if (null != _listener) {
-						if (_family1RadioButton.isSelected()) {
-							_listener.setFamilyStyle1(true);
+			);
+			add(_smoothingCheckBox);
+
+			_family1RadioButton = new JRadioButton(FAMILY1);
+			_family1RadioButton.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent event) {
+						if (null != _listener) {
+							if (_family1RadioButton.isSelected()) {
+								_listener.setFamilyStyle1(true);
+							}
 						}
 					}
-                }
-            }
-        );
-		add(_family1RadioButton);
-		
-		_family2RadioButton = new JRadioButton(FAMILY2);
-        _family2RadioButton.addActionListener(
-            new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent event) {
-					if (null != _listener) {
-						if (_family2RadioButton.isSelected()) {
-							_listener.setFamilyStyle2(true);
+				}
+			);
+			add(_family1RadioButton);
+
+			_family2RadioButton = new JRadioButton(FAMILY2);
+			_family2RadioButton.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent event) {
+						if (null != _listener) {
+							if (_family2RadioButton.isSelected()) {
+								_listener.setFamilyStyle2(true);
+							}
 						}
 					}
-                }
-            }
-        );
-		add(_family2RadioButton);
-		
-		_bandwidthRadioButton = new JRadioButton(BANDWIDTH);
-        _bandwidthRadioButton.addActionListener(
-            new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent event) {
-					if (null != _listener) {
-						if (_bandwidthRadioButton.isSelected()) {
-							updateBandwidth();
+				}
+			);
+			add(_family2RadioButton);
+
+			_bandwidthRadioButton = new JRadioButton(BANDWIDTH);
+			_bandwidthRadioButton.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent event) {
+						if (null != _listener) {
+							if (_bandwidthRadioButton.isSelected()) {
+								updateBandwidth();
+							}
 						}
 					}
-                }
-            }
-        );
-		add(_bandwidthRadioButton);
-		
-		ButtonGroup group = new ButtonGroup();
-		group.add(_family1RadioButton);
-		group.add(_family2RadioButton);
-		group.add(_bandwidthRadioButton);
-		
-        _bandwidthTextField = new JTextField("" + HistogramPanel.DEFAULT_BANDWIDTH);
-        _bandwidthTextField.addActionListener(
-            new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent event) {
-                    updateBandwidth();
-                }
-            }
-        );
-        _bandwidthTextField.addFocusListener(
-            new FocusAdapter() {
-                @Override
-                public void focusLost(FocusEvent e) {
-                    updateBandwidth();
-                }
-            }
-        );
-        add(_bandwidthTextField);
+				}
+			);
+			add(_bandwidthRadioButton);
+
+			ButtonGroup group = new ButtonGroup();
+			group.add(_family1RadioButton);
+			group.add(_family2RadioButton);
+			group.add(_bandwidthRadioButton);
+
+			_bandwidthTextField = new JTextField("" + HistogramPanel.DEFAULT_BANDWIDTH);
+			_bandwidthTextField.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent event) {
+						updateBandwidth();
+					}
+				}
+			);
+			_bandwidthTextField.addFocusListener(
+				new FocusAdapter() {
+					@Override
+					public void focusLost(FocusEvent e) {
+						updateBandwidth();
+					}
+				}
+			);
+			add(_bandwidthTextField);
+		}
 		
 		enableUI(_autoRange);
     }

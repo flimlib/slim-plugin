@@ -50,6 +50,7 @@ import java.awt.event.ItemListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import javax.swing.border.Border;
 import javax.swing.BorderFactory;
@@ -203,6 +204,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 								SCATTER_MAX = 2.0,
 								SCATTER_MIN = 0.0,
 								SCATTER_INC = 0.001;
+	
+	private Preferences userPreferences = Preferences.userNodeForPackage(this.getClass());
+	private static final String SCATTER = "scatter";
 	
     private FittingCursorHelper _fittingCursorHelper;
     private IFitterEstimator _fitterEstimator;
@@ -407,7 +411,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
         buttonPanel.add(Box.createHorizontalGlue());
-		_openButton = new JButton("New File");
+		_openButton = new JButton("New File/Batch");
 		_openButton.addActionListener(
 		    new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -1020,21 +1024,28 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _binningComboBox = new JComboBox(binningChoices);
 		refitUponStateChange(_binningComboBox);
         controlPanel.add(_binningComboBox);
-		
-		JLabel scatterLabel = new JLabel("Scatter"); //SCATTER
-		scatterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		controlPanel.add(scatterLabel);
-		_scatterSpinner = new JSpinner();
-		// see http://implementsblog.com/2012/11/26/java-gotcha-jspinner-preferred-size/
-		Dimension size = _scatterSpinner.getPreferredSize();
-		SpinnerNumberModel model = new SpinnerNumberModel(SCATTER_VALUE, SCATTER_MIN, SCATTER_MAX, SCATTER_INC);
-		_scatterSpinner.setModel(model);
-		_scatterSpinner.setPreferredSize(size);
-		refitUponStateChange(_scatterSpinner);
-		controlPanel.add(_scatterSpinner);
+
+		int rows = 5;
+		boolean showScatter = userPreferences.getBoolean(SCATTER, false);
+		userPreferences.putBoolean(SCATTER, showScatter);
+		if (showScatter) {
+			++rows;
+			
+			JLabel scatterLabel = new JLabel("Scatter"); //SCATTER
+			scatterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+			controlPanel.add(scatterLabel);
+			_scatterSpinner = new JSpinner();
+			// see http://implementsblog.com/2012/11/26/java-gotcha-jspinner-preferred-size/
+			Dimension size = _scatterSpinner.getPreferredSize();
+			SpinnerNumberModel model = new SpinnerNumberModel(SCATTER_VALUE, SCATTER_MIN, SCATTER_MAX, SCATTER_INC);
+			_scatterSpinner.setModel(model);
+			_scatterSpinner.setPreferredSize(size);
+			refitUponStateChange(_scatterSpinner);
+			controlPanel.add(_scatterSpinner);
+		}
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(controlPanel, 6, 2, 4, 4, 4, 4); //SCATTER 5 -> 6
+        SpringUtilities.makeCompactGrid(controlPanel, rows, 2, 4, 4, 4, 4);
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", controlPanel);
@@ -1654,7 +1665,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_xSpinner.setEnabled(enable);
 		_ySpinner.setEnabled(enable);
 		_thresholdSpinner.setEnabled(enable);
-		_scatterSpinner.setEnabled(enable);
+		if (null != _scatterSpinner) {
+			_scatterSpinner.setEnabled(enable);
+		}
         _chiSqTargetSpinner.setEnabled(enable);
         _binningComboBox.setEnabled(enable);
 
@@ -1888,7 +1901,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
     }
 	
 	public double getScatter() {
-		return (Double) _scatterSpinner.getValue();
+		// scatter option might be turned off in preferences
+		double returnValue = 0.0;
+		if (null != _scatterSpinner) {
+			returnValue = (Double) _scatterSpinner.getValue();
+		}
+		return returnValue;
 	}
 
     public int getParameterCount() {
