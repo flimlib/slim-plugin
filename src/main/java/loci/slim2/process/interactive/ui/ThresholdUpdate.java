@@ -38,10 +38,11 @@ package loci.slim2.process.interactive.ui;
 public interface ThresholdUpdate {
 	
 	/**
-	 * Update the threshold value.
+	 * Update the threshold values.
 	 * 
-	 * @param threshold
+	 * @param thresholdMin
+	 * @param thresholdMax
 	 * @param summed
 	 */
-	public void updateThreshold(int threshold, boolean summed);
+	public void updateThreshold(int thresholdMin, int thresholdMax, boolean summed);
 }

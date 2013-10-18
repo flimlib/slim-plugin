@@ -11,6 +11,8 @@ import imagej.data.overlay.ThresholdOverlay;
 import imagej.data.threshold.ThresholdMethod;
 import imagej.data.threshold.ThresholdService;
 import imagej.display.Display;
+import java.util.List;
+import net.imglib2.histogram.Histogram1d;
 import org.scijava.Context;
 
 /**
@@ -22,6 +24,7 @@ public class GrayscaleDisplay {
 	Dataset dataset;
 	Display display;
 	ThresholdDisplayOverlay thresholdOverlay;
+	CrossHairOverlay crossHairOverlay;
 	
 	public GrayscaleDisplay(Context context, Dataset dataset, Display display) {
 		this.context = context;
@@ -42,7 +45,7 @@ public class GrayscaleDisplay {
  * accept a change in threshold from an external source.  No need to refit unless
  * summed.
  */
-	
+//TODO ARG not used	
 	public double[] getThreshold() {
 		double[] returnValue = null;
 		ThresholdService thresholdService = context.getService(ThresholdService.class);
@@ -52,9 +55,12 @@ public class GrayscaleDisplay {
 		
 		ImageDisplay imageDisplay = imageDisplayService.getActiveImageDisplay();
 		System.out.println("imageDisplay is " + imageDisplay);
-		boolean alreadyHadOne = thresholdService.hasThreshold(imageDisplay);
+		//TODO throws exception here NPE at DefaultThresholdService.java:95
+		boolean alreadyHadOne = false;
+		//boolean alreadyHadOne = thresholdService.hasThreshold(imageDisplay);
 		System.out.println("alreadyHadOne is " + alreadyHadOne);
 		if (!alreadyHadOne) {
+			//TODO ARG this call also shows the pixels between min & max in red
 			ThresholdOverlay overlay = thresholdService.getThreshold(imageDisplay);
 			System.out.println("overlay is " + overlay);
 			System.out.println(" ranges "  + overlay.getRangeMax() + " " + overlay.getRangeMin());
@@ -64,29 +70,42 @@ public class GrayscaleDisplay {
 	}
 	
 	public double[] estimateThreshold() {
-		double[] returnValue = null;
+	if (false) {
+		//TODO ARG how to find a/default(?) threshold method
 		ThresholdService thresholdService = context.getService(ThresholdService.class);
-		System.out.println("thresholdService is " + thresholdService);
+		List<String> thresholdMethodNames = thresholdService.getThresholdMethodNames();
+		ThresholdMethod thresholdMethod = thresholdService.getThresholdMethod(thresholdMethodNames.get(0));
+
+		//TODO ARG how to check for existing threshold
 		ImageDisplayService imageDisplayService = context.getService(ImageDisplayService.class);
-		System.out.println("imageDisplayService is " + imageDisplayService);
 		ImageDisplay imageDisplay = imageDisplayService.getActiveImageDisplay();
-		System.out.println("imageDisplay is " + imageDisplay);
-		boolean alreadyHadOne = thresholdService.hasThreshold(imageDisplay);
-		ThresholdMethod thresholdMethod = thresholdService.getThresholdMethod(thresholdService.getThresholdMethodNames().get(0));
-		long[] thresholds = new long[2];
-	//	thresholdMethod.getThreshold(thresholds);
-		return new double[] { (double) thresholds[0], (double) thresholds[1] };
+		boolean alreadyHadThreshold = thresholdService.hasThreshold(imageDisplay); }
+	
+		double[] thresholds = new double[] { 0.0, 1000.0 };// (double) threshold, Double.MAX_VALUE }; //TODO s/b long threshold
+		return thresholds;
 	}
 	
-	public void setThreshold(int threshold) {
+	public void setThreshold(int thresholdMin, int thresholdMax) {
 		if (null == thresholdOverlay) {
 			System.out.println("CREATING THRESHOLD OVERLAY");
-			thresholdOverlay = new ThresholdDisplayOverlay(context, dataset, threshold);
-			display.display(thresholdOverlay);
+			thresholdOverlay = new ThresholdDisplayOverlay(context, dataset);
+			//display.display(thresholdOverlay);
 		}
-		else {
-			//TODO ARG what?? thresholdOverlay.
-		}
+		System.out.println("setThreshold " + thresholdMin + " " + thresholdMax);
+		thresholdOverlay.setThreshold(thresholdMin, thresholdMax);
 	}
 	
+	public void setPixel(long[] position) {
+		double[] doublePosition = new double[position.length];
+		for (int i = 0; i < position.length; ++i) {
+			doublePosition[i] = position[i];
+		}
+		if (null == crossHairOverlay) {
+			crossHairOverlay = new CrossHairOverlay(context, doublePosition);
+			display.display(crossHairOverlay);
+		}
+		else {
+			crossHairOverlay.setPoint(doublePosition);
+		}
+	}
 }

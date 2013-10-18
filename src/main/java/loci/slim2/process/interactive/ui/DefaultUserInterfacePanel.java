@@ -241,7 +241,8 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
     // fit settings
 	JSpinner xSpinner;
 	JSpinner ySpinner;
-	JSpinner thresholdSpinner;
+	JSpinner thresholdMinSpinner;
+	JSpinner thresholdMaxSpinner;
 	JSpinner chiSqTargetSpinner;
     JComboBox binningComboBox;
 	JSpinner scatterSpinner; // scatter experiment
@@ -369,7 +370,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
             innerPanel.add(fitPanel);
 
             JPanel cursorPanel = createCursorPanel();
-            cursorPanel.setBorder(border("Cursors"));
+            cursorPanel.setBorder(border("Cursors & Excitation"));
             innerPanel.add(cursorPanel); 
 
             JPanel controlPanel = createControlPanel(binningChoices);
@@ -1043,14 +1044,21 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		refitUponStateChange(ySpinner);
         controlPanel.add(ySpinner);
 
-        JLabel thresholdLabel = new JLabel("Threshold");
-        thresholdLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        controlPanel.add(thresholdLabel);
-		thresholdSpinner = new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX, THRESH_INC));
-		updateThresholdChange(thresholdSpinner);;
-        controlPanel.add(thresholdSpinner);;
+        JLabel thresholdMinLabel = new JLabel("Threshold Min");
+        thresholdMinLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        controlPanel.add(thresholdMinLabel);
+		thresholdMinSpinner = new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX, THRESH_INC));
+		updateThresholdChange(thresholdMinSpinner);;
+        controlPanel.add(thresholdMinSpinner);;
 
-        JLabel chiSqTargetLabel = new JLabel(CHI_SQ_TARGET);
+        JLabel thresholdMaxLabel = new JLabel("Threshold Max");
+        thresholdMaxLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        controlPanel.add(thresholdMaxLabel);
+		thresholdMaxSpinner = new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX, THRESH_INC));
+		updateThresholdChange(thresholdMaxSpinner);;
+        controlPanel.add(thresholdMaxSpinner);;
+		
+		JLabel chiSqTargetLabel = new JLabel(CHI_SQ_TARGET);
         chiSqTargetLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(chiSqTargetLabel);
 		chiSqTargetSpinner = new JSpinner(new SpinnerNumberModel(CHISQ_VALUE, CHISQ_MIN, CHISQ_MAX, CHISQ_INC));
@@ -1077,7 +1085,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		controlPanel.add(scatterSpinner);
 
         // rows, cols, initX, initY, xPad, yPad
-        SpringUtilities.makeCompactGrid(controlPanel, 6, 2, 4, 4, 4, 4); //SCATTER 5 -> 6
+        SpringUtilities.makeCompactGrid(controlPanel, 7, 2, 4, 4, 4, 4); //SCATTER 5 -> 6
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add("North", controlPanel);
@@ -1639,7 +1647,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Propagates a threshold spinner value change.
 	 * 
-	 * @param thresholdSpinner 
+	 * @param thresholdMinSpinner 
 	 */
 	private void updateThresholdChange(final JSpinner thresholdSpinner) {
 		thresholdSpinner.addChangeListener(
@@ -1649,12 +1657,29 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 					SpinnerModel spinnerModel = thresholdSpinner.getModel();
 					if (spinnerModel instanceof SpinnerNumberModel) {
 						int threshold = (Integer)((SpinnerNumberModel) spinnerModel).getValue();
+						int thesholdMin, thresholdMax;
+						if (thresholdMinSpinner == (JSpinner) e.getSource()) {
+							thesholdMin = threshold;
+							thresholdMax = (Integer) thresholdMaxSpinner.getValue();
+							if (thesholdMin > thresholdMax) {
+								thresholdMax = thesholdMin;
+								thresholdMaxSpinner.setValue(thresholdMax);
+							}
+						}
+						else {
+							thesholdMin = (Integer) thresholdMinSpinner.getValue();
+							thresholdMax = threshold;
+							if (thresholdMax < thesholdMin) {
+								thesholdMin = thresholdMax;
+								thresholdMinSpinner.setValue(thesholdMin);
+							}
+						}
 						if (null != thresholdListener) {
-							thresholdListener.updateThreshold(threshold, fitSummed());
+							thresholdListener.updateThreshold(thesholdMin, thresholdMax, fitSummed());
 						}
 						if (null != listener) {
 							if (fitSummed()) {
-								// threshold affects a summed fit
+								// threshold affects a summed fit, but not an ordingary single pixel fit
 								listener.fitSingleDecay(true);
 							}
 						}
@@ -1710,7 +1735,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         // fit control settings
 		xSpinner.setEnabled(enable);
 		ySpinner.setEnabled(enable);
-		thresholdSpinner.setEnabled(enable);
+		thresholdMinSpinner.setEnabled(enable);
 		scatterSpinner.setEnabled(enable);
         chiSqTargetSpinner.setEnabled(enable);
         binningComboBox.setEnabled(enable);
@@ -1923,14 +1948,22 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         ySpinner.setValue(y);
     }
 
-    public int getThreshold() {
-		return (Integer) thresholdSpinner.getValue();
+    public int getThresholdMinimum() {
+		return (Integer) thresholdMinSpinner.getValue();
     }
 
-    public void setThreshold(int threshold) {
-		thresholdSpinner.setValue(threshold);
+    public void setThresholdMinimum(int thresholdMin) {
+		thresholdMinSpinner.setValue(thresholdMin);
+    }
+	
+    public int getThresholdMaximum() {
+		return (Integer) thresholdMaxSpinner.getValue();
     }
 
+    public void setThresholdMaximum(int thresholdMax) {
+		thresholdMaxSpinner.setValue(thresholdMax);
+    }
+	
     public int getBinning() {
 		return binningComboBox.getSelectedIndex();
     }

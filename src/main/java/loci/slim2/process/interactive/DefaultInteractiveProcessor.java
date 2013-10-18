@@ -98,7 +98,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private double timeInc;
 	private UserInterfacePanel uiPanel;
 	private long[] position;
-	private int threshold;
+	private int thresholdMin;
+	private int thresholdMax;
 	private volatile boolean quit;
 	private volatile boolean openFile;
 	private volatile boolean fitImages;
@@ -201,16 +202,19 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 			String[] binning = new String[] { "none", "3x3", "5x5", "7x7", "9x9", "11x11" };
 			uiPanel = new DefaultUserInterfacePanel(tabbed, showTau, bins, timeInc, new String[] { "one", "two" }, binning, fittingCursor, fitterEstimator);
 		}
-		threshold = estimator.getThreshold();
-		double[] t = grayscaleDisplay.getThreshold();
-		System.out.println("threshold " + t[0] + " " + t[1]);
+		//TODO ARG calling this shows the red threshold as a side effect
+		//threshold = estimator.getThreshold();
+	//	double[] t = grayscaleDisplay.getThreshold();
+	//	System.out.println("threshold " + t[0] + " " + t[1]);
 		
-		t = grayscaleDisplay.estimateThreshold();
+		double[] t = grayscaleDisplay.estimateThreshold();
 		System.out.println("estimate as " + t[0] + " " + t[1]);
-		
-		
-		////TODO ARG is this making it go all red?  grayscaleDisplay.setThreshold(threshold);
-        uiPanel.setThreshold(threshold);
+		thresholdMin = (int) t[0];
+		thresholdMax = (int) t[1];
+				
+		grayscaleDisplay.setThreshold(thresholdMin, thresholdMax);
+        uiPanel.setThresholdMinimum(thresholdMin);
+		uiPanel.setThresholdMaximum(thresholdMax);
         uiPanel.setChiSquareTarget(estimator.getChiSquareTarget());
        // uiPanel.setFunctionParameters(0, estimator.getParameters(1, false));
        // uiPanel.setFunctionParameters(1, estimator.getParameters(2, false));
@@ -219,9 +223,10 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		uiPanel.setThresholdListener(
 			new ThresholdUpdate() {
 				@Override
-				public void updateThreshold(int newThreshold, boolean summed){
-					threshold = newThreshold;
-					grayscaleDisplay.setThreshold(threshold);
+				public void updateThreshold(int min, int max, boolean summed){
+					thresholdMin = min;
+					thresholdMax = max;
+					grayscaleDisplay.setThreshold(min, max);
 					if (summed) {
 						fitSummed = true;
 						cancel = false;
@@ -637,7 +642,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         uiPanel.setY(y);
 		
 		// update grayscale cursor
-		//TODO ARG how to paint a cursor on the grayscale version?
+		grayscaleDisplay.setPixel(position);
 
 		// do the fit
 		int binSize = uiPanel.getBinning();
@@ -658,7 +663,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	 * @return fit results
 	 */
 	private void fitSummed(long[] position) {
-		double[] decay = lifetimeDatasetWrapper.getCombinedPlaneDecay(threshold, position);
+		double[] decay = lifetimeDatasetWrapper.getCombinedPlaneDecay(thresholdMin, thresholdMax, position);
 		FitResults fitResults = fitDecay(decay);
 
 		// show fitted parameters

@@ -48,6 +48,7 @@ public class LifetimeDatasetWrapper {
 	private static final String LIFETIME = "Lifetime";
 	private static final int IMPOSSIBLE_INDEX = -1;
 	private static final int MAX_BIN_WIDTH = 21;
+	private static final int MAX_CACHE_SIZE = 1000;
 	private final Dataset dataset;
 	private final RandomAccess<? extends RealType<?>> randomAccess;
 	private final DecayCache cache;
@@ -68,7 +69,7 @@ public class LifetimeDatasetWrapper {
 	public LifetimeDatasetWrapper(Dataset dataset) {
 		this.dataset = dataset;
 		randomAccess = dataset.getImgPlus().randomAccess();
-		cache = new DecayCache(this, MAX_BIN_WIDTH, 1000);
+		cache = new DecayCache(this, MAX_BIN_WIDTH, MAX_CACHE_SIZE);
 		
 		// find lifetime axis
 		lifetimeDimension = IMPOSSIBLE_INDEX;
@@ -76,20 +77,20 @@ public class LifetimeDatasetWrapper {
 		externalAxes = new AxisType[axes.length - 1];
 		int i = 0;
 		for (int j = 0; j < axes.length; ++j) {
-			if (fuckedUp) {
-				if ("Unknown".equals(axes[j].getLabel())) {
-					lifetimeDimension = j;
-				}
-				else {
-					externalAxes[i++] = axes[j];
-				}
-			} else {
+			//if (fuckedUp) {
+			//	if ("Unknown".equals(axes[j].getLabel())) {
+			//		lifetimeDimension = j;
+			//	}
+			//	else {
+			//		externalAxes[i++] = axes[j];
+			//	}
+			//} else {
 			if (LIFETIME.equals(axes[j].getLabel())) {
 				lifetimeDimension = j;
 			}
 			else {
 				externalAxes[i++] = axes[j];
-			} }
+			} //}
 		}
 		assert IMPOSSIBLE_INDEX != lifetimeDimension;
  
@@ -208,7 +209,7 @@ public class LifetimeDatasetWrapper {
 		final long xAnchor = position[0];
 		final long yAnchor = position[1];		
 		return combineDecay(
-				0,
+				0, Integer.MAX_VALUE,
 				xAnchor - binSize, xAnchor + binSize,
 				yAnchor - binSize, yAnchor + binSize,
 				position);
@@ -220,12 +221,12 @@ public class LifetimeDatasetWrapper {
 	 * @param position
 	 * @return 
 	 */
-	public double[] getCombinedPlaneDecay(int threshold,  long[] position) {
+	public double[] getCombinedPlaneDecay(int thresholdMin, int thresholdMax,  long[] position) {
 		long x0 = 0;
 		long x1 = getDims()[0];
 		long y0 = 0;
 		long y1 = getDims()[1];
-		return combineDecay(threshold, x0, x1, y0, y1, position);
+		return combineDecay(thresholdMin, thresholdMax, x0, x1, y0, y1, position);
 	}
 
 	/**
@@ -251,7 +252,8 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Helper routine, creates combined decay from planar, rectangular area of pixels.
 	 * 
-	 * @param threshold
+	 * @param thresholdMin
+	 * @param thresholdMax
 	 * @param x0
 	 * @param x1
 	 * @param y0
@@ -259,7 +261,7 @@ public class LifetimeDatasetWrapper {
 	 * @param pos
 	 * @return 
 	 */
-	private double[] combineDecay(int threshold, long x0, long x1, long y0, long y1, long[] pos) {
+	private double[] combineDecay(int thresholdMin, int thresholdMax, long x0, long x1, long y0, long y1, long[] pos) {
 		long[] position = pos.clone(); // preserve incoming position
 		double[] combinedDecay = new double[bins];
 		for (int i = 0; i < bins; ++i) {
@@ -273,7 +275,7 @@ public class LifetimeDatasetWrapper {
 					position[0] = x;
 					position[1] = y;
 					decay = cache.getDecay(position);
-					if (0 == threshold || withinThreshold(threshold, decay)) {
+					if (withinThreshold(thresholdMin, thresholdMax, decay)) {
 						for (int i = 0; i < bins; ++i) {
 							combinedDecay[i] += decay[i];
 						}
@@ -320,18 +322,20 @@ public class LifetimeDatasetWrapper {
 	}
 
 	/**
-	 * Checks if decay is within threshold amount.
+	 * Checks if decay is within threshold limits.
 	 * 
-	 * @param threshold
+	 * @param thresholdMin
+	 * @param thresholdMax
 	 * @param decay
 	 * @return 
 	 */
-	private boolean withinThreshold(int threshold, double[] decay) {
+	private boolean withinThreshold(int thresholdMin, int thresholdMax, double[] decay) {
 		double sum = 0.0;
 		for (double d : decay) {
 			sum += d;
 		}
-		return sum > threshold;
+		//TODO ARG was sum > thresholdMin; c/b TRI2 compatibility issue
+		return ((sum >= thresholdMin) && (sum <= thresholdMax));
 	}
 
 	/**

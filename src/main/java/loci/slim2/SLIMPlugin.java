@@ -68,10 +68,13 @@ import loci.slim2.process.BatchProcessor;
 import loci.slim2.process.InteractiveProcessor;
 import loci.slim2.process.batch.DefaultBatchProcessor;
 import loci.slim2.process.interactive.DefaultInteractiveProcessor;
+import net.imglib2.Cursor;
+import net.imglib2.img.ImgPlus;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;
@@ -140,6 +143,9 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				// look for an already open LT image
 				dataset = getLifetimeDataset();	
 			}
+			
+			// temporarily kludge in dummy dataset
+			dataset = getFakeLifetimeDataset();
 
 			// none found?
 			if (null == dataset) {
@@ -561,6 +567,26 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			}
 		}
 		return null;
+	}
+	
+	// temporary code
+	private Dataset getFakeLifetimeDataset() {
+		final String name = "Dummy Lifetime";
+		long width = 64;
+		long height = 64;
+		long bins = 64;
+		final long[] dims = { width, height, bins };
+		final AxisType[] axes = { Axes.X, Axes.Y, Axes.LIFETIME };
+		Dataset dataset = datasetService.create(new UnsignedByteType(), dims, name, axes);
+		ImgPlus<UnsignedByteType> imgPlus = (ImgPlus<UnsignedByteType>) dataset.getImgPlus();
+		Cursor<UnsignedByteType> cursor = imgPlus.cursor();
+		int value = 0;
+		while (cursor.hasNext()) {
+			cursor.fwd();
+			cursor.get().set(value++);
+		}
+		
+		return dataset;
 	}
 	
 	/** Tests our command. */
