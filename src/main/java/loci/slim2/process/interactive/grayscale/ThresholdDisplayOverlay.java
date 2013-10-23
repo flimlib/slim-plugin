@@ -39,6 +39,7 @@ import imagej.data.Dataset;
 import imagej.data.overlay.ThresholdOverlay;
 import imagej.util.ColorRGB;
 import imagej.util.Colors;
+import net.imglib2.ops.pointset.PointSet;
 import org.scijava.Context;
 
 /**
@@ -49,18 +50,23 @@ public class ThresholdDisplayOverlay extends ThresholdOverlay {
 	private static final ColorRGB COLOR_LESS = Colors.AQUA;
 	private static final ColorRGB COLOR_WITHIN = Colors.PINK;
 	private static final ColorRGB COLOR_GREATER = Colors.ORANGE;
+	private final Dataset dataset;
 	
 	/**
 	 * Construct a {@link ThresholdDisplayOverlay} on a {@link Dataset} given an
 	 * {@link Context} context.
 	 */
-	public ThresholdDisplayOverlay(Context context, Dataset dataset)
+	public ThresholdDisplayOverlay(Context context, Dataset dataset, int thresholdMin, int thresholdMax)
 	{
-		super(context, dataset);
+		super(context, dataset, thresholdMin, thresholdMax);
+		this.dataset = dataset;
+		dataset.rebuild();
+		dataset.update();
+		
 		System.out.println("ThresholdDisplayOverlay ctor " + dataset);
-		super.setColorLess(COLOR_LESS);
-		super.setColorWithin(COLOR_WITHIN); //TODO ARG null);
-		super.setColorGreater(COLOR_GREATER);
+		//super.setColorLess(COLOR_LESS);
+		//super.setColorWithin(COLOR_WITHIN); //TODO ARG null);
+		//super.setColorGreater(COLOR_GREATER);
 	}
 
 	/**
@@ -72,5 +78,9 @@ public class ThresholdDisplayOverlay extends ThresholdOverlay {
 	public void setThreshold(int thresholdMin, int thresholdMax) {
 		System.out.println("ThresholdDisplayOverlay " + thresholdMin + " " + thresholdMax);
 		super.setRange(thresholdMin, thresholdMax);
+		PointSet pointSet = getPointsWithin();
+		System.out.println("pointSet size is " + pointSet.size());
+		dataset.rebuild();
+		dataset.update();
 	}
 }

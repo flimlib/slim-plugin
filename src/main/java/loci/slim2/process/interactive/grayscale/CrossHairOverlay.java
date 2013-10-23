@@ -35,7 +35,10 @@
 
 package loci.slim2.process.interactive.grayscale;
 
+import imagej.data.Dataset;
 import imagej.data.overlay.PointOverlay;
+import java.util.ArrayList;
+import java.util.List;
 import org.scijava.Context;
 
 /**
@@ -43,21 +46,15 @@ import org.scijava.Context;
  * @author aivar
  */
 public class CrossHairOverlay extends PointOverlay {
+	private final Dataset dataset;
+	
 	/**
 	 * Construct a {@link CrossHairOverlay} given a {@link Context} context.
 	 */
-	public CrossHairOverlay(Context context)
+	public CrossHairOverlay(Context context, Dataset dataset)
 	{
 		super(context);
-	}
-	
-	/**
-	 * Construct a {@link CrossHairOverlay} given a {@link Context} context
-	 * and a point.
-	 */
-	public CrossHairOverlay(Context context, double[] point)
-	{
-		super(context, point);
+		this.dataset = dataset;
 	}
 
 	/**
@@ -66,6 +63,10 @@ public class CrossHairOverlay extends PointOverlay {
 	 * @param point
 	 */
 	public void setPoint(double[] point) {
-		super.setPoint(0, point);
+		List<double[]> pts = super.getPoints();
+		pts.add(0, point);
+		super.setPoints(pts);
+		dataset.rebuild();
+		dataset.update();
 	}
 }

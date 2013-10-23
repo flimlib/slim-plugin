@@ -88,7 +88,7 @@ public class GrayscaleDisplay {
 	public void setThreshold(int thresholdMin, int thresholdMax) {
 		if (null == thresholdOverlay) {
 			System.out.println("CREATING THRESHOLD OVERLAY");
-			thresholdOverlay = new ThresholdDisplayOverlay(context, dataset);
+			thresholdOverlay = new ThresholdDisplayOverlay(context, dataset, thresholdMin, thresholdMax);
 			//display.display(thresholdOverlay);
 		}
 		System.out.println("setThreshold " + thresholdMin + " " + thresholdMax);
@@ -96,16 +96,15 @@ public class GrayscaleDisplay {
 	}
 	
 	public void setPixel(long[] position) {
+		System.out.println("setPixel position length is " + position.length + " x y " + position[0] + " " + position[1]);
 		double[] doublePosition = new double[position.length];
 		for (int i = 0; i < position.length; ++i) {
 			doublePosition[i] = position[i];
 		}
 		if (null == crossHairOverlay) {
-			crossHairOverlay = new CrossHairOverlay(context, doublePosition);
+			crossHairOverlay = new CrossHairOverlay(context, dataset);
 			display.display(crossHairOverlay);
 		}
-		else {
-			crossHairOverlay.setPoint(doublePosition);
-		}
+		crossHairOverlay.setPoint(doublePosition);
 	}
 }
