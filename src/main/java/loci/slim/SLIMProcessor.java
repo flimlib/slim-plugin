@@ -41,7 +41,8 @@ import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-import imagej.ImageJ;
+import io.scif.img.ImgOpener;
+import io.scif.img.axes.SCIFIOAxes;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -112,8 +113,7 @@ import loci.slim.ui.IUserInterfacePanelListener;
 import loci.slim.ui.UserInterfacePanel;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
-import net.imglib2.img.ImgPlus;
-import net.imglib2.meta.Axes;
+import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
@@ -1396,13 +1396,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 		return loadImage(path + file);
 	}
 
-    private ImgPlus<T> loadImage(String filePath) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+		private ImgPlus loadImage(String filePath) {
         boolean threwException = false;
-        ImageJ ij = new ImageJ(); // FIXME: Reuse existing context!
-        ImgPlus<T> image = null;
+        ImgOpener imgOpener = new ImgOpener();
+        ImgPlus image = null;
         try {
-			//TODO ARG This is using an IJ2 call within a IJ1 plugin, so for now:
-        //    image = (ImgPlus) ij.dataset().open(filePath).getImgPlus();
+            image = imgOpener.openImg(filePath);
         }
         //catch (java.io.IOException e) { }
         //catch (loci.formats.FormatException e) {
@@ -1458,7 +1458,7 @@ public class SLIMProcessor <T extends RealType<T>> {
             _channels = (int) dimensions[_channelIndex];
         }
         //System.out.println("corrected to " + _channels);
-        _bins = (int) ImageUtils.getDimSize(image, Axes.LIFETIME);
+        _bins = (int) ImageUtils.getDimSize(image, SCIFIOAxes.LIFETIME);
         _binIndex = 2;
         //System.out.println("width " + _width + " height " + _height + " timeBins " + _bins + " channels " + _channels);
         _cursor = image.randomAccess();

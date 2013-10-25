@@ -34,6 +34,7 @@ import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import imagej.data.threshold.ThresholdService;
 import imagej.display.DisplayService;
+import imagej.ui.UIService;
 
 import loci.slim2.heuristics.Estimator;
 
@@ -45,13 +46,14 @@ import org.scijava.Context;
  * @author Aivar Grislis
  */
 public interface InteractiveProcessor {
-	
+
 	/**
 	 * Initializes with required services.
 	 * 
 	 * @param context
 	 * @param datasetService
 	 * @param displayService
+	 * @param uiService
 	 * @param estimator
 	 */
 	public void init(Context context, DatasetService datasetService, DisplayService displayService, Estimator estimator);

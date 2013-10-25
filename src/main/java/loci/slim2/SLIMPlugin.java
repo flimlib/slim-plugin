@@ -70,6 +70,7 @@ import loci.slim2.process.batch.DefaultBatchProcessor;
 import loci.slim2.process.interactive.DefaultInteractiveProcessor;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
+import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -93,7 +94,6 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	//TODOprivate Map<Dataset, List<FittingContext>> map = new HashMap<Dataset, List<FittingContext>>();
 	private Dataset activeDataset;
 	private volatile boolean quit = false;
-	private boolean tempWorkAround = true;
 	
 	@Parameter
 	private Context context;
@@ -176,36 +176,14 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 					}
 					else {
 						// load the dataset
-						
-						if (tempWorkAround) {
-							try {
-								// Use this technique for pom-loci 1.8:
-								dataset = datasetService.open(files[0].getAbsolutePath());
-								
-								// prior to pom-loci 1.8:
-								//dataset = ioService.loadDataset(files[0].getAbsolutePath());
-							}
-							catch (IOException e) {
-							// prior to pom-loci 1.8:
-							//catch (Exception e) {
-								System.out.println("problem reading " + files[0].getAbsolutePath() + " " + e.getMessage());
-								e.printStackTrace();
-							}
+						try {
+							dataset = datasetService.open(files[0].getAbsolutePath());
 						}
-						else {
-					/*	try {
-							//TODO ARG latest ImgOpener moved to scifio and drops support for Bioformats format extensions (i.e. .sdt)
-							dataset = ioService.loadDataset(files[0].getAbsolutePath());
-							
-						}
-						catch (Throwable e) {
-							// typically run out of memory here
-							showError("Problem loading file '" + files[0].getAbsolutePath() + "' " + e.getMessage());
-						}
-						*/
+						catch (IOException e) {
+							System.out.println("problem reading " + files[0].getAbsolutePath() + " " + e.getMessage());
+							e.printStackTrace();
 						}
 					}
-					//TODO ARG 7/1/13 cannot find symbol, method loadDataset
 				}
 			}
 			
@@ -550,12 +528,11 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	 * @return null or lifetime Dataset
 	 */
 	private Dataset getLifetimeDataset() {
-		Display<?> display = displayService.getActiveDisplay();
 		List<Dataset> datasets = datasetService.getDatasets();
 		for (Dataset dataset : datasets) {
-			AxisType[] axisTypes = dataset.getAxes();
-			for (int i = 0; i < axisTypes.length; ++i) {
-				if (LIFETIME.equals(axisTypes[i].getLabel())) {
+			ImgPlus<?> img = dataset.getImgPlus();
+			for (int i = 0; i < img.numDimensions(); ++i) {
+				if (LIFETIME.equals(img.axis(i).type().getLabel())) {
 					return dataset;
 				}
 			}

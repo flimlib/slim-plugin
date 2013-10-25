@@ -34,8 +34,8 @@ import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
-import net.imglib2.img.ImgPlus;
 import net.imglib2.meta.AxisType;
+import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
 /**
@@ -54,11 +54,12 @@ public class DecayDatasetUtility {
 	 * @return grayscale version
 	 */
 	public static Dataset convert(final DatasetService datasetService, final Dataset dataset, final int lifetimeDimension, final int factor) {
-		final int bins = (int) dataset.dimension(lifetimeDimension);
+		ImgPlus img = dataset.getImgPlus();
+		final int bins = (int) img.dimension(lifetimeDimension);
 		
 		// want same dimensions & axes except without lifetime
-		final long[] dimensions = deleteDimension(dataset.getDims(), lifetimeDimension);
-		final AxisType[] axes = deleteAxisType(dataset.getAxes(), lifetimeDimension);
+		final long[] dimensions = deleteDimension(img, lifetimeDimension);
+		final AxisType[] axes = deleteAxisType(img, lifetimeDimension);
 
 		// create grayscale image
 		final int bpp = 16;
@@ -89,12 +90,12 @@ public class DecayDatasetUtility {
 	 * @param dimension
 	 * @return 
 	 */
-	private static long[] deleteDimension(long[] dimensions, int dimension) {
-		final long[] returnValue = new long[dimensions.length - 1];
+	private static long[] deleteDimension(ImgPlus img, int dimension) {
+		final long[] returnValue = new long[img.numDimensions() - 1];
 		int i = 0;
-		for (int j = 0; j < dimensions.length; ++j) {
+		for (int j = 0; j < img.numDimensions(); ++j) {
 			if (j != dimension) {
-				returnValue[i++] = dimensions[j];
+				returnValue[i++] = img.dimension(j);
 			}
 		}
 		return returnValue;
@@ -107,12 +108,12 @@ public class DecayDatasetUtility {
 	 * @param dimension
 	 * @return 
 	 */
-	private static AxisType[] deleteAxisType(AxisType[] axes, int dimension) {
-		final AxisType[] returnValue = new AxisType[axes.length - 1];
+	private static AxisType[] deleteAxisType(ImgPlus<?> img, int dimension) {
+		final AxisType[] returnValue = new AxisType[img.numDimensions() - 1];
 		int i = 0;
-		for (int j = 0; j < axes.length; ++j) {
+		for (int j = 0; j < img.numDimensions(); ++j) {
 			if (j != dimension) {
-				returnValue[i++] = axes[j];
+				returnValue[i++] = img.axis(j).type();
 			}
 		}
 		return returnValue;

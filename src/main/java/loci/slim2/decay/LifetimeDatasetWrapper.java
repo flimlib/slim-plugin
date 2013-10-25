@@ -32,11 +32,15 @@ package loci.slim2.decay;
 
 import imagej.data.Dataset;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import javax.swing.JOptionPane;
 
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.AxisType;
+import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
 /**
@@ -58,40 +62,46 @@ public class LifetimeDatasetWrapper {
 	private final int bins;
 	private final int factor;
 	private double inc;
-	private boolean fuckedUp = true; //TODO ARG until ioservice uses bioformats and can read SDT
 
 	/**
 	 * Constructor.
 	 * 
 	 * @param dataset 
 	 */
-	public LifetimeDatasetWrapper(Dataset dataset) {
+	public LifetimeDatasetWrapper(Dataset dataset)
+			throws NoLifetimeAxisFoundException
+	{
 		this.dataset = dataset;
 		randomAccess = dataset.getImgPlus().randomAccess();
 		cache = new DecayCache(this, MAX_BIN_WIDTH, 1000);
 		
 		// find lifetime axis
 		lifetimeDimension = IMPOSSIBLE_INDEX;
-		AxisType[] axes = dataset.getAxes();
-		externalAxes = new AxisType[axes.length - 1];
+		ImgPlus<?> img = dataset.getImgPlus();
+		List<AxisType> externalAxesList = new ArrayList<AxisType>();
 		int i = 0;
-		for (int j = 0; j < axes.length; ++j) {
-			if (fuckedUp) {
-				if ("Unknown".equals(axes[j].getLabel())) {
-					lifetimeDimension = j;
-				}
-				else {
-					externalAxes[i++] = axes[j];
-				}
-			} else {
-			if (LIFETIME.equals(axes[j].getLabel())) {
+		for (int j = 0; j < img.numDimensions(); ++j) {
+			if (LIFETIME.equals(img.axis(j).type().getLabel())) {
+				// got lifetime axis
 				lifetimeDimension = j;
 			}
 			else {
-				externalAxes[i++] = axes[j];
-			} }
+				// save other axes
+				externalAxesList.add(img.axis(j).type());
+			}
 		}
-		assert IMPOSSIBLE_INDEX != lifetimeDimension;
+		// can't proceed without a lifetime axis
+		if (IMPOSSIBLE_INDEX == lifetimeDimension) {
+			// ask the user which one to use
+			int dimension = chooseLifetimeDimensionUI(externalAxesList);
+
+			if (IMPOSSIBLE_INDEX == dimension) {
+				throw new NoLifetimeAxisFoundException("No LIFETIME axis for " + dataset.getName());
+			}
+			lifetimeDimension = dimension;
+			externalAxesList.remove(dimension);
+		}
+		externalAxes = externalAxesList.toArray(new AxisType[0]);
  
 		//TODO ARG this could be done with hyperslice cursor to find bin 0 of
 		// decay, another cursor that is limited to cruise the lifetime dim
@@ -105,8 +115,9 @@ public class LifetimeDatasetWrapper {
      // RandomAccessibleInterval< T > view =
      //     Views.interval( randomAccess, new long[] { 0, 0,1 }, new long[]{ randomAccess.dimension(0), randomAccess.dimension(1),1 } );		
 
-		// get internal (with lifetime) and external (no lifetime) dimensions
-		internalDimensions = dataset.getDims();
+		// get 'internal' (with lifetime) and 'external' (no lifetime) dimensions
+		internalDimensions = new long[img.numDimensions()];
+		img.dimensions(internalDimensions);;
 		externalDimensions = new long[internalDimensions.length - 1];
 		i = 0;
 		for (int j = 0; j < internalDimensions.length; ++j) {
@@ -246,6 +257,30 @@ public class LifetimeDatasetWrapper {
 			sum = Integer.MAX_VALUE;
 		}
 		return (int) sum;
+	}
+	
+	private int chooseLifetimeDimensionUI(List<AxisType> dimensions) {
+		// skip initial 2 dimensions, which are X and Y
+		String[] choices = new String[dimensions.size() - 2];
+		for (int i = 0; i < choices.length; ++i) {
+			choices[i] = dimensions.get(i + 2).getLabel();
+		}
+        String input = (String) JOptionPane.showInputDialog(
+				null, "Choose Lifetime Dimension...",
+				"Unknown Lifetime Dimension",
+				JOptionPane.QUESTION_MESSAGE,
+				null, // Use default icon
+				choices, // Array of choices
+				choices[0]); // Initial choice
+		int dimension = IMPOSSIBLE_INDEX;
+        for (int i = 0; i < choices.length; ++i) {
+			// input is null when Canceled
+			if (choices[i].equals(input)) {
+				dimension = i + 2;
+				break;
+			}
+		}
+		return dimension;
 	}
 
 	/**

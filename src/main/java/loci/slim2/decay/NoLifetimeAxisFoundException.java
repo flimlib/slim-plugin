@@ -1,11 +1,7 @@
-//
-// ImageUtils.java
-//
-
 /*
 SLIMPlugin for combined spectral-lifetime image analysis.
 
-Copyright (c) 2010, UW-Madison LOCI
+Copyright (c) 2010-2013, UW-Madison LOCI
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,63 +28,16 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 */
 
-package loci.slim;
-
-import net.imglib2.img.planar.PlanarImgs;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
-import net.imglib2.meta.ImgPlus;
-import net.imglib2.type.numeric.real.DoubleType;
+package loci.slim2.decay;
 
 /**
- * Utility class for working with ImgLib2 images.
- *
- * @author Barry DeZonia
+ * Exception to throw when the lifetime file has no lifetime axis.
+ * 
  * @author Aivar Grislis
- * @author Curtis Rueden
  */
-public class ImageUtils {
-
-	// -- ImageUtils methods --
-
-	public static ImgPlus<DoubleType> create(String title, long... dims) {
-		final ImgPlus<DoubleType> img =
-			new ImgPlus<DoubleType>(PlanarImgs.doubles(dims));
-		img.setName(title);
-		return img;
-	}
-
-	public static long getWidth(final ImgPlus<?> img) {
-		return getDimSize(img, Axes.X, 0);
-	}
-
-	public static long getHeight(final ImgPlus<?> img) {
-		return getDimSize(img, Axes.Y, 1);
-	}
-
-	public static long getNChannels(final ImgPlus<?> img) {
-		return getDimSize(img, Axes.CHANNEL, 2);
-	}
-
-	public static long getNSlices(final ImgPlus<?> img) {
-		return getDimSize(img, Axes.Z, 3);
-	}
-
-	public static long getNFrames(final ImgPlus<?> img) {
-		return getDimSize(img, Axes.TIME, 4);
-	}
-
-	public static long getDimSize(final ImgPlus<?> img, final AxisType axisType) {
-		return getDimSize(img, axisType, -1);
-	}
-
-	// -- Helper methods --
-
-	private static long getDimSize(final ImgPlus<?> img, final AxisType axisType,
-		final int defaultIndex)
-	{
-		final int axisIndex = img.dimensionIndex(axisType);
-		return axisIndex < 0 ? defaultIndex : img.dimension(axisIndex);
-	}
-
+public class NoLifetimeAxisFoundException extends Exception {
+	
+	public NoLifetimeAxisFoundException(String msg) {
+		super(msg);
+	}	
 }

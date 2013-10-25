@@ -8,7 +8,7 @@
   <parent>
     <groupId>loci</groupId>
     <artifactId>pom-loci</artifactId>
-    <version>1.8</version>
+    <version>1.10</version>
   </parent>
 
   <artifactId>slim_plugin</artifactId>
@@ -92,7 +92,7 @@
     <!-- dependency>
       <groupId>${scifio.groupId}</groupId>
       <artifactId>scifio-bf-compat</artifactId>
-      <version>1.0.0</version>
+      <version>${scifio-bf-compat.version}</version>
       <scope>runtime</scope>
     </dependency -->
 <!-- so instead: -->

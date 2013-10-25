@@ -4,11 +4,11 @@
  */
 package loci.slim.analysis.batch;
 
-import net.imglib2.RandomAccess;
-import net.imglib2.img.ImgPlus;
-import net.imglib2.type.numeric.real.DoubleType;
 import loci.curvefitter.ICurveFitter;
 import loci.slim.analysis.Binning;
+import net.imglib2.RandomAccess;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.real.DoubleType;
 
 /**
  *

@@ -36,6 +36,8 @@ import imagej.data.DatasetService;
 import imagej.data.threshold.ThresholdMethod;
 import imagej.data.threshold.ThresholdService;
 import imagej.display.DisplayService;
+import imagej.ui.DialogPrompt;
+import imagej.ui.UIService;
 
 import javax.swing.JFrame;
 
@@ -55,6 +57,7 @@ import loci.slim2.fitting.LocalFitParams;
 import loci.slim2.fitting.ThreadedFittingEngine;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
+import loci.slim2.decay.NoLifetimeAxisFoundException;
 import loci.slim2.heuristics.CursorEstimator;
 import loci.slim2.heuristics.DefaultFitterEstimator;
 import loci.slim2.heuristics.Estimator;
@@ -84,6 +87,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private Context context;
 	private DatasetService datasetService;
 	private DisplayService displayService;
+	private UIService uiService;
 	private Estimator estimator;
 	private FittingEngine fittingEngine;
 	private IFitterEstimator fitterEstimator;
@@ -111,6 +115,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		this.context        = context;
 		this.datasetService = datasetService;
 		this.displayService = displayService;
+		this.uiService      = uiService;
 		this.estimator      = estimator;
 	}
 	
@@ -129,7 +134,13 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		quit = openFile = fitImages = cancel = fitPixel = fitSummed = false;
 		
 		// create the clickable grayscale representation
-		createGrayscale(dataset);
+		if (!createGrayscale(dataset)) {
+			// failed to load; try again
+            uiService.showDialog(
+					"No lifetime dimension in " + dataset.getName(),
+					DialogPrompt.MessageType.WARNING_MESSAGE);
+			return false;
+		}
 		
 		// create cursor
 		bins = lifetimeDatasetWrapper.getBins();
@@ -592,10 +603,16 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         fittingCursor.sendNotifications();
 	}
 	
-	private void createGrayscale(Dataset dataset) {
-		// wrap the dataset for lifetime information
-		lifetimeDatasetWrapper = new LifetimeDatasetWrapper(dataset);
-		//fittingContext.setDatasetWrapper(lifetimeDatasetWrapper);
+	private boolean createGrayscale(Dataset dataset) {
+		try {
+			// wrap the dataset for lifetime information
+			lifetimeDatasetWrapper = new LifetimeDatasetWrapper(dataset);
+			//fittingContext.setDatasetWrapper(lifetimeDatasetWrapper);
+		}
+		catch (NoLifetimeAxisFoundException e) {
+			// not a lifetime dataset
+			return false;
+		}
 		
 		// make a grayscale version of lifetime dataset
 		lifetimeGrayscaleDataset = new LifetimeGrayscaleDataset(datasetService, lifetimeDatasetWrapper);
@@ -609,6 +626,9 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		//TODO ARG no way of getting current position from Display; can get by w/o it
 		//TODO ARG how to draw overlays on top of this display???
 		//fittingContext.setGrayscaleDisplay(display);
+
+		// success
+		return true;
 	}
 
 	/**
