@@ -135,20 +135,34 @@ public interface UserInterfacePanel {
     public boolean getFitAllChannels();
     
     /**
-     * Gets photon count threshold to fit a pixel.
+     * Gets photon count threshold minimum to fit a pixel.
      *
      * @return threshold
      */
-    public int getThreshold();
+    public int getThresholdMinimum();
 
     /**
-     * Sets photon count threshold to fit a pixel.
+     * Sets photon count threshold minimum to fit a pixel.
      *
-     * @param threshold
+     * @param thresholdMin
      */
-    public void setThreshold(int threshold);
+    public void setThresholdMinimum(int thresholdMin);
  
     /**
+     * Gets photon count threshold maximum to fit a pixel.
+     *
+     * @return threshold
+     */
+    public int getThresholdMaximum();
+
+    /**
+     * Sets photon count threshold maximum to fit a pixel.
+     *
+     * @param thresholdMax
+     */
+    public void setThresholdMaximum(int thresholdMax);
+	
+	/**
      * Gets chi square target for fit.
      * 
      * @return 
