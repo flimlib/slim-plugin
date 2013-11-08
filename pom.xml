@@ -87,14 +87,11 @@
       <artifactId>jxlayer</artifactId>
       <version>3.0.4</version>
     </dependency>
-
     <dependency>
       <groupId>${scifio.groupId}</groupId>
       <artifactId>scifio-lifesci</artifactId>
 	  <version>0.2.2-SNAPSHOT</version>
-      <scope>runtime</scope>
     </dependency>
-	
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

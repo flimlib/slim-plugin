@@ -56,6 +56,8 @@ import java.util.prefs.Preferences;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
+import loci.slim2.decay.LifetimeDatasetWrapper;
+import loci.slim2.decay.NoLifetimeAxisFoundException;
 import loci.slim2.heuristics.DefaultEstimator;
 import loci.slim2.heuristics.Estimator;
 import loci.slim2.outputset.IndexedMemberFormula;
@@ -68,14 +70,11 @@ import loci.slim2.process.BatchProcessor;
 import loci.slim2.process.InteractiveProcessor;
 import loci.slim2.process.batch.DefaultBatchProcessor;
 import loci.slim2.process.interactive.DefaultInteractiveProcessor;
-import net.imglib2.Cursor;
-import net.imglib2.img.ImgPlus;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;
@@ -94,8 +93,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	private static final String SDT_SUFFIX = ".sdt";
 	private static final String ICS_SUFFIX = ".ics";
 	private InteractiveProcessor interactiveProcessor;
-	//TODOprivate Map<Dataset, List<FittingContext>> map = new HashMap<Dataset, List<FittingContext>>();
-	private Dataset activeDataset;
+	private LifetimeDatasetWrapper activeLifetime;
 	private volatile boolean quit = false;
 	
 	@Parameter
@@ -136,30 +134,27 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		// special case first time through
 		boolean firstTime = true;
 		do {
-			// new lifetime dataset
-			Dataset dataset = null;
+			// new lifetime dataset wrapper
+			LifetimeDatasetWrapper lifetime = null;
 			
 			if (firstTime) {
 				// look for an already open LT image
-				dataset = getLifetimeDataset();	
+				lifetime = getLifetimeDatasetWrapper();	
 			}
-			
-			// temporarily kludge in dummy dataset
-			dataset = getFakeLifetimeDataset();
 
 			// none found?
-			if (null == dataset) {
-				// prompt for dataset
+			if (null == lifetime) {
+				// prompt for lifetime dataset name
                 File[] files = showFileDialog(getPathFromPreferences());
 				if (null == files) {
 					// dialog cancelled
-					if (null == activeDataset) {
+					if (null == activeLifetime) {
 						// cancel the whole plugin
 						quit = true;
 					}
 					else {
 						// reload previous
-						dataset = activeDataset;
+						lifetime = activeLifetime;
 					}
 				}
 				else {
@@ -178,24 +173,26 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 						}
 						
 						// reload previous
-						dataset = activeDataset;
+						lifetime = activeLifetime;
 					}
 					else {
-						// load the dataset
+						// load the lifetime dataset
 						try {
-							dataset = datasetService.open(files[0].getAbsolutePath());
+							lifetime = new LifetimeDatasetWrapper(context, files[0]);
 						}
 						catch (IOException e) {
-							System.out.println("problem reading " + files[0].getAbsolutePath() + " " + e.getMessage());
-							e.printStackTrace();
+							showWarning("Problem reading " + files[0].getAbsolutePath() + " " + e.getMessage());
+						}
+						catch (NoLifetimeAxisFoundException e) {
+							showWarning("No Lifetime Axis found in " + files[0].getAbsolutePath());
 						}
 					}
 				}
 			}
 			
-			if (null != dataset) {
+			if (null != lifetime) {
 				// keep track of current dataset
-				activeDataset = dataset;
+				activeLifetime = lifetime;
 
 				// create processor first time through
 				if (null == interactiveProcessor) {
@@ -205,7 +202,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				}
 
 				// gives up control to load a new dataset or when done
-				quit = interactiveProcessor.process(dataset);
+				quit = interactiveProcessor.process(lifetime);
 			}
 			
 			// one shot
@@ -529,41 +526,31 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	}
 
 	/**
-	 * Finds the first lifetime Dataset from the DisplayService.
+	 * Finds the first lifetime Dataset from the DisplayService and wraps it.
 	 * 
-	 * @return null or lifetime Dataset
+	 * @return null or lifetime dataset wrapper
 	 */
-	private Dataset getLifetimeDataset() {
+	private LifetimeDatasetWrapper getLifetimeDatasetWrapper() {
 		List<Dataset> datasets = datasetService.getDatasets();
 		for (Dataset dataset : datasets) {
 			ImgPlus<?> img = dataset.getImgPlus();
 			for (int i = 0; i < img.numDimensions(); ++i) {
 				if (LIFETIME.equals(img.axis(i).type().getLabel())) {
-					return dataset;
+					LifetimeDatasetWrapper lifetime = null;
+					try {
+					    lifetime = new LifetimeDatasetWrapper(dataset);
+					}
+					catch (NoLifetimeAxisFoundException e) {
+					}
+					finally {
+						if (null != lifetime) {
+							return lifetime;
+						}
+					}
 				}
 			}
 		}
 		return null;
-	}
-	
-	// temporary code
-	private Dataset getFakeLifetimeDataset() {
-		final String name = "Dummy Lifetime";
-		long width = 64;
-		long height = 64;
-		long bins = 64;
-		final long[] dims = { width, height, bins };
-		final AxisType[] axes = { Axes.X, Axes.Y, Axes.LIFETIME };
-		Dataset dataset = datasetService.create(new UnsignedByteType(), dims, name, axes);
-		ImgPlus<UnsignedByteType> imgPlus = (ImgPlus<UnsignedByteType>) dataset.getImgPlus();
-		Cursor<UnsignedByteType> cursor = imgPlus.cursor();
-		int value = 0;
-		while (cursor.hasNext()) {
-			cursor.fwd();
-			cursor.get().set(value++);
-		}
-		
-		return dataset;
 	}
 	
 	/** Tests our command. */

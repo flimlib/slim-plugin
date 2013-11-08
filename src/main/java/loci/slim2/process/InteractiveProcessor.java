@@ -32,12 +32,9 @@ package loci.slim2.process;
 
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
-import imagej.data.threshold.ThresholdService;
 import imagej.display.DisplayService;
-import imagej.ui.UIService;
-
+import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.heuristics.Estimator;
-
 import org.scijava.Context;
 
 /**
@@ -73,10 +70,10 @@ public interface InteractiveProcessor {
 	public void setFitSettings(FitSettings fitSettings);
 
 	/**
-	 * Processes a {@link Dataset}.
+	 * Processes a {@link LifetimeDatasetWrapper}.
 	 * 
-	 * @param dataset 
-	 * @return whether to quit (true) or load new Dataset (false)
+	 * @param lifetime
+	 * @return whether to quit (true) or load new lifetime (false)
 	 */
-	public boolean process(Dataset dataset);
+	public boolean process(LifetimeDatasetWrapper lifetime);
 }

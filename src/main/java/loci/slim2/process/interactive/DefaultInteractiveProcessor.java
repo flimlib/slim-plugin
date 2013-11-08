@@ -131,10 +131,11 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	}
 	
 	@Override
-	public boolean process(final Dataset dataset) {
+	public boolean process(final LifetimeDatasetWrapper lifetime) {
 		quit = openFile = fitImages = cancel = fitPixel = fitSummed = false;
 		
 		// create the clickable grayscale representation
+		Dataset dataset = lifetime.getDataset();
 		if (!createGrayscale(dataset)) {
 			// failed to load; try again
             uiService.showDialog(
@@ -147,10 +148,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		bins = lifetimeDatasetWrapper.getBins();
 		timeInc = lifetimeDatasetWrapper.getTimeIncrement();
 		fitterEstimator = new DefaultFitterEstimator();
-		System.out.println("timeInc is " + timeInc);
-		//TODO ARG just for testing; the 'timeInc' for gpl1.sdt
-		timeInc = 0.156;
-		System.out.println("timeInc changed for testing to :" + timeInc);
 		fittingCursor = new FittingCursor(timeInc, bins, fitterEstimator);
 		fittingCursor.addListener(
 			new FittingCursorListener() {

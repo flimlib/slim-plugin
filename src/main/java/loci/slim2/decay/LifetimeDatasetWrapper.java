@@ -31,6 +31,10 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.decay;
 
 import imagej.data.Dataset;
+import imagej.data.DatasetService;
+import io.scif.DefaultMetaTable;
+import java.io.File;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -38,10 +42,17 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
 
+import io.scif.MetaTable;
+import io.scif.io.RandomAccessInputStream;
+import io.scif.lifesci.SDTInfo;
+import java.util.Set;
+
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.AxisType;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
+
+import org.scijava.Context;
 
 /**
  * Wraps a {@link Dataset} that has lifetime information.
@@ -53,15 +64,16 @@ public class LifetimeDatasetWrapper {
 	private static final int IMPOSSIBLE_INDEX = -1;
 	private static final int MAX_BIN_WIDTH = 21;
 	private static final int MAX_CACHE_SIZE = 1000;
-	private final Dataset dataset;
-	private final RandomAccess<? extends RealType<?>> randomAccess;
-	private final DecayCache cache;
+	
+	private Dataset dataset;
+	private RandomAccess<? extends RealType<?>> randomAccess;
+	private DecayCache cache;
 	private int lifetimeDimension;
-	private final AxisType[] externalAxes;
-	private final long[] internalDimensions;
-	private final long[] externalDimensions;
-	private final int bins;
-	private final int factor;
+	private AxisType[] externalAxes;
+	private long[] internalDimensions;
+	private long[] externalDimensions;
+	private int bins;
+	private int factor;
 	private double inc;
 
 	/**
@@ -72,6 +84,52 @@ public class LifetimeDatasetWrapper {
 	public LifetimeDatasetWrapper(Dataset dataset)
 			throws NoLifetimeAxisFoundException
 	{
+		init(dataset);
+		setTimeIncrement(10.0/bins);
+		setPhotonCountFactor(1);
+	}
+	
+	public LifetimeDatasetWrapper(Context context, File file)
+			throws IOException, NoLifetimeAxisFoundException {
+		String fileName = file.getAbsolutePath();
+
+		// load and initialize with the dataset
+		DatasetService datasetService = context.getService(DatasetService.class);
+		Dataset dataset = datasetService.open(fileName);
+		init(dataset);
+
+		// get metadata
+		double time = 10.0;
+		int factor = 1;
+		if (fileName.endsWith(".sdt")) {
+			RandomAccessInputStream stream = new RandomAccessInputStream(context, fileName);
+			stream.order(true);
+			MetaTable metaTable = new DefaultMetaTable();
+			SDTInfo sdtInfo = new SDTInfo(stream, metaTable);
+			dumpMetaTable(metaTable);
+            Number timeBase = (Number) metaTable.get("time base");
+			System.out.println("look for timeBase");
+            if (null != timeBase) {
+                System.out.println("timeBase is " + timeBase.floatValue());
+				time = timeBase.floatValue();
+            }
+			Number photonFactor = (Number) metaTable.get("MeasureInfo.incr");
+			if (null != photonFactor) {
+				factor = photonFactor.intValue();
+			}
+		}
+		setTimeIncrement(time/bins);
+		setPhotonCountFactor(factor);
+	}
+	
+	private void dumpMetaTable(MetaTable metaTable) {
+		Set<String> keys = metaTable.keySet();
+		for (String key : keys) {
+			System.out.println("key >" + key + "> entry <" + metaTable.get(key) + ">");
+		}
+	}
+	
+	private void init(Dataset dataset) throws NoLifetimeAxisFoundException {
 		this.dataset = dataset;
 		randomAccess = dataset.getImgPlus().randomAccess();
 		cache = new DecayCache(this, MAX_BIN_WIDTH, MAX_CACHE_SIZE);
@@ -107,14 +165,16 @@ public class LifetimeDatasetWrapper {
 		//TODO ARG this could be done with hyperslice cursor to find bin 0 of
 		// decay, another cursor that is limited to cruise the lifetime dim
 		// that gets transformed (or origined) into place.
-		/**
-		MixedTransformView<? extends RealType<?>> r = null;
-		//MixedTransformView<?> r = null;
-		//r = Views.<?>hyperSlice(randomAccess, lifetimeDimension, 0);
-		Object rr = Views.hyperSlice(randomAccess, lifetimeDimension, 0L);**/
 		
-     // RandomAccessibleInterval< T > view =
-     //     Views.interval( randomAccess, new long[] { 0, 0,1 }, new long[]{ randomAccess.dimension(0), randomAccess.dimension(1),1 } );		
+		/*
+		MixedTransformView<? extends RealType<?>> r = null;
+		MixedTransformView<?> r = null;
+		r = Views.<?>hyperSlice(randomAccess, lifetimeDimension, 0);
+		Object rr = Views.hyperSlice(randomAccess, lifetimeDimension, 0L);
+		
+        RandomAccessibleInterval< T > view =
+		Views.interval( randomAccess, new long[] { 0, 0,1 }, new long[]{ randomAccess.dimension(0), randomAccess.dimension(1),1 } );
+		*/
 
 		// get 'internal' (with lifetime) and 'external' (no lifetime) dimensions
 		internalDimensions = new long[img.numDimensions()];
@@ -128,9 +188,6 @@ public class LifetimeDatasetWrapper {
 		}
 		
 		bins = (int) internalDimensions[lifetimeDimension];
-		
-		factor = 1; //TODO how to get this from metadata?
-		inc = 1.0; //TODO this too is in meta data
 	}
 
 	/**
@@ -166,6 +223,33 @@ public class LifetimeDatasetWrapper {
 	 */
 	public int getBins() {
 		return bins;
+	}
+	
+	/**
+	 * Sets photon count factor.
+	 * 
+	 * @param factor
+	 */
+	public void setPhotonCountFactor(int factor) {
+		this.factor = factor;
+	}
+	
+	/**
+	 * Gets photon count factor.
+	 * 
+	 * @return
+	 */
+	public int getPhotonCountFactor() {
+		return factor;
+	}
+
+	/**
+	 * Sets bin width as time.
+	 * 
+	 * @param inc 
+	 */
+	public void setTimeIncrement(double inc) {
+		this.inc = inc;
 	}
 
 	/**
