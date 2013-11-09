@@ -132,17 +132,11 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	
 	@Override
 	public boolean process(final LifetimeDatasetWrapper lifetime) {
+		lifetimeDatasetWrapper = lifetime;
 		quit = openFile = fitImages = cancel = fitPixel = fitSummed = false;
 		
 		// create the clickable grayscale representation
-		Dataset dataset = lifetime.getDataset();
-		if (!createGrayscale(dataset)) {
-			// failed to load; try again
-            uiService.showDialog(
-					"No lifetime dimension in " + dataset.getName(),
-					DialogPrompt.MessageType.WARNING_MESSAGE);
-			return false;
-		}
+		createGrayscale();
 		
 		// create cursor
 		bins = lifetimeDatasetWrapper.getBins();
@@ -605,17 +599,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         fittingCursor.sendNotifications();
 	}
 	
-	private boolean createGrayscale(Dataset dataset) {
-		try {
-			// wrap the dataset for lifetime information
-			lifetimeDatasetWrapper = new LifetimeDatasetWrapper(dataset);
-			//fittingContext.setDatasetWrapper(lifetimeDatasetWrapper);
-		}
-		catch (NoLifetimeAxisFoundException e) {
-			// not a lifetime dataset
-			return false;
-		}
-		
+	private void createGrayscale() {	
 		// make a grayscale version of lifetime dataset
 		lifetimeGrayscaleDataset = new LifetimeGrayscaleDataset(datasetService, lifetimeDatasetWrapper);
 		//fittingContext.setGrayscaleDataset(lifetimeGrayscaleDataset);
@@ -628,9 +612,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		//TODO ARG no way of getting current position from Display; can get by w/o it
 		//TODO ARG how to draw overlays on top of this display???
 		//fittingContext.setGrayscaleDisplay(display);
-
-		// success
-		return true;
 	}
 
 	/**

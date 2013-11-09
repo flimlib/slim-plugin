@@ -541,6 +541,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 					    lifetime = new LifetimeDatasetWrapper(dataset);
 					}
 					catch (NoLifetimeAxisFoundException e) {
+						// we just determined that there is a LIFETIME axis
 					}
 					finally {
 						if (null != lifetime) {

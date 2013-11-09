@@ -60,7 +60,12 @@ import org.scijava.Context;
  * @author Aivar Grislis
  */
 public class LifetimeDatasetWrapper {
+	private static final String SDT_SUFFIX = ".sdt";
 	private static final String LIFETIME = "Lifetime";
+	private static final String TIME_BASE = "time base";
+	private static final String INCR = "MeasureInfo.incr";
+	private static final double DEFAULT_TIME_BASE = 10.0;
+	private static final double DECIMAL_ADJUST = 1.0E9;
 	private static final int IMPOSSIBLE_INDEX = -1;
 	private static final int MAX_BIN_WIDTH = 21;
 	private static final int MAX_CACHE_SIZE = 1000;
@@ -77,7 +82,7 @@ public class LifetimeDatasetWrapper {
 	private double inc;
 
 	/**
-	 * Constructor.
+	 * Constructor. Wraps a pre-existing Dataset.
 	 * 
 	 * @param dataset 
 	 */
@@ -85,10 +90,18 @@ public class LifetimeDatasetWrapper {
 			throws NoLifetimeAxisFoundException
 	{
 		init(dataset);
-		setTimeIncrement(10.0/bins);
+		setTimeIncrement(DEFAULT_TIME_BASE/bins);
 		setPhotonCountFactor(1);
 	}
-	
+
+	/**
+	 * Constructor.  Loads a Dataset and wraps it.
+	 * 
+	 * @param context
+	 * @param file
+	 * @throws IOException
+	 * @throws NoLifetimeAxisFoundException 
+	 */
 	public LifetimeDatasetWrapper(Context context, File file)
 			throws IOException, NoLifetimeAxisFoundException {
 		String fileName = file.getAbsolutePath();
@@ -99,21 +112,16 @@ public class LifetimeDatasetWrapper {
 		init(dataset);
 
 		// get metadata
-		double time = 10.0;
+		double time = DEFAULT_TIME_BASE;
 		int factor = 1;
-		if (fileName.endsWith(".sdt")) {
+		if (fileName.endsWith(SDT_SUFFIX)) {
 			RandomAccessInputStream stream = new RandomAccessInputStream(context, fileName);
 			stream.order(true);
 			MetaTable metaTable = new DefaultMetaTable();
 			SDTInfo sdtInfo = new SDTInfo(stream, metaTable);
-			dumpMetaTable(metaTable);
-            Number timeBase = (Number) metaTable.get("time base");
-			System.out.println("look for timeBase");
-            if (null != timeBase) {
-                System.out.println("timeBase is " + timeBase.floatValue());
-				time = timeBase.floatValue();
-            }
-			Number photonFactor = (Number) metaTable.get("MeasureInfo.incr");
+			time = DECIMAL_ADJUST * sdtInfo.tacR / sdtInfo.tacG;
+			//dumpMetaTable(metaTable);
+			Number photonFactor = (Number) metaTable.get(INCR);
 			if (null != photonFactor) {
 				factor = photonFactor.intValue();
 			}
@@ -230,7 +238,7 @@ public class LifetimeDatasetWrapper {
 	 * 
 	 * @param factor
 	 */
-	public void setPhotonCountFactor(int factor) {
+	private void setPhotonCountFactor(int factor) {
 		this.factor = factor;
 	}
 	
@@ -248,7 +256,7 @@ public class LifetimeDatasetWrapper {
 	 * 
 	 * @param inc 
 	 */
-	public void setTimeIncrement(double inc) {
+	private void setTimeIncrement(double inc) {
 		this.inc = inc;
 	}
 
