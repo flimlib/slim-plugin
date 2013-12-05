@@ -63,13 +63,6 @@ public interface InteractiveProcessor {
 	public FitSettings getFitSettings();
 
 	/**
-	 * Sets fit settings.
-	 * 
-	 * @param fitSettings 
-	 */
-	public void setFitSettings(FitSettings fitSettings);
-
-	/**
 	 * Processes a {@link LifetimeDatasetWrapper}.
 	 * 
 	 * @param lifetime

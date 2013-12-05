@@ -107,4 +107,8 @@ public class GrayscaleDisplay {
 		}
 		crossHairOverlay.setPoint(doublePosition);
 	}
+	
+	public void close() {
+		display.close();
+	}
 }

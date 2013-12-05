@@ -42,9 +42,7 @@ import loci.slim.fitted.FittedValue;
  *
  * @author Aivar Grislis grislis @ wisc.edu
  */
-public abstract class AbstractBatchHistogram implements BatchHistogram {
-	//private static final int BINS = 200000; // 200,000 * 24 bytes ~= 4.8Mb
-	
+public abstract class AbstractBatchHistogram implements BatchHistogram {	
 	private FittedValue fittedValue;
 	private String title;
 	private double minRange; //TODO in statistics
@@ -226,7 +224,6 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		}
 		else {
 			int bin = Binning.valueToBin(totalBins, minRange, maxRange, value);
-			//System.out.println("value was " + value + " bin is " + bin + " totalBins " + totalBins);
 			++bins[bin].count;
 			bins[bin].meanSum += value;
 			bins[bin].varianceSum += value * value;
@@ -318,13 +315,16 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		// make sure that the bin for this count is within range
 		if (n < underMinCount) {
 			System.out.println("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
-			throw new RuntimeException("BatchHistogram quartile underflow " + getTitle());
+			//throw new RuntimeException("BatchHistogram quartile underflow " + getTitle());
+			return 0;
 		}
 		if (n > count - overMaxCount) {
+			// only (count - overMaxCount) values are actually binned
 			System.out.println("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
-			throw new RuntimeException("BatchHistogram quartile overflow " + getTitle());
+			//throw new RuntimeException("BatchHistogram quartile overflow " + getTitle() + "want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount + " min range " + minRange + " max range " + maxRange + " min value " + minValue + " max value " + maxValue);
+			return totalBins - 1;
 		}
-
+		
 		// look for appropriate bin
 		long sumCount = 0;
 		for (int bin = 0; bin < totalBins; ++bin) {

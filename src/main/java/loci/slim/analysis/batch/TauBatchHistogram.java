@@ -20,7 +20,7 @@ public class TauBatchHistogram extends AbstractBatchHistogram implements BatchHi
 		int totalBins = 200000;
 		setTotalBins(totalBins);
 		
-		// expect tau values from 0.0..20.0 nanoseconds
+		// bin tau values from 0.0..20.0 nanoseconds
 		double minRange = 0.0;
 		double maxRange = 20.0;
 		setMinMaxRange(minRange, maxRange);

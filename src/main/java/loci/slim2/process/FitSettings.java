@@ -30,6 +30,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim2.process;
 
+import loci.slim2.fitting.GlobalFitParams;
+
 /**
  * Holds basic FLIM fit settings.
  * <p>
@@ -40,6 +42,14 @@ package loci.slim2.process;
  * @author Aivar Grislis
  */
 public interface FitSettings {
+	
+	public GlobalFitParams getGlobalFitParams();
+	
+	public void setGlobalFitParams(GlobalFitParams globalFitParams);
+	
+	public String getFittedImages();
+	
+	public void setFittedImages(String fittedImages);
 
 	/**
 	 * Get number of bins in time histogram.

@@ -122,12 +122,12 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	
 	@Override
 	public FitSettings getFitSettings() {
-		return null; //TODO ARG might be defunct; fit settings is a way to save/restore all settings
-	}
-
-	@Override
-	public void setFitSettings(FitSettings fitSettings) {
-		//TODO ARG
+		DefaultFitSettings fitSettings = new DefaultFitSettings();
+		fitSettings.setGlobalFitParams(getGlobalFitParams(uiPanel, fittingCursor));
+		String fittedImages = uiPanel.getFittedImages();
+		fitSettings.setFittedImages(fittedImages);
+		fitSettings.setBins(bins);
+		return fitSettings;
 	}
 	
 	@Override
@@ -136,9 +136,12 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		quit = openFile = fitImages = cancel = fitPixel = fitSummed = false;
 		
 		// create the clickable grayscale representation
-		createGrayscale();
+		if (null != grayscaleDisplay) {
+			grayscaleDisplay.close();
+		}
+		grayscaleDisplay = createGrayscale();
 		
-		// create cursor
+		// create cursors to clip transient and prompt decays
 		bins = lifetimeDatasetWrapper.getBins();
 		timeInc = lifetimeDatasetWrapper.getTimeIncrement();
 		fitterEstimator = new DefaultFitterEstimator();
@@ -591,15 +594,15 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
         int dataStart = results[CursorEstimator.DATA_START];
         int transientStop = results[CursorEstimator.TRANSIENT_STOP];
 
-        // want to batch all of the fitting cursor notifications to listeners
-        fittingCursor.suspendNotifications();
+        // send fitting cursor notifications to listeners
+        fittingCursor.suspendNotifications(); // start batch
         fittingCursor.setTransientStartIndex(transientStart);
         fittingCursor.setDataStartIndex(dataStart);
         fittingCursor.setTransientStopIndex(transientStop);
-        fittingCursor.sendNotifications();
+        fittingCursor.sendNotifications(); // send batch
 	}
 	
-	private void createGrayscale() {	
+	private GrayscaleDisplay createGrayscale() {	
 		// make a grayscale version of lifetime dataset
 		lifetimeGrayscaleDataset = new LifetimeGrayscaleDataset(datasetService, lifetimeDatasetWrapper);
 		//fittingContext.setGrayscaleDataset(lifetimeGrayscaleDataset);
@@ -607,7 +610,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		// display grayscale version
 		Display<?> display = displayService.createDisplay(lifetimeGrayscaleDataset.getDataset());
 		
-		grayscaleDisplay = new GrayscaleDisplay(context, lifetimeGrayscaleDataset.getDataset(), display);
+		return new GrayscaleDisplay(context, lifetimeGrayscaleDataset.getDataset(), display);
 		
 		//TODO ARG no way of getting current position from Display; can get by w/o it
 		//TODO ARG how to draw overlays on top of this display???

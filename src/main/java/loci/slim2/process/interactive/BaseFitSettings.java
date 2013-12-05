@@ -30,6 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim2.process.interactive;
 
+import loci.slim2.fitting.GlobalFitParams;
 import loci.slim2.process.FitSettings;
 import loci.slim2.process.HorzCursor;
 import loci.slim2.process.VertCursor;
@@ -39,6 +40,7 @@ import loci.slim2.process.VertCursor;
  * @author Aivar Grislis
  */
 public class BaseFitSettings implements FitSettings {
+	private String fittedImages;
 	private int bins;
 	private double timeInc;
 	private double[] excitation;
@@ -47,6 +49,28 @@ public class BaseFitSettings implements FitSettings {
 	private HorzCursor[] decayHorzCursors;
 	private VertCursor decayVertCursor;
 	private int binningFactor;
+	
+	public GlobalFitParams globalFitParams;
+
+	@Override
+	public GlobalFitParams getGlobalFitParams() {
+		return globalFitParams;
+	}
+
+	@Override
+	public void setGlobalFitParams(GlobalFitParams globalFitParams) {
+		this.globalFitParams = globalFitParams;
+	}
+	
+	@Override
+	public String getFittedImages() {
+		return fittedImages;
+	}
+
+	@Override
+	public void setFittedImages(String fittedImages) {
+		this.fittedImages = fittedImages;
+	}
 	
 	@Override
 	public int getBins() {

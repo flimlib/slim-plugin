@@ -46,14 +46,17 @@ import imagej.tool.Tool;
 import imagej.tool.ToolService;
 import imagej.ui.DialogPrompt;
 import imagej.ui.UIService;
+import java.awt.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 
 import loci.slim2.decay.LifetimeDatasetWrapper;
@@ -120,19 +123,17 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	@Parameter
 	private ThresholdService thresholdService;
 	
+	private Component parent;
+	
 	@Override
 	public void run() {
-		System.out.println("SLIMPlugin.run " + this);
-		
-		loci.slim2.experimental.EnderleinErdmann.fit(loci.slim2.experimental.EnderleinErdmann.SINGLE, null, null);
-		loci.slim2.experimental.EnderleinErdmann.fit(loci.slim2.experimental.EnderleinErdmann.DOUBLE, null, null);		
-		loci.slim2.experimental.EnderleinErdmann.fit(loci.slim2.experimental.EnderleinErdmann.TRIPLE, null, null);
 		
 		// allow clicking on the grayscale version during this session
 		showTool();
-
+		
 		// special case first time through
 		boolean firstTime = true;
+		parent = ij.ImageJ.getFrames()[0];
 		do {
 			// new lifetime dataset wrapper
 			LifetimeDatasetWrapper lifetime = null;
@@ -145,7 +146,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			// none found?
 			if (null == lifetime) {
 				// prompt for lifetime dataset name
-                File[] files = showFileDialog(getPathFromPreferences());
+                File[] files = showFileDialog(parent, getPathFromPreferences());				System.out.println("back from showFileDialog");
 				if (null == files) {
 					// dialog cancelled
 					if (null == activeLifetime) {
@@ -165,7 +166,8 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 						if (null != interactiveProcessor) {
 							// do some batch processing
 							final BatchProcessor batchProcessor = new DefaultBatchProcessor();
-							batchProcessor.process(files, interactiveProcessor.getFitSettings());
+							int batchBins = interactiveProcessor.getFitSettings().getBins(); // check for same number bins
+							batchProcessor.process(context, batchBins, files, interactiveProcessor.getFitSettings());
 						}
 						else {
 							// error; no settings available yet
@@ -259,18 +261,34 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
     /**
      * Prompts for a FLIM file.
      *
+	 * @param parent
      * @param default path
      * @return null or array of Files
      */
-    private File[] showFileDialog(String defaultPath) {
-		JFileChooser chooser = new JFileChooser();
+    private File[] showFileDialog(final Component parent, String defaultPath) {
+		final JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(defaultPath));
 		chooser.setDialogTitle("Open Lifetime Image(s)");
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		chooser.setMultiSelectionEnabled(true);
 		chooser.setFileFilter(new ShowFileDialogFilter());
 
-		if (chooser.showOpenDialog(ij.ImageJ.getFrames()[0]) == JFileChooser.APPROVE_OPTION) {
+		// run on event dispatch thread
+		final int[] returnCode = new int[1];
+		try {
+			SwingUtilities.invokeAndWait(
+				new Runnable() {
+					public void run() {
+						returnCode[0] = chooser.showOpenDialog(parent);
+					}
+			});
+		}
+		catch (InterruptedException e) {	
+		}
+		catch (InvocationTargetException e) {
+		}
+
+		if (returnCode[0] == JFileChooser.APPROVE_OPTION) {
 			File[] files = chooser.getSelectedFiles();
 			List<File> fileList = new ArrayList<File>();
 			for (File file : files) {

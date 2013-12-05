@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim2.process;
 
 import java.io.File;
+import org.scijava.Context;
 
 /**
  *
@@ -41,8 +42,10 @@ public interface BatchProcessor {
 	/**
 	 * Processes list of files with current settings.
 	 * 
+	 * @param context 
+	 * @param bins
 	 * @param files
 	 * @param fitSettings 
 	 */
-	public void process(File[] files, FitSettings fitSettings);
+	public void process(Context context, int bins, File[] files, FitSettings fitSettings);
 }

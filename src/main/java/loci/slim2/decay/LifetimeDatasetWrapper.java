@@ -119,7 +119,9 @@ public class LifetimeDatasetWrapper {
 			stream.order(true);
 			MetaTable metaTable = new DefaultMetaTable();
 			SDTInfo sdtInfo = new SDTInfo(stream, metaTable);
-			time = DECIMAL_ADJUST * sdtInfo.tacR / sdtInfo.tacG;
+			if (0 != sdtInfo.tacG) {
+				time = DECIMAL_ADJUST * sdtInfo.tacR / sdtInfo.tacG;
+			}
 			//dumpMetaTable(metaTable);
 			Number photonFactor = (Number) metaTable.get(INCR);
 			if (null != photonFactor) {
