@@ -42,10 +42,10 @@ import static loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL;
 import static loci.curvefitter.ICurveFitter.FitFunction.STRETCHED_EXPONENTIAL;
 import static loci.curvefitter.ICurveFitter.FitFunction.TRIPLE_EXPONENTIAL;
 import loci.curvefitter.ICurveFitter.FitRegion;
+import loci.slim2.analysis.batch.ExportHistogramsToText;
+import loci.slim2.analysis.batch.ExportPixelsToText;
 import loci.slim2.analysis.batch.ExportSummaryToText;
 import loci.slim.analysis.batch.ui.BatchHistogramListener;
-import loci.slim.analysis.plugins.ExportHistogramsToText;
-import loci.slim.analysis.plugins.ExportPixelsToText;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
 import loci.slim2.process.BatchProcessor;
@@ -167,7 +167,7 @@ public class DefaultBatchProcessor implements BatchProcessor {
 		
 		String fittedImages = fitSettings.getFittedImages();
 		FitFunction fitFunction = fitSettings.getGlobalFitParams().getFitFunction();
-		FitRegion fitRegion = null; // was uiPanel.getFitRegion()
+		FitRegion fitRegion = FitRegion.EACH;
 		
 		
 		// validate file names

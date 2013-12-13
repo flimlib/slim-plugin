@@ -394,7 +394,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
         buttonPanel.add(Box.createHorizontalGlue());
-		openButton = new JButton("New File");
+		openButton = new JButton("New File/Batch");
 		openButton.addActionListener(
 		    new ActionListener() {
 				public void actionPerformed(ActionEvent e) {

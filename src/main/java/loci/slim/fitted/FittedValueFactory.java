@@ -56,11 +56,9 @@ public class FittedValueFactory {
 		List<FittedValue> fittedValues = new ArrayList<FittedValue>();
 		String[] descriptors = fittedValueDescriptor.split(" ");
 		for (String descriptor : descriptors) {
-			System.out.println("descriptor>" + descriptor + "<");
 			if (FittedValue.CHI_SQ.equals(descriptor)) {
-				System.out.println("CHI SQUARE FITTED VALUE");
 				ChiSqFittedValue fittedValue = new ChiSqFittedValue();
-				fittedValue.init(FittedValue.CHI_SQ);
+				fittedValue.init("X2");
 				fittedValues.add(fittedValue);
 			}
 			else if (FittedValue.Z.equals(descriptor)) {
@@ -107,30 +105,30 @@ public class FittedValueFactory {
 					case 1:
 					{
 						TFittedValue fittedValue = new TFittedValue();
-						fittedValue.init(FittedValue.T, 1);
+						fittedValue.init("T", 1);
 						fittedValues.add(fittedValue);
 						break;
 					}
 					case 2:
 					{
 						TFittedValue fittedValue1 = new TFittedValue();
-						fittedValue1.init(FittedValue.T1, 1);
+						fittedValue1.init("T1", 1);
 						fittedValues.add(fittedValue1);
 						TFittedValue fittedValue2 = new TFittedValue();
-						fittedValue2.init(FittedValue.T2, 2);
+						fittedValue2.init("T2", 2);
 						fittedValues.add(fittedValue2);
 						break;
 					}
 					case 3:
 					{
 						TFittedValue fittedValue1 = new TFittedValue();
-						fittedValue1.init(FittedValue.T1, 1);
+						fittedValue1.init("T1", 1);
 						fittedValues.add(fittedValue1);
 						TFittedValue fittedValue2 = new TFittedValue();
-						fittedValue2.init(FittedValue.T2, 2);
+						fittedValue2.init("T2", 2);
 						fittedValues.add(fittedValue2);
 						TFittedValue fittedValue3 = new TFittedValue();
-						fittedValue2.init(FittedValue.T3, 3);
+						fittedValue2.init("T3", 3);
 						fittedValues.add(fittedValue3);
 						break;
 					}
@@ -206,7 +204,7 @@ public class FittedValueFactory {
 			}
 			else if (FittedValue.T_MEAN.equals(descriptor)) {
 				TMeanFittedValue fittedValue = new TMeanFittedValue();
-				fittedValue.init(FittedValue.T_MEAN, components);
+				fittedValue.init("Tm", components);
 				fittedValues.add(fittedValue);
 			}
 		}
