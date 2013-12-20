@@ -14,7 +14,7 @@
   <artifactId>slim_plugin</artifactId>
   <version>2.0.0-SNAPSHOT</version>
 
-  <name>SLIMPlugin-ij2</name>
+  <name>SLIMPlugin</name>
   <description>An ImageJ plugin for combined spectral-lifetime image analysis.</description>
   <inceptionYear>2010</inceptionYear>
 
@@ -26,7 +26,6 @@
   </licenses>
 
   <dependencies>
-<!-- loci/scifio/4.4.8 (really just loci.format.*) used to load main file for SLIM Plugin 1 & excitation file for 1 & 2 -->
     <dependency>
       <groupId>${bio-formats.groupId}</groupId>
       <artifactId>scifio</artifactId>
@@ -90,7 +89,7 @@
     <dependency>
       <groupId>${scifio.groupId}</groupId>
       <artifactId>scifio-lifesci</artifactId>
-	  <version>0.2.2-SNAPSHOT</version>
+	  <version>0.2.2</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
