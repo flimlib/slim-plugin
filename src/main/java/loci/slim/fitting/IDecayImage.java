@@ -35,10 +35,8 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.fitting;
 
 import loci.slim.preprocess.IProcessor;
-
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.RealType;
-import mpicbg.imglib.type.numeric.real.DoubleType;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.RealType;
 
 /**
  *
@@ -95,5 +93,5 @@ public interface IDecayImage<T extends RealType<T>> extends IProcessor {
      * 
      * @return 
      */
-    public Image<DoubleType> getImage();
+    public ImgPlus<T> getImage();
 }

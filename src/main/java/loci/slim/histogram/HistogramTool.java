@@ -171,7 +171,7 @@ public class HistogramTool {
      * Gets an IndexColorModel by loading a hardcoded LUT file.
      * This is just a temporary expedient, really belongs elsewhere.
      * 
-     * @return 
+     * @return null or color model
      */
     public static IndexColorModel getIndexColorModel() {
         IndexColorModel colorModel = null;
@@ -191,7 +191,7 @@ public class HistogramTool {
         catch (IOException e) {
             IJ.showMessage("Missing LUT", "Install lifetime.lut from LOCI FIJI update site.");
             IJ.log("Problem loading LUT " + lutPath);
-            System.out.println("Problem loading LUT " + lutPath);
+			return null;
         }
         // IJ converts the FloatProcessor to 8-bits and then uses this palette
         // for display.  Unfortunately values less than or greater than the LUT

@@ -34,10 +34,14 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim;
 
-import mpicbg.imglib.image.Image;
+import net.imglib2.img.planar.PlanarImgs;
+import net.imglib2.meta.Axes;
+import net.imglib2.meta.AxisType;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.real.DoubleType;
 
 /**
- * Utility class for accessing Image dimensions.
+ * Utility class for working with ImgLib2 images.
  *
  * @author Barry DeZonia
  * @author Aivar Grislis
@@ -45,68 +49,46 @@ import mpicbg.imglib.image.Image;
  */
 public class ImageUtils {
 
-	public static final String X = "X";
-	public static final String Y = "Y";
-	public static final String Z = "Z";
-	public static final String TIME = "Time";
-	public static final String CHANNEL = "Channel";
-
 	// -- ImageUtils methods --
 
-	public static int getWidth(final Image<?> img) {
-		return getDimSize(img, X, 0);
+	public static ImgPlus<DoubleType> create(String title, long... dims) {
+		final ImgPlus<DoubleType> img =
+			new ImgPlus<DoubleType>(PlanarImgs.doubles(dims));
+		img.setName(title);
+		return img;
 	}
 
-	public static int getHeight(final Image<?> img) {
-		return getDimSize(img, Y, 1);
+	public static long getWidth(final ImgPlus<?> img) {
+		return getDimSize(img, Axes.X, 0);
 	}
 
-	public static int getNChannels(final Image<?> img) {
-		return getDimSize(img, CHANNEL, 2);
+	public static long getHeight(final ImgPlus<?> img) {
+		return getDimSize(img, Axes.Y, 1);
 	}
 
-	public static int getNSlices(final Image<?> img) {
-		return getDimSize(img, Z, 3);
+	public static long getNChannels(final ImgPlus<?> img) {
+		return getDimSize(img, Axes.CHANNEL, 2);
 	}
 
-	public static int getNFrames(final Image<?> img) {
-		return getDimSize(img, TIME, 4);
+	public static long getNSlices(final ImgPlus<?> img) {
+		return getDimSize(img, Axes.Z, 3);
 	}
 
-	public static int getDimSize(final Image<?> img, final String dimType) {
-		return getDimSize(img, dimType, -1);
+	public static long getNFrames(final ImgPlus<?> img) {
+		return getDimSize(img, Axes.TIME, 4);
+	}
+
+	public static long getDimSize(final ImgPlus<?> img, final AxisType axisType) {
+		return getDimSize(img, axisType, -1);
 	}
 
 	// -- Helper methods --
 
-	/** Converts the given image name back to a list of dimensional axis types. */
-	private static String[] decodeTypes(String name) {
-		final int lBracket = name.lastIndexOf(" [");
-		if (lBracket < 0) return new String[0];
-		final int rBracket = name.lastIndexOf("]");
-		if (rBracket < lBracket) return new String[0];
-		return name.substring(lBracket + 2, rBracket).split(" ");
-	}
-
-	private static int getDimSize(final Image<?> img, final String dimType,
+	private static long getDimSize(final ImgPlus<?> img, final AxisType axisType,
 		final int defaultIndex)
 	{
-		final String imgName = img.getName();
-		final int[] dimensions = img.getDimensions();
-		final String[] dimTypes = decodeTypes(imgName);
-		int size = 1;
-		if (dimTypes.length == dimensions.length) {
-			for (int i = 0; i < dimTypes.length; i++) {
-				if (dimType.equals(dimTypes[i])) size *= dimensions[i];
-			}
-		}
-		else {
-			// assume default ordering
-			if (defaultIndex >= 0 && defaultIndex < dimensions.length) {
-				size = dimensions[defaultIndex];
-			}
-		}
-		return size;
+		final int axisIndex = img.dimensionIndex(axisType);
+		return axisIndex < 0 ? defaultIndex : img.dimension(axisIndex);
 	}
 
 }

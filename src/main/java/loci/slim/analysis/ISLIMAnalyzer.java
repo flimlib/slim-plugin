@@ -36,9 +36,9 @@ package loci.slim.analysis;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.real.DoubleType;
 
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.real.DoubleType;
 
 /**
  * An interface for analyzing the results of a SLIM Plugin fit.
@@ -50,5 +50,5 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  * @author Aivar Grislis grislis at wisc dot edu
  */
 public interface ISLIMAnalyzer {
-    public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function, String parameters);
+    public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters);
 }

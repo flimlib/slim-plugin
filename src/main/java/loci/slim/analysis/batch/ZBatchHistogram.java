@@ -17,13 +17,13 @@ public class ZBatchHistogram extends AbstractBatchHistogram implements BatchHist
 	public void init(FittedValue fittedValue) {
 		setFittedValue(fittedValue);
 		
-		// 100,000 * 24 bytes ~= 2.4Mb memory usage
+		// 200,000 * 24 bytes ~= 4.8Mb memory usage
 		int totalBins = 100000;
 		setTotalBins(totalBins);
 		
-		// expect z values from -10.0..+10.0
-		double minRange = -10.0;
-		double maxRange = 10.0;
+		// bin z values from -50.0..+50.0
+		double minRange = -50.0;
+		double maxRange = 50.0;
 		setMinMaxRange(minRange, maxRange);
 	}
 }

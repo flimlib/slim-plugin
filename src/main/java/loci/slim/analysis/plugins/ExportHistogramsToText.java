@@ -34,29 +34,26 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.analysis.plugins;
 
-import loci.slim.analysis.HistogramStatistics;
-import loci.slim.analysis.Binning;
 import ij.IJ;
 import ij.gui.GenericDialog;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.prefs.*;
+import java.util.prefs.Preferences;
+
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
+import loci.slim.analysis.Binning;
+import loci.slim.analysis.HistogramStatistics;
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
-import mpicbg.imglib.cursor.LocalizableByDimCursor;
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.real.DoubleType;
+import net.imglib2.RandomAccess;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.real.DoubleType;
 
 /**
  * Exports histogram values as text for further analysis of SLIMPlugin results.
@@ -81,7 +78,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
     private BufferedWriter bufferedWriter;
 	private boolean combined = true;
 
-    public void analyze(Image<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
+    public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
 		// need entire fitted image
 		if (FitRegion.EACH == region) {
 			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
@@ -107,7 +104,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		}
     }
 	
-    public void export(String fileName, boolean append, Image<DoubleType> image,
+    public void export(String fileName, boolean append, ImgPlus<DoubleType> image,
 			FitFunction function, String parameters, char separator)
 	{
 		int params = 0;
@@ -149,8 +146,9 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				bufferedWriter.newLine();
 				
 				// look at image dimensions
-				int[] dimensions = image.getDimensions();
-				int channels = dimensions[CHANNEL_INDEX];
+				long[] dimensions = new long[image.numDimensions()];
+				image.dimensions(dimensions);
+				int channels = (int) dimensions[CHANNEL_INDEX];
 
 				// for all channels
 				for (int channel = 0; channel < channels; ++channel) {
@@ -196,7 +194,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 	 * @param fittedValue
 	 * @return 
 	 */
-	public HistogramStatistics getStatistics(Image<DoubleType> image, int channel, int params, FittedValue fittedValue) {
+	public HistogramStatistics getStatistics(ImgPlus<DoubleType> image, int channel, int params, FittedValue fittedValue) {
 		// first pass through image
 		Statistics1 statistics1 = getStatistics1(image, channel, params, fittedValue);
 		
@@ -240,18 +238,19 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 	 * @param fittedValue
 	 * @return container of various statistics
 	 */
-	private Statistics1 getStatistics1(Image<DoubleType> image, int channel, int params, FittedValue fittedValue) {
+	private Statistics1 getStatistics1(ImgPlus<DoubleType> image, int channel, int params, FittedValue fittedValue) {
 		long count = 0;
 		double min = Double.MAX_VALUE;
 		double max = -Double.MAX_VALUE;
 		double sum = 0.0;
 		double[] quartile = null;
 		double[] range = null;
-		int[] dimensions = image.getDimensions();
-		LocalizableByDimCursor<DoubleType> cursor = image.createLocalizableByDimCursor();
+		long[] dimensions = new long[image.numDimensions()];
+		image.dimensions(dimensions);
+		RandomAccess<DoubleType> cursor = image.randomAccess();
 
 		// collect & sort non-NaN values
-		double[] values = new double[dimensions[0] * dimensions[1]];
+		double[] values = new double[(int) dimensions[0] * (int) dimensions[1]];
 		int index = 0;
 		int[] position = new int[dimensions.length];
 		for (int y = 0; y < dimensions[1]; ++y) {
@@ -266,7 +265,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				for (int p = 0; p < params; ++p) {
 					position[3] = p;
 					cursor.setPosition(position);
-					double value = cursor.getType().getRealDouble();
+					double value = cursor.get().getRealDouble();
 					fittedParameters[p] = value;
 				}
 				
@@ -361,17 +360,18 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 	 * @param bins
 	 * @return container of various statistics
 	 */
-	private Statistics2 getStatistics2(Image<DoubleType> image, int channel, int params, FittedValue fittedValue, double mean, double[] range, int bins) {
+	private Statistics2 getStatistics2(ImgPlus<DoubleType> image, int channel, int params, FittedValue fittedValue, double mean, double[] range, int bins) {
 		double diffSquaredSum = 0.0;
 		long count = 0;
 		long histogramCount = 0;
 		long[] histogram = new long[bins];
 		
-		int[] dimensions = image.getDimensions();
-		LocalizableByDimCursor<DoubleType> cursor = image.createLocalizableByDimCursor();
+		long[] dimensions = new long[image.numDimensions()];
+		image.dimensions(dimensions);
+		RandomAccess<DoubleType> cursor = image.randomAccess();
 
 		// collect & histogram non-NaN values
-		double[] values = new double[dimensions[0] * dimensions[1]];
+		double[] values = new double[(int) dimensions[0] * (int) dimensions[1]];
 		int index = 0;
 		int[] position = new int[dimensions.length];
 		for (int y = 0; y < dimensions[1]; ++y) {
@@ -386,7 +386,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				for (int p = 0; p < params; ++p) {
 					position[3] = p;
 					cursor.setPosition(position);
-					double value = cursor.getType().getRealDouble();
+					double value = cursor.get().getRealDouble();
 					fittedParameters[p] = value;
 				}
 				

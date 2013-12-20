@@ -38,13 +38,15 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
-import ij.io.OpenDialog;
 import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+import io.scif.img.ImgOpener;
+import io.scif.img.axes.SCIFIOAxes;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.image.IndexColorModel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -66,43 +68,18 @@ import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.JaolhoCurveFitter;
 import loci.curvefitter.SLIMCurveFitter;
-
 import loci.formats.FormatException;
-import loci.formats.FormatTools;
 import loci.formats.ImageReader;
 import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.analysis.batch.ExportBatchHistogram;
+import loci.slim.analysis.batch.ExportSummaryToText;
 import loci.slim.analysis.batch.ui.BatchHistogramListener;
 import loci.slim.analysis.plugins.ExportHistogramsToText;
 import loci.slim.analysis.plugins.ExportPixelsToText;
-import loci.slim.analysis.batch.ExportSummaryToText;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
 import loci.slim.fitting.ErrorManager;
-import loci.slim.fitting.IErrorListener;
-import loci.slim.fitting.RapidLifetimeDetermination;
-import loci.slim.preprocess.ISLIMBinner;
-import loci.slim.preprocess.RoiProcessor;
-import loci.slim.preprocess.SLIMBinning;
-import loci.slim.heuristics.FitterEstimator;
-import loci.slim.heuristics.CursorEstimator;
-import loci.slim.preprocess.IProcessor;
-import loci.slim.preprocess.Threshold;
-import loci.slim.ui.DecayGraph;
-import loci.slim.ui.ExcitationPanel;
-import loci.slim.ui.IDecayGraph;
-import loci.slim.ui.IUserInterfacePanel;
-import loci.slim.ui.IUserInterfacePanelListener;
-import loci.slim.ui.UserInterfacePanel;
-import mpicbg.imglib.container.planar.PlanarContainerFactory;
-import mpicbg.imglib.cursor.Cursor;
-import mpicbg.imglib.cursor.LocalizableByDimCursor;
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.image.ImageFactory;
-import mpicbg.imglib.io.ImageOpener;
-import mpicbg.imglib.type.numeric.RealType;
-import mpicbg.imglib.type.numeric.real.DoubleType;
-
+import loci.slim.fitting.FitInfo;
 // Kludge in the new stuff:
 import loci.slim.fitting.IDecayImage;
 import loci.slim.fitting.IFittedImage;
@@ -111,19 +88,35 @@ import loci.slim.fitting.cursor.FittingCursor;
 import loci.slim.fitting.cursor.FittingCursorHelper;
 import loci.slim.fitting.cursor.IFittingCursorListener;
 import loci.slim.fitting.engine.IFittingEngine;
-import loci.slim.fitting.images.FittedImageParser;
-import loci.slim.fitting.params.IGlobalFitParams;
-import loci.slim.fitting.params.LocalFitParams;
-import loci.slim.fitting.params.GlobalFitParams;
-import loci.slim.fitting.params.ILocalFitParams;
-import loci.slim.fitting.params.IFitResults;
-
-import loci.slim.fitting.FitInfo;
 import loci.slim.fitting.images.FittedImageFitter;
 import loci.slim.fitting.images.FittedImageFitter.FittedImageType;
+import loci.slim.fitting.images.FittedImageParser;
+import loci.slim.fitting.params.GlobalFitParams;
+import loci.slim.fitting.params.IFitResults;
+import loci.slim.fitting.params.IGlobalFitParams;
+import loci.slim.fitting.params.ILocalFitParams;
+import loci.slim.fitting.params.LocalFitParams;
+import loci.slim.heuristics.CursorEstimator;
 import loci.slim.heuristics.Estimator;
+import loci.slim.heuristics.FitterEstimator;
 import loci.slim.heuristics.IEstimator;
 import loci.slim.histogram.HistogramTool;
+import loci.slim.preprocess.IProcessor;
+import loci.slim.preprocess.ISLIMBinner;
+import loci.slim.preprocess.RoiProcessor;
+import loci.slim.preprocess.SLIMBinning;
+import loci.slim.preprocess.Threshold;
+import loci.slim.ui.DecayGraph;
+import loci.slim.ui.ExcitationPanel;
+import loci.slim.ui.IDecayGraph;
+import loci.slim.ui.IUserInterfacePanel;
+import loci.slim.ui.IUserInterfacePanelListener;
+import loci.slim.ui.UserInterfacePanel;
+import net.imglib2.Cursor;
+import net.imglib2.RandomAccess;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.real.DoubleType;
 
 /**
  * SLIMProcessor is the main class of the SLIM Plugin. It was originally just
@@ -200,10 +193,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 	
 	private static final char TAB = '\t';
 
-    private Image<T> _image;
-    private LocalizableByDimCursor<T> _cursor;
+    private ImgPlus<T> _image;
+    private RandomAccess<T> _cursor;
 
-    private Image<DoubleType> _fittedImage = null;
+    private ImgPlus<DoubleType> _fittedImage = null;
     private int _fittedParameterCount = 0;
     boolean _visibleFit = true;
 
@@ -266,7 +259,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		_refit = false;
     }
 
-    public void processImage(Image<T> image) {
+    public void processImage(ImgPlus<T> image) {
         boolean success = false;
 
         _image = image;
@@ -377,11 +370,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		if (input.endsWith(SDT_SUFFIX) || input.endsWith(ICS_SUFFIX)) {
 			try {
-				// close last image
-				if (null != _image) {
-					_image.close();
-				}
-
 				// load batched image
 				_image = loadImage(input);
 				getImageInfo(_image);
@@ -400,18 +388,21 @@ public class SLIMProcessor <T extends RealType<T>> {
 				}
 
 				// fit batched image with current UI settings
-				Image<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
+				ImgPlus<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
+				
+				if (null != fittedImage) {
+					// export to text
+					if (exportPixels) {
+						ExportPixelsToText exportPixelsToText = new ExportPixelsToText();
+						exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function, _uiPanel.getFittedImages(), TAB);
+					}		
+					if (exportHistograms) {
+						ExportHistogramsToText exportHistogramsToText = new ExportHistogramsToText();
 
-				// export to text
-				if (exportPixels) {
-					ExportPixelsToText exportPixelsToText = new ExportPixelsToText();
-					exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function, _uiPanel.getFittedImages(), TAB);
-				}		
-				if (exportHistograms) {
-					ExportHistogramsToText exportHistogramsToText = new ExportHistogramsToText();
-					
-					exportHistogramsToText.export(output, true, fittedImage, _function, _uiPanel.getFittedImages(), TAB);
+						exportHistogramsToText.export(output, true, fittedImage, _function, _uiPanel.getFittedImages(), TAB);
+					}
 				}
+
 				IJ.log(input);
 			}
 			catch (Exception e) {
@@ -428,11 +419,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 */
 	public void endBatch() {
 		IJ.log("end SLIM Plugin batch processing");
-		
-		// close last image
-		if (null != _image) {
-		    _image.close();
-		}
 		
 		// restore current file
 		_image = loadImage(_path, _file);
@@ -484,10 +470,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		if (input.endsWith(SDT_SUFFIX) || input.endsWith(ICS_SUFFIX)) {
 			try {
-				// close last image
-				if (null != _image) {
-					_image.close();
-				}
 
 				// load batched image
 				_image = loadImage(input);
@@ -507,9 +489,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 				}
 
 				// fit batched image with current UI settings
-				Image<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
+				ImgPlus<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
 				
-				_exportBatchHistogram.export(fittedImage, _function);
+				if (null != fittedImage) {
+					_exportBatchHistogram.export(fittedImage, _function);
+				}
 
 				IJ.log(input);
 			}
@@ -521,18 +505,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}
 	    }
 	}
-	
+
 	//TODO ARG EXPERIMENTAL
 	public void endBatchHisto() {
 		IJ.log("end SLIM Plugin batch histogram processing");
 		
 		_exportBatchHistogram.end(_exportOutput);
-		
-		// close last image
-		if (null != _image) {
-			_image.close();
-		}
-		
+
 		// restore current image
 		_image = loadImage(_path, _file);
 		getImageInfo(_image);
@@ -1154,11 +1133,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 				
 				//TODO if (i > 0) break; //TODO just process a single image
 
-				// close last image
-				if (null != _image) {
-					_image.close();
-				}
-				
+
 				// show progress bar
 				IJ.showProgress(i, (files.length + 1));
 				
@@ -1181,19 +1156,21 @@ public class SLIMProcessor <T extends RealType<T>> {
 				}
 
 				// fit batched image with current UI settings, channel 1, batch mode
-				Image<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
+				ImgPlus<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
 				
-				if (exportPixels) {
-					//System.out.println("Export pixels");
-					pixels.export(pixelsFile, true, fittedImage, _region, _function, _uiPanel.getFittedImages(), separator);
-				}
-				if (exportHistograms) {
-					//System.out.println("Export histograms");
-					histograms.export(histogramsFile, true, fittedImage, _function, _uiPanel.getFittedImages(), separator);
-				}
-				if (exportSummary) {
-					//System.out.println("Export summary");
-					summary.process(file.getCanonicalPath(), fittedImage);
+				if (null != fittedImage) {
+					if (exportPixels) {
+						//System.out.println("Export pixels");
+						pixels.export(pixelsFile, true, fittedImage, _region, _function, _uiPanel.getFittedImages(), separator);
+					}
+					if (exportHistograms) {
+						//System.out.println("Export histograms");
+						histograms.export(histogramsFile, true, fittedImage, _function, _uiPanel.getFittedImages(), separator);
+					}
+					if (exportSummary) {
+						//System.out.println("Export summary");
+						summary.process(file.getCanonicalPath(), fittedImage);
+					}
 				}
 			}
 			
@@ -1209,12 +1186,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 				IJ.log("   " + el.toString());
 			}
 		}
-		
-		// close last image
-		if (null != _image) {
-			_image.close();
-		}
-		
+
 		// restore current image
 		_image = loadImage(_path, _file);
 		getImageInfo(_image);
@@ -1428,16 +1400,17 @@ public class SLIMProcessor <T extends RealType<T>> {
 		}
 	}
 	
-	private Image<T> loadImage(String path, String file) {
+	private ImgPlus<T> loadImage(String path, String file) {
 		return loadImage(path + file);
 	}
 
-    private Image<T> loadImage(String filePath) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+		private ImgPlus loadImage(String filePath) {
         boolean threwException = false;
-        ImageOpener imageOpener = new ImageOpener();
-        Image<T> image = null;
+        ImgOpener imgOpener = new ImgOpener();
+        ImgPlus image = null;
         try {
-            image = imageOpener.openImage(filePath);
+            image = imgOpener.openImg(filePath);
         }
         //catch (java.io.IOException e) { }
         //catch (loci.formats.FormatException e) {
@@ -1463,11 +1436,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         
         return image;
     }
-   
-    private boolean getImageInfo(Image<T> image) {
-        int[] dimensions = new int[0];
+
+    private boolean getImageInfo(ImgPlus<T> image) {
+        long[] dimensions = new long[0];
         try {
-            dimensions = image.getDimensions();
+            dimensions = new long[image.numDimensions()];
+            image.dimensions(dimensions);
             //System.out.println("dimensions size is " + dimensions.length);
             //for (int i : dimensions) {
             //    System.out.print("" + i + " ");
@@ -1480,30 +1454,30 @@ public class SLIMProcessor <T extends RealType<T>> {
 			return false;
         }
         Integer xIndex, yIndex, lifetimeIndex, channelIndex;
-        _width = ImageUtils.getWidth(image);
-        _height = ImageUtils.getHeight(image);
-        _channels = ImageUtils.getNChannels(image);
+        _width = (int) ImageUtils.getWidth(image);
+        _height = (int) ImageUtils.getHeight(image);
+        _channels = (int) ImageUtils.getNChannels(image);
         //TODO this is broken; returns 1 when there are 16 channels; corrected below
         //System.out.println("ImageUtils.getNChannels returns " + _channels);
         _hasChannels = false;
         if (dimensions.length > 3) {
             _hasChannels = true;
             _channelIndex = 3;
-            _channels = dimensions[_channelIndex];
+            _channels = (int) dimensions[_channelIndex];
         }
         //System.out.println("corrected to " + _channels);
-        _bins = ImageUtils.getDimSize(image, FormatTools.LIFETIME);
+        _bins = (int) ImageUtils.getDimSize(image, SCIFIOAxes.LIFETIME);
         _binIndex = 2;
         //System.out.println("width " + _width + " height " + _height + " timeBins " + _bins + " channels " + _channels);
-        _cursor = image.createLocalizableByDimCursor();
+        _cursor = image.randomAccess();
         
         _timeRange = 10.0f;
+		_increment = 1;
         if (null != _globalMetadata) {
             Number timeBase = (Number) _globalMetadata.get("time base");
             if (null != timeBase) {
                 _timeRange = timeBase.floatValue();
             }
-            _increment = 1;
             Number increment = (Number) _globalMetadata.get("MeasureInfo.incr");
             if (null != increment) {
                 _increment = increment.intValue();
@@ -1539,7 +1513,7 @@ public class SLIMProcessor <T extends RealType<T>> {
      * Fits the data as requested by UI.
      */
     private void fitData(IUserInterfacePanel uiPanel) {
-        Image<DoubleType> fittedImage = null;
+        ImgPlus<DoubleType> fittedImage = null;
         // only one fit at a time
         synchronized (_synchFit) {
             
@@ -1607,7 +1581,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 * @param batch whether or not batch processing is in effect
      * @return 
      */
-    private Image<DoubleType> fitImage(IUserInterfacePanel uiPanel, int channel, boolean batch) {
+    private ImgPlus<DoubleType> fitImage(IUserInterfacePanel uiPanel, int channel, boolean batch) {
         // get fit settings from the UI panel
         FitInfo fitInfo = getFitInfo(uiPanel, channel, _fittingCursor);
         fitInfo.setXInc(_timeRange);
@@ -1618,7 +1592,8 @@ public class SLIMProcessor <T extends RealType<T>> {
             double[] values = _excitationPanel.getValues(startIndex, stopIndex, base);
             fitInfo.setPrompt(values);
         }
-        fitInfo.setIndexColorModel(HistogramTool.getIndexColorModel());
+		IndexColorModel indexColorModel = HistogramTool.getIndexColorModel();
+        fitInfo.setIndexColorModel(indexColorModel);
         _fitInfo = fitInfo;
         
         // set up images
@@ -1682,7 +1657,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 * @param batch whether or not batch processing is in effect
      * @return 
      */
-    private Image<DoubleType> fitImage(
+    private ImgPlus<DoubleType> fitImage(
             IFittingEngine fittingEngine,
             FitInfo fitInfo,
             IDecayImage decayImage,
@@ -1928,8 +1903,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     /*
      * Sums all pixels and fits the result.
      */
-    private Image<DoubleType> fitSummed(IUserInterfacePanel uiPanel) {
-        Image<DoubleType> fittedPixels = null;
+    private ImgPlus<DoubleType> fitSummed(IUserInterfacePanel uiPanel) {
+        ImgPlus<DoubleType> fittedPixels = null;
 		
 		_grayScaleImage.hideCursor();
 		
@@ -2025,7 +2000,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         int channels = _fitAllChannels ? _channels : 1;
         //fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
         fittedPixels = makeImage(channels + 1, 2, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
-        LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();
+        RandomAccess<DoubleType> resultsCursor = fittedPixels.randomAccess();
         setFittedParamsFromData(resultsCursor, dataArray);
         return fittedPixels;
     }
@@ -2033,8 +2008,8 @@ public class SLIMProcessor <T extends RealType<T>> {
     /*
      * Sums and fits each ROI.
      */
-    private Image<DoubleType> fitROIs(IUserInterfacePanel uiPanel) {
-        Image<DoubleType> fittedPixels = null;
+    private ImgPlus<DoubleType> fitROIs(IUserInterfacePanel uiPanel) {
+        ImgPlus<DoubleType> fittedPixels = null;
         double params[] = uiPanel.getParameters();
         
         // build the data
@@ -2150,13 +2125,13 @@ public class SLIMProcessor <T extends RealType<T>> {
         int channels = _fitAllChannels ? _channels : 1;
         //fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
         fittedPixels = makeImage(channels + 1, getRois().length + 1, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
-        LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();
+        RandomAccess<DoubleType> resultsCursor = fittedPixels.randomAccess();
         setFittedParamsFromData(resultsCursor, dataArray);
         return fittedPixels;
     }
 
     // added kludge to make moving cursors in DecayGraph do a refit. //TODO this has to change FittingCursor will know whenever cursors change.
-    private Image<DoubleType> fitPixel(
+    private ImgPlus<DoubleType> fitPixel(
             IUserInterfacePanel uiPanel,
             FittingCursor fittingCursor) {
         int x = uiPanel.getX();
@@ -2176,8 +2151,8 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param x
      * @param y
      */
-    private Image<DoubleType> fitPixel(IUserInterfacePanel uiPanel, int x, int y) {
-        Image<DoubleType> fittedPixels = null;
+    private ImgPlus<DoubleType> fitPixel(IUserInterfacePanel uiPanel, int x, int y) {
+        ImgPlus<DoubleType> fittedPixels = null;
 		
 		_grayScaleImage.showCursor(_x, _y);
         
@@ -2284,7 +2259,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         int channels = _fitAllChannels ? _channels : 1;
         //fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
         fittedPixels = makeImage(channels + 1, 2, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
-        LocalizableByDimCursor<DoubleType> resultsCursor = fittedPixels.createLocalizableByDimCursor();               
+        RandomAccess<DoubleType> resultsCursor = fittedPixels.randomAccess();
         setFittedParamsFromData(resultsCursor, dataArray);
         return fittedPixels;
     }
@@ -2330,15 +2305,15 @@ public class SLIMProcessor <T extends RealType<T>> {
      * //TODO fix it!
      */
     private void imglibBug() {
-        int dim[] = { 1, 1, 1, 4 };
-        Image<DoubleType> image = new ImageFactory<DoubleType>(new DoubleType(), new PlanarContainerFactory()).createImage(dim, "Test");
+        long[] dim = { 1, 1, 1, 4 };
+        ImgPlus<DoubleType> image = ImageUtils.create("Test", dim);
 
         // initialize image
-        Cursor<DoubleType> cursor = image.createCursor();
+        Cursor<DoubleType> cursor = image.cursor();
         while (cursor.hasNext()) {
             System.out.println("fwd");
             cursor.fwd();
-            cursor.getType().set(Double.NaN);
+            cursor.get().set(Double.NaN);
         }
     }
 
@@ -2408,7 +2383,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         return returnValue;
     }
 
-    private double getData(LocalizableByDimCursor<T> cursor, int channel, int x, int y, int bin) {
+    private double getData(RandomAccess<T> cursor, int channel, int x, int y, int bin) {
         int dim[];
         if (_hasChannels) {
             dim = new int[] { x, y, bin, channel }; //TODO ARG is this order guaranteed?
@@ -2416,8 +2391,8 @@ public class SLIMProcessor <T extends RealType<T>> {
         else {
             dim = new int[] { x, y, bin };
         }
-        cursor.moveTo(dim);
-        return cursor.getType().getRealFloat() / _minNonZeroPhotonCount;
+        cursor.setPosition(dim);
+        return cursor.get().getRealFloat() / _minNonZeroPhotonCount;
     }
 
     /**
@@ -2428,26 +2403,26 @@ public class SLIMProcessor <T extends RealType<T>> {
      * @param components
      * @return
      */
-    private Image<DoubleType> makeImage(int channels, int width, int height, int parameters) {
-        Image<DoubleType> image = null;
+    private ImgPlus<DoubleType> makeImage(int channels, int width, int height, int parameters) {
+        ImgPlus<DoubleType> image = null;
 
 //        System.out.println("channels width height params " + channels + " " + width + " " + height + " " + parameters);
         
         // create image object
-        int dim[] = { width, height, channels, parameters }; //TODO when we keep chi square in image  ++parameters };
-        image = new ImageFactory<DoubleType>(new DoubleType(), new PlanarContainerFactory()).createImage(dim, "Fitted");
+        long[] dim = { width, height, channels, parameters }; //TODO when we keep chi square in image  ++parameters };
+        image = ImageUtils.create("Fitted", dim);
 
         // initialize image
-        Cursor<DoubleType> cursor = image.createCursor();
+        Cursor<DoubleType> cursor = image.cursor();
         while (cursor.hasNext()) {
             cursor.fwd();
-            cursor.getType().set(Double.NaN);
+            cursor.get().set(Double.NaN);
         }
 
         return image;
     }
 
-    private double[] getFittedParams(LocalizableByDimCursor<DoubleType> cursor, int channel, int x, int y, int count) {
+    private double[] getFittedParams(RandomAccess<DoubleType> cursor, int channel, int x, int y, int count) {
         double params[] = new double[count];
         int position[] = new int[4];
         position[0] = x;
@@ -2456,12 +2431,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         for (int i = 0; i < count; ++i) {
             position[3] = i;
             cursor.setPosition(position);
-            params[i] = cursor.getType().getRealDouble();
+            params[i] = cursor.get().getRealDouble();
         }
         return params;
     }
 
-    private void setFittedParamsFromData(LocalizableByDimCursor<DoubleType> cursor, ICurveFitData dataArray[]) {
+    private void setFittedParamsFromData(RandomAccess<DoubleType> cursor, ICurveFitData dataArray[]) {
         int x, y;
         double[] params;
         for (ICurveFitData data : dataArray) {
@@ -2469,7 +2444,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         }
     }
     
-    private void setFittedParams(LocalizableByDimCursor<DoubleType> cursor, int channel, int x, int y, double[] params) {
+    private void setFittedParams(RandomAccess<DoubleType> cursor, int channel, int x, int y, double[] params) {
         int position[] = new int[4];
         position[0] = x;
         position[1] = y;
@@ -2477,7 +2452,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         for (int i = 0; i < params.length; ++i) {
             position[3] = i;
             cursor.setPosition(position);
-            cursor.getType().set(params[i]);
+            cursor.get().set(params[i]);
         }
     }
 

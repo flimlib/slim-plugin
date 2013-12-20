@@ -34,17 +34,18 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim.analysis.batch;
 
+import ij.IJ;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import ij.IJ;
 import loci.curvefitter.ICurveFitter;
 import loci.slim.analysis.HistogramStatistics;
-import loci.slim.analysis.batch.ui.BatchHistogramsFrame;
 import loci.slim.analysis.batch.ui.BatchHistogramListener;
+import loci.slim.analysis.batch.ui.BatchHistogramsFrame;
 import loci.slim.fitted.AFittedValue;
 import loci.slim.fitted.ChiSqFittedValue;
 import loci.slim.fitted.FittedValue;
@@ -53,9 +54,9 @@ import loci.slim.fitted.FractionalIntensityFittedValue;
 import loci.slim.fitted.TFittedValue;
 import loci.slim.fitted.TMeanFittedValue;
 import loci.slim.fitted.ZFittedValue;
-import mpicbg.imglib.cursor.LocalizableByDimCursor;
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.real.DoubleType;
+import net.imglib2.RandomAccess;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.real.DoubleType;
 
 /**
  * Exports a summary histogram in batch mode.
@@ -94,10 +95,11 @@ public class ExportSummaryToText {
 	 * @param fileName
 	 * @param image 
 	 */
-	public void process(String fileName, Image<DoubleType> image) {
-		int[] dimensions = image.getDimensions();
-		int fittedParameters = dimensions[3];
-		LocalizableByDimCursor<DoubleType> cursor = image.createLocalizableByDimCursor();
+	public void process(String fileName, ImgPlus<DoubleType> image) {
+		long[] dimensions = new long[image.numDimensions()];
+		image.dimensions(dimensions);
+		int fittedParameters = (int) dimensions[3];
+		RandomAccess<DoubleType> cursor = image.randomAccess();
 
 		// build array of BatchHistogram for this image
 		BatchHistogram[] imageHistograms = buildBatchHistograms(parameters);
@@ -116,7 +118,7 @@ public class ExportSummaryToText {
 				for (int i = 0; i < fittedParameters; ++i) {
 					position[3] = i;
 					cursor.setPosition(position);
-					values[i] = cursor.getType().getRealDouble();
+					values[i] = cursor.get().getRealDouble();
 				}
 				
 				// update histograms for this image

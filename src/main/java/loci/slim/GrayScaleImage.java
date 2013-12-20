@@ -39,16 +39,15 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.ImageCanvas;
 import ij.gui.ImageRoi;
-import ij.gui.Roi;
 import ij.gui.Overlay;
-import ij.process.ImageProcessor;
+import ij.gui.Roi;
 
 import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.Preferences;
@@ -56,14 +55,13 @@ import java.util.prefs.Preferences;
 import loci.slim.mask.IMaskGroup;
 import loci.slim.mask.IMaskNode;
 import loci.slim.mask.IMaskNodeListener;
-
 import loci.slim.mask.Mask;
 import loci.slim.mask.MaskNode;
+import net.imglib2.RandomAccess;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.ComplexType;
+import net.imglib2.type.numeric.RealType;
 
-import mpicbg.imglib.cursor.LocalizableByDimCursor;
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.ComplexType;
-import mpicbg.imglib.type.numeric.RealType;
 
 /**
  * The GrayScaleImage shows a grayscale representation of the input data.  It
@@ -109,33 +107,36 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	private Overlay _overlay;
 	private Set<IMaskGroup> _maskGroupSet;
 
-    public GrayScaleImage(Image<T> image) {
+    public GrayScaleImage(ImgPlus<T> image) {
         String title = image.getName();
         int spaceIndex = title.indexOf(" ");
         if (0 < spaceIndex) {
             title = title.substring(0, spaceIndex);
         }
-        int dimensions[] = image.getDimensions();
-        _width = dimensions[0];
-        _height = dimensions[1];
-        int bins = dimensions[2];
+		
+		int numDimensions = image.numDimensions();
+        long dimensions[] = new long[numDimensions];
+        image.dimensions(dimensions);
+        _width = (int) dimensions[0];
+        _height = (int) dimensions[1];
+        int bins = (int) dimensions[2];
         int channels = 1;
-        if (dimensions.length > 3) {
-            channels = dimensions[3];
+        if (numDimensions > 3) {
+            channels = (int) dimensions[3];
         }
 
         // building an image stack
         _imageStack = new ImageStack(_width, _height);
         _saveOutPixels = new short[channels][];
 
-        LocalizableByDimCursor cursor = image.createLocalizableByDimCursor();
+        RandomAccess cursor = image.randomAccess();
         double[][] pixels = new double[_width][_height];
-        int[] position = (channels > 1) ? new int[4] : new int[3];
+        int[] position = new int[numDimensions];
 
 		// keep track of minimum count; usually 1.0 but can be 10.0, etc.
         _minNonZeroPhotonCount = Double.MAX_VALUE;
         for (int c = 0; c < channels; ++c) {
-            if (channels > 1) {
+            if (numDimensions > 3) {
                 position[3] = c;
             }
 			short[] outPixels = new short[_width * _height];
@@ -151,7 +152,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
                         position[2] = b;
 
                         cursor.setPosition(position);
-                        double photonCount = ((ComplexType) cursor.getType()).getRealDouble();
+                        double photonCount = ((ComplexType) cursor.get()).getRealDouble();
                         pixels[x][y] += photonCount;
                         
                         // keep track of minimum

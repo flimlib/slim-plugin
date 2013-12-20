@@ -41,7 +41,6 @@ import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.ICurveFitter.NoiseModel;
 import loci.slim.IThresholdUpdate;
-import loci.slim.fitting.cursor.FittingCursorHelper;
 
 /**
  * Interface to the User Interface Panel

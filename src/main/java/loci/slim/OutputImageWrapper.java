@@ -35,13 +35,12 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim;
 
 import loci.slim.fitting.IFittedImage;
+import net.imglib2.Cursor;
+import net.imglib2.RandomAccess;
+import net.imglib2.img.planar.PlanarImgs;
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.real.DoubleType;
 
-import mpicbg.imglib.container.planar.PlanarContainerFactory;
-import mpicbg.imglib.cursor.Cursor;
-import mpicbg.imglib.cursor.LocalizableByDimCursor;
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.image.ImageFactory;
-import mpicbg.imglib.type.numeric.real.DoubleType;
 
 /**
  * This class wraps an image that is being used as output from a fit.
@@ -49,13 +48,13 @@ import mpicbg.imglib.type.numeric.real.DoubleType;
  * @author Aivar Grislis
  */
 public class OutputImageWrapper implements IFittedImage {
-    private Image<DoubleType> _image;
+    private ImgPlus<DoubleType> _image;
     private int _width;
     private int _height;
     private int _channels;
     private int _parameters;
     private int _parameterIndex;
-    private LocalizableByDimCursor<DoubleType> _cursor;
+    private RandomAccess<DoubleType> _cursor;
     private int[] _location;
 
     /**
@@ -72,22 +71,21 @@ public class OutputImageWrapper implements IFittedImage {
         _channels = channels;
         _parameters = parameters;
         
-        int[] dimensions = new int[] { width, height, channels, parameters };
+        long[] dimensions = new long[] { width, height, channels, parameters };
         _parameterIndex = 3;
         _location = new int[dimensions.length];
 
-        _image = new ImageFactory<DoubleType>
-                (new DoubleType(),
-                 new PlanarContainerFactory()).createImage(dimensions, title + " Fitted " + fitTitle);
+        _image = new ImgPlus<DoubleType>(PlanarImgs.doubles(dimensions));
+        _image.setName(title + " Fitted " + fitTitle);
         
         // fill image with NaNs
-        Cursor<DoubleType> cursor = _image.createCursor();
+        Cursor<DoubleType> cursor = _image.cursor();
         while (cursor.hasNext()) {
             cursor.fwd();
-            cursor.getType().set(Double.NaN);
+            cursor.get().set(Double.NaN);
         }
         
-        _cursor = _image.createLocalizableByDimCursor();
+        _cursor = _image.randomAccess();
     }
 
     /**
@@ -144,8 +142,8 @@ public class OutputImageWrapper implements IFittedImage {
         double[] parameters = new double[_parameters];
         for (int i = 0; i < _parameters; ++i) {
             _location[_parameterIndex] = i;
-            _cursor.moveTo(_location);
-            parameters[i] = _cursor.getType().getRealFloat();
+            _cursor.setPosition(_location);
+            parameters[i] = _cursor.get().getRealFloat();
         }
         return parameters;
     }
@@ -157,9 +155,9 @@ public class OutputImageWrapper implements IFittedImage {
         }
         for (int i = 0; i < _parameters; ++i) {
             _location[_parameterIndex] = i;
-            _cursor.moveTo(_location);
+            _cursor.setPosition(_location);
 			// a pixel with an error fitting will have null value
-            _cursor.getType().set(null == value ? Double.NaN : value[i]);
+            _cursor.get().set(null == value ? Double.NaN : value[i]);
         }
     }
 
@@ -169,7 +167,7 @@ public class OutputImageWrapper implements IFittedImage {
      * @return 
      */
     @Override
-    public Image<DoubleType> getImage() {
+    public ImgPlus<DoubleType> getImage() {
         return _image;
     }
 }

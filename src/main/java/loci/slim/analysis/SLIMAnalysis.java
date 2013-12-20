@@ -35,17 +35,14 @@ POSSIBILITY OF SUCH DAMAGE.
 package loci.slim.analysis;
 
 import ij.IJ;
-import ij.ImagePlus;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
-
-import mpicbg.imglib.image.Image;
-import mpicbg.imglib.type.numeric.real.DoubleType;
-
+import net.imglib2.meta.ImgPlus;
+import net.imglib2.type.numeric.real.DoubleType;
 import net.java.sezpoz.Index;
 import net.java.sezpoz.IndexItem;
 
@@ -99,7 +96,7 @@ public class SLIMAnalysis {
      * @param function
 	 * @param parameters
      */
-    public void doAnalysis(String name, Image<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
+    public void doAnalysis(String name, ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
         
         // find selected plugin
         IndexItem<SLIMAnalyzer, ISLIMAnalyzer> selectedPlugin = null;
