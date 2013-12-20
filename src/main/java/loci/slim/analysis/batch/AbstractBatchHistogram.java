@@ -321,17 +321,25 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		}
 		
 		// look for appropriate bin
+		int bin;
 		long sumCount = 0;
-		for (int bin = 0; bin < totalBins; ++bin) {
+		for (bin = 0; bin < totalBins; ++bin) {
 			sumCount += bins[bin].count;
 			if (sumCount > n) {
-				// return value of bin
-				return binToValue(bin);
+				break;
 			}
 		}
+		if (0 == sumCount) {
+			// degenerate case, no counts at all
+			bin = 0;
+		}
+		else if (bin == totalBins) {
+			// this shouldn't happen
+			throw new RuntimeException("BatchHistogram quartile problem " + getTitle());
+		}
 		
-		// can't happen
-		throw new RuntimeException("BatchHistogram quartile problem " + getTitle());
+		// return value of bin
+		return binToValue(bin);
 	}
 
 	/**

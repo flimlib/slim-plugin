@@ -222,8 +222,14 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 			statistics.setStandardDeviation(statistics2.standardDeviation);
 		}
 		statistics.setHistogramCount(statistics2.histogramCount);
-		statistics.setMinRange(statistics1.range[0]);
-		statistics.setMaxRange(statistics1.range[1]);
+		if (null == statistics1.range) {
+			statistics.setMinRange(Double.NaN);
+			statistics.setMaxRange(Double.NaN);
+		}
+		else {
+			statistics.setMinRange(statistics1.range[0]);
+			statistics.setMaxRange(statistics1.range[1]);
+		}
 		statistics.setHistogram(statistics2.histogram);
 		
 		return statistics;
