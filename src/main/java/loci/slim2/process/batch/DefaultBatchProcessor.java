@@ -161,7 +161,7 @@ public class DefaultBatchProcessor implements BatchProcessor {
 			boolean exportSummary, String summaryFile,
 			FitSettings fitSettings, File[] files, boolean csv)
 	{
-		ExportPixelsToText pixels = null; //TODO ARG these live in loci.slim (not slim2!)
+		ExportPixelsToText pixels = null;
 		ExportHistogramsToText histograms = null;
 		ExportSummaryToText summary = null;
 		

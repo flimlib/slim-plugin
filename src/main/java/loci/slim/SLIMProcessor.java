@@ -46,6 +46,7 @@ import io.scif.img.axes.SCIFIOAxes;
 
 import java.awt.Color;
 import java.awt.Rectangle;
+import java.awt.image.IndexColorModel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -388,17 +389,20 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 				// fit batched image with current UI settings
 				ImgPlus<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
+				
+				if (null != fittedImage) {
+					// export to text
+					if (exportPixels) {
+						ExportPixelsToText exportPixelsToText = new ExportPixelsToText();
+						exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function, _uiPanel.getFittedImages(), TAB);
+					}		
+					if (exportHistograms) {
+						ExportHistogramsToText exportHistogramsToText = new ExportHistogramsToText();
 
-				// export to text
-				if (exportPixels) {
-					ExportPixelsToText exportPixelsToText = new ExportPixelsToText();
-					exportPixelsToText.export(output, true, fittedImage, FitRegion.EACH, _function, _uiPanel.getFittedImages(), TAB);
-				}		
-				if (exportHistograms) {
-					ExportHistogramsToText exportHistogramsToText = new ExportHistogramsToText();
-					
-					exportHistogramsToText.export(output, true, fittedImage, _function, _uiPanel.getFittedImages(), TAB);
+						exportHistogramsToText.export(output, true, fittedImage, _function, _uiPanel.getFittedImages(), TAB);
+					}
 				}
+
 				IJ.log(input);
 			}
 			catch (Exception e) {
@@ -487,7 +491,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 				// fit batched image with current UI settings
 				ImgPlus<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
 				
-				_exportBatchHistogram.export(fittedImage, _function);
+				if (null != fittedImage) {
+					_exportBatchHistogram.export(fittedImage, _function);
+				}
 
 				IJ.log(input);
 			}
@@ -1152,17 +1158,19 @@ public class SLIMProcessor <T extends RealType<T>> {
 				// fit batched image with current UI settings, channel 1, batch mode
 				ImgPlus<DoubleType> fittedImage = fitImage(_uiPanel, 1, true);
 				
-				if (exportPixels) {
-					//System.out.println("Export pixels");
-					pixels.export(pixelsFile, true, fittedImage, _region, _function, _uiPanel.getFittedImages(), separator);
-				}
-				if (exportHistograms) {
-					//System.out.println("Export histograms");
-					histograms.export(histogramsFile, true, fittedImage, _function, _uiPanel.getFittedImages(), separator);
-				}
-				if (exportSummary) {
-					//System.out.println("Export summary");
-					summary.process(file.getCanonicalPath(), fittedImage);
+				if (null != fittedImage) {
+					if (exportPixels) {
+						//System.out.println("Export pixels");
+						pixels.export(pixelsFile, true, fittedImage, _region, _function, _uiPanel.getFittedImages(), separator);
+					}
+					if (exportHistograms) {
+						//System.out.println("Export histograms");
+						histograms.export(histogramsFile, true, fittedImage, _function, _uiPanel.getFittedImages(), separator);
+					}
+					if (exportSummary) {
+						//System.out.println("Export summary");
+						summary.process(file.getCanonicalPath(), fittedImage);
+					}
 				}
 			}
 			
@@ -1464,12 +1472,12 @@ public class SLIMProcessor <T extends RealType<T>> {
         _cursor = image.randomAccess();
         
         _timeRange = 10.0f;
+		_increment = 1;
         if (null != _globalMetadata) {
             Number timeBase = (Number) _globalMetadata.get("time base");
             if (null != timeBase) {
                 _timeRange = timeBase.floatValue();
             }
-            _increment = 1;
             Number increment = (Number) _globalMetadata.get("MeasureInfo.incr");
             if (null != increment) {
                 _increment = increment.intValue();
@@ -1584,7 +1592,8 @@ public class SLIMProcessor <T extends RealType<T>> {
             double[] values = _excitationPanel.getValues(startIndex, stopIndex, base);
             fitInfo.setPrompt(values);
         }
-        fitInfo.setIndexColorModel(HistogramTool.getIndexColorModel());
+		IndexColorModel indexColorModel = HistogramTool.getIndexColorModel();
+        fitInfo.setIndexColorModel(indexColorModel);
         _fitInfo = fitInfo;
         
         // set up images

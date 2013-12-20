@@ -113,13 +113,15 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
         if (0 < spaceIndex) {
             title = title.substring(0, spaceIndex);
         }
-        long dimensions[] = new long[image.numDimensions()];
+		
+		int numDimensions = image.numDimensions();
+        long dimensions[] = new long[numDimensions];
         image.dimensions(dimensions);
         _width = (int) dimensions[0];
         _height = (int) dimensions[1];
         int bins = (int) dimensions[2];
         int channels = 1;
-        if (dimensions.length > 3) {
+        if (numDimensions > 3) {
             channels = (int) dimensions[3];
         }
 
@@ -129,12 +131,12 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 
         RandomAccess cursor = image.randomAccess();
         double[][] pixels = new double[_width][_height];
-        int[] position = (channels > 1) ? new int[4] : new int[3];
+        int[] position = new int[numDimensions];
 
 		// keep track of minimum count; usually 1.0 but can be 10.0, etc.
         _minNonZeroPhotonCount = Double.MAX_VALUE;
         for (int c = 0; c < channels; ++c) {
-            if (channels > 1) {
+            if (numDimensions > 3) {
                 position[3] = c;
             }
 			short[] outPixels = new short[_width * _height];
