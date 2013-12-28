@@ -40,6 +40,26 @@ import loci.curvefitter.ICurveFitter;
  * @author Aivar Grislis
  */
 public interface UserInterfacePanel {
+    // Unicode special characters
+    public static final Character CHI      = '\u03c7',
+                                  SQUARE   = '\u00b2',
+                                  TAU_CHAR = '\u03c4',
+                                  LAMBDA   = '\u03bb',
+                                  SIGMA    = '\u03c3',
+                                  SUB_1    = '\u2081',
+                                  SUB_2    = '\u2082',
+                                  SUB_3    = '\u2083',
+                                  SUB_M    = '\u2098', // Unicode 6.0.0 (October 2010)
+								  SUB_R    = '\u1d63';
+	
+	public static final String TAU = "" + TAU_CHAR,
+			                   TAU1 = TAU + "1",
+			                   TAU2 = TAU + "2",
+			                   TAU3 = TAU + "3",
+			                   CHISQUARE = "" + CHI + SQUARE,
+			                   F_UPPER = "F ",
+			                   F_LOWER = "f ",
+			                   TAU_MEAN = "" + TAU_CHAR + "m";
 
     /**
      * Gets the UI JFrame.

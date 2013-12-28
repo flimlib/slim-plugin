@@ -150,23 +150,23 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	public List<Dataset> getDatasets() {
 		return list;
 	}
-
+	
 	/**
-	 * Inputs a list of values at a given position.  These values are then used
+	 * Inputs an array of values at a given position.  These values are then used
 	 * singly or in some combining formula to yield the output set images pixel
 	 * values.
 	 * 
 	 * @param values
 	 * @param position 
-	 */
-	public void setPixelValue(List<T> values, long[] position) {
+	 */	
+	public void setPixelValue(double[] values, long[] position) {
 		for (OutputSetMember index : indices) {
 			index.setPixelValue(values, position);
 		}
 	}
 
 	/**
-	 * Inputs a list of values at a given position.
+	 * Inputs an array of values at a given position.
 	 * <p>
 	 * This variant allows drawing fat pixels.  With this scheme pixels are
 	 * drawn very coarse and sparse initially but later in increasingly finer
@@ -177,7 +177,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param position
 	 * @param chunkySize 
 	 */
-	public void setPixelValue(List<T> values, long[] position, int[] chunkySize) {
+	public void setPixelValue(double[] values, long[] position, int[] chunkySize) {
 		for (OutputSetMember index : indices) {
 			index.setPixelValue(values, position, chunkySize);
 		}

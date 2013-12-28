@@ -30,6 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim2.process.interactive;
 
+import imagej.command.CommandService;
 import imagej.display.Display;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
@@ -38,6 +39,8 @@ import imagej.data.threshold.ThresholdService;
 import imagej.display.DisplayService;
 import imagej.ui.DialogPrompt;
 import imagej.ui.UIService;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -61,6 +64,12 @@ import loci.slim2.decay.NoLifetimeAxisFoundException;
 import loci.slim2.heuristics.CursorEstimator;
 import loci.slim2.heuristics.DefaultFitterEstimator;
 import loci.slim2.heuristics.Estimator;
+import loci.slim2.outputset.IndexedMemberFormula;
+import loci.slim2.outputset.MemberFormula;
+import loci.slim2.outputset.OutputSet;
+import loci.slim2.outputset.OutputSetMember;
+import loci.slim2.outputset.temp.ChunkyPixel;
+import loci.slim2.outputset.temp.ChunkyPixelIterator;
 import loci.slim2.process.Excitation;
 import loci.slim2.process.ExcitationFileUtility;
 import loci.slim2.process.FitSettings;
@@ -76,6 +85,9 @@ import loci.slim2.process.interactive.ui.ExcitationPanel;
 import loci.slim2.process.interactive.ui.ThresholdUpdate;
 import loci.slim2.process.interactive.ui.UserInterfacePanel;
 import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
+import net.imglib2.meta.Axes;
+import net.imglib2.meta.AxisType;
+import net.imglib2.type.numeric.real.DoubleType;
 import org.scijava.Context;
 
 /**
@@ -85,6 +97,7 @@ import org.scijava.Context;
  */
 public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private Context context;
+	private CommandService commandService;
 	private DatasetService datasetService;
 	private DisplayService displayService;
 	private UIService uiService;
@@ -112,8 +125,11 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	private volatile boolean fitSummed;
 	
 	@Override
-	public void init(Context context, DatasetService datasetService, DisplayService displayService, Estimator estimator) {
+	public void init(Context context, CommandService commandService,
+			DatasetService datasetService, DisplayService displayService,
+			Estimator estimator) {
 		this.context        = context;
+		this.commandService = commandService;
 		this.datasetService = datasetService;
 		this.displayService = displayService;
 		this.uiService      = uiService;
@@ -520,12 +536,9 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 				fitImages = false;
 			}
 			else if (fitImages) {
-				try {
-					Thread.sleep(1000);
-				}
-				catch (InterruptedException e) {
-					
-				}
+				fitImages();
+				uiPanel.reset();
+				fitImages = false;
 			}
 			else if (fitPixel) {
 				fitPixel();
@@ -691,6 +704,256 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		data.setYFitted(yFitted);
 		
 		return getFittingEngine(uiPanel).fit(params, data);
+	}
+	
+    /**
+	 * Produces a set of fitted images.
+	 */
+	private void fitImages() {
+		String choices = uiPanel.getFittedImages();
+		int parameterCount = uiPanel.getParameterCount();
+		List<OutputSetMember> list = buildFittedImageList(choices, parameterCount);
+		
+		boolean combined = false; // whether to create combined or separate fitted images
+		boolean useChannelDimension = false;
+		DoubleType type = new DoubleType();
+		String title = lifetimeGrayscaleDataset.getDataset().getName();
+		int numDimensions = lifetimeGrayscaleDataset.getDataset().numDimensions();
+		long[] dimensions = new long[numDimensions];
+		lifetimeGrayscaleDataset.getDataset().dimensions(dimensions);
+		AxisType[] axes = new AxisType[numDimensions];
+		//TODO ARG very poor workaround here
+		axes[0] = Axes.X;
+		axes[1] = Axes.Y;
+		if (numDimensions > 2) {
+			axes[2] = Axes.Z;
+			if (numDimensions > 3) {
+				axes[3] = Axes.TIME;
+				if (numDimensions > 4) {
+					axes[4] = Axes.CHANNEL;
+				}
+			}
+		}
+		OutputSet imageSet = new OutputSet(commandService, datasetService, combined, useChannelDimension, type, dimensions, title, axes, list);
+		
+		List<Dataset> datasetList = imageSet.getDatasets();
+		Display display = null;
+		for (Dataset d : datasetList) {
+			d.getImgPlus().setChannelMinimum(0, 0.0); //TODO ARG just to see if this works; set min/max
+			d.getImgPlus().setChannelMaximum(0, 1.0);
+			d.setDirty(true);
+			display = displayService.createDisplay(d);
+		}
+
+		ChunkyPixelIterator iterator = new ChunkyPixelIterator(dimensions);
+		while (iterator.hasNext()) {
+			ChunkyPixel chunkyPixel = iterator.next();
+			long[] position = chunkyPixel.getPosition();
+			
+			// do the fit
+			int binSize = uiPanel.getBinning();
+			double[] decay = lifetimeDatasetWrapper.getBinnedDecay(binSize, position);
+			FitResults fitResults = fitDecay(decay);
+			imageSet.setPixelValue(fitResults.getParams(), position);
+		}
+
+	}
+	
+	private List<OutputSetMember> buildFittedImageList(String choices, int parameterCount) {
+		List<OutputSetMember> list = new ArrayList<OutputSetMember>();
+		String[] choiceArray = choices.split(" ");
+		int inputIndex = 0;
+		int outputIndex = 0;
+		MemberFormula formula;
+		OutputSetMember member;
+		for (String choice : choiceArray) {
+			// fitted parameters are ordered X2 Z A1 T1 A2 T2 A3 T3
+			if (choice.equals("A")) {
+				switch (parameterCount) {
+					case 4: // single exponential
+					case 5: // stretched exponential
+						// output A T Z X2 (or A T H Z X2 stretched)
+						inputIndex = 2;
+						outputIndex = 0;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>("A", outputIndex, formula);
+		                list.add(member);
+						break;
+					case 6: // double exponential
+						// output A1 T1 A2 T2 Z X2
+						inputIndex = 2;
+						outputIndex = 0;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>("A1", outputIndex, formula);
+		                list.add(member);
+						inputIndex = 4;
+						outputIndex = 2;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>("A2", outputIndex, formula);
+		                list.add(member);
+						break;
+					case 8: // triple exponential
+						// output A1 T1 A2 T2 A3 T3 Z X2
+						inputIndex = 2;
+						outputIndex = 0;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>("A1", outputIndex, formula);
+						list.add(member);
+						inputIndex = 4;
+						outputIndex = 2;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>("A2", outputIndex, formula);
+						list.add(member);
+						inputIndex = 6;
+						outputIndex = 4;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>("A3", outputIndex, formula);
+						list.add(member);
+						break;
+				}
+			}
+			else if (choice.equals(uiPanel.TAU)) {
+				switch (parameterCount) {
+					case 4: // single exponential
+					case 5: // stretched exponential
+						// output A T Z X2 (or A T H Z X2 stretched)
+						inputIndex = 3;
+						outputIndex = 1;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>(uiPanel.TAU, outputIndex, formula);
+		                list.add(member);
+						break;
+					case 6: // double exponential
+						// output A1 T1 A2 T2 Z X2
+						inputIndex = 3;
+						outputIndex = 1;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>(uiPanel.TAU1, outputIndex, formula);
+		                list.add(member);
+						inputIndex = 5;
+						outputIndex = 3;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>(uiPanel.TAU2, outputIndex, formula);
+		                list.add(member);
+						break;
+					case 8: // triple exponential
+						// output A1 T1 A2 T2 A3 T3 Z X2
+						inputIndex = 3;
+						outputIndex = 1;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>(uiPanel.TAU1, outputIndex, formula);
+						list.add(member);
+						inputIndex = 5;
+						outputIndex = 3;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>(uiPanel.TAU2, outputIndex, formula);
+						list.add(member);
+						inputIndex = 7;
+						outputIndex = 5;
+						formula = new IndexedMemberFormula(inputIndex);
+						member = new OutputSetMember<DoubleType>(uiPanel.TAU3, outputIndex, formula);
+						list.add(member);
+						break;
+				}
+			}
+			else if (choice.equals("Z")) {
+				inputIndex = 1;
+				switch (parameterCount) {
+					case 4: // single exponential
+						// output A T Z X2
+						outputIndex = 2;
+						break;
+					case 5: // stretched exponential
+						// output A T H Z X2
+						outputIndex = 3;
+						break;
+					case 6: // double exponential
+						// output A1 T1 A2 T2 Z X2
+						outputIndex = 4;
+						break;
+					case 8: // triple exponential
+						// output A1 T1 A2 T2 A3 T3 Z X2
+						outputIndex = 6;
+						break;
+				}
+				formula = new IndexedMemberFormula(inputIndex);
+				member = new OutputSetMember<DoubleType>("Z", outputIndex, formula);
+				list.add(member);
+			}
+			else if (choice.equals(uiPanel.CHISQUARE)) {
+				inputIndex = 0;
+				switch (parameterCount) {
+					case 4: // single exponential
+						// output A T Z X2
+						outputIndex = 3;
+						break;
+					case 5: // stretched exponential
+						// output A T H Z X2
+						outputIndex = 4;
+						break;
+					case 6: // double exponential
+						// output A1 T1 A2 T2 Z X2
+						outputIndex = 5;
+						break;
+					case 8: // triple exponential
+						// output A1 T1 A2 T2 A3 T3 Z X2
+						outputIndex = 7;
+						break;
+				}
+				formula = new IndexedMemberFormula(inputIndex);
+				member = new OutputSetMember<DoubleType>(uiPanel.CHISQUARE, outputIndex, formula);
+				list.add(member);
+			}
+			else if (choice.equals(uiPanel.F_UPPER)) {
+				switch (parameterCount) {
+					case 4:
+						// output A T Z X2
+						break;
+					case 5:
+						// output A T H Z X2
+						break;
+					case 6:
+						// output A1 T1 A2 T2 Z X2
+						break;
+					case 8:
+						// output A1 T1 A2 T2 A3 T3 Z X2
+						break;
+				}
+			}
+			else if (choice.equals(uiPanel.F_LOWER)) {
+				switch (parameterCount) {
+					case 4:
+						// output A T Z X2
+						break;
+					case 5:
+						// output A T H Z X2
+						break;
+					case 6:
+						// output A1 T1 A2 T2 Z X2
+						break;
+					case 8:
+						// output A1 T1 A2 T2 A3 T3 Z X2
+						break;
+				}
+			}
+			else if (choice.equals(uiPanel.TAU_MEAN)) {
+				switch (parameterCount) {
+					case 4:
+						// output A T Z X2
+						break;
+					case 5:
+						// output A T H Z X2
+						break;
+					case 6:
+						// output A1 T1 A2 T2 Z X2
+						break;
+					case 8:
+						// output A1 T1 A2 T2 A3 T3 Z X2
+						break;
+				}
+			}
+		}
+		return list;
 	}
 
 	/**

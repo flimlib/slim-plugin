@@ -30,6 +30,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim2.process;
 
+import imagej.command.CommandService;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import imagej.display.DisplayService;
@@ -48,12 +49,15 @@ public interface InteractiveProcessor {
 	 * Initializes with required services.
 	 * 
 	 * @param context
+	 * @param commandService
 	 * @param datasetService
 	 * @param displayService
 	 * @param uiService
 	 * @param estimator
 	 */
-	public void init(Context context, DatasetService datasetService, DisplayService displayService, Estimator estimator);
+	public void init(Context context, CommandService commandService,
+			DatasetService datasetService, DisplayService displayService,
+			Estimator estimator);
 	
 	/**
 	 * Gets current fit settings.

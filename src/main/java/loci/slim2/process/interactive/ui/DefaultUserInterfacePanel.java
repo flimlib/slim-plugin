@@ -79,18 +79,6 @@ import loci.slim2.process.interactive.cursor.FittingCursorListener;
  */
 public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	private static final String TITLE = "SLIM Plugin";
-	
-    // Unicode special characters
-    private static final Character CHI    = '\u03c7',
-                                   SQUARE = '\u00b2',
-                                   TAU    = '\u03c4',
-                                   LAMBDA = '\u03bb',
-                                   SIGMA  = '\u03c3',
-                                   SUB_1  = '\u2081',
-                                   SUB_2  = '\u2082',
-                                   SUB_3  = '\u2083',
-                                   SUB_M  = '\u2098', // Unicode 6.0.0 (October 2010)
-								   SUB_R  = '\u1d63';
     
     private static final String SUM_REGION = "Sum All Pixels",
                                 ROIS_REGION = "Sum Each ROI",
@@ -134,25 +122,24 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
                                 ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM },
                                 FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL },
                                 NOISE_MODEL_ITEMS[] = { GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA, MAXIMUM_LIKELIHOOD };
-    
-    private static final String A_T_Z_X2 = "A " + TAU + " Z " + CHI + SQUARE,
-                                A_T_X2 = "A " + TAU + " " + CHI + SQUARE,
-                                A_T = "A " + TAU,
-								F_UPPER_T_Z_X2 = "F " + TAU + " Z " + CHI + SQUARE,
-								F_UPPER_T_X2 = "F " + TAU + " " + CHI + SQUARE,
-								F_UPPER_T = "F " + TAU,
-								F_LOWER_T_Z_X2 = "f " + TAU + " Z " + CHI + SQUARE,
-								F_LOWER_T_X2 = "f " + TAU + " " + CHI + SQUARE,
-			                    F_LOWER_T = "f " + TAU,
-			                    T_X2 = TAU + " " + CHI + SQUARE,
-                                T = "" + TAU,
-								TAU_MEAN_X2 = TAU + "m " + CHI + SQUARE,
-								TAU_MEAN = TAU + "m",
-								A_T_H_Z_X2 = "A " + TAU + " H Z " + CHI + SQUARE,
-                                A_T_H_X2 = "A " + TAU + " H " + CHI + SQUARE,
-                                A_T_H = "A " + TAU + " H",
-                                T_H_X2 = TAU + " H " + CHI + SQUARE,
-                                T_H = TAU + " H",
+	
+    private static final String A_T_Z_X2 = "A " + TAU_CHAR + " Z " + CHISQUARE,
+                                A_T_X2 = "A " + TAU_CHAR + " " + CHISQUARE,
+                                A_T = "A " + TAU_CHAR,
+								F_UPPER_T_Z_X2 = F_UPPER + TAU_CHAR + " Z " + CHISQUARE,
+								F_UPPER_T_X2 = F_UPPER + TAU_CHAR + " " + CHISQUARE,
+								F_UPPER_T = F_UPPER + TAU_CHAR,
+								F_LOWER_T_Z_X2 = F_LOWER + TAU_CHAR + " Z " + CHISQUARE,
+								F_LOWER_T_X2 = F_LOWER + TAU_CHAR + " " + CHISQUARE,
+			                    F_LOWER_T = F_LOWER + TAU_CHAR,
+			                    T_X2 = TAU_CHAR + " " + CHISQUARE,
+                                T = "" + TAU_CHAR,
+								TAU_MEAN_X2 = TAU_MEAN + CHISQUARE,
+								A_T_H_Z_X2 = "A " + TAU_CHAR + " H Z " + CHISQUARE,
+                                A_T_H_X2 = "A " + TAU_CHAR + " H " + CHISQUARE,
+                                A_T_H = "A " + TAU_CHAR + " H",
+                                T_H_X2 = TAU_CHAR + " H " + CHISQUARE,
+                                T_H = TAU_CHAR + " H",
 								NONE = " ";
 	
 	private static final String FITTING_ERROR = "Fitting Error",
@@ -325,7 +312,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
             FittingCursor fittingCursor,
             IFitterEstimator fitterEstimator)
     {
-        String lifetimeLabel = "" + (showTau ? TAU : LAMBDA);
+        String lifetimeLabel = "" + (showTau ? TAU_CHAR : LAMBDA);
         
         this.fittingCursor = fittingCursor;
         this.fitterEstimator = fitterEstimator;

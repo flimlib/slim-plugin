@@ -30,22 +30,18 @@ POSSIBILITY OF SUCH DAMAGE.
 
 package loci.slim2.outputset;
 
-
-import java.util.List;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.RealType;
-
 /**
- *
+ * A formula for calculating the value of a member of an output set.
+ * 
  * @author Aivar Grislis
  */
-//TODO ARG prob'ly s/b an Op
-public interface MemberFormula <T extends RealType<T> & NativeType<T>> {
-	
+public interface MemberFormula {
+
 	/**
 	 * Formula for calculating a value for this tuple dimension.
 	 * 
-	 * @param <T> type of the values
+	 * @param values array
+	 * @return calculated value
 	 */
-	public T compute(List<T> values);
+	public double compute(double[] values);
 }

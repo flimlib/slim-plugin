@@ -51,7 +51,7 @@ import net.imglib2.type.numeric.RealType;
 		private final int POST_XY_INDEX = 2; //TODO ARG find Y index constant somewhere in Imglib2, + 1; also, is Z s'posed to be 2???
 		private final String label;
 		private final int index;
-		private final MemberFormula<T> formula;
+		private final MemberFormula formula;
 		private boolean combined;
 		private RandomAccess<T> randomAccess;
 
@@ -62,7 +62,7 @@ import net.imglib2.type.numeric.RealType;
 		 * @param index index in output (used for combined images)
 		 * @param formula used to derive index value
 		 */
-		public OutputSetMember(String label, int index, MemberFormula<T> formula) {
+		public OutputSetMember(String label, int index, MemberFormula formula) {
 			this.label = label;
 			this.index = index;
 			this.formula = formula;
@@ -88,8 +88,13 @@ import net.imglib2.type.numeric.RealType;
 			this.randomAccess = randomAccess;
 		}
 		
-		public void setPixelValue(List<T> values, long[] position, int[] chunkyPixelSize) {
-			T value = formula.compute(values);
+		public void setPixelValue(double[] values, long[] position) {
+			double value = formula.compute(values);
+			setPixelValue(value, position);
+		}
+		
+		public void setPixelValue(double[] values, long[] position, int[] chunkyPixelSize) {
+			double value = formula.compute(values);
 			long x = position[0];
 			long y = position[1];
 			for (int i = 0; i < chunkyPixelSize[0]; ++i) {
@@ -101,19 +106,14 @@ import net.imglib2.type.numeric.RealType;
 			}
 		}
 		
-		public void setPixelValue(List<T> values, long[] position) {
-			T value = formula.compute(values);
-			setPixelValue(value, position);
-		}
-		
-		public void setPixelValue(T value, long[] position) {
+		public void setPixelValue(double value, long[] position) {
 			if (combined) {
 				// adjust position for combined stack
 				position = expandPosition(position, POST_XY_INDEX);
 				position[POST_XY_INDEX] = index;
 			}
 			randomAccess.setPosition(position);
-			randomAccess.get().set(value);
+			randomAccess.get().setReal(value);
 		}
 		
 		private long[] expandPosition(long[] position, int index) {

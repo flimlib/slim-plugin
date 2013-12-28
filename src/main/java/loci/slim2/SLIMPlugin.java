@@ -200,7 +200,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				if (null == interactiveProcessor) {
 					Estimator estimator = new DefaultEstimator();
 					interactiveProcessor = new DefaultInteractiveProcessor();
-					interactiveProcessor.init(context, datasetService, displayService, estimator);
+					interactiveProcessor.init(context, commandService, datasetService, displayService, estimator);
 				}
 
 				// gives up control to load a new dataset or when done
@@ -211,10 +211,6 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			firstTime = false;
 		}
 		while (!quit);
-
-	 System.out.println("BEGIN TEST>>>>>>"); //TODO ARG this test just throws up dummy fitted images
-		test();
-		System.out.println("<<<<<<<END TEST");
 
 		// done clicking on the grayscale version
 		hideTool();
@@ -360,18 +356,18 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		inputIndex = 3;
 		outputIndex = 2;
 		IndexedMemberFormula formula4 = new IndexedMemberFormula(inputIndex);
-		OutputSetMember index4 = new OutputSetMember<T>("A2", outputIndex, formula3);
-		list.add(index3);
+		OutputSetMember index4 = new OutputSetMember<T>("A2", outputIndex, formula4);
+		list.add(index4);
 		inputIndex = 4;
 		outputIndex = 1;
 		IndexedMemberFormula formula5 = new IndexedMemberFormula(inputIndex);
-		OutputSetMember index5 = new OutputSetMember<T>("T2", outputIndex, formula3);
-		list.add(index3);		
+		OutputSetMember index5 = new OutputSetMember<T>("T2", outputIndex, formula5);
+		list.add(index5);		
 		inputIndex = 5;
 		outputIndex = 0;
 		IndexedMemberFormula formula6 = new IndexedMemberFormula(inputIndex);
-		OutputSetMember index6 = new OutputSetMember<T>("Z", outputIndex, formula3);
-		list.add(index3);		
+		OutputSetMember index6 = new OutputSetMember<T>("Z", outputIndex, formula6);
+		list.add(index6);		
 		
 		boolean combined = false; //true; // create a stack
 		boolean useChannelDimension = false;
@@ -419,7 +415,6 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			new RampGenerator(RampGenerator.RampType.UPPER_RIGHT, width, height),
 			new RampGenerator(RampGenerator.RampType.LOWER_LEFT, width, height)
 		};
-		List<DoubleType> valuesList = new ArrayList<DoubleType>();
 		double[] inputValues = new double[inputs.length];
 		
 		long time = System.currentTimeMillis();
@@ -435,18 +430,16 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			long[] position = chunkyPixel.getPosition();
 			long x = position[0];
 			long y = position[1];
-			valuesList.clear();
 			for (int i = 0; i < inputs.length; ++i) {
-				valuesList.add(new DoubleType(inputs[i].getValue(x, y)));
 				inputValues[i] = inputs[i].getValue(x, y);
 			}
 			for (long z = 0; z < dimensions[2]; ++z) {
-				imageSet2.setPixelValue(valuesList, position); //TODO ARG how does this work?  why iterate over z when nothing changes within the loop????
+				imageSet.setPixelValue(inputValues, position); //TODO ARG how does this work?  why iterate over z when nothing changes within the loop????
 			}
 		}
 		System.out.println("Elapsed chunky pixel overhead time " + (System.currentTimeMillis() - time));
 		
-		Dataset dd = datasetList2.get(0);
+		Dataset dd = datasetList.get(0);
 		System.out.println("dd name is " + dd.getName());
 		dd.getImgPlus().setChannelMaximum(0, 1.0);
 		dd.getImgPlus().setChannelMinimum(0, 0.0);
