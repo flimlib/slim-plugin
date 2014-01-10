@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>loci</groupId>
 		<artifactId>pom-loci</artifactId>
-		<version>1.11</version>
+		<version>1.13</version>
 	</parent>
 
 	<artifactId>slim_plugin</artifactId>
@@ -24,6 +24,10 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+
+	<properties>
+		<imglib2.version>2.0.0-beta-20</imglib2.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
