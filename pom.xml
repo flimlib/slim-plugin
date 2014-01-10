@@ -198,6 +198,13 @@
 		</developer>
 	</developers>
 
+	<scm>
+		<connection>scm:git:git://github.com/uw-loci/slim-plugin</connection>
+		<developerConnection>scm:git:git@github.com:uw-loci/slim-plugin</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/uw-loci/slim-plugin</url>
+	</scm>
+
 	<repositories>
 		<!-- NB: for project parent -->
 		<repository>
