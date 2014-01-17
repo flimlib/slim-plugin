@@ -8,7 +8,8 @@
 	<parent>
 		<groupId>loci</groupId>
 		<artifactId>pom-loci</artifactId>
-		<version>1.13</version>
+		<version>1.15</version>
+		<relativePath />
 	</parent>
 
 	<artifactId>slim_plugin</artifactId>
@@ -26,7 +27,7 @@
 	</licenses>
 
 	<properties>
-		<imglib2.version>2.0.0-beta-20</imglib2.version>
+		<imglib2.version>2.0.0-beta-22</imglib2.version>
 	</properties>
 
 	<dependencies>
@@ -73,7 +74,7 @@
 		<dependency>
 			<groupId>net.java.sezpoz</groupId>
 			<artifactId>sezpoz</artifactId>
-			<version>${sezpoz.version}</version>
+			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jfree</groupId>
