@@ -15,7 +15,7 @@
 	<artifactId>slim_plugin</artifactId>
 	<version>2.0.0-SNAPSHOT</version>
 
-	<name>SLIMPlugin</name>
+	<name>SLIM Plugin</name>
 	<description>An ImageJ plugin for combined spectral-lifetime image analysis.</description>
 	<inceptionYear>2010</inceptionYear>
 
@@ -115,6 +115,14 @@
 							<packageName>loci.slim</packageName>
 						</manifest>
 					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<licenseName>bsd_2</licenseName>
+					<projectName>SLIM Plugin for combined spectral-lifetime image analysis.</projectName>
 				</configuration>
 			</plugin>
 		</plugins>

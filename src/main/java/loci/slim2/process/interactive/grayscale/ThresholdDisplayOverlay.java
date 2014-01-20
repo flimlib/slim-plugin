@@ -1,10 +1,9 @@
 /*
  * #%L
- * ImageJ software for multidimensional image processing and analysis.
+ * SLIM Plugin for combined spectral-lifetime image analysis.
  * %%
- * Copyright (C) 2009 - 2013 Board of Regents of the University of
- * Wisconsin-Madison, Broad Institute of MIT and Harvard, and Max Planck
- * Institute of Molecular Cell Biology and Genetics.
+ * Copyright (C) 2010 - 2014 Board of Regents of the University of
+ * Wisconsin-Madison.
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,10 +25,6 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
- * The views and conclusions contained in the software and documentation are
- * those of the authors and should not be interpreted as representing official
- * policies, either expressed or implied, of any organization.
  * #L%
  */
 
@@ -44,7 +39,7 @@ import org.scijava.Context;
 
 /**
  * The ThresholdDisplayOverlay
- * @author aivar
+ * @author Aivar Grislis
  */
 public class ThresholdDisplayOverlay extends ThresholdOverlay {
 	private static final ColorRGB COLOR_LESS = Colors.AQUA;
