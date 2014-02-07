@@ -45,7 +45,7 @@ import net.imglib2.type.numeric.RealType;
  *
  * @author Aivar Grislis
  */
-public class ExcitationFileUtility <T extends RealType<T>> {
+public class ExcitationFileUtility {
 	private static final String ICS = ".ics";
 	private static final String IRF = ".irf";
 
