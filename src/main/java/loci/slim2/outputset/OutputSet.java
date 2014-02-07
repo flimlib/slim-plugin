@@ -143,7 +143,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	public List<Dataset> getDatasets() {
 		return list;
 	}
-	
+
 	/**
 	 * Inputs an array of values at a given position.  These values are then used
 	 * singly or in some combining formula to yield the output set images pixel
@@ -151,7 +151,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * 
 	 * @param values
 	 * @param position 
-	 */	
+	 */
 	public void setPixelValue(double[] values, long[] position) {
 		for (OutputSetMember index : indices) {
 			index.setPixelValue(values, position);
@@ -243,7 +243,7 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 				index.setRandomAccess(dataset.getImgPlus().randomAccess());
 			}
 		}
-		
+
 		// pop up a data histogram tool
 		System.out.println("OutputSet: pop up DataHistogramCommand");
 		commandService.run(DataHistogramCommand.class);

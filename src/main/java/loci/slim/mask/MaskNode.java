@@ -29,56 +29,56 @@ package loci.slim.mask;
  * @author Aivar Grislis
  */
 public class MaskNode implements IMaskNode {
-    IMaskGroup _maskGroup;
-    IMaskNodeListener _listener;
-    Mask _selfMask;
-    Mask _otherMask;
-    
-    public MaskNode(IMaskGroup maskGroup, IMaskNodeListener listener) {
-        _maskGroup = maskGroup;
-        _listener = listener;
-		_selfMask = _otherMask = null;
-        maskGroup.addNode(this);
-    }
+	IMaskGroup _maskGroup;
+	IMaskNodeListener _listener;
+	Mask _selfMask;
+	Mask _otherMask;
 
-    /**
-     * This method should be called when node has changed its mask.
-     * 
-     * @param mask may be null
-     */
-    @Override
-    public void updateSelfMask(Mask selfMask) {
+	public MaskNode(IMaskGroup maskGroup, IMaskNodeListener listener) {
+		_maskGroup = maskGroup;
+		_listener = listener;
+		_selfMask = _otherMask = null;
+		maskGroup.addNode(this);
+	}
+
+	/**
+	 * This method should be called when node has changed its mask.
+	 * 
+	 * @param mask may be null
+	 */
+	@Override
+	public void updateSelfMask(Mask selfMask) {
 		_selfMask = selfMask;
-		
+
 		// show changes locally
 		_listener.updateMasks(_otherMask, getTotalMask());
-		
+
 		// propagate changes through the mask group
-        _maskGroup.updateMask(this);
-    }
+		_maskGroup.updateMask(this);
+	}
 
-    /**
-     * Gets the current mask created by this node.
-     * 
-     * @return mask may be null
-     */
-    @Override
-    public Mask getSelfMask() {
-        return _selfMask;
-    }
+	/**
+	 * Gets the current mask created by this node.
+	 * 
+	 * @return mask may be null
+	 */
+	@Override
+	public Mask getSelfMask() {
+		return _selfMask;
+	}
 
-    /**
-     * This method notifies this node that other nodes have changed masks.
-     * 
-     * @param otherMask may be null
-     */
-    @Override
-    public void updateOtherMask(Mask otherMask) {
-        _otherMask = otherMask;
+	/**
+	 * This method notifies this node that other nodes have changed masks.
+	 * 
+	 * @param otherMask may be null
+	 */
+	@Override
+	public void updateOtherMask(Mask otherMask) {
+		_otherMask = otherMask;
 
 		_listener.updateMasks(_otherMask, getTotalMask());
-    }
-	
+	}
+
 	String debugMask(Mask mask) {
 		if (null == mask) {
 			return "NULL";
@@ -86,23 +86,23 @@ public class MaskNode implements IMaskNode {
 		return "" + mask.getCount();
 	}
 
-    /**
-     * Gets the current mask created by all other nodes.
-     * 
-     * @return mask may be null
-     */
-    @Override
-    public Mask getOtherMask() {
-        return _otherMask;
-    }
+	/**
+	 * Gets the current mask created by all other nodes.
+	 * 
+	 * @return mask may be null
+	 */
+	@Override
+	public Mask getOtherMask() {
+		return _otherMask;
+	}
 
-    /**
-     * Gets the current total mask.
-     * 
-     * @return mask may be null
-     */
-    @Override
-    public Mask getTotalMask() {
+	/**
+	 * Gets the current total mask.
+	 * 
+	 * @return mask may be null
+	 */
+	@Override
+	public Mask getTotalMask() {
 		Mask mask = null;
 		if (null == _otherMask) {
 			if (null != _selfMask) {
@@ -112,6 +112,6 @@ public class MaskNode implements IMaskNode {
 		else {
 			mask = _otherMask.add(_selfMask);
 		}
-        return mask;
-    }
+		return mask;
+	}
 }

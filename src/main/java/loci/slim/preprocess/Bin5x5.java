@@ -34,7 +34,7 @@ package loci.slim.preprocess;
  */
 @SLIMBinner("5 x 5")
 public class Bin5x5 extends SquareBinner implements ISLIMBinner {
-    public void init(int width, int height) {
-        super.init(2, width, height);
-    }
+	public void init(int width, int height) {
+		super.init(2, width, height);
+	}
 }

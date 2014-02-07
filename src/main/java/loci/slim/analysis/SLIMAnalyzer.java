@@ -47,5 +47,5 @@ import net.java.sezpoz.Indexable;
 @Retention(RetentionPolicy.SOURCE)
 @Indexable(type=ISLIMAnalyzer.class)
 public @interface SLIMAnalyzer {
-    String name();
+	String name();
 }

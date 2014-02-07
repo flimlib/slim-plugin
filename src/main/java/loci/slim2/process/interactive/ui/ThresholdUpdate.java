@@ -29,7 +29,7 @@ package loci.slim2.process.interactive.ui;
  * @author Aivar Grislis
  */
 public interface ThresholdUpdate {
-	
+
 	/**
 	 * Update the threshold values.
 	 * 

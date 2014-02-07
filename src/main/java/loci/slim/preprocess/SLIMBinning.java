@@ -41,51 +41,51 @@ import net.java.sezpoz.IndexItem;
  * @author Aivar Grislis
  */
 public class SLIMBinning {
-    public static final String NONE = "None";
-    IndexItem<SLIMBinner, ISLIMBinner> m_plugins[];
-    String m_names[];
+	public static final String NONE = "None";
+	IndexItem<SLIMBinner, ISLIMBinner> m_plugins[];
+	String m_names[];
 
-    public SLIMBinning() {
-        // get list of plugins and their names
-        List<String> names = new ArrayList<String>();
-        List<IndexItem> plugins = new ArrayList<IndexItem>();
-        names.add(NONE);
-        plugins.add(null);
+	public SLIMBinning() {
+		// get list of plugins and their names
+		List<String> names = new ArrayList<String>();
+		List<IndexItem> plugins = new ArrayList<IndexItem>();
+		names.add(NONE);
+		plugins.add(null);
 
-        // get all matches
-        for (final IndexItem<SLIMBinner, ISLIMBinner> item :
-                Index.load(SLIMBinner.class, ISLIMBinner.class, IJ.getClassLoader())) {
-            plugins.add(item);
-            names.add(item.annotation().value());
-        }
-        m_plugins = plugins.toArray(new IndexItem[0]);
-        m_names = names.toArray(new String[0]);
-    }
+		// get all matches
+		for (final IndexItem<SLIMBinner, ISLIMBinner> item :
+				Index.load(SLIMBinner.class, ISLIMBinner.class, IJ.getClassLoader())) {
+			plugins.add(item);
+			names.add(item.annotation().value());
+		}
+		m_plugins = plugins.toArray(new IndexItem[0]);
+		m_names = names.toArray(new String[0]);
+	}
 
-    public String[] getChoices() {
-        return m_names;
-    }
-    
-    public ISLIMBinner getBinner(String name) {
-        ISLIMBinner instance = null;
-        
-        IndexItem<SLIMBinner, ISLIMBinner> selectedPlugin = null;
-        for (int i = 0; i < m_names.length; ++i) {
-            if (name.equals(m_names[i])) {
-                selectedPlugin = m_plugins[i];
-            }
-        }
-        
-        if (null != selectedPlugin) {
-            // create an instance
-            try {
-                instance = selectedPlugin.instance();
-            }
-            catch (InstantiationException e) {
-                System.out.println("Error instantiating plugin " + e.getMessage());
-            }
-        }
-        
-        return instance;
-    }
+	public String[] getChoices() {
+		return m_names;
+	}
+
+	public ISLIMBinner getBinner(String name) {
+		ISLIMBinner instance = null;
+
+		IndexItem<SLIMBinner, ISLIMBinner> selectedPlugin = null;
+		for (int i = 0; i < m_names.length; ++i) {
+			if (name.equals(m_names[i])) {
+				selectedPlugin = m_plugins[i];
+			}
+		}
+
+		if (null != selectedPlugin) {
+			// create an instance
+			try {
+				instance = selectedPlugin.instance();
+			}
+			catch (InstantiationException e) {
+				System.out.println("Error instantiating plugin " + e.getMessage());
+			}
+		}
+
+		return instance;
+	}
 }

@@ -29,8 +29,8 @@ package loci.slim2.decay;
  * @author Aivar Grislis
  */
 public class NoLifetimeAxisFoundException extends Exception {
-	
+
 	public NoLifetimeAxisFoundException(String msg) {
 		super(msg);
-	}	
+	}
 }

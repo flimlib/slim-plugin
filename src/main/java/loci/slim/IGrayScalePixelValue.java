@@ -29,14 +29,14 @@ package loci.slim;
  * @author Aivar Grislis
  */
 public interface IGrayScalePixelValue {
-    
-    /**
-     * Gets a grayscale pixel value.
-     *
-     * @param channel
-     * @param x
-     * @param y
-     * @return unsigned byte expressed as an integer, 0...255
-     */
-    public int getGrayValue(int channel, int x, int y);
+
+	/**
+	 * Gets a grayscale pixel value.
+	 *
+	 * @param channel
+	 * @param x
+	 * @param y
+	 * @return unsigned byte expressed as an integer, 0...255
+	 */
+	public int getGrayValue(int channel, int x, int y);
 }

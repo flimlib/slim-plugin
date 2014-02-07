@@ -29,7 +29,7 @@ package loci.slim.preprocess;
  * @author Aivar Grislis
  */
 public interface ISLIMBinner extends IProcessor {
-    
-    public void init(int width, int height);
-    
+
+	public void init(int width, int height);
+
 }

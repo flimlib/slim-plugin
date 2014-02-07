@@ -29,7 +29,7 @@ package loci.slim.analysis.batch.ui;
  * @author Aivar Grislis
  */
 public interface BatchHistogramListener {
-	
+
 	public void swapImage(String filePath);
-	
+
 }

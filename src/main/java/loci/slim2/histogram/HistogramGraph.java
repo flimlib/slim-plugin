@@ -125,7 +125,7 @@ public class HistogramGraph {
 		this.histogram = histogram;
 		repaint();
 	}
-	
+
 	public long[] getHistogram() {
 		return histogram;
 	}
@@ -149,18 +149,18 @@ public class HistogramGraph {
 	 * Redraws the histogram graph.
 	 */
 	private void repaint() {
-		DrawingTool tool = new DrawingTool(dataset, renderingService);		
-		
+		DrawingTool tool = new DrawingTool(dataset, renderingService);
+
 		// draw background and frame
 		tool.setChannels(WHITE_CHANNELS);
 		tool.fillRect(0, 0, totalWidth, totalHeight);
 		tool.setChannels(BLACK_CHANNELS);
 		tool.drawRect(X_MARGIN, Y_MARGIN, width + 2 * FRAME_WIDTH, height + 2 * FRAME_HEIGHT);
-		
+
 		// draw histogram
 		if (null != histogram) {
 			int[] barHeights = getBarHeights(width, height);
-			
+
 			// draw bars
 			tool.setChannels(GRAY_CHANNELS);
 			for (int i = 0; i < barHeights.length; ++i) {
@@ -186,7 +186,7 @@ public class HistogramGraph {
 	 */
 	private int[] getBarHeights(int width, int height) {
 		int[] barHeights = new int[histogram.length];
-		
+
 		// find maximum count
 		long maxBinCount = Long.MIN_VALUE;
 		for (long binCount : histogram) {
@@ -237,7 +237,7 @@ public class HistogramGraph {
 						// if option selected, make sure values of one show at least a single pixel
 						barHeights[i] = (int)((height - extraPixel) * histogram[i] / maxBinCount) + extraPixel;
 					}
-				}	
+				}
 			}
 		}
 		return barHeights;

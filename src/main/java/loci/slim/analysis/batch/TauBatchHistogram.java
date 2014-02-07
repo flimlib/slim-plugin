@@ -31,14 +31,14 @@ import loci.slim.fitted.FittedValue;
  * @author Aivar Grislis
  */
 public class TauBatchHistogram extends AbstractBatchHistogram implements BatchHistogram {
-	
+
 	public void init(FittedValue fittedValue) {
 		setFittedValue(fittedValue);
-		
+
 		// 200,000 * 24 bytes ~= 4.8Mb memory usage
 		int totalBins = 200000;
 		setTotalBins(totalBins);
-		
+
 		// bin tau values from 0.0..20.0 nanoseconds
 		double minRange = 0.0;
 		double maxRange = 20.0;

@@ -42,7 +42,7 @@ public class BaseFitSettings implements FitSettings {
 	private HorzCursor[] decayHorzCursors;
 	private VertCursor decayVertCursor;
 	private int binningFactor;
-	
+
 	public GlobalFitParams globalFitParams;
 
 	@Override
@@ -54,7 +54,7 @@ public class BaseFitSettings implements FitSettings {
 	public void setGlobalFitParams(GlobalFitParams globalFitParams) {
 		this.globalFitParams = globalFitParams;
 	}
-	
+
 	@Override
 	public String getFittedImages() {
 		return fittedImages;
@@ -64,12 +64,12 @@ public class BaseFitSettings implements FitSettings {
 	public void setFittedImages(String fittedImages) {
 		this.fittedImages = fittedImages;
 	}
-	
+
 	@Override
 	public int getBins() {
 		return bins;
 	}
-	
+
 	/**
 	 * Set number of time bins.
 	 * 
@@ -92,12 +92,12 @@ public class BaseFitSettings implements FitSettings {
 	public void setTimeInc(double timeInc) {
 		this.timeInc = timeInc;
 	}
-	
+
 	@Override
 	public double[] getExcitation() {
 		return excitation;
 	}
-	
+
 	/**
 	 * Set excitation decay values.
 	 * 
@@ -106,12 +106,12 @@ public class BaseFitSettings implements FitSettings {
 	public void setExcitation(double[] excitation) {
 		this.excitation = excitation;
 	}
-	
+
 	@Override
 	public HorzCursor[] getExcitationHorzCursors() {
 		return excitationHorzCursors;
 	}
-	
+
 	/**
 	 * Sets horizontal cursor positions on excitation decay.
 	 * 
@@ -125,7 +125,7 @@ public class BaseFitSettings implements FitSettings {
 	public VertCursor getExcitationVertCursor() {
 		return excitationVertCursor;
 	}
-	
+
 	/**
 	 * Sets vertical cursor position on excitation decay.
 	 * 
@@ -134,7 +134,7 @@ public class BaseFitSettings implements FitSettings {
 	public void setExcitationVertCursor(VertCursor excitationVertCursor) {
 		this.excitationVertCursor = excitationVertCursor;
 	}
-	
+
 	@Override
 	public HorzCursor[] getDecayHorzCursors() {
 		return decayHorzCursors;
@@ -162,12 +162,12 @@ public class BaseFitSettings implements FitSettings {
 	public void setDecayVertCursor(VertCursor decayVertCursor) {
 		this.decayVertCursor = decayVertCursor;
 	}
-	
+
 	@Override
 	public int getBinningFactor() {
 		return binningFactor;
 	}
-	
+
 	/**
 	 * Sets binning factor.
 	 * <p>

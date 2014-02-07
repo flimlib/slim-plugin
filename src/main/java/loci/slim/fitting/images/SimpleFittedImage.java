@@ -34,36 +34,36 @@ import loci.slim.mask.IMaskGroup;
  * @author Aivar Grislis
  */
 public class SimpleFittedImage extends AbstractBaseFittedImage {
-    private int _parameterIndex;
+	private int _parameterIndex;
 
-    /**
-     * Constructor, giving index of input parameter to display
-     *
-     * @param title
-     * @param dimension
+	/**
+	 * Constructor, giving index of input parameter to display
+	 *
+	 * @param title
+	 * @param dimension
 	 * @param indexColorModel
-     * @param parameterIndex
+	 * @param parameterIndex
 	 * @param colorizeGrayScale
 	 * @param grayScalePixelValue;
 	 * @param maskGroup;
-     */
-    public SimpleFittedImage(String title, int[] dimension,
+	 */
+	public SimpleFittedImage(String title, int[] dimension,
 			IndexColorModel indexColorModel, int parameterIndex,
-            boolean colorizeGrayScale, IGrayScaleImage grayScaleImage,
-            IMaskGroup[] maskGroup) {
-        super(title, dimension, indexColorModel, colorizeGrayScale,
-                grayScaleImage, maskGroup);
-        _parameterIndex = parameterIndex;
-    }
-    
-    /**
-     * Given the array of fitted parameters, get the value for this image.
-     * 
-     * @param parameters
-     * @return 
-     */
-    @Override
-    public double getValue(double[] parameters) {
-        return parameters[_parameterIndex];
-    }
+			boolean colorizeGrayScale, IGrayScaleImage grayScaleImage,
+			IMaskGroup[] maskGroup) {
+		super(title, dimension, indexColorModel, colorizeGrayScale,
+				grayScaleImage, maskGroup);
+		_parameterIndex = parameterIndex;
+	}
+
+	/**
+	 * Given the array of fitted parameters, get the value for this image.
+	 * 
+	 * @param parameters
+	 * @return 
+	 */
+	@Override
+	public double getValue(double[] parameters) {
+		return parameters[_parameterIndex];
+	}
 }

@@ -43,20 +43,20 @@ public class SLIM_PlugIn implements PlugIn {
 	private static final Stack<SLIMProcessor> stack = new Stack<SLIMProcessor>();
 	private static volatile SLIMProcessor instance = null;
 
-    public void run(String arg) {
-        SLIMProcessor slimProcessor = new SLIMProcessor();
+	public void run(String arg) {
+		SLIMProcessor slimProcessor = new SLIMProcessor();
 		stack.push(slimProcessor);
-        slimProcessor.process(arg);
+		slimProcessor.process(arg);
 		stack.pop();
-    }
+	}
 
-    public static void main(String [] args)
-    {
-        new ImageJ();
-        SLIM_PlugIn plugIn = new SLIM_PlugIn();
-        plugIn.run("");
-        System.exit(0);
-    }
+	public static void main(String [] args)
+	{
+		new ImageJ();
+		SLIM_PlugIn plugIn = new SLIM_PlugIn();
+		plugIn.run("");
+		System.exit(0);
+	}
 
 	/**
 	 * Starts up batch processing.
@@ -101,8 +101,8 @@ public class SLIM_PlugIn implements PlugIn {
 		}
 		instance = null;
 	}
-	
-	
+
+
 	//TODO ARG EXPERIMENTAL
 	/**
 	 * Starts up batch processing.
@@ -145,5 +145,5 @@ public class SLIM_PlugIn implements PlugIn {
 		}
 		instance = null;
 	}
-	
+
 }

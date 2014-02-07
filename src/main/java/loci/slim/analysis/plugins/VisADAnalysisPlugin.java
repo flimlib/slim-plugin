@@ -46,10 +46,10 @@ import net.imglib2.type.numeric.real.DoubleType;
 //TODO ARG 9/21/12 disabled the VisAD plugin since it doesn't function
 //@SLIMAnalyzer(name="VisAD")
 public class VisADAnalysisPlugin /*implements ISLIMAnalyzer*/ {
-    //@Override
-    public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function) {
-        ImagePlus imp = ImageJFunctions.show(image);
-        imp.setTitle("Fitted results");
-        IJ.runPlugIn(imp, "imagej.visad.VisADPlugin", "");
-    }
+	//@Override
+	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function) {
+		ImagePlus imp = ImageJFunctions.show(image);
+		imp.setTitle("Fitted results");
+		IJ.runPlugIn(imp, "imagej.visad.VisADPlugin", "");
+	}
 }

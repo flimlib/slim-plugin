@@ -33,18 +33,18 @@ import loci.slim2.process.interactive.cursor.FittingCursor;
  * @author Aivar Grislis
  */
 public interface ExcitationGraph {
-	
-    /**
-     * Gets the chart JPanel
-     *
-     * @return JFrame
-     */
-    public JComponent getComponent();
 
-    /**
-     * Sets the fitting cursor.
-     * 
-     * @param fittingCursor 
-     */
-    public void setFittingCursor(FittingCursor fittingCursor);
+	/**
+	 * Gets the chart JPanel
+	 *
+	 * @return JFrame
+	 */
+	public JComponent getComponent();
+
+	/**
+	 * Sets the fitting cursor.
+	 * 
+	 * @param fittingCursor 
+	 */
+	public void setFittingCursor(FittingCursor fittingCursor);
 }

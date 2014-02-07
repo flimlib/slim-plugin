@@ -29,46 +29,46 @@ package loci.slim.preprocess;
  * @author Aivar Grislis
  */
 public class SquareBinner implements IProcessor {
-    private int _size;
-    private int _width;
-    private int _height;
-    private IProcessor _processor;
+	private int _size;
+	private int _width;
+	private int _height;
+	private IProcessor _processor;
 
-    /**
-     * Initializes the binner.  Must be called once after instantiation and
-     * before use.
-     * 
-     * @param size
-     * @param width
-     * @param height 
-     */
-    public void init(int size, int width, int height) {
-        _size   = size;
-        _width  = width;
-        _height = height;
-    }
-    
-    /**
-     * Specifies a source IProcessor to be chained to this one.
-     * 
-     * @param processor 
-     */
-    public void chain(IProcessor processor) {
-        _processor = processor;
-    }
-    
-    /**
-     * Gets input pixel value.
-     * 
-     * @param location
-     * @return pixel value
-     */
-    public double[] getPixel(int[] location) {
-        double[] sum = _processor.getPixel(location);
+	/**
+	 * Initializes the binner.  Must be called once after instantiation and
+	 * before use.
+	 * 
+	 * @param size
+	 * @param width
+	 * @param height 
+	 */
+	public void init(int size, int width, int height) {
+		_size   = size;
+		_width  = width;
+		_height = height;
+	}
+
+	/**
+	 * Specifies a source IProcessor to be chained to this one.
+	 * 
+	 * @param processor 
+	 */
+	public void chain(IProcessor processor) {
+		_processor = processor;
+	}
+
+	/**
+	 * Gets input pixel value.
+	 * 
+	 * @param location
+	 * @return pixel value
+	 */
+	public double[] getPixel(int[] location) {
+		double[] sum = _processor.getPixel(location);
 		if (null != sum) {
 			// keep a running sum; don't change source pixel
 			sum = sum.clone();
-			
+
 			int x = location[0];
 			int y = location[1];
 
@@ -103,15 +103,15 @@ public class SquareBinner implements IProcessor {
 				}
 			}
 		}
-        return sum;
-    }
+		return sum;
+	}
 
-    /*
-     * Adds together two decays.
-     */
-    private void add(double[] sum, double[] pixel) {
-        for (int i = 0; i < sum.length; ++i) {
-            sum[i] += pixel[i];
-        }
-    }
+	/*
+	 * Adds together two decays.
+	 */
+	private void add(double[] sum, double[] pixel) {
+		for (int i = 0; i < sum.length; ++i) {
+			sum[i] += pixel[i];
+		}
+	}
 }

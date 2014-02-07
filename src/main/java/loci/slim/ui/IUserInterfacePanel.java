@@ -42,212 +42,212 @@ import loci.slim.IThresholdUpdate;
  */
 public interface IUserInterfacePanel {
 
-    /**
-     * Gets the UI JFrame.
-     *
-     * @return JFrame
-     */
-    public JFrame getFrame();
+	/**
+	 * Gets the UI JFrame.
+	 *
+	 * @return JFrame
+	 */
+	public JFrame getFrame();
 
-    /**
-     * Sets the listener
-     */
-    public void setListener(IUserInterfacePanelListener listener);
+	/**
+	 * Sets the listener
+	 */
+	public void setListener(IUserInterfacePanelListener listener);
 
 	/**
 	 * Sets the threshold listener.
 	 */
 	public void setThresholdListener(IThresholdUpdate thresholdListener);
-	
+
 	/**
 	 * Disables the UI.
 	 */
 	public void disable();
 
-    /**
-     * Resets the UI after a fit.
-     */
-    public void reset();
+	/**
+	 * Resets the UI after a fit.
+	 */
+	public void reset();
 
 	/**
 	 * Disables the UI buttons.
 	 */
 	public void disableButtons();
-	
+
 	/**
 	 * Resets the UI buttons after a fit.
 	 */
 	public void resetButtons();
 
-    /**
-     * Gets region the fit applies to.
-     *
-     * @return fit region
-     */
-    public FitRegion getRegion();
+	/**
+	 * Gets region the fit applies to.
+	 *
+	 * @return fit region
+	 */
+	public FitRegion getRegion();
 
-    /**
-     * Gets implementation & algorithm for the fit.
-     *
-     * @return fit algorithm.
-     */
-    public FitAlgorithm getAlgorithm();
+	/**
+	 * Gets implementation & algorithm for the fit.
+	 *
+	 * @return fit algorithm.
+	 */
+	public FitAlgorithm getAlgorithm();
 
-    /**
-     * Gets function to be fitted.
-     *
-     * @return fit function
-     */
-    public FitFunction getFunction();
+	/**
+	 * Gets function to be fitted.
+	 *
+	 * @return fit function
+	 */
+	public FitFunction getFunction();
 
-    /**
-     * Gets noise model for fit.
-     *
-     * @return
-     */
-    public NoiseModel getNoiseModel();
+	/**
+	 * Gets noise model for fit.
+	 *
+	 * @return
+	 */
+	public NoiseModel getNoiseModel();
 
-    /**
-     * Returns list of fitted images to display.
-     *
-     * @return
-     */
-    public String getFittedImages();
+	/**
+	 * Returns list of fitted images to display.
+	 *
+	 * @return
+	 */
+	public String getFittedImages();
 
-    /**
-     * Returns whether to create colorized grayscale fitted images.
-     * 
-     * @return 
-     */
-    public boolean getColorizeGrayScale();
+	/**
+	 * Returns whether to create colorized grayscale fitted images.
+	 * 
+	 * @return 
+	 */
+	public boolean getColorizeGrayScale();
 
-    /**
-     * Gets analysis plugin names.
-     *
-     * @return analysis plugin names
-     */
-    public String[] getAnalysisList();
+	/**
+	 * Gets analysis plugin names.
+	 *
+	 * @return analysis plugin names
+	 */
+	public String[] getAnalysisList();
 
-    /**
-     * Gets whether or not to fit all channels.
-     *
-     * @return fit all channels
-     */
-    public boolean getFitAllChannels();
-    
-    /**
-     * Gets photon count threshold to fit a pixel.
-     *
-     * @return threshold
-     */
-    public int getThreshold();
+	/**
+	 * Gets whether or not to fit all channels.
+	 *
+	 * @return fit all channels
+	 */
+	public boolean getFitAllChannels();
 
-    /**
-     * Sets photon count threshold to fit a pixel.
-     *
-     * @param threshold
-     */
-    public void setThreshold(int threshold);
- 
-    /**
-     * Gets chi square target for fit.
-     * 
-     * @return 
-     */
-    public double getChiSquareTarget();
+	/**
+	 * Gets photon count threshold to fit a pixel.
+	 *
+	 * @return threshold
+	 */
+	public int getThreshold();
 
-    /**
-     * Sets chi square target for fit.
-     * 
-     * @param chiSqTarget 
-     */
-    public void setChiSquareTarget(double chiSqTarget);   
+	/**
+	 * Sets photon count threshold to fit a pixel.
+	 *
+	 * @param threshold
+	 */
+	public void setThreshold(int threshold);
 
-    /**
-     * Gets binning plugin name.
-     *
-     * @return binning plugin name
-     */
-    public String getBinning();
+	/**
+	 * Gets chi square target for fit.
+	 * 
+	 * @return 
+	 */
+	public double getChiSquareTarget();
 
-    /**
-     * Gets pixel x.
-     *
-     * @return x
-     */
-    public int getX();
+	/**
+	 * Sets chi square target for fit.
+	 * 
+	 * @param chiSqTarget 
+	 */
+	public void setChiSquareTarget(double chiSqTarget);
 
-    /**
-     * Sets pixel x.
-     *
-     * @param x
-     */
-    public void setX(int x);
+	/**
+	 * Gets binning plugin name.
+	 *
+	 * @return binning plugin name
+	 */
+	public String getBinning();
 
-    /**
-     * Gets pixel y.
-     *
-     * @return y
-     */
-    public int getY();
+	/**
+	 * Gets pixel x.
+	 *
+	 * @return x
+	 */
+	public int getX();
 
-    /**
-     * Sets pixel y.
-     *
-     * @param y
-     */
-    public void setY(int y);
+	/**
+	 * Sets pixel x.
+	 *
+	 * @param x
+	 */
+	public void setX(int x);
 
-    /**
-     * Gets number of fit parameters
-     *
-     * @return count
-     */
-    public int getParameterCount();
+	/**
+	 * Gets pixel y.
+	 *
+	 * @return y
+	 */
+	public int getY();
 
-    /**
-     * Sets number of fitted parameters after a successful fit.
-     *
-     * @param components
-     */
-    public void setFittedParameterCount(int count);
+	/**
+	 * Sets pixel y.
+	 *
+	 * @param y
+	 */
+	public void setY(int y);
 
-    /**
-     * Gets the parameters of the fit
-     *
-     * @return fit parameters
-     */
-    public double[] getParameters();
+	/**
+	 * Gets number of fit parameters
+	 *
+	 * @return count
+	 */
+	public int getParameterCount();
 
-    /**
-     * Sets the parameters of the fit
-     *
-     * @param parameters
+	/**
+	 * Sets number of fitted parameters after a successful fit.
+	 *
+	 * @param components
+	 */
+	public void setFittedParameterCount(int count);
+
+	/**
+	 * Gets the parameters of the fit
+	 *
+	 * @return fit parameters
+	 */
+	public double[] getParameters();
+
+	/**
+	 * Sets the parameters of the fit
+	 *
+	 * @param parameters
 	 * @param AIC
-     */
-    public void setParameters(double parameters[], double AIC);
+	 */
+	public void setParameters(double parameters[], double AIC);
 
-    /**
-     * Sets the parameters of the fit by function.
-     *
-     * @param function index
-     * @param parameters
-     */
-    public void setFunctionParameters(int function, double parameters[]);
+	/**
+	 * Sets the parameters of the fit by function.
+	 *
+	 * @param function index
+	 * @param parameters
+	 */
+	public void setFunctionParameters(int function, double parameters[]);
 
-    /**
-     * Gets which parameters aren't fixed.
-     *
-     * @return free parameters
-     */
-    public boolean[] getFree();
+	/**
+	 * Gets which parameters aren't fixed.
+	 *
+	 * @return free parameters
+	 */
+	public boolean[] getFree();
 
-    /**
-     * Gets whether to start next fit with results of last fit.
-     *
-     * @return
-     */
-    public boolean getRefineFit();
+	/**
+	 * Gets whether to start next fit with results of last fit.
+	 *
+	 * @return
+	 */
+	public boolean getRefineFit();
 
 	/**
 	 * Experimental: gets a scatter factor from UI.  SPC Image can fit an

@@ -35,13 +35,13 @@ import loci.slim2.fitting.GlobalFitParams;
  * @author Aivar Grislis
  */
 public interface FitSettings {
-	
+
 	public GlobalFitParams getGlobalFitParams();
-	
+
 	public void setGlobalFitParams(GlobalFitParams globalFitParams);
-	
+
 	public String getFittedImages();
-	
+
 	public void setFittedImages(String fittedImages);
 
 	/**
@@ -64,7 +64,7 @@ public interface FitSettings {
 	 * @return 
 	 */
 	public double[] getExcitation();
-	
+
 	/**
 	 * Gets horizontal cursor positions on excitation decay.
 	 * 
@@ -92,7 +92,7 @@ public interface FitSettings {
 	 * @return null or cursor
 	 */
 	public VertCursor getDecayVertCursor();
-	
+
 	/**
 	 * Gets binning factor.
 	 * <p>

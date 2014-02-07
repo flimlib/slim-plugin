@@ -29,7 +29,7 @@ package loci.slim.mask;
  * @author Aivar Grislis
  */
 public interface IMaskGroupListener {
-	
+
 	/**
 	 * Sets a mask group to listen for changes.
 	 * 

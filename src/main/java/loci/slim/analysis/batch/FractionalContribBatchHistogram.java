@@ -35,11 +35,11 @@ public class FractionalContribBatchHistogram extends AbstractBatchHistogram impl
 	@Override
 	public void init(FittedValue fittedValue) {
 		setFittedValue(fittedValue);
-		
+
 		// 100,000 * 24 bytes ~= 2.4Mb memory usage
 		int totalBins = 100000;
 		setTotalBins(totalBins);
-		
+
 		// expect f values from 0.0...1.0
 		double minRange = 0.0;
 		double maxRange = 1.0;

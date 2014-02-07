@@ -31,23 +31,23 @@ import ij.gui.Roi;
  */
 public class RoiProcessor implements IProcessor {
 	private Roi[] _rois;
-    private IProcessor _processor;
-	
+	private IProcessor _processor;
+
 	public RoiProcessor(Roi[] rois) {
 		_rois = rois;
 	}
-	
-    @Override
-    public void chain(IProcessor processor) {
+
+	@Override
+	public void chain(IProcessor processor) {
 		_processor = processor;
 	}
-    
-    @Override
-    public double[] getPixel(int[] location) {
+
+	@Override
+	public double[] getPixel(int[] location) {
 		double[] returnValue = _processor.getPixel(location);
 		for (Roi roi : _rois) {
 			if (roi.contains(location[0], location[1])) {
-			   return returnValue;
+				return returnValue;
 			}
 		}
 		return null;

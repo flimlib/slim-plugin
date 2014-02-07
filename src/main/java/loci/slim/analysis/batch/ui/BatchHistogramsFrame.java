@@ -43,7 +43,7 @@ import loci.slim.analysis.batch.BatchHistogram;
  */
 public class BatchHistogramsFrame extends JFrame {
 	public static final String SUMMARY = "Summary";
-    private static final String TITLE = "Batch Histograms";
+	private static final String TITLE = "Batch Histograms";
 	private static final int SCROLLBAR_WIDTH = ((Integer) UIManager.get("ScrollBar.width")).intValue();
 	private BatchHistogramListener listener;
 	private BorderLayout layout;
@@ -80,7 +80,7 @@ public class BatchHistogramsFrame extends JFrame {
 		HistogramStatisticsRowPanel summaryStatisticsRow = new HistogramStatisticsRowPanel(SUMMARY, summaryStatistics, null);
 		this.summaryStatisticsRow = summaryStatisticsRow;
 		Component component = layout.getLayoutComponent(BorderLayout.SOUTH);
-        if (null != component) {
+		if (null != component) {
 			remove(component);
 		}
 		add(summaryStatisticsRow, BorderLayout.SOUTH);

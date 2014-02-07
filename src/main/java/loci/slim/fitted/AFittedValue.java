@@ -30,7 +30,7 @@ package loci.slim.fitted;
  */
 public class AFittedValue extends AbstractFittedValue implements FittedValue {
 	private int fittedParamIndex;
-	
+
 	public void init(String title, int component) {
 		setTitle(title);
 		switch (component) {

@@ -30,9 +30,9 @@ package loci.slim2.fitting;
  */
 public class DefaultFitResults implements FitResults {
 	int errorCode;
-    double chiSquare;
-    double[] params;
-    double[] yFitted;
+	double chiSquare;
+	double[] params;
+	double[] yFitted;
 	double[] trans;
 	int photonCount;
 	int transStart;
@@ -43,52 +43,52 @@ public class DefaultFitResults implements FitResults {
 	public void setErrorCode(int errorCode) {
 		this.errorCode = errorCode;
 	}
-	
-	@Override	
+
+	@Override
 	public int getErrorCode() {
 		return errorCode;
 	}
-	
-	@Override    
-    public void setChiSquare(double chiSquare) {
-        this.chiSquare = chiSquare;
-    }
-	
-	@Override    
-    public double getChiSquare() {
-        return chiSquare;
-    }
-	
-	@Override    
-    public void setParams(double[] params) {
-        this.params = params;
-    }
-	
-	@Override    
-    public double[] getParams() {
-        return params;
-    }
-	
-	@Override    
-    public void setYFitted(double[] yFitted) {
-        this.yFitted = yFitted;
-    }
-	
-	@Override    
-    public double[] getYFitted() {
-        return yFitted;
-    }
-	
+
+	@Override
+	public void setChiSquare(double chiSquare) {
+		this.chiSquare = chiSquare;
+	}
+
+	@Override
+	public double getChiSquare() {
+		return chiSquare;
+	}
+
+	@Override
+	public void setParams(double[] params) {
+		this.params = params;
+	}
+
+	@Override
+	public double[] getParams() {
+		return params;
+	}
+
+	@Override
+	public void setYFitted(double[] yFitted) {
+		this.yFitted = yFitted;
+	}
+
+	@Override
+	public double[] getYFitted() {
+		return yFitted;
+	}
+
 	@Override
 	public void setTransient(double[] trans) {
 		this.trans = trans;
 	}
-	
+
 	@Override
 	public double[] getTransient() {
 		return trans;
 	}
-	
+
 	@Override
 	public void setPhotonCount(int photonCount) {
 		this.photonCount = photonCount;

@@ -29,31 +29,31 @@ package loci.slim.fitting.params;
  * @author Aivar Grislis
  */
 public class FitResults implements IFitResults {
-    double _chiSquare;
-    double[] _params;
-    double[] _yFitted;
-    
-    public void setChiSquare(double chiSquare) {
-        _chiSquare = chiSquare;
-    }
-    
-    public double getChiSquare() {
-        return _chiSquare;
-    }
-    
-    public void setParams(double[] params) {
-        _params = params;
-    }
-    
-    public double[] getParams() {
-        return _params;
-    }
-    
-    public void setYFitted(double[] yFitted) {
-        _yFitted = yFitted;
-    }
-    
-    public double[] getYFitted() {
-        return _yFitted;
-    }
+	double _chiSquare;
+	double[] _params;
+	double[] _yFitted;
+
+	public void setChiSquare(double chiSquare) {
+		_chiSquare = chiSquare;
+	}
+
+	public double getChiSquare() {
+		return _chiSquare;
+	}
+
+	public void setParams(double[] params) {
+		_params = params;
+	}
+
+	public double[] getParams() {
+		return _params;
+	}
+
+	public void setYFitted(double[] yFitted) {
+		_yFitted = yFitted;
+	}
+
+	public double[] getYFitted() {
+		return _yFitted;
+	}
 }

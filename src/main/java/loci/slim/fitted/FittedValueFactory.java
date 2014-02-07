@@ -32,7 +32,7 @@ import java.util.List;
  * @author Aivar Grislis
  */
 public class FittedValueFactory {
-	
+
 	/**
 	 * Creates array of FittedValue from String descriptor.
 	 * 

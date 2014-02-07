@@ -30,45 +30,45 @@ package loci.slim.fitting.params;
  */
 public interface IFitResults {
 
-    /**
-     * Sets fitted chi square result.
-     * 
-     * @param chiSquare 
-     */
-    public void setChiSquare(double chiSquare);
+	/**
+	 * Sets fitted chi square result.
+	 * 
+	 * @param chiSquare 
+	 */
+	public void setChiSquare(double chiSquare);
 
-    /**
-     * Gets fitted chi square result.
-     * 
-     * @return 
-     */
-    public double getChiSquare();
+	/**
+	 * Gets fitted chi square result.
+	 * 
+	 * @return 
+	 */
+	public double getChiSquare();
 
-    /**
-     * Sets fitted parameters.
-     * 
-     * @param params or null
-     */
-    public void setParams(double[] params);
+	/**
+	 * Sets fitted parameters.
+	 * 
+	 * @param params or null
+	 */
+	public void setParams(double[] params);
 
-    /**
-     * Gets fitted parameters.
-     * 
-     * @return null or fitted params
-     */
-    public double[] getParams();
+	/**
+	 * Gets fitted parameters.
+	 * 
+	 * @return null or fitted params
+	 */
+	public double[] getParams();
 
-    /**
-     * Sets fitted curve.
-     * 
-     * @param yFitted 
-     */
-    public void setYFitted(double[] yFitted);
+	/**
+	 * Sets fitted curve.
+	 * 
+	 * @param yFitted 
+	 */
+	public void setYFitted(double[] yFitted);
 
-    /**
-     * Gets fitted curve.
-     * 
-     * @return 
-     */
-    public double[] getYFitted();
+	/**
+	 * Gets fitted curve.
+	 * 
+	 * @return 
+	 */
+	public double[] getYFitted();
 }

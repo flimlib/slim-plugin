@@ -91,55 +91,55 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	private InteractiveProcessor interactiveProcessor;
 	private LifetimeDatasetWrapper activeLifetime;
 	private volatile boolean quit = false;
-	
+
 	@Parameter
 	private Context context;
-	
+
 	@Parameter
 	private CommandService commandService;
-	
+
 	@Parameter
 	private IOService ioService;
-	
+
 	@Parameter
 	private DatasetService datasetService;
-	
+
 	@Parameter
 	private DisplayService displayService;
-	
+
 	@Parameter
 	private ToolService toolService;
-	
+
 	@Parameter
 	private UIService uiService;
-	
+
 	@Parameter
 	private ThresholdService thresholdService;
-	
+
 	private Component parent;
-	
+
 	@Override
 	public void run() {
-		
+
 		// allow clicking on the grayscale version during this session
 		showTool();
-		
+
 		// special case first time through
 		boolean firstTime = true;
 		parent = ij.ImageJ.getFrames()[0];
 		do {
 			// new lifetime dataset wrapper
 			LifetimeDatasetWrapper lifetime = null;
-			
+
 			if (firstTime) {
 				// look for an already open LT image
-				lifetime = getLifetimeDatasetWrapper();	
+				lifetime = getLifetimeDatasetWrapper();
 			}
 
 			// none found?
 			if (null == lifetime) {
 				// prompt for lifetime dataset name
-                File[] files = showFileDialog(parent, getPathFromPreferences());				System.out.println("back from showFileDialog");
+				File[] files = showFileDialog(parent, getPathFromPreferences());				System.out.println("back from showFileDialog");
 				if (null == files) {
 					// dialog cancelled
 					if (null == activeLifetime) {
@@ -166,7 +166,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 							// error; no settings available yet
 							showWarning("Manually process a single image before doing batch processing.");
 						}
-						
+
 						// reload previous
 						lifetime = activeLifetime;
 					}
@@ -184,7 +184,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 					}
 				}
 			}
-			
+
 			if (null != lifetime) {
 				// keep track of current dataset
 				activeLifetime = lifetime;
@@ -199,7 +199,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				// gives up control to load a new dataset or when done
 				quit = interactiveProcessor.process(lifetime);
 			}
-			
+
 			// one shot
 			firstTime = false;
 		}
@@ -226,35 +226,35 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	private void showError(String message) {
 		uiService.showDialog(message, DialogPrompt.MessageType.ERROR_MESSAGE);
 	}
-	
-    /**
-     * Restores path name from Java Preferences.
-     *
-     * @return String with path name
-     */
-    private String getPathFromPreferences() {
-       Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-       return prefs.get(PATH_KEY, "");
-    }
 
-    /**
-     * Saves the path name to Java Preferences.
-     *
-     * @param path
-     */
-    private void savePathInPreferences(String path) {
-        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-        prefs.put(PATH_KEY, path);
-    }
-	
-    /**
-     * Prompts for a FLIM file.
-     *
+	/**
+	 * Restores path name from Java Preferences.
+	 *
+	 * @return String with path name
+	 */
+	private String getPathFromPreferences() {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		return prefs.get(PATH_KEY, "");
+	}
+
+	/**
+	 * Saves the path name to Java Preferences.
+	 *
+	 * @param path
+	 */
+	private void savePathInPreferences(String path) {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		prefs.put(PATH_KEY, path);
+	}
+
+	/**
+	 * Prompts for a FLIM file.
+	 *
 	 * @param parent
-     * @param default path
-     * @return null or array of Files
-     */
-    private File[] showFileDialog(final Component parent, String defaultPath) {
+	 * @param default path
+	 * @return null or array of Files
+	 */
+	private File[] showFileDialog(final Component parent, String defaultPath) {
 		final JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(defaultPath));
 		chooser.setDialogTitle("Open Lifetime Image(s)");
@@ -270,9 +270,9 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 					public void run() {
 						returnCode[0] = chooser.showOpenDialog(parent);
 					}
-			});
+				});
 		}
-		catch (InterruptedException e) {	
+		catch (InterruptedException e) {
 		}
 		catch (InvocationTargetException e) {
 		}
@@ -298,20 +298,20 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		}
 		// no files selected
 		return null;
-    }
+	}
 
 	/**
 	 * File filter for lifetime files.
 	 */
 	private class ShowFileDialogFilter extends FileFilter {
 		private static final String DESCRIPTION = "Lifetime .ics & .sdt";
-		
-        @Override		
+
+		@Override
 		public boolean accept(File file) {
 			if (file.getName().endsWith(ICS_SUFFIX)) {
 				return true;
 			}
-		    if (file.getName().endsWith(SDT_SUFFIX)) {
+			if (file.getName().endsWith(SDT_SUFFIX)) {
 				return true;
 			}
 			if (file.isDirectory()) {
@@ -319,7 +319,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			}
 			return false;
 		}
-		
+
 		@Override
 		public String getDescription() {
 			return DESCRIPTION;
@@ -355,13 +355,13 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		outputIndex = 1;
 		IndexedMemberFormula formula5 = new IndexedMemberFormula(inputIndex);
 		OutputSetMember index5 = new OutputSetMember<T>("T2", outputIndex, formula5);
-		list.add(index5);		
+		list.add(index5);
 		inputIndex = 5;
 		outputIndex = 0;
 		IndexedMemberFormula formula6 = new IndexedMemberFormula(inputIndex);
 		OutputSetMember index6 = new OutputSetMember<T>("Z", outputIndex, formula6);
-		list.add(index6);		
-		
+		list.add(index6);
+
 		boolean combined = false; //true; // create a stack
 		boolean useChannelDimension = false;
 		DoubleType type = new DoubleType();
@@ -371,7 +371,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		axes[1] = Axes.Y;
 		axes[2] = Axes.Z;
 		OutputSet imageSet = new OutputSet(commandService, datasetService, combined, useChannelDimension, type, dimensions, "Test", axes, list);
-		
+
 		List<Dataset> datasetList = imageSet.getDatasets();
 		Display display = null;
 		for (Dataset d : datasetList) {
@@ -381,7 +381,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			//d.getImgPlus().getImg().
 			display = displayService.createDisplay(d);
 		}
-		
+
 		// slightly easier way to create similar sets
 		combined = !combined; // try the other variant also (stack vs separate images)
 		System.out.println("!!! commandService is " + commandService);
@@ -396,7 +396,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			d.setDirty(true);
 			displays[index++] = displayService.createDisplay(d);
 		}
-		
+
 		// do some drawing
 		long width = dimensions[0];
 		long height = dimensions[1];
@@ -409,7 +409,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			new RampGenerator(RampGenerator.RampType.LOWER_LEFT, width, height)
 		};
 		double[] inputValues = new double[inputs.length];
-		
+
 		long time = System.currentTimeMillis();
 		ChunkyPixelIterator iterator = new ChunkyPixelIterator(dimensions);
 		while (iterator.hasNext()) {
@@ -417,7 +417,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				Thread.sleep(1);
 			}
 			catch (Exception e) {
-				
+
 			}
 			ChunkyPixel chunkyPixel = iterator.next();
 			long[] position = chunkyPixel.getPosition();
@@ -431,14 +431,14 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			}
 		}
 		System.out.println("Elapsed chunky pixel overhead time " + (System.currentTimeMillis() - time));
-		
+
 		Dataset dd = datasetList.get(0);
 		System.out.println("dd name is " + dd.getName());
 		dd.getImgPlus().setChannelMaximum(0, 1.0);
 		dd.getImgPlus().setChannelMinimum(0, 0.0);
 		dd.setDirty(true);
 		dd.update();
-		
+
 		/*
 		// previous, non-chunky drawing code:
 		for (long y = 0; y < height; ++y) {
@@ -454,7 +454,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				}
 			}
 		}
-		*/
+		 */
 
 		//TODO ARG big problem here!
 		// I should be able to createDisplay up above and just update here
@@ -463,7 +463,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		//if (false) for (Dataset d : datasetList2) {
 		//	displays[index++] = displayService.createDisplay(d);
 		//}
-		
+
 		for (Display d : displays) {
 			if (d instanceof DefaultImageDisplay) {
 				DefaultImageDisplay defaultImageDisplay = (DefaultImageDisplay) d;
@@ -473,26 +473,26 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 			}
 			d.update(); // just monkeys with the axes
 		}
-		
+
 		//displays[0].
-		
+
 		//display.update();
-		
-	//private void setMinMax(final double min, final double max) {
-	//	view.setChannelRanges(min, max);
-	//	view.getProjector().map();
-	//	view.update();
-	//}		
-		
-		
+
+		//private void setMinMax(final double min, final double max) {
+		//	view.setChannelRanges(min, max);
+		//	view.getProjector().map();
+		//	view.update();
+		//}
+
+
 		Dataset dataset2 = (Dataset) imageSet2.getDatasets().get(0);
 		dataset2.setDirty(true);
 		System.out.println("FINIS");
-		
-		
+
+
 		// one more time; see if there's a timing issue with updates
 		display.update();
-		
+
 		//TODO end experimental
 	}
 
@@ -542,7 +542,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 				if (LIFETIME.equals(img.axis(i).type().getLabel())) {
 					LifetimeDatasetWrapper lifetime = null;
 					try {
-					    lifetime = new LifetimeDatasetWrapper(dataset);
+						lifetime = new LifetimeDatasetWrapper(dataset);
 					}
 					catch (NoLifetimeAxisFoundException e) {
 						// we just determined that there is a LIFETIME axis
@@ -557,7 +557,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		}
 		return null;
 	}
-	
+
 	/** Tests our command. */
 	public static void main(final String... args) throws Exception {
 		// Launch ImageJ as usual.

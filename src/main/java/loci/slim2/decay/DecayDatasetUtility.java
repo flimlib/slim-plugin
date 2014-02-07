@@ -49,7 +49,7 @@ public class DecayDatasetUtility {
 	public static Dataset convert(final DatasetService datasetService, final Dataset dataset, final int lifetimeDimension, final int factor) {
 		ImgPlus img = dataset.getImgPlus();
 		final int bins = (int) img.dimension(lifetimeDimension);
-		
+
 		// want same dimensions & axes except without lifetime
 		final long[] dimensions = deleteDimension(img, lifetimeDimension);
 		final AxisType[] axes = deleteAxisType(img, lifetimeDimension);
@@ -59,7 +59,7 @@ public class DecayDatasetUtility {
 		final boolean signed = false;
 		final boolean floating = false;
 		final Dataset returnValue = datasetService.create(dimensions, dataset.getName(), axes, bpp, signed, floating);
-		
+
 		// iterate through grayscale image
 		final double[] decay = new double[bins];
 		final ImgPlus imgPlus = returnValue.getImgPlus();
@@ -129,7 +129,7 @@ public class DecayDatasetUtility {
 			decay[i] = randomAccess.get().getRealDouble();
 		}
 	}
-	
+
 	private static void dumpPosition(long[] position) {
 		for (long p : position) {
 			System.out.print(" " + p);

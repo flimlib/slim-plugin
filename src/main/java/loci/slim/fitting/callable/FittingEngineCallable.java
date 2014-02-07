@@ -38,45 +38,45 @@ import loci.slim.fitting.params.ILocalFitParams;
  * @author Aivar Grislis
  */
 public class FittingEngineCallable implements IFittingEngineCallable {
-    private ICurveFitter _curveFitter;
-    private IGlobalFitParams _globalParams;
-    private ILocalFitParams _localParams;
-    private IFitResults _result;
-    
-    @Override
-    public void setup(final ICurveFitter curveFitter,
-            final IGlobalFitParams globalParams,
-            final ILocalFitParams localParams) {
-        _curveFitter = curveFitter;
-        _globalParams = globalParams;
-        _localParams = localParams;
-    }
- 
-    @Override
-    public IFitResults call() {
-        _curveFitter.setEstimator(_globalParams.getEstimator());
-        _curveFitter.setFitAlgorithm(_globalParams.getFitAlgorithm());
-        _curveFitter.setFitFunction(_globalParams.getFitFunction());
-        _curveFitter.setNoiseModel(_globalParams.getNoiseModel());
-        _curveFitter.setInstrumentResponse(_globalParams.getPrompt());
-        _curveFitter.setXInc(_globalParams.getXInc());
-        _curveFitter.setFree(_globalParams.getFree());
-       
-        ICurveFitData curveFitData = new CurveFitData(); 
-        curveFitData.setChiSquareTarget(_globalParams.getChiSquareTarget());
-        curveFitData.setYCount(_localParams.getY());
-        curveFitData.setTransStartIndex(_globalParams.getTransientStart());
-        curveFitData.setDataStartIndex(_globalParams.getDataStart());
-        curveFitData.setTransEndIndex(_globalParams.getTransientStop());        
-        curveFitData.setSig(_localParams.getSig());
-        curveFitData.setParams(_localParams.getParams().clone()); // params is overwritten
-        curveFitData.setYFitted(_localParams.getYFitted());
-        
-        ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData };
-		
-        int returnValue = _curveFitter.fitData(curveFitDataArray);
+	private ICurveFitter _curveFitter;
+	private IGlobalFitParams _globalParams;
+	private ILocalFitParams _localParams;
+	private IFitResults _result;
 
-        _result = new FitResults();
+	@Override
+	public void setup(final ICurveFitter curveFitter,
+			final IGlobalFitParams globalParams,
+			final ILocalFitParams localParams) {
+		_curveFitter = curveFitter;
+		_globalParams = globalParams;
+		_localParams = localParams;
+	}
+
+	@Override
+	public IFitResults call() {
+		_curveFitter.setEstimator(_globalParams.getEstimator());
+		_curveFitter.setFitAlgorithm(_globalParams.getFitAlgorithm());
+		_curveFitter.setFitFunction(_globalParams.getFitFunction());
+		_curveFitter.setNoiseModel(_globalParams.getNoiseModel());
+		_curveFitter.setInstrumentResponse(_globalParams.getPrompt());
+		_curveFitter.setXInc(_globalParams.getXInc());
+		_curveFitter.setFree(_globalParams.getFree());
+
+		ICurveFitData curveFitData = new CurveFitData();
+		curveFitData.setChiSquareTarget(_globalParams.getChiSquareTarget());
+		curveFitData.setYCount(_localParams.getY());
+		curveFitData.setTransStartIndex(_globalParams.getTransientStart());
+		curveFitData.setDataStartIndex(_globalParams.getDataStart());
+		curveFitData.setTransEndIndex(_globalParams.getTransientStop());
+		curveFitData.setSig(_localParams.getSig());
+		curveFitData.setParams(_localParams.getParams().clone()); // params is overwritten
+		curveFitData.setYFitted(_localParams.getYFitted());
+
+		ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData };
+
+		int returnValue = _curveFitter.fitData(curveFitDataArray);
+
+		_result = new FitResults();
 		_result.setParams(curveFitData.getParams());
 		if (returnValue >= 0) {
 			// success
@@ -88,7 +88,7 @@ public class FittingEngineCallable implements IFittingEngineCallable {
 			_result.setChiSquare(0.0);
 			_result.setYFitted(new double[] { });
 		}
- 
-        return _result;
-    }   
+
+		return _result;
+	}
 }

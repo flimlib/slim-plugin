@@ -39,5 +39,5 @@ import net.imglib2.type.numeric.real.DoubleType;
  * @author Aivar Grislis
  */
 public interface ISLIMAnalyzer {
-    public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters);
+	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters);
 }

@@ -30,50 +30,50 @@ package loci.slim.fitting.params;
  * @author Aivar Grislis
  */
 public class LocalFitParams implements ILocalFitParams {
-    private double[] _y;
-    private double[] _sig;
-    private int _fitStart;
-    private int _fitStop;
-    private double[] _params;
-    private double[] _yFitted;
-    
-    @Override
-    public void setY(double[] y) {
-        _y = y;
-    }
-    
-    @Override
-    public double[] getY() {
-        return _y;
-    }
- 
-    @Override
-    public void setSig(double[] sig) {
-        _sig = sig;
-    }
+	private double[] _y;
+	private double[] _sig;
+	private int _fitStart;
+	private int _fitStop;
+	private double[] _params;
+	private double[] _yFitted;
 
-    @Override
-    public double[] getSig() {
-        return _sig;
-    }
-    
-    @Override
-    public void setParams(double[] params) {
-        _params = params;
-    }
-    
-    @Override
-    public double[] getParams() {
-        return _params;
-    }
-    
-    @Override
-    public void setYFitted(double[] yFitted) {
-        _yFitted = yFitted;
-    }
-    
-    @Override
-    public double[] getYFitted() {
-        return _yFitted;
-    }
+	@Override
+	public void setY(double[] y) {
+		_y = y;
+	}
+
+	@Override
+	public double[] getY() {
+		return _y;
+	}
+
+	@Override
+	public void setSig(double[] sig) {
+		_sig = sig;
+	}
+
+	@Override
+	public double[] getSig() {
+		return _sig;
+	}
+
+	@Override
+	public void setParams(double[] params) {
+		_params = params;
+	}
+
+	@Override
+	public double[] getParams() {
+		return _params;
+	}
+
+	@Override
+	public void setYFitted(double[] yFitted) {
+		_yFitted = yFitted;
+	}
+
+	@Override
+	public double[] getYFitted() {
+		return _yFitted;
+	}
 }

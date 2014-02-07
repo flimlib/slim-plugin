@@ -53,21 +53,21 @@ import net.imglib2.type.numeric.real.DoubleType;
 public class ExportHistogramsToText implements ISLIMAnalyzer {
 	private static final int BINS = 256;
 	private static final long MIN_COUNT = 3;
-    private static final String FILE_KEY = "export_histograms_to_text/file";
+	private static final String FILE_KEY = "export_histograms_to_text/file";
 	private static final String APPEND_KEY = "export_histograms_to_text/append";
 	private static final String CSV_KEY = "export_histograms_to_text/csv";
-    private static final int CHANNEL_INDEX = 2;
-    private static final char TAB = '\t';
+	private static final int CHANNEL_INDEX = 2;
+	private static final char TAB = '\t';
 	private static final char COMMA = ',';
 	private static final String TSV_SUFFIX = ".tsv";
 	private static final String CSV_SUFFIX = ".csv";
 	private String fileName;
 	private boolean append;
 	private boolean csv;
-    private BufferedWriter bufferedWriter;
+	private BufferedWriter bufferedWriter;
 	private boolean combined = true;
 
-    public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
+	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
 		// need entire fitted image
 		if (FitRegion.EACH == region) {
 			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
@@ -91,10 +91,10 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				export(fileName, append, image, function, parameters, separator);
 			}
 		}
-    }
-	
-    public void export(String fileName, boolean append, ImgPlus<DoubleType> image,
-			FitFunction function, String parameters, char separator)
+	}
+
+	public void export(String fileName, boolean append, ImgPlus<DoubleType> image,
+		FitFunction function, String parameters, char separator)
 	{
 		int params = 0;
 		int components = 0;
@@ -113,27 +113,27 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				break;
 			case STRETCHED_EXPONENTIAL:
 				params = 5;
-				
+
 				//TODO fix stretched; how many components?
 				break;
 		}
 		FittedValue[] fittedValues = FittedValueFactory.createFittedValues(parameters, components);
-		
-        try {
-            bufferedWriter = new BufferedWriter(new FileWriter(fileName, append));
-        }
+
+		try {
+			bufferedWriter = new BufferedWriter(new FileWriter(fileName, append));
+		}
 		catch (IOException e) {
-            IJ.log("exception opening file " + fileName);
-            IJ.handleException(e);
-        }
-		
+			IJ.log("exception opening file " + fileName);
+			IJ.handleException(e);
+		}
+
 		if (null != bufferedWriter) {
 			try {
 				// title this export
 				bufferedWriter.write("Export Histograms" + separator + image.getName());
 				bufferedWriter.newLine();
 				bufferedWriter.newLine();
-				
+
 				// look at image dimensions
 				long[] dimensions = new long[image.numDimensions()];
 				image.dimensions(dimensions);
@@ -142,7 +142,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				// for all channels
 				for (int channel = 0; channel < channels; ++channel) {
 					if (channels > 1) {
-					    bufferedWriter.write("Channel" + separator + channel);
+						bufferedWriter.write("Channel" + separator + channel);
 						bufferedWriter.newLine();
 						bufferedWriter.newLine();
 					}
@@ -151,7 +151,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 					for (int i = 0; i < fittedValues.length; ++i) {
 						statisticsArray[i] = getStatistics(image, channel, params, fittedValues[i]);
 					}
-					
+
 					if (combined) {
 						HistogramStatistics.export(statisticsArray, bufferedWriter, separator);
 					}
@@ -186,10 +186,10 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 	public HistogramStatistics getStatistics(ImgPlus<DoubleType> image, int channel, int params, FittedValue fittedValue) {
 		// first pass through image
 		ExportHistogramsToText.Statistics1 statistics1 = getStatistics1(image, channel, params, fittedValue);
-		
+
 		// second pass through the image
 		ExportHistogramsToText.Statistics2 statistics2 = getStatistics2(image, channel, params, fittedValue, statistics1.mean, statistics1.range, BINS);
-		
+
 		HistogramStatistics statistics = new HistogramStatistics();
 		statistics.setTitle(fittedValue.getTitle());
 		statistics.setCount(statistics1.count);
@@ -214,7 +214,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		statistics.setMinRange(statistics1.range[0]);
 		statistics.setMaxRange(statistics1.range[1]);
 		statistics.setHistogram(statistics2.histogram);
-		
+
 		return statistics;
 	}
 
@@ -239,7 +239,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		RandomAccess<DoubleType> cursor = image.randomAccess();
 		boolean hasChannelDimension;
 		int parameterIndex;
-		
+
 		if (3 == image.numDimensions()) {
 			hasChannelDimension = false;
 			parameterIndex = 2;
@@ -270,9 +270,9 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 					double value = cursor.get().getRealDouble();
 					fittedParameters[p] = value;
 				}
-				
+
 				// get value for this fitted parameter & account for it
-				double value = fittedValue.getValue(fittedParameters);	
+				double value = fittedValue.getValue(fittedParameters);
 				if (!Double.isNaN(value)) {
 					values[index++] = value;
 					if (value < min) {
@@ -288,7 +288,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		}
 		// sort values to read off quartiles
 		Arrays.sort(values, 0, index);
-		
+
 		if (count >= MIN_COUNT) {
 			// read off the quartiles
 			quartile = new double[3];
@@ -339,7 +339,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 			// avoid reporting spurious values
 			min = max = Double.NaN;
 		}
-			
+
 		ExportHistogramsToText.Statistics1 statistics = new ExportHistogramsToText.Statistics1();
 		statistics.count = count;
 		statistics.min = min;
@@ -367,13 +367,13 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		long count = 0;
 		long histogramCount = 0;
 		long[] histogram = new long[bins];
-		
+
 		long[] dimensions = new long[image.numDimensions()];
 		image.dimensions(dimensions);
 		RandomAccess<DoubleType> cursor = image.randomAccess();
 		boolean hasChannelDimension;
 		int parameterIndex;
-		
+
 		if (3 == image.numDimensions()) {
 			hasChannelDimension = false;
 			parameterIndex = 2;
@@ -382,7 +382,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 			hasChannelDimension = true;
 			parameterIndex = 3;
 		}
-		
+
 		// collect & histogram non-NaN values
 		double[] values = new double[(int) dimensions[0] * (int) dimensions[1]];
 		int index = 0;
@@ -404,15 +404,15 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 					double value = cursor.get().getRealDouble();
 					fittedParameters[p] = value;
 				}
-				
+
 				// get value for this fitted parameter & account for it
-				double value = fittedValue.getValue(fittedParameters);	
+				double value = fittedValue.getValue(fittedParameters);
 				if (!Double.isNaN(value)) {
 					// compute standard deviation from mean
 					double diff = mean - value;
 					diffSquaredSum += diff * diff;
 					++count;
-					
+
 					int bin = Binning.exclusiveValueToBin(bins, range[0], range[1], value);
 					if (0 <= bin && bin < bins) {
 						++histogram[bin];
@@ -421,7 +421,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 				}
 			}
 		}
-		
+
 		ExportHistogramsToText.Statistics2 statistics = new ExportHistogramsToText.Statistics2();
 		statistics.standardDeviation = Math.sqrt(diffSquaredSum / count);
 		statistics.histogramCount = histogramCount;
@@ -450,48 +450,48 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 		public long[] histogram;
 	}
 
-    private String getFileFromPreferences() {
-       Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-       return prefs.get(FILE_KEY, fileName);
-    }
+	private String getFileFromPreferences() {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		return prefs.get(FILE_KEY, fileName);
+	}
 
-    private void saveFileInPreferences(String fileName) {
-        Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-        prefs.put(FILE_KEY, fileName);
-    }
-	
+	private void saveFileInPreferences(String fileName) {
+		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		prefs.put(FILE_KEY, fileName);
+	}
+
 	private boolean getAppendFromPreferences() {
 		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		return prefs.getBoolean(APPEND_KEY, append);
 	}
-	
+
 	private void saveAppendInPreferences(boolean append) {
 		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putBoolean(APPEND_KEY, append);
 	}
-	
+
 	private boolean getCSVFromPreferences() {
 		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		return prefs.getBoolean(CSV_KEY, csv);
 	}
-	
+
 	private void saveCSVInPreferences(boolean csv) {
 		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putBoolean(CSV_KEY, csv);
 	}
 
-    private boolean showFileDialog(String defaultFile, boolean defaultAppend, boolean defaultCSV) {
-        GenericDialog dialog = new GenericDialog("Export Histograms to Text");
-        dialog.addStringField("Save As:", defaultFile, 24);
+	private boolean showFileDialog(String defaultFile, boolean defaultAppend, boolean defaultCSV) {
+		GenericDialog dialog = new GenericDialog("Export Histograms to Text");
+		dialog.addStringField("Save As:", defaultFile, 24);
 		dialog.addCheckbox("Append", defaultAppend);
 		dialog.addCheckbox("Comma Separated", defaultCSV);
-        dialog.showDialog();
-        if (dialog.wasCanceled()) {
-            return false;
-        }
+		dialog.showDialog();
+		if (dialog.wasCanceled()) {
+			return false;
+		}
 		fileName = dialog.getNextString();
 		append   = dialog.getNextBoolean();
 		csv      = dialog.getNextBoolean();
 		return true;
-    }
+	}
 }

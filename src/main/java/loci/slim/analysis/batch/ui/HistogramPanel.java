@@ -52,10 +52,10 @@ public class HistogramPanel extends JPanel {
 	public Dimension getPreferredSize() {
 		return PREFERRED_SIZE;
 	}
-	
-    @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
+
+	@Override
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
 		long[] histogram = histogramStatistics.getHistogram();
 		if (null != histogram) {
 			// find maximum count for scaling
@@ -65,11 +65,11 @@ public class HistogramPanel extends JPanel {
 					maxCount = histogram[i];
 				}
 			}
-	
+
 			// fill with white
 			g.setColor(Color.WHITE);
 			g.fillRect(0, 0, HISTO_WIDTH, HISTO_HEIGHT);
-			
+
 			// draw bars in gray
 			g.setColor(Color.DARK_GRAY);
 
@@ -84,7 +84,7 @@ public class HistogramPanel extends JPanel {
 					g.drawLine(i, HISTO_HEIGHT - height, i, HISTO_HEIGHT);
 				}
 			}
-        }
+		}
 		else {
 			g.setColor(Color.ORANGE);
 			g.fillRect(0, 0, HISTO_WIDTH, HISTO_HEIGHT);
@@ -92,6 +92,6 @@ public class HistogramPanel extends JPanel {
 			g.drawLine(0, 0, HISTO_WIDTH, HISTO_HEIGHT);
 			g.drawLine(WIDTH, 0, 0, HISTO_HEIGHT);
 		}
-    }
+	}
 
 }

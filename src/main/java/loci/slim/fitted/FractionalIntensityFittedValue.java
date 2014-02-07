@@ -32,7 +32,7 @@ package loci.slim.fitted;
 public class FractionalIntensityFittedValue extends AbstractFittedValue implements FittedValue {
 	private int components;
 	private int fittedParamIndex;
-	
+
 	public void init(String title, int component, int components) {
 		setTitle(title);
 		this.components = components;

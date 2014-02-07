@@ -94,11 +94,11 @@ public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
 			// done with row; time for a new one
 			x = chunkTable[chunkIndex].offset[X_INDEX];
 			y += chunkTable[chunkIndex].inc[Y_INDEX];
-			
+
 			if (y >= dimensions[Y_INDEX]) {
 				// done with plane at this chunk size; time for a new chunk
 				++chunkIndex;
-				
+
 				if (chunkIndex >= chunkTable.length) {
 					// done with chunk sizes; time for a new plane
 					if (!incTail()) {
@@ -115,10 +115,10 @@ public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
 		long width  = chunkTable[chunkIndex].size[X_INDEX];
 		long height = chunkTable[chunkIndex].size[Y_INDEX];
 		ChunkyPixel returnValue = new ChunkyPixel(position, width, height);
-		
+
 		// increment x for next time
 		x += chunkTable[chunkIndex].inc[X_INDEX];
-		
+
 		return returnValue;
 	}
 
@@ -167,7 +167,7 @@ public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
 		public long[] offset;
 		public long[] inc;
 		public long[] size;
-		
+
 		public Chunk(long[] offset, long[] inc, long[] size) {
 			this.offset = offset;
 			this.inc    = inc;

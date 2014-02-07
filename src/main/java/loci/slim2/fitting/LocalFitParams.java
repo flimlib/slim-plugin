@@ -30,20 +30,20 @@ package loci.slim2.fitting;
  * @author Aivar Grislis
  */
 public interface LocalFitParams {
-    
-    public void setY(double[] y);
-    
-    public double[] getY();
-    
-    public void setSig(double[] sig);
-    
-    public double[] getSig();
-    
-    public void setParams(double[] params);
-    
-    public double[] getParams();
-    
-    public void setYFitted(double[] yFitted); //TODO ARG not really a fit param
-    
-    public double[] getYFitted(); //TODO ARG not really a fit param
+
+	public void setY(double[] y);
+
+	public double[] getY();
+
+	public void setSig(double[] sig);
+
+	public double[] getSig();
+
+	public void setParams(double[] params);
+
+	public double[] getParams();
+
+	public void setYFitted(double[] yFitted); //TODO ARG not really a fit param
+
+	public double[] getYFitted(); //TODO ARG not really a fit param
 }

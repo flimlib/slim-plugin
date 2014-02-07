@@ -30,26 +30,26 @@ package loci.slim.mask;
  */
 public interface IMaskGroup {
 
-    /**
-     * Adds a mask node to group.
-     * 
-     * @param node 
-     */
-    public void addNode(IMaskNode node);
+	/**
+	 * Adds a mask node to group.
+	 * 
+	 * @param node 
+	 */
+	public void addNode(IMaskNode node);
 
-    /**
-     * Removes a mask node from group.
-     * 
-     * @param node 
-     */
-    public void removeNode(IMaskNode node);
+	/**
+	 * Removes a mask node from group.
+	 * 
+	 * @param node 
+	 */
+	public void removeNode(IMaskNode node);
 
-    /**
-     * Updates the mask, notifies group.
-     * 
-     * @param node originating node
-     */
-    public void updateMask(IMaskNode node);
+	/**
+	 * Updates the mask, notifies group.
+	 * 
+	 * @param node originating node
+	 */
+	public void updateMask(IMaskNode node);
 
 	/**
 	 * Gets the current total mask for this group.

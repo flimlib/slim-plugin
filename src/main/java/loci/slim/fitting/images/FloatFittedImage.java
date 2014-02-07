@@ -33,40 +33,40 @@ import java.awt.image.IndexColorModel;
  * @author Aivar Grislis
  */
 public class FloatFittedImage implements IFittedImageSlice {
-    int _width;
-    int _height;
-    int _channel;
-    FloatProcessor _imageProcessor;
-    
-    public void init(int width, int height, int channel,
-            IndexColorModel indexColorModel) {
-        _width = width;
-        _height = height;
-        _channel = channel;
-        
-        _imageProcessor = new FloatProcessor(width, height);
-        _imageProcessor.setColorModel(indexColorModel);
-        
-        // fill the image with a value that will be out of LUT range and
-        // paint black
-        _imageProcessor.setValue(Float.NaN);
-        _imageProcessor.fill();
-    }
-    
-    public void setColorModel(IndexColorModel indexColorModel) {
-        _imageProcessor.setColorModel(indexColorModel);
-    }
-    
-    public ImageProcessor getImageProcessor() {
-        return _imageProcessor;
-    }
-    
-    public void setMinAndMax(double min, double max) {
-        _imageProcessor.setMinAndMax(min, max);
-    }
-    
-    public void draw(int x, int y, double value) {
-        _imageProcessor.setValue(value);
-        _imageProcessor.drawPixel(x, y);
-    }
+	int _width;
+	int _height;
+	int _channel;
+	FloatProcessor _imageProcessor;
+
+	public void init(int width, int height, int channel,
+			IndexColorModel indexColorModel) {
+		_width = width;
+		_height = height;
+		_channel = channel;
+
+		_imageProcessor = new FloatProcessor(width, height);
+		_imageProcessor.setColorModel(indexColorModel);
+
+		// fill the image with a value that will be out of LUT range and
+		// paint black
+		_imageProcessor.setValue(Float.NaN);
+		_imageProcessor.fill();
+	}
+
+	public void setColorModel(IndexColorModel indexColorModel) {
+		_imageProcessor.setColorModel(indexColorModel);
+	}
+
+	public ImageProcessor getImageProcessor() {
+		return _imageProcessor;
+	}
+
+	public void setMinAndMax(double min, double max) {
+		_imageProcessor.setMinAndMax(min, max);
+	}
+
+	public void draw(int x, int y, double value) {
+		_imageProcessor.setValue(value);
+		_imageProcessor.drawPixel(x, y);
+	}
 }

@@ -30,17 +30,17 @@ import javax.swing.JPanel;
  * @author Aivar Grislis
  */
 public class BatchHistogramPanel extends JPanel {
-    private HistogramPanel histogramPanel;
-    private StatisticsPanel statisticsPanel;
-    
-    public BatchHistogramPanel(HistogramPanel histogramPanel,
-	    StatisticsPanel statisticsPanel)
-    {
+	private HistogramPanel histogramPanel;
+	private StatisticsPanel statisticsPanel;
+
+	public BatchHistogramPanel(HistogramPanel histogramPanel,
+		StatisticsPanel statisticsPanel)
+	{
 	super();
-	
+
 	this.histogramPanel = histogramPanel;
 	this.add(histogramPanel);
 	this.statisticsPanel = statisticsPanel;
 	this.add(statisticsPanel);
-    }
+	}
 }

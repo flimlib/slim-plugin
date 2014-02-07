@@ -46,118 +46,118 @@ import loci.slim.heuristics.ExcitationScaler;
  * @author Aivar Grislis
  */
 public class ExcitationPanel extends JFrame {
-    private static final String TITLE = "Instrument Response Function";
-    private Excitation _excitation;
-    private int _bins;
-    private double _timeInc;
+	private static final String TITLE = "Instrument Response Function";
+	private Excitation _excitation;
+	private int _bins;
+	private double _timeInc;
 
-    public ExcitationPanel(Excitation excitation, final FittingCursor fittingCursor) {
+	public ExcitationPanel(Excitation excitation, final FittingCursor fittingCursor) {
 
-        _excitation = excitation;
+		_excitation = excitation;
 
-        this.setTitle(TITLE);
-        
-        double start = fittingCursor.getPromptStartValue();
-        double stop  = fittingCursor.getPromptStopValue();
-        double base = fittingCursor.getPromptBaselineValue();
+		this.setTitle(TITLE);
 
-        double[] values = excitation.getValues();
-        _bins = values.length;
-        _timeInc = excitation.getTimeInc();
-        ExcitationGraph excitationGraph = new ExcitationGraph(start, stop, base,
-                _bins, values, _timeInc);
-        excitationGraph.setFittingCursor(fittingCursor);
-        
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add("North", createTopPanel());
-        panel.add("Center", excitationGraph.getComponent());
-		
+		double start = fittingCursor.getPromptStartValue();
+		double stop  = fittingCursor.getPromptStopValue();
+		double base = fittingCursor.getPromptBaselineValue();
+
+		double[] values = excitation.getValues();
+		_bins = values.length;
+		_timeInc = excitation.getTimeInc();
+		ExcitationGraph excitationGraph = new ExcitationGraph(start, stop, base,
+			_bins, values, _timeInc);
+		excitationGraph.setFittingCursor(fittingCursor);
+
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add("North", createTopPanel());
+		panel.add("Center", excitationGraph.getComponent());
+
 		// DEBUGGING AIDS
 		if (false) {
-		JPanel panelX = new JPanel();
-		JLabel label = new JLabel("EXPERIMENTAL:");
-		panelX.add(label);
-		
-		JButton button1 = new JButton("Square IRF");
-		button1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int start = fittingCursor.getPromptStartBin();
-				int stop = fittingCursor.getPromptStopBin();
-				double baseline = fittingCursor.getPromptBaselineValue();
-				System.out.println("start " + start + " stop " + stop + " baseline " + baseline);
-				double[] values = new double[_bins];
-				for (int i = 0; i < _bins; ++i) {
-					if (i < start || i > stop) {
-						values[i] = 0.0;
+			JPanel panelX = new JPanel();
+			JLabel label = new JLabel("EXPERIMENTAL:");
+			panelX.add(label);
+
+			JButton button1 = new JButton("Square IRF");
+			button1.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					int start = fittingCursor.getPromptStartBin();
+					int stop = fittingCursor.getPromptStopBin();
+					double baseline = fittingCursor.getPromptBaselineValue();
+					System.out.println("start " + start + " stop " + stop + " baseline " + baseline);
+					double[] values = new double[_bins];
+					for (int i = 0; i < _bins; ++i) {
+						if (i < start || i > stop) {
+							values[i] = 0.0;
+						}
+						else {
+							values[i] = baseline;
+						}
 					}
-					else {
-						values[i] = baseline;
-					}
-				}
-				_excitation = new Excitation("Square", values, _timeInc);
-			}});
-		panelX.add(button1);
-		
-		JButton button2 = new JButton("Gaussian IRF");
-		button2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int start = fittingCursor.getPromptStartBin();
-				int stop = fittingCursor.getPromptStopBin();
-				double baseline = fittingCursor.getPromptBaselineValue();
-				System.out.println("start " + start + " stop " + stop + " baseline " + baseline);
-				double[] values = null;
-				_excitation = new Excitation("Gaussian", values, _timeInc);
-			}});
-		panelX.add(button2);
-		
-		panel.add("South", panelX);
+					_excitation = new Excitation("Square", values, _timeInc);
+				}});
+			panelX.add(button1);
+
+			JButton button2 = new JButton("Gaussian IRF");
+			button2.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					int start = fittingCursor.getPromptStartBin();
+					int stop = fittingCursor.getPromptStopBin();
+					double baseline = fittingCursor.getPromptBaselineValue();
+					System.out.println("start " + start + " stop " + stop + " baseline " + baseline);
+					double[] values = null;
+					_excitation = new Excitation("Gaussian", values, _timeInc);
+				}});
+			panelX.add(button2);
+
+			panel.add("South", panelX);
 		}
 
-        this.getContentPane().add(panel);
+		this.getContentPane().add(panel);
 
-        this.setSize(450, 225);
-        this.pack();
-        this.setVisible(true);
-    }
-    
-    public void quit() {
-        this.setVisible(false);
-    }
-    
-    public double[] getRawValues() {
-        return _excitation.getValues();
-    }
+		this.setSize(450, 225);
+		this.pack();
+		this.setVisible(true);
+	}
 
-    /**
-     * Gets the excitation values scaled for a particular start/stop/base cursor.
-     * 
-     * @param startIndex
-     * @param stopIndex
-     * @param base;
-     * @return 
-     */
-    public double[] getValues(int startIndex, int stopIndex, double base) {
-        return ExcitationScaler.scale(_excitation.getValues(),
-                startIndex, stopIndex, base, _timeInc, _bins);
-    }
+	public void quit() {
+		this.setVisible(false);
+	}
 
-    /*
-     * Creates a panel with file name.
-     */
-    private JPanel createTopPanel() {
-        JPanel panel = new JPanel();
-       // panel.setBorder(new EmptyBorder(0, 0, 8, 8));
-       // panel.setLayout(new SpringLayout());
+	public double[] getRawValues() {
+		return _excitation.getValues();
+	}
 
-        //JLabel fileLabel = new JLabel("File");
-        //fileLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        //panel.add(fileLabel);
+	/**
+	 * Gets the excitation values scaled for a particular start/stop/base cursor.
+	 * 
+	 * @param startIndex
+	 * @param stopIndex
+	 * @param base;
+	 * @return 
+	 */
+	public double[] getValues(int startIndex, int stopIndex, double base) {
+		return ExcitationScaler.scale(_excitation.getValues(),
+			startIndex, stopIndex, base, _timeInc, _bins);
+	}
 
-        panel.add(new JLabel(_excitation.getFileName()));
+	/*
+	 * Creates a panel with file name.
+	 */
+	private JPanel createTopPanel() {
+		JPanel panel = new JPanel();
+		// panel.setBorder(new EmptyBorder(0, 0, 8, 8));
+		// panel.setLayout(new SpringLayout());
 
-        // rows, cols, initX, initY, xPad, yPad
-        //SpringUtilities.makeCompactGrid(panel, 1, 2, 4, 4, 4, 4);
+		//JLabel fileLabel = new JLabel("File");
+		//fileLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		//panel.add(fileLabel);
 
-        return panel;
-    }
+		panel.add(new JLabel(_excitation.getFileName()));
+
+		// rows, cols, initX, initY, xPad, yPad
+		//SpringUtilities.makeCompactGrid(panel, 1, 2, 4, 4, 4, 4);
+
+		return panel;
+	}
 }

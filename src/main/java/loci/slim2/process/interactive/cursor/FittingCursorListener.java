@@ -31,10 +31,10 @@ package loci.slim2.process.interactive.cursor;
  */
 public interface FittingCursorListener {
 
-    /**
-     * Callback when the cursor changes.
-     * 
-     * @param cursor 
-     */
-    public void cursorChanged(FittingCursor cursor);
+	/**
+	 * Callback when the cursor changes.
+	 * 
+	 * @param cursor 
+	 */
+	public void cursorChanged(FittingCursor cursor);
 }

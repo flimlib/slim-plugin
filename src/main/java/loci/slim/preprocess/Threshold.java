@@ -29,41 +29,41 @@ package loci.slim.preprocess;
  * @author Aivar Grislis
  */
 public class Threshold implements IProcessor {
-    private final int _threshold;
-    private IProcessor _processor;
-    
-    public Threshold(int threshold) {
-        _threshold = threshold;
-    }
-    
-    /**
-     * Specifies a source IProcessor to be chained to this one.
-     * 
-     * @param processor 
-     */
-    public void chain(IProcessor processor) {
-        _processor = processor;
-    }
-    
-    /**
-     * Gets input pixel value.
-     * 
-     * @param location
-     * @return null or pixel value
-     */
-    public double[] getPixel(int[] location) {
-        double[] decay = _processor.getPixel(location);
-        
-        // reject any pixels that have less than the threshold number of photons
-        if (null != decay) {
-            double sum = 0.0;
-            for (int bin = 0; bin < decay.length; ++bin) {
-                sum += decay[bin];
-            }
-            if (sum < _threshold) {
-                decay = null;
-            }
-        }
-        return decay;
-    }  
+	private final int _threshold;
+	private IProcessor _processor;
+
+	public Threshold(int threshold) {
+		_threshold = threshold;
+	}
+
+	/**
+	 * Specifies a source IProcessor to be chained to this one.
+	 * 
+	 * @param processor 
+	 */
+	public void chain(IProcessor processor) {
+		_processor = processor;
+	}
+
+	/**
+	 * Gets input pixel value.
+	 * 
+	 * @param location
+	 * @return null or pixel value
+	 */
+	public double[] getPixel(int[] location) {
+		double[] decay = _processor.getPixel(location);
+
+		// reject any pixels that have less than the threshold number of photons
+		if (null != decay) {
+			double sum = 0.0;
+			for (int bin = 0; bin < decay.length; ++bin) {
+				sum += decay[bin];
+			}
+			if (sum < _threshold) {
+				decay = null;
+			}
+		}
+		return decay;
+	}
 }

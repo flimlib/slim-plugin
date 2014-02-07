@@ -30,103 +30,103 @@ package loci.slim2.process;
  * @author Aivar Grislis
  */
 public class Excitation {
-    private final String fileName;
-    private final double[] values;
-    private final double timeInc;
-    private int start;
-    private int stop;
-    private double base;
+	private final String fileName;
+	private final double[] values;
+	private final double timeInc;
+	private int start;
+	private int stop;
+	private double base;
 
-    /**
-     * Creates an excitation with given filename and values.
-     *
-     * @param fileName
-     * @param values
-     */
-    public Excitation(String fileName, double[] values, double timeInc) {
-        this.fileName = fileName;
-        this.values = values;
-        this.timeInc = timeInc;
-    }
+	/**
+	 * Creates an excitation with given filename and values.
+	 *
+	 * @param fileName
+	 * @param values
+	 */
+	public Excitation(String fileName, double[] values, double timeInc) {
+		this.fileName = fileName;
+		this.values = values;
+		this.timeInc = timeInc;
+	}
 
-    /**
-     * Gets the file name.
-     *
-     * @return
-     */
-    public String getFileName() {
-        return fileName;
-    }
+	/**
+	 * Gets the file name.
+	 *
+	 * @return
+	 */
+	public String getFileName() {
+		return fileName;
+	}
 
-    /**
-     * Gets the values of the excitation curve.
-     *
-     * @return
-     */
-    public double[] getValues() {
-        return values;
-    }
+	/**
+	 * Gets the values of the excitation curve.
+	 *
+	 * @return
+	 */
+	public double[] getValues() {
+		return values;
+	}
 
-    /**
-     * Gets the horizontal time increment for the excitation curve.
-     *
-     * @return
-     */
-    public double getTimeInc() {
-        return timeInc;
-    }
+	/**
+	 * Gets the horizontal time increment for the excitation curve.
+	 *
+	 * @return
+	 */
+	public double getTimeInc() {
+		return timeInc;
+	}
 
-    /**
-     * Sets start cursor.
-     *
-     * @param start
-     */
-    public void setStart(int start) {
-        this.start = start;
-    }
+	/**
+	 * Sets start cursor.
+	 *
+	 * @param start
+	 */
+	public void setStart(int start) {
+		this.start = start;
+	}
 
-    /**
-     * Gets start cursor.
-     *
-     * @return
-     */
-    public int getStart() {
-        return start;
-    }
+	/**
+	 * Gets start cursor.
+	 *
+	 * @return
+	 */
+	public int getStart() {
+		return start;
+	}
 
-    /**
-     * Sets the stop cursor.
-     * 
-     * @param stop
-     */
-    public void setStop(int stop) {
-        this.stop = stop;
-    }
+	/**
+	 * Sets the stop cursor.
+	 * 
+	 * @param stop
+	 */
+	public void setStop(int stop) {
+		this.stop = stop;
+	}
 
-    /**
-     * Gets the stop cursor.
-     *
-     * @return
-     */
-    public int getStop() {
-        return stop;
-    }
+	/**
+	 * Gets the stop cursor.
+	 *
+	 * @return
+	 */
+	public int getStop() {
+		return stop;
+	}
 
-    /**
-     * Sets the base cursor.
-     *
-     * @param base
-     */
-    public void setBase(double base) {
-        this.base = base;
-    }
+	/**
+	 * Sets the base cursor.
+	 *
+	 * @param base
+	 */
+	public void setBase(double base) {
+		this.base = base;
+	}
 
-    /**
-     * Gets the base cursor.
-     *
-     * @return
-     */
-    public double getBase() {
-        return base;
-    }
+	/**
+	 * Gets the base cursor.
+	 *
+	 * @return
+	 */
+	public double getBase() {
+		return base;
+	}
 }

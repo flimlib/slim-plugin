@@ -64,7 +64,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 
 	@Parameter
 	private DisplayService displayService;
-	
+
 	@Parameter
 	private DatasetService datasetService;
 
@@ -83,25 +83,25 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	@Parameter(label = "Show full range", persist = true,
 		callback = "rangeChanged")
 	private boolean showFullRange;
-	
+
 	@Parameter(label = "Logarithmic", persist = true,
 		callback = "logarithmicChanged")
 	private boolean logarithmic;
-	
+
 	@Parameter(label = "Show low counts", persist = true,
 		callback = "showLowCountsChanged")
-	private boolean showLowCounts;	
+	private boolean showLowCounts;
 
 	/** The minimum and maximum values of the data itself. */
 	private double dataMin, dataMax;
 
 	/** The initial minimum and maximum values of the data view. */
 	private double initialMin, initialMax;
-	
+
 	private HistogramGraph histogramGraph;
-	
+
 	private DatasetView saveView;
-	
+
 	private volatile boolean running;
 
 	public DataHistogramCommand() {
@@ -182,20 +182,20 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 			view = saveView;
 			return;
 		}
-		
+
 		// did view really change?
 		if (saveView == null || view != saveView) {
 			saveView = view;
 			System.out.println("new view " + view);
-			
+
 			final Dataset dataset = view.getData();
 			final ImgPlus img = dataset.getImgPlus();
-			
+
 			//TODO ARG just autorange it for now
 			computeDataMinMax(img);
 			min = dataMin;
 			max = dataMax;
-			
+
 			updateHistogram(img);
 
 			long[] dims = new long[img.numDimensions()];
@@ -225,12 +225,12 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 			//TODO ARG etc?? see above
 		}
 	}
-	
+
 	/** Called when show full range changes. */
 	protected void rangeChanged() {
 		System.out.println("RANGE CHANGED");
 	}
-	
+
 	/** Called when logarithmic changes. */
 	protected void logarithmicChanged() {
 		System.out.println("LOG CHANGED " + logarithmic);
@@ -254,7 +254,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	}
 
 	// -- Helper methods --
-	
+
 	private <T extends RealType<T>> void updateHistogram(final ImgPlus<T> img) {
 		System.out.println("in updateHistogram and min max are " + min + " " + max);
 		//TODO ARG use statistics service

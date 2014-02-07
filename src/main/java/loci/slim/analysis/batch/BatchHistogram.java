@@ -45,14 +45,14 @@ public interface BatchHistogram {
 	 * @return 
 	 */
 	public String getTitle();
-	
+
 	/**
 	 * Processes fitted values for a pixel.
 	 * 
 	 * @param value 
 	 */
 	public void process(double[] value);
-	
+
 	/**
 	 * Called periodically to get current statistics.
 	 * 

@@ -37,7 +37,7 @@ import loci.slim.fitted.FittedValue;
  * 
  * @author Aivar Grislis
  */
-public abstract class AbstractBatchHistogram implements BatchHistogram {	
+public abstract class AbstractBatchHistogram implements BatchHistogram {
 	private FittedValue fittedValue;
 	private String title;
 	private double minRange;
@@ -55,7 +55,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	private double minValue = Double.MAX_VALUE;
 	private double maxValue = -Double.MAX_VALUE;
 	private HistogramStatistics statistics;
-	
+
 	@Override
 	public String getTitle() {
 		return title;
@@ -75,7 +75,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	public HistogramStatistics getStatistics() {
 		// build fresh statistics
 		statistics = null;
-		
+
 		return computeStatistics();
 	}
 
@@ -102,7 +102,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		double iqr = statistics.getThirdQuartile() - statistics.getFirstQuartile();
 		double minSubRange = statistics.getMedian() - 1.5 * iqr;
 		double maxSubRange = statistics.getMedian() + 1.5 * iqr;
-		
+
 		int minBin = Binning.valueToBin(totalBins, minRange, maxRange, minSubRange);
 		int maxBin = Binning.valueToBin(totalBins, minRange, maxRange, maxSubRange);
 		if (maxBin - minBin + 1 < binCount) {
@@ -133,33 +133,33 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		}
 		return dstBins;
 	}
-	
+
 	@Override
 	public double[] getScaledCenterValues() {
 		return getScaledCenterValues(256);
 	}
-	
+
 	@Override
 	public double[] getScaledCenterValues(int binCount) {
 		statistics = computeStatistics();
-		
+
 		return Binning.centerValuesPerBin(binCount, statistics.getMinRange(), statistics.getMaxRange());
 	}
-	
+
 	void setFittedValue(FittedValue fittedValue) {
 		this.fittedValue = fittedValue;
 		this.title = fittedValue.getTitle();
 	}
-	
+
 	void setMinMaxRange(double minRange, double maxRange) {
 		this.minRange = minRange;
 		this.maxRange = maxRange;
 	}
-	
+
 	double[] getMinMaxRange() {
 		return new double[] { minRange, maxRange };
 	}
-	
+
 	void setTotalBins(int totalBins) {
 		this.totalBins = totalBins;
 		bins = new HistogramBin[totalBins];
@@ -167,7 +167,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			bins[bin] = new HistogramBin();
 		}
 	}
-	
+
 	int getTotalBins() {
 		return totalBins;
 	}
@@ -181,7 +181,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		if (Double.isNaN(value)) {
 			return;
 		}
-		
+
 		// check for count overflow
 		if (count == Long.MAX_VALUE) {
 			throw new RuntimeException("BatchHistogram count overflow");
@@ -202,7 +202,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			++underMinCount;
 			underMinSum += value;
 			underMinVarianceSum += value * value;
-			
+
 		}
 		else if (value > maxRange) {
 			++overMaxCount;
@@ -221,7 +221,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		// only compute if not already computed
 		if (null == statistics) {
 			statistics = new HistogramStatistics();
-			
+
 			// title
 			statistics.setTitle(title);
 
@@ -229,10 +229,10 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			statistics.setCount(count);
 			statistics.setMin(minValue);
 			statistics.setMax(maxValue);
-			
+
 			// mean
 			statistics.setMean(sum / count);
-			
+
 			// calculate running standard deviation
 			// https://en.wikipedia.org/wiki/Standard_deviation#Rapid_calculation_methods
 			double s0 = 0.0;
@@ -252,16 +252,16 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			//System.out.println("s0 " + s0 + " (count " + count + ") s1 " + s1 + " s2 " + s2);
 			double standardDeviation = Math.sqrt(s0 * s2 - s1 * s1) / count;
 			statistics.setStandardDeviation(standardDeviation);
-			
+
 			// quartiles
 			double quartile1 = countToValue(count / 4);
 			double quartile2 = countToValue(count / 2);
 			double quartile3 = countToValue(3 * count / 4);
-			
+
 			statistics.setFirstQuartile(quartile1);
 			statistics.setMedian(quartile2);
 			statistics.setThirdQuartile(quartile3);
-			
+
 			// range to define outliers
 			if (Double.isNaN(quartile1)) {
 				// unable to compute first quartile, approximate
@@ -308,7 +308,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			// computed values way out of reasonable range, report unknown statistic
 			return Double.NaN;
 		}
-		
+
 		// look for appropriate bin
 		int bin;
 		long sumCount = 0;
@@ -326,7 +326,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			// this shouldn't happen
 			throw new RuntimeException("BatchHistogram quartile problem " + getTitle());
 		}
-		
+
 		// return value of bin
 		return binToValue(bin);
 	}

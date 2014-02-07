@@ -28,17 +28,17 @@ package loci.slim.fitting.config;
  * @author Aivar Grislis
  */
 public class ConfigurationHelper {
-    
-    public void discoverInterface(String name, String label) {
-        
-    }
-    
-    public void configure() {
-        
-    }
-    
-    public Object getInterface(String name) {
-        return null;
-    }
-    
+
+	public void discoverInterface(String name, String label) {
+
+	}
+
+	public void configure() {
+
+	}
+
+	public Object getInterface(String name) {
+		return null;
+	}
+
 }

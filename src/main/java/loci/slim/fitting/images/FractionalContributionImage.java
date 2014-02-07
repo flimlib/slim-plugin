@@ -36,72 +36,72 @@ import loci.slim.mask.IMaskGroup;
  * @author Aivar Grislis
  */
 public class FractionalContributionImage extends AbstractBaseFittedImage {
-    private int _component;
-    private int _components;
+	private int _component;
+	private int _components;
 
-    /**
-     * Create the fitted image.  Specifies number of components which should
-     * be 2 or 3 and the current component which should be 0..1 or 0..2
-     * respectively.
-     * 
-     * @param title
-     * @param dimension
-     * @param component
-     * @param components 
-     */
-    public FractionalContributionImage(String title, int[] dimension,
-            IndexColorModel indexColorModel, int component, int components,
-            boolean colorizeGrayScale, IGrayScaleImage grayScaleImage,
-            IMaskGroup[] maskGroup) {
-        super(title, dimension, indexColorModel, colorizeGrayScale,
-                grayScaleImage, maskGroup);
-        _component = component;
-        _components = components;
-    }
-    
-    public double getValue(double[] parameters) {
-        double value = 0.0;
-        double sum = 0.0;
-        switch (_components) {
-            case 2:
-                sum = parameters[FittedImageFitter.A1_INDEX]
-                        * parameters[FittedImageFitter.T1_INDEX]
-                        + parameters[FittedImageFitter.A2_INDEX]
-                        * parameters[FittedImageFitter.T2_INDEX];
-                switch (_component) {
-                    case 0:
-                        value = parameters[FittedImageFitter.A1_INDEX]
-                                * parameters[FittedImageFitter.T1_INDEX];
-                        break;
-                    case 1:
-                        value = parameters[FittedImageFitter.A2_INDEX]
-                                * parameters[FittedImageFitter.T2_INDEX];
-                        break;
-                }
-                break;
-            case 3:
-                sum = parameters[FittedImageFitter.A1_INDEX]
-                        * parameters[FittedImageFitter.T1_INDEX]
-                        + parameters[FittedImageFitter.A2_INDEX]
-                        * parameters[FittedImageFitter.T2_INDEX]
-                        + parameters[FittedImageFitter.A3_INDEX]
-                        * parameters[FittedImageFitter.T3_INDEX];
-                switch (_component) {
-                    case 0:
-                        value = parameters[FittedImageFitter.A1_INDEX]
-                                * parameters[FittedImageFitter.T1_INDEX];
-                        break;
-                    case 1:
-                        value = parameters[FittedImageFitter.A2_INDEX]
-                                * parameters[FittedImageFitter.T2_INDEX];
-                        break;
-                    case 2:
-                        value = parameters[FittedImageFitter.A3_INDEX]
-                                * parameters[FittedImageFitter.T3_INDEX];
-                        break;
-                }
-                break;
-        }
-        return value / sum;
-    }   
+	/**
+	 * Create the fitted image.  Specifies number of components which should
+	 * be 2 or 3 and the current component which should be 0..1 or 0..2
+	 * respectively.
+	 * 
+	 * @param title
+	 * @param dimension
+	 * @param component
+	 * @param components 
+	 */
+	public FractionalContributionImage(String title, int[] dimension,
+			IndexColorModel indexColorModel, int component, int components,
+			boolean colorizeGrayScale, IGrayScaleImage grayScaleImage,
+			IMaskGroup[] maskGroup) {
+		super(title, dimension, indexColorModel, colorizeGrayScale,
+				grayScaleImage, maskGroup);
+		_component = component;
+		_components = components;
+	}
+
+	public double getValue(double[] parameters) {
+		double value = 0.0;
+		double sum = 0.0;
+		switch (_components) {
+			case 2:
+				sum = parameters[FittedImageFitter.A1_INDEX]
+						* parameters[FittedImageFitter.T1_INDEX]
+						+ parameters[FittedImageFitter.A2_INDEX]
+						* parameters[FittedImageFitter.T2_INDEX];
+				switch (_component) {
+					case 0:
+						value = parameters[FittedImageFitter.A1_INDEX]
+								* parameters[FittedImageFitter.T1_INDEX];
+						break;
+					case 1:
+						value = parameters[FittedImageFitter.A2_INDEX]
+								* parameters[FittedImageFitter.T2_INDEX];
+						break;
+				}
+				break;
+			case 3:
+				sum = parameters[FittedImageFitter.A1_INDEX]
+						* parameters[FittedImageFitter.T1_INDEX]
+						+ parameters[FittedImageFitter.A2_INDEX]
+						* parameters[FittedImageFitter.T2_INDEX]
+						+ parameters[FittedImageFitter.A3_INDEX]
+						* parameters[FittedImageFitter.T3_INDEX];
+				switch (_component) {
+					case 0:
+						value = parameters[FittedImageFitter.A1_INDEX]
+								* parameters[FittedImageFitter.T1_INDEX];
+						break;
+					case 1:
+						value = parameters[FittedImageFitter.A2_INDEX]
+								* parameters[FittedImageFitter.T2_INDEX];
+						break;
+					case 2:
+						value = parameters[FittedImageFitter.A3_INDEX]
+								* parameters[FittedImageFitter.T3_INDEX];
+						break;
+				}
+				break;
+		}
+		return value / sum;
+	}
 }

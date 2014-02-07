@@ -34,10 +34,10 @@ import java.math.RoundingMode;
  */
 public class DoubleFormatter {
 	public static final char INFINITY = '\u221E';
-    double _value;
-    String _text;
+	double _value;
+	String _text;
 
-    public DoubleFormatter(boolean min, int digits, double value) {
+	public DoubleFormatter(boolean min, int digits, double value) {
 		if (Double.isInfinite(value)) {
 			if (value < 0.0) {
 				_text = "-" + INFINITY;
@@ -58,29 +58,29 @@ public class DoubleFormatter {
 				_text = "0.0";
 			}
 		}
-    }
+	}
 
-    /**
-     * Gets the rounded value.
-     *
-     * @return rounded value
-     */
-    public double getValue() {
-        return _value;
-    }
+	/**
+	 * Gets the rounded value.
+	 *
+	 * @return rounded value
+	 */
+	public double getValue() {
+		return _value;
+	}
 
-    /**
-     * Gets the formatted string representation of value.
-     *
-     * @return formatted string
-     */
-    public String getText() {
-        int index = _text.indexOf("-");
-        if (index > 0) {
-            if ('E' != _text.charAt(index - 1)) {
-                ij.IJ.log("Funny text " + _text);
-            }
-        }
-        return _text;
-    }
+	/**
+	 * Gets the formatted string representation of value.
+	 *
+	 * @return formatted string
+	 */
+	public String getText() {
+		int index = _text.indexOf("-");
+		if (index > 0) {
+			if ('E' != _text.charAt(index - 1)) {
+				ij.IJ.log("Funny text " + _text);
+			}
+		}
+		return _text;
+	}
 }

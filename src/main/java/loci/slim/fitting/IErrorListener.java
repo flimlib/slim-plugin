@@ -46,5 +46,5 @@ public interface IErrorListener {
 	 * @param channel 
 	 */
 	public void updateErrorMask(Mask mask, int channel);
-	
+
 }

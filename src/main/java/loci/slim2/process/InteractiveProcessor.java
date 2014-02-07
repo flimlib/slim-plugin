@@ -51,7 +51,7 @@ public interface InteractiveProcessor {
 	public void init(Context context, CommandService commandService,
 			DatasetService datasetService, DisplayService displayService,
 			Estimator estimator);
-	
+
 	/**
 	 * Gets current fit settings.
 	 * 

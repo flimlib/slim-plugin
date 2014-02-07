@@ -45,70 +45,70 @@ import net.java.sezpoz.IndexItem;
  * @author Aivar Grislis
  */
 public class SLIMAnalysis {
-    IndexItem<SLIMAnalyzer, ISLIMAnalyzer> _plugins[];
-    String _names[];
+	IndexItem<SLIMAnalyzer, ISLIMAnalyzer> _plugins[];
+	String _names[];
 
-    /**
-     * Constructor, gets list of potential analysis plugins.
-     * 
-     */
-    public SLIMAnalysis() {
-        // get list of plugins and their names
-        List<String> names = new ArrayList<String>();
-        List<IndexItem> plugins = new ArrayList<IndexItem>();
+	/**
+	 * Constructor, gets list of potential analysis plugins.
+	 * 
+	 */
+	public SLIMAnalysis() {
+		// get list of plugins and their names
+		List<String> names = new ArrayList<String>();
+		List<IndexItem> plugins = new ArrayList<IndexItem>();
 
-        // look for matches
-        for (final IndexItem<SLIMAnalyzer, ISLIMAnalyzer> item :
-                Index.load(SLIMAnalyzer.class, ISLIMAnalyzer.class, IJ.getClassLoader())) {
-            plugins.add(item);
-            names.add(item.annotation().name());
-        }
-        _plugins = plugins.toArray(new IndexItem[0]);
-        _names = names.toArray(new String[0]);
-    }
+		// look for matches
+		for (final IndexItem<SLIMAnalyzer, ISLIMAnalyzer> item :
+				Index.load(SLIMAnalyzer.class, ISLIMAnalyzer.class, IJ.getClassLoader())) {
+			plugins.add(item);
+			names.add(item.annotation().name());
+		}
+		_plugins = plugins.toArray(new IndexItem[0]);
+		_names = names.toArray(new String[0]);
+	}
 
-    /**
-     * Returns list of potential analysis plugin names.
-     * 
-     * @return 
-     */
-    public String[] getChoices() {
-        return _names;
-    }
+	/**
+	 * Returns list of potential analysis plugin names.
+	 * 
+	 * @return 
+	 */
+	public String[] getChoices() {
+		return _names;
+	}
 
-    /**
-     * Does image analysis.
-     * 
-     * @param name
-     * @param image
-     * @param region
-     * @param function
+	/**
+	 * Does image analysis.
+	 * 
+	 * @param name
+	 * @param image
+	 * @param region
+	 * @param function
 	 * @param parameters
-     */
-    public void doAnalysis(String name, ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
-        
-        // find selected plugin
-        IndexItem<SLIMAnalyzer, ISLIMAnalyzer> selectedPlugin = null;
-        for (int i = 0; i < _names.length; ++i) {
-            if (name.equals(_names[i])) {
-                selectedPlugin = _plugins[i];
-            }
-        }
+	 */
+	public void doAnalysis(String name, ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
 
-        // run selected plugin
-        if (null != selectedPlugin) {
-            // create an instance
-            ISLIMAnalyzer instance = null;
-            try {
-                instance = selectedPlugin.instance();
-            }
-            catch (InstantiationException e) {
-                System.out.println("Error instantiating plugin " + e.getMessage());
-            }
+		// find selected plugin
+		IndexItem<SLIMAnalyzer, ISLIMAnalyzer> selectedPlugin = null;
+		for (int i = 0; i < _names.length; ++i) {
+			if (name.equals(_names[i])) {
+				selectedPlugin = _plugins[i];
+			}
+		}
 
-            if (null != instance) {
-                instance.analyze(image, region, function, parameters);
-            }
-        }
-    }
+		// run selected plugin
+		if (null != selectedPlugin) {
+			// create an instance
+			ISLIMAnalyzer instance = null;
+			try {
+				instance = selectedPlugin.instance();
+			}
+			catch (InstantiationException e) {
+				System.out.println("Error instantiating plugin " + e.getMessage());
+			}
+
+			if (null != instance) {
+				instance.analyze(image, region, function, parameters);
+			}
+		}
+	}
 }

@@ -38,53 +38,53 @@ import java.util.Map;
  * @author Aivar Grislis
  */
 public class MaskGroup implements IMaskGroup {
-    List<IMaskNode> _nodeList;
-    Map<IMaskNode, Mask> _maskMap;
-    IMaskNode[] _nodes;
+	List<IMaskNode> _nodeList;
+	Map<IMaskNode, Mask> _maskMap;
+	IMaskNode[] _nodes;
 
-    public MaskGroup() {
-        _nodeList = new ArrayList<IMaskNode>();
-        _maskMap = new HashMap<IMaskNode, Mask>();
-    }
+	public MaskGroup() {
+		_nodeList = new ArrayList<IMaskNode>();
+		_maskMap = new HashMap<IMaskNode, Mask>();
+	}
 
-    @Override
-    public void addNode(IMaskNode node) {
+	@Override
+	public void addNode(IMaskNode node) {
 		// avoid duplicate entries
 		if (!_nodeList.contains(node)) {
-            _nodeList.add(node);
+			_nodeList.add(node);
 		}
-    }
+	}
 
-    @Override
-    public void removeNode(IMaskNode node) {
-        _nodeList.remove(node);
-        _maskMap.put(node, null);
-    }
+	@Override
+	public void removeNode(IMaskNode node) {
+		_nodeList.remove(node);
+		_maskMap.put(node, null);
+	}
 
-    @Override
-    public void updateMask(IMaskNode node) {
-        // update map with node's new self mask
+	@Override
+	public void updateMask(IMaskNode node) {
+		// update map with node's new self mask
 		Mask selfMask = node.getSelfMask();
 		_maskMap.put(node, selfMask);
 
-        // combine masks and notify other nodes
-        for (IMaskNode peerNode : _nodeList) {
-            // skip notifying the caller
-            if (peerNode != node) {
-                // combine all masks but the recipient's own
-                Mask peerSelfMask = _maskMap.get(peerNode);
+		// combine masks and notify other nodes
+		for (IMaskNode peerNode : _nodeList) {
+			// skip notifying the caller
+			if (peerNode != node) {
+				// combine all masks but the recipient's own
+				Mask peerSelfMask = _maskMap.get(peerNode);
 				Collection<Mask> masks = new ArrayList<Mask>(_maskMap.values());
 				if (null != peerSelfMask) {
-                    masks.remove(peerSelfMask);
+					masks.remove(peerSelfMask);
 				}
 
 				// notify other node
-                Mask peerOtherMask = Mask.addMasks(masks);
-                peerNode.updateOtherMask(peerOtherMask);
-            }
-        }
-    }
-	
+				Mask peerOtherMask = Mask.addMasks(masks);
+				peerNode.updateOtherMask(peerOtherMask);
+			}
+		}
+	}
+
 	@Override
 	public Mask getMask() {
 		// combine all masks

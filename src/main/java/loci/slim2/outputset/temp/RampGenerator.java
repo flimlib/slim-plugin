@@ -34,18 +34,18 @@ public class RampGenerator {
 	private final long width;
 	private final long height;
 	private final long diagonal;
-	
+
 	public RampGenerator(RampType rampType, long width, long height) {
 		this.rampType = rampType;
 		this.height = height;
 		this.width = width;
 		this.diagonal = getDiagonal(width, height);
 	}
-	
+
 	public double getValue(long[] position) {
 		return getValue(position[0], position[1]);
 	}
-	
+
 	public double getValue(long x, long y) {
 		long i = 0;
 		long j = diagonal;
@@ -84,7 +84,7 @@ public class RampGenerator {
 		}
 		return ((double) i) / j;
 	}
-	
+
 	private long getDiagonal(long width, long height) {
 		long returnValue = (long) Math.sqrt(width * width + height * height);
 		//System.out.println("width " + width + " HEIGHt " + height + " returnValue " + returnValue);

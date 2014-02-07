@@ -46,12 +46,12 @@ public class ExportBatchHistogram2 {
 	private double sum = 0.0;
 	private long count = 0;
 	private double stdDev = 0.0;
-	
+
 	public void start() {
-		
+
 	}
-	
-    public void export(ImgPlus<DoubleType> image,
+
+	public void export(ImgPlus<DoubleType> image,
 			ICurveFitter.FitFunction function) {
 		long[] dimensions = new long[image.numDimensions()];
 		image.dimensions(dimensions);
@@ -95,7 +95,7 @@ public class ExportBatchHistogram2 {
 		}
 
 	}
-	
+
 	public void end(String fileName) {
 		System.out.println("actual mean in-range is " + sum / count + " count was " + count);
 		System.out.println("actual mean total is " + totalSum / totalCount + " totalCount was " + totalCount);
@@ -103,10 +103,10 @@ public class ExportBatchHistogram2 {
 
 		System.out.println("in-range std dev is " + stdDev / count);
 		//System.out.println("total std dev is " + totalStdDev / totalCount);
-		
+
 		//System.out.println("std dev from histo is " + standardDeviationFromHisto(_histoT, meanFromHisto(_histoT)));
 	}
-	
+
 	private double meanFromHisto(long[] histo) {
 		double sum = 0.0;
 		long count = 0;
@@ -119,7 +119,7 @@ public class ExportBatchHistogram2 {
 		System.out.println("histo count is " + count);
 		return sum / count;
 	}
-	
+
 	private double standardDeviationFromHisto(long[] histo, double mean) {
 		double sum = 0.0;
 		long count = 0;
@@ -132,7 +132,7 @@ public class ExportBatchHistogram2 {
 		}
 		return sum / count;
 	}
-	
+
 	private class HistoBin {
 		public double meanSum;
 		public double varianceSum;

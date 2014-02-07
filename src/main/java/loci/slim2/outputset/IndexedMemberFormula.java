@@ -31,11 +31,11 @@ package loci.slim2.outputset;
  */
 public class IndexedMemberFormula implements MemberFormula {
 	private int index;
-	
+
 	public IndexedMemberFormula(int index) {
 		this.index = index;
 	}
-	
+
 	@Override
 	public double compute(double[] values) {
 		return values[index];

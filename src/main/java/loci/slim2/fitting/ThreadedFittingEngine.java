@@ -36,50 +36,50 @@ import loci.curvefitter.ICurveFitter;
  * @author Aivar Grislis
  */
 public class ThreadedFittingEngine implements FittingEngine {
-    private ThreadPool<FitResults> threadPool;
-    private ICurveFitter curveFitter;
-    
-    public ThreadedFittingEngine() {
-        threadPool = new ThreadPool<FitResults>();
-    }
- 
-    @Override
-    public void shutdown() {
-        threadPool.shutdown();
-    }
-    
-    @Override
-    public synchronized void setThreads(int threads) {
-        threadPool.setThreads(threads);
-    }
-    
-    @Override
-    public synchronized void setCurveFitter(ICurveFitter curveFitter) {
-        this.curveFitter = curveFitter;
-    }
-    
-    @Override
-    public synchronized FitResults fit
-            (final GlobalFitParams params, final LocalFitParams data) {
-        FittingCallable callable = new DefaultFittingCallable();
-        callable.setup(curveFitter, params, data);
+	private ThreadPool<FitResults> threadPool;
+	private ICurveFitter curveFitter;
+
+	public ThreadedFittingEngine() {
+		threadPool = new ThreadPool<FitResults>();
+	}
+
+	@Override
+	public void shutdown() {
+		threadPool.shutdown();
+	}
+
+	@Override
+	public synchronized void setThreads(int threads) {
+		threadPool.setThreads(threads);
+	}
+
+	@Override
+	public synchronized void setCurveFitter(ICurveFitter curveFitter) {
+		this.curveFitter = curveFitter;
+	}
+
+	@Override
+	public synchronized FitResults fit
+			(final GlobalFitParams params, final LocalFitParams data) {
+		FittingCallable callable = new DefaultFittingCallable();
+		callable.setup(curveFitter, params, data);
 		return callable.call();
-    }
-    
-    @Override
-    public synchronized List<FitResults> fit
-            (final GlobalFitParams params, final List<LocalFitParams> dataList) {
-        
-        List<FittingCallable> callableList
-                = new ArrayList<FittingCallable>();
-        
-        for (LocalFitParams data : dataList) {
-            FittingCallable callable = new DefaultFittingCallable();
-            callable.setup(curveFitter, params, data);
-            callableList.add(callable);
-        }
-        
-        List<FitResults> resultList = threadPool.process(callableList);
-        return resultList;
-    }
+	}
+
+	@Override
+	public synchronized List<FitResults> fit
+			(final GlobalFitParams params, final List<LocalFitParams> dataList) {
+
+		List<FittingCallable> callableList
+				= new ArrayList<FittingCallable>();
+
+		for (LocalFitParams data : dataList) {
+			FittingCallable callable = new DefaultFittingCallable();
+			callable.setup(curveFitter, params, data);
+			callableList.add(callable);
+		}
+
+		List<FitResults> resultList = threadPool.process(callableList);
+		return resultList;
+	}
 }

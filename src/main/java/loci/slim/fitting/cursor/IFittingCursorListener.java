@@ -30,10 +30,10 @@ package loci.slim.fitting.cursor;
  */
 public interface IFittingCursorListener {
 
-    /**
-     * Callback when the cursor changes.
-     * 
-     * @param cursor 
-     */
-    public void cursorChanged(FittingCursor cursor);
+	/**
+	 * Callback when the cursor changes.
+	 * 
+	 * @param cursor 
+	 */
+	public void cursorChanged(FittingCursor cursor);
 }

@@ -28,5 +28,5 @@ package imagej.charts.cursors;
  * @author Aivar Grislis
  */
 public interface ICursorStretchListener {
-    public void cursorMoved(int id, int position, double proportion);
+	public void cursorMoved(int id, int position, double proportion);
 }

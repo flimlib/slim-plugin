@@ -29,39 +29,39 @@ package loci.slim.mask;
  * @author Aivar Grislis
  */
 public interface IMaskNode {
-    
-    /**
-     * This method notifies other nodes that this node has changed the mask.
-     * 
-     * @param mask or null
-     */
-    public void updateSelfMask(Mask mask);
 
-    /**
-     * Gets the current mask created by this node.
-     * 
-     * @return mask or null
-     */
-    public Mask getSelfMask();
+	/**
+	 * This method notifies other nodes that this node has changed the mask.
+	 * 
+	 * @param mask or null
+	 */
+	public void updateSelfMask(Mask mask);
 
-    /**
-     * This method notifies a node that other nodes have changed the mask.
-     * 
-     * @param mask or null
-     */
-    public void updateOtherMask(Mask mask);
+	/**
+	 * Gets the current mask created by this node.
+	 * 
+	 * @return mask or null
+	 */
+	public Mask getSelfMask();
 
-    /**
-     * Gets the current mask created by all other nodes.
-     * 
-     * @return mask or null
-     */
-    public Mask getOtherMask();
+	/**
+	 * This method notifies a node that other nodes have changed the mask.
+	 * 
+	 * @param mask or null
+	 */
+	public void updateOtherMask(Mask mask);
 
-    /**
-     * Gets the current mask.
-     * 
-     * @return mask or null
-     */
-    public Mask getTotalMask();
+	/**
+	 * Gets the current mask created by all other nodes.
+	 * 
+	 * @return mask or null
+	 */
+	public Mask getOtherMask();
+
+	/**
+	 * Gets the current mask.
+	 * 
+	 * @return mask or null
+	 */
+	public Mask getTotalMask();
 }

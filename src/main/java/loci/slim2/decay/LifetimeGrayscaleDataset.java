@@ -36,7 +36,7 @@ import net.imglib2.type.numeric.RealType;
  * @author Aivar Grislis
  */
 public class LifetimeGrayscaleDataset {
-    private final Dataset grayscaleDataset;
+	private final Dataset grayscaleDataset;
 	private final long[] maxPosition;
 
 	/**
@@ -55,7 +55,7 @@ public class LifetimeGrayscaleDataset {
 		final boolean signed = true;
 		final boolean floating = false;
 		grayscaleDataset = datasetService.create(dimensions, name, axes, bpp, signed, floating);
-		
+
 		// iterate through grayscale image
 		final ImgPlus imgPlus = grayscaleDataset.getImgPlus();
 		final Cursor<? extends RealType<?>> grayscaleCursor = imgPlus.localizingCursor();
@@ -66,7 +66,7 @@ public class LifetimeGrayscaleDataset {
 		while (grayscaleCursor.hasNext()) {
 			grayscaleCursor.fwd();
 			grayscaleCursor.localize(position);
-			
+
 			final int summed = lifetimeDatasetWrapper.getSummedDecay(binSize, position);
 			grayscaleCursor.get().setReal(summed);
 

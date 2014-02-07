@@ -47,5 +47,5 @@ import net.java.sezpoz.Indexable;
 @Retention(RetentionPolicy.SOURCE)
 @Indexable(type=ISLIMBinner.class)
 public @interface SLIMBinner {
-    String value();
+	String value();
 }

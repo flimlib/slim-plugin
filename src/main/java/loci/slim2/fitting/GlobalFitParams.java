@@ -35,57 +35,57 @@ import loci.curvefitter.IFitterEstimator;
  * @author Aivar Grislis
  */
 public interface GlobalFitParams {
-    
-    public void setEstimator(IFitterEstimator estimator);
-    
-    public IFitterEstimator getEstimator();
-    
-    public void setFitAlgorithm(FitAlgorithm fitAlgorithm);
-    
-    public FitAlgorithm getFitAlgorithm();
-    
-    public void setFitFunction(FitFunction fitFunction);
-    
-    public FitFunction getFitFunction();
-    
-    public void setNoiseModel(NoiseModel noiseModel);
-    
-    public NoiseModel getNoiseModel();
-    
-    public void setXInc(double xInc);
-    
-    public double getXInc();
-    
-    public void setPrompt(double[] prompt);
-    
-    public double[] getPrompt();
-    
-    public void setChiSquareTarget(double chiSquareTarget);
-    
-    public double getChiSquareTarget();
-    
-    public void setFree(boolean[] free);
-    
-    public boolean[] getFree();
-    
-    public void setStartPrompt(int startPrompt);
-    
-    public int getStartPrompt();
-    
-    public void setStopPrompt(int stopPrompt);
-    
-    public int getStopPrompt();
-    
-    public int getTransientStart();
-    
-    public void setTransientStart(int transientStart);
-    
-    public int getDataStart();
-    
-    public void setDataStart(int dataStart);
-    
-    public int getTransientStop();
-    
-    public void setTransientStop(int transientStop);
+
+	public void setEstimator(IFitterEstimator estimator);
+
+	public IFitterEstimator getEstimator();
+
+	public void setFitAlgorithm(FitAlgorithm fitAlgorithm);
+
+	public FitAlgorithm getFitAlgorithm();
+
+	public void setFitFunction(FitFunction fitFunction);
+
+	public FitFunction getFitFunction();
+
+	public void setNoiseModel(NoiseModel noiseModel);
+
+	public NoiseModel getNoiseModel();
+
+	public void setXInc(double xInc);
+
+	public double getXInc();
+
+	public void setPrompt(double[] prompt);
+
+	public double[] getPrompt();
+
+	public void setChiSquareTarget(double chiSquareTarget);
+
+	public double getChiSquareTarget();
+
+	public void setFree(boolean[] free);
+
+	public boolean[] getFree();
+
+	public void setStartPrompt(int startPrompt);
+
+	public int getStartPrompt();
+
+	public void setStopPrompt(int stopPrompt);
+
+	public int getStopPrompt();
+
+	public int getTransientStart();
+
+	public void setTransientStart(int transientStart);
+
+	public int getDataStart();
+
+	public void setDataStart(int dataStart);
+
+	public int getTransientStop();
+
+	public void setTransientStop(int transientStop);
 }
 

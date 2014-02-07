@@ -41,67 +41,67 @@ import java.awt.image.IndexColorModel;
  * @author Aivar Grislis
  */
 public class PaletteFix {
-    public static final int NATIVE_SIZE = 256;
-    public static final int ADJUSTED_SIZE = 254;
+	public static final int NATIVE_SIZE = 256;
+	public static final int ADJUSTED_SIZE = 254;
 
-    /**
-     * Given a 256-color palette, turns it into a 254-color palette, using the
-     * first and last palette entries for the below and above colors.
-     *
-     * @param colorModel
-     * @param below
-     * @param above
-     * @return
-     */
-    public static IndexColorModel fixIndexColorModel(IndexColorModel colorModel,
-            Color below, Color above) {
-        // get the RGB colors for this color model
-        byte[] reds   = new byte[NATIVE_SIZE];
-        byte[] greens = new byte[NATIVE_SIZE];
-        byte[] blues  = new byte[NATIVE_SIZE];
-        colorModel.getReds(reds);
-        colorModel.getBlues(blues);
-        colorModel.getGreens(greens);
+	/**
+	 * Given a 256-color palette, turns it into a 254-color palette, using the
+	 * first and last palette entries for the below and above colors.
+	 *
+	 * @param colorModel
+	 * @param below
+	 * @param above
+	 * @return
+	 */
+	public static IndexColorModel fixIndexColorModel(IndexColorModel colorModel,
+			Color below, Color above) {
+		// get the RGB colors for this color model
+		byte[] reds   = new byte[NATIVE_SIZE];
+		byte[] greens = new byte[NATIVE_SIZE];
+		byte[] blues  = new byte[NATIVE_SIZE];
+		colorModel.getReds(reds);
+		colorModel.getBlues(blues);
+		colorModel.getGreens(greens);
 
-        // make the first entry the below color and the last the above color
-        reds  [0] = (byte) below.getRed();
-        greens[0] = (byte) below.getGreen();
-        blues [0] = (byte) below.getBlue();
+		// make the first entry the below color and the last the above color
+		reds  [0] = (byte) below.getRed();
+		greens[0] = (byte) below.getGreen();
+		blues [0] = (byte) below.getBlue();
 
-        reds  [NATIVE_SIZE - 1] = (byte) above.getRed();
-        greens[NATIVE_SIZE - 1] = (byte) above.getGreen();
-        blues [NATIVE_SIZE - 1] = (byte) above.getBlue();
+		reds  [NATIVE_SIZE - 1] = (byte) above.getRed();
+		greens[NATIVE_SIZE - 1] = (byte) above.getGreen();
+		blues [NATIVE_SIZE - 1] = (byte) above.getBlue();
 
-        // make a new color model
-        colorModel = new IndexColorModel(8, NATIVE_SIZE, reds, greens, blues);
-        return colorModel;
-    }
+		// make a new color model
+		colorModel = new IndexColorModel(8, NATIVE_SIZE, reds, greens, blues);
+		return colorModel;
+	}
 
-    /**
-     * Given a min and max specification for a 254-color palette, turns it into
-     * a 256-color palette min and max.  Values below 254-color min are colored
-     * with below color and values above 254-color max are colored with above
-     * color.
-     * 
-     * @param min
-     * @param max
-     * @return
-     */
-    public static double[] adjustMinMax(double min, double max) {
-        double adjust = (max - min) / ADJUSTED_SIZE;
-        
-        //TODO ARG ueed ADJUSTED_SIZE + 1 as a kludge: it made more black dots
-        //TODO ARG having - 1 appears to have the same result!
-        //TODO ARG tried + or - 0.5
-        return new double[] { min - adjust, max + adjust };
-    }
+	/**
+	 * Given a min and max specification for a 254-color palette, turns it into
+	 * a 256-color palette min and max.  Values below 254-color min are colored
+	 * with below color and values above 254-color max are colored with above
+	 * color.
+	 * 
+	 * @param min
+	 * @param max
+	 * @return
+	 */
+	public static double[] adjustMinMax(double min, double max) {
+		double adjust = (max - min) / ADJUSTED_SIZE;
 
-    /**
-     * Gets the adjusted palette size.
-     *
-     * @return
-     */
-    public static int getSize() {
-        return ADJUSTED_SIZE;
-    }
+		//TODO ARG ueed ADJUSTED_SIZE + 1 as a kludge: it made more black dots
+		//TODO ARG having - 1 appears to have the same result!
+		//TODO ARG tried + or - 0.5
+		return new double[] { min - adjust, max + adjust };
+	}
+
+	/**
+	 * Gets the adjusted palette size.
+	 *
+	 * @return
+	 */
+	public static int getSize() {
+		return ADJUSTED_SIZE;
+	}
 }

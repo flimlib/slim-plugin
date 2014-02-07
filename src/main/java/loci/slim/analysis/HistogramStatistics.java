@@ -39,7 +39,7 @@ import java.math.RoundingMode;
 public class HistogramStatistics {
 	private static final int MIN_COUNT = 3;
 	private static final String NAN = "NaN";
-    private static final MathContext context = new MathContext(4, RoundingMode.FLOOR);
+	private static final MathContext context = new MathContext(4, RoundingMode.FLOOR);
 	String title;
 	private long count;
 	private double min;
@@ -53,14 +53,14 @@ public class HistogramStatistics {
 	private double minRange;
 	private double maxRange;
 	private long[] histogram;
-	
+
 	/**
 	 * @return the title
 	 */
 	public String getTitle() {
 		return title;
 	}
-	
+
 	/**
 	 * @param title the title to set
 	 */
@@ -247,18 +247,18 @@ public class HistogramStatistics {
 	public boolean export(BufferedWriter writer, char separator) throws IOException {
 		if (getCount() < MIN_COUNT) {
 			writer.write("Count" + separator + getCount());
-			writer.newLine();	
+			writer.newLine();
 			writer.write("Too few pixels for histograms");
 			writer.newLine();
 			writer.newLine();
-							
+
 			// don't process any more parameters; all will have same count
 			return false;
 		}
 		else {
 			writer.write("Parameter" + separator + getTitle());
 			writer.newLine();
-													
+
 			// put out statistics
 			writer.write("Min" + separator + showParameter(getMin()));
 			writer.newLine();
@@ -314,15 +314,15 @@ public class HistogramStatistics {
 		long count = statistics[0].getCount();
 		if (count < MIN_COUNT) {
 			writer.write("Count" + separator + count);
-			writer.newLine();	
+			writer.newLine();
 			writer.write("Too few pixels for histograms");
 			writer.newLine();
 			writer.newLine();
-							
+
 			// don't process any more parameters; all will have same count
 			return false;
 		}
-		
+
 		boolean firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -332,7 +332,7 @@ public class HistogramStatistics {
 			writer.write("Parameter" + separator + statistic.getTitle());
 		}
 		writer.newLine();
-		
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -342,7 +342,7 @@ public class HistogramStatistics {
 			writer.write("Min" + separator + showParameter(statistic.getMin()));
 		}
 		writer.newLine();
-		
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -352,8 +352,8 @@ public class HistogramStatistics {
 			writer.write("Max" + separator + showParameter(statistic.getMax()));
 		}
 		writer.newLine();
-		
-		
+
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -363,7 +363,7 @@ public class HistogramStatistics {
 			writer.write("Count" + separator + statistic.getCount());
 		}
 		writer.newLine();
-		
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -373,7 +373,7 @@ public class HistogramStatistics {
 			writer.write("Mean" + separator + showParameter(statistic.getMean()));
 		}
 		writer.newLine();
-		
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -383,7 +383,7 @@ public class HistogramStatistics {
 			writer.write("Standard Deviation" + separator + showParameter(statistic.getStandardDeviation()));
 		}
 		writer.newLine();
-		
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -393,8 +393,8 @@ public class HistogramStatistics {
 			writer.write("1st Quartile" + separator + showParameter(statistic.getFirstQuartile()));
 		}
 		writer.newLine();
-		
-		
+
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -404,7 +404,7 @@ public class HistogramStatistics {
 			writer.write("Median" + separator + showParameter(statistic.getMedian()));
 		}
 		writer.newLine();
-		
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -426,7 +426,7 @@ public class HistogramStatistics {
 			}
 			centers[i] = Binning.centerValuesPerBin(histos[i].length, statistics[i].getMinRange(), statistics[i].getMaxRange());
 		}
-		
+
 		firstTime = true;
 		for (long[] histo : histos) {
 			if (!firstTime) {
@@ -436,7 +436,7 @@ public class HistogramStatistics {
 			writer.write("Histogram Bins" + separator + histo.length);
 		}
 		writer.newLine();
-		
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -446,7 +446,7 @@ public class HistogramStatistics {
 			writer.write("Histogram Min" + separator + showParameter(statistic.getMinRange()));
 		}
 		writer.newLine();
-		
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -456,7 +456,7 @@ public class HistogramStatistics {
 			writer.write("Histogram Max" + separator + showParameter(statistic.getMaxRange()));
 		}
 		writer.newLine();
-		
+
 		firstTime = true;
 		for (HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
@@ -464,10 +464,10 @@ public class HistogramStatistics {
 			}
 			firstTime = false;
 			writer.write("Histogram Count" + separator + statistic.getHistogramCount());
-		}		
+		}
 		writer.newLine();
-		
-        for (int bin = 0; bin < maxHistosLength; ++bin) {
+
+		for (int bin = 0; bin < maxHistosLength; ++bin) {
 			firstTime = true;
 			for (int i = 0; i < histos.length; ++i) {
 				if (!firstTime) {
@@ -483,16 +483,16 @@ public class HistogramStatistics {
 			}
 			writer.newLine();
 		}
-		
+
 		return true;
 	}
-	
 
-    private static String showParameter(double parameter) {
+
+	private static String showParameter(double parameter) {
 		String returnValue = NAN;
 		if (!Double.isNaN(parameter)) {
 			returnValue = BigDecimal.valueOf(parameter).round(context).toEngineeringString();
 		}
-        return returnValue;
+		return returnValue;
 	}
 }

@@ -30,7 +30,7 @@ package loci.slim.fitted;
  * @author Aivar Grislis
  */
 public class ZFittedValue extends AbstractFittedValue implements FittedValue {
-	
+
 	public void init(String title) {
 		setTitle(title);
 	}

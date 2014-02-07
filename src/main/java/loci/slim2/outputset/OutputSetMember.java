@@ -58,32 +58,32 @@ import net.imglib2.type.numeric.RealType;
 			this.index = index;
 			this.formula = formula;
 		}
-		
+
 		public String getLabel() {
 			return label;
 		}
-		
+
 		public int getIndex() {
 			return index;
 		}
-		
+
 		public MemberFormula getFormula() {
 			return formula;
 		}
-		
+
 		public void setCombined(boolean combined) {
 			this.combined = combined;
 		}
-		
+
 		public void setRandomAccess(RandomAccess<T> randomAccess) {
 			this.randomAccess = randomAccess;
 		}
-		
+
 		public void setPixelValue(double[] values, long[] position) {
 			double value = formula.compute(values);
 			setPixelValue(value, position);
 		}
-		
+
 		public void setPixelValue(double[] values, long[] position, int[] chunkyPixelSize) {
 			double value = formula.compute(values);
 			long x = position[0];
@@ -96,7 +96,7 @@ import net.imglib2.type.numeric.RealType;
 				}
 			}
 		}
-		
+
 		public void setPixelValue(double value, long[] position) {
 			if (combined) {
 				// adjust position for combined stack
@@ -106,7 +106,7 @@ import net.imglib2.type.numeric.RealType;
 			randomAccess.setPosition(position);
 			randomAccess.get().setReal(value);
 		}
-		
+
 		private long[] expandPosition(long[] position, int index) {
 			long[] expandedPosition = new long[position.length + 1];
 			for (int i = 0; i < expandedPosition.length; ++i) {

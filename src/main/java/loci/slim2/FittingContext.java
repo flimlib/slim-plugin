@@ -36,27 +36,27 @@ public class FittingContext {
 	private LifetimeDatasetWrapper datasetWrapper;
 	private LifetimeGrayscaleDataset grayscaleDataset;
 	private Display<?> grayscaleDisplay;
-	
+
 	public void setDatasetWrapper(LifetimeDatasetWrapper wrapper) {
 		datasetWrapper = wrapper;
 	}
-	
+
 	public LifetimeDatasetWrapper getDatasetWrapper() {
 		return datasetWrapper;
 	}
-	
+
 	public void setGrayscaleDataset(LifetimeGrayscaleDataset dataset) {
 		grayscaleDataset = dataset;
 	}
-	
+
 	public LifetimeGrayscaleDataset getGrayscaleDataset() {
 		return grayscaleDataset;
 	}
-	
+
 	public void setGrayscaleDisplay(Display<?> display) {
 		grayscaleDisplay = display;
 	}
-	
+
 	public Display<?> getGrayscaleDisplay() {
 		return grayscaleDisplay;
 	}

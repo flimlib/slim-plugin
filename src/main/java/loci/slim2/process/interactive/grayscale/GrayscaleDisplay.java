@@ -45,13 +45,13 @@ public class GrayscaleDisplay {
 	Display display;
 	ThresholdDisplayOverlay thresholdOverlay;
 	CrossHairOverlay crossHairOverlay;
-	
+
 	public GrayscaleDisplay(Context context, Dataset dataset, Display display) {
 		this.context = context;
 		this.dataset = dataset;
 		this.display = display;
 	}
-	
+
 	//TODO ARG:
 	/*
 	 * I'm building the grayscale, so how could it have an existing threshold?
@@ -65,14 +65,14 @@ public class GrayscaleDisplay {
  * accept a change in threshold from an external source.  No need to refit unless
  * summed.
  */
-//TODO ARG not used	
+//TODO ARG not used
 	public double[] getThreshold() {
 		double[] returnValue = null;
 		ThresholdService thresholdService = context.getService(ThresholdService.class);
 		System.out.println("thresholdService is " + thresholdService);
 		ImageDisplayService imageDisplayService = context.getService(ImageDisplayService.class);
 		System.out.println("imageDisplayService is " + imageDisplayService);
-		
+
 		ImageDisplay imageDisplay = imageDisplayService.getActiveImageDisplay();
 		System.out.println("imageDisplay is " + imageDisplay);
 		//TODO throws exception here NPE at DefaultThresholdService.java:95
@@ -88,7 +88,7 @@ public class GrayscaleDisplay {
 		}
 		return returnValue;
 	}
-	
+
 	public double[] estimateThreshold() {
 	if (false) {
 		//TODO ARG how to find a/default(?) threshold method
@@ -100,11 +100,11 @@ public class GrayscaleDisplay {
 		ImageDisplayService imageDisplayService = context.getService(ImageDisplayService.class);
 		ImageDisplay imageDisplay = imageDisplayService.getActiveImageDisplay();
 		boolean alreadyHadThreshold = thresholdService.hasThreshold(imageDisplay); }
-	
+
 		double[] thresholds = new double[] { 0.0, 1000.0 };// (double) threshold, Double.MAX_VALUE }; //TODO s/b long threshold
 		return thresholds;
 	}
-	
+
 	public void setThreshold(int thresholdMin, int thresholdMax) {
 		if (null == thresholdOverlay) {
 			System.out.println("CREATING THRESHOLD OVERLAY");
@@ -114,7 +114,7 @@ public class GrayscaleDisplay {
 		System.out.println("setThreshold " + thresholdMin + " " + thresholdMax);
 		thresholdOverlay.setThreshold(thresholdMin, thresholdMax);
 	}
-	
+
 	public void setPixel(long[] position) {
 		System.out.println("setPixel position length is " + position.length + " x y " + position[0] + " " + position[1]);
 		double[] doublePosition = new double[position.length];
@@ -127,7 +127,7 @@ public class GrayscaleDisplay {
 		}
 		crossHairOverlay.setPoint(doublePosition);
 	}
-	
+
 	public void close() {
 		display.close();
 	}

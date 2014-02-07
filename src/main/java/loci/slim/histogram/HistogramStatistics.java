@@ -107,7 +107,7 @@ public class HistogramStatistics {
 	public void setQuartileIndices(int[] quartileIndices) {
 		_quartileIndices = quartileIndices;
 	}
-	
+
 	/**
 	 * Gets the 'fences' that demarcate outliers.
 	 * 
@@ -118,8 +118,8 @@ public class HistogramStatistics {
 		if (null != _quartiles) {
 			fences = new double[2];
 			double interquartileRange = _quartiles[2] - _quartiles[0];
-			
-            // 1.5 factor is rule of thumb by John Tukey, inventor of box-and-whisker plots.
+
+			// 1.5 factor is rule of thumb by John Tukey, inventor of box-and-whisker plots.
 			// "Why 1.5?" JT: "Because 1 is too small and 2 is too large."
 			fences[0] = _quartiles[0] - 1.5 * interquartileRange;
 			fences[1] = _quartiles[2] + 1.5 * interquartileRange;

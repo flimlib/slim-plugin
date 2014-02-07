@@ -40,7 +40,7 @@ public class ThresholdDisplayOverlay extends ThresholdOverlay {
 	private static final ColorRGB COLOR_WITHIN = Colors.PINK;
 	private static final ColorRGB COLOR_GREATER = Colors.ORANGE;
 	private final Dataset dataset;
-	
+
 	/**
 	 * Construct a {@link ThresholdDisplayOverlay} on a {@link Dataset} given an
 	 * {@link Context} context.
@@ -51,7 +51,7 @@ public class ThresholdDisplayOverlay extends ThresholdOverlay {
 		this.dataset = dataset;
 		dataset.rebuild();
 		dataset.update();
-		
+
 		System.out.println("ThresholdDisplayOverlay ctor " + dataset);
 		//super.setColorLess(COLOR_LESS);
 		//super.setColorWithin(COLOR_WITHIN); //TODO ARG null);

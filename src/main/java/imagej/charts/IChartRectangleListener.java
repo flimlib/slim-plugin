@@ -31,5 +31,5 @@ import java.awt.Rectangle;
  */
 public interface IChartRectangleListener {
 
-    public void setRectangle(Rectangle rectangle);
+	public void setRectangle(Rectangle rectangle);
 }

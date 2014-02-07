@@ -33,22 +33,22 @@ import java.util.Collection;
  * @author Aivar Grislis
  */
 public class Mask implements Cloneable {
-    private boolean[][] _bits;
+	private boolean[][] _bits;
 	private int _width;
 	private int _height;
-    
-    public Mask(boolean[][] bits) {
+
+	public Mask(boolean[][] bits) {
 		_width = bits[0].length;
 		_height = bits.length;
-        _bits = bits;
-    }
-    
-    public Mask(int width, int height) {
+		_bits = bits;
+	}
+
+	public Mask(int width, int height) {
 		_width = width;
 		_height = height;
-        // create array of FALSE
-        _bits = new boolean[width][height];
-    }
+		// create array of FALSE
+		_bits = new boolean[width][height];
+	}
 
 	public Mask clone() {
 		boolean[][] bits = new boolean[_width][_height];
@@ -60,50 +60,50 @@ public class Mask implements Cloneable {
 		return new Mask(bits);
 	}
 
-    /**
-     * Gets the boolean switches.
-     * 
-     * @return 
-     */
-    public boolean[][] getBits() {
-        return _bits;
-    }
+	/**
+	 * Gets the boolean switches.
+	 * 
+	 * @return 
+	 */
+	public boolean[][] getBits() {
+		return _bits;
+	}
 
-    /**
-     * Sets the boolean switches.
-     * 
-     * @param bits 
-     */
-    public void setBits(boolean[][] bits) {
-        _bits = bits;
-    }
+	/**
+	 * Sets the boolean switches.
+	 * 
+	 * @param bits 
+	 */
+	public void setBits(boolean[][] bits) {
+		_bits = bits;
+	}
 
-    /**
-     * Test whether a given x and y is masked.
-     * 
-     * @param x
-     * @param y
-     * @return 
-     */
-    public boolean test(int x, int y) {
-        boolean result = true;
-        if (null != _bits) {
-            result = _bits[x][y];
-        }
-        return result;
-    }
+	/**
+	 * Test whether a given x and y is masked.
+	 * 
+	 * @param x
+	 * @param y
+	 * @return 
+	 */
+	public boolean test(int x, int y) {
+		boolean result = true;
+		if (null != _bits) {
+			result = _bits[x][y];
+		}
+		return result;
+	}
 
-    /**
-     * Sets a masked x and y.
-     * 
-     * @param x
-     * @param y 
-     */
-    public void set(int x, int y) {
-        if (null != _bits) {
-            _bits[x][y] = true;
-        }
-    }
+	/**
+	 * Sets a masked x and y.
+	 * 
+	 * @param x
+	 * @param y 
+	 */
+	public void set(int x, int y) {
+		if (null != _bits) {
+			_bits[x][y] = true;
+		}
+	}
 
 	/**
 	 * Any masking going on?
@@ -155,45 +155,45 @@ public class Mask implements Cloneable {
 				}
 			}
 		}
-        return returnValue;
+		return returnValue;
 	}
 
-    /**
-     * Adds given mask to current mask, generating a new mask.
-     * 
-     * @param mask
-     * @return 
-     */
-    public Mask add(Mask mask) {
-        if (null == mask) {
-            return clone();
-        }
-        boolean[][] bits = mask.getBits();
-        boolean[][] result = new boolean[_width][_height];
-        for (int x = 0; x < _width; ++x) {
-            for (int y = 0; y < _height; ++y) {
-                result[x][y] = _bits[x][y] && bits[x][y];
-            }
-        }
-        return new Mask(result);
-    }
-    
-    /**
-     * Given a collection of masks, adds them all together.
-     * <p>
-     * Having this be part of the Mask class hides implementation details.
-     * 
-	 * @param masks
-     * @return mask or null
-     */
-    public static Mask addMasks(Collection<Mask> masks) {
-        Mask returnValue = null;
-        if (!masks.isEmpty()) {
-            boolean[][] result = null;
-            int width  = 0;
-            int height = 0;
+	/**
+	 * Adds given mask to current mask, generating a new mask.
+	 * 
+	 * @param mask
+	 * @return 
+	 */
+	public Mask add(Mask mask) {
+		if (null == mask) {
+			return clone();
+		}
+		boolean[][] bits = mask.getBits();
+		boolean[][] result = new boolean[_width][_height];
+		for (int x = 0; x < _width; ++x) {
+			for (int y = 0; y < _height; ++y) {
+				result[x][y] = _bits[x][y] && bits[x][y];
+			}
+		}
+		return new Mask(result);
+	}
 
-            for (Mask mask : masks) {
+	/**
+	 * Given a collection of masks, adds them all together.
+	 * <p>
+	 * Having this be part of the Mask class hides implementation details.
+	 * 
+	 * @param masks
+	 * @return mask or null
+	 */
+	public static Mask addMasks(Collection<Mask> masks) {
+		Mask returnValue = null;
+		if (!masks.isEmpty()) {
+			boolean[][] result = null;
+			int width  = 0;
+			int height = 0;
+
+			for (Mask mask : masks) {
 				if (null != mask) {
 					boolean[][] maskBits = mask.getBits();
 					if (null == result) {
@@ -212,14 +212,14 @@ public class Mask implements Cloneable {
 						}
 					}
 				}
-            }
-            if (null != result) {
-                returnValue = new Mask(result);
-            }
-        }
-        return returnValue;
-    }
-	
+			}
+			if (null != result) {
+				returnValue = new Mask(result);
+			}
+		}
+		return returnValue;
+	}
+
 	public int getCount() {
 		int count = 0;
 		for (int y = 0; y < _height; ++y) {
@@ -231,7 +231,7 @@ public class Mask implements Cloneable {
 		}
 		return count;
 	}
-	
+
 	public void debug() {
 		if (null == _bits) {
 			System.out.print("NONE");

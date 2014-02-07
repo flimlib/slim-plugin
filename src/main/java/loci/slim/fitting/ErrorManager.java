@@ -81,9 +81,9 @@ public class ErrorManager {
 		if (null != listener) {
 			for (int c = 0; c < errorMasks.length; ++c) {
 				ij.IJ.log("gotFocus, errorMasks " + errorMasks.length);
-                listener.updateErrorMask(errorMasks[c], c);
+				listener.updateErrorMask(errorMasks[c], c);
 			}
 		}
 	}
-	
+
 }

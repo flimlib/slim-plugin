@@ -47,7 +47,7 @@ public class HistogramStatisticsRowPanel extends JPanel {
 		labelPanel.add(label, BorderLayout.LINE_START);
 		//labelPanel.setMaximumSize(label.getMinimumSize());
 		this.add(labelPanel);
-		
+
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 		if (null != statistics) {
@@ -59,7 +59,7 @@ public class HistogramStatisticsRowPanel extends JPanel {
 		}
 
 		this.add(panel);
-		
+
 		this.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -67,20 +67,20 @@ public class HistogramStatisticsRowPanel extends JPanel {
 					listener.swapImage(fileName);
 				}
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) { }
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) { }
-			
+
 			@Override
 			public void mousePressed(MouseEvent e) { }
-			
+
 			@Override
 			public void mouseReleased(MouseEvent e) { }
 		});
-		
+
 		this.validate();
 	}
 }

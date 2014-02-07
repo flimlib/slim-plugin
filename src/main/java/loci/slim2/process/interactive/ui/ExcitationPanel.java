@@ -42,32 +42,32 @@ import loci.slim2.process.interactive.cursor.FittingCursor;
  * @author Aivar Grislis
  */
 public class ExcitationPanel extends JFrame {
-    private static final String TITLE = "Instrument Response Function";
-    private Excitation excitation;
-    private int bins;
-    private double timeInc;
+	private static final String TITLE = "Instrument Response Function";
+	private Excitation excitation;
+	private int bins;
+	private double timeInc;
 
-    public ExcitationPanel(Excitation excitationParam, final FittingCursor fittingCursor) {
+	public ExcitationPanel(Excitation excitationParam, final FittingCursor fittingCursor) {
 
-        excitation = excitationParam; //NB can't do "this.excitation = excitation": method variable will hide class variable in ActionListener
+		excitation = excitationParam; //NB can't do "this.excitation = excitation": method variable will hide class variable in ActionListener
 
-        setTitle(TITLE);
-        
-        double start = fittingCursor.getPromptStartTime();
-        double stop  = fittingCursor.getPromptStopTime();
-        double base = fittingCursor.getPromptBaselineValue();
+		setTitle(TITLE);
 
-        double[] values = excitation.getValues();
-        bins = values.length;
-        timeInc = excitation.getTimeInc();
+		double start = fittingCursor.getPromptStartTime();
+		double stop  = fittingCursor.getPromptStopTime();
+		double base = fittingCursor.getPromptBaselineValue();
+
+		double[] values = excitation.getValues();
+		bins = values.length;
+		timeInc = excitation.getTimeInc();
 		ExcitationGraph excitationGraph = new DefaultExcitationGraph(start, stop, base,
-                bins, values, timeInc);
-        excitationGraph.setFittingCursor(fittingCursor);
-        
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add("North", createTopPanel());
-        panel.add("Center", excitationGraph.getComponent());
-		
+			bins, values, timeInc);
+		excitationGraph.setFittingCursor(fittingCursor);
+
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add("North", createTopPanel());
+		panel.add("Center", excitationGraph.getComponent());
+
 		// Experimental IRF stuff
 		boolean experiment = false;
 		if (experiment) {
@@ -109,57 +109,57 @@ public class ExcitationPanel extends JFrame {
 
 			panel.add("South", panelX);
 		}
-		
+
 		if (false) {
 
 		}
 
-        this.getContentPane().add(panel);
+		this.getContentPane().add(panel);
 
-        this.setSize(450, 225);
-        this.pack();
-        this.setVisible(true);
-    }
-    
-    public void quit() {
-        this.setVisible(false);
-    }
-    
-    public double[] getRawValues() {
-        return excitation.getValues();
-    }
+		this.setSize(450, 225);
+		this.pack();
+		this.setVisible(true);
+	}
 
-    /**
-     * Gets the excitation values scaled for a particular start/stop/base cursor.
-     * 
-     * @param startIndex
-     * @param stopIndex
-     * @param base;
-     * @return 
-     */
-    public double[] getValues(int startIndex, int stopIndex, double base) {
-        return ExcitationScaler.scale(excitation.getValues(),
-                startIndex, stopIndex, base, timeInc, bins);
-    }
+	public void quit() {
+		this.setVisible(false);
+	}
 
-    /*
-     * Creates a panel with file name.
-     */
-    private JPanel createTopPanel() {
-        JPanel panel = new JPanel();
-       // panel.setBorder(new EmptyBorder(0, 0, 8, 8));
-       // panel.setLayout(new SpringLayout());
+	public double[] getRawValues() {
+		return excitation.getValues();
+	}
 
-        //JLabel fileLabel = new JLabel("File");
-        //fileLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        //panel.add(fileLabel);
+	/**
+	 * Gets the excitation values scaled for a particular start/stop/base cursor.
+	 * 
+	 * @param startIndex
+	 * @param stopIndex
+	 * @param base;
+	 * @return 
+	 */
+	public double[] getValues(int startIndex, int stopIndex, double base) {
+		return ExcitationScaler.scale(excitation.getValues(),
+			startIndex, stopIndex, base, timeInc, bins);
+	}
 
-        panel.add(new JLabel(excitation.getFileName()));
+	/*
+	 * Creates a panel with file name.
+	 */
+	private JPanel createTopPanel() {
+		JPanel panel = new JPanel();
+		// panel.setBorder(new EmptyBorder(0, 0, 8, 8));
+		// panel.setLayout(new SpringLayout());
 
-        // rows, cols, initX, initY, xPad, yPad
-        //SpringUtilities.makeCompactGrid(panel, 1, 2, 4, 4, 4, 4);
+		//JLabel fileLabel = new JLabel("File");
+		//fileLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		//panel.add(fileLabel);
 
-        return panel;
-    }
+		panel.add(new JLabel(excitation.getFileName()));
+
+		// rows, cols, initX, initY, xPad, yPad
+		//SpringUtilities.makeCompactGrid(panel, 1, 2, 4, 4, 4, 4);
+
+		return panel;
+	}
 }
 

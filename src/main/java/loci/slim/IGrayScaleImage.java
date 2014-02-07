@@ -46,36 +46,36 @@ public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate,
 	 */
 	public void close();
 
-    /**
-     * Sets a listener for when the user clicks on the image.
-     *
-     * @param listener
-     */
-    public void setListener(ISelectListener listener);
+	/**
+	 * Sets a listener for when the user clicks on the image.
+	 *
+	 * @param listener
+	 */
+	public void setListener(ISelectListener listener);
 
-    /**
-     * Gets the channel slider selection.
-     *
-     * @return channel
-     */
-    public int getChannel();
+	/**
+	 * Gets the channel slider selection.
+	 *
+	 * @return channel
+	 */
+	public int getChannel();
 
-    /**
-     * Disables and enables channel selection, during and after a fit.
-     *
-     * @param enable
-     */
-    public void enable(boolean enable);
-    
-    /**
-     * Gets the minimum, non-zero photon count encountered in the image.
-     * 
-     * Usually 1.0, but sometimes its 10.0 and all photon counts are multiples
-     * of 10.0.
-     * 
-     * @return 
-     */
-    public double getMinNonZeroPhotonCount();
+	/**
+	 * Disables and enables channel selection, during and after a fit.
+	 *
+	 * @param enable
+	 */
+	public void enable(boolean enable);
+
+	/**
+	 * Gets the minimum, non-zero photon count encountered in the image.
+	 * 
+	 * Usually 1.0, but sometimes its 10.0 and all photon counts are multiples
+	 * of 10.0.
+	 * 
+	 * @return 
+	 */
+	public double getMinNonZeroPhotonCount();
 
 	/**
 	 * Gets the photon count of the brightest point in the image.
@@ -84,13 +84,13 @@ public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate,
 	 */
 	public double getMaxTotalPhotons();
 
-    /**
-     * Gets the coordinates of the brightest point in the image.
-     * 
-     * @return { x, y }
-     */
-    public int[] getBrightestPoint();
-	
+	/**
+	 * Gets the coordinates of the brightest point in the image.
+	 * 
+	 * @return { x, y }
+	 */
+	public int[] getBrightestPoint();
+
 	/**
 	 * Sets a mask group to listen for changes.
 	 * 

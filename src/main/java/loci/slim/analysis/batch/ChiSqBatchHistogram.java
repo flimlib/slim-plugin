@@ -35,11 +35,11 @@ public class ChiSqBatchHistogram extends AbstractBatchHistogram implements Batch
 	@Override
 	public void init(FittedValue fittedValue) {
 		setFittedValue(fittedValue);
-		
+
 		// 200,000 * 24 bytes ~= 4.8Mb memory usage
 		int totalBins = 200000;
 		setTotalBins(totalBins);
-		
+
 		// bin chisquare values from 0.0..50.0
 		double minRange = 0.0;
 		double maxRange = 50.0;

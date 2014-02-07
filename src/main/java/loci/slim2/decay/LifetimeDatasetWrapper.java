@@ -62,7 +62,7 @@ public class LifetimeDatasetWrapper {
 	private static final int IMPOSSIBLE_INDEX = -1;
 	private static final int MAX_BIN_WIDTH = 21;
 	private static final int MAX_CACHE_SIZE = 1000;
-	
+
 	private Dataset dataset;
 	private RandomAccess<? extends RealType<?>> randomAccess;
 	private DecayCache cache;
@@ -124,19 +124,19 @@ public class LifetimeDatasetWrapper {
 		setTimeIncrement(time/bins);
 		setPhotonCountFactor(factor);
 	}
-	
+
 	private void dumpMetaTable(MetaTable metaTable) {
 		Set<String> keys = metaTable.keySet();
 		for (String key : keys) {
 			System.out.println("key >" + key + "> entry <" + metaTable.get(key) + ">");
 		}
 	}
-	
+
 	private void init(Dataset dataset) throws NoLifetimeAxisFoundException {
 		this.dataset = dataset;
 		randomAccess = dataset.getImgPlus().randomAccess();
 		cache = new DecayCache(this, MAX_BIN_WIDTH, MAX_CACHE_SIZE);
-		
+
 		// find lifetime axis
 		lifetimeDimension = IMPOSSIBLE_INDEX;
 		ImgPlus<?> img = dataset.getImgPlus();
@@ -164,18 +164,18 @@ public class LifetimeDatasetWrapper {
 			externalAxesList.remove(dimension);
 		}
 		externalAxes = externalAxesList.toArray(new AxisType[0]);
- 
+
 		//TODO ARG this could be done with hyperslice cursor to find bin 0 of
 		// decay, another cursor that is limited to cruise the lifetime dim
 		// that gets transformed (or origined) into place.
-		
+
 		/*
 		MixedTransformView<? extends RealType<?>> r = null;
 		MixedTransformView<?> r = null;
 		r = Views.<?>hyperSlice(randomAccess, lifetimeDimension, 0);
 		Object rr = Views.hyperSlice(randomAccess, lifetimeDimension, 0L);
-		
-        RandomAccessibleInterval< T > view =
+
+		RandomAccessibleInterval< T > view =
 		Views.interval( randomAccess, new long[] { 0, 0,1 }, new long[]{ randomAccess.dimension(0), randomAccess.dimension(1),1 } );
 		*/
 
@@ -189,7 +189,7 @@ public class LifetimeDatasetWrapper {
 				externalDimensions[i++] = internalDimensions[j];
 			}
 		}
-		
+
 		bins = (int) internalDimensions[lifetimeDimension];
 	}
 
@@ -227,7 +227,7 @@ public class LifetimeDatasetWrapper {
 	public int getBins() {
 		return bins;
 	}
-	
+
 	/**
 	 * Sets photon count factor.
 	 * 
@@ -236,7 +236,7 @@ public class LifetimeDatasetWrapper {
 	private void setPhotonCountFactor(int factor) {
 		this.factor = factor;
 	}
-	
+
 	/**
 	 * Gets photon count factor.
 	 * 
@@ -305,7 +305,7 @@ public class LifetimeDatasetWrapper {
 			return getDecay(position);
 		}
 		final long xAnchor = position[0];
-		final long yAnchor = position[1];		
+		final long yAnchor = position[1];
 		return combineDecay(
 				0, Integer.MAX_VALUE,
 				xAnchor - binSize, xAnchor + binSize,
@@ -346,14 +346,14 @@ public class LifetimeDatasetWrapper {
 		}
 		return (int) sum;
 	}
-	
+
 	private int chooseLifetimeDimensionUI(List<AxisType> dimensions) {
 		// skip initial 2 dimensions, which are X and Y
 		String[] choices = new String[dimensions.size() - 2];
 		for (int i = 0; i < choices.length; ++i) {
 			choices[i] = dimensions.get(i + 2).getLabel();
 		}
-        String input = (String) JOptionPane.showInputDialog(
+		String input = (String) JOptionPane.showInputDialog(
 				null, "Choose Lifetime Dimension...",
 				"Unknown Lifetime Dimension",
 				JOptionPane.QUESTION_MESSAGE,
@@ -361,7 +361,7 @@ public class LifetimeDatasetWrapper {
 				choices, // Array of choices
 				choices[0]); // Initial choice
 		int dimension = IMPOSSIBLE_INDEX;
-        for (int i = 0; i < choices.length; ++i) {
+		for (int i = 0; i < choices.length; ++i) {
 			// input is null when Canceled
 			if (choices[i].equals(input)) {
 				dimension = i + 2;
@@ -514,9 +514,9 @@ public class LifetimeDatasetWrapper {
 			final long x = position[0];
 			final long y = position[1];
 			final long key = x * xDim + y;
-			
+
 			decay = cache.get(key);
-			
+
 			if (null == decay) {
 				decay = wrapper.getDecay(position);
 				cache.put(key, decay);

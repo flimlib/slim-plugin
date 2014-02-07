@@ -46,230 +46,230 @@ import net.imglib2.type.numeric.RealType;
  * @author Aivar Grislis
  */
 public class ExcitationFileUtility <T extends RealType<T>> {
-    private static final String ICS = ".ics";
-    private static final String IRF = ".irf";
+	private static final String ICS = ".ics";
+	private static final String IRF = ".irf";
 
-    public static Excitation loadExcitation(String fileName, double timeInc) {
-        Excitation excitation = null;
-        double values[] = null;
-        if (fileName.toLowerCase().endsWith(ICS)) {
-            values = loadICSExcitationFile(fileName);
-        }
-        else {
-            if (!fileName.toLowerCase().endsWith(IRF)) {
-                fileName += IRF;
-            }
-            values = loadIRFExcitationFile(fileName);
-        }
-        if (null != values) {
-            excitation = new Excitation(fileName, values, timeInc);
-        }
-        return excitation;
-    }
+	public static Excitation loadExcitation(String fileName, double timeInc) {
+		Excitation excitation = null;
+		double values[] = null;
+		if (fileName.toLowerCase().endsWith(ICS)) {
+			values = loadICSExcitationFile(fileName);
+		}
+		else {
+			if (!fileName.toLowerCase().endsWith(IRF)) {
+				fileName += IRF;
+			}
+			values = loadIRFExcitationFile(fileName);
+		}
+		if (null != values) {
+			excitation = new Excitation(fileName, values, timeInc);
+		}
+		return excitation;
+	}
 
-    public static Excitation createExcitation(String fileName, double[] values, double timeInc) {
-        Excitation excitation = null;
-        boolean success = false;
-        if (fileName.endsWith(ICS)) {
-            success = saveICSExcitationFile(fileName, values);
-        }
-        else {
-            if (!fileName.endsWith(IRF)) {
-                fileName += IRF;
-            }
-            success = saveIRFExcitationFile(fileName, values);
-        }
-        if (success) {
-            excitation = new Excitation(fileName, values, timeInc);
-        }
-        return excitation;
-    }
+	public static Excitation createExcitation(String fileName, double[] values, double timeInc) {
+		Excitation excitation = null;
+		boolean success = false;
+		if (fileName.endsWith(ICS)) {
+			success = saveICSExcitationFile(fileName, values);
+		}
+		else {
+			if (!fileName.endsWith(IRF)) {
+				fileName += IRF;
+			}
+			success = saveIRFExcitationFile(fileName, values);
+		}
+		if (success) {
+			excitation = new Excitation(fileName, values, timeInc);
+		}
+		return excitation;
+	}
 
-    private static double[] loadICSExcitationFile(String fileName) {
-        double[] results = null;
-        ICSReader icsReader = new ICSReader();
-        try {
-            icsReader.setId(fileName);
-            int bitsPerPixel = icsReader.getBitsPerPixel();
-            int bytesPerPixel = bitsPerPixel / 8;
-            boolean littleEndian = icsReader.isLittleEndian();
-            boolean interleaved = icsReader.isInterleaved();
-            int bins = icsReader.getSizeC();
-            if (1 == bins) {
-                // hack for lifetime ICS that reader doesn't recognize as such
-                bins = icsReader.getSizeZ();
-            }
-            results = new double[bins];
-            byte bytes[];
-            if (false || icsReader.isInterleaved()) { //TODO ARG interleaved does not read the whole thing; was 130K, now 32767
-                // this returns the whole thing
-                bytes = icsReader.openBytes(0);
-                System.out.println("INTERLEAVED reads # bytes: " + bytes.length);
-                for (int bin = 0; bin < bins; ++bin) {
-                    results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, bytesPerPixel * bin);
-                }
-            }
-            else {
-                for (int bin = 0; bin < bins; ++bin) {
-                    bytes = icsReader.openBytes(bin);
-                    results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, 0);
-                }
-            }
-            icsReader.close();
-        }
-        catch (IOException e) {
-            System.out.println("IOException " + e.getMessage());
-        }
-        catch (FormatException e) {
-            System.out.println("FormatException " + e.getMessage());
-        }
-        return results;
-    }
+	private static double[] loadICSExcitationFile(String fileName) {
+		double[] results = null;
+		ICSReader icsReader = new ICSReader();
+		try {
+			icsReader.setId(fileName);
+			int bitsPerPixel = icsReader.getBitsPerPixel();
+			int bytesPerPixel = bitsPerPixel / 8;
+			boolean littleEndian = icsReader.isLittleEndian();
+			boolean interleaved = icsReader.isInterleaved();
+			int bins = icsReader.getSizeC();
+			if (1 == bins) {
+				// hack for lifetime ICS that reader doesn't recognize as such
+				bins = icsReader.getSizeZ();
+			}
+			results = new double[bins];
+			byte bytes[];
+			if (false || icsReader.isInterleaved()) { //TODO ARG interleaved does not read the whole thing; was 130K, now 32767
+				// this returns the whole thing
+				bytes = icsReader.openBytes(0);
+				System.out.println("INTERLEAVED reads # bytes: " + bytes.length);
+				for (int bin = 0; bin < bins; ++bin) {
+					results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, bytesPerPixel * bin);
+				}
+			}
+			else {
+				for (int bin = 0; bin < bins; ++bin) {
+					bytes = icsReader.openBytes(bin);
+					results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, 0);
+				}
+			}
+			icsReader.close();
+		}
+		catch (IOException e) {
+			System.out.println("IOException " + e.getMessage());
+		}
+		catch (FormatException e) {
+			System.out.println("FormatException " + e.getMessage());
+		}
+		return results;
+	}
 
-    //TODO doesn't work; needed to interoperate with TRI2
-    private static boolean saveICSExcitationFile(String fileName, double[] values) {
-        boolean success = false;
-        ICSWriter icsWriter = new ICSWriter();
-        MetadataRetrieve meta = null;
+	//TODO doesn't work; needed to interoperate with TRI2
+	private static boolean saveICSExcitationFile(String fileName, double[] values) {
+		boolean success = false;
+		ICSWriter icsWriter = new ICSWriter();
+		MetadataRetrieve meta = null;
 //        icsWriter.setMetadataRetrieve(meta);
-        try {
-            for (int bin = 0; bin < values.length; ++bin) {
-                icsWriter.saveBytes(bin, convertDoubleToBytes(values[bin]));
-            }
-            success = true;
-        }
-        catch (IOException e) {
-            System.out.println("IOException " + e.getMessage());
-        }
-        catch (FormatException e) {
-            System.out.println("FormatException " + e.getMessage());
-        }        
-        return success;
-    }
+		try {
+			for (int bin = 0; bin < values.length; ++bin) {
+				icsWriter.saveBytes(bin, convertDoubleToBytes(values[bin]));
+			}
+			success = true;
+		}
+		catch (IOException e) {
+			System.out.println("IOException " + e.getMessage());
+		}
+		catch (FormatException e) {
+			System.out.println("FormatException " + e.getMessage());
+		}
+		return success;
+	}
 
-    private static double[] loadIRFExcitationFile(String fileName) {
-        double[] values = null;
-        try {
-            ArrayList<Float> valuesArrayList = new ArrayList<Float>();
-            Scanner scanner = new Scanner(new FileReader(fileName));
-            String line = null;
-            while (scanner.hasNextLine()) {
-                line = scanner.nextLine();
-                valuesArrayList.add(Float.parseFloat(line));
-            }
-            values = new double[valuesArrayList.size()];
-            for (int i = 0; i < valuesArrayList.size(); ++i) {
-                values[i] = valuesArrayList.get(i);
-            }
-        }
-        catch (Exception e) {
-            System.out.println("Exception " + e.getMessage());
-        }
-        return values;
-    }
+	private static double[] loadIRFExcitationFile(String fileName) {
+		double[] values = null;
+		try {
+			ArrayList<Float> valuesArrayList = new ArrayList<Float>();
+			Scanner scanner = new Scanner(new FileReader(fileName));
+			String line = null;
+			while (scanner.hasNextLine()) {
+				line = scanner.nextLine();
+				valuesArrayList.add(Float.parseFloat(line));
+			}
+			values = new double[valuesArrayList.size()];
+			for (int i = 0; i < valuesArrayList.size(); ++i) {
+				values[i] = valuesArrayList.get(i);
+			}
+		}
+		catch (Exception e) {
+			System.out.println("Exception " + e.getMessage());
+		}
+		return values;
+	}
 
-    private static boolean saveIRFExcitationFile(String fileName, double[] values) {
-        boolean success = false;
-        try {
-            FileWriter writer = new FileWriter(fileName);
-            for (int i = 0; i < values.length; ++i) {
-                if (i > 0) {
-                    writer.append('\n');
-                }
-                writer.append(Double.toString(values[i]));
-            }
-            writer.flush();
-            writer.close();
-            success = true;
-        }
-        catch (IOException e) {
-            System.out.println("IOException " + e.getMessage());
-        }
-        return success;
-    }
+	private static boolean saveIRFExcitationFile(String fileName, double[] values) {
+		boolean success = false;
+		try {
+			FileWriter writer = new FileWriter(fileName);
+			for (int i = 0; i < values.length; ++i) {
+				if (i > 0) {
+					writer.append('\n');
+				}
+				writer.append(Double.toString(values[i]));
+			}
+			writer.flush();
+			writer.close();
+			success = true;
+		}
+		catch (IOException e) {
+			System.out.println("IOException " + e.getMessage());
+		}
+		return success;
+	}
 
-    private static byte[] convertDoubleToBytes(double d) {
-        float f = (float) d;
-        int rawIntBits = Float.floatToRawIntBits(f);
-        byte[] result = new byte[4];
-        for (int i = 0; i < 4; ++i) {
-            int offset = 8 * i;
-            result[i] = (byte) ((rawIntBits >>> offset) & 0xff);
-        }
-        return result;
-    }
+	private static byte[] convertDoubleToBytes(double d) {
+		float f = (float) d;
+		int rawIntBits = Float.floatToRawIntBits(f);
+		byte[] result = new byte[4];
+		for (int i = 0; i < 4; ++i) {
+			int offset = 8 * i;
+			result[i] = (byte) ((rawIntBits >>> offset) & 0xff);
+		}
+		return result;
+	}
 
-    /**
-     * Converts a little-endian four byte array to a double.
-     *
-     * @param littleEndian byte order
-     * @param bitsPerPixel
-     * @param bytes
-     * @param index
-     * @return
-     */
-    private static double convertBytesToDouble(boolean littleEndian, int bitsPerPixel, byte[] bytes, int index) {
-        double returnValue = 0.0f;
-        if (32 == bitsPerPixel) {
-            int i = 0;
-            if (littleEndian) {
-                i |= bytes[index + 3] & 0xff;
-                i <<= 8;
-                i |= bytes[index + 2] & 0xff;
-                i <<= 8;
-                i |= bytes[index + 1] & 0xff;
-                i <<= 8;
-                i |= bytes[index + 0] & 0xff;
-            }
-            else {
-                i |= bytes[index + 0] & 0xff;
-                i <<= 8;
-                i |= bytes[index + 1] & 0xff;
-                i <<= 8;
-                i |= bytes[index + 2] & 0xff;
-                i <<= 8;
-                i |= bytes[index + 3] & 0xff;
-            }
-            returnValue = Float.intBitsToFloat(i);
-        }
-        else if (64 == bitsPerPixel) {
-            long l = 0;
-            if (littleEndian) {
-                l |= bytes[index + 7] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 6] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 5] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 4] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 3] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 2] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 1] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 0] & 0xff;
-            }
-            else {
-                l |= bytes[index + 0] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 1] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 2] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 3] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 4] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 5] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 6] & 0xff;
-                l <<= 8;
-                l |= bytes[index + 7] & 0xff;
-            }
-            returnValue = Double.longBitsToDouble(l);
-        }
-        return returnValue;
-    }
+	/**
+	 * Converts a little-endian four byte array to a double.
+	 *
+	 * @param littleEndian byte order
+	 * @param bitsPerPixel
+	 * @param bytes
+	 * @param index
+	 * @return
+	 */
+	private static double convertBytesToDouble(boolean littleEndian, int bitsPerPixel, byte[] bytes, int index) {
+		double returnValue = 0.0f;
+		if (32 == bitsPerPixel) {
+			int i = 0;
+			if (littleEndian) {
+				i |= bytes[index + 3] & 0xff;
+				i <<= 8;
+				i |= bytes[index + 2] & 0xff;
+				i <<= 8;
+				i |= bytes[index + 1] & 0xff;
+				i <<= 8;
+				i |= bytes[index + 0] & 0xff;
+			}
+			else {
+				i |= bytes[index + 0] & 0xff;
+				i <<= 8;
+				i |= bytes[index + 1] & 0xff;
+				i <<= 8;
+				i |= bytes[index + 2] & 0xff;
+				i <<= 8;
+				i |= bytes[index + 3] & 0xff;
+			}
+			returnValue = Float.intBitsToFloat(i);
+		}
+		else if (64 == bitsPerPixel) {
+			long l = 0;
+			if (littleEndian) {
+				l |= bytes[index + 7] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 6] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 5] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 4] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 3] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 2] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 1] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 0] & 0xff;
+			}
+			else {
+				l |= bytes[index + 0] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 1] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 2] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 3] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 4] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 5] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 6] & 0xff;
+				l <<= 8;
+				l |= bytes[index + 7] & 0xff;
+			}
+			returnValue = Double.longBitsToDouble(l);
+		}
+		return returnValue;
+	}
 }

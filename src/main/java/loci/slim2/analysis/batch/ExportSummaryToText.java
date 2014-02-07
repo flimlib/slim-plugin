@@ -82,7 +82,7 @@ public class ExportSummaryToText {
 		this.function = function;
 		this.listener = listener;
 		this.parameters = parameters;
-		
+
 		histograms = buildBatchHistograms(parameters);
 	}
 
@@ -117,7 +117,7 @@ public class ExportSummaryToText {
 					cursor.setPosition(position);
 					values[i] = cursor.get().getRealDouble();
 				}
-				
+
 				// update histograms for this image
 				for (BatchHistogram histogram : imageHistograms) {
 					histogram.process(values);
@@ -129,30 +129,30 @@ public class ExportSummaryToText {
 				}
 			}
 		}
-		
-		
+
+
 		// build list of histogram statistics for the current image
 		List<HistogramStatistics> imageList = new ArrayList<HistogramStatistics>();
 		for (BatchHistogram histogram : imageHistograms) {
 			HistogramStatistics imageStatistics = histogram.getStatistics();
 			imageList.add(imageStatistics);
 		}
-		
+
 		// build list of summarized histogram statistics
 		List<HistogramStatistics> summaryList = new ArrayList<HistogramStatistics>();
 		for (BatchHistogram histogram : histograms) {
-		    HistogramStatistics summaryStatistics = histogram.getStatistics();
-		    summaryList.add(summaryStatistics);
+			HistogramStatistics summaryStatistics = histogram.getStatistics();
+			summaryList.add(summaryStatistics);
 		}
-		
+
 		// lazy instantiation of frame
 		if (null == frame) {
-		    frame = new BatchHistogramsFrame(listener);
+			frame = new BatchHistogramsFrame(listener);
 		}
 		// show new image statistics and update summary
 		frame.update(
 			fileName,
-			imageList.toArray(new HistogramStatistics[imageList.size()]), 
+			imageList.toArray(new HistogramStatistics[imageList.size()]),
 			summaryList.toArray(new HistogramStatistics[summaryList.size()]));
 	}
 
@@ -162,16 +162,16 @@ public class ExportSummaryToText {
 	 * @param fileName
 	 * @param separator
 	 */
-    public void export(String fileName, char separator) {
+	public void export(String fileName, char separator) {
 		BufferedWriter bufferedWriter = null;
 		try {
-            bufferedWriter = new BufferedWriter(new FileWriter(fileName, true));
-        }
+			bufferedWriter = new BufferedWriter(new FileWriter(fileName, true));
+		}
 		catch (IOException e) {
-            IJ.log("exception opening file " + fileName);
-            IJ.handleException(e);
-        }
-		
+			IJ.log("exception opening file " + fileName);
+			IJ.handleException(e);
+		}
+
 		if (null != bufferedWriter) {
 			try {
 				// title this export
@@ -214,7 +214,7 @@ public class ExportSummaryToText {
 		List<BatchHistogram> histogramsList = new ArrayList<BatchHistogram>();
 		for (FittedValue parameter : parameters) {
 			BatchHistogram histogram = null;
-			
+
 			if (parameter instanceof ChiSqFittedValue) {
 				histogram = new ChiSqBatchHistogram();
 			}
@@ -237,13 +237,13 @@ public class ExportSummaryToText {
 				histogram = new TauBatchHistogram();
 			}
 			//TODO 'h' parameter for stretched
-			
+
 			if (null != histogram) {
 				histogram.init(parameter);
 				histogramsList.add(histogram);
 			}
 		}
-		
+
 		return histogramsList.toArray(new BatchHistogram[histogramsList.size()]);
 	}
 }

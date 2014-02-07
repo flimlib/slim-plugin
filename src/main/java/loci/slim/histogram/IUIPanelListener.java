@@ -28,33 +28,33 @@ package loci.slim.histogram;
  * @author Aivar Grislis
  */
 public interface IUIPanelListener {
-    
-    /**
-     * User has clicked the auto ranging checkbox.
-     * 
-     * @param autoRange
-     */
-    public void setAutoRange(boolean autoRange);
-    
-    /**
-     * User has clicked the exclude pixels checkbox.
-     * 
-     * @param excludePixels
-     */
-    public void setExcludePixels(boolean excludePixels);
-    
-    /**
-     * User has clicked the combine channels checkbox.
-     */
-    public void setCombineChannels(boolean combineChannels);
 
-    /**
-     * User has clicked the display channels checkbox.
-     * 
-     * @param displayChannels 
-     */
-    public void setDisplayChannels(boolean displayChannels);
-	
+	/**
+	 * User has clicked the auto ranging checkbox.
+	 * 
+	 * @param autoRange
+	 */
+	public void setAutoRange(boolean autoRange);
+
+	/**
+	 * User has clicked the exclude pixels checkbox.
+	 * 
+	 * @param excludePixels
+	 */
+	public void setExcludePixels(boolean excludePixels);
+
+	/**
+	 * User has clicked the combine channels checkbox.
+	 */
+	public void setCombineChannels(boolean combineChannels);
+
+	/**
+	 * User has clicked the display channels checkbox.
+	 * 
+	 * @param displayChannels 
+	 */
+	public void setDisplayChannels(boolean displayChannels);
+
 	/**
 	 * User has clicked the logarithmic display checkbox.
 	 * 
@@ -75,14 +75,14 @@ public interface IUIPanelListener {
 	 * @param bandwidth 
 	 */
 	public void setBandwidth(double bandwidth);
-	
+
 	/**
 	 * User has clicked the family style 1 checkbox.
 	 * 
 	 * @param on
 	 */
 	public void setFamilyStyle1(boolean on);
-	
+
 	/**
 	 * User has clicked the family style 1 checkbox.
 	 * 
@@ -90,11 +90,11 @@ public interface IUIPanelListener {
 	 */
 	public void setFamilyStyle2(boolean on);
 
-    /**
-     * User has entered new min/max LUT value.
-     *
-     * @param min
-     * @param max
-     */
-    public void setMinMaxLUT(double min, double max);
+	/**
+	 * User has entered new min/max LUT value.
+	 *
+	 * @param min
+	 * @param max
+	 */
+	public void setMinMaxLUT(double min, double max);
 }

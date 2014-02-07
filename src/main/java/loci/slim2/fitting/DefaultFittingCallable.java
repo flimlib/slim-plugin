@@ -34,53 +34,53 @@ import loci.curvefitter.ICurveFitter;
  * @author Aivar Grislis
  */
 public class DefaultFittingCallable implements FittingCallable {
-    private ICurveFitter curveFitter;
-    private GlobalFitParams globalParams;
-    private LocalFitParams localParams;
-    private FitResults result;
-    
-    @Override
-    public void setup(final ICurveFitter curveFitter,
-            final GlobalFitParams globalParams,
-            final LocalFitParams localParams) {
-        this.curveFitter = curveFitter;
-        this.globalParams = globalParams;
-        this.localParams = localParams;
-    }
- 
-    @Override
-    public FitResults call() {
+	private ICurveFitter curveFitter;
+	private GlobalFitParams globalParams;
+	private LocalFitParams localParams;
+	private FitResults result;
+
+	@Override
+	public void setup(final ICurveFitter curveFitter,
+			final GlobalFitParams globalParams,
+			final LocalFitParams localParams) {
+		this.curveFitter = curveFitter;
+		this.globalParams = globalParams;
+		this.localParams = localParams;
+	}
+
+	@Override
+	public FitResults call() {
 		int dataStart;
 		int transientStop;
 		int photonCount;
 		double[] decay;
-		
-        curveFitter.setEstimator(globalParams.getEstimator());
-        curveFitter.setFitAlgorithm(globalParams.getFitAlgorithm());
-        curveFitter.setFitFunction(globalParams.getFitFunction());
-        curveFitter.setNoiseModel(globalParams.getNoiseModel());
-        curveFitter.setInstrumentResponse(globalParams.getPrompt());
-        curveFitter.setXInc(globalParams.getXInc());
-        curveFitter.setFree(globalParams.getFree());
-       
-        ICurveFitData curveFitData = new CurveFitData(); 
-        curveFitData.setChiSquareTarget(globalParams.getChiSquareTarget());
-		decay = localParams.getY();
-        curveFitData.setYCount(decay);
-        curveFitData.setTransStartIndex(globalParams.getTransientStart());
-		dataStart = globalParams.getDataStart();
-        curveFitData.setDataStartIndex(dataStart);
-		transientStop = globalParams.getTransientStop();
-        curveFitData.setTransEndIndex(transientStop);        
-        curveFitData.setSig(localParams.getSig());
-        curveFitData.setParams(localParams.getParams().clone()); // params is overwritten
-        curveFitData.setYFitted(localParams.getYFitted());
-        
-        ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData }; //TODO refactor to non-array
-		
-        int returnValue = curveFitter.fitData(curveFitDataArray);
 
-        result = new DefaultFitResults();
+		curveFitter.setEstimator(globalParams.getEstimator());
+		curveFitter.setFitAlgorithm(globalParams.getFitAlgorithm());
+		curveFitter.setFitFunction(globalParams.getFitFunction());
+		curveFitter.setNoiseModel(globalParams.getNoiseModel());
+		curveFitter.setInstrumentResponse(globalParams.getPrompt());
+		curveFitter.setXInc(globalParams.getXInc());
+		curveFitter.setFree(globalParams.getFree());
+
+		ICurveFitData curveFitData = new CurveFitData();
+		curveFitData.setChiSquareTarget(globalParams.getChiSquareTarget());
+		decay = localParams.getY();
+		curveFitData.setYCount(decay);
+		curveFitData.setTransStartIndex(globalParams.getTransientStart());
+		dataStart = globalParams.getDataStart();
+		curveFitData.setDataStartIndex(dataStart);
+		transientStop = globalParams.getTransientStop();
+		curveFitData.setTransEndIndex(transientStop);
+		curveFitData.setSig(localParams.getSig());
+		curveFitData.setParams(localParams.getParams().clone()); // params is overwritten
+		curveFitData.setYFitted(localParams.getYFitted());
+
+		ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData }; //TODO refactor to non-array
+
+		int returnValue = curveFitter.fitData(curveFitDataArray);
+
+		result = new DefaultFitResults();
 		result.setErrorCode(returnValue);
 		result.setChiSquare(curveFitData.getChiSquare());
 		result.setParams(curveFitData.getParams());
@@ -94,7 +94,7 @@ public class DefaultFittingCallable implements FittingCallable {
 		result.setTransStart(globalParams.getTransientStart());
 		result.setDataStart(globalParams.getDataStart());
 		result.setTransStop(globalParams.getTransientStop());
- 
-        return result;
-    }   
+
+		return result;
+	}
 }

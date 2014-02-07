@@ -40,40 +40,40 @@ import java.awt.event.AdjustmentListener;
  * @author Aivar Grislis
  */
 public class MyStackWindow extends StackWindow {
-    private int m_slice = 1;
-    private int m_height;
+	private int m_slice = 1;
+	private int m_height;
 
-    public MyStackWindow(ImagePlus imp) {
-        super(imp);
-        //System.out.println("MyStackWindow " + imp.getTitle());        
-        m_height = imp.getHeight();
-        if (null != sliceSelector) {
-            sliceSelector.addAdjustmentListener(
-                new AdjustmentListener() {
-                    public void adjustmentValueChanged(AdjustmentEvent e) {
-                       if (e.getValue() != m_slice) {
-                           System.out.println("Show slice " + e.getValue());
-                           m_slice = e.getValue();
-                           //TODO this does affect the scrollbar, but not the ImagePlus!
-                           showSlice(m_slice);
-                       }
-                    }
-                }
-            );
-        }
-    }
+	public MyStackWindow(ImagePlus imp) {
+		super(imp);
+		//System.out.println("MyStackWindow " + imp.getTitle());
+		m_height = imp.getHeight();
+		if (null != sliceSelector) {
+			sliceSelector.addAdjustmentListener(
+				new AdjustmentListener() {
+					public void adjustmentValueChanged(AdjustmentEvent e) {
+						if (e.getValue() != m_slice) {
+							System.out.println("Show slice " + e.getValue());
+							m_slice = e.getValue();
+							//TODO this does affect the scrollbar, but not the ImagePlus!
+							showSlice(m_slice);
+						}
+					}
+				}
+					);
+		}
+	}
 
-    public MyStackWindow(ImagePlus imp, ImageCanvas ic) {
-	 super(imp, ic);
-    }
+	public MyStackWindow(ImagePlus imp, ImageCanvas ic) {
+		super(imp, ic);
+	}
 
-    public int getSlice() {
-        //TODO this approach did not work; StackWindow doesn't keep slice up to date.
-        //return slice;
-        return m_slice;
-    }
+	public int getSlice() {
+		//TODO this approach did not work; StackWindow doesn't keep slice up to date.
+		//return slice;
+		return m_slice;
+	}
 
-    public float getZoomFactor() {
-        return (float) m_height / ic.getHeight();
-    }
+	public float getZoomFactor() {
+		return (float) m_height / ic.getHeight();
+	}
 }

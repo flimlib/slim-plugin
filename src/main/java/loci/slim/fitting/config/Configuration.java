@@ -40,52 +40,52 @@ import loci.slim.heuristics.FitterEstimator;
  * @author Aivar Grislis
  */
 public class Configuration extends ConfigurationHelper {
-    private static Configuration _instance = null;
-    private int _threads = 8;
-    private IFittingEngine _fittingEngine;
-    private ICurveFitter _curveFitter;
-    private IFitterEstimator _cursorEstimator;
+	private static Configuration _instance = null;
+	private int _threads = 8;
+	private IFittingEngine _fittingEngine;
+	private ICurveFitter _curveFitter;
+	private IFitterEstimator _cursorEstimator;
 
-    /**
-     * Private constructor for singleton pattern.
-     */
-    private Configuration() {
-    }
-    
-    public static synchronized Configuration getInstance() {
-        if (null == _instance) {
-            _instance = new Configuration();
-        }
-        return _instance;
-    }
-    
-    public int getThreads() {
-        return _threads;
-    }
-    
-    public synchronized IFittingEngine getFittingEngine() {
-        if (null == _fittingEngine) {
-            _fittingEngine = new ThreadedFittingEngine();
-        }
-        return _fittingEngine;
-    }
-    
-    public synchronized ICurveFitter getCurveFitter() {
-        if (null == _curveFitter) {
-            _curveFitter = new SLIMCurveFitter();
-        }
-        return _curveFitter;
-    }
-    
-    public synchronized IFitterEstimator getCursorEstimator() {
-        if (null == _cursorEstimator) {
-            _cursorEstimator = new FitterEstimator();
-        }
-        return _cursorEstimator;
-    }
-    
-    public IFittingEngineCallable newFittingEngineCallable() {
-        return new FittingEngineCallable();
-    }
-    
+	/**
+	 * Private constructor for singleton pattern.
+	 */
+	private Configuration() {
+	}
+
+	public static synchronized Configuration getInstance() {
+		if (null == _instance) {
+			_instance = new Configuration();
+		}
+		return _instance;
+	}
+
+	public int getThreads() {
+		return _threads;
+	}
+
+	public synchronized IFittingEngine getFittingEngine() {
+		if (null == _fittingEngine) {
+			_fittingEngine = new ThreadedFittingEngine();
+		}
+		return _fittingEngine;
+	}
+
+	public synchronized ICurveFitter getCurveFitter() {
+		if (null == _curveFitter) {
+			_curveFitter = new SLIMCurveFitter();
+		}
+		return _curveFitter;
+	}
+
+	public synchronized IFitterEstimator getCursorEstimator() {
+		if (null == _cursorEstimator) {
+			_cursorEstimator = new FitterEstimator();
+		}
+		return _cursorEstimator;
+	}
+
+	public IFittingEngineCallable newFittingEngineCallable() {
+		return new FittingEngineCallable();
+	}
+
 }

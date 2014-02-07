@@ -39,26 +39,26 @@ import org.junit.Test;
  * @author Aivar Grislis
  */
 public class MaskTest {
-	
+
 	public MaskTest() {
 	}
-	
+
 	@BeforeClass
 	public static void setUpClass() {
 	}
-	
+
 	@AfterClass
 	public static void tearDownClass() {
 	}
-	
+
 	@Before
 	public void setUp() {
 	}
-	
+
 	@After
 	public void tearDown() {
 	}
-	
+
 	@Test
 	public void testConstructors() {
 		// construct at given size
@@ -83,12 +83,12 @@ public class MaskTest {
 	public void testClone() {
 		Mask mask1 = new Mask(400, 300);
 		Mask mask2 = mask1.clone();
-		
+
 		// setting flag in original should not affect clone
 		mask1.set(0,0);
 		assert(!mask2.test(0, 0));
 	}
-	
+
 	@Test
 	public void testAdd1() {
 		Mask mask1 = new Mask(10, 10);
@@ -118,7 +118,7 @@ public class MaskTest {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testAdd2() {
 		Mask mask1 = new Mask(10, 10);
@@ -142,7 +142,7 @@ public class MaskTest {
 			}
 		}
 	}
-	
+
 	@Test
 	public void testAddMasks() {
 		Mask mask1 = new Mask(3, 3);
@@ -163,7 +163,7 @@ public class MaskTest {
 		mask4.set(1, 1);
 		mask4.set(0, 2);
 		mask4.set(2, 2);
-		
+
 		Collection<Mask> masks = new ArrayList<Mask>();
 		Mask mask = Mask.addMasks(masks);
 		assertEquals(mask, null);
@@ -181,7 +181,7 @@ public class MaskTest {
 		assert(!mask.test(0, 2));
 		assert(!mask.test(1, 2));
 		assert(!mask.test(2, 2));
-		
+
 		masks = new ArrayList<Mask>();
 		masks.add(mask1);
 		masks.add(mask2);
@@ -196,7 +196,7 @@ public class MaskTest {
 		assert(!mask.test(0, 2));
 		assert(!mask.test(1, 2));
 		assert(!mask.test(2, 2));
-		
+
 		masks = new ArrayList<Mask>();
 		masks.add(mask3);
 		masks.add(mask4);

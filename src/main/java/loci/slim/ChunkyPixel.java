@@ -34,99 +34,99 @@ package loci.slim;
  * @author Aivar Grislis
  */
 public class ChunkyPixel {
-    final int _x;
-    final int _y;
-    final int _width;
-    final int _height;
-    int[] _inputLocation;
-    int[] _outputLocation;
+	final int _x;
+	final int _y;
+	final int _width;
+	final int _height;
+	int[] _inputLocation;
+	int[] _outputLocation;
 
-    /**
-     * Constructor.
-     * 
-     * @param x
-     * @param y
-     * @param width
-     * @param height 
-     */
-    public ChunkyPixel(int x, int y, int width, int height) {
-        _x = x;
-        _y = y;
-        _width = width;
-        _height = height;
-        _inputLocation = null;
-        _outputLocation = null;
-    }
+	/**
+	 * Constructor.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height 
+	 */
+	public ChunkyPixel(int x, int y, int width, int height) {
+		_x = x;
+		_y = y;
+		_width = width;
+		_height = height;
+		_inputLocation = null;
+		_outputLocation = null;
+	}
 
-    /**
-     * Gets the x location.
-     * 
-     * @return 
-     */
-    public int getX() {
-        return _x;
-    }
+	/**
+	 * Gets the x location.
+	 * 
+	 * @return 
+	 */
+	public int getX() {
+		return _x;
+	}
 
-    /**
-     * Gets the y location.
-     * 
-     * @return 
-     */
-    public int getY() {
-        return _y;
-    }
+	/**
+	 * Gets the y location.
+	 * 
+	 * @return 
+	 */
+	public int getY() {
+		return _y;
+	}
 
-    /**
-     * Gets the width to draw the pixel.
-     * 
-     * @return 
-     */
-    public int getWidth() {
-        return _width;
-    }
+	/**
+	 * Gets the width to draw the pixel.
+	 * 
+	 * @return 
+	 */
+	public int getWidth() {
+		return _width;
+	}
 
-    /**
-     * Gets the height to draw the pixel.
-     * 
-     * @return 
-     */
-    public int getHeight() {
-        return _height;
-    }
+	/**
+	 * Gets the height to draw the pixel.
+	 * 
+	 * @return 
+	 */
+	public int getHeight() {
+		return _height;
+	}
 
-    /**
-     * Sets the location of the pixel in the input image.
-     * 
-     * @param location 
-     */
-    public void setInputLocation(int[] location) {
-        _inputLocation = location;
-    }
+	/**
+	 * Sets the location of the pixel in the input image.
+	 * 
+	 * @param location 
+	 */
+	public void setInputLocation(int[] location) {
+		_inputLocation = location;
+	}
 
-    /**
-     * Gets the location of the pixel in the input image.
-     * 
-     * @return 
-     */
-    public int[] getInputLocation() {
-        return _inputLocation;
-    }
+	/**
+	 * Gets the location of the pixel in the input image.
+	 * 
+	 * @return 
+	 */
+	public int[] getInputLocation() {
+		return _inputLocation;
+	}
 
-    /**
-     * Sets the location of the pixel in the output image.
-     * 
-     * @param location 
-     */
-    public void setOutputLocation(int[] location) {
-        _outputLocation = location;
-    }
+	/**
+	 * Sets the location of the pixel in the output image.
+	 * 
+	 * @param location 
+	 */
+	public void setOutputLocation(int[] location) {
+		_outputLocation = location;
+	}
 
-    /**
-     * Gets the location of the pixel in the output image.
-     * 
-     * @return 
-     */
-    public int[] getOutputLocation() {
-        return _outputLocation;
-    }
+	/**
+	 * Gets the location of the pixel in the output image.
+	 * 
+	 * @return 
+	 */
+	public int[] getOutputLocation() {
+		return _outputLocation;
+	}
 }

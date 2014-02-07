@@ -30,55 +30,55 @@ package loci.slim2.process.interactive.ui;
  */
 public interface UserInterfacePanelListener {
 
-    /**
-     * Triggers a fit, creating fitted images.
-     */
-    public void fitImages();
-	
+	/**
+	 * Triggers a fit, creating fitted images.
+	 */
+	public void fitImages();
+
 	/**
 	 * Triggers a fitSingleDecay of pixel or summed.
 	 */
 	public void fitSingleDecay(boolean summed);
 
-    /**
-     * Cancels ongoing fitted image creation.
-     */
-    public void cancelFit();
+	/**
+	 * Cancels ongoing fitted image creation.
+	 */
+	public void cancelFit();
 
-    /**
-     * Quits running plugin.
-     */
-    public void quit();
-	
+	/**
+	 * Quits running plugin.
+	 */
+	public void quit();
+
 	/**
 	 * Opens new file(s).
 	 */
 	public void openFile();
-	
-    /**
-     * Loads an excitation curve from file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean loadExcitation(String fileName);
 
-    /**
-     * Creates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean createExcitation(String fileName);
-	
-    /**
-     * Estimates an excitation curve from current X, Y and saves to file.
-     *
-     * @param fileName
-     * @return whether successful
-     */
-    public boolean estimateExcitation(String fileName);
-	
+	/**
+	 * Loads an excitation curve from file.
+	 *
+	 * @param fileName
+	 * @return whether successful
+	 */
+	public boolean loadExcitation(String fileName);
+
+	/**
+	 * Creates an excitation curve from current X, Y and saves to file.
+	 *
+	 * @param fileName
+	 * @return whether successful
+	 */
+	public boolean createExcitation(String fileName);
+
+	/**
+	 * Estimates an excitation curve from current X, Y and saves to file.
+	 *
+	 * @param fileName
+	 * @return whether successful
+	 */
+	public boolean estimateExcitation(String fileName);
+
 	/**
 	 * Creates excitation curve from gaussian.
 	 * 
@@ -87,14 +87,14 @@ public interface UserInterfacePanelListener {
 	 */
 	public boolean gaussianExcitation(String fileName);
 
-    /**
-     * Cancels the current excitation curve, if any.
-     */
-    public void cancelExcitation();
+	/**
+	 * Cancels the current excitation curve, if any.
+	 */
+	public void cancelExcitation();
 
-    /**
-     * Estimates the prompt and decay cursors.
-     */
-    public void estimateCursors();
+	/**
+	 * Estimates the prompt and decay cursors.
+	 */
+	public void estimateCursors();
 }
 

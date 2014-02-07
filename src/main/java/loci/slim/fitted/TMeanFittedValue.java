@@ -31,7 +31,7 @@ package loci.slim.fitted;
  */
 public class TMeanFittedValue extends AbstractFittedValue implements FittedValue {
 	private int components;
-	
+
 	public void init(String title, int components) {
 		setTitle(title);
 		this.components = components;

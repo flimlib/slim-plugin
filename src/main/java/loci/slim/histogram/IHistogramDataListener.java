@@ -29,17 +29,17 @@ package loci.slim.histogram;
  * @author Aivar Grislis
  */
 public interface IHistogramDataListener {
-    
-    /**
-     * Called when the minimum or maximum changes.
-     * 
-     * @param minView
-     * @param maxView
-     * @param minLUT
-     * @param maxLUT 
-     */
-    public void minMaxChanged(
+
+	/**
+	 * Called when the minimum or maximum changes.
+	 * 
+	 * @param minView
+	 * @param maxView
+	 * @param minLUT
+	 * @param maxLUT 
+	 */
+	public void minMaxChanged(
 			HistogramDataGroup histogramDataGroup,
 			double minView, double maxView,
-            double minLUT, double maxLUT);
+			double minLUT, double maxLUT);
 }

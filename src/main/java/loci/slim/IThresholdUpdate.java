@@ -29,14 +29,14 @@ package loci.slim;
  * @author Aivar Grislis
  */
 public interface IThresholdUpdate {
-	
+
 	/**
 	 * Gets an initial threshold estimate.
 	 * 
 	 * @return 
 	 */
 	public int estimateThreshold();
-	
+
 	/**
 	 * Update the threshold value.
 	 * 

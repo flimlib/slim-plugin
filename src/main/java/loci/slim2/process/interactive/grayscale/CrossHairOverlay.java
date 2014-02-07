@@ -36,7 +36,7 @@ import org.scijava.Context;
  */
 public class CrossHairOverlay extends PointOverlay {
 	private final Dataset dataset;
-	
+
 	/**
 	 * Construct a {@link CrossHairOverlay} given a {@link Context} context.
 	 */
