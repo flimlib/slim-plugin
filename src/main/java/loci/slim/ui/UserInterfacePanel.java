@@ -994,8 +994,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         thresholdLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(thresholdLabel);
 		_thresholdSpinner = new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX, THRESH_INC));
-		updateThresholdChange(_thresholdSpinner);;
-        controlPanel.add(_thresholdSpinner);;
+		updateThresholdChange(_thresholdSpinner);
+        controlPanel.add(_thresholdSpinner);
 
         JLabel chiSqTargetLabel = new JLabel(CHI_SQ_TARGET);
         chiSqTargetLabel.setHorizontalAlignment(SwingConstants.RIGHT);

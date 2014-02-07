@@ -1556,7 +1556,7 @@ public class SLIMProcessor <T extends RealType<T>> {
         fitInfo.setY(uiPanel.getY());
         fitInfo.setParameterCount(uiPanel.getParameterCount());
         fitInfo.setParameters(uiPanel.getParameters());
-        fitInfo.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));;
+        fitInfo.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
         fitInfo.setRefineFit(uiPanel.getRefineFit());
         return fitInfo;
     }

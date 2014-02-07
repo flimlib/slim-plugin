@@ -29,7 +29,7 @@ package loci.slim2.outputset.temp;
  * @author Aivar Grislis
  */
 public class RampGenerator {
-	public enum RampType { UPPER_LEFT, UPPER_RIGHT, LOWER_LEFT, LOWER_RIGHT, TOP, LEFT, RIGHT, BOTTOM };
+	public enum RampType { UPPER_LEFT, UPPER_RIGHT, LOWER_LEFT, LOWER_RIGHT, TOP, LEFT, RIGHT, BOTTOM }
 	private final RampType rampType;
 	private final long width;
 	private final long height;

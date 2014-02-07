@@ -38,7 +38,7 @@ import loci.slim.mask.MaskGroup;
  * @author Aivar Grislis
  */
 public class FittedImageFitter {
-    public enum FittedImageType { A1, T1, A2, T2, A3, T3, Z, H, CHISQ, F1, F2, F3, f1, f2, f3, Tm };
+    public enum FittedImageType { A1, T1, A2, T2, A3, T3, Z, H, CHISQ, F1, F2, F3, f1, f2, f3, Tm }
     public static final int A1_INDEX    = 2;
     public static final int T1_INDEX    = 3;
     public static final int A2_INDEX    = 4;

@@ -1031,15 +1031,15 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
         thresholdMinLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(thresholdMinLabel);
 		thresholdMinSpinner = new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX, THRESH_INC));
-		updateThresholdChange(thresholdMinSpinner);;
-        controlPanel.add(thresholdMinSpinner);;
+		updateThresholdChange(thresholdMinSpinner);
+        controlPanel.add(thresholdMinSpinner);
 
         JLabel thresholdMaxLabel = new JLabel("Threshold Max");
         thresholdMaxLabel.setHorizontalAlignment(SwingConstants.RIGHT);
         controlPanel.add(thresholdMaxLabel);
 		thresholdMaxSpinner = new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX, THRESH_INC));
-		updateThresholdChange(thresholdMaxSpinner);;
-        controlPanel.add(thresholdMaxSpinner);;
+		updateThresholdChange(thresholdMaxSpinner);
+        controlPanel.add(thresholdMaxSpinner);
 		
 		JLabel chiSqTargetLabel = new JLabel(CHI_SQ_TARGET);
         chiSqTargetLabel.setHorizontalAlignment(SwingConstants.RIGHT);

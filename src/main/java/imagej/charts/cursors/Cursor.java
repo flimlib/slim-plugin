@@ -38,7 +38,7 @@ public class Cursor {
     public static final int LOWER = 1;
     public static final int SINGLE = 1;
     public static final int PAIR = 2;
-    public enum Orientation { HORZ, VERT };
+    public enum Orientation { HORZ, VERT }
     int _ids;
     Orientation _orientation;
     private volatile boolean _dragListening;

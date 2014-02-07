@@ -540,7 +540,7 @@ public class FitInfo {
      * 
      */
     public void setFree(boolean[] free) {
-        _free = free;;
+        _free = free;
     }
 
     /**

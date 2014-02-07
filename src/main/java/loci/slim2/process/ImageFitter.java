@@ -53,7 +53,7 @@ import org.scijava.Context;
  * @author Aivar Grislis
  */
 public class ImageFitter {
-	public enum ErrorCode { NONE, IO_EXCEPTION, NO_LIFETIME_AXIS, BIN_COUNT_MISMATCH };
+	public enum ErrorCode { NONE, IO_EXCEPTION, NO_LIFETIME_AXIS, BIN_COUNT_MISMATCH }
 	private int IMPOSSIBLE_VALUE = -1;
 	private int X_INDEX = 0;
 	private int Y_INDEX = 1;

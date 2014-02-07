@@ -71,7 +71,7 @@ public class FractionalIntensityImage extends AbstractBaseFittedImage {
                         value = parameters[FittedImageFitter.A1_INDEX];
                         break;
                     case 1:
-                        value = parameters[FittedImageFitter.A2_INDEX];;
+                        value = parameters[FittedImageFitter.A2_INDEX];
                         break;
                 }
                 break;

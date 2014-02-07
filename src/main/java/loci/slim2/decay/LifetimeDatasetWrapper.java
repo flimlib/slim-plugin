@@ -181,7 +181,7 @@ public class LifetimeDatasetWrapper {
 
 		// get 'internal' (with lifetime) and 'external' (no lifetime) dimensions
 		internalDimensions = new long[img.numDimensions()];
-		img.dimensions(internalDimensions);;
+		img.dimensions(internalDimensions);
 		externalDimensions = new long[internalDimensions.length - 1];
 		i = 0;
 		for (int j = 0; j < internalDimensions.length; ++j) {
