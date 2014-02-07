@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
@@ -166,7 +167,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private static final String PATH_KEY = "path";
 	private String _file;
 	private String _path;
-	private Hashtable<String, Object> _globalMetadata;
+	private Map<String, Object> _globalMetadata;
 
 	private static final String EXPORT_PIXELS_KEY = "exportpixels";
 	private static final String PIXELS_FILE_KEY = "pixelsfile";
