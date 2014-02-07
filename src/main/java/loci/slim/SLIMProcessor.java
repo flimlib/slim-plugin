@@ -1393,7 +1393,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		return loadImage(path + file);
 	}
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("rawtypes")
 		private ImgPlus loadImage(String filePath) {
         boolean threwException = false;
         ImgOpener imgOpener = new ImgOpener();
