@@ -23,8 +23,7 @@
 
 package loci.slim.mask;
 
-import java.lang.Cloneable;
-import java.util.Collection; 
+import java.util.Collection;
 
 /**
  * Class for keeping track of exclusion masks.

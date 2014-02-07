@@ -23,10 +23,10 @@
 
 package loci.slim.fitting.images;
 
-import java.awt.image.IndexColorModel;
-
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
+
+import java.awt.image.IndexColorModel;
 
 /**
  * 

@@ -25,17 +25,9 @@ package loci.slim2.process;
 
 import java.io.File;
 import java.io.IOException;
+
 import loci.curvefitter.ICurveFitter;
-import static loci.curvefitter.ICurveFitter.FitAlgorithm;
-import static loci.curvefitter.ICurveFitter.FitAlgorithm.JAOLHO;
-import static loci.curvefitter.ICurveFitter.FitAlgorithm.SLIMCURVE_LMA;
-import static loci.curvefitter.ICurveFitter.FitAlgorithm.SLIMCURVE_RLD;
-import static loci.curvefitter.ICurveFitter.FitAlgorithm.SLIMCURVE_RLD_LMA;
-import static loci.curvefitter.ICurveFitter.FitFunction;
-import static loci.curvefitter.ICurveFitter.FitFunction.DOUBLE_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.STRETCHED_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.TRIPLE_EXPONENTIAL;
+import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.JaolhoCurveFitter;
 import loci.curvefitter.SLIMCurveFitter;
 import loci.slim2.decay.LifetimeDatasetWrapper;
@@ -47,12 +39,12 @@ import loci.slim2.fitting.GlobalFitParams;
 import loci.slim2.fitting.LocalFitParams;
 import loci.slim2.fitting.ThreadedFittingEngine;
 import loci.slim2.heuristics.DefaultFitterEstimator;
-import loci.slim2.process.interactive.ui.UserInterfacePanel;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.img.planar.PlanarImgs;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
+
 import org.scijava.Context;
 
 /**

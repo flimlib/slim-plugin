@@ -23,11 +23,11 @@
 
 package loci.slim.fitting.images;
 
-import java.awt.Color;
-import java.awt.image.IndexColorModel;
-
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+
+import java.awt.Color;
+import java.awt.image.IndexColorModel;
 
 import loci.slim.IGrayScalePixelValue;
 

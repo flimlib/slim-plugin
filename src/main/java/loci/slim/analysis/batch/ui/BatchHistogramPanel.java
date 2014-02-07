@@ -23,8 +23,6 @@
 
 package loci.slim.analysis.batch.ui;
 
-import java.awt.Dimension;
-
 import javax.swing.JPanel;
 
 /**

@@ -24,9 +24,11 @@
 package loci.slim2.process.interactive.ui;
 
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -37,8 +39,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.util.prefs.Preferences;
 
 import javax.swing.JCheckBox;
@@ -49,14 +49,12 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import loci.curvefitter.ICurveFitData;
 import loci.slim2.fitting.FitResults;
 import loci.slim2.process.interactive.cursor.FittingCursor;
 import loci.slim2.process.interactive.cursor.FittingCursorListener;
 
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
-
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogarithmicAxis;

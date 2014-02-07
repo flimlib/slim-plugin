@@ -23,14 +23,13 @@
 
 package imagej.charts.cursors;
 
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.swing.JPanel;
-
 import imagej.charts.IChartRectangleListener;
+
+import java.awt.Rectangle;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.swing.JPanel;
 
 /**
  *

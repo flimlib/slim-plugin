@@ -24,8 +24,10 @@
 package loci.slim2.fitting;
 
 import imagej.thread.ThreadPool;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import loci.curvefitter.ICurveFitter;
 
 /**

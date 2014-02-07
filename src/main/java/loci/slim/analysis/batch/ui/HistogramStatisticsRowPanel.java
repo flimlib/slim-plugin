@@ -24,12 +24,13 @@
 package loci.slim.analysis.batch.ui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import loci.slim.analysis.HistogramStatistics;
 /**
  *

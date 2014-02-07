@@ -26,14 +26,15 @@ package loci.slim.analysis.batch.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneLayout;
 import javax.swing.UIManager;
+
 import loci.slim.analysis.HistogramStatistics;
+import loci.slim.analysis.batch.BatchHistogram;
 
 /**
  * UI Panel to show information from several {@link BatchHistogram}.

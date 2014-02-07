@@ -23,16 +23,14 @@
 
 package loci.slim.fitting.config;
 
-import loci.slim.fitting.callable.IFittingEngineCallable;
-import loci.slim.fitting.callable.FittingEngineCallable;
-import loci.slim.heuristics.FitterEstimator;
-import loci.slim.fitting.cursor.ICursorEstimator;
-import loci.slim.fitting.engine.IFittingEngine;
-import loci.slim.fitting.engine.ThreadedFittingEngine;
-
 import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.SLIMCurveFitter;
+import loci.slim.fitting.callable.FittingEngineCallable;
+import loci.slim.fitting.callable.IFittingEngineCallable;
+import loci.slim.fitting.engine.IFittingEngine;
+import loci.slim.fitting.engine.ThreadedFittingEngine;
+import loci.slim.heuristics.FitterEstimator;
 
 /**
  * Handles configuration specific to the SLIM Plugin.

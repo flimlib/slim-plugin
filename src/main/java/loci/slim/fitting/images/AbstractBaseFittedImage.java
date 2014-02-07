@@ -24,6 +24,9 @@
 package loci.slim.fitting.images;
 
 import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.WindowAdapter;
@@ -32,19 +35,14 @@ import java.awt.image.IndexColorModel;
 import java.util.ArrayList;
 import java.util.List;
 
-import ij.ImagePlus;
-import ij.ImageStack;
-
 import loci.slim.IGrayScaleImage;
-import loci.slim.IGrayScalePixelValue;
+import loci.slim.MyStackWindow;
 import loci.slim.histogram.HistogramDataGroup;
 import loci.slim.histogram.HistogramDataNode;
 import loci.slim.histogram.HistogramTool;
 import loci.slim.histogram.PaletteFix;
 import loci.slim.mask.IMaskGroup;
 import loci.slim.mask.Mask;
-
-import loci.slim.MyStackWindow;
 
 /**
  * Base class for the fitted images.

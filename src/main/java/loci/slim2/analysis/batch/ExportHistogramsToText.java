@@ -33,10 +33,6 @@ import java.util.Arrays;
 import java.util.prefs.Preferences;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
-import static loci.curvefitter.ICurveFitter.FitFunction.DOUBLE_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.STRETCHED_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.TRIPLE_EXPONENTIAL;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.slim.analysis.Binning;
 import loci.slim.analysis.HistogramStatistics;

@@ -39,8 +39,8 @@ import imagej.tool.Tool;
 import imagej.tool.ToolService;
 import imagej.ui.DialogPrompt;
 import imagej.ui.UIService;
-import java.awt.Component;
 
+import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

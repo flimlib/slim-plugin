@@ -27,7 +27,6 @@ import javax.swing.JFrame;
 
 import loci.slim2.fitting.FitResults;
 import loci.slim2.process.interactive.cursor.FittingCursor;
-import loci.slim2.process.interactive.ui.PixelPicker;
 
 /**
  * Interface for a decay chart.

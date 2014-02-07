@@ -23,7 +23,6 @@
 
 package loci.slim.heuristics;
 
-import loci.curvefitter.IFitterEstimator;
 
 /**
  * A class with static functions for working with the excitation.

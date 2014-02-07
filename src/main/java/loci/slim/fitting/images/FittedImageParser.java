@@ -23,10 +23,10 @@
 
 package loci.slim.fitting.images;
 
-import loci.slim.fitting.images.FittedImageFitter.FittedImageType;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import loci.slim.fitting.images.FittedImageFitter.FittedImageType;
 
 /**
  * This class parses a string containing a list of output images, such as 

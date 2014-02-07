@@ -23,9 +23,9 @@
 
 package loci.slim.fitting.images;
 
-import java.awt.image.IndexColorModel;
-
 import ij.process.ImageProcessor;
+
+import java.awt.image.IndexColorModel;
 
 /**
  * This interface is for a 2D slice of the fitted image.

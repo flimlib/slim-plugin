@@ -28,6 +28,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 
 import javax.swing.JPanel;
+
 import loci.slim.analysis.HistogramStatistics;
 
 /**

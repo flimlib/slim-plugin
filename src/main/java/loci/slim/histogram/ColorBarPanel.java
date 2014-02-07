@@ -23,13 +23,13 @@
 
 package loci.slim.histogram;
 
+import ij.process.LUT;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
 import javax.swing.JPanel;
-
-import ij.process.LUT;
 
 /**
  * Displays a color bar with the current colorization scheme.  Live,

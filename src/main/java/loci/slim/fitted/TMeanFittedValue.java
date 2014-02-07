@@ -23,8 +23,6 @@
 
 package loci.slim.fitted;
 
-import loci.slim.fitted.FittedValue;
-import loci.slim.fitted.AbstractFittedValue;
 
 /**
  * Extracts Tau Mean fitted values.

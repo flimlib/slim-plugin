@@ -23,12 +23,12 @@
 
 package loci.slim.fitting.callable;
 
-import loci.slim.fitting.params.ILocalFitParams;
-import loci.slim.fitting.params.IGlobalFitParams;
-import loci.slim.fitting.params.IFitResults;
-import loci.curvefitter.ICurveFitter;
-
 import java.util.concurrent.Callable;
+
+import loci.curvefitter.ICurveFitter;
+import loci.slim.fitting.params.IFitResults;
+import loci.slim.fitting.params.IGlobalFitParams;
+import loci.slim.fitting.params.ILocalFitParams;
 
 /**
  *

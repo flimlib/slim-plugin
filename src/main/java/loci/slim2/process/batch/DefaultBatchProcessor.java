@@ -25,27 +25,26 @@ package loci.slim2.process.batch;
 
 import ij.IJ;
 import ij.gui.GenericDialog;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.prefs.Preferences;
+
 import loci.curvefitter.ICurveFitter.FitFunction;
-import static loci.curvefitter.ICurveFitter.FitFunction.DOUBLE_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.STRETCHED_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.TRIPLE_EXPONENTIAL;
 import loci.curvefitter.ICurveFitter.FitRegion;
-import loci.slim2.analysis.batch.ExportHistogramsToText;
-import loci.slim2.analysis.batch.ExportPixelsToText;
-import loci.slim2.analysis.batch.ExportSummaryToText;
 import loci.slim.analysis.batch.ui.BatchHistogramListener;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
+import loci.slim2.analysis.batch.ExportHistogramsToText;
+import loci.slim2.analysis.batch.ExportPixelsToText;
+import loci.slim2.analysis.batch.ExportSummaryToText;
 import loci.slim2.process.BatchProcessor;
 import loci.slim2.process.FitSettings;
 import loci.slim2.process.ImageFitter;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
+
 import org.scijava.Context;
 
 /**

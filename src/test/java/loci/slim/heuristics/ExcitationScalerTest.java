@@ -23,10 +23,6 @@
 
 package loci.slim.heuristics;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Unit test of scaling a prompt to a particular cursor.

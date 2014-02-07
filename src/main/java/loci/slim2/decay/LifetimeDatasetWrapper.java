@@ -26,19 +26,19 @@ package loci.slim2.decay;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import io.scif.DefaultMetaTable;
+import io.scif.MetaTable;
+import io.scif.io.RandomAccessInputStream;
+import io.scif.lifesci.SDTInfo;
+
 import java.io.File;
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.JOptionPane;
-
-import io.scif.MetaTable;
-import io.scif.io.RandomAccessInputStream;
-import io.scif.lifesci.SDTInfo;
 import java.util.Set;
+
+import javax.swing.JOptionPane;
 
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.AxisType;

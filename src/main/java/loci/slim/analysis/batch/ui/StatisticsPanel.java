@@ -23,13 +23,15 @@
 
 package loci.slim.analysis.batch.ui;
 
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.awt.GridLayout;
-import java.awt.Font;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import loci.slim.analysis.HistogramStatistics;
 
 /**

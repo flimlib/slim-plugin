@@ -25,6 +25,7 @@ package loci.slim2.process.interactive.ui;
 
 import ij.io.OpenDialog;
 import ij.io.SaveDialog;
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
@@ -39,6 +40,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -60,6 +62,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.IFitterEstimator;
 import loci.slim2.process.interactive.cursor.FittingCursor;

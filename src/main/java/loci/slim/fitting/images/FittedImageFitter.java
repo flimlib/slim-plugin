@@ -28,10 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import loci.slim.IGrayScaleImage;
-import loci.slim.IGrayScalePixelValue;
 import loci.slim.histogram.HistogramTool;
 import loci.slim.mask.IMaskGroup;
-import loci.slim.mask.IMaskGroupListener;
 import loci.slim.mask.MaskGroup;
 
 /**

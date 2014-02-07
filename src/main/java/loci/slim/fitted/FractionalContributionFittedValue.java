@@ -23,7 +23,6 @@
 
 package loci.slim.fitted;
 
-import loci.slim.fitted.AbstractFittedValue;
 
 /**
  * Extracts Fractional Intensity fitted value.

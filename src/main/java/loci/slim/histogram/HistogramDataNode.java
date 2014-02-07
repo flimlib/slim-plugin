@@ -24,6 +24,7 @@
 package loci.slim.histogram;
 
 import java.util.Arrays;
+
 import loci.slim.fitting.images.IFittedImage;
 import loci.slim.mask.IMaskGroup;
 import loci.slim.mask.IMaskNode;

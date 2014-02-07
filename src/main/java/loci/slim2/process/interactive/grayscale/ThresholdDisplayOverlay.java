@@ -28,6 +28,7 @@ import imagej.data.overlay.ThresholdOverlay;
 import imagej.util.ColorRGB;
 import imagej.util.Colors;
 import net.imglib2.ops.pointset.PointSet;
+
 import org.scijava.Context;
 
 /**

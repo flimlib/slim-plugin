@@ -23,12 +23,12 @@
 
 package loci.slim.fitting.cursor;
 
-import loci.slim.heuristics.FitterEstimator;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Set;
 
 import loci.curvefitter.IFitterEstimator;
+import loci.slim.heuristics.FitterEstimator;
 
 /**
  * Keeps cursor information.  Cursors mark the sections of the excitation

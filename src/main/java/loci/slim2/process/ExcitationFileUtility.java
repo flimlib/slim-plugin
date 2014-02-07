@@ -29,11 +29,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import net.imglib2.type.numeric.RealType;
 import loci.formats.FormatException;
 import loci.formats.in.ICSReader;
 import loci.formats.meta.MetadataRetrieve;
 import loci.formats.out.ICSWriter;
+import net.imglib2.type.numeric.RealType;
 
 
 /**

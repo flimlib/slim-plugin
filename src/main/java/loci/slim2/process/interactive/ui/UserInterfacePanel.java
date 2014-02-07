@@ -25,6 +25,7 @@ package loci.slim2.process.interactive.ui;
 
 //TODO ARG copied wholesale from IJ1 version; imports and methods may be off
 import javax.swing.JFrame;
+
 import loci.curvefitter.ICurveFitter;
 
 /**

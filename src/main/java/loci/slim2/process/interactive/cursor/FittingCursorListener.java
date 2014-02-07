@@ -23,7 +23,6 @@
 
 package loci.slim2.process.interactive.cursor;
 
-import loci.slim2.process.interactive.cursor.FittingCursor;
 
 /**
  * Listener interface for fitting cursor changes.

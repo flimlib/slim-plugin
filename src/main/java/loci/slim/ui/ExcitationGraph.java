@@ -33,9 +33,11 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 
+import loci.slim.fitting.cursor.FittingCursor;
+import loci.slim.fitting.cursor.IFittingCursorListener;
+
 import org.jdesktop.jxlayer.JXLayer;
 import org.jdesktop.jxlayer.plaf.AbstractLayerUI;
-
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.LogarithmicAxis;
@@ -45,9 +47,6 @@ import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RectangleEdge;
-
-import loci.slim.fitting.cursor.FittingCursor;
-import loci.slim.fitting.cursor.IFittingCursorListener;
 
 /**
  * Graph that displays the excitation or prompt.

@@ -24,26 +24,24 @@
 package loci.slim2.process.interactive;
 
 import imagej.command.CommandService;
-import imagej.display.Display;
 import imagej.data.Dataset;
 import imagej.data.DatasetService;
-import imagej.data.threshold.ThresholdMethod;
-import imagej.data.threshold.ThresholdService;
+import imagej.display.Display;
 import imagej.display.DisplayService;
-import imagej.ui.DialogPrompt;
 import imagej.ui.UIService;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
 
-import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.JaolhoCurveFitter;
 import loci.curvefitter.SLIMCurveFitter;
-
+import loci.slim2.decay.LifetimeDatasetWrapper;
+import loci.slim2.decay.LifetimeGrayscaleDataset;
 import loci.slim2.fitting.DefaultGlobalFitParams;
 import loci.slim2.fitting.DefaultLocalFitParams;
 import loci.slim2.fitting.FitResults;
@@ -51,9 +49,6 @@ import loci.slim2.fitting.FittingEngine;
 import loci.slim2.fitting.GlobalFitParams;
 import loci.slim2.fitting.LocalFitParams;
 import loci.slim2.fitting.ThreadedFittingEngine;
-import loci.slim2.decay.LifetimeDatasetWrapper;
-import loci.slim2.decay.LifetimeGrayscaleDataset;
-import loci.slim2.decay.NoLifetimeAxisFoundException;
 import loci.slim2.heuristics.CursorEstimator;
 import loci.slim2.heuristics.DefaultFitterEstimator;
 import loci.slim2.heuristics.Estimator;
@@ -81,6 +76,7 @@ import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import net.imglib2.type.numeric.real.DoubleType;
+
 import org.scijava.Context;
 
 /**

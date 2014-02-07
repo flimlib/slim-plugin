@@ -23,14 +23,13 @@
 
 package loci.slim.fitting.callable;
 
-import loci.slim.fitting.params.FitResults;
-import loci.slim.fitting.params.ILocalFitParams;
-import loci.slim.fitting.params.IGlobalFitParams;
-import loci.slim.fitting.params.IFitResults;
-
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
+import loci.slim.fitting.params.FitResults;
+import loci.slim.fitting.params.IFitResults;
+import loci.slim.fitting.params.IGlobalFitParams;
+import loci.slim.fitting.params.ILocalFitParams;
 
 /**
  * This class brings together everything needed to fit one pixel.  It is a 

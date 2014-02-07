@@ -23,18 +23,17 @@
 
 package loci.slim.fitting.engine;
 
-import loci.slim.fitting.params.ILocalFitParams;
-import loci.slim.fitting.params.IGlobalFitParams;
-import loci.slim.fitting.params.IFitResults;
-import loci.slim.fitting.callable.IFittingEngineCallable;
-import loci.slim.fitting.config.Configuration;
-
-import loci.curvefitter.ICurveFitter;
+import imagej.thread.ThreadPool;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import imagej.thread.ThreadPool;
+import loci.curvefitter.ICurveFitter;
+import loci.slim.fitting.callable.IFittingEngineCallable;
+import loci.slim.fitting.config.Configuration;
+import loci.slim.fitting.params.IFitResults;
+import loci.slim.fitting.params.IGlobalFitParams;
+import loci.slim.fitting.params.ILocalFitParams;
 
 /**
  * Fitting engine that uses a thread pool.

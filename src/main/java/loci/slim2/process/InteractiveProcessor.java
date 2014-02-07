@@ -24,11 +24,11 @@
 package loci.slim2.process;
 
 import imagej.command.CommandService;
-import imagej.data.Dataset;
 import imagej.data.DatasetService;
 import imagej.display.DisplayService;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.heuristics.Estimator;
+
 import org.scijava.Context;
 
 /**

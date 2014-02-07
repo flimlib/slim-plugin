@@ -26,7 +26,6 @@ package loci.slim;
 import loci.slim.fitting.IErrorListener;
 import loci.slim.mask.IMaskGroup;
 import loci.slim.mask.IMaskGroupListener;
-import loci.slim.mask.Mask;
 
 
 /**

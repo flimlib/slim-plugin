@@ -24,6 +24,7 @@
 package loci.slim2.process;
 
 import java.io.File;
+
 import org.scijava.Context;
 
 /**

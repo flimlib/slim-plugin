@@ -23,7 +23,6 @@
 
 package loci.slim.analysis;
 
-import loci.slim.analysis.Binning;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.math.BigDecimal;

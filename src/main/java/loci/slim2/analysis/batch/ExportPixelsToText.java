@@ -37,15 +37,7 @@ import java.math.RoundingMode;
 import java.util.prefs.Preferences;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
-import static loci.curvefitter.ICurveFitter.FitFunction.DOUBLE_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.SINGLE_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.STRETCHED_EXPONENTIAL;
-import static loci.curvefitter.ICurveFitter.FitFunction.TRIPLE_EXPONENTIAL;
 import loci.curvefitter.ICurveFitter.FitRegion;
-import static loci.curvefitter.ICurveFitter.FitRegion.EACH;
-import static loci.curvefitter.ICurveFitter.FitRegion.POINT;
-import static loci.curvefitter.ICurveFitter.FitRegion.ROI;
-import static loci.curvefitter.ICurveFitter.FitRegion.SUMMED;
 import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.fitted.FittedValue;

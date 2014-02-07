@@ -23,7 +23,6 @@
 
 package loci.slim.fitted;
 
-import loci.slim.fitted.AFittedValue;
 import java.util.ArrayList;
 import java.util.List;
 

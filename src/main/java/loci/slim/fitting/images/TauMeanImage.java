@@ -26,7 +26,6 @@ package loci.slim.fitting.images;
 import java.awt.image.IndexColorModel;
 
 import loci.slim.IGrayScaleImage;
-import loci.slim.IGrayScalePixelValue;
 import loci.slim.mask.IMaskGroup;
 
 /**

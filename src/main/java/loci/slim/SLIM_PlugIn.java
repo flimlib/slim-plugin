@@ -23,12 +23,11 @@
 
 package loci.slim;
 
-import java.util.Stack;
-
-import ij.IJ;
 import ij.ImageJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+
+import java.util.Stack;
 
 /**
  * TODO

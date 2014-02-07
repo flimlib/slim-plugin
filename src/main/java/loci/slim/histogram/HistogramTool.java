@@ -23,19 +23,18 @@
 
 package loci.slim.histogram;
 
-import java.awt.BorderLayout;
-import java.awt.image.IndexColorModel;
-import java.io.IOException;
-
 import ij.IJ;
 import ij.plugin.LutLoader;
 import ij.process.LUT;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.image.IndexColorModel;
 import java.io.File;
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.prefs.Preferences;

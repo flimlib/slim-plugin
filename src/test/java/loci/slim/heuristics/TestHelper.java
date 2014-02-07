@@ -23,7 +23,7 @@
 
 package loci.slim.heuristics;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 /**
  * Improved JUnit double assertations.
