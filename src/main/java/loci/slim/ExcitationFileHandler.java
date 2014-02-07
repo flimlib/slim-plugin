@@ -55,6 +55,10 @@ public class ExcitationFileHandler {
         return s_instance;
     }
 
+    private ExcitationFileHandler() {
+        // NB: Singleton; prevent external instantiation.
+    }
+
     public Excitation loadExcitation(String fileName, double timeInc) {
         Excitation excitation = null;
         double values[] = null;
