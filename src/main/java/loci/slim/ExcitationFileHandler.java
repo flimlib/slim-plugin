@@ -33,8 +33,6 @@ import loci.formats.FormatException;
 import loci.formats.in.ICSReader;
 import loci.formats.meta.MetadataRetrieve;
 import loci.formats.out.ICSWriter;
-import net.imglib2.type.numeric.RealType;
-
 
 /**
  * Loads and saves excitation files.
@@ -45,7 +43,7 @@ import net.imglib2.type.numeric.RealType;
  *
  * @author Aivar Grislis
  */
-public class ExcitationFileHandler <T extends RealType<T>> {
+public class ExcitationFileHandler {
     private static final String ICS = ".ics";
     private static final String IRF = ".irf";
     private static ExcitationFileHandler s_instance = null;
