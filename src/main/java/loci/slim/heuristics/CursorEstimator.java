@@ -193,7 +193,7 @@ public class CursorEstimator {
         }
 
         // "Find the steepest rise"
-        steepp = (int) findMax(diffed, index);
+        steepp = findMax(diffed, index);
         if (steepp < startp) {
             startp = steepp;
         }
@@ -218,7 +218,7 @@ public class CursorEstimator {
         }
 
         // "Find the steepest rise"
-        steept = (int) findMax(diffedd, index);
+        steept = findMax(diffedd, index);
 
         // "Make steep - start the same for both prompt and transient"
         startt = steept - (steepp - startp);

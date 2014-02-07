@@ -428,7 +428,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
         _fitButton.addActionListener(
             new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    String text = (String)e.getActionCommand();
+                    String text = e.getActionCommand();
                     if (text.equals(_fitButtonText)) {
                         enableAll(false);
                         setFitButtonState(false);

@@ -110,7 +110,7 @@ public class Binning {
      */
     public static double[] centerValuesPerBin(int bins, double min, double max) {
         double[] edgeValues = edgeValuesPerBin(bins, min, max);
-        double[] centerValues = new double[(int) bins];
+        double[] centerValues = new double[bins];
         
         // average the edge values to get centers
         for (int i = 0; i < bins - 1; ++i) {

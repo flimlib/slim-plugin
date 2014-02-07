@@ -142,9 +142,9 @@ public class ColorBarPanel extends JPanel {
         //TODO make sure numberColors is 256!
         Color[] color = new Color[numberColors];
         for (int n = 0; n < numberColors; ++n) {
-            int red   = 0xff & (int) bytes[n];
-            int green = 0xff & (int) bytes[256 + n];
-            int blue  = 0xff & (int) bytes[512 + n];
+            int red   = 0xff & bytes[n];
+            int green = 0xff & bytes[256 + n];
+            int blue  = 0xff & bytes[512 + n];
             color[n] = new Color(red, green, blue);
         }
         return color;

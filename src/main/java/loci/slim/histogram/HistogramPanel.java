@@ -505,7 +505,7 @@ public class HistogramPanel extends JPanel {
 						}
 						else {
 							// make sure values of one show at least a single pixel
-							height = (int)((_height - SINGLE_PIXEL) * _bins[i] / _maxBinCount) + SINGLE_PIXEL;
+							height = (_height - SINGLE_PIXEL) * _bins[i] / _maxBinCount + SINGLE_PIXEL;
 						}
 						if (height > _height) {
 							height = _height;

@@ -574,7 +574,7 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
     private double roundToDecimalPlaces(double value, int decimalPlaces) {
         double decimalTerm = Math.pow(10.0, decimalPlaces);
         int tmp = (int) Math.round(value * decimalTerm);
-        double rounded = (double) tmp / decimalTerm;
+        double rounded = tmp / decimalTerm;
         return rounded;
     }
 
@@ -865,7 +865,7 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
 
         private double screenToValue(int x) {
             return plot.getDomainAxis().java2DToValue(
-                    (double) x, getDataArea(), RectangleEdge.TOP);
+                    x, getDataArea(), RectangleEdge.TOP);
         }
     }  
     

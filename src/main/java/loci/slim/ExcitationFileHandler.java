@@ -278,7 +278,7 @@ public class ExcitationFileHandler {
                 l <<= 8;
                 l |= bytes[index + 7] & 0xff;
             }
-            returnValue = (double) Double.longBitsToDouble(l);
+            returnValue = Double.longBitsToDouble(l);
         }
         return returnValue;
     }

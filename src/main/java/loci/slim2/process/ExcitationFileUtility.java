@@ -268,7 +268,7 @@ public class ExcitationFileUtility <T extends RealType<T>> {
                 l <<= 8;
                 l |= bytes[index + 7] & 0xff;
             }
-            returnValue = (double) Double.longBitsToDouble(l);
+            returnValue = Double.longBitsToDouble(l);
         }
         return returnValue;
     }

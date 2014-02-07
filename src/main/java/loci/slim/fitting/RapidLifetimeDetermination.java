@@ -86,14 +86,14 @@ public class RapidLifetimeDetermination {
 		}
 		
 		exp_dt_tau = d23 / d12;  /* exp(-dt/tau) */
-		tau[0] = -dt / (double) Math.log(exp_dt_tau);
-		exp_t0_tau = (double) Math.exp(-t0 / tau[0]);
+		tau[0] = -dt / Math.log(exp_dt_tau);
+		exp_t0_tau = Math.exp(-t0 / tau[0]);
 		a[0] = d12 / (tau[0] * exp_t0_tau * (1 - 2 * exp_dt_tau + exp_dt_tau * exp_dt_tau));
 		z[0] = (d1 - a[0] * tau[0] * exp_t0_tau * (1 - exp_dt_tau)) / dt;
 		
 		// now calculate the fitted curve and chi-squared if wanted
 		for (int i = 0; i < fit_end; ++i) {
-			fitted[i] = z[0] * a[0] * (double) Math.exp(-i * xincr / tau[0]);
+			fitted[i] = z[0] * a[0] * Math.exp(-i * xincr / tau[0]);
 		}
 		
 		// ok, so now fitted contains our data for the timeslice of interest.
@@ -196,8 +196,8 @@ public class RapidLifetimeDetermination {
 		}
 		
 		exp_dt_tau = d23 / d12;  /* exp(-dt/tau) */
-		tau[0] = -dt / (double) Math.log(exp_dt_tau);
-		exp_t0_tau = (double) Math.exp(-t0 / tau[0]);
+		tau[0] = -dt / Math.log(exp_dt_tau);
+		exp_t0_tau = Math.exp(-t0 / tau[0]);
 		a[0] = d12 / (tau[0] * exp_t0_tau * (1 - 2 * exp_dt_tau + exp_dt_tau * exp_dt_tau));
 		z[0] = (d1 - a[0] * tau[0] * exp_t0_tau * (1 - exp_dt_tau)) / dt;
 		
@@ -211,7 +211,7 @@ public class RapidLifetimeDetermination {
 		sum = scaling = 0;
 		for (int i = 0; i < ninstr; ++i) {
 			sum += instr[i];
-			scaling += instr[i] * (double) Math.exp(i * xincr / tau[0]);
+			scaling += instr[i] * Math.exp(i * xincr / tau[0]);
 		}
 		scaling /= sum; // make instrument response sum to 1.0
 		a[0] /= scaling;
@@ -220,7 +220,7 @@ public class RapidLifetimeDetermination {
 		fitted_preconv_size = fit_end;
 		
 		for (int i = 0; i < fit_end; ++i) {
-			fitted_preconv[i] = a[0] * (double) Math.exp(-i * xincr / tau[0]);
+			fitted_preconv[i] = a[0] * Math.exp(-i * xincr / tau[0]);
 		}
 		for (int i = 0; i < fit_end; ++i) {
 			int convpts;
@@ -356,17 +356,17 @@ public class RapidLifetimeDetermination {
 		int stop = data.getAdjustedTransEndIndex();
 		double[] trans = data.getAdjustedTransient();
 		
-		a[0] = (double) fitter.getEstimator().getDefaultA();
-		tau[0] = (double) fitter.getEstimator().getDefaultT();
-		z[0] = (double) fitter.getEstimator().getDefaultZ();
+		a[0] = fitter.getEstimator().getDefaultA();
+		tau[0] = fitter.getEstimator().getDefaultT();
+		z[0] = fitter.getEstimator().getDefaultZ();
 		
 		// these lines give more TRI2 compatible fit results
 		start = fitter.getEstimator().getEstimateStartIndex(trans, start, stop);
-		a[0] = (double) fitter.getEstimator().getEstimateAValue((double) a[0], trans, start, stop);
+		a[0] = fitter.getEstimator().getEstimateAValue(a[0], trans, start, stop);
 		// omitted changing the noise model for the RLD estimate
 		int chiSquareAdjust = stop - start - 3;
 		
-		double xinc = (double) fitter.getXInc();
+		double xinc = fitter.getXInc();
 		int ninstr = 0;
 		double[] instrumentResponse = fitter.getInstrumentResponse(1);
 		double[] instrumentResponseFloat = null;
@@ -580,17 +580,17 @@ public class RapidLifetimeDetermination {
 		int stop = data.getAdjustedTransEndIndex();
 		double[] trans = data.getAdjustedTransient();
 		
-		a[0] = (double) fitter.getEstimator().getDefaultA();
-		tau[0] = (double) fitter.getEstimator().getDefaultT();
-		z[0] = (double) fitter.getEstimator().getDefaultZ();
+		a[0] = fitter.getEstimator().getDefaultA();
+		tau[0] = fitter.getEstimator().getDefaultT();
+		z[0] = fitter.getEstimator().getDefaultZ();
 		
 		// these lines give more TRI2 compatible fit results
 		start = fitter.getEstimator().getEstimateStartIndex(trans, start, stop);
-		a[0] = (double) fitter.getEstimator().getEstimateAValue((double) a[0], trans, start, stop);
+		a[0] = fitter.getEstimator().getEstimateAValue(a[0], trans, start, stop);
 		// omitted changing the noise model for the RLD estimate
 		int chiSquareAdjust = stop - start - 3;
 		
-		double xinc = (double) fitter.getXInc();
+		double xinc = fitter.getXInc();
 		int ninstr = 0;
 		double[] instrumentResponse = fitter.getInstrumentResponse(1);
 		if (null != instrumentResponse) {

@@ -709,7 +709,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 					//TODO WHY? _fittingCursor = null;
 					
 					double a = peak;
-					double b = (double) peakBin;
+					double b = peakBin;
 					double c = (double) (peakBin - maxSlopeBin) / 2;
 					
 					System.out.println("max slope estimated GAUSSIAN a " + a + " b " + b + " c " + c);

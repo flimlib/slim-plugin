@@ -409,7 +409,7 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
             Rectangle2D dataArea =
                     panel.getChartRenderingInfo().getPlotInfo().getDataArea();
             Rectangle2D area = getDataArea();
-            double proportion = ((double) e.getX() - area.getX())
+            double proportion = (e.getX() - area.getX())
                     / area.getWidth();
             if (proportion < 0.0) {
                 proportion = 0.0;
@@ -433,7 +433,7 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
             Rectangle2D area = getDataArea();
             //double proportion = ((double) e.getY() - area.getY()) / area.getHeight();
             double proportion =
-                    ((double) area.getY() + area.getHeight() - e.getY())
+                    (area.getY() + area.getHeight() - e.getY())
                         / area.getHeight();
             if (proportion < 0.0) {
                 proportion = 0.0;
@@ -520,7 +520,7 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
          */
         @Deprecated
         private double horzScreenToValue(int x) {
-            return plot.getDomainAxis().java2DToValue((double) x, getDataArea(), RectangleEdge.TOP);
+            return plot.getDomainAxis().java2DToValue(x, getDataArea(), RectangleEdge.TOP);
         }
 
         /**
@@ -531,7 +531,7 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
          */
         @Deprecated
         private double vertScreenToValue(int y) {
-            return plot.getRangeAxis().java2DToValue((double) y, getDataArea(), RectangleEdge.LEFT);
+            return plot.getRangeAxis().java2DToValue(y, getDataArea(), RectangleEdge.LEFT);
         }
     }
     

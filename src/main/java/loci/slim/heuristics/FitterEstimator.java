@@ -207,7 +207,7 @@ public class FitterEstimator implements IFitterEstimator {
     public double roundToDecimalPlaces(double value, int decimalPlaces) {
         double decimalTerm = Math.pow(10.0, decimalPlaces);
         int tmp = roundToNearestInteger(value * decimalTerm);
-        double rounded = (double) tmp / decimalTerm;
+        double rounded = tmp / decimalTerm;
         //System.out.println("value " + value + " rounds to " + rounded);
         return rounded;
     }

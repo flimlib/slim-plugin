@@ -149,7 +149,7 @@ public class ColorizedFittedImage implements IFittedImageSlice {
         // synthesize new color, using grayValue brightness
         float hue        = hsv[0];
         float saturation = SATURATION;
-        float brightness = (float) grayValue / 255.0f; // 0..255 -> 0.0..1.0
+        float brightness = grayValue / 255.0f; // 0..255 -> 0.0..1.0
         return Color.getHSBColor(hue, saturation, brightness);
     }
 }

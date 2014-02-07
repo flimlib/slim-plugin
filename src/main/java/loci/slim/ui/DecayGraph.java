@@ -629,7 +629,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
     private double roundToDecimalPlaces(double value, int decimalPlaces) {
         double decimalTerm = Math.pow(10.0, decimalPlaces);
         int tmp = (int) Math.round(value * decimalTerm);
-        double rounded = (double) tmp / decimalTerm;
+        double rounded = tmp / decimalTerm;
         return rounded;
     }
 
@@ -920,7 +920,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 
         private double screenToValue(int x) {
             return _plot.getDomainAxis().java2DToValue(
-                    (double) x, getDataArea(), RectangleEdge.TOP);
+                    x, getDataArea(), RectangleEdge.TOP);
         }
     }  
     
