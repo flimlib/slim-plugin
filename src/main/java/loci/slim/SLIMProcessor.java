@@ -30,6 +30,13 @@ import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+import io.scif.Format;
+import io.scif.FormatException;
+import io.scif.Metadata;
+import io.scif.Reader;
+import io.scif.SCIFIO;
+import io.scif.config.SCIFIOConfig;
+import io.scif.img.ImgIOException;
 import io.scif.img.ImgOpener;
 import io.scif.img.axes.SCIFIOAxes;
 
@@ -57,8 +64,6 @@ import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.JaolhoCurveFitter;
 import loci.curvefitter.SLIMCurveFitter;
-import loci.formats.FormatException;
-import loci.formats.ImageReader;
 import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.analysis.batch.ExportBatchHistogram;
 import loci.slim.analysis.batch.ExportSummaryToText;
@@ -1394,33 +1399,35 @@ public class SLIMProcessor <T extends RealType<T>> {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private ImgPlus loadImage(String filePath) {
-		boolean threwException = false;
-		ImgOpener imgOpener = new ImgOpener();
+	private ImgPlus loadImage(final String filePath) {
 		ImgPlus image = null;
 		try {
-			image = imgOpener.openImg(filePath);
-		}
-		//catch (java.io.IOException e) { }
-		//catch (loci.formats.FormatException e) {
-		catch (Exception e) {
-			System.out.println("Exception message: " + e.getMessage());
-			threwException = true;
-		}
-		if (null == image && !threwException) {
-			System.out.println("imageOpener returned null image");
-		}
+			// determine file format
+			final SCIFIO scifio = new SCIFIO();
+			final Format format = scifio.format().getFormat(filePath);
 
-		// Open the file again, just to get metadata
-		ImageReader imageReader = new ImageReader();
-		try {
-			imageReader.setId(filePath);
-			_globalMetadata = imageReader.getGlobalMetadata();
-			imageReader.close();
+			// NB: Would be nice if Metadata were attached to the SCIFIOImgPlus
+			// directly, and then we won't need to go through this rigamarole here.
+			// See: https://github.com/scifio/scifio/issues/135
+
+			// parse metadata
+			final Metadata meta = format.createParser().parse(filePath);
+			_globalMetadata = meta.getTable();
+
+			// create reader
+			final ImgOpener imgOpener = new ImgOpener(scifio.getContext());
+			final Reader reader = format.createReader();
+			reader.setMetadata(meta);
+
+			// open the image
+			image = imgOpener.openImg(reader, new SCIFIOConfig());
 		}
-		catch (IOException e) {
+		catch (final Exception e) {
+			System.out.println("Exception message: " + e.getMessage());
+			return null;
 		}
-		catch (FormatException e) {
+		if (image == null) {
+			System.out.println("imageOpener returned null image");
 		}
 
 		return image;
