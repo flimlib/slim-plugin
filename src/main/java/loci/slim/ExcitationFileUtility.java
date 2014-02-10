@@ -21,7 +21,7 @@
  * #L%
  */
 
-package loci.slim2.process;
+package loci.slim;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -33,6 +33,7 @@ import loci.formats.FormatException;
 import loci.formats.in.ICSReader;
 import loci.formats.meta.MetadataRetrieve;
 import loci.formats.out.ICSWriter;
+import loci.slim2.process.Excitation;
 import net.imglib2.type.numeric.RealType;
 
 
