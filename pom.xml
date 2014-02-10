@@ -63,10 +63,21 @@
 			<version>${imglib2.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>${scifio.groupId}</groupId>
+			<artifactId>scifio</artifactId>
+			<version>${scifio.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${scifio.groupId}</groupId>
+			<artifactId>scifio-lifesci</artifactId>
+			<version>${scifio-lifesci.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>${scijava-common.groupId}</groupId>
 			<artifactId>scijava-common</artifactId>
 			<version>${scijava-common.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>loci</groupId>
 			<artifactId>curve-fitter</artifactId>
@@ -92,11 +103,7 @@
 			<artifactId>jxlayer</artifactId>
 			<version>3.0.4</version>
 		</dependency>
-		<dependency>
-			<groupId>${scifio.groupId}</groupId>
-			<artifactId>scifio-lifesci</artifactId>
-			<version>${scifio-lifesci.version}</version>
-		</dependency>
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
