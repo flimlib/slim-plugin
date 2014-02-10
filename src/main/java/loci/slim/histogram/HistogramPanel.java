@@ -565,7 +565,7 @@ public class HistogramPanel extends JPanel {
 	}
 
 	private double estimateBandwidth(double range, int n) {
-		IJ.log("range is " + range + " count " + n);
+		//IJ.log("range is " + range + " count " + n);
 		return range / Math.sqrt(n);
 	}
 }

@@ -239,7 +239,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			miscPane.add(_logCheckBox);
 			container.add(miscPane, BorderLayout.SOUTH);
 
-			IJ.log("size from prefs " + getSizeFromPreferences());
+			//IJ.log("size from prefs " + getSizeFromPreferences());
 			//_frame.setSize(getSizeFromPreferences());
 			//_frame.setMaximumSize(MAX_SIZE); // doesn't work; bug in Java
 			_frame.pack();
@@ -259,7 +259,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 					// constrain maximum size
 					boolean resize = false;
 					Dimension size = _frame.getSize();
-					IJ.log("COMPONENT RESIZED incoming size " + size);
+					//IJ.log("COMPONENT RESIZED incoming size " + size);
 					if (size.width > MAX_SIZE.width) {
 						size.width = MAX_SIZE.width;
 						resize = true;
@@ -279,7 +279,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 					if (resize) {
 						_frame.setSize(size);
 					}
-					IJ.log("save resized " + resize + " size " + size);
+					//IJ.log("save resized " + resize + " size " + size);
 					saveSizeInPreferences(size);
 				}
 

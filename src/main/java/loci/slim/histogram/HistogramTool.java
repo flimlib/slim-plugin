@@ -113,7 +113,7 @@ public class HistogramTool {
 			_frame.getContentPane().add(panel, BorderLayout.SOUTH);
 			_frame.pack();
 			_frame.setVisible(true);
-			IJ.log("initial size " + _frame.getSize());
+			//IJ.log("initial size " + _frame.getSize());
 			_frame.addComponentListener(new ComponentListener() {
 				@Override
 				public void componentHidden(ComponentEvent e) {

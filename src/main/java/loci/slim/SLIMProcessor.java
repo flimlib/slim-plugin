@@ -524,7 +524,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		IFitterEstimator fitterEstimator = new FitterEstimator();
 
 		// cursor support
-		IJ.log("doFits opens new FittingCursor");
+		//IJ.log("doFits opens new FittingCursor");
 		_fittingCursor = new FittingCursor(_timeRange, _bins, fitterEstimator);
 		_fittingCursor.addListener(new FittingCursorListener());
 
@@ -1783,10 +1783,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 			return null;
 		}
 		else {
-			IJ.log("fitImage pixelsToProcessCount leftover " + pixelsToProcessCount);
+			//IJ.log("fitImage pixelsToProcessCount leftover " + pixelsToProcessCount);
 			if (pixelsToProcessCount > 0) {
 				ChunkyPixel[] pixelArray = pixelList.toArray(new ChunkyPixel[0]);
-				IJ.log("process remainder " + pixelArray.length);
+				//IJ.log("process remainder " + pixelArray.length);
 				ILocalFitParams[] localFitParamsArray = localFitParamsList.toArray(new ILocalFitParams[0]);
 				processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, errorManager, fitter, newImage, batch);
 			}
