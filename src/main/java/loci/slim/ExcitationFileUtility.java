@@ -34,8 +34,6 @@ import loci.formats.in.ICSReader;
 import loci.formats.meta.MetadataRetrieve;
 import loci.formats.out.ICSWriter;
 import loci.slim2.process.Excitation;
-import net.imglib2.type.numeric.RealType;
-
 
 /**
  * Loads and saves excitation files.
