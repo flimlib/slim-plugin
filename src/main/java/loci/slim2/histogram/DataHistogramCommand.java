@@ -46,9 +46,10 @@ import org.scijava.plugin.Plugin;
 /**
  * Plugin that sets the minimum and maximum for scaling of display values. Sets
  * the same min/max for each channel.
- * 
- * Based on {@link imagej.core.commands.display.interactive.BrightnessContrast}
- * by Curtis Rueden & Grant Harris.
+ * <p>
+ * Based on
+ * {@link imagej.plugins.commands.display.interactive.BrightnessContrast}.
+ * </p>
  */
 //TODO ARG I thought perhaps there was an image realm for histograms and a data one,
 //  with the latter if you have enough measurements the distribution tends to normal
