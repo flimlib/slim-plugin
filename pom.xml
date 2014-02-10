@@ -27,8 +27,8 @@
 	</licenses>
 
 	<properties>
-		<imagej.version>2.0.0-beta-7.5</imagej.version>
-		<imglib2.version>2.0.0-beta-20</imglib2.version>
+		<imagej.version>2.0.0-beta-7.6</imagej.version>
+		<imglib2.version>2.0.0-beta-23</imglib2.version>
 	</properties>
 
 	<dependencies>

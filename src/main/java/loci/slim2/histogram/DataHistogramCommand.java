@@ -284,7 +284,9 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		// Dataset (not DatasetView) is a good place for it, because it is metadata
 		// independent of the visualization settings.
 		//TODO ARG we need 2 versions/options of min/max: one for the entire channel, one for current plane of channel
-		final ComputeMinMax<T> computeMinMax = new ComputeMinMax<T>(img);
+		final T type = img.firstElement();
+		final ComputeMinMax<T> computeMinMax =
+			new ComputeMinMax<T>(img, type.createVariable(), type.createVariable());
 		computeMinMax.process();
 		dataMin = computeMinMax.getMin().getRealDouble();
 		dataMax = computeMinMax.getMax().getRealDouble();
