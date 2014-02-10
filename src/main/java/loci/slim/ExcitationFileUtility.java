@@ -33,7 +33,6 @@ import loci.formats.FormatException;
 import loci.formats.in.ICSReader;
 import loci.formats.meta.MetadataRetrieve;
 import loci.formats.out.ICSWriter;
-import loci.slim2.process.Excitation;
 
 /**
  * Loads and saves excitation files.

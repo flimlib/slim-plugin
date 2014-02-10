@@ -24,18 +24,18 @@
 package loci.slim;
 
 /**
- * This class is a container for values for the instrument response function,
- * aka IRF, aka excitation, aka prompt, aka lamp function.
- *
+ * This class is a container for values for the excitation (also known as the
+ * prompt, instrument response function, or lamp function).
+ * 
  * @author Aivar Grislis
  */
 public class Excitation {
-	private final String _fileName;
-	private final double[] _values;
-	private final double _timeInc;
-	private int _start;
-	private int _stop;
-	private double _base;
+	private final String fileName;
+	private final double[] values;
+	private final double timeInc;
+	private int start;
+	private int stop;
+	private double base;
 
 	/**
 	 * Creates an excitation with given filename and values.
@@ -44,9 +44,9 @@ public class Excitation {
 	 * @param values
 	 */
 	public Excitation(String fileName, double[] values, double timeInc) {
-		_fileName = fileName;
-		_values = values;
-		_timeInc = timeInc;
+		this.fileName = fileName;
+		this.values = values;
+		this.timeInc = timeInc;
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class Excitation {
 	 * @return
 	 */
 	public String getFileName() {
-		return _fileName;
+		return fileName;
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class Excitation {
 	 * @return
 	 */
 	public double[] getValues() {
-		return _values;
+		return values;
 	}
 
 	/**
@@ -73,7 +73,7 @@ public class Excitation {
 	 * @return
 	 */
 	public double getTimeInc() {
-		return _timeInc;
+		return timeInc;
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class Excitation {
 	 * @param start
 	 */
 	public void setStart(int start) {
-		_start = start;
+		this.start = start;
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class Excitation {
 	 * @return
 	 */
 	public int getStart() {
-		return _start;
+		return start;
 	}
 
 	/**
@@ -100,7 +100,7 @@ public class Excitation {
 	 * @param stop
 	 */
 	public void setStop(int stop) {
-		_stop = stop;
+		this.stop = stop;
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class Excitation {
 	 * @return
 	 */
 	public int getStop() {
-		return _stop;
+		return stop;
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class Excitation {
 	 * @param base
 	 */
 	public void setBase(double base) {
-		_base = base;
+		this.base = base;
 	}
 
 	/**
@@ -127,7 +127,6 @@ public class Excitation {
 	 * @return
 	 */
 	public double getBase() {
-		return _base;
+		return base;
 	}
-
 }

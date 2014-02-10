@@ -32,8 +32,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import loci.slim.Excitation;
 import loci.slim2.heuristics.ExcitationScaler;
-import loci.slim2.process.Excitation;
 import loci.slim2.process.interactive.cursor.FittingCursor;
 
 /**
