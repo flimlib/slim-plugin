@@ -639,7 +639,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 				 */
 				@Override
 				public boolean loadExcitation(String fileName) {
-					Excitation excitation = ExcitationFileHandler.getInstance().loadExcitation(fileName, _timeRange);
+					Excitation excitation = ExcitationFileUtility.loadExcitation(fileName, _timeRange);
 					return updateExcitation(uiPanel, excitation);
 				}
 
@@ -661,7 +661,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 					for (int b = 0; b < _bins; ++b) {
 						values[b] = getData(_cursor, channel, x, y, b);
 					}
-					Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, values, _timeRange);
+					Excitation excitation = ExcitationFileUtility.createExcitation(fileName, values, _timeRange);
 					return updateExcitation(uiPanel, excitation);
 				}
 
@@ -727,7 +727,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 						if (0.0 != oV) System.out.println(" " + oV);
 					}
 
-					Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, outValues, _timeRange);
+					Excitation excitation = ExcitationFileUtility.createExcitation(fileName, outValues, _timeRange);
 					return updateExcitation(uiPanel, excitation);
 				}
 
@@ -759,7 +759,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 						outValues[i] = gaussian(a, b, c, i);
 					}
 
-					Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, outValues, _timeRange);
+					Excitation excitation = ExcitationFileUtility.createExcitation(fileName, outValues, _timeRange);
 					return updateExcitation(uiPanel, excitation);
 				}
 
