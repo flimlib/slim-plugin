@@ -23,6 +23,7 @@
 
 package loci.slim;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
 import ij.gui.StackWindow;
@@ -45,14 +46,14 @@ public class MyStackWindow extends StackWindow {
 
 	public MyStackWindow(ImagePlus imp) {
 		super(imp);
-		//System.out.println("MyStackWindow " + imp.getTitle());
+		//IJ.log("MyStackWindow " + imp.getTitle());
 		m_height = imp.getHeight();
 		if (null != sliceSelector) {
 			sliceSelector.addAdjustmentListener(
 				new AdjustmentListener() {
 					public void adjustmentValueChanged(AdjustmentEvent e) {
 						if (e.getValue() != m_slice) {
-							System.out.println("Show slice " + e.getValue());
+							IJ.log("Show slice " + e.getValue());
 							m_slice = e.getValue();
 							//TODO this does affect the scrollbar, but not the ImagePlus!
 							showSlice(m_slice);

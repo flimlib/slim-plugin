@@ -23,6 +23,7 @@
 
 package loci.slim.analysis.batch;
 
+import ij.IJ;
 import loci.curvefitter.ICurveFitter;
 import loci.slim.analysis.Binning;
 import net.imglib2.RandomAccess;
@@ -70,7 +71,7 @@ public class ExportBatchHistogram2 {
 
 				// account for value
 				double value = cursor.get().getRealDouble();
-				//System.out.println("value is " + value);
+				//IJ.log("value is " + value);
 				if (!Double.isNaN(value)) {
 					if (value < _histoTMin) {
 						++_histoTUnder;
@@ -84,7 +85,7 @@ public class ExportBatchHistogram2 {
 						histoBin.meanSum += value;
 						histoBin.varianceSum += value * value;
 						++histoBin.count;
-						//System.out.println("--> bin " + bin);
+						//IJ.log("--> bin " + bin);
 						sum += value;
 						++count;
 					}
@@ -97,14 +98,14 @@ public class ExportBatchHistogram2 {
 	}
 
 	public void end(String fileName) {
-		System.out.println("actual mean in-range is " + sum / count + " count was " + count);
-		System.out.println("actual mean total is " + totalSum / totalCount + " totalCount was " + totalCount);
-		//System.out.println("mean from histo is " + meanFromHisto(_histoT));
+		IJ.log("actual mean in-range is " + sum / count + " count was " + count);
+		IJ.log("actual mean total is " + totalSum / totalCount + " totalCount was " + totalCount);
+		//IJ.log("mean from histo is " + meanFromHisto(_histoT));
 
-		System.out.println("in-range std dev is " + stdDev / count);
-		//System.out.println("total std dev is " + totalStdDev / totalCount);
+		IJ.log("in-range std dev is " + stdDev / count);
+		//IJ.log("total std dev is " + totalStdDev / totalCount);
 
-		//System.out.println("std dev from histo is " + standardDeviationFromHisto(_histoT, meanFromHisto(_histoT)));
+		//IJ.log("std dev from histo is " + standardDeviationFromHisto(_histoT, meanFromHisto(_histoT)));
 	}
 
 	private double meanFromHisto(long[] histo) {
@@ -116,7 +117,7 @@ public class ExportBatchHistogram2 {
 			//sum += counter * Binning.centerValuesPerBin(BINS, _histoTMin, _histoTMax)[i];
 			//count += counter;
 		}
-		System.out.println("histo count is " + count);
+		IJ.log("histo count is " + count);
 		return sum / count;
 	}
 

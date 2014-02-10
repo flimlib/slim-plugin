@@ -23,6 +23,8 @@
 
 package loci.slim.ui;
 
+import ij.IJ;
+
 import java.awt.Component;
 import java.awt.Container;
 
@@ -46,9 +48,9 @@ public class SpringUtilities {
 	 * minimum, preferred, and maximum sizes.
 	 */
 	public static void printSizes(Component c) {
-		System.out.println("minimumSize = " + c.getMinimumSize());
-		System.out.println("preferredSize = " + c.getPreferredSize());
-		System.out.println("maximumSize = " + c.getMaximumSize());
+		IJ.log("minimumSize = " + c.getMinimumSize());
+		IJ.log("preferredSize = " + c.getPreferredSize());
+		IJ.log("maximumSize = " + c.getMaximumSize());
 	}
 
 	/**

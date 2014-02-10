@@ -23,6 +23,7 @@
 
 package loci.slim.fitting;
 
+import ij.IJ;
 import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
 
@@ -79,10 +80,10 @@ public class RapidLifetimeDetermination {
 		d23 = d2 - d3;
 		if (d12 <= d23 || d23 <= 0) {
 			if (d12 <= d23) {
-				System.out.println("d12 " + d12 + " <= d23 " + d23);
+				IJ.log("d12 " + d12 + " <= d23 " + d23);
 			}
 			if (d23 <= 0) {
-				System.out.println("d23 <= 0 " + d23);
+				IJ.log("d23 <= 0 " + d23);
 			}
 			return -2;
 		}
@@ -189,10 +190,10 @@ public class RapidLifetimeDetermination {
 		d23 = d2 - d3;
 		if (d12 <= d23 || d23 <= 0) {
 			if (d12 <= d23) {
-				System.out.println("d12 " + d12 + " <= d23 " + d23);
+				IJ.log("d12 " + d12 + " <= d23 " + d23);
 			}
 			if (d23 <= 0) {
-				System.out.println("d23 <= 0 " + d23);
+				IJ.log("d23 <= 0 " + d23);
 			}
 			return -2;
 		}
@@ -309,7 +310,7 @@ public class RapidLifetimeDetermination {
 
 		if (0 == ninstr) {
 			returnCode = gciTripleIntegral(xincr, y, fit_start, fit_end, noise, sig, z, a, tau, fitted, residuals, local_chisq, division);
-			System.out.println("tries " + tries + " a t z chisq " + a[0] + " " + tau[0] + " " + z[0] + " " + local_chisq[0] + " returns " + returnCode);
+			IJ.log("tries " + tries + " a t z chisq " + a[0] + " " + tau[0] + " " + z[0] + " " + local_chisq[0] + " returns " + returnCode);
 
 			while (local_chisq[0] > chisq_target && local_chisq[0] <= old_chisq && tries < MAX_REFITS) {
 				old_chisq = local_chisq[0];
@@ -320,12 +321,12 @@ public class RapidLifetimeDetermination {
 				division += division / 3;
 				++tries;
 				returnCode = gciTripleIntegral(xincr, y, fit_start, fit_end, noise, sig, z, a, tau, fitted, residuals, local_chisq, division);
-				System.out.println("tries " + tries + " a t z chisq " + a[0] + " " + tau[0] + " " + z[0] + " " + local_chisq[0] + " returns " + returnCode);
+				IJ.log("tries " + tries + " a t z chisq " + a[0] + " " + tau[0] + " " + z[0] + " " + local_chisq[0] + " returns " + returnCode);
 			}
 		}
 		else {
 			returnCode = gciTripleIntegralInstr(xincr, y, fit_start, fit_end, instr, ninstr, noise, sig, z, a, tau, fitted, residuals, local_chisq, division);
-			System.out.println("instr tries " + tries + " a t z chisq " + a[0] + " " + tau[0] + " " + z[0] + " " + local_chisq[0] + " returns " + returnCode);
+			IJ.log("instr tries " + tries + " a t z chisq " + a[0] + " " + tau[0] + " " + z[0] + " " + local_chisq[0] + " returns " + returnCode);
 
 			while (local_chisq[0] > chisq_target && local_chisq[0] <= old_chisq && tries < MAX_REFITS) {
 				old_chisq = local_chisq[0];
@@ -336,7 +337,7 @@ public class RapidLifetimeDetermination {
 				division += division / 3;
 				++tries;
 				returnCode = gciTripleIntegralInstr(xincr, y, fit_start, fit_end, instr, ninstr, noise, sig, z, a, tau, fitted, residuals, local_chisq, division);
-				System.out.println("instr tries " + tries + " a t z chisq " + a[0] + " " + tau[0] + " " + z[0] + " " + local_chisq[0] + " returns " + returnCode);
+				IJ.log("instr tries " + tries + " a t z chisq " + a[0] + " " + tau[0] + " " + z[0] + " " + local_chisq[0] + " returns " + returnCode);
 			}
 		}
 		return 0;
@@ -383,7 +384,7 @@ public class RapidLifetimeDetermination {
 		int noise = 3;
 
 		int returnValue = gciTripleIntegralFittingEngine(xinc, trans, start, stop, instrumentResponseFloat, ninstr, noise, null, z, a, tau, fitted, residuals, chisquare, data.getChiSquareTarget() * chiSquareAdjust);
-		System.out.println("return triple integral fitting engine " + returnValue);
+		IJ.log("return triple integral fitting engine " + returnValue);
 		return 0;
 	}
 
@@ -401,7 +402,7 @@ public class RapidLifetimeDetermination {
 		int width5Divisible = (width / 5) * 5;
 		int fifthWidth = width5Divisible / 5;
 
-		System.out.println("width " + width + " width5Divisible " + width5Divisible + " fifthWidth " + fifthWidth);
+		IJ.log("width " + width + " width5Divisible " + width5Divisible + " fifthWidth " + fifthWidth);
 
 		// sum photons in each fifth of the range
 		double[] fifth = new double[5];
@@ -412,16 +413,16 @@ public class RapidLifetimeDetermination {
 		}
 		double sum = 0.0;
 		for (int i = 0; i < 5; ++i) {
-			System.out.println(" " + fifth[i]);
+			IJ.log(" " + fifth[i]);
 			sum += fifth[i];
 		}
-		System.out.println("fifths summed to " + sum);
+		IJ.log("fifths summed to " + sum);
 
 		sum = 0.0;
 		for (int i = start; i < start + width5Divisible; ++i) {
 			sum += decay[i] - offset;
 		}
-		System.out.println("sum from start " + start + " to stop " + (start + width5Divisible) + " is " + sum);
+		IJ.log("sum from start " + start + " to stop " + (start + width5Divisible) + " is " + sum);
 
 		// uses overlapping gates see Figure 2b of Sharman
 		double d0, d1, d2, d3;
@@ -432,30 +433,30 @@ public class RapidLifetimeDetermination {
 
 		// compute intermediate calculations (16)-(21)
 		double r = d1 * d1 - d2 * d0;
-		System.out.println("r " + r + " = d1 " + d1 + " * d1 " + d1 + " - d2 " + d2 + " * d0 " + d0);
+		IJ.log("r " + r + " = d1 " + d1 + " * d1 " + d1 + " - d2 " + d2 + " * d0 " + d0);
 		double p = d1 * d2 + d3 * d0;
-		System.out.println("p " + p + " = d1 " + d1 + " * d2 " + d2 + " + d3 " + d3 + " * d0 " + d0);
+		IJ.log("p " + p + " = d1 " + d1 + " * d2 " + d2 + " + d3 " + d3 + " * d0 " + d0);
 		double q = d2 * d2 - d3 * d1;
-		System.out.println("q " + q + " = d2 " + d2 + " * d2 " + d2 + " - d3 " + d3 + " * d1 " + d1);
+		IJ.log("q " + q + " = d2 " + d2 + " * d2 " + d2 + " - d3 " + d3 + " * d1 " + d1);
 		double disc = p * p - 4.0 * r * q;
-		System.out.println("disc " + disc + " = p " + p + " * p " + p + " - 4.0 * r " + r + " * q " + q);
+		IJ.log("disc " + disc + " = p " + p + " * p " + p + " - 4.0 * r " + r + " * q " + q);
 		double sqrtDisc = Math.sqrt(disc);
-		System.out.println("sqrt disc " + sqrtDisc + " = Math.sqrt disc " + disc);
+		IJ.log("sqrt disc " + sqrtDisc + " = Math.sqrt disc " + disc);
 		double x = (-p - sqrtDisc) / (2 * r);
-		System.out.println("x " + x + " = (-p " + p + " - sqrtDisc " + sqrtDisc + ") / (2 * r " + r + ")");
+		IJ.log("x " + x + " = (-p " + p + " - sqrtDisc " + sqrtDisc + ") / (2 * r " + r + ")");
 		double y = (-p + sqrtDisc) / (2 * r);
 
-		System.out.println("y " + y + " = (-p " + p + " + sqrtDisc " + sqrtDisc + ") / (2 * r " + r + ")");
+		IJ.log("y " + y + " = (-p " + p + " + sqrtDisc " + sqrtDisc + ") / (2 * r " + r + ")");
 
 		double deltaT = 2 * fifthWidth * xinc;
-		System.out.println("deltaT " + deltaT + " = 2 * fifthWidth " + fifthWidth + " * xinc " + xinc);
+		IJ.log("deltaT " + deltaT + " = 2 * fifthWidth " + fifthWidth + " * xinc " + xinc);
 
-		System.out.println("delta T is " + deltaT + " y squared is " + (y * y) + " x squared is " + (x * x));
+		IJ.log("delta T is " + deltaT + " y squared is " + (y * y) + " x squared is " + (x * x));
 
 		// compute taus (26)-(27)
 		double t1 = -deltaT / Math.log(y * y);
 		double t2 = -deltaT / Math.log(x * x);
-		System.out.println("RLD overlapping T1 is " + t1 + " T2 is " + t2);
+		IJ.log("RLD overlapping T1 is " + t1 + " T2 is " + t2);
 		return 0;
 	}
 
@@ -466,7 +467,7 @@ public class RapidLifetimeDetermination {
 		int width4Divisible = (width / 4) * 4;
 		int fourthWidth = width4Divisible / 4;
 
-		System.out.println("width " + width + " width4Divisible " + width4Divisible + " fourthWidth " + fourthWidth);
+		IJ.log("width " + width + " width4Divisible " + width4Divisible + " fourthWidth " + fourthWidth);
 
 		// sum photons in each fifth of the range
 		double[] fourth = new double[4];
@@ -479,13 +480,13 @@ public class RapidLifetimeDetermination {
 		for (int i = 0; i < 4; ++i) {
 			sum += fourth[i];
 		}
-		System.out.println("sum of fourths " + sum);
+		IJ.log("sum of fourths " + sum);
 
 		sum = 0.0;
 		for (int i = start; i < start + width4Divisible; ++i) {
 			sum += decay[i] - offset;
 		}
-		System.out.println("sum from start " + start + " to " + (start + width4Divisible) + " is " + sum);
+		IJ.log("sum from start " + start + " to " + (start + width4Divisible) + " is " + sum);
 
 		// uses non-overlapping gates see Figure 2a of Sharman
 		double d0, d1, d2, d3;
@@ -496,34 +497,34 @@ public class RapidLifetimeDetermination {
 
 		// compute intermediate calculations (16)-(21)
 		double r = d1 * d1 - d2 * d0;
-		System.out.println("r " + r + " = d1 " + d1 + " * d1 " + d1 + " - d2 " + d2 + " * d0 " + d0);
+		IJ.log("r " + r + " = d1 " + d1 + " * d1 " + d1 + " - d2 " + d2 + " * d0 " + d0);
 		double p = d1 * d2 + d3 * d0;
-		System.out.println("p " + p + " = d1 " + d1 + " * d2 " + d2 + " + d3 " + d3 + " * d0 " + d0);
+		IJ.log("p " + p + " = d1 " + d1 + " * d2 " + d2 + " + d3 " + d3 + " * d0 " + d0);
 		double q = d2 * d2 - d3 * d1;
-		System.out.println("q " + q + " = d2 " + d2 + " * d2 " + d2 + " - d3 " + d3 + " * d1 " + d1);
+		IJ.log("q " + q + " = d2 " + d2 + " * d2 " + d2 + " - d3 " + d3 + " * d1 " + d1);
 		double disc = p * p - 4.0 * r * q;
-		System.out.println("disc " + disc + " = p " + p + " * p " + p + " - 4.0 * r " + r + " * q " + q);
+		IJ.log("disc " + disc + " = p " + p + " * p " + p + " - 4.0 * r " + r + " * q " + q);
 		double sqrtDisc = Math.sqrt(disc);
-		System.out.println("sqrt disc " + sqrtDisc + " = Math.sqrt disc " + disc);
+		IJ.log("sqrt disc " + sqrtDisc + " = Math.sqrt disc " + disc);
 		double x = (-p - sqrtDisc) / (2 * r);
-		System.out.println("x " + x + " = (-p " + p + " - sqrtDisc " + sqrtDisc + ") / (2 * r " + r + ")");
+		IJ.log("x " + x + " = (-p " + p + " - sqrtDisc " + sqrtDisc + ") / (2 * r " + r + ")");
 		double y = (-p + sqrtDisc) / (2 * r);
 		if (x <= 0.0f) {
-			System.out.println("OOPS x is negative " + x);
+			IJ.log("OOPS x is negative " + x);
 		}
 		if (y <= 0.0f) {
-			System.out.println("OOPS y is negative " + y);
+			IJ.log("OOPS y is negative " + y);
 		}
 
-		System.out.println("y " + y + " = (-p " + p + " + sqrtDisc " + sqrtDisc + ") / (2 * r " + r + ")");
+		IJ.log("y " + y + " = (-p " + p + " + sqrtDisc " + sqrtDisc + ") / (2 * r " + r + ")");
 
 		double deltaT = 2 * fourthWidth * xinc;
-		System.out.println("deltaT " + deltaT + " = 2 * fourthWidth " + fourthWidth + " * xinc " + xinc);
+		IJ.log("deltaT " + deltaT + " = 2 * fourthWidth " + fourthWidth + " * xinc " + xinc);
 
 		// compute taus (22)-(23)
 		double t1 = -deltaT / Math.log(y);
 		double t2 = -deltaT / Math.log(x);
-		System.out.println("RLD T1 is " + t1 + " T2 is " + t2);
+		IJ.log("RLD T1 is " + t1 + " T2 is " + t2);
 		return 0;
 	}
 
@@ -545,7 +546,7 @@ public class RapidLifetimeDetermination {
 		int width4Divisible = (width / 4) * 4;
 		int fourthWidth = width4Divisible / 4;
 
-		System.out.println("width " + width + " width4Divisible " + width4Divisible + " fourthWidth " + fourthWidth);
+		IJ.log("width " + width + " width4Divisible " + width4Divisible + " fourthWidth " + fourthWidth);
 
 		double f0 = decay[0] - offset;
 		double f1 = decay[fourthWidth] - offset;
@@ -565,9 +566,9 @@ public class RapidLifetimeDetermination {
 		double tau1 = -alpha1 / 2 + Math.sqrt((alpha1 * alpha1 / 4 - alpha2));
 		double tau2 = -alpha1 / 2 - Math.sqrt((alpha1 * alpha1 / 4 - alpha2));
 
-		System.out.println("f0 " + f0 + " f1 " + f1 + " f2 " + f2 + " f3 " + f3);
-		System.out.println("alpha1 " + alpha1 + " alpha2 " + alpha2);
-		System.out.println("tau1 " + tau1 + " tau2 " + tau2);
+		IJ.log("f0 " + f0 + " f1 " + f1 + " f2 " + f2 + " f3 " + f3);
+		IJ.log("alpha1 " + alpha1 + " alpha2 " + alpha2);
+		IJ.log("tau1 " + tau1 + " tau2 " + tau2);
 		// typically tau2 and alpha2 come out negative
 
 		return 0;
@@ -608,9 +609,9 @@ public class RapidLifetimeDetermination {
 		double offset = 0.53; // from SPC Image fitting Brian's _40a.sdt at (142, 215)
 
 		testDoubleRLDFitOverlapping(offset, trans, xinc, start, stop);
-		System.out.println("*************************************");
+		IJ.log("*************************************");
 		testDoubleRLDFit(offset, trans, xinc, start, stop);
-		System.out.println("=====================================");
+		IJ.log("=====================================");
 		testPronysMethod(offset, trans, xinc, start, stop);
 
 		return 0;

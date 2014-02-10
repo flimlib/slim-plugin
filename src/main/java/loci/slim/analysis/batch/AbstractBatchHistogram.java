@@ -23,6 +23,7 @@
 
 package loci.slim.analysis.batch;
 
+import ij.IJ;
 import loci.slim.analysis.Binning;
 import loci.slim.analysis.HistogramStatistics;
 import loci.slim.fitted.FittedValue;
@@ -106,7 +107,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		int minBin = Binning.valueToBin(totalBins, minRange, maxRange, minSubRange);
 		int maxBin = Binning.valueToBin(totalBins, minRange, maxRange, maxSubRange);
 		if (maxBin - minBin + 1 < binCount) {
-			System.out.println("getScaledHistogram scaling up from " + (maxBin - minBin + 1) + " to " + binCount);
+			IJ.log("getScaledHistogram scaling up from " + (maxBin - minBin + 1) + " to " + binCount);
 		}
 
 		// character existing bins by center values
@@ -249,7 +250,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			s1 += overMaxSum;
 			s2 += underMinVarianceSum;
 			s2 += overMaxVarianceSum;
-			//System.out.println("s0 " + s0 + " (count " + count + ") s1 " + s1 + " s2 " + s2);
+			//IJ.log("s0 " + s0 + " (count " + count + ") s1 " + s1 + " s2 " + s2);
 			double standardDeviation = Math.sqrt(s0 * s2 - s1 * s1) / count;
 			statistics.setStandardDeviation(standardDeviation);
 
@@ -298,13 +299,13 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	private double countToValue(long n) {
 		// make sure that the bin for this count is within range
 		if (n < underMinCount) {
-			System.out.println("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
+			IJ.log("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
 			// computed values way out of reasonable range, report unknown statistic
 			return Double.NaN;
 		}
 		if (n > count - overMaxCount) {
 			// only (count - overMaxCount) values are actually binned
-			System.out.println("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
+			IJ.log("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
 			// computed values way out of reasonable range, report unknown statistic
 			return Double.NaN;
 		}

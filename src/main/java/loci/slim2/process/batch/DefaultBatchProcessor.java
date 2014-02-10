@@ -297,10 +297,7 @@ public class DefaultBatchProcessor implements BatchProcessor {
 			}
 		}
 		catch (Exception e) {
-			IJ.log("Exception: " + e.getMessage() + " " + e.toString());
-			for (StackTraceElement el : e.getStackTrace()) {
-				IJ.log("   " + el.toString());
-			}
+			IJ.handleException(e);
 		}
 
 		//TODO ARG need IJ2 version:

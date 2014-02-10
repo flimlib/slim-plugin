@@ -23,6 +23,7 @@
 
 package loci.slim.ui;
 
+import ij.IJ;
 import ij.io.OpenDialog;
 import ij.io.SaveDialog;
 
@@ -1814,7 +1815,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	public String getFittedImages() {
 		StringBuffer returnValue = new StringBuffer();
 		String selected = (String) _fittedImagesComboBox.getSelectedItem();
-		//System.out.println("selected is " + selected);
+		//IJ.log("selected is " + selected);
 		String[] fittedImages = selected.split(" ");
 		for (String fittedImage : fittedImages) {
 			boolean fit = true;
@@ -1832,7 +1833,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				returnValue.append(' ');
 			}
 		}
-		//System.out.println("changes to " + returnValue);
+		//IJ.log("changes to " + returnValue);
 		return returnValue.toString();
 	}
 
@@ -2308,7 +2309,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			value = Integer.parseInt(field.getText());
 		}
 		catch (NumberFormatException e) {
-			System.out.println("Error parsing " + field.getName());
+			IJ.log("Error parsing " + field.getName());
 		}
 		return value;
 	}

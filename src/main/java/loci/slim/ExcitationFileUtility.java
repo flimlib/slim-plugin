@@ -23,6 +23,7 @@
 
 package loci.slim;
 
+import ij.IJ;
 import io.scif.ByteArrayPlane;
 import io.scif.FormatException;
 import io.scif.ImageMetadata;
@@ -107,7 +108,7 @@ public class ExcitationFileUtility {
 			if (interleaved) { //TODO ARG interleaved does not read the whole thing; was 130K, now 32767
 				// this returns the whole thing
 				bytes = reader.openPlane(0, 0).getBytes();
-				System.out.println("INTERLEAVED reads # bytes: " + bytes.length);
+				IJ.log("INTERLEAVED reads # bytes: " + bytes.length);
 				for (int bin = 0; bin < bins; ++bin) {
 					results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, bytesPerPixel * bin);
 				}
@@ -121,10 +122,10 @@ public class ExcitationFileUtility {
 			reader.close();
 		}
 		catch (IOException e) {
-			System.out.println("IOException " + e.getMessage());
+			IJ.log("IOException " + e.getMessage());
 		}
 		catch (FormatException e) {
-			System.out.println("FormatException " + e.getMessage());
+			IJ.log("FormatException " + e.getMessage());
 		}
 		return results;
 	}
@@ -152,10 +153,10 @@ public class ExcitationFileUtility {
 			success = true;
 		}
 		catch (IOException e) {
-			System.out.println("IOException " + e.getMessage());
+			IJ.log("IOException " + e.getMessage());
 		}
 		catch (FormatException e) {
-			System.out.println("FormatException " + e.getMessage());
+			IJ.log("FormatException " + e.getMessage());
 		}
 		return success;
 	}
@@ -176,7 +177,7 @@ public class ExcitationFileUtility {
 			}
 		}
 		catch (Exception e) {
-			System.out.println("Exception " + e.getMessage());
+			IJ.log("Exception " + e.getMessage());
 		}
 		return values;
 	}
@@ -196,7 +197,7 @@ public class ExcitationFileUtility {
 			success = true;
 		}
 		catch (IOException e) {
-			System.out.println("IOException " + e.getMessage());
+			IJ.log("IOException " + e.getMessage());
 		}
 		return success;
 	}

@@ -23,13 +23,15 @@
 
 package loci.slim.fitting;
 
+import ij.IJ;
+
 /**
  *
  * @author Aivar Grislis
  */
 public class DefaultIntegrator implements Integrator {
 	public double integrate(double[] function, double offset, double inc, int start, int stop) {
-		System.out.println("integrate " + start + " to " + stop);
+		IJ.log("integrate " + start + " to " + stop);
 		// sum heights
 		float sum = 0.0f;
 		for (int i = start; i < stop; ++i) {

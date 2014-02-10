@@ -23,6 +23,8 @@
 
 package imagej.thread;
 
+import ij.IJ;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -93,7 +95,7 @@ public class ThreadPool<T> {
 					result = callable.call();
 				}
 				catch (Exception e) {
-					System.out.println("Exception " + e.getMessage()); //TODO IJ.log it!
+					IJ.log("Exception " + e.getMessage()); //TODO IJ.log it!
 				}
 				returnList.add(result);
 			}
@@ -114,7 +116,7 @@ public class ThreadPool<T> {
 				futureList = _executorService.invokeAll(callableList);
 			}
 			catch (InterruptedException e) {
-				System.out.println("ExecutorService.invokeAll was interrupted " + e.getMessage());
+				IJ.log("ExecutorService.invokeAll was interrupted " + e.getMessage());
 				//TODO just IJ.log it
 			}
 
@@ -125,11 +127,11 @@ public class ThreadPool<T> {
 					returnList.add(result);
 				}
 				catch (ExecutionException e) {
-					System.out.println("ExecutionException " + e.getMessage());
+					IJ.log("ExecutionException " + e.getMessage());
 					//TODO just IJ.log it
 				}
 				catch (InterruptedException e) {
-					System.out.println("InterruptedException " + e.getMessage());
+					IJ.log("InterruptedException " + e.getMessage());
 					// TODO just IJ.log it
 				}
 			}
@@ -156,7 +158,7 @@ public class ThreadPool<T> {
 					"ImageJ-" /* + getContext().getID() */
 					+ "ThreadPool-" + _threadPoolNumber
 					+ "-Thread-" + _threadNumber++;
-			//System.out.println("NEW THREAD");
+			//IJ.log("NEW THREAD");
 			return new Thread(r, threadName);
 		}
 	}

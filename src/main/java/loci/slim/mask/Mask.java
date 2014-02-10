@@ -23,6 +23,8 @@
 
 package loci.slim.mask;
 
+import ij.IJ;
+
 import java.util.Collection;
 
 /**
@@ -234,16 +236,17 @@ public class Mask implements Cloneable {
 
 	public void debug() {
 		if (null == _bits) {
-			System.out.print("NONE");
+			IJ.log("NONE");
 		}
 		else {
+			final StringBuilder sb = new StringBuilder();
 			for (int y = 0; y < _height; ++y) {
 				for (int x = 0; x < _width; ++x) {
-					System.out.print(" " + _bits[x][y]);
+					sb.append(" " + _bits[x][y]);
 				}
-				System.out.println();
+				sb.append("\n");
 			}
+			IJ.log(sb.toString());
 		}
-		System.out.println();
 	}
 }

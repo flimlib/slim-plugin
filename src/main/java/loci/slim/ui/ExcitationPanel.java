@@ -23,6 +23,8 @@
 
 package loci.slim.ui;
 
+import ij.IJ;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -84,7 +86,7 @@ public class ExcitationPanel extends JFrame {
 					int start = fittingCursor.getPromptStartBin();
 					int stop = fittingCursor.getPromptStopBin();
 					double baseline = fittingCursor.getPromptBaselineValue();
-					System.out.println("start " + start + " stop " + stop + " baseline " + baseline);
+					IJ.log("start " + start + " stop " + stop + " baseline " + baseline);
 					double[] values = new double[_bins];
 					for (int i = 0; i < _bins; ++i) {
 						if (i < start || i > stop) {
@@ -104,7 +106,7 @@ public class ExcitationPanel extends JFrame {
 					int start = fittingCursor.getPromptStartBin();
 					int stop = fittingCursor.getPromptStopBin();
 					double baseline = fittingCursor.getPromptBaselineValue();
-					System.out.println("start " + start + " stop " + stop + " baseline " + baseline);
+					IJ.log("start " + start + " stop " + stop + " baseline " + baseline);
 					double[] values = null;
 					_excitation = new Excitation("Gaussian", values, _timeInc);
 				}});

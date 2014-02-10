@@ -127,7 +127,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 				(chartPanel, _excitationPlot, this, _maxHorzValue, _maxVertValue);
 		_layer.setUI(_startStopBaseDraggingUI);
 
-	 //System.out.println("ExcitationGraph start " + start + " stop " + stop + " base " + base);
+	 //IJ.log("ExcitationGraph start " + start + " stop " + stop + " base " + base);
 		// initialize the vertical bars that show start and stop time bins and
 		// the horizontal bar with the base count.
 		_startStopBaseDraggingUI.setStartStopBaseValues(_start, _stop, _base);

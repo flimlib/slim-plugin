@@ -240,10 +240,10 @@ public class FittingCursor {
 			/*int tmp = (int) Math.ceil(_promptStartValue / _inc);
 
 			if (returnValue != tmp) {
-				System.out.println("*******getPromptStartBin********");
-				System.out.println("SP " + returnValue + " TRI2 " + tmp);
+				IJ.log("*******getPromptStartBin********");
+				IJ.log("SP " + returnValue + " TRI2 " + tmp);
 				if (_kludge) {
-					System.out.println("go with " + tmp);
+					IJ.log("go with " + tmp);
 					returnValue = tmp;
 				}
 			}*/

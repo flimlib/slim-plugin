@@ -23,6 +23,8 @@
 
 package loci.slim.fitting.images;
 
+import ij.IJ;
+
 import java.awt.image.IndexColorModel;
 
 import loci.slim.IGrayScaleImage;
@@ -60,10 +62,10 @@ public class FittedImageFactory {
 			IMaskGroup[] maskGroup)
 	{
 		if (dimension.length > 3) {
-			System.out.println("dim 2 " + dimension[2] + " dim 3 " + dimension[3]);
+			IJ.log("dim 2 " + dimension[2] + " dim 3 " + dimension[3]);
 		}
 		else {
-			System.out.println("dim " + dimension[0] + " " + dimension[1] + " " + dimension[2]);
+			IJ.log("dim " + dimension[0] + " " + dimension[1] + " " + dimension[2]);
 		}
 		IFittedImage fittedImage = null;
 		String title;

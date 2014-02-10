@@ -23,6 +23,8 @@
 
 package loci.slim.heuristics;
 
+import ij.IJ;
+
 
 /**
  * A class with static functions for working with the excitation.
@@ -69,7 +71,7 @@ public class ExcitationScaler {
 
 		// Can be used to generate data to cut & paste into test methods
 		if (createTestData) {
-			System.out.println("----8<-----");
+			IJ.log("----8<-----");
 			System.out.print("double[] decay = {");
 			for (int i = 0; i < decay.length; ++i) {
 				if (i > 0) {
@@ -77,13 +79,13 @@ public class ExcitationScaler {
 				}
 				System.out.print(" " + decay[i]);
 			}
-			System.out.println(" };");
+			IJ.log(" };");
 
-			System.out.println("int startIndex = " + startIndex + ";");
-			System.out.println("int stopIndex = " + stopIndex + ";");
-			System.out.println("double base = " + base + ";");
-			System.out.println("double timeInc " + timeInc + ";");
-			System.out.println("int bins = " + bins + ";");
+			IJ.log("int startIndex = " + startIndex + ";");
+			IJ.log("int stopIndex = " + stopIndex + ";");
+			IJ.log("double base = " + base + ";");
+			IJ.log("double timeInc " + timeInc + ";");
+			IJ.log("int bins = " + bins + ";");
 
 			System.out.print("double[] expResult = {");
 			for (int i = 0; i < values.length; ++i) {
@@ -92,8 +94,8 @@ public class ExcitationScaler {
 				}
 				System.out.print(" " + values[i]);
 			}
-			System.out.println(" };");
-			System.out.println("-----------");
+			IJ.log(" };");
+			IJ.log("-----------");
 		}
 
 		return values;

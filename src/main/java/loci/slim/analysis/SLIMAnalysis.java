@@ -103,7 +103,7 @@ public class SLIMAnalysis {
 				instance = selectedPlugin.instance();
 			}
 			catch (InstantiationException e) {
-				System.out.println("Error instantiating plugin " + e.getMessage());
+				IJ.log("Error instantiating plugin " + e.getMessage());
 			}
 
 			if (null != instance) {
