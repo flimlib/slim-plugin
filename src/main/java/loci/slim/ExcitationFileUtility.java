@@ -23,16 +23,20 @@
 
 package loci.slim;
 
+import io.scif.ByteArrayPlane;
+import io.scif.FormatException;
+import io.scif.ImageMetadata;
+import io.scif.SCIFIO;
+import io.scif.Writer;
+import io.scif.common.DataTools;
+import io.scif.filters.ReaderFilter;
+import io.scif.img.axes.SCIFIOAxes;
+
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import loci.formats.FormatException;
-import loci.formats.in.ICSReader;
-import loci.formats.meta.MetadataRetrieve;
-import loci.formats.out.ICSWriter;
 
 /**
  * Loads and saves excitation files.
@@ -85,23 +89,24 @@ public class ExcitationFileUtility {
 
 	private static double[] loadICSExcitationFile(String fileName) {
 		double[] results = null;
-		ICSReader icsReader = new ICSReader();
 		try {
-			icsReader.setId(fileName);
-			int bitsPerPixel = icsReader.getBitsPerPixel();
-			int bytesPerPixel = bitsPerPixel / 8;
-			boolean littleEndian = icsReader.isLittleEndian();
-			boolean interleaved = icsReader.isInterleaved();
-			int bins = icsReader.getSizeC();
-			if (1 == bins) {
-				// hack for lifetime ICS that reader doesn't recognize as such
-				bins = icsReader.getSizeZ();
+			final SCIFIO scifio = new SCIFIO();
+			final ReaderFilter reader = scifio.initializer().initializeReader(fileName);
+			final ImageMetadata meta = reader.getMetadata().get(0);
+			final int bitsPerPixel = meta.getBitsPerPixel();
+			final int bytesPerPixel = bitsPerPixel / 8;
+			final boolean littleEndian = meta.isLittleEndian();
+			final boolean interleaved = false; // meta.isInterleaved(); // CTR FIXME use ChannelSeparator to prevent interleaved
+			long lifetimeLength = meta.getAxisLength(SCIFIOAxes.LIFETIME);
+			if (lifetimeLength > Integer.MAX_VALUE) {
+				throw new IllegalArgumentException("Lifetime dimension too large: " + lifetimeLength);
 			}
+			int bins = (int) lifetimeLength;
 			results = new double[bins];
 			byte bytes[];
-			if (false || icsReader.isInterleaved()) { //TODO ARG interleaved does not read the whole thing; was 130K, now 32767
+			if (interleaved) { //TODO ARG interleaved does not read the whole thing; was 130K, now 32767
 				// this returns the whole thing
-				bytes = icsReader.openBytes(0);
+				bytes = reader.openPlane(0, 0).getBytes();
 				System.out.println("INTERLEAVED reads # bytes: " + bytes.length);
 				for (int bin = 0; bin < bins; ++bin) {
 					results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, bytesPerPixel * bin);
@@ -109,11 +114,11 @@ public class ExcitationFileUtility {
 			}
 			else {
 				for (int bin = 0; bin < bins; ++bin) {
-					bytes = icsReader.openBytes(bin);
+					bytes = reader.openPlane(0, bin).getBytes();
 					results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, 0);
 				}
 			}
-			icsReader.close();
+			reader.close();
 		}
 		catch (IOException e) {
 			System.out.println("IOException " + e.getMessage());
@@ -127,12 +132,22 @@ public class ExcitationFileUtility {
 	//TODO doesn't work; needed to interoperate with TRI2
 	private static boolean saveICSExcitationFile(String fileName, double[] values) {
 		boolean success = false;
-		ICSWriter icsWriter = new ICSWriter();
-		MetadataRetrieve meta = null;
-//        icsWriter.setMetadataRetrieve(meta);
+		final SCIFIO scifio = new SCIFIO();
+		// NB: Use a fake string as a shorthand for metadata values.
+		final String source =
+			"pixelType=uint16&lengths=1,1," + values.length +
+				"&axes=X,Y,Lifetime.fake";
 		try {
+			final Writer writer =
+					scifio.initializer().initializeWriter(source, fileName);
+			// TODO: Writer may require bytes to be structured according to a
+			// particular endianness. But at this point, is it possible yet to
+			// interrogate the writer to ask for its desired endianness?
+			final boolean little = true;
+			final ByteArrayPlane plane = new ByteArrayPlane(scifio.getContext());
 			for (int bin = 0; bin < values.length; ++bin) {
-				icsWriter.saveBytes(bin, convertDoubleToBytes(values[bin]));
+				plane.setData(DataTools.doubleToBytes(values[bin], little));
+				writer.savePlane(0, bin, plane);
 			}
 			success = true;
 		}
@@ -186,19 +201,8 @@ public class ExcitationFileUtility {
 		return success;
 	}
 
-	private static byte[] convertDoubleToBytes(double d) {
-		float f = (float) d;
-		int rawIntBits = Float.floatToRawIntBits(f);
-		byte[] result = new byte[4];
-		for (int i = 0; i < 4; ++i) {
-			int offset = 8 * i;
-			result[i] = (byte) ((rawIntBits >>> offset) & 0xff);
-		}
-		return result;
-	}
-
 	/**
-	 * Converts a little-endian four byte array to a double.
+	 * Converts a four- or eight-byte array to a double.
 	 *
 	 * @param littleEndian byte order
 	 * @param bitsPerPixel
@@ -206,68 +210,16 @@ public class ExcitationFileUtility {
 	 * @param index
 	 * @return
 	 */
-	private static double convertBytesToDouble(boolean littleEndian, int bitsPerPixel, byte[] bytes, int index) {
-		double returnValue = 0.0f;
-		if (32 == bitsPerPixel) {
-			int i = 0;
-			if (littleEndian) {
-				i |= bytes[index + 3] & 0xff;
-				i <<= 8;
-				i |= bytes[index + 2] & 0xff;
-				i <<= 8;
-				i |= bytes[index + 1] & 0xff;
-				i <<= 8;
-				i |= bytes[index + 0] & 0xff;
-			}
-			else {
-				i |= bytes[index + 0] & 0xff;
-				i <<= 8;
-				i |= bytes[index + 1] & 0xff;
-				i <<= 8;
-				i |= bytes[index + 2] & 0xff;
-				i <<= 8;
-				i |= bytes[index + 3] & 0xff;
-			}
-			returnValue = Float.intBitsToFloat(i);
+	private static double convertBytesToDouble(boolean littleEndian,
+		int bitsPerPixel, byte[] bytes, int index)
+	{
+		if (bitsPerPixel == 32) {
+			return DataTools.bytesToFloat(bytes, index, littleEndian);
 		}
-		else if (64 == bitsPerPixel) {
-			long l = 0;
-			if (littleEndian) {
-				l |= bytes[index + 7] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 6] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 5] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 4] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 3] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 2] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 1] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 0] & 0xff;
-			}
-			else {
-				l |= bytes[index + 0] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 1] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 2] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 3] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 4] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 5] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 6] & 0xff;
-				l <<= 8;
-				l |= bytes[index + 7] & 0xff;
-			}
-			returnValue = Double.longBitsToDouble(l);
+		if (bitsPerPixel == 64) {
+			return DataTools.bytesToDouble(bytes, index, littleEndian);
 		}
-		return returnValue;
+		throw new IllegalArgumentException("Invalid bits per pixel: " +
+			bitsPerPixel);
 	}
 }
