@@ -1795,7 +1795,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		}
 
 		return newImage.getImage();
-		}
+	}
 
 	/**
 	 * Helper function that processes an array of pixels.  When creating
