@@ -189,11 +189,11 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		}
 		_stackWindow.setVisible(true);
 
-		//System.out.println("minNonZeroPhotonCount is " + _minNonZeroPhotonCount);
+		//IJ.log("minNonZeroPhotonCount is " + _minNonZeroPhotonCount);
 
-		//System.out.println("Channel selector " + _stackWindow.getChannelSelector());
-		//System.out.println("Slice selector " + _stackWindow.getSliceSelector());
-		//System.out.println("Frame selector " + _stackWindow.getFrameSelector());
+		//IJ.log("Channel selector " + _stackWindow.getChannelSelector());
+		//IJ.log("Slice selector " + _stackWindow.getSliceSelector());
+		//IJ.log("Frame selector " + _stackWindow.getFrameSelector());
 
 		// hook up mouse listener
 		ImageCanvas canvas = _stackWindow.getCanvas();

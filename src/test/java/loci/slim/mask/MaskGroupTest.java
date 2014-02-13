@@ -23,6 +23,8 @@
 
 package loci.slim.mask;
 
+import ij.IJ;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -198,13 +200,14 @@ public class MaskGroupTest {
 
 	private void dumpMask(Mask mask) {
 		if (null == mask) {
-			System.out.println("NULL");
+			IJ.log("NULL");
 		}
 		else for (int y = 0; y < 3; ++y) {
+			final StringBuilder sb = new StringBuilder();
 			for (int x = 0; x < 3; ++x) {
-				System.out.print("" + mask.getBits()[x][y] + " " );
+				sb.append("" + mask.getBits()[x][y] + " " );
 			}
-			System.out.println();
+			IJ.log(sb.toString());
 		}
 	}
 
@@ -245,7 +248,7 @@ public class MaskGroupTest {
 		 * @param mask or null
 		 */
 		public void updateOtherMask(Mask mask) {
-			System.out.println("Node " + name  + " updateOtherMask");
+			IJ.log("Node " + name  + " updateOtherMask");
 			dumpMask(mask);
 			otherMask = mask;
 		}

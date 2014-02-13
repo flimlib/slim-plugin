@@ -82,7 +82,7 @@ public class SLIMBinning {
 				instance = selectedPlugin.instance();
 			}
 			catch (InstantiationException e) {
-				System.out.println("Error instantiating plugin " + e.getMessage());
+				IJ.log("Error instantiating plugin " + e.getMessage());
 			}
 		}
 

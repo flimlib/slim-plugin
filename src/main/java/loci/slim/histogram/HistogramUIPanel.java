@@ -370,7 +370,7 @@ public class HistogramUIPanel extends JPanel {
 	private void updateBandwidth() {
 		try {
 			_bandwidth = Double.parseDouble(_bandwidthTextField.getText());
-			System.out.println("bandwidth parsed to " + _bandwidth);
+			IJ.log("bandwidth parsed to " + _bandwidth);
 			if (null != _listener) {
 				_listener.setBandwidth(_bandwidth);
 			}
@@ -459,7 +459,7 @@ public class HistogramUIPanel extends JPanel {
 	 * @param max 
 	 */
 	public void dragMinMaxLUT(double min, double max) {
-//        System.out.println("UIPanel.dragMinMaxLUT " + min + " " + max);
+//        IJ.log("UIPanel.dragMinMaxLUT " + min + " " + max);
 		showMinMaxLUT(min, max);
 	}
 
@@ -470,7 +470,7 @@ public class HistogramUIPanel extends JPanel {
 	 * @param max 
 	 */
 	public void setMinMaxLUT(double min, double max) {
-//        System.out.println("UIPanel.setMinMaxLUT " + min + " " + max);
+//        IJ.log("UIPanel.setMinMaxLUT " + min + " " + max);
 		showMinMaxLUT(min, max);
 		//TODO anything else?  if not combine these two methods
 	}
@@ -508,7 +508,7 @@ public class HistogramUIPanel extends JPanel {
 		int index = text.indexOf(DoubleFormatter.INFINITY);
 		if (0 == index) {
 			value = Double.POSITIVE_INFINITY;
-			//System.out.println("parsed positive infinity");
+			//IJ.log("parsed positive infinity");
 		}
 		else if (1 == index) {
 			value = Double.NEGATIVE_INFINITY;

@@ -30,6 +30,11 @@ import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+import io.scif.Format;
+import io.scif.Metadata;
+import io.scif.Reader;
+import io.scif.SCIFIO;
+import io.scif.config.SCIFIOConfig;
 import io.scif.img.ImgOpener;
 import io.scif.img.axes.SCIFIOAxes;
 
@@ -40,7 +45,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
@@ -58,8 +62,6 @@ import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.IFitterEstimator;
 import loci.curvefitter.JaolhoCurveFitter;
 import loci.curvefitter.SLIMCurveFitter;
-import loci.formats.FormatException;
-import loci.formats.ImageReader;
 import loci.slim.analysis.SLIMAnalysis;
 import loci.slim.analysis.batch.ExportBatchHistogram;
 import loci.slim.analysis.batch.ExportSummaryToText;
@@ -396,10 +398,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 				IJ.log(input);
 			}
 			catch (Exception e) {
-				IJ.log("Exception: " + e.getMessage() + " " + e.toString());
-				for (StackTraceElement el : e.getStackTrace()) {
-					IJ.log("   " + el.toString());
-				}
+				IJ.handleException(e);
 			}
 		}
 	}
@@ -488,10 +487,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 				IJ.log(input);
 			}
 			catch (Exception e) {
-				IJ.log("Exception: " + e.getMessage() + " " + e.toString());
-				for (StackTraceElement el : e.getStackTrace()) {
-					IJ.log("   " + el.toString());
-				}
+				IJ.handleException(e);
 			}
 		}
 	}
@@ -528,7 +524,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		IFitterEstimator fitterEstimator = new FitterEstimator();
 
 		// cursor support
-		System.out.println("doFits opens new FittingCursor");
+		//IJ.log("doFits opens new FittingCursor");
 		_fittingCursor = new FittingCursor(_timeRange, _bins, fitterEstimator);
 		_fittingCursor.addListener(new FittingCursorListener());
 
@@ -640,7 +636,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 				 */
 				@Override
 				public boolean loadExcitation(String fileName) {
-					Excitation excitation = ExcitationFileHandler.getInstance().loadExcitation(fileName, _timeRange);
+					Excitation excitation = ExcitationFileUtility.loadExcitation(fileName, _timeRange);
 					return updateExcitation(uiPanel, excitation);
 				}
 
@@ -662,7 +658,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 					for (int b = 0; b < _bins; ++b) {
 						values[b] = getData(_cursor, channel, x, y, b);
 					}
-					Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, values, _timeRange);
+					Excitation excitation = ExcitationFileUtility.createExcitation(fileName, values, _timeRange);
 					return updateExcitation(uiPanel, excitation);
 				}
 
@@ -713,22 +709,22 @@ public class SLIMProcessor <T extends RealType<T>> {
 					double b = peakBin;
 					double c = (double) (peakBin - maxSlopeBin) / 2;
 
-					System.out.println("max slope estimated GAUSSIAN a " + a + " b " + b + " c " + c);
+					IJ.log("max slope estimated GAUSSIAN a " + a + " b " + b + " c " + c);
 
 					double[] outValues = new double[_bins];
 					for (int i = 0; i < _bins; ++i) {
 						outValues[i] = gaussian(a, b, c, i);
 					}
 
-					System.out.println("PEAK VALUE " + peak + " BIN " + peakBin);
-					System.out.println("MAX SLOPE " + maxSlope + " BIN " + maxSlopeBin);
-					System.out.println("GAUSSIAN a " + a + " b " + b + " c " + c);
+					IJ.log("PEAK VALUE " + peak + " BIN " + peakBin);
+					IJ.log("MAX SLOPE " + maxSlope + " BIN " + maxSlopeBin);
+					IJ.log("GAUSSIAN a " + a + " b " + b + " c " + c);
 					//TODO END EXPERIMENTAL
 					for (double oV : outValues) {
-						if (0.0 != oV) System.out.println(" " + oV);
+						if (0.0 != oV) IJ.log(" " + oV);
 					}
 
-					Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, outValues, _timeRange);
+					Excitation excitation = ExcitationFileUtility.createExcitation(fileName, outValues, _timeRange);
 					return updateExcitation(uiPanel, excitation);
 				}
 
@@ -760,7 +756,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 						outValues[i] = gaussian(a, b, c, i);
 					}
 
-					Excitation excitation = ExcitationFileHandler.getInstance().createExcitation(fileName, outValues, _timeRange);
+					Excitation excitation = ExcitationFileUtility.createExcitation(fileName, outValues, _timeRange);
 					return updateExcitation(uiPanel, excitation);
 				}
 
@@ -795,8 +791,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 					}
 
 					double chiSqTarget = _uiPanel.getChiSquareTarget();
-//					System.out.println("chiSqTarget is " + chiSqTarget);
-//					System.out.println("prompt is " + prompt + " and fitting cursor thinks prompt " + _fittingCursor.getHasPrompt());
+//					IJ.log("chiSqTarget is " + chiSqTarget);
+//					IJ.log("prompt is " + prompt + " and fitting cursor thinks prompt " + _fittingCursor.getHasPrompt());
 					if (null != prompt && _fittingCursor.getHasPrompt()) {
 						double[] results = CursorEstimator.estimateCursors
 								(xInc, prompt, decay, chiSqTarget);
@@ -1150,15 +1146,15 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 				if (null != fittedImage) {
 					if (exportPixels) {
-						//System.out.println("Export pixels");
+						//IJ.log("Export pixels");
 						pixels.export(pixelsFile, true, fittedImage, _region, _function, _uiPanel.getFittedImages(), separator);
 					}
 					if (exportHistograms) {
-						//System.out.println("Export histograms");
+						//IJ.log("Export histograms");
 						histograms.export(histogramsFile, true, fittedImage, _function, _uiPanel.getFittedImages(), separator);
 					}
 					if (exportSummary) {
-						//System.out.println("Export summary");
+						//IJ.log("Export summary");
 						summary.process(file.getCanonicalPath(), fittedImage);
 					}
 				}
@@ -1166,15 +1162,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 			if (exportSummary) {
 				// export summary to text file
-				System.out.println("exportSummary time in SP.java and sep is " + separator);
+				IJ.log("exportSummary time in SP.java and sep is " + separator);
 				summary.export(summaryFile, separator);
 			}
 		}
 		catch (Exception e) {
-			IJ.log("Exception: " + e.getMessage() + " " + e.toString());
-			for (StackTraceElement el : e.getStackTrace()) {
-				IJ.log("   " + el.toString());
-			}
+			IJ.handleException(e);
 		}
 
 		// restore current image
@@ -1197,7 +1190,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 			//TODO
 			File file = new File(fileName);
-			System.out.println("file is " + file.getCanonicalPath());
+			IJ.log("file is " + file.getCanonicalPath());
 			return true;
 		}
 		catch (IOException e) {
@@ -1293,7 +1286,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 			// want all the fitting cursor listeners to get everything at once
 			if (null == _fittingCursor) {
-				System.out.println("fittingCursor is null");
+				IJ.log("fittingCursor is null");
 			}
 			_fittingCursor.suspendNotifications();
 			_fittingCursor.setHasPrompt(true);
@@ -1395,33 +1388,35 @@ public class SLIMProcessor <T extends RealType<T>> {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private ImgPlus loadImage(String filePath) {
-		boolean threwException = false;
-		ImgOpener imgOpener = new ImgOpener();
+	private ImgPlus loadImage(final String filePath) {
 		ImgPlus image = null;
 		try {
-			image = imgOpener.openImg(filePath);
-		}
-		//catch (java.io.IOException e) { }
-		//catch (loci.formats.FormatException e) {
-		catch (Exception e) {
-			System.out.println("Exception message: " + e.getMessage());
-			threwException = true;
-		}
-		if (null == image && !threwException) {
-			System.out.println("imageOpener returned null image");
-		}
+			// determine file format
+			final SCIFIO scifio = new SCIFIO();
+			final Format format = scifio.format().getFormat(filePath);
 
-		// Open the file again, just to get metadata
-		ImageReader imageReader = new ImageReader();
-		try {
-			imageReader.setId(filePath);
-			_globalMetadata = imageReader.getGlobalMetadata();
-			imageReader.close();
+			// NB: Would be nice if Metadata were attached to the SCIFIOImgPlus
+			// directly, and then we won't need to go through this rigamarole here.
+			// See: https://github.com/scifio/scifio/issues/135
+
+			// parse metadata
+			final Metadata meta = format.createParser().parse(filePath);
+			_globalMetadata = meta.getTable();
+
+			// create reader
+			final ImgOpener imgOpener = new ImgOpener(scifio.getContext());
+			final Reader reader = format.createReader();
+			reader.setMetadata(meta);
+
+			// open the image
+			image = imgOpener.openImg(reader, new SCIFIOConfig());
 		}
-		catch (IOException e) {
+		catch (final Exception e) {
+			IJ.handleException(e);
+			return null;
 		}
-		catch (FormatException e) {
+		if (image == null) {
+			IJ.error("imageOpener returned null image");
 		}
 
 		return image;
@@ -1432,15 +1427,15 @@ public class SLIMProcessor <T extends RealType<T>> {
 		try {
 			dimensions = new long[image.numDimensions()];
 			image.dimensions(dimensions);
-			//System.out.println("dimensions size is " + dimensions.length);
+			//IJ.log("dimensions size is " + dimensions.length);
 			//for (int i : dimensions) {
 			//    System.out.print("" + i + " ");
 			//}
-			//System.out.println();
+			//IJ.log();
 		}
 		catch (NullPointerException e) {
-			System.out.println("image.getDimensions throws NullPointerException " + e.getMessage());
-			System.out.println("can't detect channels");
+			IJ.log("can't detect channels");
+			IJ.handleException(e);
 			return false;
 		}
 		Integer xIndex, yIndex, lifetimeIndex, channelIndex;
@@ -1448,17 +1443,17 @@ public class SLIMProcessor <T extends RealType<T>> {
 		_height = (int) ImageUtils.getHeight(image);
 		_channels = (int) ImageUtils.getNChannels(image);
 		//TODO this is broken; returns 1 when there are 16 channels; corrected below
-		//System.out.println("ImageUtils.getNChannels returns " + _channels);
+		//IJ.log("ImageUtils.getNChannels returns " + _channels);
 		_hasChannels = false;
 		if (dimensions.length > 3) {
 			_hasChannels = true;
 			_channelIndex = 3;
 			_channels = (int) dimensions[_channelIndex];
 		}
-		//System.out.println("corrected to " + _channels);
+		//IJ.log("corrected to " + _channels);
 		_bins = (int) ImageUtils.getDimSize(image, SCIFIOAxes.LIFETIME);
 		_binIndex = 2;
-		//System.out.println("width " + _width + " height " + _height + " timeBins " + _bins + " channels " + _channels);
+		//IJ.log("width " + _width + " height " + _height + " timeBins " + _bins + " channels " + _channels);
 		_cursor = image.randomAccess();
 
 		_timeRange = 10.0f;
@@ -1471,7 +1466,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			Number increment = (Number) _globalMetadata.get("MeasureInfo.incr");
 			if (null != increment) {
 				_increment = increment.intValue();
-				//System.out.println("MeasureInfo.incr is " + _increment);
+				//IJ.log("MeasureInfo.incr is " + _increment);
 			}
 		}
 		_timeRange /= _bins;
@@ -1787,21 +1782,20 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}
 			return null;
 		}
-		else {
-			System.out.println("fitImage pixelsToProcessCount leftover " + pixelsToProcessCount);
-			if (pixelsToProcessCount > 0) {
-				ChunkyPixel[] pixelArray = pixelList.toArray(new ChunkyPixel[0]);
-				System.out.println("process remainder " + pixelArray.length);
-				ILocalFitParams[] localFitParamsArray = localFitParamsList.toArray(new ILocalFitParams[0]);
-				processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, errorManager, fitter, newImage, batch);
-			}
-			if (null != fitter) {
-				fitter.endFit();
-			}
+
+		//IJ.log("fitImage pixelsToProcessCount leftover " + pixelsToProcessCount);
+		if (pixelsToProcessCount > 0) {
+			ChunkyPixel[] pixelArray = pixelList.toArray(new ChunkyPixel[0]);
+			//IJ.log("process remainder " + pixelArray.length);
+			ILocalFitParams[] localFitParamsArray = localFitParamsList.toArray(new ILocalFitParams[0]);
+			processPixels(fittingEngine, pixelArray, globalFitParams, localFitParamsArray, errorManager, fitter, newImage, batch);
+		}
+		if (null != fitter) {
+			fitter.endFit();
 		}
 
 		return newImage.getImage();
-		}
+	}
 
 	/**
 	 * Helper function that processes an array of pixels.  When creating
@@ -1900,7 +1894,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		double params[] = uiPanel.getParameters(); //TODO go cumulative; i.e. refit with last fit results as estimate
 
-		//System.out.println("FIT SUMMED startBin " + _startBin + " stopBin " + _stopBin);
+		//IJ.log("FIT SUMMED startBin " + _startBin + " stopBin " + _stopBin);
 
 		// set up the source
 		IDecayImage decayImage = new DecayImageWrapper(_image, _width, _height, _channels, _bins, _binIndex, _increment);
@@ -2128,10 +2122,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 		int y = uiPanel.getY();
 		_startBin = fittingCursor.getDataStartBin();
 		_stopBin = fittingCursor.getTransientStopBin();
-//		System.out.println("_startBin is " + _startBin + " _stopBin " + _stopBin);
-//		System.out.println("FYI FWIW prompt delay is " + _fittingCursor.getPromptDelay());
-//		System.out.println("prompt start is " + _fittingCursor.getPromptStartValue() + " stop " + _fittingCursor.getPromptStopValue());
-//		System.out.println("_fittingCursor start value " + _fittingCursor.getTransientStartValue() + " bin " + _fittingCursor.getTransientStartBin() + " stop value " + _fittingCursor.getTransientStopValue() + " bin " + _fittingCursor.getTransientStopBin());
+//		IJ.log("_startBin is " + _startBin + " _stopBin " + _stopBin);
+//		IJ.log("FYI FWIW prompt delay is " + _fittingCursor.getPromptDelay());
+//		IJ.log("prompt start is " + _fittingCursor.getPromptStartValue() + " stop " + _fittingCursor.getPromptStopValue());
+//		IJ.log("_fittingCursor start value " + _fittingCursor.getTransientStartValue() + " bin " + _fittingCursor.getTransientStartBin() + " stop value " + _fittingCursor.getTransientStopValue() + " bin " + _fittingCursor.getTransientStopBin());
 		return fitPixel(uiPanel, x, y);
 	}
 
@@ -2182,7 +2176,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			//SCATTER
 			double scatter = uiPanel.getScatter();
 			if (scatter != 0.0) {
-				System.out.println("scatter " + scatter);
+				IJ.log("scatter " + scatter);
 				yCount = correctForScatter(yCount, curveFitter.getInstrumentResponse(1), _fittingCursor, scatter);
 			}
 
@@ -2221,9 +2215,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 		//TODO some test code for RLD fitting experiments:
 		/*
 		RapidLifetimeDetermination rld = new RapidLifetimeDetermination();
-		System.out.println("***TRI2 COMPATIBLE****");
+		IJ.log("***TRI2 COMPATIBLE****");
 		rld.rldFit(curveFitter, dataArray[0]);
-		System.out.println("****TRIAL*****");
+		IJ.log("****TRIAL*****");
 		rld.trialRldFit(curveFitter, dataArray[0]); */
 
 		int returnValue = getCurveFitter(uiPanel).fitData(dataArray);
@@ -2256,7 +2250,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 	private double[] correctForScatter(double[] decay, double[] prompt, FittingCursor fittingCursor, double scatter) {
 		if (null == prompt) {
-			System.out.println("NO PROMPT LOADED");
+			IJ.log("NO PROMPT LOADED");
 			return decay;
 		}
 		double decayPeak = -Double.MAX_VALUE;
@@ -2275,13 +2269,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 		double factor = scatter * decayPeak / promptPeak;
 		int startIndex = fittingCursor.getPromptStartBin();
 		int stopIndex = fittingCursor.getPromptStopBin();
-		System.out.println("factor is " + factor + " start " + startIndex + " stop " + stopIndex);
+		IJ.log("factor is " + factor + " start " + startIndex + " stop " + stopIndex);
 
 		double[] corrected = new double[decay.length];
 		for (int i = 0; i < decay.length; ++i) {
 			if (startIndex <= i && i <= stopIndex && i < prompt.length) {
 				corrected[i] = decay[i] - factor * prompt[i];
-				System.out.println("" + decay[i] + " -> " + corrected[i] + " factor was " + factor + " prompt was " + prompt[i]);
+				IJ.log("" + decay[i] + " -> " + corrected[i] + " factor was " + factor + " prompt was " + prompt[i]);
 			}
 			else {
 				corrected[i] = decay[i];
@@ -2301,7 +2295,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		// initialize image
 		Cursor<DoubleType> cursor = image.cursor();
 		while (cursor.hasNext()) {
-			System.out.println("fwd");
+			IJ.log("fwd");
 			cursor.fwd();
 			cursor.get().set(Double.NaN);
 		}
@@ -2396,7 +2390,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private ImgPlus<DoubleType> makeImage(int channels, int width, int height, int parameters) {
 		ImgPlus<DoubleType> image = null;
 
-//		System.out.println("channels width height params " + channels + " " + width + " " + height + " " + parameters);
+//		IJ.log("channels width height params " + channels + " " + width + " " + height + " " + parameters);
 
 		// create image object
 		long[] dim = { width, height, channels, parameters }; //TODO when we keep chi square in image  ++parameters };
@@ -2736,7 +2730,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 				_promptStop     = promptStop;
 				_promptBaseline = promptBaseline;
 
-				if (null == _uiPanel) System.out.println("UI PANEL IS NULL");
+				if (null == _uiPanel) IJ.log("UI PANEL IS NULL");
 				if (null != _uiPanel) { // initial update comes during UI construction
 					if (_summed) {
 						fitSummed(_uiPanel, _fittingCursor);

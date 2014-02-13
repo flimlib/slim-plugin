@@ -23,6 +23,8 @@
 
 package loci.slim.analysis.batch.ui;
 
+import ij.IJ;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -84,7 +86,7 @@ public class BatchHistogramsFrame extends JFrame {
 			remove(component);
 		}
 		add(summaryStatisticsRow, BorderLayout.SOUTH);
-		System.out.println("row width " + summaryStatisticsRow.getWidth() + " scrollbar width " + SCROLLBAR_WIDTH + " height " + summaryStatisticsRow.getHeight());
+		IJ.log("row width " + summaryStatisticsRow.getWidth() + " scrollbar width " + SCROLLBAR_WIDTH + " height " + summaryStatisticsRow.getHeight());
 		setSize(new Dimension(300, 700)); //summaryStatisticsRow.getWidth() + SCROLLBAR_WIDTH, 3 * summaryStatisticsRow.getHeight()));
 		validate();
 		doLayout();

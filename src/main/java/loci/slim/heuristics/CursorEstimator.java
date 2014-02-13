@@ -23,6 +23,7 @@
 
 package loci.slim.heuristics;
 
+import ij.IJ;
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.NoiseModel;
@@ -128,8 +129,8 @@ public class CursorEstimator {
 
 		// Can be used to generate data to cut & paste into test methods
 		if (createTestData) {
-			System.out.println("----8<----- 1/2");
-			System.out.println("double xInc = " + xInc + ";");
+			IJ.log("----8<----- 1/2");
+			IJ.log("double xInc = " + xInc + ";");
 
 			System.out.print("double[] prompt = {");
 			for (int n = 0; n < prompt.length; ++n) {
@@ -138,7 +139,7 @@ public class CursorEstimator {
 				}
 				System.out.print(" " + prompt[n]);
 			}
-			System.out.println(" };");
+			IJ.log(" };");
 
 			System.out.print("double[] decay = {");
 			for (int n = 0; n < decay.length; ++n) {
@@ -147,11 +148,11 @@ public class CursorEstimator {
 				}
 				System.out.print(" " + decay[n]);
 			}
-			System.out.println(" };");
+			IJ.log(" };");
 
-			System.out.println("double chiSqTarget = " + chiSqTarget + ";");
+			IJ.log("double chiSqTarget = " + chiSqTarget + ";");
 
-			System.out.println("-----------");
+			IJ.log("-----------");
 		}
 
 		// "Estimate prompt baseline; very rough and ready"
@@ -337,7 +338,7 @@ public class CursorEstimator {
 		//TODO ARG patches a bug!:
 		if (value[DATA_START] < value[TRANSIENT_START]) {
 			if (value[DATA_START] < 0.0) {
-				System.out.println("Calculated data start is less than zero!!!");
+				IJ.log("Calculated data start is less than zero!!!");
 				value[DATA_START] = 0.0;
 
 			}
@@ -348,7 +349,7 @@ public class CursorEstimator {
 
 		// Can be used to generate data to cut & paste into test methods
 		if (createTestData) {
-			System.out.println("----8<----- 2/2");
+			IJ.log("----8<----- 2/2");
 
 			System.out.print("double[] expResult = {");
 			for (int i = 0; i < value.length; ++i) {
@@ -357,8 +358,8 @@ public class CursorEstimator {
 				}
 				System.out.print(" " + value[i]);
 			}
-			System.out.println(" };");
-			System.out.println("-----------");
+			IJ.log(" };");
+			IJ.log("-----------");
 		}
 	}
 

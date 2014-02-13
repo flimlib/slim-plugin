@@ -113,7 +113,7 @@ public class HistogramTool {
 			_frame.getContentPane().add(panel, BorderLayout.SOUTH);
 			_frame.pack();
 			_frame.setVisible(true);
-			System.out.println("initial size " + _frame.getSize());
+			//IJ.log("initial size " + _frame.getSize());
 			_frame.addComponentListener(new ComponentListener() {
 				@Override
 				public void componentHidden(ComponentEvent e) {
@@ -225,10 +225,10 @@ public class HistogramTool {
 			minMaxLUT  = _histogramDataGroup.getMinMaxLUT();
 		}
 
-//		System.out.println("----");
-//		System.out.println("setHistogramData");
-//		System.out.println("view " + minMaxView[0] + " "  + minMaxView[1] + " lut " + minMaxLUT[0] + " " + minMaxLUT[1]);
-//		System.out.println("----");
+//		IJ.log("----");
+//		IJ.log("setHistogramData");
+//		IJ.log("view " + minMaxView[0] + " "  + minMaxView[1] + " lut " + minMaxLUT[0] + " " + minMaxLUT[1]);
+//		IJ.log("----");
 
 		if (null != _frame) {
 			if (_frame.isVisible()) {
@@ -311,7 +311,7 @@ public class HistogramTool {
 			//
 			//TODO if the user drags a new LUT range this doesn't get called!
 
-			//System.out.println("changed min/maxView " + minView + " " + maxView + " min/maxLUT " + minLUT + " " + maxLUT);
+			//IJ.log("changed min/maxView " + minView + " " + maxView + " min/maxLUT " + minLUT + " " + maxLUT);
 
 
 			_histogramDataGroup.redisplay();
@@ -490,7 +490,7 @@ public class HistogramTool {
 						if (maxView != maxLUT) {
 							pixel = cursorPixelFromValue(true, maxLUT);
 							//pixel = valueToPixel(maxLUT);
-							//System.out.println("PeriodicTask.run maxLUT is " + maxLUT + " cursor is at " + pixel);
+							//IJ.log("PeriodicTask.run maxLUT is " + maxLUT + " cursor is at " + pixel);
 							//_histogramPanel.setCursors(null, INSET + pixel + 1); //TODO ARG this is still a little bit off
 							_histogramPanel.setCursors(null, pixel); //TODO ARG this is still a little off
 						}
@@ -499,7 +499,7 @@ public class HistogramTool {
 						if (minView != minLUT) {
 							pixel = cursorPixelFromValue(false, minLUT);
 							//pixel = valueToPixel(minLUT);
-							//System.out.println("PeriodicTask.run minLUT is " + minLUT + " cursor is at " + pixel);
+							//IJ.log("PeriodicTask.run minLUT is " + minLUT + " cursor is at " + pixel);
 							//_histogramPanel.setCursors(INSET + pixel, null); //TODO ARG this is still a little bit off
 							_histogramPanel.setCursors(pixel, null); //TODO ARG this is still a little off
 

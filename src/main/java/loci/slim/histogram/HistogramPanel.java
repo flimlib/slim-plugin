@@ -23,6 +23,8 @@
 
 package loci.slim.histogram;
 
+import ij.IJ;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -286,7 +288,7 @@ public class HistogramPanel extends JPanel {
 	}
 
 	public void setBandwidth(double bandwidth) {
-		System.out.println("bandwidth is " + bandwidth);
+		IJ.log("bandwidth is " + bandwidth);
 		_family = false;
 		_bandwidth = bandwidth;
 		_kernelDensityEstimate = kernelDensityEstimation(_bins, _maxBinCount, _bandwidth);
@@ -353,9 +355,9 @@ public class HistogramPanel extends JPanel {
 		for (int i = 0; i < _bins.length; ++i) { //TODO if this stays, incorporate in earlier loop
 			count += _bins[i];
 		}
-		//System.out.println("statistics.getStdDev is " + statistics.getStdDev());
-		//System.out.println("Silverman's rule bandwidth is count " + count + " bandwidth " + silvermansRule(0.27, count));
-		//System.out.println("estimate " + estimateBandwidth(statistics.getFences()[1] - statistics.getFences()[0], count));
+		//IJ.log("statistics.getStdDev is " + statistics.getStdDev());
+		//IJ.log("Silverman's rule bandwidth is count " + count + " bandwidth " + silvermansRule(0.27, count));
+		//IJ.log("estimate " + estimateBandwidth(statistics.getFences()[1] - statistics.getFences()[0], count));
 		_bandwidth = 5 * estimateBandwidth(statistics.getFences()[1] - statistics.getFences()[0], count);
 		_kernelDensityEstimate = kernelDensityEstimation(_bins, _maxBinCount, _bandwidth);
 
@@ -563,7 +565,7 @@ public class HistogramPanel extends JPanel {
 	}
 
 	private double estimateBandwidth(double range, int n) {
-		System.out.println("range is " + range + " count " + n);
+		//IJ.log("range is " + range + " count " + n);
 		return range / Math.sqrt(n);
 	}
 }

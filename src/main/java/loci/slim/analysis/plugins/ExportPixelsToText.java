@@ -222,7 +222,7 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 				bufferedWriter.close();
 			}
 			catch (IOException e) {
-				System.out.println("Error writing file " + e.getMessage());
+				IJ.log("Error writing file " + e.getMessage());
 				IJ.log("exception writing file");
 				IJ.handleException(e);
 			}

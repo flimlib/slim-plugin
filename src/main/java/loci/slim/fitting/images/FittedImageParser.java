@@ -90,7 +90,7 @@ public class FittedImageParser {
 		List<FittedImageType> list = new ArrayList<FittedImageType>();
 		String[] tokens = _input.split(" ");
 		for (String token : tokens) {
-			//System.out.println("TOKEN >" + token + "<");
+			//IJ.log("TOKEN >" + token + "<");
 			if ("A".equals(token)) {
 				switch (_components) {
 					case 1:

@@ -23,6 +23,8 @@
 
 package loci.slim.ui;
 
+import ij.IJ;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -237,7 +239,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			miscPane.add(_logCheckBox);
 			container.add(miscPane, BorderLayout.SOUTH);
 
-			System.out.println("size from prefs " + getSizeFromPreferences());
+			//IJ.log("size from prefs " + getSizeFromPreferences());
 			//_frame.setSize(getSizeFromPreferences());
 			//_frame.setMaximumSize(MAX_SIZE); // doesn't work; bug in Java
 			_frame.pack();
@@ -257,7 +259,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 					// constrain maximum size
 					boolean resize = false;
 					Dimension size = _frame.getSize();
-					System.out.println("COMPONENT RESIZED incoming size " + size);
+					//IJ.log("COMPONENT RESIZED incoming size " + size);
 					if (size.width > MAX_SIZE.width) {
 						size.width = MAX_SIZE.width;
 						resize = true;
@@ -277,7 +279,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 					if (resize) {
 						_frame.setSize(size);
 					}
-					System.out.println("save resized " + resize + " size " + size);
+					//IJ.log("save resized " + resize + " size " + size);
 					saveSizeInPreferences(size);
 				}
 
@@ -524,7 +526,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			double yPromptMax = -Double.MAX_VALUE;
 			for (int i = 0; i < prompt.length; ++i) {
 				// debugging
-				System.out.println(" " + prompt[i]);
+				IJ.log(" " + prompt[i]);
 
 				// find max
 				if (prompt[i] > yPromptMax) {
@@ -710,7 +712,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 				_y0 = (int) area.getY();
 				_y1 = (int) (area.getY() + area.getHeight());
 				double width = area.getWidth();
-				//System.out.println("x " + area.getX() + " y " + area.getY() + " width " + area.getWidth() + " height " + area.getHeight());
+				//IJ.log("x " + area.getX() + " y " + area.getY() + " width " + area.getWidth() + " height " + area.getHeight());
 				_xTransStart = (int) Math.round(x + width * _transStartMarkerProportion)
 						+ HORZ_TWEAK;
 				_xDataStart = (int) Math.round(x + width * _dataStartMarkerProportion)

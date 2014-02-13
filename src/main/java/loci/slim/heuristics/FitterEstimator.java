@@ -51,7 +51,7 @@ public class FitterEstimator implements IFitterEstimator {
 
 	@Override
 	public int getEstimateStartIndex(double[] yCount, int start, int stop) {
-		//System.out.println("FitterEstimator.getEstimateStartIndex " + yCount.length + " " + start + " " + stop);
+		//IJ.log("FitterEstimator.getEstimateStartIndex " + yCount.length + " " + start + " " + stop);
 		if (start < 0) {
 			start = 0;
 		} //TODO ARG patch for an exception
@@ -62,7 +62,7 @@ public class FitterEstimator implements IFitterEstimator {
 
 	@Override
 	public double getEstimateAValue(double A, double[] yCount, int start, int stop) {
-		//System.out.println("FitterEstimator.getEstimateA " + yCount.length + " " + start + " " + stop);
+		//IJ.log("FitterEstimator.getEstimateA " + yCount.length + " " + start + " " + stop);
 		// A parameter estimate changes for RLD estimate fit
 		int transEstimateStartIndex = findMax(yCount, start, stop);
 		return yCount[transEstimateStartIndex];
@@ -208,7 +208,7 @@ public class FitterEstimator implements IFitterEstimator {
 		double decimalTerm = Math.pow(10.0, decimalPlaces);
 		int tmp = roundToNearestInteger(value * decimalTerm);
 		double rounded = tmp / decimalTerm;
-		//System.out.println("value " + value + " rounds to " + rounded);
+		//IJ.log("value " + value + " rounds to " + rounded);
 		return rounded;
 	}
 
