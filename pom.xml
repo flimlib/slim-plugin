@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>loci</groupId>
 		<artifactId>pom-loci</artifactId>
-		<version>1.15</version>
+		<version>1.16</version>
 		<relativePath />
 	</parent>
 
@@ -25,13 +25,6 @@
 			<url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
 		</license>
 	</licenses>
-
-	<properties>
-		<imagej.version>2.0.0-beta-7.6</imagej.version>
-		<imglib2.version>2.0.0-beta-23</imglib2.version>
-		<scifio.version>0.9.0</scifio.version>
-		<scifio-lifesci.version>0.4.0</scifio-lifesci.version>
-	</properties>
 
 	<dependencies>
 		<dependency>
