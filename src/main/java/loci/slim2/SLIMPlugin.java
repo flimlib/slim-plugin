@@ -564,6 +564,6 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		final ImageJ ij = imagej.Main.launch(args);
 
 		// Launch the "SLIMPlugin" command right away.
-		ij.command().run(SLIMPlugin.class);
+		ij.command().run(SLIMPlugin.class, true);
 	}
 }
