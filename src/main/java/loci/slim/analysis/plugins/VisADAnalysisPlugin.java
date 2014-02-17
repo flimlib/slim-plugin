@@ -37,10 +37,6 @@ import net.imglib2.type.numeric.real.DoubleType;
  *
  * This will run on a separate thread, control returns to the caller right away.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/plugins/VisADAnalysisPlugin.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/plugins/VisADAnalysisPlugin.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 //TODO ARG 9/21/12 disabled the VisAD plugin since it doesn't function

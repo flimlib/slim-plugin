@@ -36,10 +36,6 @@ import javax.swing.SpringLayout;
  * creating form- or grid-style layouts with SpringLayout.
  * These utilities are used by several programs, such as
  * SpringBox and SpringCompactGrid.
- *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/SpringUtilities.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/SpringUtilities.java">SVN</a></dd></dl>
  */
 public class SpringUtilities {
 

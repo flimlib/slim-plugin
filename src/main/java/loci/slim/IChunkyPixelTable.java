@@ -26,10 +26,6 @@ package loci.slim;
 /**
  * Interface for a table of chunky pixels.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/IChunkyPixelTable.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/IChunkyPixelTable.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public interface IChunkyPixelTable {

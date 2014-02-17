@@ -32,10 +32,6 @@ import net.imglib2.type.numeric.real.DoubleType;
 /**
  * An interface for analyzing the results of a SLIM Plugin fit.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/ISLIMAnalyzer.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/analysis/ISLIMAnalyzer.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public interface ISLIMAnalyzer {

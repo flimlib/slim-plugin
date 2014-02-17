@@ -32,10 +32,6 @@ import loci.slim.mask.IMaskGroupListener;
  * Interface for the GrayScaleImage UI.  Allows user to click on a pixel and
  * set the current channel selection.  Used for thresholding.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/IGrayScaleImage.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/IGrayScaleImage.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate, ICursorListener, IErrorListener, IMaskGroupListener {

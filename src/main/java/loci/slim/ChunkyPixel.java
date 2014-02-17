@@ -27,10 +27,6 @@ package loci.slim;
  * Class that handles drawing the image using progressively smaller "chunky"
  * (larger than single pixel) pixels.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixel.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixel.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public class ChunkyPixel {

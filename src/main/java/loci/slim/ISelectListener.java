@@ -27,10 +27,6 @@ package loci.slim;
  * Interface called by the gray scale image code when user clicks on it to
  * select a pixel.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ISelectListener.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ISelectListener.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public interface ISelectListener {

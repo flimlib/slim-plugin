@@ -115,10 +115,6 @@ import net.imglib2.type.numeric.real.DoubleType;
  * thrown together to get something working, with some code/techniques borrowed
  * from SLIM Plotter. Parts of this code are ugly and experimental.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/SLIMProcessor.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/SLIMProcessor.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public class SLIMProcessor <T extends RealType<T>> {

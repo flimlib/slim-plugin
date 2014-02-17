@@ -26,10 +26,6 @@ package loci.slim;
 /**
  * Table used for the "chunky pixel" effect.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixelTableImpl.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixelTableImpl.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public class ChunkyPixelTableImpl implements IChunkyPixelTable {

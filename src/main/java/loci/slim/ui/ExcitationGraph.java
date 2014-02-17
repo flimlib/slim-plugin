@@ -51,10 +51,6 @@ import org.jfree.ui.RectangleEdge;
 /**
  * Graph that displays the excitation or prompt.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/ExcitationGraph.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/ExcitationGraph.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public class ExcitationGraph implements IStartStopBaseProportionListener {

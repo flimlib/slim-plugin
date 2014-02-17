@@ -34,10 +34,6 @@ import loci.slim.IThresholdUpdate;
 /**
  * Interface to the User Interface Panel
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/IUserInterfacePanel.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/IUserInterfacePanel.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public interface IUserInterfacePanel {

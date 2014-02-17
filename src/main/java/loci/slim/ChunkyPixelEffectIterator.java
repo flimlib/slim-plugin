@@ -28,10 +28,6 @@ import java.util.Iterator;
 /**
  * Iterator that supplies a series of chunky pixels.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixelEffectIterator.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ChunkyPixelEffectIterator.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public class ChunkyPixelEffectIterator implements Iterator {

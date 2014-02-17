@@ -35,10 +35,6 @@ import javax.swing.JPanel;
  * Displays a color bar with the current colorization scheme.  Live,
  * reflects ongoing changes.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/histogram/ColorBarPanel.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/histogram/ColorBarPanel.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public class ColorBarPanel extends JPanel {

@@ -41,10 +41,6 @@ import loci.slim.heuristics.ExcitationScaler;
 /**
  * Panel that holds the excitation graph.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/ExcitationPanel.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/ui/ExcitationPanel.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public class ExcitationPanel extends JFrame {

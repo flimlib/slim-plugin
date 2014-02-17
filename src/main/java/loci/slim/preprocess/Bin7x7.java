@@ -26,10 +26,6 @@ package loci.slim.preprocess;
 /**
  * A plugin within a plugin, this is used to bin the fit input.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/process/Bin3x3.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/process/Bin3x3.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 @SLIMBinner("7 x 7")

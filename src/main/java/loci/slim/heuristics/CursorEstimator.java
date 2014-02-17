@@ -32,10 +32,6 @@ import loci.curvefitter.SLIMCurveFitter;
 /**
  * Based on TRI2 TRCursors.c.  Comments in quotes are from that source file.
  *
- * <dl><dt><b>Source code:</b></dt>
- * <dd><a href="http://dev.loci.wisc.edu/trac/software/browser/trunk/projects/slim-plugin/src/main/java/loci/slim/CursorHelper.java">Trac</a>,
- * <a href="http://dev.loci.wisc.edu/svn/software/trunk/projects/slim-plugin/src/main/java/loci/slim/CursorHelper.java">SVN</a></dd></dl>
- *
  * @author Aivar Grislis
  */
 public class CursorEstimator {
