@@ -36,6 +36,7 @@ import io.scif.Reader;
 import io.scif.SCIFIO;
 import io.scif.config.SCIFIOConfig;
 import io.scif.img.ImgOpener;
+import io.scif.img.SCIFIOImgPlus;
 import io.scif.img.axes.SCIFIOAxes;
 
 import java.awt.Color;
@@ -1379,40 +1380,26 @@ public class SLIMProcessor <T extends RealType<T>> {
 		}
 	}
 
-	private ImgPlus<T> loadImage(String path, String file) {
+	@SuppressWarnings("unchecked")
+	private SCIFIOImgPlus<T> loadImage(String path, String file) {
 		return loadImage(path + file);
 	}
 
 	@SuppressWarnings("rawtypes")
-	private ImgPlus loadImage(final String filePath) {
-		ImgPlus image = null;
+	private SCIFIOImgPlus loadImage(final String filePath) {
+		SCIFIOImgPlus<?> image = null;
 		try {
-			// determine file format
-			final SCIFIO scifio = new SCIFIO();
-			final Format format = scifio.format().getFormat(filePath);
-
-			// NB: Would be nice if Metadata were attached to the SCIFIOImgPlus
-			// directly, and then we won't need to go through this rigamarole here.
-			// See: https://github.com/scifio/scifio/issues/135
-
-			// parse metadata
-			final Metadata meta = format.createParser().parse(filePath);
-			_globalMetadata = meta.getTable();
-
-			// create reader
-			final ImgOpener imgOpener = new ImgOpener(scifio.getContext());
-			final Reader reader = format.createReader();
-			reader.setMetadata(meta);
-
 			// open the image
-			image = imgOpener.openImg(reader, new SCIFIOConfig());
+			final ImgOpener imgOpener = new ImgOpener();
+			image = imgOpener.openImg(filePath);
+
+			// extract parsed metadata
+			final Metadata meta = image.getMetadata();
+			_globalMetadata = meta.getTable();
 		}
 		catch (final Exception e) {
 			IJ.handleException(e);
 			return null;
-		}
-		if (image == null) {
-			IJ.error("imageOpener returned null image");
 		}
 
 		return image;
