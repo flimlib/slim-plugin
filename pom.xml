@@ -128,10 +128,6 @@
 	<profiles>
 		<profile>
 			<id>with-dependencies</id>
-			<!-- TODO for my local test builds, uncomment -->
-			<!-- activation>
-				<activeByDefault>true</activeByDefault>
-			</activation -->
 			<build>
 				<plugins>
 					<plugin>
