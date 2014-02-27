@@ -27,9 +27,11 @@ import ij.IJ;
 import io.scif.ByteArrayPlane;
 import io.scif.FormatException;
 import io.scif.ImageMetadata;
+import io.scif.Metadata;
 import io.scif.SCIFIO;
 import io.scif.Writer;
 import io.scif.common.DataTools;
+import io.scif.filters.PlaneSeparator;
 import io.scif.filters.ReaderFilter;
 import io.scif.img.axes.SCIFIOAxes;
 
@@ -37,7 +39,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
+
+import net.imglib2.meta.Axes;
+import net.imglib2.meta.AxisType;
+import net.imglib2.meta.CalibratedAxis;
 
 /**
  * Loads and saves excitation files.
@@ -89,6 +97,7 @@ public class ExcitationFileUtility {
 		try {
 			final SCIFIO scifio = new SCIFIO();
 			final ReaderFilter reader = scifio.initializer().initializeReader(fileName);
+			reader.enable(PlaneSeparator.class).separate(axesToSplit(reader));
 			final ImageMetadata meta = reader.getMetadata().get(0);
 			final int bitsPerPixel = meta.getBitsPerPixel();
 			final boolean littleEndian = meta.isLittleEndian();
@@ -187,5 +196,20 @@ public class ExcitationFileUtility {
 			IJ.log("IOException " + e.getMessage());
 		}
 		return success;
+	}
+
+	private static AxisType[] axesToSplit(final ReaderFilter r) {
+		final Set<AxisType> axes = new HashSet<AxisType>();
+		final Metadata meta = r.getTail().getMetadata();
+		// Split any non-X,Y axis
+		for (final CalibratedAxis t : meta.get(0).getAxesPlanar()) {
+			final AxisType type = t.type();
+			if (!(type == Axes.X || type == Axes.Y)) {
+				axes.add(type);
+			}
+		}
+		// Ensure channel is attempted to be split
+		axes.add(Axes.CHANNEL);
+		return axes.toArray(new AxisType[axes.size()]);
 	}
 }
