@@ -91,7 +91,6 @@ public class ExcitationFileUtility {
 			final ReaderFilter reader = scifio.initializer().initializeReader(fileName);
 			final ImageMetadata meta = reader.getMetadata().get(0);
 			final int bitsPerPixel = meta.getBitsPerPixel();
-			final int bytesPerPixel = bitsPerPixel / 8;
 			final boolean littleEndian = meta.isLittleEndian();
 			final boolean interleaved = false; // meta.isInterleaved(); // CTR FIXME use ChannelSeparator to prevent interleaved
 			long lifetimeLength = meta.getAxisLength(SCIFIOAxes.LIFETIME);
@@ -101,19 +100,11 @@ public class ExcitationFileUtility {
 			int bins = (int) lifetimeLength;
 			results = new double[bins];
 			byte bytes[];
-			if (interleaved) { //TODO ARG interleaved does not read the whole thing; was 130K, now 32767
-				// this returns the whole thing
-				bytes = reader.openPlane(0, 0).getBytes();
-				IJ.log("INTERLEAVED reads # bytes: " + bytes.length);
-				for (int bin = 0; bin < bins; ++bin) {
-					results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, bytesPerPixel * bin);
-				}
-			}
-			else {
-				for (int bin = 0; bin < bins; ++bin) {
-					bytes = reader.openPlane(0, bin).getBytes();
-					results[bin] = convertBytesToDouble(littleEndian, bitsPerPixel, bytes, 0);
-				}
+
+			for (int bin = 0; bin < bins; ++bin) {
+				bytes = reader.openPlane(0, bin).getBytes();
+				results[bin] =
+					DataTools.bytesToDouble(bytes, 0, bitsPerPixel, littleEndian);
 			}
 			reader.close();
 		}
@@ -196,27 +187,5 @@ public class ExcitationFileUtility {
 			IJ.log("IOException " + e.getMessage());
 		}
 		return success;
-	}
-
-	/**
-	 * Converts a four- or eight-byte array to a double.
-	 *
-	 * @param littleEndian byte order
-	 * @param bitsPerPixel
-	 * @param bytes
-	 * @param index
-	 * @return
-	 */
-	private static double convertBytesToDouble(boolean littleEndian,
-		int bitsPerPixel, byte[] bytes, int index)
-	{
-		if (bitsPerPixel == 32) {
-			return DataTools.bytesToFloat(bytes, index, littleEndian);
-		}
-		if (bitsPerPixel == 64) {
-			return DataTools.bytesToDouble(bytes, index, littleEndian);
-		}
-		throw new IllegalArgumentException("Invalid bits per pixel: " +
-			bitsPerPixel);
 	}
 }
