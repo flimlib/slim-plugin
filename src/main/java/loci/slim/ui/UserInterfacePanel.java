@@ -610,6 +610,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			}
 			_analysisCheckBoxList = checkBoxList.toArray(new JCheckBox[0]);
 		}
+		else {
+			_analysisCheckBoxList = new JCheckBox[0];
+		}
 
 		// rows, cols, initX, initY, xPad, yPad
 		SpringUtilities.makeCompactGrid(fitPanel, 6 + choices, 2, 4, 4, 4, 4);

@@ -30,11 +30,7 @@ import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-import io.scif.Format;
 import io.scif.Metadata;
-import io.scif.Reader;
-import io.scif.SCIFIO;
-import io.scif.config.SCIFIOConfig;
 import io.scif.img.ImgOpener;
 import io.scif.img.SCIFIOImgPlus;
 import io.scif.img.axes.SCIFIOAxes;
@@ -107,6 +103,7 @@ import loci.slim.ui.IUserInterfacePanelListener;
 import loci.slim.ui.UserInterfacePanel;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
+import net.imglib2.meta.CalibratedAxis;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -182,7 +179,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 	private static final char TAB = '\t';
 
-	private ImgPlus<T> _image;
+	private SCIFIOImgPlus<T> _image;
 	private RandomAccess<T> _cursor;
 
 	private ImgPlus<DoubleType> _fittedImage = null;
@@ -248,7 +245,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		_refit = false;
 	}
 
-	public void processImage(ImgPlus<T> image) {
+	public void processImage(SCIFIOImgPlus<T> image) {
 		boolean success = false;
 
 		_image = image;
@@ -1405,7 +1402,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		return image;
 	}
 
-	private boolean getImageInfo(ImgPlus<T> image) {
+	private boolean getImageInfo(SCIFIOImgPlus<T> image) {
 		long[] dimensions = new long[0];
 		try {
 			dimensions = new long[image.numDimensions()];
@@ -1453,6 +1450,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}
 		}
 		_timeRange /= _bins;
+		// If our metadata has an actual physical size for the lifetime dimension,
+		// just use it.
+		CalibratedAxis lifetime = image.getMetadata().get(0).getAxis(SCIFIOAxes.LIFETIME);
+		if (lifetime != null) {
+			_timeRange = lifetime.averageScale(0, 1);
+		}
 
 		return true;
 	}

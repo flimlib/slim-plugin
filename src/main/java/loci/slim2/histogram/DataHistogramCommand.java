@@ -38,7 +38,9 @@ import net.imglib2.meta.Axes;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
+import org.scijava.Context;
 import org.scijava.ItemIO;
+import org.scijava.NullContextException;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -300,6 +302,14 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		view.setChannelRanges(min, max);
 		view.getProjector().map();
 		view.update();
+	}
+
+	@Override
+	public Context context() {
+		// FIXME: Delete this once a new IJ2 is released with a type hierarchy
+		// updated for scijava-common 2.10.0
+		if (getContext() == null) throw new NullContextException();
+		return getContext();
 	}
 
 }
