@@ -17,6 +17,7 @@
 
 	<name>SLIM Curve plugin for ImageJ</name>
 	<description>An ImageJ plugin for combined spectral-lifetime image analysis.</description>
+	<url>http://fiji.sc/SLIM_Curve</url>
 	<inceptionYear>2010</inceptionYear>
 
 	<licenses>
