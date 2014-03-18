@@ -217,10 +217,10 @@
 	</developers>
 
 	<scm>
-		<connection>scm:git:git://github.com/uw-loci/slim-plugin</connection>
-		<developerConnection>scm:git:git@github.com:uw-loci/slim-plugin</developerConnection>
+		<connection>scm:git:git://github.com/slim-curve/slim-plugin</connection>
+		<developerConnection>scm:git:git@github.com:slim-curve/slim-plugin</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/uw-loci/slim-plugin</url>
+		<url>https://github.com/slim-curve/slim-plugin</url>
 	</scm>
 
 	<repositories>
