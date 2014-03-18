@@ -15,7 +15,7 @@
 	<artifactId>slim_plugin</artifactId>
 	<version>2.0.0-SNAPSHOT</version>
 
-	<name>Spectral Lifetime Analysis</name>
+	<name>SLIM Curve plugin for ImageJ</name>
 	<description>An ImageJ plugin for combined spectral-lifetime image analysis.</description>
 	<inceptionYear>2010</inceptionYear>
 
@@ -119,7 +119,7 @@
 				<artifactId>license-maven-plugin</artifactId>
 				<configuration>
 					<licenseName>gpl_v3</licenseName>
-					<projectName>SLIM plugin for combined spectral-lifetime image analysis.</projectName>
+					<projectName>SLIM Curve plugin for combined spectral-lifetime image analysis.</projectName>
 				</configuration>
 			</plugin>
 		</plugins>
