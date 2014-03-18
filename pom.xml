@@ -216,6 +216,16 @@
 		</developer>
 	</developers>
 
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/slim-curve/slim-plugin/issues</url>
+	</issueManagement>
+
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://jenkins.imagej.net/job/SLIM-plugin/</url>
+	</ciManagement>
+
 	<scm>
 		<connection>scm:git:git://github.com/slim-curve/slim-plugin</connection>
 		<developerConnection>scm:git:git@github.com:slim-curve/slim-plugin</developerConnection>
