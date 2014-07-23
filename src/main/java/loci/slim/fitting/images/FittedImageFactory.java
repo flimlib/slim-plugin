@@ -23,8 +23,6 @@
 
 package loci.slim.fitting.images;
 
-import ij.IJ;
-
 import java.awt.image.IndexColorModel;
 
 import loci.slim.IGrayScaleImage;
