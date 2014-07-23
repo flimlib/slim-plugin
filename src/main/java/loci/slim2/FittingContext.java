@@ -23,9 +23,10 @@
 
 package loci.slim2;
 
-import imagej.display.Display;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.decay.LifetimeGrayscaleDataset;
+
+import org.scijava.display.Display;
 
 /**
  * Keeps track of various entities during the fit process.

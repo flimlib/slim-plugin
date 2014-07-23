@@ -23,8 +23,8 @@
 
 package loci.slim2.decay;
 
-import imagej.data.Dataset;
-import imagej.data.DatasetService;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.AxisType;

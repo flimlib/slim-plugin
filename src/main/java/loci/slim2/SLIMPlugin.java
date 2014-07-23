@@ -24,22 +24,6 @@
 package loci.slim2;
 //TODO ARG 'slim2' is just a temporary package name for IJ2 version to keep the two codebases separate
 
-import imagej.ImageJ;
-import imagej.command.Command;
-import imagej.command.CommandService;
-import imagej.data.Dataset;
-import imagej.data.DatasetService;
-import imagej.data.display.DataView;
-import imagej.data.display.DefaultImageDisplay;
-import imagej.data.threshold.ThresholdService;
-import imagej.display.Display;
-import imagej.display.DisplayService;
-import imagej.io.IOService;
-import imagej.tool.Tool;
-import imagej.tool.ToolService;
-import imagej.ui.DialogPrompt;
-import imagej.ui.UIService;
-
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +50,12 @@ import loci.slim2.process.BatchProcessor;
 import loci.slim2.process.InteractiveProcessor;
 import loci.slim2.process.batch.DefaultBatchProcessor;
 import loci.slim2.process.interactive.DefaultInteractiveProcessor;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
+import net.imagej.ImageJ;
+import net.imagej.display.DataView;
+import net.imagej.display.DefaultImageDisplay;
+import net.imagej.threshold.ThresholdService;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import net.imglib2.meta.ImgPlus;
@@ -74,8 +64,17 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;
+import org.scijava.command.Command;
+import org.scijava.command.CommandService;
+import org.scijava.display.Display;
+import org.scijava.display.DisplayService;
+import org.scijava.io.IOService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.tool.Tool;
+import org.scijava.tool.ToolService;
+import org.scijava.ui.DialogPrompt;
+import org.scijava.ui.UIService;
 
 /**
  * A command used to analyze time-based lifetime images.
@@ -561,7 +560,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 	/** Tests our command. */
 	public static void main(final String... args) throws Exception {
 		// Launch ImageJ as usual.
-		final ImageJ ij = imagej.Main.launch(args);
+		final ImageJ ij = net.imagej.Main.launch(args);
 
 		// Launch the "SLIMPlugin" command right away.
 		ij.command().run(SLIMPlugin.class, true);

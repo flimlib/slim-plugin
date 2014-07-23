@@ -23,13 +23,6 @@
 
 package loci.slim2.process.interactive;
 
-import imagej.command.CommandService;
-import imagej.data.Dataset;
-import imagej.data.DatasetService;
-import imagej.display.Display;
-import imagej.display.DisplayService;
-import imagej.ui.UIService;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,11 +66,17 @@ import loci.slim2.process.interactive.ui.ExcitationPanel;
 import loci.slim2.process.interactive.ui.ThresholdUpdate;
 import loci.slim2.process.interactive.ui.UserInterfacePanel;
 import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;
+import org.scijava.command.CommandService;
+import org.scijava.display.Display;
+import org.scijava.display.DisplayService;
+import org.scijava.ui.UIService;
 
 /**
  * Fits FLIM data in an interactive manner.

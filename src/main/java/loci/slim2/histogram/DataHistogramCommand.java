@@ -23,14 +23,12 @@
 
 package loci.slim2.histogram;
 
-import imagej.command.Command;
-import imagej.data.Dataset;
-import imagej.data.DatasetService;
-import imagej.data.command.InteractiveImageCommand;
-import imagej.data.display.DatasetView;
-import imagej.display.DisplayService;
-import imagej.menu.MenuConstants;
-import imagej.render.RenderingService;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
+import net.imagej.command.InteractiveImageCommand;
+import net.imagej.display.DatasetView;
+import net.imagej.plugins.commands.display.interactive.BrightnessContrast;
+import net.imagej.render.RenderingService;
 import net.imglib2.Binning;
 import net.imglib2.Cursor;
 import net.imglib2.algorithm.stats.ComputeMinMax;
@@ -41,6 +39,9 @@ import net.imglib2.type.numeric.RealType;
 import org.scijava.Context;
 import org.scijava.ItemIO;
 import org.scijava.NullContextException;
+import org.scijava.command.Command;
+import org.scijava.display.DisplayService;
+import org.scijava.menu.MenuConstants;
 import org.scijava.plugin.Menu;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -49,8 +50,7 @@ import org.scijava.plugin.Plugin;
  * Plugin that sets the minimum and maximum for scaling of display values. Sets
  * the same min/max for each channel.
  * <p>
- * Based on
- * {@link imagej.plugins.commands.display.interactive.BrightnessContrast}.
+ * Based on {@link BrightnessContrast}.
  * </p>
  */
 //TODO ARG I thought perhaps there was an image realm for histograms and a data one,

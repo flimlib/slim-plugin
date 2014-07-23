@@ -23,13 +23,13 @@
 
 package loci.slim2.process;
 
-import imagej.command.CommandService;
-import imagej.data.DatasetService;
-import imagej.display.DisplayService;
 import loci.slim2.decay.LifetimeDatasetWrapper;
 import loci.slim2.heuristics.Estimator;
+import net.imagej.DatasetService;
 
 import org.scijava.Context;
+import org.scijava.command.CommandService;
+import org.scijava.display.DisplayService;
 
 /**
  * Interface for lifetime processing with interactive UI.

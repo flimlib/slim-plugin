@@ -23,10 +23,10 @@
 
 package loci.slim2.process.interactive.grayscale;
 
-import imagej.data.Dataset;
-import imagej.data.overlay.PointOverlay;
-
 import java.util.List;
+
+import net.imagej.Dataset;
+import net.imagej.overlay.PointOverlay;
 
 import org.scijava.Context;
 

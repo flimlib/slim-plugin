@@ -23,14 +23,12 @@
 
 package loci.slim2.outputset;
 
-import imagej.command.CommandService;
-import imagej.data.Dataset;
-import imagej.data.DatasetService;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import loci.slim2.histogram.DataHistogramCommand;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
 import net.imglib2.Cursor;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
@@ -38,6 +36,8 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
+
+import org.scijava.command.CommandService;
 
 /**
  * Builds a set of related images.  In these images corresponding pixels

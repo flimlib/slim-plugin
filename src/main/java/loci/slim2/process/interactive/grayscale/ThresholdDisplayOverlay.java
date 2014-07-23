@@ -23,13 +23,13 @@
 
 package loci.slim2.process.interactive.grayscale;
 
-import imagej.data.Dataset;
-import imagej.data.overlay.ThresholdOverlay;
-import imagej.util.ColorRGB;
-import imagej.util.Colors;
+import net.imagej.Dataset;
+import net.imagej.overlay.ThresholdOverlay;
 import net.imglib2.ops.pointset.PointSet;
 
 import org.scijava.Context;
+import org.scijava.util.ColorRGB;
+import org.scijava.util.Colors;
 
 /**
  * The ThresholdDisplayOverlay

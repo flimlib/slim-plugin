@@ -23,8 +23,6 @@
 
 package loci.slim2.decay;
 
-import imagej.data.Dataset;
-import imagej.data.DatasetService;
 import io.scif.DefaultMetaTable;
 import io.scif.MetaTable;
 import io.scif.io.RandomAccessInputStream;
@@ -40,6 +38,8 @@ import java.util.Set;
 
 import javax.swing.JOptionPane;
 
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
 import net.imglib2.RandomAccess;
 import net.imglib2.meta.AxisType;
 import net.imglib2.meta.ImgPlus;

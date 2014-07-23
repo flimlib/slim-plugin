@@ -23,20 +23,21 @@
 
 package loci.slim2.histogram;
 
-import imagej.data.ChannelCollection;
-import imagej.data.Dataset;
-import imagej.data.DatasetService;
-import imagej.data.DrawingTool;
-import imagej.render.RenderingService;
-import imagej.util.Colors;
+import net.imagej.ChannelCollection;
+import net.imagej.Dataset;
+import net.imagej.DatasetService;
+import net.imagej.DrawingTool;
+import net.imagej.plugins.commands.display.ShowLUT;
+import net.imagej.render.RenderingService;
 import net.imglib2.meta.Axes;
 import net.imglib2.meta.AxisType;
+
+import org.scijava.util.Colors;
 
 /**
  * Histogram graph {@link Dataset} drawing class.
  * 
- * Based on {@link imagej.core.commands.display.ShowLUT} by Barry DeZonia &
- * Wayne Rasband.
+ * Based on {@link ShowLUT} by Barry DeZonia & Wayne Rasband.
  * 
  * @author Aivar Grislis
  */
