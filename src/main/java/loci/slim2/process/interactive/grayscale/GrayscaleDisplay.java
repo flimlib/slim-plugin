@@ -90,17 +90,6 @@ public class GrayscaleDisplay {
 	}
 
 	public double[] estimateThreshold() {
-	if (false) {
-		//TODO ARG how to find a/default(?) threshold method
-		ThresholdService thresholdService = context.getService(ThresholdService.class);
-		List<String> thresholdMethodNames = thresholdService.getThresholdMethodNames();
-		ThresholdMethod thresholdMethod = thresholdService.getThresholdMethod(thresholdMethodNames.get(0));
-
-		//TODO ARG how to check for existing threshold
-		ImageDisplayService imageDisplayService = context.getService(ImageDisplayService.class);
-		ImageDisplay imageDisplay = imageDisplayService.getActiveImageDisplay();
-		boolean alreadyHadThreshold = thresholdService.hasThreshold(imageDisplay); }
-
 		double[] thresholds = new double[] { 0.0, 1000.0 };// (double) threshold, Double.MAX_VALUE }; //TODO s/b long threshold
 		return thresholds;
 	}

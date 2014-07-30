@@ -112,10 +112,6 @@ public class ExcitationPanel extends JFrame {
 			panel.add("South", panelX);
 		}
 
-		if (false) {
-
-		}
-
 		this.getContentPane().add(panel);
 
 		this.setSize(450, 225);

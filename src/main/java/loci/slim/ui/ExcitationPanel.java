@@ -70,47 +70,6 @@ public class ExcitationPanel extends JFrame {
 		panel.add("North", createTopPanel());
 		panel.add("Center", excitationGraph.getComponent());
 
-		// DEBUGGING AIDS
-		if (false) {
-			JPanel panelX = new JPanel();
-			JLabel label = new JLabel("EXPERIMENTAL:");
-			panelX.add(label);
-
-			JButton button1 = new JButton("Square IRF");
-			button1.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					int start = fittingCursor.getPromptStartBin();
-					int stop = fittingCursor.getPromptStopBin();
-					double baseline = fittingCursor.getPromptBaselineValue();
-					IJ.log("start " + start + " stop " + stop + " baseline " + baseline);
-					double[] values = new double[_bins];
-					for (int i = 0; i < _bins; ++i) {
-						if (i < start || i > stop) {
-							values[i] = 0.0;
-						}
-						else {
-							values[i] = baseline;
-						}
-					}
-					_excitation = new Excitation("Square", values, _timeInc);
-				}});
-			panelX.add(button1);
-
-			JButton button2 = new JButton("Gaussian IRF");
-			button2.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					int start = fittingCursor.getPromptStartBin();
-					int stop = fittingCursor.getPromptStopBin();
-					double baseline = fittingCursor.getPromptBaselineValue();
-					IJ.log("start " + start + " stop " + stop + " baseline " + baseline);
-					double[] values = null;
-					_excitation = new Excitation("Gaussian", values, _timeInc);
-				}});
-			panelX.add(button2);
-
-			panel.add("South", panelX);
-		}
-
 		this.getContentPane().add(panel);
 
 		this.setSize(450, 225);

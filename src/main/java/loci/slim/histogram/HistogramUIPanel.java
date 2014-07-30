@@ -195,20 +195,6 @@ public class HistogramUIPanel extends JPanel {
 			}
 		);
 
-		/**
-		 * IJ1 uses the same LUT for the entire stack.  It might be possible for
-		 * the histogram tool to set the appropriate LUT for the current channel
-		 * but there is no listener or event for the histogram tool to know when
-		 * the channel changes.
-		 * 
-		 * Perhaps this can change with IJ2.
-		 * 
-		 * ARG 2/8/12
-		 */
-		if (false && hasChannels) {
-			add(_combineChannelsCheckBox);
-		}
-
 		_displayChannelsCheckBox =
 			new JCheckBox(DISPLAY_CHANNELS, _displayChannels);
 		_displayChannelsCheckBox.addItemListener(
@@ -222,15 +208,7 @@ public class HistogramUIPanel extends JPanel {
 				}
 			}
 		);
-		/**
-		 * Now that we're down to one extra checkbox for channels, lets always
-		 * display it.  (See above.)
-		 * 
-		 * ARG 2/8/12
-		 */
-		if (true || hasChannels) {
-			add(_displayChannelsCheckBox);
-		}
+		add(_displayChannelsCheckBox);
 
 		_logarithmicDisplayCheckBox =
 			new JCheckBox(LOG_DISPLAY, _logarithmicDisplay);
