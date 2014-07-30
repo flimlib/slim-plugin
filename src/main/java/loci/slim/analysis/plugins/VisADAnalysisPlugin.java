@@ -33,7 +33,7 @@ import net.imglib2.type.numeric.real.DoubleType;
 
 
 /**
- * Runs the VisADPlugin to analyze SLIMPlugin results.
+ * Runs the VisADPlugin to analyze SLIM Curve results.
  *
  * This will run on a separate thread, control returns to the caller right away.
  *

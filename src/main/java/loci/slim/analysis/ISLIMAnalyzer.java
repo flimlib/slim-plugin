@@ -30,7 +30,7 @@ import net.imglib2.type.numeric.real.DoubleType;
 
 
 /**
- * An interface for analyzing the results of a SLIM Plugin fit.
+ * An interface for analyzing the results of a SLIM Curve fit.
  *
  * @author Aivar Grislis
  */

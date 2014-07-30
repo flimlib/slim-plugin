@@ -33,9 +33,9 @@ import loci.slim.fitting.engine.ThreadedFittingEngine;
 import loci.slim.heuristics.FitterEstimator;
 
 /**
- * Handles configuration specific to the SLIM Plugin.
+ * Handles configuration specific to the SLIM Curve plugin for ImageJ.
  * 
- * A singleton so only one configuration for the SLIMPlugin.//TODO
+ * A singleton so only one configuration.//TODO
  * 
  * @author Aivar Grislis
  */

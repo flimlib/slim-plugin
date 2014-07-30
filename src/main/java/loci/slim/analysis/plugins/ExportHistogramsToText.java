@@ -45,7 +45,7 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
 /**
- * Exports histogram values as text for further analysis of SLIMPlugin results.
+ * Exports histogram values as text for further analysis of SLIM Curve results.
  * 
  * @author Aivar Grislis
  */

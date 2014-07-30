@@ -65,7 +65,7 @@ public class SLIM_PlugIn implements PlugIn {
 		instance = null;
 		if (stack.empty()) {
 			GenericDialog dialog = new GenericDialog("Error in Batch Processing");
-			dialog.addMessage("SLIM Plugin should be running before invoking batch processing macro.");
+			dialog.addMessage("SLIM Curve should be running before invoking batch processing macro.");
 			dialog.showDialog();
 		}
 		else {
@@ -111,7 +111,7 @@ public class SLIM_PlugIn implements PlugIn {
 		instance = null;
 		if (stack.empty()) {
 			GenericDialog dialog = new GenericDialog("Error in Batch Processing");
-			dialog.addMessage("SLIM Plugin should be running before invoking batch processing macro.");
+			dialog.addMessage("SLIM Curve should be running before invoking batch processing macro.");
 			dialog.showDialog();
 		}
 		else {

@@ -83,7 +83,7 @@ import org.scijava.ui.UIService;
  * @author Aivar Grislis
  */
 @Plugin(type = Command.class, menuPath = "Analyze>Lifetime>Spectral Lifetime Analysis (IJ2)") //TODO ARG rename w/o IJ2
-public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Command {
+public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Command {
 	private static final String PATH_KEY = "path";
 	private static final String LIFETIME = "Lifetime";
 	private static final String SDT_SUFFIX = ".sdt";

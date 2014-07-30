@@ -49,7 +49,7 @@ import net.imglib2.type.numeric.real.DoubleType;
 
 
 /**
- * Exports pixel values as text for further analysis of SLIMPlugin results.
+ * Exports pixel values as text for further analysis of SLIM Curve results.
  *
  * @author Aivar Grislis
  */

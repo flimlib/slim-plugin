@@ -80,7 +80,7 @@ import loci.slim.fitting.cursor.IFittingCursorUI;
  */
 
 public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI {
-	private static final String TITLE = "SLIM Plugin";
+	private static final String TITLE = "SLIM Curve";
 
 	// Unicode special characters
 	private static final Character CHI    = '\u03c7',

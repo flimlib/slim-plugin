@@ -108,9 +108,10 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 /**
- * SLIMProcessor is the main class of the SLIM Plugin. It was originally just
- * thrown together to get something working, with some code/techniques borrowed
- * from SLIM Plotter. Parts of this code are ugly and experimental.
+ * SLIMProcessor is the main class of the SLIM Curve plugin for ImageJ. It was
+ * originally just thrown together to get something working, with some
+ * code/techniques borrowed from SLIM Plotter. Parts of this code are ugly and
+ * experimental.
  *
  * @author Aivar Grislis
  */
@@ -317,7 +318,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		_uiPanel.disable();
 		_firstBatch = true;
 		_batchError = false;
-		IJ.log("start SLIM Plugin batch processing");
+		IJ.log("start SLIM Curve batch processing");
 		return true;
 	}
 
@@ -399,7 +400,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 * End batch processing.
 	 */
 	public void endBatch() {
-		IJ.log("end SLIM Plugin batch processing");
+		IJ.log("end SLIM Curve batch processing");
 
 		// restore current file
 		_image = loadImage(_path, _file);
@@ -417,7 +418,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	//TODO ARG EXPERIMENTAL: (vestigial macro code)
 	public boolean startBatchHisto() {
 		_uiPanel.disable();
-		IJ.log("start SLIM Plugin batch histogram processing");
+		IJ.log("start SLIM Curve batch histogram processing");
 		_firstBatchHisto = true;
 		_exportBatchHistogram = new ExportBatchHistogram();
 		_exportBatchHistogram.start();
@@ -486,7 +487,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 	//TODO ARG EXPERIMENTAL
 	public void endBatchHisto() {
-		IJ.log("end SLIM Plugin batch histogram processing");
+		IJ.log("end SLIM Curve batch histogram processing");
 
 		_exportBatchHistogram.end(_exportOutput);
 

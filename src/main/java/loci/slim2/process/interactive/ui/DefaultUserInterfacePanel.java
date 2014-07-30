@@ -74,7 +74,7 @@ import loci.slim2.process.interactive.cursor.FittingCursorListener;
  * @author Aivar Grislis
  */
 public class DefaultUserInterfacePanel implements UserInterfacePanel {
-	private static final String TITLE = "SLIM Plugin";
+	private static final String TITLE = "SLIM Curve";
 
 	private static final String SUM_REGION = "Sum All Pixels",
 								ROIS_REGION = "Sum Each ROI",
