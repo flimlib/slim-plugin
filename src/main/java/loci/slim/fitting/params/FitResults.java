@@ -33,26 +33,32 @@ public class FitResults implements IFitResults {
 	double[] _params;
 	double[] _yFitted;
 
+	@Override
 	public void setChiSquare(double chiSquare) {
 		_chiSquare = chiSquare;
 	}
 
+	@Override
 	public double getChiSquare() {
 		return _chiSquare;
 	}
 
+	@Override
 	public void setParams(double[] params) {
 		_params = params;
 	}
 
+	@Override
 	public double[] getParams() {
 		return _params;
 	}
 
+	@Override
 	public void setYFitted(double[] yFitted) {
 		_yFitted = yFitted;
 	}
 
+	@Override
 	public double[] getYFitted() {
 		return _yFitted;
 	}

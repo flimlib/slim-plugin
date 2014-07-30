@@ -49,5 +49,6 @@ public interface FittingCallable extends Callable<FitResults> {
 	 * 
 	 * @return 
 	 */
+	@Override
 	public FitResults call();
 }

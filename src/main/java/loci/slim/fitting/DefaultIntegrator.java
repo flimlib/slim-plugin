@@ -30,6 +30,7 @@ import ij.IJ;
  * @author Aivar Grislis
  */
 public class DefaultIntegrator implements Integrator {
+	@Override
 	public double integrate(double[] function, double offset, double inc, int start, int stop) {
 		IJ.log("integrate " + start + " to " + stop);
 		// sum heights

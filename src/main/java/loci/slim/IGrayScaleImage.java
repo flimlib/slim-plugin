@@ -92,5 +92,6 @@ public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate,
 	 * 
 	 * @param maskGroup 
 	 */
+	@Override
 	public void listenToMaskGroup(IMaskGroup maskGroup);
 }

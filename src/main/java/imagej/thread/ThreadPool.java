@@ -153,6 +153,7 @@ public class ThreadPool<T> {
 	 * Thread factory inner class that names the threads.
 	 */
 	private class ThreadPoolThreadFactory implements ThreadFactory {
+		@Override
 		public Thread newThread(final Runnable r) {
 			final String threadName =
 					"ImageJ-" /* + getContext().getID() */

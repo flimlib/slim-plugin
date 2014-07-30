@@ -61,6 +61,7 @@ public class TauMeanImage extends AbstractBaseFittedImage {
 		_components = components;
 	}
 
+	@Override
 	public double getValue(double[] parameters) {
 		double value = 0.0;
 		double sum = 0.0;

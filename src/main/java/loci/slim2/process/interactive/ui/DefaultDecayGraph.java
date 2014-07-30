@@ -195,6 +195,7 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
 			logCheckBox = new JCheckBox(LOGARITHMIC);
 			logCheckBox.setSelected(logarithmic);
 			logCheckBox.addItemListener(new ItemListener() {
+				@Override
 				public void itemStateChanged(ItemEvent e) {
 					logarithmic = logCheckBox.isSelected();
 					NumberAxis photonAxis;

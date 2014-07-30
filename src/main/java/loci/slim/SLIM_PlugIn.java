@@ -39,6 +39,7 @@ public class SLIM_PlugIn implements PlugIn {
 	private static final Stack<SLIMProcessor> stack = new Stack<SLIMProcessor>();
 	private static volatile SLIMProcessor instance = null;
 
+	@Override
 	public void run(String arg) {
 		SLIMProcessor slimProcessor = new SLIMProcessor();
 		stack.push(slimProcessor);

@@ -380,6 +380,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		openButton = new JButton("New File/Batch");
 		openButton.addActionListener(
 			new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (null != listener) {
 						listener.openFile();
@@ -392,6 +393,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		quitButton = new JButton("Quit");
 		quitButton.addActionListener(
 			new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (null != listener) {
 						listener.quit();
@@ -404,6 +406,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		fitButton = new JButton(fitButtonText);
 		fitButton.addActionListener(
 			new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					boolean summed;
 					System.out.println("fitbutton event e " + e);
@@ -479,10 +482,12 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		this.listener = listener;
 	}
 
+	@Override
 	public void setThresholdListener(ThresholdUpdate thresholdListener) {
 		this.thresholdListener = thresholdListener;
 	}
 
+	@Override
 	public void disable() {
 		enableAll(false);
 	}
@@ -493,10 +498,12 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		setFitButtonState(true);
 	}
 
+	@Override
 	public void disableButtons() {
 		enableButtons(false);
 	}
 
+	@Override
 	public void resetButtons() {
 		enableButtons(true);
 	}
@@ -677,6 +684,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		showBins = new JCheckBox("Display as indices");
 		showBins.addItemListener(
 			new ItemListener() {
+				@Override
 				public void itemStateChanged(ItemEvent e) {
 					boolean showBins = e.getStateChange() == ItemEvent.SELECTED;
 					//TODO 4/2/13
@@ -714,6 +722,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		promptComboBox = new JComboBox(EXCITATION_ITEMS);
 		promptComboBox.addActionListener(
 			new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					final String selectedItem = (String) promptComboBox.getSelectedItem();
 					if (null == promptSelection || promptSelection != selectedItem) {
@@ -741,6 +750,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		estimateCursorsButton = new JButton("Estimate Cursors");
 		estimateCursorsButton.addActionListener(
 			new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (null != listener) {
 						listener.estimateCursors();
@@ -1785,6 +1795,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		fitButton.setEnabled(enable);
 	}
 
+	@Override
 	public ICurveFitter.FitRegion getRegion() {
 		ICurveFitter.FitRegion region = null;
 		String selected = (String) regionComboBox.getSelectedItem();
@@ -1803,6 +1814,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		return region;
 	}
 
+	@Override
 	public ICurveFitter.FitAlgorithm getAlgorithm() {
 		ICurveFitter.FitAlgorithm algorithm = null;
 		String selected = (String) algorithmComboBox.getSelectedItem();
@@ -1821,6 +1833,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		return algorithm;
 	}
 
+	@Override
 	public ICurveFitter.FitFunction getFunction() {
 		ICurveFitter.FitFunction function = null;
 		String selected = (String) functionComboBox.getSelectedItem();
@@ -1839,6 +1852,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		return function;
 	}
 
+	@Override
 	public String[] getAnalysisList() {
 		List<String> analysisList = new ArrayList<String>();
 		for (JCheckBox checkBox : analysisCheckBoxList) {
@@ -1854,6 +1868,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	 *
 	 * @return
 	 */
+	@Override
 	public ICurveFitter.NoiseModel getNoiseModel() {
 		ICurveFitter.NoiseModel noiseModel = null;
 		String selected = (String) noiseModelComboBox.getSelectedItem();
@@ -1877,6 +1892,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	 *
 	 * @return
 	 */
+	@Override
 	public String getFittedImages() {
 		StringBuffer returnValue = new StringBuffer();
 		String selected = (String) fittedImagesComboBox.getSelectedItem();
@@ -1907,62 +1923,77 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	 * 
 	 * @return 
 	 */
+	@Override
 	public boolean getColorizeGrayScale() {
 		return colorizeGrayScale.isSelected();
 	}
 
+	@Override
 	public boolean getFitAllChannels() {
 		return fitAllChannels.isSelected();
 	}
 
+	@Override
 	public int getX() {
 		return (Integer) xSpinner.getValue();
 	}
 
+	@Override
 	public void setX(int x) {
 		xSpinner.setValue(x);
 	}
 
+	@Override
 	public int getY() {
 		return (Integer) ySpinner.getValue();
 	}
 
+	@Override
 	public void setY(int y) {
 		ySpinner.setValue(y);
 	}
 
+	@Override
 	public int getThresholdMinimum() {
 		return (Integer) thresholdMinSpinner.getValue();
 	}
 
+	@Override
 	public void setThresholdMinimum(int thresholdMin) {
 		thresholdMinSpinner.setValue(thresholdMin);
 	}
 
+	@Override
 	public int getThresholdMaximum() {
 		return (Integer) thresholdMaxSpinner.getValue();
 	}
 
+	@Override
 	public void setThresholdMaximum(int thresholdMax) {
 		thresholdMaxSpinner.setValue(thresholdMax);
 	}
 
+	@Override
 	public int getBinning() {
 		return binningComboBox.getSelectedIndex();
 	}
 
+	@Override
 	public double getChiSquareTarget() {
 		return (Double) chiSqTargetSpinner.getValue();
 	}
 
+	@Override
 	public void setChiSquareTarget(double chiSqTarget) {
 		chiSqTargetSpinner.setValue(chiSqTarget);
 	}
 
+	@Override
 	public double getScatter() {
 		return (Double) scatterSpinner.getValue();
 	}
 
+	@Override
 	public int getParameterCount() {
 		int count = 0;
 		String function = (String) functionComboBox.getSelectedItem();
@@ -1981,10 +2012,12 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		return count;
 	}
 
+	@Override
 	public void setFittedParameterCount(int count) {
 		fittedParameterCount = count;
 	}
 
+	@Override
 	public double[] getParameters() {
 		double parameters[] = null;
 		if (noFit) {
@@ -2049,6 +2082,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		return parameters;
 	}
 
+	@Override
 	public void setParameters(double params[], double AIC) {
 		// parameters NaN signals error
 		noFit = Double.isNaN(params[0]);
@@ -2169,6 +2203,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	 * @param function
 	 * @param params 
 	 */
+	@Override
 	public void setFunctionParameters(int function, double params[]) {
 		switch (function) {
 			case 0:
@@ -2209,6 +2244,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		}
 	}
 
+	@Override
 	public boolean[] getFree() {
 		boolean free[] = null;
 		String function = (String) functionComboBox.getSelectedItem();
@@ -2247,6 +2283,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		return free;
 	}
 
+	@Override
 	public boolean getRefineFit() {
 		JCheckBox checkBox = null;
 		String function = (String) functionComboBox.getSelectedItem();

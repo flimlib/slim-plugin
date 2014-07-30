@@ -65,6 +65,7 @@ public interface IDecayImage<T extends RealType<T>> extends IProcessor {
 	 * 
 	 * @param processor 
 	 */
+	@Override
 	public void chain(IProcessor processor);
 
 	/**
@@ -75,6 +76,7 @@ public interface IDecayImage<T extends RealType<T>> extends IProcessor {
 	 * @param channel
 	 * @return null or pixel value
 	 */
+	@Override
 	public double[] getPixel(int[] location);
 
 	/**

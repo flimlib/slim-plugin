@@ -38,6 +38,7 @@ public class FloatFittedImage implements IFittedImageSlice {
 	int _channel;
 	FloatProcessor _imageProcessor;
 
+	@Override
 	public void init(int width, int height, int channel,
 			IndexColorModel indexColorModel) {
 		_width = width;
@@ -53,18 +54,22 @@ public class FloatFittedImage implements IFittedImageSlice {
 		_imageProcessor.fill();
 	}
 
+	@Override
 	public void setColorModel(IndexColorModel indexColorModel) {
 		_imageProcessor.setColorModel(indexColorModel);
 	}
 
+	@Override
 	public ImageProcessor getImageProcessor() {
 		return _imageProcessor;
 	}
 
+	@Override
 	public void setMinAndMax(double min, double max) {
 		_imageProcessor.setMinAndMax(min, max);
 	}
 
+	@Override
 	public void draw(int x, int y, double value) {
 		_imageProcessor.setValue(value);
 		_imageProcessor.drawPixel(x, y);

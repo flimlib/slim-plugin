@@ -383,6 +383,7 @@ public class HistogramTool {
 		 * @param min
 		 * @param max 
 		 */
+		@Override
 		public void setMinMaxLUTPixels(int min, int max) {
 			killTimer();
 

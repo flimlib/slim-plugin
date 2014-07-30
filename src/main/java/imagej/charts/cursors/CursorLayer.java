@@ -55,6 +55,7 @@ public class CursorLayer {
 
 	public IChartRectangleListener getChartRectangleListener() {
 		return new IChartRectangleListener () {
+			@Override
 			public void setRectangle(Rectangle rectangle) {
 				_rectangle = rectangle;
 				for (Cursor cursor : _cursorSet) {

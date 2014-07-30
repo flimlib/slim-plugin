@@ -228,6 +228,7 @@ public class MaskGroupTest {
 		 * 
 		 * @param mask or null
 		 */
+		@Override
 		public void updateSelfMask(Mask mask) {
 			selfMask = mask;
 			maskGroup.updateMask(this);
@@ -238,6 +239,7 @@ public class MaskGroupTest {
 		 * 
 		 * @return mask or null
 		 */
+		@Override
 		public Mask getSelfMask() {
 			return selfMask;
 		}
@@ -247,6 +249,7 @@ public class MaskGroupTest {
 		 * 
 		 * @param mask or null
 		 */
+		@Override
 		public void updateOtherMask(Mask mask) {
 			IJ.log("Node " + name  + " updateOtherMask");
 			dumpMask(mask);
@@ -258,6 +261,7 @@ public class MaskGroupTest {
 		 * 
 		 * @return mask or null
 		 */
+		@Override
 		public Mask getOtherMask() {
 			return otherMask;
 		}
@@ -267,6 +271,7 @@ public class MaskGroupTest {
 		 * 
 		 * @return mask or null
 		 */
+		@Override
 		public Mask getTotalMask() {
 			if (null == selfMask) {
 				if (null == otherMask) {

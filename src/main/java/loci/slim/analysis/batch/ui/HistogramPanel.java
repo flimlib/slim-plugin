@@ -49,6 +49,7 @@ public class HistogramPanel extends JPanel {
 		repaint();
 	}
 
+	@Override
 	public Dimension getPreferredSize() {
 		return PREFERRED_SIZE;
 	}

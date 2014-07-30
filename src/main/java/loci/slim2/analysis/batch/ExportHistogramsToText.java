@@ -67,6 +67,7 @@ public class ExportHistogramsToText implements ISLIMAnalyzer {
 	private BufferedWriter bufferedWriter;
 	private boolean combined = true;
 
+	@Override
 	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
 		// need entire fitted image
 		if (FitRegion.EACH == region) {

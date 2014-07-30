@@ -168,6 +168,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * @param timeInc
 	 * @return frame
 	 */
+	@Override
 	public JFrame init(final JFrame frame, final int bins, final double timeInc, ICursorListener cursorListener) {
 		boolean create = false;
 		if (null == _frame
@@ -224,6 +225,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			_logCheckBox = new JCheckBox(LOGARITHMIC);
 			_logCheckBox.setSelected(_logarithmic);
 			_logCheckBox.addItemListener(new ItemListener() {
+				@Override
 				public void itemStateChanged(ItemEvent e) {
 					_logarithmic = _logCheckBox.isSelected();
 					NumberAxis photonAxis;
@@ -305,6 +307,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * 
 	 * @param fittingCursor 
 	 */
+	@Override
 	public void setFittingCursor(FittingCursor fittingCursor) {
 		if (null == _fittingCursor) {
 			_fittingCursorListener = new FittingCursorListener();
@@ -321,6 +324,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * 
 	 * @param title 
 	 */
+	@Override
 	public void setTitle(final String title) {
 		_frame.setTitle(title);
 	}
@@ -332,6 +336,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * @param prompt
 	 * @param data
 	 */
+	@Override
 	public void setData(int promptIndex, double[] prompt, ICurveFitData data) {
 		createDatasets(_bins, _timeInc, promptIndex, prompt, data);
 
@@ -342,6 +347,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * 
 	 * @param chiSquare 
 	 */
+	@Override
 	public void setChiSquare(double chiSquare) {
 		String text = "" + roundToDecimalPlaces(chiSquare, 6);
 		_chiSqTextField.setText(text);
@@ -352,6 +358,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * 
 	 * @param photons 
 	 */
+	@Override
 	public void setPhotons(int photons) {
 		_photonTextField.setText("" + photons);
 	}
@@ -372,6 +379,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * @param dataStart
 	 * @param transStop
 	 */
+	@Override
 	public void setStartStop(double transStart, double dataStart, double transStop) {
 		_startStopDraggingUI.setStartStopValues(transStart, dataStart, transStop);
 	}
@@ -385,6 +393,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * @param dataStartProportion
 	 * @param transStopProportion
 	 */
+	@Override
 	public void setStartStopProportion(
 		double transStartProportion,
 		double dataStartProportion,

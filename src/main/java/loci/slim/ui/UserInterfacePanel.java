@@ -401,6 +401,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_openButton = new JButton("New File/Batch");
 		_openButton.addActionListener(
 			new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (null != _listener) {
 						_listener.openFile();
@@ -413,6 +414,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_quitButton = new JButton("Quit");
 		_quitButton.addActionListener(
 			new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (null != _listener) {
 						_listener.quit();
@@ -425,6 +427,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_fitButton = new JButton(_fitButtonText);
 		_fitButton.addActionListener(
 			new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					String text = e.getActionCommand();
 					if (text.equals(_fitButtonText)) {
@@ -482,10 +485,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_listener = listener;
 	}
 
+	@Override
 	public void setThresholdListener(IThresholdUpdate thresholdListener) {
 		_thresholdListener = thresholdListener;
 	}
 
+	@Override
 	public void disable() {
 		enableAll(false);
 	}
@@ -496,10 +501,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		setFitButtonState(true);
 	}
 
+	@Override
 	public void disableButtons() {
 		enableButtons(false);
 	}
 
+	@Override
 	public void resetButtons() {
 		enableButtons(true);
 	}
@@ -849,6 +856,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_showBins = new JCheckBox("Display as indices");
 		_showBins.addItemListener(
 			new ItemListener() {
+				@Override
 				public void itemStateChanged(ItemEvent e) {
 					boolean showBins = e.getStateChange() == ItemEvent.SELECTED;
 					//TODO 4/2/13
@@ -887,6 +895,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_promptComboBox = new JComboBox(EXCITATION_ITEMS);
 		_promptComboBox.addActionListener(
 			new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					String selectedItem = (String) _promptComboBox.getSelectedItem();
 					boolean isExcitationLoaded = false;
@@ -954,6 +963,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_estimateCursorsButton = new JButton("Estimate Cursors");
 		_estimateCursorsButton.addActionListener(
 			new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (null != _listener) {
 						_listener.estimateCursors();
@@ -1723,6 +1733,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_fitButton.setEnabled(enable);
 	}
 
+	@Override
 	public FitRegion getRegion() {
 		FitRegion region = null;
 		String selected = (String) _regionComboBox.getSelectedItem();
@@ -1741,6 +1752,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		return region;
 	}
 
+	@Override
 	public FitAlgorithm getAlgorithm() {
 		FitAlgorithm algorithm = null;
 		String selected = (String) _algorithmComboBox.getSelectedItem();
@@ -1759,6 +1771,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		return algorithm;
 	}
 
+	@Override
 	public FitFunction getFunction() {
 		FitFunction function = null;
 		String selected = (String) _functionComboBox.getSelectedItem();
@@ -1777,6 +1790,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		return function;
 	}
 
+	@Override
 	public String[] getAnalysisList() {
 		List<String> analysisList = new ArrayList<String>();
 		for (JCheckBox checkBox : _analysisCheckBoxList) {
@@ -1792,6 +1806,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 *
 	 * @return
 	 */
+	@Override
 	public NoiseModel getNoiseModel() {
 		NoiseModel noiseModel = null;
 		String selected = (String) _noiseModelComboBox.getSelectedItem();
@@ -1815,6 +1830,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 *
 	 * @return
 	 */
+	@Override
 	public String getFittedImages() {
 		StringBuffer returnValue = new StringBuffer();
 		String selected = (String) _fittedImagesComboBox.getSelectedItem();
@@ -1845,51 +1861,63 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @return 
 	 */
+	@Override
 	public boolean getColorizeGrayScale() {
 		return _colorizeGrayScale.isSelected();
 	}
 
+	@Override
 	public boolean getFitAllChannels() {
 		return _fitAllChannels.isSelected();
 	}
 
+	@Override
 	public int getX() {
 		return (Integer) _xSpinner.getValue();
 	}
 
+	@Override
 	public void setX(int x) {
 		_xSpinner.setValue(x);
 	}
 
+	@Override
 	public int getY() {
 		return (Integer) _ySpinner.getValue();
 	}
 
+	@Override
 	public void setY(int y) {
 		_ySpinner.setValue(y);
 	}
 
+	@Override
 	public int getThreshold() {
 		return (Integer) _thresholdSpinner.getValue();
 	}
 
+	@Override
 	public void setThreshold(int threshold) {
 		_thresholdSpinner.setValue(threshold);
 	}
 
+	@Override
 	public String getBinning() {
 		String selected = (String) _binningComboBox.getSelectedItem();
 		return selected;
 	}
 
+	@Override
 	public double getChiSquareTarget() {
 		return (Double) _chiSqTargetSpinner.getValue();
 	}
 
+	@Override
 	public void setChiSquareTarget(double chiSqTarget) {
 		_chiSqTargetSpinner.setValue(chiSqTarget);
 	}
 
+	@Override
 	public double getScatter() {
 		// scatter option might be turned off in preferences
 		double returnValue = 0.0;
@@ -1899,6 +1927,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		return returnValue;
 	}
 
+	@Override
 	public int getParameterCount() {
 		int count = 0;
 		String function = (String) _functionComboBox.getSelectedItem();
@@ -1917,10 +1946,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		return count;
 	}
 
+	@Override
 	public void setFittedParameterCount(int count) {
 		_fittedParameterCount = count;
 	}
 
+	@Override
 	public double[] getParameters() {
 		double parameters[] = null;
 		if (_noFit) {
@@ -1985,6 +2016,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		return parameters;
 	}
 
+	@Override
 	public void setParameters(double params[], double AIC) {
 		// parameters NaN signals error
 		_noFit = Double.isNaN(params[0]);
@@ -2105,6 +2137,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * @param function
 	 * @param params 
 	 */
+	@Override
 	public void setFunctionParameters(int function, double params[]) {
 		switch (function) {
 			case 0:
@@ -2145,6 +2178,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		}
 	}
 
+	@Override
 	public boolean[] getFree() {
 		boolean free[] = null;
 		String function = (String) _functionComboBox.getSelectedItem();
@@ -2183,6 +2217,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		return free;
 	}
 
+	@Override
 	public boolean getRefineFit() {
 		JCheckBox checkBox = null;
 		String function = (String) _functionComboBox.getSelectedItem();
@@ -2206,6 +2241,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @return 
 	 */
+	@Override
 	public String getTransientStart() {
 		return _transientStartSpinner.getValue().toString();
 	}
@@ -2215,6 +2251,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @param transientStart 
 	 */
+	@Override
 	public void setTransientStart(String transientStart) {
 		_transientStartSpinner.setValue(Double.parseDouble(transientStart));
 	}
@@ -2223,6 +2260,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * Gets the data start cursor.
 	 * @return 
 	 */ 
+	@Override
 	public String getDataStart() {
 		return _dataStartSpinner.getValue().toString();
 	}
@@ -2231,6 +2269,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * Sets the data start cursor.
 	 * @return 
 	 */
+	@Override
 	public void setDataStart(String dataStart) {
 		_dataStartSpinner.setValue(Double.parseDouble(dataStart));
 	}
@@ -2240,6 +2279,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @return 
 	 */
+	@Override
 	public String getTransientStop() {
 		return _transientStopSpinner.getValue().toString();
 	}
@@ -2249,6 +2289,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @param transientStop 
 	 */
+	@Override
 	public void setTransientStop(String transientStop) {
 		_transientStopSpinner.setValue(Double.parseDouble(transientStop));
 	}
@@ -2258,6 +2299,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @return 
 	 */
+	@Override
 	public String getPromptDelay() {
 		return _promptDelaySpinner.getValue().toString();
 	}
@@ -2267,6 +2309,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @param promptStart 
 	 */
+	@Override
 	public void setPromptDelay(String promptDelay) {
 		_promptDelaySpinner.setValue(Double.parseDouble(promptDelay));
 	}
@@ -2275,6 +2318,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * Gets the excitation width cursor.
 	 * @return 
 	 */
+	@Override
 	public String getPromptWidth() {
 		return _promptWidthSpinner.getValue().toString();
 	}
@@ -2284,6 +2328,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @param promptWidth 
 	 */
+	@Override
 	public void setPromptWidth(String promptWidth) {
 		_promptWidthSpinner.setValue(Double.parseDouble(promptWidth));
 	}
@@ -2293,6 +2338,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @return 
 	 */
+	@Override
 	public String getPromptBaseline() {
 		return _promptBaselineSpinner.getValue().toString();
 	}
@@ -2302,6 +2348,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 * 
 	 * @param promptBaseline 
 	 */
+	@Override
 	public void setPromptBaseline(String promptBaseline) {
 		_promptBaselineSpinner.setValue(Double.parseDouble(promptBaseline));
 	}

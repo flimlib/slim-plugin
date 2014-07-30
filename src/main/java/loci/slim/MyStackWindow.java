@@ -46,6 +46,7 @@ public class MyStackWindow extends StackWindow {
 		if (null != sliceSelector) {
 			sliceSelector.addAdjustmentListener(
 				new AdjustmentListener() {
+					@Override
 					public void adjustmentValueChanged(AdjustmentEvent e) {
 						if (e.getValue() != m_slice) {
 							//IJ.log("Show slice " + e.getValue());

@@ -53,6 +53,7 @@ public class SquareBinner implements IProcessor {
 	 * 
 	 * @param processor 
 	 */
+	@Override
 	public void chain(IProcessor processor) {
 		_processor = processor;
 	}
@@ -63,6 +64,7 @@ public class SquareBinner implements IProcessor {
 	 * @param location
 	 * @return pixel value
 	 */
+	@Override
 	public double[] getPixel(int[] location) {
 		double[] sum = _processor.getPixel(location);
 		if (null != sum) {

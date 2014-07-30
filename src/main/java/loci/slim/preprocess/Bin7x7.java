@@ -30,6 +30,7 @@ package loci.slim.preprocess;
  */
 @SLIMBinner("7 x 7")
 public class Bin7x7 extends SquareBinner implements ISLIMBinner {
+	@Override
 	public void init(int width, int height) {
 		super.init(3, width, height);
 	}

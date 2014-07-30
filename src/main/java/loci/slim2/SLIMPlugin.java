@@ -266,6 +266,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 		try {
 			SwingUtilities.invokeAndWait(
 				new Runnable() {
+					@Override
 					public void run() {
 						returnCode[0] = chooser.showOpenDialog(parent);
 					}

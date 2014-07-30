@@ -32,6 +32,7 @@ import loci.slim.fitted.FittedValue;
  */
 public class TauBatchHistogram extends AbstractBatchHistogram implements BatchHistogram {
 
+	@Override
 	public void init(FittedValue fittedValue) {
 		setFittedValue(fittedValue);
 

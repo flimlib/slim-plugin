@@ -41,6 +41,7 @@ public class Threshold implements IProcessor {
 	 * 
 	 * @param processor 
 	 */
+	@Override
 	public void chain(IProcessor processor) {
 		_processor = processor;
 	}
@@ -51,6 +52,7 @@ public class Threshold implements IProcessor {
 	 * @param location
 	 * @return null or pixel value
 	 */
+	@Override
 	public double[] getPixel(int[] location) {
 		double[] decay = _processor.getPixel(location);
 

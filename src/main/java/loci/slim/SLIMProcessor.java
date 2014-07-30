@@ -982,6 +982,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		prefs.put(SUMMARY_FILE_KEY, summaryFile);
 
 		new Thread() {
+			@Override
 			public void run() {
 				batchProcessing(exportPixels, pixelsFile,
 					exportHistograms, histogramsFile,
@@ -2669,6 +2670,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		private Integer _promptStop    = null;
 		private Double _promptBaseline = null;
 
+		@Override
 		public void cursorChanged(FittingCursor cursor) {
 			// get current cursor values
 			int transStart        = cursor.getTransientStartBin();

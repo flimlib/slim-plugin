@@ -162,6 +162,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 	 * @param startProportion
 	 * @param stopProportion
 	 */
+	@Override
 	public void setStartStopBaseProportion(
 			double startProportion,
 			double stopProportion,
@@ -452,6 +453,7 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 		 * @param e
 		 * @param l
 		 */
+		@Override
 		protected void processMouseEvent(MouseEvent e, JXLayer<? extends V> l) {
 			super.processMouseEvent(e, l);
 			if (null != _startMarkerProportion && null != _stopMarkerProportion && null != _baseMarkerProportion) {

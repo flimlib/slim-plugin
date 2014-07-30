@@ -71,6 +71,7 @@ public class ExportPixelsToText implements ISLIMAnalyzer {
 	private BufferedWriter bufferedWriter;
 	private MathContext context = new MathContext(4, RoundingMode.FLOOR);
 
+	@Override
 	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
 		boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
 		if (export && null != fileName) {

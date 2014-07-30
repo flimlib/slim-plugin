@@ -52,6 +52,7 @@ public class Mask implements Cloneable {
 		_bits = new boolean[width][height];
 	}
 
+	@Override
 	public Mask clone() {
 		boolean[][] bits = new boolean[_width][_height];
 		for (int y = 0; y < _height; ++y) {

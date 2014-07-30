@@ -53,6 +53,7 @@ public class ThreadedFittingEngine implements IFittingEngine {
 	/**
 	 * Cancel fit or done fitting.
 	 */
+	@Override
 	public void shutdown() {
 		_threadPool.shutdown();
 	}
@@ -62,6 +63,7 @@ public class ThreadedFittingEngine implements IFittingEngine {
 	 * 
 	 * @param threads 
 	 */
+	@Override
 	public synchronized void setThreads(int threads) {
 		_threadPool.setThreads(threads);
 	}
@@ -71,6 +73,7 @@ public class ThreadedFittingEngine implements IFittingEngine {
 	 * 
 	 * @param curve fitter 
 	 */
+	@Override
 	public synchronized void setCurveFitter(ICurveFitter curveFitter) {
 		_curveFitter = curveFitter;
 	}
@@ -84,6 +87,7 @@ public class ThreadedFittingEngine implements IFittingEngine {
 	 * @param data
 	 * @return results
 	 */
+	@Override
 	public synchronized IFitResults fit
 			(final IGlobalFitParams params, final ILocalFitParams data) {
 		IFittingEngineCallable callable
@@ -99,6 +103,7 @@ public class ThreadedFittingEngine implements IFittingEngine {
 	 * @param data one or more pixels data
 	 * @return results one or more pixels results
 	 */
+	@Override
 	public synchronized List<IFitResults> fit
 			(final IGlobalFitParams params, final List<ILocalFitParams> dataList) {
 

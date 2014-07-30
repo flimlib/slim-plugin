@@ -77,6 +77,7 @@ public class ExcitationPanel extends JFrame {
 
 			JButton button1 = new JButton("Square IRF");
 			button1.addActionListener(new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					int start = fittingCursor.getPromptStartIndex();
 					int stop = fittingCursor.getPromptStopIndex();
@@ -97,6 +98,7 @@ public class ExcitationPanel extends JFrame {
 
 			JButton button2 = new JButton("Gaussian IRF");
 			button2.addActionListener(new ActionListener() {
+				@Override
 				public void actionPerformed(ActionEvent e) {
 					int start = fittingCursor.getPromptStartIndex();
 					int stop = fittingCursor.getPromptStopIndex();

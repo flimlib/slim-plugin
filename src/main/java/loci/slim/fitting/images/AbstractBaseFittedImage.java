@@ -168,6 +168,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * 
 	 * @return 
 	 */
+	@Override
 	public String getTitle() {
 		return _title;
 	}
@@ -177,6 +178,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * 
 	 * @param colorModel 
 	 */
+	@Override
 	public void setColorModel(IndexColorModel colorModel) {
 		for (IFittedImageSlice fittedImage : _fittedImages) {
 			fittedImage.setColorModel(colorModel);
@@ -187,6 +189,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * Gets the associated histogram data object.
 	 * @return
 	 */
+	@Override
 	public HistogramDataGroup getHistogramData() {
 		return _histogramData;
 	}
@@ -194,18 +197,21 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	/**
 	 * Begins a fit.
 	 */
+	@Override
 	public void beginFit() {
 	}
 
 	/**
 	 * Ends a fit.
 	 */
+	@Override
 	public void endFit() {
 	}
 
 	/**
 	 * Cancels a fit.
 	 */
+	@Override
 	public void cancelFit() {
 		_imagePlus.close();
 		_imagePlus.hide();
@@ -215,6 +221,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * Recalculates the image histogram and resets the palette.  Called
 	 * periodically during the fit.  Redisplays the image.
 	 */
+	@Override
 	public void updateRanges() {
 		double[] minMaxLUT = _histogramData.updateRanges();
 
@@ -227,6 +234,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * Called from the histogram tool.  Redisplays the image after LUT ranges
 	 * have changed.
 	 */
+	@Override
 	public void redisplay() {
 		double[] minMaxLUT = _histogramData.getMinMaxLUT();
 		redisplay(minMaxLUT);
@@ -238,6 +246,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * 
 	 * @param mask
 	 */
+	@Override
 	public void updateMask(Mask mask) {
 		if (mask != _mask) {
 			_mask = mask;
@@ -300,6 +309,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * @param location
 	 * @param parameters null signals error
 	 */
+	@Override
 	public void updatePixel(int[] location, double[] parameters) {
 		double value;
 
@@ -342,6 +352,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * @param dimension
 	 * @param parameters
 	 */
+	@Override
 	public void updateChunkyPixel(int[] location, int[] dimension,
 		double[] parameters)
 	{
@@ -355,6 +366,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * @param parameters
 	 * @return 
 	 */
+	@Override
 	abstract public double getValue(double[] parameters);
 
 	/*

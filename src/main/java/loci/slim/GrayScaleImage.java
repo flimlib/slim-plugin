@@ -226,6 +226,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		_maskGroupSet = new HashSet<IMaskGroup>();
 	}
 
+	@Override
 	public void close() {
 		// run once
 		if (null != _stackWindow) {
@@ -236,11 +237,13 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		}
 	}
 
+	@Override
 	public void hideCursor() {
 		_cursorRoi.setLocation(-CURSOR_WIDTH, -CURSOR_HEIGHT);
 		_imagePlus.draw();
 	}
 
+	@Override
 	public void showCursor(int x, int y) {
 		x -= CURSOR_WIDTH / 2;
 		y -= CURSOR_HEIGHT / 2;
