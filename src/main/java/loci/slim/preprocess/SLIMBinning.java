@@ -28,60 +28,71 @@ import ij.IJ;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.java.sezpoz.Index;
-import net.java.sezpoz.IndexItem;
+import org.scijava.Context;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
 
 /**
- * TODO
+ * Helper class for managing binner plugins.
  *
  * @author Aivar Grislis
+ * @author Curtis Rueden
+ * @see SLIMBinner
  */
 public class SLIMBinning {
+
 	public static final String NONE = "None";
-	IndexItem<SLIMBinner, ISLIMBinner> m_plugins[];
-	String m_names[];
+
+	private final List<PluginInfo<SLIMBinner>> binners;
+	private final String[] names;
 
 	public SLIMBinning() {
+		final List<PluginInfo<SLIMBinner>> binnerPlugins =
+			pluginService().getPluginsOfType(SLIMBinner.class);
+
 		// get list of plugins and their names
-		List<String> names = new ArrayList<String>();
-		List<IndexItem> plugins = new ArrayList<IndexItem>();
-		names.add(NONE);
-		plugins.add(null);
+		binners = new ArrayList<PluginInfo<SLIMBinner>>();
+
+		// add an initial blank entry
+		binners.add(null);
 
 		// get all matches
-		for (final IndexItem<SLIMBinner, ISLIMBinner> item :
-				Index.load(SLIMBinner.class, ISLIMBinner.class, IJ.getClassLoader())) {
-			plugins.add(item);
-			names.add(item.annotation().value());
+		for (final PluginInfo<SLIMBinner> info : binnerPlugins) {
+			binners.add(info);
 		}
-		m_plugins = plugins.toArray(new IndexItem[0]);
-		m_names = names.toArray(new String[0]);
+
+		// build list of names
+		names = new String[binners.size()];
+		for (int i=0; i<names.length; i++) {
+			names[i] = getName(binners.get(i));
+		}
 	}
+
+	// -- SLIMBinning methods --
 
 	public String[] getChoices() {
-		return m_names;
+		return names;
 	}
 
-	public ISLIMBinner getBinner(String name) {
-		ISLIMBinner instance = null;
-
-		IndexItem<SLIMBinner, ISLIMBinner> selectedPlugin = null;
-		for (int i = 0; i < m_names.length; ++i) {
-			if (name.equals(m_names[i])) {
-				selectedPlugin = m_plugins[i];
+	public SLIMBinner createBinner(final String name) {
+		for (final PluginInfo<SLIMBinner> binner : binners) {
+			if (name.equals(getName(binner))) {
+				return pluginService().createInstance(binner);
 			}
 		}
-
-		if (null != selectedPlugin) {
-			// create an instance
-			try {
-				instance = selectedPlugin.instance();
-			}
-			catch (InstantiationException e) {
-				IJ.log("Error instantiating plugin " + e.getMessage());
-			}
-		}
-
-		return instance;
+		return null;
 	}
+
+	// -- Helper methods --
+
+	private PluginService pluginService() {
+		final Context context = (Context) IJ.runPlugIn("org.scijava.Context", "");
+		final PluginService pluginService = context.service(PluginService.class);
+		return pluginService;
+	}
+
+	private String getName(final PluginInfo<SLIMBinner> binner) {
+		return binner == null ? NONE : binner.getName();
+	}
+
 }

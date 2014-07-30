@@ -23,13 +23,15 @@
 
 package loci.slim.preprocess;
 
+import org.scijava.plugin.Plugin;
+
 /**
- * A plugin within a plugin, this is used to bin the fit input.
+ * Binning plugin which handles 3x3 square binning.
  *
  * @author Aivar Grislis
  */
-@SLIMBinner("3 x 3")
-public class Bin3x3 extends SquareBinner implements ISLIMBinner {
+@Plugin(name = "3 x 3", type = SLIMBinner.class)
+public class Bin3x3 extends SquareBinner implements SLIMBinner {
 	@Override
 	public void init(int width, int height) {
 		super.init(1, width, height);

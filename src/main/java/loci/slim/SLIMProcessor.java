@@ -90,7 +90,7 @@ import loci.slim.heuristics.FitterEstimator;
 import loci.slim.heuristics.IEstimator;
 import loci.slim.histogram.HistogramTool;
 import loci.slim.preprocess.IProcessor;
-import loci.slim.preprocess.ISLIMBinner;
+import loci.slim.preprocess.SLIMBinner;
 import loci.slim.preprocess.RoiProcessor;
 import loci.slim.preprocess.SLIMBinning;
 import loci.slim.preprocess.Threshold;
@@ -1588,7 +1588,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			threshold.chain(processor);
 			processor = threshold;
 		}
-		ISLIMBinner binner = _binning.getBinner(uiPanel.getBinning());
+		SLIMBinner binner = _binning.createBinner(uiPanel.getBinning());
 		if (null != binner) {
 			// do binning
 			binner.init(_width, _height);
@@ -2117,7 +2117,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		// set up the source
 		IDecayImage decayImage = new DecayImageWrapper(_image, _width, _height, _channels, _bins, _binIndex, _increment);
 		IProcessor processor = decayImage;
-		ISLIMBinner binner = _binning.getBinner(uiPanel.getBinning());
+		SLIMBinner binner = _binning.createBinner(uiPanel.getBinning());
 		if (null != binner) {
 			binner.init(_width, _height);
 			binner.chain(processor);

@@ -23,25 +23,15 @@
 
 package loci.slim.preprocess;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import net.java.sezpoz.Indexable;
+import org.scijava.plugin.SciJavaPlugin;
 
 /**
- * Annotation used to name ISLIMBinner implementations.  These names appear
- * in the dropdown list in the UI.
- *
- * Syntax:
- *  @SLIMBinner("Binner")
- *
+ * Interface for an input processor that does binning.
+ * 
  * @author Aivar Grislis
  */
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
-@Retention(RetentionPolicy.SOURCE)
-@Indexable(type=ISLIMBinner.class)
-public @interface SLIMBinner {
-	String value();
+public interface SLIMBinner extends IProcessor, SciJavaPlugin {
+
+	void init(int width, int height);
+
 }
