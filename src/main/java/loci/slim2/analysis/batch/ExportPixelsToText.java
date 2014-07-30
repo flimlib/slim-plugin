@@ -38,7 +38,6 @@ import java.util.prefs.Preferences;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
-import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
@@ -47,14 +46,15 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
+import org.scijava.plugin.Plugin;
 
 /**
  * Exports pixel values as text for further analysis of SLIM Curve results.
  *
  * @author Aivar Grislis
  */
-@SLIMAnalyzer(name="Export Pixels to Text")
-public class ExportPixelsToText implements ISLIMAnalyzer {
+@Plugin(type = SLIMAnalyzer.class, name = "Export Pixels to Text")
+public class ExportPixelsToText implements SLIMAnalyzer {
 	private static final String FILE_KEY = "export_pixels_to_text/file";
 	private static final String APPEND_KEY = "export_pixels_to_text/append";
 	private static final String CSV_KEY = "export_pixels_to_text/csv";

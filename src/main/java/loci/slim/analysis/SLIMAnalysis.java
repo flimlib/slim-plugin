@@ -25,86 +25,79 @@ package loci.slim.analysis;
 
 import ij.IJ;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
-import net.java.sezpoz.Index;
-import net.java.sezpoz.IndexItem;
+
+import org.scijava.Context;
+import org.scijava.plugin.PluginInfo;
+import org.scijava.plugin.PluginService;
 
 /**
  * This class runs post-fit analysis on the fitted image.
  *
  * @author Aivar Grislis
+ * @author Curtis Rueden
  */
 public class SLIMAnalysis {
-	IndexItem<SLIMAnalyzer, ISLIMAnalyzer> _plugins[];
-	String _names[];
+
+	private final List<PluginInfo<SLIMAnalyzer>> analyzers;
+	private final String[] names;
 
 	/**
 	 * Constructor, gets list of potential analysis plugins.
-	 * 
 	 */
 	public SLIMAnalysis() {
-		// get list of plugins and their names
-		List<String> names = new ArrayList<String>();
-		List<IndexItem> plugins = new ArrayList<IndexItem>();
+		analyzers = pluginService().getPluginsOfType(SLIMAnalyzer.class);
 
-		// look for matches
-		for (final IndexItem<SLIMAnalyzer, ISLIMAnalyzer> item :
-				Index.load(SLIMAnalyzer.class, ISLIMAnalyzer.class, IJ.getClassLoader())) {
-			plugins.add(item);
-			names.add(item.annotation().name());
+		// build list of names
+		names = new String[analyzers.size()];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = analyzers.get(i).getName();
 		}
-		_plugins = plugins.toArray(new IndexItem[0]);
-		_names = names.toArray(new String[0]);
 	}
 
 	/**
 	 * Returns list of potential analysis plugin names.
-	 * 
-	 * @return 
 	 */
 	public String[] getChoices() {
-		return _names;
+		return names;
 	}
 
 	/**
 	 * Does image analysis.
-	 * 
-	 * @param name
-	 * @param image
-	 * @param region
-	 * @param function
-	 * @param parameters
 	 */
-	public void doAnalysis(String name, ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
-
-		// find selected plugin
-		IndexItem<SLIMAnalyzer, ISLIMAnalyzer> selectedPlugin = null;
-		for (int i = 0; i < _names.length; ++i) {
-			if (name.equals(_names[i])) {
-				selectedPlugin = _plugins[i];
-			}
+	public void
+		doAnalysis(final String name, final ImgPlus<DoubleType> image,
+			final FitRegion region, final FitFunction function,
+			final String parameters)
+	{
+		final SLIMAnalyzer analyzer = createAnalyzer(name);
+		if (analyzer == null) {
+			IJ.error("No such analyzer: " + name);
+			return;
 		}
-
-		// run selected plugin
-		if (null != selectedPlugin) {
-			// create an instance
-			ISLIMAnalyzer instance = null;
-			try {
-				instance = selectedPlugin.instance();
-			}
-			catch (InstantiationException e) {
-				IJ.log("Error instantiating plugin " + e.getMessage());
-			}
-
-			if (null != instance) {
-				instance.analyze(image, region, function, parameters);
-			}
-		}
+		analyzer.analyze(image, region, function, parameters);
 	}
+
+	// -- Helper methods --
+
+	private PluginService pluginService() {
+		final Context context = (Context) IJ.runPlugIn("org.scijava.Context", "");
+		final PluginService pluginService = context.service(PluginService.class);
+		return pluginService;
+	}
+
+	private SLIMAnalyzer createAnalyzer(final String name) {
+		for (final PluginInfo<SLIMAnalyzer> analyzer : analyzers) {
+			if (name.equals(analyzer.getName())) {
+				return pluginService().createInstance(analyzer);
+			}
+		}
+		return null;
+	}
+
 }

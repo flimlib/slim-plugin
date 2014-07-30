@@ -36,7 +36,6 @@ import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.slim.analysis.Binning;
 import loci.slim.analysis.HistogramStatistics;
-import loci.slim.analysis.ISLIMAnalyzer;
 import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
@@ -44,13 +43,15 @@ import net.imglib2.RandomAccess;
 import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
+import org.scijava.plugin.Plugin;
+
 /**
  * Exports histogram values as text for further analysis of SLIM Curve results.
  * 
  * @author Aivar Grislis
  */
-@SLIMAnalyzer(name="Export Histograms to Text")
-public class ExportHistogramsToText implements ISLIMAnalyzer {
+@Plugin(type = SLIMAnalyzer.class, name = "Export Histograms to Text")
+public class ExportHistogramsToText implements SLIMAnalyzer {
 	private static final int BINS = 256;
 	private static final long MIN_COUNT = 3;
 	private static final String FILE_KEY = "export_histograms_to_text/file";
