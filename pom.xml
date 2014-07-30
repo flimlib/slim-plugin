@@ -169,7 +169,7 @@
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>SLIMPlugIn</mainClass>
+									<mainClass>loci.slim.SLIM_PlugIn</mainClass>
 								</manifest>
 							</archive>
 							<descriptors>
