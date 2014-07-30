@@ -78,11 +78,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>net.java.sezpoz</groupId>
-			<artifactId>sezpoz</artifactId>
-			<version>1.9-imagej</version>
-		</dependency>
-		<dependency>
 			<groupId>org.jfree</groupId>
 			<artifactId>jcommon</artifactId>
 			<version>1.0.17</version>
