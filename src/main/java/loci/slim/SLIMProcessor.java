@@ -30,7 +30,6 @@ import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-import io.scif.Metadata;
 import io.scif.img.ImgOpener;
 import io.scif.img.SCIFIOImgPlus;
 import io.scif.img.axes.SCIFIOAxes;
@@ -43,7 +42,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
@@ -163,7 +161,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private static final String PATH_KEY = "path";
 	private String _file;
 	private String _path;
-	private Map<String, Object> _globalMetadata;
 
 	private static final String EXPORT_PIXELS_KEY = "exportpixels";
 	private static final String PIXELS_FILE_KEY = "pixelsfile";
@@ -1389,10 +1386,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 			// open the image
 			final ImgOpener imgOpener = new ImgOpener();
 			image = imgOpener.openImg(filePath);
-
-			// extract parsed metadata
-			final Metadata meta = image.getMetadata();
-			_globalMetadata = meta.getTable();
 		}
 		catch (final Exception e) {
 			IJ.handleException(e);
@@ -1438,23 +1431,16 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		_timeRange = 10.0f;
 		_increment = 1;
-		if (null != _globalMetadata) {
-			Number timeBase = (Number) _globalMetadata.get("time base");
-			if (null != timeBase) {
-				_timeRange = timeBase.floatValue();
-			}
-			Number increment = (Number) _globalMetadata.get("MeasureInfo.incr");
-			if (null != increment) {
-				_increment = increment.intValue();
-				//IJ.log("MeasureInfo.incr is " + _increment);
-			}
-		}
-		_timeRange /= _bins;
-		// If our metadata has an actual physical size for the lifetime dimension,
-		// just use it.
-		CalibratedAxis lifetime = image.getMetadata().get(0).getAxis(SCIFIOAxes.LIFETIME);
+
+		// extract time range from lifetime dimension metadata
+		final CalibratedAxis lifetime =
+			image.getMetadata().get(0).getAxis(SCIFIOAxes.LIFETIME);
 		if (lifetime != null) {
-			_timeRange = lifetime.averageScale(0, 1);
+			final String unit = lifetime.unit();
+			// TODO: Always use the UnitService to convert to ns.
+			if ("ns".equals(unit)) {
+				_timeRange = lifetime.averageScale(0, 1);
+			}
 		}
 
 		return true;
