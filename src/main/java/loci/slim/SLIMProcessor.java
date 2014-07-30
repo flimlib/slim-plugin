@@ -2290,9 +2290,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}
 			return channelIndices;
 		}
-		else {
-			return new int[] { channel };
-		}
+		return new int[] { channel };
 	}
 
 	/**
@@ -2436,9 +2434,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}
 			return false;
 		}
-		else {
-			return true;
-		}
+		return true;
 	}
 
 	/**

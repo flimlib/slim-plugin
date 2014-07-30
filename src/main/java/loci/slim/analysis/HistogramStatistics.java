@@ -255,49 +255,47 @@ public class HistogramStatistics {
 			// don't process any more parameters; all will have same count
 			return false;
 		}
-		else {
-			writer.write("Parameter" + separator + getTitle());
-			writer.newLine();
+		writer.write("Parameter" + separator + getTitle());
+		writer.newLine();
 
-			// put out statistics
-			writer.write("Min" + separator + showParameter(getMin()));
-			writer.newLine();
-			writer.write("Max" + separator + showParameter(getMax()));
-			writer.newLine();
-			writer.write("Count" + separator + getCount());
-			writer.newLine();
-			writer.write("Mean" + separator + showParameter(getMean()));
-			writer.newLine();
-			writer.write("Standard Deviation" + separator + showParameter(getStandardDeviation()));
-			writer.newLine();
-			writer.write("1st Quartile" + separator + showParameter(getFirstQuartile()));
-			writer.newLine();
-			writer.write("Median" + separator + showParameter(getMedian()));
-			writer.newLine();
-			writer.write("3rd Quartile" + separator + showParameter(getThirdQuartile()));
-			writer.newLine();
+		// put out statistics
+		writer.write("Min" + separator + showParameter(getMin()));
+		writer.newLine();
+		writer.write("Max" + separator + showParameter(getMax()));
+		writer.newLine();
+		writer.write("Count" + separator + getCount());
+		writer.newLine();
+		writer.write("Mean" + separator + showParameter(getMean()));
+		writer.newLine();
+		writer.write("Standard Deviation" + separator + showParameter(getStandardDeviation()));
+		writer.newLine();
+		writer.write("1st Quartile" + separator + showParameter(getFirstQuartile()));
+		writer.newLine();
+		writer.write("Median" + separator + showParameter(getMedian()));
+		writer.newLine();
+		writer.write("3rd Quartile" + separator + showParameter(getThirdQuartile()));
+		writer.newLine();
 
-			// put out histogram
-			long[] histo = getHistogram();
-			writer.write("Histogram");
-			writer.newLine();
-			writer.write("Bins" + separator + histo.length);
-			writer.newLine();
-			writer.write("Min" + separator + showParameter(getMinRange()));
-			writer.newLine();
-			writer.write("Max" + separator + showParameter(getMaxRange()));
-			writer.newLine();
-			writer.write("Count" + separator + getHistogramCount());
-			writer.newLine();
+		// put out histogram
+		long[] histo = getHistogram();
+		writer.write("Histogram");
+		writer.newLine();
+		writer.write("Bins" + separator + histo.length);
+		writer.newLine();
+		writer.write("Min" + separator + showParameter(getMinRange()));
+		writer.newLine();
+		writer.write("Max" + separator + showParameter(getMaxRange()));
+		writer.newLine();
+		writer.write("Count" + separator + getHistogramCount());
+		writer.newLine();
 
-			double[] values = Binning.centerValuesPerBin(histo.length, getMinRange(), getMaxRange());
-			for (int j = 0; j < histo.length; ++j) {
-				writer.write(showParameter(values[j]) + separator + histo[j]);
-				writer.newLine();
-			}
+		double[] values = Binning.centerValuesPerBin(histo.length, getMinRange(), getMaxRange());
+		for (int j = 0; j < histo.length; ++j) {
+			writer.write(showParameter(values[j]) + separator + histo[j]);
 			writer.newLine();
-			return true;
 		}
+		writer.newLine();
+		return true;
 	}
 
 	/**

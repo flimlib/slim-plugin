@@ -134,10 +134,8 @@ public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
 				// successful increment
 				return true;
 			}
-			else {
-				tail[i] = 0;
-				++i;
-			}
+			tail[i] = 0;
+			++i;
 		}
 		// done iterating tail
 		return false;
