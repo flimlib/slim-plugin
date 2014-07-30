@@ -25,6 +25,7 @@ package loci.slim2;
 //TODO ARG 'slim2' is just a temporary package name for IJ2 version to keep the two codebases separate
 
 import java.awt.Component;
+import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -125,7 +126,7 @@ public class SLIMPlugin <T extends RealType<T> & NativeType<T>> implements Comma
 
 		// special case first time through
 		boolean firstTime = true;
-		parent = ij.ImageJ.getFrames()[0];
+		parent = Frame.getFrames()[0];
 		do {
 			// new lifetime dataset wrapper
 			LifetimeDatasetWrapper lifetime = null;

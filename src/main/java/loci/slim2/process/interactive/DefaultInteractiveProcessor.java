@@ -800,7 +800,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 						break;
 				}
 			}
-			else if (choice.equals(uiPanel.TAU)) {
+			else if (choice.equals(UserInterfacePanel.TAU)) {
 				switch (parameterCount) {
 					case 4: // single exponential
 					case 5: // stretched exponential
@@ -808,7 +808,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 						inputIndex = 3;
 						outputIndex = 1;
 						formula = new IndexedMemberFormula(inputIndex);
-						member = new OutputSetMember<DoubleType>(uiPanel.TAU, outputIndex, formula);
+						member = new OutputSetMember<DoubleType>(UserInterfacePanel.TAU, outputIndex, formula);
 						list.add(member);
 						break;
 					case 6: // double exponential
@@ -816,12 +816,12 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 						inputIndex = 3;
 						outputIndex = 1;
 						formula = new IndexedMemberFormula(inputIndex);
-						member = new OutputSetMember<DoubleType>(uiPanel.TAU1, outputIndex, formula);
+						member = new OutputSetMember<DoubleType>(UserInterfacePanel.TAU1, outputIndex, formula);
 						list.add(member);
 						inputIndex = 5;
 						outputIndex = 3;
 						formula = new IndexedMemberFormula(inputIndex);
-						member = new OutputSetMember<DoubleType>(uiPanel.TAU2, outputIndex, formula);
+						member = new OutputSetMember<DoubleType>(UserInterfacePanel.TAU2, outputIndex, formula);
 						list.add(member);
 						break;
 					case 8: // triple exponential
@@ -829,17 +829,17 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 						inputIndex = 3;
 						outputIndex = 1;
 						formula = new IndexedMemberFormula(inputIndex);
-						member = new OutputSetMember<DoubleType>(uiPanel.TAU1, outputIndex, formula);
+						member = new OutputSetMember<DoubleType>(UserInterfacePanel.TAU1, outputIndex, formula);
 						list.add(member);
 						inputIndex = 5;
 						outputIndex = 3;
 						formula = new IndexedMemberFormula(inputIndex);
-						member = new OutputSetMember<DoubleType>(uiPanel.TAU2, outputIndex, formula);
+						member = new OutputSetMember<DoubleType>(UserInterfacePanel.TAU2, outputIndex, formula);
 						list.add(member);
 						inputIndex = 7;
 						outputIndex = 5;
 						formula = new IndexedMemberFormula(inputIndex);
-						member = new OutputSetMember<DoubleType>(uiPanel.TAU3, outputIndex, formula);
+						member = new OutputSetMember<DoubleType>(UserInterfacePanel.TAU3, outputIndex, formula);
 						list.add(member);
 						break;
 				}
@@ -868,7 +868,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 				member = new OutputSetMember<DoubleType>("Z", outputIndex, formula);
 				list.add(member);
 			}
-			else if (choice.equals(uiPanel.CHISQUARE)) {
+			else if (choice.equals(UserInterfacePanel.CHISQUARE)) {
 				inputIndex = 0;
 				switch (parameterCount) {
 					case 4: // single exponential
@@ -889,10 +889,10 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 						break;
 				}
 				formula = new IndexedMemberFormula(inputIndex);
-				member = new OutputSetMember<DoubleType>(uiPanel.CHISQUARE, outputIndex, formula);
+				member = new OutputSetMember<DoubleType>(UserInterfacePanel.CHISQUARE, outputIndex, formula);
 				list.add(member);
 			}
-			else if (choice.equals(uiPanel.F_UPPER)) {
+			else if (choice.equals(UserInterfacePanel.F_UPPER)) {
 				switch (parameterCount) {
 					case 4:
 						// output A T Z X2
@@ -908,7 +908,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 						break;
 				}
 			}
-			else if (choice.equals(uiPanel.F_LOWER)) {
+			else if (choice.equals(UserInterfacePanel.F_LOWER)) {
 				switch (parameterCount) {
 					case 4:
 						// output A T Z X2
@@ -924,7 +924,7 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 						break;
 				}
 			}
-			else if (choice.equals(uiPanel.TAU_MEAN)) {
+			else if (choice.equals(UserInterfacePanel.TAU_MEAN)) {
 				switch (parameterCount) {
 					case 4:
 						// output A T Z X2

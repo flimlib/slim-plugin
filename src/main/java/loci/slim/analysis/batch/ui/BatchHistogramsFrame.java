@@ -33,6 +33,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 
 import loci.slim.analysis.HistogramStatistics;
@@ -68,8 +69,8 @@ public class BatchHistogramsFrame extends JFrame {
 		viewPanel = new JPanel();
 		viewPanel.setLayout(new BoxLayout(viewPanel, BoxLayout.Y_AXIS));
 		scrollPane = new JScrollPane(viewPanel);
-		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		add(scrollPane, BorderLayout.CENTER);
 		setVisible(false);
 	}

@@ -35,6 +35,7 @@ import io.scif.img.SCIFIOImgPlus;
 import io.scif.img.axes.SCIFIOAxes;
 
 import java.awt.Color;
+import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.image.IndexColorModel;
 import java.io.File;
@@ -1333,7 +1334,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		chooser.setMultiSelectionEnabled(true);
 		chooser.setFileFilter(new showFileDialogFilter());
 
-		if (chooser.showOpenDialog(ij.ImageJ.getFrames()[0]) == JFileChooser.APPROVE_OPTION) {
+		if (chooser.showOpenDialog(Frame.getFrames()[0]) == JFileChooser.APPROVE_OPTION) {
 			File[] files = chooser.getSelectedFiles();
 			List<File> fileList = new ArrayList<File>();
 			for (File file : files) {
