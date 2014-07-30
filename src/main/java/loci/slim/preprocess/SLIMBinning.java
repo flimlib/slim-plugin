@@ -63,7 +63,7 @@ public class SLIMBinning {
 
 		// build list of names
 		names = new String[binners.size()];
-		for (int i=0; i<names.length; i++) {
+		for (int i = 0; i < names.length; i++) {
 			names[i] = getName(binners.get(i));
 		}
 	}
