@@ -1392,7 +1392,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 			final Context context = (Context) IJ.runPlugIn("org.scijava.Context", "");
 			final ImgOpener imgOpener =
 				context == null ? new ImgOpener() : new ImgOpener(context);
-			image = imgOpener.openImg(filePath);
+			final List<SCIFIOImgPlus<?>> images = imgOpener.openImgs(filePath);
+			image = images == null || images.isEmpty() ? null : images.get(0);
 		}
 		catch (final Exception e) {
 			IJ.handleException(e);
