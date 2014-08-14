@@ -107,6 +107,8 @@ import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
+import org.scijava.Context;
+
 /**
  * SLIMProcessor is the main class of the SLIM Curve plugin for ImageJ. It was
  * originally just thrown together to get something working, with some
@@ -1387,7 +1389,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 		SCIFIOImgPlus<?> image = null;
 		try {
 			// open the image
-			final ImgOpener imgOpener = new ImgOpener();
+			final Context context = (Context) IJ.runPlugIn("org.scijava.Context", "");
+			final ImgOpener imgOpener =
+				context == null ? new ImgOpener() : new ImgOpener(context);
 			image = imgOpener.openImg(filePath);
 		}
 		catch (final Exception e) {
