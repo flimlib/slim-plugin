@@ -60,8 +60,8 @@ import org.scijava.plugin.Plugin;
 @Plugin(type = Command.class, menu = {
 	@Menu(label = MenuConstants.ANALYZE_LABEL, weight = MenuConstants.ANALYZE_WEIGHT,
 		mnemonic = MenuConstants.ANALYZE_MNEMONIC),
-	@Menu(label = "Data Histogram...", accelerator = "control shift C",
-		weight = 0) }, iconPath = "/icons/commands/contrast.png", headless = true, //TODO ARG use 'normal.png', which is on my Desktop
+	@Menu(label = "Data Histogram...",
+		weight = 0) }, iconPath = "/icons/commands/contrast.png", headless = true,
 		initializer = "initValues")
 public class DataHistogramCommand extends InteractiveImageCommand {
 
