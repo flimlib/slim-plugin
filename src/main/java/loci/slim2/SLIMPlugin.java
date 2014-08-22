@@ -70,6 +70,7 @@ import org.scijava.command.CommandService;
 import org.scijava.display.Display;
 import org.scijava.display.DisplayService;
 import org.scijava.io.IOService;
+import org.scijava.plugin.Attr;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.tool.Tool;
@@ -82,7 +83,9 @@ import org.scijava.ui.UIService;
  * 
  * @author Aivar Grislis
  */
-@Plugin(type = Command.class, menuPath = "Analyze>Lifetime>Spectral Lifetime Analysis (IJ2)") //TODO ARG rename w/o IJ2
+@Plugin(type = Command.class,
+	menuPath = "Analyze>Lifetime>Spectral Lifetime Analysis",
+	attrs = { @Attr(name = "no-legacy") })
 public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Command {
 	private static final String PATH_KEY = "path";
 	private static final String LIFETIME = "Lifetime";
