@@ -463,6 +463,7 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 	}
 
 	private boolean showFileDialog(String defaultFile, boolean defaultAppend, boolean defaultCSV) {
+		// TODO: Consolidate logic with same in ExportPixelsToText!
 		GenericDialog dialog = new GenericDialog("Export Histograms to Text");
 		dialog.addStringField("Save As:", defaultFile, 24);
 		dialog.addCheckbox("Append", defaultAppend);

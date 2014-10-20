@@ -317,7 +317,7 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 	}
 
 	private boolean showFileDialog(String defaultFile, boolean defaultAppend, boolean defaultCSV) {
-		//TODO shouldn't UI be in separate class?
+		// TODO: Consolidate logic with same in ExportHistogramsToText!
 		GenericDialog dialog = new GenericDialog("Export Pixels to Text");
 		dialog.addStringField("Save As:", defaultFile, 24);
 		dialog.addCheckbox("Append", defaultAppend);

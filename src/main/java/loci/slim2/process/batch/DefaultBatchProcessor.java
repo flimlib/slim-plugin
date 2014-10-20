@@ -77,6 +77,7 @@ public class DefaultBatchProcessor implements BatchProcessor {
 		String defSummaryFile = prefs.get(SUMMARY_FILE_KEY, "summary");
 		boolean defCSV = prefs.getBoolean(CSV_KEY, false);
 
+		// TODO - Consolidate this logic with same in SLIMProcessor!
 		GenericDialog dialog = new GenericDialog("Batch Processing");
 		dialog.addCheckbox("Export Pixels", defExportPixels);
 		dialog.addStringField("Pixels File", defPixelsFile);
