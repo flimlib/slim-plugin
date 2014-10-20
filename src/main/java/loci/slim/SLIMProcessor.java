@@ -27,7 +27,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
-import ij.plugin.frame.RoiManager;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import io.scif.img.ImgOpener;
@@ -2450,12 +2449,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 * @return array of ROIs.
 	 */
 	private Roi[] getRois() {
-		Roi[] rois = {};
-		RoiManager manager = RoiManager.getInstance();
-		if (null != manager) {
-			rois = manager.getRoisAsArray();
-		}
-		return rois;
+		// FIXME: Use the associated raw lifetime image, not active image!
+		final Roi roi = IJ.getImage().getRoi();
+		return roi == null ? new Roi[0] : new Roi[] {roi};
 	}
 
 	/**
