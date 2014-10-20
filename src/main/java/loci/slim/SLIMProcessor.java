@@ -934,13 +934,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		// TODO - Consolidate this logic with same in DefaultBatchProcessor!
 		GenericDialog dialog = new GenericDialog("Batch Processing");
-		dialog.addCheckbox("Export Pixels", defExportPixels);
-		dialog.addStringField("Pixels File", defPixelsFile);
-		dialog.addCheckbox("Export Histograms", defExportHistograms);
-		dialog.addStringField("Histogram File", defHistogramsFile);
-		dialog.addCheckbox("Export Summary Histogram", defExportSummary);
-		dialog.addStringField("Summary File", defSummaryFile);
-		dialog.addCheckbox("Comma Separated", defCSV);
+		dialog.addCheckbox("Export_Pixels", defExportPixels);
+		dialog.addStringField("Pixels_File", defPixelsFile);
+		dialog.addCheckbox("Export_Histograms", defExportHistograms);
+		dialog.addStringField("Histogram_File", defHistogramsFile);
+		dialog.addCheckbox("Export_Summary_Histogram", defExportSummary);
+		dialog.addStringField("Summary_File", defSummaryFile);
+		dialog.addCheckbox("Comma_Separated", defCSV);
 		dialog.showDialog();
 		if (dialog.wasCanceled()) {
 			return;
