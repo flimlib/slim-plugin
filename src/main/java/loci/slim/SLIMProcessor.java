@@ -267,7 +267,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 		File[] files = showFileDialog(getPathFromPreferences());
 		if (files.length > 1) {
 			showError("Error in Batch Processing", "Need to fit a sample image first");
-			GenericDialog dialog = new GenericDialog("Error in Batch Processing");
 		}
 		else {
 			String[] pathAndFile = getPathAndFile(files[0]);
