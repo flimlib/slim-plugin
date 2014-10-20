@@ -269,10 +269,8 @@ public class DefaultBatchProcessor implements BatchProcessor {
 					}
 
 					if (null != message) {
-						GenericDialog dialog = new GenericDialog(BATCH_ERROR);
-						dialog.addMessage(message);
-						dialog.showDialog();
-						if (dialog.wasCanceled()) {
+						final boolean ok = IJ.showMessageWithCancel(BATCH_ERROR, message);
+						if (!ok) {
 							// Cancel cancels rest of batch; OK continues
 							return;
 						}
@@ -313,10 +311,8 @@ public class DefaultBatchProcessor implements BatchProcessor {
 			return true;
 		}
 		catch (IOException e) {
-			GenericDialog dialog = new GenericDialog("Error in Batch Processing");
-			dialog.addMessage("Problem writing to file: " + fileName);
-			dialog.hideCancelButton();
-			dialog.showDialog();
+			IJ.showMessage("Error in Batch Processing", "Problem writing to file: " +
+				fileName);
 			return false;
 		}
 	}

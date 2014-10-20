@@ -23,8 +23,8 @@
 
 package loci.slim;
 
+import ij.IJ;
 import ij.ImageJ;
-import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
 import java.util.Stack;
@@ -64,9 +64,8 @@ public class SLIM_PlugIn implements PlugIn {
 		boolean success = false;
 		instance = null;
 		if (stack.empty()) {
-			GenericDialog dialog = new GenericDialog("Error in Batch Processing");
-			dialog.addMessage("SLIM Curve should be running before invoking batch processing macro.");
-			dialog.showDialog();
+			IJ.showMessage("Error in Batch Processing",
+				"SLIM Curve should be running before invoking batch processing macro.");
 		}
 		else {
 			instance = stack.peek();
@@ -110,9 +109,8 @@ public class SLIM_PlugIn implements PlugIn {
 		boolean success = false;
 		instance = null;
 		if (stack.empty()) {
-			GenericDialog dialog = new GenericDialog("Error in Batch Processing");
-			dialog.addMessage("SLIM Curve should be running before invoking batch processing macro.");
-			dialog.showDialog();
+			IJ.showMessage("Error in Batch Processing",
+				"SLIM Curve should be running before invoking batch processing macro.");
 		}
 		else {
 			instance = stack.peek();

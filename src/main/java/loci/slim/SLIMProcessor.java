@@ -293,10 +293,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	}
 
 	static final private void showError(String title, String message) {
-		GenericDialog dialog = new GenericDialog(title);
-		dialog.addMessage(message);
-		dialog.hideCancelButton();
-		dialog.showDialog();
+		IJ.showMessage(title, message);
 	}
 
 	static final private String[] getPathAndFile(File file) {
@@ -341,10 +338,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 				fileWriter.close();
 			}
 			catch (IOException e) {
-				GenericDialog dialog = new GenericDialog("Error in Batch Processing");
-				dialog.addMessage("Problem writing to file: " + output);
-				dialog.hideCancelButton();
-				dialog.showDialog();
+				IJ.showMessage("Error in Batch Processing",
+					"Problem writing to file: " + output);
 				_batchError = true;
 			}
 		}
@@ -361,15 +356,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 				getImageInfo(_image);
 
 				if (_batchBins != _bins) {
-					GenericDialog dialog = new GenericDialog("Error in Batch Processing");
 					String imageName = input.substring(input.lastIndexOf(File.separatorChar) + 1);
-					dialog.addMessage("Settings are for " + _batchBins + " bins, " + imageName + " has " + _bins + " bins.");
-					dialog.hideCancelButton();
-					dialog.showDialog();
-					if (dialog.wasCanceled()) {
-						// Cancel cancels rest of batch; OK continues
-						_batchError = true;
-					}
+					IJ.showMessage("Error in Batch Processing", "Settings are for " +
+						_batchBins + " bins, " + imageName + " has " + _bins + " bins.");
 					return;
 				}
 
@@ -437,10 +426,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 				fileWriter.close();
 			}
 			catch (IOException e) {
-				GenericDialog dialog = new GenericDialog("Error in Batch Histogram Processing");
-				dialog.addMessage("Problem writing to file: " + output);
-				dialog.hideCancelButton();
-				dialog.showDialog();
+				IJ.showMessage("Error in Batch Histogram Processing",
+					"Problem writing to file: " + output);
 				_batchError = true;
 			}
 			_exportOutput = output;
@@ -459,15 +446,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 				getImageInfo(_image);
 
 				if (_batchHistoBins != _bins) {
-					GenericDialog dialog = new GenericDialog("Error in Batch Processing");
 					String imageName = input.substring(input.lastIndexOf(File.separatorChar) + 1);
-					dialog.addMessage("Settings are for " + _batchHistoBins + " bins, " + imageName + " has " + _bins + " bins.");
-					dialog.hideCancelButton();
-					dialog.showDialog();
-					if (dialog.wasCanceled()) {
-						// Cancel cancels rest of batch; OK continues
-						_batchError = true;
-					}
+					IJ.showMessage("Error in Batch Processing", "Settings are for " +
+						_batchHistoBins + " bins, " + imageName + " has " + _bins +
+						" bins.");
 					return;
 				}
 
@@ -1123,13 +1105,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 				getImageInfo(_image);
 
 				if (_batchBins != _bins) {
-					GenericDialog dialog = new GenericDialog("Error in Batch Processing");
 					String imageName = file.getCanonicalPath();
 					imageName = imageName.substring(imageName.lastIndexOf(File.separatorChar) + 1);
-					dialog.addMessage("Settings are for " + _batchBins + " bins, " + imageName + " has " + _bins + " bins.");
-					//dialog.hideCancelButton();
-					dialog.showDialog();
-					if (dialog.wasCanceled()) {
+					final boolean ok =
+						IJ.showMessageWithCancel("Error in Batch Processing",
+							"Settings are for " + _batchBins + " bins, " + imageName +
+								" has " + _bins + " bins.");
+					if (!ok) {
 						// Cancel cancels rest of batch; OK continues
 						_batchError = true;
 						break;
@@ -1189,10 +1171,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 			return true;
 		}
 		catch (IOException e) {
-			GenericDialog dialog = new GenericDialog("Error in Batch Processing");
-			dialog.addMessage("Problem writing to file: " + fileName);
-			dialog.hideCancelButton();
-			dialog.showDialog();
+			IJ.showMessage("Error in Batch Processing", "Problem writing to file: " +
+				fileName);
 			return false;
 		}
 	}
