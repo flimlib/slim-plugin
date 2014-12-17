@@ -1753,6 +1753,27 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	}
 
 	@Override
+	public void setRegion(final FitRegion region) {
+		switch (region) {
+		case EACH:
+			_regionComboBox.setSelectedItem(ALL_REGION);
+			break;
+		case POINT:
+			_regionComboBox.setSelectedItem(PIXEL_REGION);
+			break;
+		case ROI:
+			_regionComboBox.setSelectedItem(ROIS_REGION);
+			break;
+		case SUMMED:
+			_regionComboBox.setSelectedItem(SUM_REGION);
+			break;
+		default:
+			throw new IllegalStateException("Unknown region: " + region);
+			break;
+		}
+	}
+
+	@Override
 	public FitAlgorithm getAlgorithm() {
 		FitAlgorithm algorithm = null;
 		String selected = (String) _algorithmComboBox.getSelectedItem();

@@ -83,6 +83,13 @@ public interface IUserInterfacePanel {
 	FitRegion getRegion();
 
 	/**
+	 * Sets region the fit applies to.
+	 *
+	 * @param region The region to use.
+	 */
+	void setRegion(FitRegion region);
+
+	/**
 	 * Gets implementation & algorithm for the fit.
 	 *
 	 * @return fit algorithm.
