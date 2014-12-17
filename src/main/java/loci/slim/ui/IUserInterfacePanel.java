@@ -43,177 +43,177 @@ public interface IUserInterfacePanel {
 	 *
 	 * @return JFrame
 	 */
-	public JFrame getFrame();
+	JFrame getFrame();
 
 	/**
 	 * Sets the listener
 	 */
-	public void setListener(IUserInterfacePanelListener listener);
+	void setListener(IUserInterfacePanelListener listener);
 
 	/**
 	 * Sets the threshold listener.
 	 */
-	public void setThresholdListener(IThresholdUpdate thresholdListener);
+	void setThresholdListener(IThresholdUpdate thresholdListener);
 
 	/**
 	 * Disables the UI.
 	 */
-	public void disable();
+	void disable();
 
 	/**
 	 * Resets the UI after a fit.
 	 */
-	public void reset();
+	void reset();
 
 	/**
 	 * Disables the UI buttons.
 	 */
-	public void disableButtons();
+	void disableButtons();
 
 	/**
 	 * Resets the UI buttons after a fit.
 	 */
-	public void resetButtons();
+	void resetButtons();
 
 	/**
 	 * Gets region the fit applies to.
 	 *
 	 * @return fit region
 	 */
-	public FitRegion getRegion();
+	FitRegion getRegion();
 
 	/**
 	 * Gets implementation & algorithm for the fit.
 	 *
 	 * @return fit algorithm.
 	 */
-	public FitAlgorithm getAlgorithm();
+	FitAlgorithm getAlgorithm();
 
 	/**
 	 * Gets function to be fitted.
 	 *
 	 * @return fit function
 	 */
-	public FitFunction getFunction();
+	FitFunction getFunction();
 
 	/**
 	 * Gets noise model for fit.
 	 *
 	 * @return
 	 */
-	public NoiseModel getNoiseModel();
+	NoiseModel getNoiseModel();
 
 	/**
 	 * Returns list of fitted images to display.
 	 *
 	 * @return
 	 */
-	public String getFittedImages();
+	String getFittedImages();
 
 	/**
 	 * Returns whether to create colorized grayscale fitted images.
 	 * 
 	 * @return 
 	 */
-	public boolean getColorizeGrayScale();
+	boolean getColorizeGrayScale();
 
 	/**
 	 * Gets analysis plugin names.
 	 *
 	 * @return analysis plugin names
 	 */
-	public String[] getAnalysisList();
+	String[] getAnalysisList();
 
 	/**
 	 * Gets whether or not to fit all channels.
 	 *
 	 * @return fit all channels
 	 */
-	public boolean getFitAllChannels();
+	boolean getFitAllChannels();
 
 	/**
 	 * Gets photon count threshold to fit a pixel.
 	 *
 	 * @return threshold
 	 */
-	public int getThreshold();
+	int getThreshold();
 
 	/**
 	 * Sets photon count threshold to fit a pixel.
 	 *
 	 * @param threshold
 	 */
-	public void setThreshold(int threshold);
+	void setThreshold(int threshold);
 
 	/**
 	 * Gets chi square target for fit.
 	 * 
 	 * @return 
 	 */
-	public double getChiSquareTarget();
+	double getChiSquareTarget();
 
 	/**
 	 * Sets chi square target for fit.
 	 * 
 	 * @param chiSqTarget 
 	 */
-	public void setChiSquareTarget(double chiSqTarget);
+	void setChiSquareTarget(double chiSqTarget);
 
 	/**
 	 * Gets binning plugin name.
 	 *
 	 * @return binning plugin name
 	 */
-	public String getBinning();
+	String getBinning();
 
 	/**
 	 * Gets pixel x.
 	 *
 	 * @return x
 	 */
-	public int getX();
+	int getX();
 
 	/**
 	 * Sets pixel x.
 	 *
 	 * @param x
 	 */
-	public void setX(int x);
+	void setX(int x);
 
 	/**
 	 * Gets pixel y.
 	 *
 	 * @return y
 	 */
-	public int getY();
+	int getY();
 
 	/**
 	 * Sets pixel y.
 	 *
 	 * @param y
 	 */
-	public void setY(int y);
+	void setY(int y);
 
 	/**
 	 * Gets number of fit parameters
 	 *
 	 * @return count
 	 */
-	public int getParameterCount();
+	int getParameterCount();
 
 	/**
 	 * Sets number of fitted parameters after a successful fit.
 	 *
 	 * @param components
 	 */
-	public void setFittedParameterCount(int count);
+	void setFittedParameterCount(int count);
 
 	/**
 	 * Gets the parameters of the fit
 	 *
 	 * @return fit parameters
 	 */
-	public double[] getParameters();
+	double[] getParameters();
 
 	/**
 	 * Sets the parameters of the fit
@@ -221,7 +221,7 @@ public interface IUserInterfacePanel {
 	 * @param parameters
 	 * @param AIC
 	 */
-	public void setParameters(double parameters[], double AIC);
+	void setParameters(double parameters[], double AIC);
 
 	/**
 	 * Sets the parameters of the fit by function.
@@ -229,21 +229,21 @@ public interface IUserInterfacePanel {
 	 * @param function index
 	 * @param parameters
 	 */
-	public void setFunctionParameters(int function, double parameters[]);
+	void setFunctionParameters(int function, double parameters[]);
 
 	/**
 	 * Gets which parameters aren't fixed.
 	 *
 	 * @return free parameters
 	 */
-	public boolean[] getFree();
+	boolean[] getFree();
 
 	/**
 	 * Gets whether to start next fit with results of last fit.
 	 *
 	 * @return
 	 */
-	public boolean getRefineFit();
+	boolean getRefineFit();
 
 	/**
 	 * Experimental: gets a scatter factor from UI.  SPC Image can fit an
@@ -252,5 +252,6 @@ public interface IUserInterfacePanel {
 	 * 
 	 * @return 
 	 */
-	public double getScatter();
+	double getScatter();
+
 }
