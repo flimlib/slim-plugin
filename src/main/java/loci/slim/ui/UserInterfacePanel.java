@@ -70,6 +70,7 @@ import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.ICurveFitter.NoiseModel;
 import loci.curvefitter.IFitterEstimator;
 import loci.slim.IThresholdUpdate;
+import loci.slim.SLIMProcessor;
 import loci.slim.fitting.cursor.FittingCursorHelper;
 import loci.slim.fitting.cursor.IFittingCursorUI;
 
@@ -324,10 +325,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	String _fitButtonText = FIT_IMAGE;
 
 	public UserInterfacePanel(boolean tabbed, boolean showTau,
-		int maxBin, double xInc,
-		String[] analysisChoices, String[] binningChoices,
-		FittingCursorHelper fittingCursorHelper,
-		IFitterEstimator fitterEstimator)
+			int maxBin, double xInc,
+			String[] analysisChoices, String[] binningChoices,
+			FittingCursorHelper fittingCursorHelper,
+			IFitterEstimator fitterEstimator)
 	{
 		String lifetimeLabel = "" + (showTau ? TAU : LAMBDA);
 
@@ -400,51 +401,60 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		buttonPanel.add(Box.createHorizontalGlue());
 		_openButton = new JButton("New File/Batch");
 		_openButton.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (null != _listener) {
-						_listener.openFile();
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						if (null != _listener) {
+							_listener.openFile();
+						}
 					}
 				}
-			}
 				);
 		buttonPanel.add(_openButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 		_quitButton = new JButton("Quit");
 		_quitButton.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (null != _listener) {
-						_listener.quit();
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						if (null != _listener) {
+							_listener.quit();
+						}
 					}
 				}
-			}
 				);
 		buttonPanel.add(_quitButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 		_fitButton = new JButton(_fitButtonText);
 		_fitButton.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					String text = e.getActionCommand();
-					if (text.equals(_fitButtonText)) {
-						enableAll(false);
-						setFitButtonState(false);
-						if (null != _listener) {
-							_listener.doFit();
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						String text = e.getActionCommand();
+						if (text.equals(_fitButtonText)) {
+							enableAll(false);
+							setFitButtonState(false);
+							if (null != _listener) {
+								_listener.doFit();
+								String[] arg = {"0","0"};
+								//arg=
+								SLIMProcessor.record(SLIMProcessor.FIT_IMAGE_FN, arg);
+								//test code
+//								IJ.log("reached");
+//								int a=SLIMProcessor.myparams.algotype;
+//								IJ.log(Integer.toString(a));
+								///test code ends
+
+							}
 						}
-					}
-					else{
-						setFitButtonState(true);
-						if (null != _listener) {
-							_listener.cancelFit();
+						else{
+							setFitButtonState(true);
+							if (null != _listener) {
+								_listener.cancelFit();
+							}
 						}
 					}
 				}
-			}
 				);
 		buttonPanel.add(_fitButton);
 
@@ -455,18 +465,18 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		final Dimension preferred = _frame.getPreferredSize();
 		_frame.setMinimumSize(preferred);
 		_frame.addComponentListener(
-			new ComponentAdapter() {
-				@Override
-				public void componentResized(ComponentEvent e) {
-					// allow horizontal but not vertical resize
-					int width = _frame.getWidth();
-					if (width < (int) preferred.getWidth()) {
-						width = (int) preferred.getWidth();
+				new ComponentAdapter() {
+					@Override
+					public void componentResized(ComponentEvent e) {
+						// allow horizontal but not vertical resize
+						int width = _frame.getWidth();
+						if (width < (int) preferred.getWidth()) {
+							width = (int) preferred.getWidth();
+						}
+						_frame.setSize(width, (int) preferred.getHeight());
 					}
-					_frame.setSize(width, (int) preferred.getHeight());
-				}
 
-			});
+				});
 
 		// no prompt initially
 		enablePromptCursors(false);
@@ -528,27 +538,27 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_regionComboBox = new JComboBox(REGION_ITEMS);
 		_regionComboBox.setSelectedItem(ALL_REGION);
 		_regionComboBox.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() == ItemEvent.SELECTED) {
-						String item = (String) e.getItem();
-						if (SUM_REGION.equals(item)) {
-							_fitButtonText = FIT_SUMMED_PIXELS;
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.SELECTED) {
+							String item = (String) e.getItem();
+							if (SUM_REGION.equals(item)) {
+								_fitButtonText = FIT_SUMMED_PIXELS;
+							}
+							else if (ROIS_REGION.equals(item)) {
+								_fitButtonText = FIT_SUMMED_ROIS;
+							}
+							else if (PIXEL_REGION.equals(item)) {
+								_fitButtonText = FIT_PIXEL;
+							}
+							else if (ALL_REGION.equals(item)) {
+								_fitButtonText = FIT_IMAGE;
+							}
+							_fitButton.setText(_fitButtonText);
 						}
-						else if (ROIS_REGION.equals(item)) {
-							_fitButtonText = FIT_SUMMED_ROIS;
-						}
-						else if (PIXEL_REGION.equals(item)) {
-							_fitButtonText = FIT_PIXEL;
-						}
-						else if (ALL_REGION.equals(item)) {
-							_fitButtonText = FIT_IMAGE;
-						}
-						_fitButton.setText(_fitButtonText);
 					}
 				}
-			}
 				);
 		fitPanel.add(_regionComboBox);
 
@@ -565,18 +575,23 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		fitPanel.add(functionLabel);
 		_functionComboBox = new JComboBox(FUNCTION_ITEMS);
 		_functionComboBox.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() == ItemEvent.SELECTED) {
-						String item = (String) e.getItem();
-						CardLayout cl = (CardLayout)(_cardPanel.getLayout());
-						cl.show(_cardPanel, item);
-						reconcileStartParam();
-						updateFittedImagesComboBox(FUNCTION_ITEMS, item);
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.SELECTED) {
+							String item = (String) e.getItem();
+							SLIMProcessor.myparams.algotype=1;
+							CardLayout cl = (CardLayout)(_cardPanel.getLayout());
+							cl.show(_cardPanel, item);
+							reconcileStartParam();
+							updateFittedImagesComboBox(FUNCTION_ITEMS, item);
+//							SLIMProcessor.myparams.fucntion_type=1;
+//							IJ.log("item llistener fro function has been reached");
+							//ADDMACRO
+							
+						}
 					}
 				}
-			}
 				);
 		refitUponStateChange(_functionComboBox);
 		fitPanel.add(_functionComboBox);
@@ -855,31 +870,31 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		cursorPanel.add(dummyLabel);
 		_showBins = new JCheckBox("Display as indices");
 		_showBins.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					boolean showBins = e.getStateChange() == ItemEvent.SELECTED;
-					//TODO 4/2/13
-					/**
-					 * I tried having two models, one for bins and one for time
-					 * values and swapping them here.  Crashes when one model has
-					 * integer values and the other doubles.  So, switch to doubles
-					 * for all, but still doesn't work.  Same thing having a single
-					 * model that gets different min/max/inc.  In 'bins' mode I
-					 * could never get the spinner to work, or even type in new
-					 * values.
-					 * 
-					 * Therefore, for now, just disable these spinners altogether
-					 * when in 'bins' mode.
-					 */
-					_transientStartSpinner.setEnabled(!showBins);
-					_dataStartSpinner.setEnabled(!showBins);
-					_transientStopSpinner.setEnabled(!showBins);
-					_promptDelaySpinner.setEnabled(!showBins);
-					_promptWidthSpinner.setEnabled(!showBins);
-					_fittingCursorHelper.setShowBins(showBins);
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						boolean showBins = e.getStateChange() == ItemEvent.SELECTED;
+						//TODO 4/2/13
+						/**
+						 * I tried having two models, one for bins and one for time
+						 * values and swapping them here.  Crashes when one model has
+						 * integer values and the other doubles.  So, switch to doubles
+						 * for all, but still doesn't work.  Same thing having a single
+						 * model that gets different min/max/inc.  In 'bins' mode I
+						 * could never get the spinner to work, or even type in new
+						 * values.
+						 * 
+						 * Therefore, for now, just disable these spinners altogether
+						 * when in 'bins' mode.
+						 */
+						_transientStartSpinner.setEnabled(!showBins);
+						_dataStartSpinner.setEnabled(!showBins);
+						_transientStopSpinner.setEnabled(!showBins);
+						_promptDelaySpinner.setEnabled(!showBins);
+						_promptWidthSpinner.setEnabled(!showBins);
+						_fittingCursorHelper.setShowBins(showBins);
+					}
 				}
-			}
 				);
 		//TODO 4/2/13
 		// Swapping models doesn't work correctly.
