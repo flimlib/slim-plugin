@@ -25,6 +25,7 @@ package loci.slim;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.process.ColorProcessor;
@@ -108,6 +109,14 @@ import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;
 
+
+
+
+
+
+import ij.plugin.frame.Recorder;
+
+
 /**
  * SLIMProcessor is the main class of the SLIM Curve plugin for ImageJ. It was
  * originally just thrown together to get something working, with some
@@ -176,7 +185,16 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private static final String GAUSSIAN_A_KEY = "a";
 	private static final String GAUSSIAN_B_KEY = "b";
 	private static final String GAUSSIAN_C_KEY = "c";
+	
+	/////Macro specific keys for better recordability
+	public static final String PLUGIN_NAME = "SLIM pluguin";
+	public static final String FIT_IMAGE_FN= "fitImages";
+	public static final String SET_OF_EXPONENTS= "setExponentNo";
 
+	public static FitInfo fitInfo =new FitInfo();
+	
+	public static paramSetMacro myparams =new paramSetMacro();
+	
 	private static final char TAB = '\t';
 
 	private SCIFIOImgPlus<T> _image;
@@ -267,8 +285,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 		File[] files = showFileDialog(getPathFromPreferences());
 		if (files.length > 1) {
 			showError("Error in Batch Processing", "Need to fit a sample image first");
+			
 		}
 		else {
+			
+			recordRun("","");
 			String[] pathAndFile = getPathAndFile(files[0]);
 			_path = pathAndFile[0];
 			_file = pathAndFile[1];
@@ -493,6 +514,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 *
 	 * @param uiPanel
 	 */
+	//public static void doFits() {
 	private void doFits() {
 		// heuristics
 		IEstimator estimator = new Estimator();
@@ -811,47 +833,57 @@ public class SLIMProcessor <T extends RealType<T>> {
 		showGrayScaleAndFit(uiPanel);
 
 		// processing loop; waits for UI panel input
-		while (!_quit) {
-			while (!_fitInProgress) {
-				try {
-					Thread.sleep(1000);
-				}
-				catch (InterruptedException e) {
+		
+		new Thread(new Runnable(){
 
+			@Override
+			public void run() {
+				while (!_quit) {
+					while (!_fitInProgress) {
+						try {
+							Thread.sleep(100);
+						}
+						catch (InterruptedException e) {
+
+						}
+						if (_quit) {
+							hideUIPanel(uiPanel);
+							return;
+						}
+					}
+
+					//uiPanel.enable(false); //TODO this might be better to be same as grayScalePanel
+					_grayScaleImage.enable(false);
+
+					// get settings of requested fit
+					getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
+
+					if (_refit) {
+						if (_summed) {
+							fitSummed(_uiPanel, _fittingCursor);
+						}
+						else {
+							fitPixel(_uiPanel, _fittingCursor);
+						}
+						_refit = false;
+					}
+					else {
+						// do the fit
+						fitData(uiPanel);
+						_summed = uiPanel.getRegion() == FitRegion.SUMMED;
+					}
+
+					_fitInProgress = false;
+					//uiPanel.enable(true);
+					_grayScaleImage.enable(true);
+					uiPanel.reset();
 				}
-				if (_quit) {
-					hideUIPanel(uiPanel);
-					return;
-				}
+				hideUIPanel(uiPanel);
 			}
+			
+		},"SLIM-Processor").start();
 
-			//uiPanel.enable(false); //TODO this might be better to be same as grayScalePanel
-			_grayScaleImage.enable(false);
-
-			// get settings of requested fit
-			getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
-
-			if (_refit) {
-				if (_summed) {
-					fitSummed(_uiPanel, _fittingCursor);
-				}
-				else {
-					fitPixel(_uiPanel, _fittingCursor);
-				}
-				_refit = false;
-			}
-			else {
-				// do the fit
-				fitData(uiPanel);
-				_summed = uiPanel.getRegion() == FitRegion.SUMMED;
-			}
-
-			_fitInProgress = false;
-			//uiPanel.enable(true);
-			_grayScaleImage.enable(true);
-			uiPanel.reset();
-		}
-		hideUIPanel(uiPanel);
+		
 	}
 
 	private double gaussian(double a, double b, double c, double x) {
@@ -1507,7 +1539,15 @@ public class SLIMProcessor <T extends RealType<T>> {
 		fitInfo.setThreshold(uiPanel.getThreshold());
 		fitInfo.setChiSquareTarget(uiPanel.getChiSquareTarget());
 		fitInfo.setBinning(uiPanel.getBinning());
+		
+		
 		fitInfo.setX(uiPanel.getX());
+//		int a=SLIMProcessor.myparams.algotype;
+//		
+//		
+//		IJ.log(Integer.toString(a));
+//		fitInfo.setX(a);
+//		
 		fitInfo.setY(uiPanel.getY());
 		fitInfo.setParameterCount(uiPanel.getParameterCount());
 		fitInfo.setParameters(uiPanel.getParameters());
@@ -1528,6 +1568,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private ImgPlus<DoubleType> fitImage(IUserInterfacePanel uiPanel, int channel, boolean batch) {
 		// get fit settings from the UI panel
 		FitInfo fitInfo = getFitInfo(uiPanel, channel, _fittingCursor);
+		
+	//	IJ.log((uiPanel.getAlgorithm());
 		fitInfo.setXInc(_timeRange);
 		if (_fittingCursor.getHasPrompt() && null != _excitationPanel) {
 			int startIndex = _fittingCursor.getPromptStartBin();
@@ -2695,5 +2737,98 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}
 		}
 	}
+	
+	/* **********************************************************
+	 * Macro recording related methods
+	 * *********************************************************/
+
+	/**
+	 * Macro-record a specific command. The command names match the static 
+	 * methods that reproduce that part of the code.
+	 * 
+	 * @param command name of the command including package info
+	 * @param args set of arguments for the command
+	 */
+	public static void record(String command, String... args) 
+	{
+		command = "call(\"loci.slim.SLIMProcessor." + command;
+		for(int i = 0; i < args.length; i++)
+			command += "\", \"" + args[i];
+		command += "\");\n";
+		// in Windows systems, replace backslashes by double ones
+		if( IJ.isWindows() )
+			command = command.replaceAll( "\\\\", "\\\\\\\\" );
+		if(Recorder.record)
+			Recorder.recordString(command);
+	}
+	
+	public static void recordRun(String command, String... args) 
+	{
+		//command = "run(\"loci.slim.SLIMPlugin(\"\")\")\n";
+		command = "run(\"SLIM Curve\")\n";
+		
+//		for(int i = 0; i < args.length; i++)
+//			command += "\", \"" + args[i];
+//		command += "\");\n";
+		// in Windows systems, replace backslashes by double ones
+		if( IJ.isWindows() )
+			command = command.replaceAll( "\\\\", "\\\\\\\\" );
+		if(Recorder.record)
+			Recorder.recordString(command);
+	}
+	
+	
+	public static void fitImages(String fileName, String param1){
+		
+		// TODO: Consider reusing an existing SLIMProcessor/SLIM_PlugIn, if one is visible
+		SLIMProcessor slimProc = new SLIMProcessor();
+
+		IJ.log("reachederearacasdsa");
+		// TODO: Encapsulate this duplicate logic into its own method of SLIMProcessor
+		// SLIMProcessor.setFile
+		String[] pathAndFile = getPathAndFile(new File(fileName));
+		slimProc._path = pathAndFile[0];
+		slimProc._file = pathAndFile[1];
+		slimProc._image = slimProc.loadImage(slimProc._path, slimProc._file);
+		if (null == slimProc._image) {
+			showError("Error", "Could not load image");
+			return;
+		}
+
+		//TODO
+		//slimProc.setParam1(param1); // FIXME
+		
+		// show the UI; do fits
+		
+		IJ.log(slimProc._file);
+		slimProc.doFits();
+		
+//		_cancel = false;
+//		_fitInProgress = true;
+	}
+	
+	public  void setExponentNo(String arg ){
+		_uiPanel.disable();
+		
+
+	}
+	
+	public static void test2(){
+		IJ.log("is it running");
+		
+		myparams.algotype=1;
+		
+		IJ.log(Integer.toString(myparams.algotype));
+		
+		
+		//SLIMProcessor slimProc = new SLIMProcessor();
+//		slimProc.setExponentNo("");
+		
+		
+	}
+		
+		
+	
+	
 
 }
