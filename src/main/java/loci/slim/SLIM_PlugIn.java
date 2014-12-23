@@ -24,7 +24,6 @@
 package loci.slim;
 
 import ij.IJ;
-import ij.ImageJ;
 import ij.plugin.PlugIn;
 
 import java.util.Stack;
@@ -45,14 +44,6 @@ public class SLIM_PlugIn implements PlugIn {
 		stack.push(slimProcessor);
 		slimProcessor.process(arg);
 		stack.pop();
-	}
-
-	public static void main(String [] args)
-	{
-		new ImageJ();
-		SLIM_PlugIn plugIn = new SLIM_PlugIn();
-		plugIn.run("");
-		System.exit(0);
 	}
 
 	/**
