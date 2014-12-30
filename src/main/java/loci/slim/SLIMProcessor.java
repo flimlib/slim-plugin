@@ -165,6 +165,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private volatile boolean _quit;
 	private volatile boolean _cancel;
 	private volatile boolean _fitInProgress;
+//	static volatile boolean _cancel;
+//	static volatile boolean _fitInProgress;
 	private volatile boolean _fitted;
 	private volatile boolean _summed;
 	private volatile boolean _refit;
@@ -190,10 +192,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String PLUGIN_NAME = "SLIM pluguin";
 	public static final String FIT_IMAGE_FN= "fitImages";
 	public static final String SET_OF_EXPONENTS= "setExponentNo";
+	
+	public static final String SET_FUNCTION_TYPE= "setFunctionType";
 
 	public static FitInfo fitInfo =new FitInfo();
 	
-	public static paramSetMacro myparams =new paramSetMacro();
+	public static paramSetMacro macroParams =new paramSetMacro();
 	
 	private static final char TAB = '\t';
 
@@ -1527,7 +1531,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 		fitInfo.setChannel(channel);
 		fitInfo.setRegion(uiPanel.getRegion());
 		fitInfo.setAlgorithm(uiPanel.getAlgorithm());
+		
 		fitInfo.setFunction(uiPanel.getFunction());
+		
+		//fitInfo.setFunction(SLIMProcessor.macroParams.getFunction());
+		
+		IJ.log(fitInfo.getFunction().toString());
+		
 		fitInfo.setNoiseModel(uiPanel.getNoiseModel());
 		fitInfo.setFittedImages(uiPanel.getFittedImages());
 		fitInfo.setColorizeGrayScale(uiPanel.getColorizeGrayScale());
@@ -1538,16 +1548,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 		fitInfo.setTransientStop(fittingCursor.getTransientStopBin());
 		fitInfo.setThreshold(uiPanel.getThreshold());
 		fitInfo.setChiSquareTarget(uiPanel.getChiSquareTarget());
+		
 		fitInfo.setBinning(uiPanel.getBinning());
 		
 		
 		fitInfo.setX(uiPanel.getX());
-//		int a=SLIMProcessor.myparams.algotype;
-//		
-//		
-//		IJ.log(Integer.toString(a));
-//		fitInfo.setX(a);
-//		
+
+		
 		fitInfo.setY(uiPanel.getY());
 		fitInfo.setParameterCount(uiPanel.getParameterCount());
 		fitInfo.setParameters(uiPanel.getParameters());
@@ -1661,6 +1668,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		int channel = fitInfo.getChannel();
 		boolean fitAllChannels = fitInfo.getFitAllChannels();
 
+		
 		// needed to display progress bar
 		int pixelCount = 0;
 		int totalPixelCount = totalPixelCount(width, height, channels, fitAllChannels);
@@ -1678,11 +1686,14 @@ public class SLIMProcessor <T extends RealType<T>> {
 		int[] dimension = new int[] { width, height, fittedChannels };
 		FittedImageFitter fitter = null;
 		String outputs = fitInfo.getFittedImages();
+		
+		
 		if (!batch && null != outputs) {
 			int channelNumber = -1;
 			if (channels > 1 && !fitAllChannels) {
 				channelNumber = channel + 1;
 			}
+		
 			int components = fitInfo.getComponents();
 			boolean stretched = fitInfo.getStretched();
 			FittedImageParser parser =
@@ -1709,6 +1720,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 		globalFitParams.setEstimator(new FitterEstimator());
 		globalFitParams.setFitAlgorithm(fitInfo.getAlgorithm());
 		globalFitParams.setFitFunction(fitInfo.getFunction());
+		
+		//sagar test addition
+		IJ.log(globalFitParams.getFitFunction().toString()+"in globaal");
+		
 		globalFitParams.setNoiseModel(fitInfo.getNoiseModel());
 		globalFitParams.setTransientStart(fitInfo.getTransientStart());
 		globalFitParams.setDataStart(fitInfo.getDataStart());
@@ -2813,16 +2828,17 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 	}
 	
-	public static void test2(){
-		IJ.log("is it running");
+
+	
+	public static void setFunctionType(String arg){
+		///add function to set the function type in the paramSetMacro class
+		//
+		//namely it will be myparam.fucntion_type= something and it will be set to fit function parameter whenever is needed
+		// so some flag might be needed if it is operating in the macro or normal mode
 		
-		myparams.algotype=1;
+	
+		macroParams.setFunction(arg);
 		
-		IJ.log(Integer.toString(myparams.algotype));
-		
-		
-		//SLIMProcessor slimProc = new SLIMProcessor();
-//		slimProc.setExponentNo("");
 		
 		
 	}

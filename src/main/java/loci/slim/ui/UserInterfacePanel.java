@@ -438,10 +438,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 								_listener.doFit();
 								String[] arg = {"0","0"};
 								//arg=
-								SLIMProcessor.record(SLIMProcessor.FIT_IMAGE_FN, arg);
+//								SLIMProcessor.record(SLIMProcessor.FIT_IMAGE_FN, arg);
 								//test code
 //								IJ.log("reached");
-//								int a=SLIMProcessor.myparams.algotype;
+//								int a=SLIMProcessor.macroParams.algotype;
 //								IJ.log(Integer.toString(a));
 								///test code ends
 
@@ -580,19 +580,23 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					public void itemStateChanged(ItemEvent e) {
 						if (e.getStateChange() == ItemEvent.SELECTED) {
 							String item = (String) e.getItem();
-							SLIMProcessor.myparams.algotype=1;
+						//	SLIMProcessor.macroParams.algotype=1;
 							CardLayout cl = (CardLayout)(_cardPanel.getLayout());
 							cl.show(_cardPanel, item);
 							reconcileStartParam();
 							updateFittedImagesComboBox(FUNCTION_ITEMS, item);
-//							SLIMProcessor.myparams.fucntion_type=1;
+//							SLIMProcessor.macroParams.fucntion_type=1;
 //							IJ.log("item llistener fro function has been reached");
 							//ADDMACRO
+							// add macro to record the setFunctionType function
+							SLIMProcessor.macroParams.setFunction(item);
+							SLIMProcessor.record(SLIMProcessor.SET_FUNCTION_TYPE, item);
 							
 						}
 					}
 				}
 				);
+		
 		refitUponStateChange(_functionComboBox);
 		fitPanel.add(_functionComboBox);
 
@@ -909,66 +913,66 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		cursorPanel.add(excitationLabel);
 		_promptComboBox = new JComboBox(EXCITATION_ITEMS);
 		_promptComboBox.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					String selectedItem = (String) _promptComboBox.getSelectedItem();
-					boolean isExcitationLoaded = false;
-					if (EXCITATION_FILE.equals(selectedItem)) {
-						OpenDialog dialog = new OpenDialog("Load Excitation File", "");
-						String directory = dialog.getDirectory();
-						String fileName = dialog.getFileName();
-						if (null != fileName && !fileName.equals("") && null != _listener) {
-							isExcitationLoaded = _listener.loadExcitation(directory + fileName);
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						String selectedItem = (String) _promptComboBox.getSelectedItem();
+						boolean isExcitationLoaded = false;
+						if (EXCITATION_FILE.equals(selectedItem)) {
+							OpenDialog dialog = new OpenDialog("Load Excitation File", "");
+							String directory = dialog.getDirectory();
+							String fileName = dialog.getFileName();
+							if (null != fileName && !fileName.equals("") && null != _listener) {
+								isExcitationLoaded = _listener.loadExcitation(directory + fileName);
+							}
 						}
-					}
-					else if (EXCITATION_CREATE.equals(selectedItem)) {
-						SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
-						String directory = dialog.getDirectory();
-						String fileName = dialog.getFileName();
-						if (null != fileName && !fileName.equals("") && null != _listener) {
-							isExcitationLoaded = _listener.createExcitation(directory + fileName);
+						else if (EXCITATION_CREATE.equals(selectedItem)) {
+							SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+							String directory = dialog.getDirectory();
+							String fileName = dialog.getFileName();
+							if (null != fileName && !fileName.equals("") && null != _listener) {
+								isExcitationLoaded = _listener.createExcitation(directory + fileName);
+							}
 						}
-					}
-					else if (EXCITATION_ESTIMATE.equals(selectedItem)) {
-						SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
-						String directory = dialog.getDirectory();
-						String fileName = dialog.getFileName();
-						if (null != fileName && !fileName.equals("") && null != _listener) {
-							isExcitationLoaded = _listener.estimateExcitation(directory + fileName);
+						else if (EXCITATION_ESTIMATE.equals(selectedItem)) {
+							SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+							String directory = dialog.getDirectory();
+							String fileName = dialog.getFileName();
+							if (null != fileName && !fileName.equals("") && null != _listener) {
+								isExcitationLoaded = _listener.estimateExcitation(directory + fileName);
+							}
 						}
-					}
-					else if (EXCITATION_GAUSSIAN.equals(selectedItem)) {
-						SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
-						String directory = dialog.getDirectory();
-						String fileName = dialog.getFileName();
-						if (null != fileName && !fileName.equals("") && null != _listener) {
-							isExcitationLoaded = _listener.gaussianExcitation(directory + fileName);
+						else if (EXCITATION_GAUSSIAN.equals(selectedItem)) {
+							SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+							String directory = dialog.getDirectory();
+							String fileName = dialog.getFileName();
+							if (null != fileName && !fileName.equals("") && null != _listener) {
+								isExcitationLoaded = _listener.gaussianExcitation(directory + fileName);
+							}
 						}
-					}
 
-					if (isExcitationLoaded) {
-						_promptComboBox.setSelectedItem(EXCITATION_FILE);
-						enablePromptCursors(true);
-					}
-					else {
-						_promptComboBox.setSelectedItem(EXCITATION_NONE);
-						_promptDelaySpinner.setValue(0);
-						_promptWidthSpinner.setValue(0);
-						_promptBaselineSpinner.setValue(0);
+						if (isExcitationLoaded) {
+							_promptComboBox.setSelectedItem(EXCITATION_FILE);
+							enablePromptCursors(true);
+						}
+						else {
+							_promptComboBox.setSelectedItem(EXCITATION_NONE);
+							_promptDelaySpinner.setValue(0);
+							_promptWidthSpinner.setValue(0);
+							_promptBaselineSpinner.setValue(0);
 
-						/* String text = _fittingCursorHelper.getShowBins() ? "0" : "0.0";
+							/* String text = _fittingCursorHelper.getShowBins() ? "0" : "0.0";
 						_promptDelayField.setText(text);
 						_promptWidthField.setText(text);
 						_promptBaselineField.setText("0.0"); */
-						enablePromptCursors(false);
-						if (null != _listener) {
-							_listener.cancelExcitation();
+							enablePromptCursors(false);
+							if (null != _listener) {
+								_listener.cancelExcitation();
+							}
 						}
+						_listener.reFit();
 					}
-					_listener.reFit();
 				}
-			}
 				);
 		cursorPanel.add(_promptComboBox);
 
@@ -977,14 +981,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		cursorPanel.add(dummyLabel2);
 		_estimateCursorsButton = new JButton("Estimate Cursors");
 		_estimateCursorsButton.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (null != _listener) {
-						_listener.estimateCursors();
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						if (null != _listener) {
+							_listener.estimateCursors();
+						}
 					}
 				}
-			}
 				);
 		cursorPanel.add(_estimateCursorsButton);
 
@@ -1519,8 +1523,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 	private Border border(String title) {
 		return BorderFactory.createCompoundBorder(
-			BorderFactory.createTitledBorder(ETCHED_BORDER, title),
-			EMPTY_BORDER);
+				BorderFactory.createTitledBorder(ETCHED_BORDER, title),
+				EMPTY_BORDER);
 	}
 
 	private void setFitButtonState(boolean on) {
@@ -1538,15 +1542,15 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 */
 	private void refitUponStateChange(ItemSelectable itemSelectable) {
 		itemSelectable.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() == ItemEvent.SELECTED
-							&& null != _listener) {
-						_listener.reFit();
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.SELECTED
+								&& null != _listener) {
+							_listener.reFit();
+						}
 					}
-				}
-			});
+				});
 	}
 
 	/**
@@ -1556,30 +1560,30 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 */
 	private void refitUponStateChange(final JTextField textField) {
 		textField.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					// trigger if just edited text
-					_listener.reFit();
-				}
-			});
-		textField.addFocusListener(
-			new FocusListener() {
-				private String _text;
-
-				@Override
-				public void focusGained(FocusEvent e) {
-					_text = textField.getText();
-				}
-
-				@Override
-				public void focusLost(FocusEvent e) {
-					if (!_text.equals(textField.getText())) {
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
 						// trigger if just edited text
 						_listener.reFit();
 					}
-				}
-			});
+				});
+		textField.addFocusListener(
+				new FocusListener() {
+					private String _text;
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						_text = textField.getText();
+					}
+
+					@Override
+					public void focusLost(FocusEvent e) {
+						if (!_text.equals(textField.getText())) {
+							// trigger if just edited text
+							_listener.reFit();
+						}
+					}
+				});
 	}
 
 	/**
@@ -1592,14 +1596,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		refitUponStateChange(textField);
 
 		checkBox.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					// definitely trigger if DESELECTED
-					// also if SELECTED, in case text field already edited
-					_listener.reFit();
-				}
-			});
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						// definitely trigger if DESELECTED
+						// also if SELECTED, in case text field already edited
+						_listener.reFit();
+					}
+				});
 	}
 
 	/**
@@ -1609,14 +1613,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 */
 	private void refitUponStateChange(final JSpinner spinner) {
 		spinner.addChangeListener(
-			new ChangeListener() {
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					if (null != _listener) {
-						_listener.reFit();
+				new ChangeListener() {
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						if (null != _listener) {
+							_listener.reFit();
+						}
 					}
-				}
-			});
+				});
 	}
 
 	/**
@@ -1626,24 +1630,24 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 */
 	private void updateThresholdChange(final JSpinner thresholdSpinner) {
 		thresholdSpinner.addChangeListener(
-			new ChangeListener() {
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					SpinnerModel spinnerModel = thresholdSpinner.getModel();
-					if (spinnerModel instanceof SpinnerNumberModel) {
-						int threshold = (Integer)((SpinnerNumberModel) spinnerModel).getValue();
-						if (null != _thresholdListener) {
-							_thresholdListener.updateThreshold(threshold);
-						}
-						if (null != _listener) {
-							if (FitRegion.SUMMED == getRegion()) {
-								// threshold affects a summed fit
-								_listener.reFit();
+				new ChangeListener() {
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						SpinnerModel spinnerModel = thresholdSpinner.getModel();
+						if (spinnerModel instanceof SpinnerNumberModel) {
+							int threshold = (Integer)((SpinnerNumberModel) spinnerModel).getValue();
+							if (null != _thresholdListener) {
+								_thresholdListener.updateThreshold(threshold);
+							}
+							if (null != _listener) {
+								if (FitRegion.SUMMED == getRegion()) {
+									// threshold affects a summed fit
+									_listener.reFit();
+								}
 							}
 						}
 					}
-				}
-			});
+				});
 	}
 
 	/*
@@ -1784,7 +1788,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			break;
 		default:
 			throw new IllegalStateException("Unknown region: " + region);
-			break;
+
 		}
 	}
 
@@ -1811,6 +1815,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	public FitFunction getFunction() {
 		FitFunction function = null;
 		String selected = (String) _functionComboBox.getSelectedItem();
+		
+		
 		if (selected.equals(SINGLE_EXPONENTIAL)) {
 			function = FitFunction.SINGLE_EXPONENTIAL;
 		}
@@ -1825,6 +1831,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		}
 		return function;
 	}
+	
 
 	@Override
 	public String[] getAnalysisList() {
@@ -2176,41 +2183,41 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	@Override
 	public void setFunctionParameters(int function, double params[]) {
 		switch (function) {
-			case 0:
-				_aParam1.setText    ("" + (float) params[2]);
-				_tParam1.setText    ("" + (float) params[3]);
-				_zParam1.setText    ("" + (float) params[1]);
-				_chiSqParam1.setText("" + (float) params[0]);
-				_errorLabel1.setVisible(false);
-				break;
-			case 1:
-				_a1Param2.setText   ("" + (float) params[2]);
-				_t1Param2.setText   ("" + (float) params[3]);
-				_a2Param2.setText   ("" + (float) params[4]);
-				_t2Param2.setText   ("" + (float) params[5]);
-				_zParam2.setText    ("" + (float) params[1]);
-				_chiSqParam2.setText("" + (float) params[0]);
-				_errorLabel2.setVisible(false);
-				break;
-			case 2:
-				_a1Param3.setText   ("" + (float) params[2]);
-				_t1Param3.setText   ("" + (float) params[3]);
-				_a2Param3.setText   ("" + (float) params[4]);
-				_t2Param3.setText   ("" + (float) params[5]);
-				_a3Param3.setText   ("" + (float) params[6]);
-				_t3Param3.setText   ("" + (float) params[7]);
-				_zParam3.setText    ("" + (float) params[1]);
-				_chiSqParam3.setText("" + (float) params[0]);
-				_errorLabel3.setVisible(false);
-				break;
-			case 3:
-				_aParam4.setText    ("" + (float) params[0]);
-				_tParam4.setText    ("" + (float) params[1]);
-				_hParam4.setText    ("" + (float) params[2]);
-				_zParam4.setText    ("" + (float) params[1]);
-				_chiSqParam4.setText("" + (float) params[0]);
-				_errorLabel4.setVisible(false);
-				break;
+		case 0:
+			_aParam1.setText    ("" + (float) params[2]);
+			_tParam1.setText    ("" + (float) params[3]);
+			_zParam1.setText    ("" + (float) params[1]);
+			_chiSqParam1.setText("" + (float) params[0]);
+			_errorLabel1.setVisible(false);
+			break;
+		case 1:
+			_a1Param2.setText   ("" + (float) params[2]);
+			_t1Param2.setText   ("" + (float) params[3]);
+			_a2Param2.setText   ("" + (float) params[4]);
+			_t2Param2.setText   ("" + (float) params[5]);
+			_zParam2.setText    ("" + (float) params[1]);
+			_chiSqParam2.setText("" + (float) params[0]);
+			_errorLabel2.setVisible(false);
+			break;
+		case 2:
+			_a1Param3.setText   ("" + (float) params[2]);
+			_t1Param3.setText   ("" + (float) params[3]);
+			_a2Param3.setText   ("" + (float) params[4]);
+			_t2Param3.setText   ("" + (float) params[5]);
+			_a3Param3.setText   ("" + (float) params[6]);
+			_t3Param3.setText   ("" + (float) params[7]);
+			_zParam3.setText    ("" + (float) params[1]);
+			_chiSqParam3.setText("" + (float) params[0]);
+			_errorLabel3.setVisible(false);
+			break;
+		case 3:
+			_aParam4.setText    ("" + (float) params[0]);
+			_tParam4.setText    ("" + (float) params[1]);
+			_hParam4.setText    ("" + (float) params[2]);
+			_zParam4.setText    ("" + (float) params[1]);
+			_chiSqParam4.setText("" + (float) params[0]);
+			_errorLabel4.setVisible(false);
+			break;
 		}
 	}
 

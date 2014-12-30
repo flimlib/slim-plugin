@@ -48,7 +48,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	private int _transientStart;
 	private int _dataStart;
 	private int _transientStop;
-
+	
 	@Override
 	public void setEstimator(IFitterEstimator estimator) {
 		_estimator = estimator;
