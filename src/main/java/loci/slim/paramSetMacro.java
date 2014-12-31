@@ -18,7 +18,7 @@ public class paramSetMacro {
 		// TODO Auto-generated constructor stub
 	
 		algorithm=FitAlgorithm.SLIMCURVE_RLD_LMA;
-		function=FitFunction.DOUBLE_EXPONENTIAL;
+		function=FitFunction.SINGLE_EXPONENTIAL;
 	}
 	
 
@@ -64,6 +64,7 @@ public class paramSetMacro {
 	public FitFunction getFunction() {
 		return function;
 	}
+	
 	public FitAlgorithm getAlgorithm(){
 		return algorithm;
 	} 

@@ -210,11 +210,16 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	JFrame _frame;
 	JPanel _cardPanel;
 
-	JComboBox _regionComboBox;
-	JComboBox _algorithmComboBox;
-	JComboBox _functionComboBox;
-	JComboBox _noiseModelComboBox;
-	JComboBox _fittedImagesComboBox;
+	private boolean flagFunctionComboBox=false;
+	
+	public static JComboBox _regionComboBox;
+	public static JComboBox _algorithmComboBox;
+	public static JComboBox _functionComboBox;
+	public static JComboBox _binningComboBox;
+	public static JComboBox _fittedImagesComboBox;
+	
+	public static JComboBox _noiseModelComboBox;
+
 	JCheckBox _colorizeGrayScale;
 	JCheckBox[] _analysisCheckBoxList;
 	JCheckBox _fitAllChannels;
@@ -249,7 +254,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	JSpinner _ySpinner;
 	JSpinner _thresholdSpinner;
 	JSpinner _chiSqTargetSpinner;
-	JComboBox _binningComboBox;
+
 	JSpinner _scatterSpinner; // scatter experiment
 
 	// parameter panel
@@ -556,6 +561,11 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 								_fitButtonText = FIT_IMAGE;
 							}
 							_fitButton.setText(_fitButtonText);
+							
+							
+							SLIMProcessor.record(SLIMProcessor.SET_REGION_TYPE, item);
+							
+							
 						}
 					}
 				}
@@ -567,7 +577,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		fitPanel.add(algorithmLabel);
 		_algorithmComboBox = new JComboBox(ALGORITHM_ITEMS);
 		_algorithmComboBox.setSelectedItem(SLIM_CURVE_RLD_LMA_ALGORITHM);
-		refitUponStateChange(_algorithmComboBox);
+		refitUponStateChangeAlgorithm(_algorithmComboBox);//sagar
 		fitPanel.add(_algorithmComboBox);
 
 		JLabel functionLabel = new JLabel("Function");
@@ -579,6 +589,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					@Override
 					public void itemStateChanged(ItemEvent e) {
 						if (e.getStateChange() == ItemEvent.SELECTED) {
+							flagFunctionComboBox=true;
 							String item = (String) e.getItem();
 						//	SLIMProcessor.macroParams.algotype=1;
 							CardLayout cl = (CardLayout)(_cardPanel.getLayout());
@@ -591,6 +602,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 							// add macro to record the setFunctionType function
 							SLIMProcessor.macroParams.setFunction(item);
 							SLIMProcessor.record(SLIMProcessor.SET_FUNCTION_TYPE, item);
+							flagFunctionComboBox=false;
 							
 						}
 					}
@@ -605,15 +617,55 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		fitPanel.add(noiseModelLabel);
 		_noiseModelComboBox = new JComboBox(NOISE_MODEL_ITEMS);
 		_noiseModelComboBox.setSelectedItem(MAXIMUM_LIKELIHOOD);
+		_noiseModelComboBox.addItemListener(
+
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.SELECTED ) {
+							String item = (String) e.getItem();
+							SLIMProcessor.record(SLIMProcessor.SET_NOISE_MODEL, item);
+							
+						}
+					}
+				}
+
+
+				);
+		
 		refitUponStateChange(_noiseModelComboBox);
 		fitPanel.add(_noiseModelComboBox);
 
+		
+		
+		
+		
 		JLabel fittedImagesLabel = new JLabel("Fitted Images");
 		fittedImagesLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		fitPanel.add(fittedImagesLabel);
 		_fittedImagesComboBox = new JComboBox(SINGLE_FITTED_IMAGE_ITEMS);
-		fitPanel.add(_fittedImagesComboBox);
+		_fittedImagesComboBox.addItemListener(
 
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						if (e.getStateChange() == ItemEvent.SELECTED && !flagFunctionComboBox ) {
+							String item = (String) e.getItem();
+							SLIMProcessor.record(SLIMProcessor.SET_FITTED_IMAGES, item);
+							
+						}
+					}
+				}
+
+
+				);
+
+		
+		fitPanel.add(_fittedImagesComboBox);
+		//refitUponStateChangeFittedImage(_fittedImagesComboBox);//sagar
+		
+		
+		
 		JLabel dummyLabel = new JLabel("");
 		dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		fitPanel.add(dummyLabel);
@@ -1041,7 +1093,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		binningLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(binningLabel);
 		_binningComboBox = new JComboBox(binningChoices);
-		refitUponStateChange(_binningComboBox);
+		refitUponStateChangeBinning(_binningComboBox);//sagar
 		controlPanel.add(_binningComboBox);
 
 		int rows = 5;
@@ -1545,10 +1597,101 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				new ItemListener() {
 					@Override
 					public void itemStateChanged(ItemEvent e) {
+						///item added for macro recording
+						//sagar
+
 						if (e.getStateChange() == ItemEvent.SELECTED
 								&& null != _listener) {
 							_listener.reFit();
 						}
+
+						
+					}
+				});
+	}
+	
+
+	/**
+	 * macro recorder specific macro recorder
+	 * 
+	 * This one is for Binning
+	 * 
+	 * @param itemSelectable
+	 */
+	
+	private void refitUponStateChangeBinning(ItemSelectable itemSelectable) {
+		itemSelectable.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						///item added for macro recording
+						//sagar
+
+						if (e.getStateChange() == ItemEvent.SELECTED
+								&& null != _listener) {
+							String item = (String) e.getItem();
+							SLIMProcessor.record(SLIMProcessor.SET_BINNING, item);
+							_listener.reFit();
+						}
+
+						
+					}
+				});
+	}
+	
+	
+	/**
+	 * macro recorder specific macro recorder
+	 * 
+	 * This one is for Algorithm
+	 * 
+	 * @param itemSelectable
+	 */
+	
+	private void refitUponStateChangeAlgorithm(ItemSelectable itemSelectable) {
+		itemSelectable.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						///item added for macro recording
+						//sagar
+
+						if (e.getStateChange() == ItemEvent.SELECTED
+								&& null != _listener) {
+							String item = (String) e.getItem();
+							SLIMProcessor.record(SLIMProcessor.SET_ALGORITHM_TYPE, item);
+							_listener.reFit();
+						}
+
+						
+					}
+				});
+	}
+	
+	/**
+	 * macro recorder specific macro recorder
+	 * 
+	 * This one is for fitted Images
+	 * 
+	 * @param itemSelectable
+	 */
+	
+	private void refitUponStateChangeFittedImage(ItemSelectable itemSelectable) {
+		itemSelectable.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						///item added for macro recording
+						//sagar
+
+						if (e.getStateChange() == ItemEvent.SELECTED
+								&& null != _listener) {
+							String item = (String) e.getItem();
+							
+
+						}
+
+						
 					}
 				});
 	}
@@ -2224,7 +2367,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	@Override
 	public boolean[] getFree() {
 		boolean free[] = null;
-		String function = (String) _functionComboBox.getSelectedItem();
+		String function = (String) _functionComboBox.getSelectedItem();//sagar
+		//String function = SLIMProcessor.macroParams.getFunction().toString();
 		if (function.equals(SINGLE_EXPONENTIAL)) {
 			free = new boolean[3];
 			free[0] = !_aFix1.isSelected();

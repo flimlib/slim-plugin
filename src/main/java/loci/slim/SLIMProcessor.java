@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
@@ -108,6 +109,7 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;
+
 
 
 
@@ -194,6 +196,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_OF_EXPONENTS= "setExponentNo";
 	
 	public static final String SET_FUNCTION_TYPE= "setFunctionType";
+	public static final String SET_ALGORITHM_TYPE="setAlgorithmType";
+	public static final String SET_BINNING="setBinnning";
+	public static final String SET_FITTED_IMAGES="setFittedImagesType";
+	public static final String SET_REGION_TYPE="setRegionType";
+	public static final String SET_NOISE_MODEL="setNoiseModel";
+	
+	
 
 	public static FitInfo fitInfo =new FitInfo();
 	
@@ -1325,6 +1334,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		_region         = uiPanel.getRegion();
 		_algorithm      = uiPanel.getAlgorithm();
 		_function       = uiPanel.getFunction();
+		//_function		= SLIMProcessor.macroParams.getFunction();//sagar
 		_fitAllChannels = uiPanel.getFitAllChannels();
 
 		_x              = uiPanel.getX();
@@ -1518,7 +1528,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		}
 		if (null != fittedImage) {
 			for (String analysis : uiPanel.getAnalysisList()) {
-				_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction(), uiPanel.getFittedImages());
+				_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction(), uiPanel.getFittedImages());//sagar
+				//_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), SLIMProcessor.macroParams.getFunction(), uiPanel.getFittedImages());
 			}
 		}
 	}
@@ -1548,10 +1559,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		fitInfo.setTransientStop(fittingCursor.getTransientStopBin());
 		fitInfo.setThreshold(uiPanel.getThreshold());
 		fitInfo.setChiSquareTarget(uiPanel.getChiSquareTarget());
-		
-		fitInfo.setBinning(uiPanel.getBinning());
-		
-		
+		fitInfo.setBinning(uiPanel.getBinning());		
 		fitInfo.setX(uiPanel.getX());
 
 		
@@ -1559,6 +1567,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		fitInfo.setParameterCount(uiPanel.getParameterCount());
 		fitInfo.setParameters(uiPanel.getParameters());
 		fitInfo.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+//		fitInfo.setFree(translateFree(SLIMProcessor.macroParams.getFunction(), uiPanel.getFree()));
 		fitInfo.setRefineFit(uiPanel.getRefineFit());
 		return fitInfo;
 	}
@@ -1722,7 +1731,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		globalFitParams.setFitFunction(fitInfo.getFunction());
 		
 		//sagar test addition
-		IJ.log(globalFitParams.getFitFunction().toString()+"in globaal");
+
 		
 		globalFitParams.setNoiseModel(fitInfo.getNoiseModel());
 		globalFitParams.setTransientStart(fitInfo.getTransientStart());
@@ -2584,7 +2593,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 				break;
 		}
 		ICurveFitter.FitFunction fitFunction = null;
-		switch (uiPanel.getFunction()) {
+		switch (uiPanel.getFunction()) {//sagar
+		//switch (SLIMProcessor.macroParams.getFunction()) {
 			case SINGLE_EXPONENTIAL:
 				fitFunction = FitFunction.SINGLE_EXPONENTIAL;
 				break;
@@ -2603,6 +2613,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		curveFitter.setNoiseModel(uiPanel.getNoiseModel());
 		curveFitter.setXInc(_timeRange);
 		curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+		//curveFitter.setFree(translateFree(SLIMProcessor.macroParams.getFunction(), uiPanel.getFree()));//sagar
+		
 		if (null != _excitationPanel) {
 			double[] excitation = null;
 			int startIndex = _fittingCursor.getPromptStartBin();
@@ -2837,13 +2849,52 @@ public class SLIMProcessor <T extends RealType<T>> {
 		// so some flag might be needed if it is operating in the macro or normal mode
 		
 	
-		macroParams.setFunction(arg);
-		
+		//macroParams.setFunction(arg);
+		UserInterfacePanel._functionComboBox.setSelectedItem(arg);
 		
 		
 	}
 		
 		
+	public static void setAlgorithmType(String arg){
+		
+		
+		///macro recorder for algorithm change
+		UserInterfacePanel._algorithmComboBox.setSelectedItem(arg);
+	}
+	
+	public static void setBinnning(String arg){
+		
+		
+		///macro recorder for algorithm change
+		UserInterfacePanel._binningComboBox.setSelectedItem(arg);
+	}
+	
+	
+	public static void setFittedImagesType(String arg){
+		
+		
+		///macro recorder for algorithm change
+		UserInterfacePanel._fittedImagesComboBox.setSelectedItem(arg);
+	}
+	
+	
+	
+	public static void setRegionType(String arg){
+		
+		
+		///macro recorder for algorithm change
+		UserInterfacePanel._regionComboBox.setSelectedItem(arg);
+	}
+	
+	
+	public static void setNoiseModel(String arg){
+		
+		
+		///macro recorder for algorithm change
+		UserInterfacePanel._noiseModelComboBox.setSelectedItem(arg);
+	}
+	
 	
 	
 
