@@ -161,10 +161,13 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	private static final String FITTING_ERROR = "Fitting Error",
 			NO_FIT = "--";
 
-	private static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, NONE },
-			DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, F_UPPER_T_Z_X2, F_UPPER_T_X2, F_UPPER_T, F_LOWER_T_Z_X2, F_LOWER_T_X2, F_LOWER_T, T_X2, T, TAU_MEAN_X2, TAU_MEAN, NONE },
-			TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, F_UPPER_T_Z_X2, F_UPPER_T_X2, F_UPPER_T, F_LOWER_T_Z_X2, F_LOWER_T_X2, F_LOWER_T, T_X2, T, TAU_MEAN_X2, TAU_MEAN, NONE },
-			STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, NONE };
+	public static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, NONE };
+
+	public static final String DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, F_UPPER_T_Z_X2, F_UPPER_T_X2, F_UPPER_T, F_LOWER_T_Z_X2, F_LOWER_T_X2, F_LOWER_T, T_X2, T, TAU_MEAN_X2, TAU_MEAN, NONE };
+
+	public static final String TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, F_UPPER_T_Z_X2, F_UPPER_T_X2, F_UPPER_T, F_LOWER_T_Z_X2, F_LOWER_T_X2, F_LOWER_T, T_X2, T, TAU_MEAN_X2, TAU_MEAN, NONE };
+
+	public static final String STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, NONE };
 
 	private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE, EXCITATION_ESTIMATE, EXCITATION_GAUSSIAN };
 
@@ -224,6 +227,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	JCheckBox[] _analysisCheckBoxList;
 	JCheckBox _fitAllChannels;
 
+	
 	// cursor settings
 	JTextField _promptBaselineField;
 	JTextField _transientStartField;
@@ -643,15 +647,23 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		JLabel fittedImagesLabel = new JLabel("Fitted Images");
 		fittedImagesLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		fitPanel.add(fittedImagesLabel);
+		
+		
+		
 		_fittedImagesComboBox = new JComboBox(SINGLE_FITTED_IMAGE_ITEMS);
+		
 		_fittedImagesComboBox.addItemListener(
 
 				new ItemListener() {
 					@Override
 					public void itemStateChanged(ItemEvent e) {
 						if (e.getStateChange() == ItemEvent.SELECTED && !flagFunctionComboBox ) {
+							
 							String item = (String) e.getItem();
-							SLIMProcessor.record(SLIMProcessor.SET_FITTED_IMAGES, item);
+							//IJ.log(item);
+							String selectedItemFittedComboBox=Integer.toString(_fittedImagesComboBox.getSelectedIndex());
+							//IJ.log(selectedItemFittedComboBox);
+							SLIMProcessor.record(SLIMProcessor.SET_FITTED_IMAGES,selectedItemFittedComboBox);
 							
 						}
 					}
@@ -670,6 +682,15 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		fitPanel.add(dummyLabel);
 		_colorizeGrayScale = new JCheckBox("Colorize grayscale");
+		//_colorizeGrayScale.addItemListener
+		
+//		_colorizeGrayScale.addItemListener(new ItemListener() {
+//		      public void itemStateChanged(ItemEvent e) {
+//		        IJ.log("Checked? " + _colorizeGrayScale.isSelected());
+//		      }
+//		    });
+		
+		
 		fitPanel.add(_colorizeGrayScale);
 
 		int choices = analysisChoices.length;

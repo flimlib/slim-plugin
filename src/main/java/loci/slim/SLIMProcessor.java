@@ -116,6 +116,8 @@ import org.scijava.Context;
 
 
 
+
+
 import ij.plugin.frame.Recorder;
 
 
@@ -189,6 +191,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private static final String GAUSSIAN_A_KEY = "a";
 	private static final String GAUSSIAN_B_KEY = "b";
 	private static final String GAUSSIAN_C_KEY = "c";
+	
+	
+	private static final String SINGLE_EXPONENTIAL = "Single Exponential",
+			DOUBLE_EXPONENTIAL = "Double Exponential",
+			TRIPLE_EXPONENTIAL = "Triple Exponential",
+			STRETCHED_EXPONENTIAL = "Stretched Exponential";
 	
 	/////Macro specific keys for better recordability
 	public static final String PLUGIN_NAME = "SLIM pluguin";
@@ -2875,7 +2883,34 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		
 		///macro recorder for algorithm change
-		UserInterfacePanel._fittedImagesComboBox.setSelectedItem(arg);
+
+		//UserInterfacePanel._fittedImagesComboBox.setSelectedItem(UserInterfacePanel.SINGLE_FITTED_IMAGE_ITEMS);
+		
+		
+		int setIndexComboBox = Integer.parseInt(arg);
+		
+		UserInterfacePanel._fittedImagesComboBox.setSelectedIndex(setIndexComboBox);
+		
+//		
+//		IJ.log(arg);
+//		if (a.equals(a)) {
+//			IJ.log("reached");
+//			macroUpdateComboBox(UserInterfacePanel._fittedImagesComboBox, UserInterfacePanel.SINGLE_FITTED_IMAGE_ITEMS);
+//			UserInterfacePanel._fittedImagesComboBox.setSelectedIndex(1);
+//			
+//		}
+//		else if (DOUBLE_EXPONENTIAL.equals(arg)) {
+//			macroUpdateComboBox(UserInterfacePanel._fittedImagesComboBox, UserInterfacePanel.DOUBLE_FITTED_IMAGE_ITEMS);
+//		}
+//		else if (TRIPLE_EXPONENTIAL.equals(arg)) {
+//			macroUpdateComboBox(UserInterfacePanel._fittedImagesComboBox, UserInterfacePanel.TRIPLE_FITTED_IMAGE_ITEMS);
+//		}
+//		else if (STRETCHED_EXPONENTIAL.equals(arg)) {
+//			macroUpdateComboBox(UserInterfacePanel._fittedImagesComboBox, UserInterfacePanel.STRETCHED_FITTED_IMAGE_ITEMS);
+//		}
+//		
+		
+	
 	}
 	
 	
@@ -2892,9 +2927,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		
 		///macro recorder for algorithm change
-		UserInterfacePanel._noiseModelComboBox.setSelectedItem(arg);
+		UserInterfacePanel._noiseModelComboBox.setSelectedItem( arg);
 	}
 	
+
 	
 	
 
