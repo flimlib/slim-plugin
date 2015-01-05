@@ -199,6 +199,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 			STRETCHED_EXPONENTIAL = "Stretched Exponential";
 	
 	/////Macro specific keys for better recordability
+	public static boolean guiUpdateWithMacro=true;
+	
 	public static final String PLUGIN_NAME = "SLIM pluguin";
 	public static final String FIT_IMAGE_FN= "fitImages";
 	public static final String SET_OF_EXPONENTS= "setExponentNo";
@@ -209,6 +211,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_FITTED_IMAGES="setFittedImagesType";
 	public static final String SET_REGION_TYPE="setRegionType";
 	public static final String SET_NOISE_MODEL="setNoiseModel";
+	public static final String SET_CHI2_TARGET="setChi2Target";
 	
 	
 
@@ -1555,7 +1558,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		//fitInfo.setFunction(SLIMProcessor.macroParams.getFunction());
 		
-		IJ.log(fitInfo.getFunction().toString());
+		//IJ.log(fitInfo.getFunction().toString());
 		
 		fitInfo.setNoiseModel(uiPanel.getNoiseModel());
 		fitInfo.setFittedImages(uiPanel.getFittedImages());
@@ -2868,14 +2871,20 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		
 		///macro recorder for algorithm change
-		UserInterfacePanel._algorithmComboBox.setSelectedItem(arg);
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._algorithmComboBox.setSelectedItem(arg);
+		}
+		macroParams.setAlgorithm(arg);
+		
 	}
 	
 	public static void setBinnning(String arg){
 		
 		
 		///macro recorder for algorithm change
-		UserInterfacePanel._binningComboBox.setSelectedItem(arg);
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._binningComboBox.setSelectedItem(arg);
+		}
 	}
 	
 	
@@ -2888,27 +2897,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		
 		int setIndexComboBox = Integer.parseInt(arg);
-		
-		UserInterfacePanel._fittedImagesComboBox.setSelectedIndex(setIndexComboBox);
-		
-//		
-//		IJ.log(arg);
-//		if (a.equals(a)) {
-//			IJ.log("reached");
-//			macroUpdateComboBox(UserInterfacePanel._fittedImagesComboBox, UserInterfacePanel.SINGLE_FITTED_IMAGE_ITEMS);
-//			UserInterfacePanel._fittedImagesComboBox.setSelectedIndex(1);
-//			
-//		}
-//		else if (DOUBLE_EXPONENTIAL.equals(arg)) {
-//			macroUpdateComboBox(UserInterfacePanel._fittedImagesComboBox, UserInterfacePanel.DOUBLE_FITTED_IMAGE_ITEMS);
-//		}
-//		else if (TRIPLE_EXPONENTIAL.equals(arg)) {
-//			macroUpdateComboBox(UserInterfacePanel._fittedImagesComboBox, UserInterfacePanel.TRIPLE_FITTED_IMAGE_ITEMS);
-//		}
-//		else if (STRETCHED_EXPONENTIAL.equals(arg)) {
-//			macroUpdateComboBox(UserInterfacePanel._fittedImagesComboBox, UserInterfacePanel.STRETCHED_FITTED_IMAGE_ITEMS);
-//		}
-//		
+
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._fittedImagesComboBox.setSelectedIndex(setIndexComboBox);
+		}
+
 		
 	
 	}
@@ -2919,7 +2912,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		
 		///macro recorder for algorithm change
-		UserInterfacePanel._regionComboBox.setSelectedItem(arg);
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._regionComboBox.setSelectedItem(arg);
+		}
+		
 	}
 	
 	
@@ -2927,9 +2923,31 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		
 		///macro recorder for algorithm change
-		UserInterfacePanel._noiseModelComboBox.setSelectedItem( arg);
+		
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._noiseModelComboBox.setSelectedItem( arg);
+		}
 	}
 	
+	
+	public static void setChi2Target(String arg){
+		
+		
+		///macro recorder for algorithm change
+		
+		
+		
+		//setChiSquareTarget
+		
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._noiseModelComboBox.setSelectedItem( arg);
+		}
+		
+		macroParams.setChiSquareTarget(Double.parseDouble(arg));
+		
+		
+		
+	}
 
 	
 	

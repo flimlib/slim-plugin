@@ -1958,21 +1958,28 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 	@Override
 	public FitAlgorithm getAlgorithm() {
-		FitAlgorithm algorithm = null;
-		String selected = (String) _algorithmComboBox.getSelectedItem();
-		if (selected.equals(JAOLHO_LMA_ALGORITHM)) {
-			algorithm = FitAlgorithm.JAOLHO;
+		
+		if(SLIMProcessor.macroParams.getAlgorithm()!=null){
+			return SLIMProcessor.macroParams.getAlgorithm();
 		}
-		else if (selected.equals(SLIM_CURVE_RLD_ALGORITHM)) {
-			algorithm = FitAlgorithm.SLIMCURVE_RLD;
+		else
+		{
+			FitAlgorithm algorithm = null;
+			String selected = (String) _algorithmComboBox.getSelectedItem();
+			if (selected.equals(JAOLHO_LMA_ALGORITHM)) {
+				algorithm = FitAlgorithm.JAOLHO;
+			}
+			else if (selected.equals(SLIM_CURVE_RLD_ALGORITHM)) {
+				algorithm = FitAlgorithm.SLIMCURVE_RLD;
+			}
+			else if (selected.equals(SLIM_CURVE_LMA_ALGORITHM)) {
+				algorithm = FitAlgorithm.SLIMCURVE_LMA;
+			}
+			else if (selected.equals(SLIM_CURVE_RLD_LMA_ALGORITHM)) {
+				algorithm = FitAlgorithm.SLIMCURVE_RLD_LMA;
+			}
+			return algorithm;
 		}
-		else if (selected.equals(SLIM_CURVE_LMA_ALGORITHM)) {
-			algorithm = FitAlgorithm.SLIMCURVE_LMA;
-		}
-		else if (selected.equals(SLIM_CURVE_RLD_LMA_ALGORITHM)) {
-			algorithm = FitAlgorithm.SLIMCURVE_RLD_LMA;
-		}
-		return algorithm;
 	}
 
 	@Override
@@ -2116,7 +2123,13 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 	@Override
 	public double getChiSquareTarget() {
-		return (Double) _chiSqTargetSpinner.getValue();
+		
+		if(SLIMProcessor.macroParams.getChiSquareTarget()<0.0){
+			return (Double) _chiSqTargetSpinner.getValue();
+		}
+		else {
+			return SLIMProcessor.macroParams.getChiSquareTarget();
+		}
 	}
 
 	@Override

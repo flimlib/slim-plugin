@@ -8,6 +8,7 @@ public class paramSetMacro {
 
 	private FitAlgorithm algorithm;
 	private FitFunction function; 
+	private double chiSquaretarget;
 	
 	private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA",
 			SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD",
@@ -17,7 +18,8 @@ public class paramSetMacro {
 	public paramSetMacro() {
 		// TODO Auto-generated constructor stub
 	
-		algorithm=FitAlgorithm.SLIMCURVE_RLD_LMA;
+		algorithm=null;
+		chiSquaretarget=-100.0;
 		function=FitFunction.SINGLE_EXPONENTIAL;
 	}
 	
@@ -68,6 +70,14 @@ public class paramSetMacro {
 	public FitAlgorithm getAlgorithm(){
 		return algorithm;
 	} 
+	
+	public double getChiSquareTarget(){
+		return chiSquaretarget;
+	}
+	
+	public void setChiSquareTarget(double chiVal){
+		chiSquaretarget=chiVal;
+	}
 
 	
 }
