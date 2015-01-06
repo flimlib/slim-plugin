@@ -257,7 +257,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	JSpinner _xSpinner;
 	JSpinner _ySpinner;
 	JSpinner _thresholdSpinner;
-	JSpinner _chiSqTargetSpinner;
+	public static JSpinner _chiSqTargetSpinner;
 
 	JSpinner _scatterSpinner; // scatter experiment
 
@@ -1092,7 +1092,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		JLabel yLabel = new JLabel("Y");
 		yLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(yLabel);
-		_ySpinner = new JSpinner(new SpinnerNumberModel(Y_VALUE, Y_MIN, Y_MAX, Y_INC));
+		_ySpinner = new JSpinner(new SpinnerNumberModel(Y_VALUE, Y_MIN, Y_MAX, Y_INC)); 
 		refitUponStateChange(_ySpinner);
 		controlPanel.add(_ySpinner);
 
@@ -1107,7 +1107,24 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		chiSqTargetLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(chiSqTargetLabel);
 		_chiSqTargetSpinner = new JSpinner(new SpinnerNumberModel(CHISQ_VALUE, CHISQ_MIN, CHISQ_MAX, CHISQ_INC));
-		refitUponStateChange(_chiSqTargetSpinner);
+		//refitUponStateChange(_chiSqTargetSpinner);sagar
+
+		_chiSqTargetSpinner.addChangeListener(
+				new ChangeListener() {
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						//sagar added
+						SLIMProcessor.chi2MacroUsed=false;
+						String chi2Value=_chiSqTargetSpinner.getValue().toString();
+						SLIMProcessor.record(SLIMProcessor.SET_CHI2_TARGET, chi2Value);
+						if (null != _listener) {
+							_listener.reFit();
+							
+						}
+					}
+				});
+	
+		
 		controlPanel.add(_chiSqTargetSpinner);
 
 		JLabel binningLabel = new JLabel("Bin");
@@ -2124,11 +2141,11 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	@Override
 	public double getChiSquareTarget() {
 		
-		if(SLIMProcessor.macroParams.getChiSquareTarget()<0.0){
-			return (Double) _chiSqTargetSpinner.getValue();
+		if(SLIMProcessor.chi2MacroUsed){
+			return SLIMProcessor.macroParams.getChiSquareTarget();
 		}
 		else {
-			return SLIMProcessor.macroParams.getChiSquareTarget();
+			return (Double) _chiSqTargetSpinner.getValue();
 		}
 	}
 

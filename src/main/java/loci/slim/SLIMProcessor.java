@@ -118,6 +118,7 @@ import org.scijava.Context;
 
 
 
+
 import ij.plugin.frame.Recorder;
 
 
@@ -200,6 +201,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	
 	/////Macro specific keys for better recordability
 	public static boolean guiUpdateWithMacro=true;
+	public static boolean chi2MacroUsed=false;
 	
 	public static final String PLUGIN_NAME = "SLIM pluguin";
 	public static final String FIT_IMAGE_FN= "fitImages";
@@ -2939,12 +2941,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		//setChiSquareTarget
 		
-		if(guiUpdateWithMacro){
-			UserInterfacePanel._noiseModelComboBox.setSelectedItem( arg);
-		}
+//		if(guiUpdateWithMacro){
+//			UserInterfacePanel._chiSqTargetSpinner.setValue((String)arg);
+//		}
 		
 		macroParams.setChiSquareTarget(Double.parseDouble(arg));
-		
+		chi2MacroUsed=true;
 		
 		
 	}
