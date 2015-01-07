@@ -201,7 +201,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 	
 	/////Macro specific keys for better recordability
 	public static boolean guiUpdateWithMacro=true;
-	public static boolean chi2MacroUsed=false;
+	
+	
 	
 	public static final String PLUGIN_NAME = "SLIM pluguin";
 	public static final String FIT_IMAGE_FN= "fitImages";
@@ -214,6 +215,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_REGION_TYPE="setRegionType";
 	public static final String SET_NOISE_MODEL="setNoiseModel";
 	public static final String SET_CHI2_TARGET="setChi2Target";
+	public static final String SET_THRESHOLD="setThersholdValue";
 	
 	
 
@@ -2946,10 +2948,30 @@ public class SLIMProcessor <T extends RealType<T>> {
 //		}
 		
 		macroParams.setChiSquareTarget(Double.parseDouble(arg));
-		chi2MacroUsed=true;
+		macroParams.chi2MacroUsed=true;
 		
 		
 	}
+	
+	public static void setThersholdValue(String arg){
+		
+		
+		///macro recorder for algorithm change
+		
+		
+		
+		//setChiSquareTarget
+		
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._thresholdSpinner.setValue(Integer.parseInt(arg));
+		}
+		
+		macroParams.setThresholdValue(Integer.parseInt(arg));
+		macroParams.thresholdMacroUsed=true;
+		
+		
+	}
+
 
 	
 	

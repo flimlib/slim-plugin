@@ -9,6 +9,9 @@ public class paramSetMacro {
 	private FitAlgorithm algorithm;
 	private FitFunction function; 
 	private double chiSquaretarget;
+	private int thresholdValue;
+	public static boolean chi2MacroUsed=false;
+	public static boolean thresholdMacroUsed=false;
 	
 	private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA",
 			SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD",
@@ -77,6 +80,14 @@ public class paramSetMacro {
 	
 	public void setChiSquareTarget(double chiVal){
 		chiSquaretarget=chiVal;
+	}
+	
+	public int getThresholdValue(){
+		return thresholdValue;
+	}
+	
+	public void setThresholdValue(int thVal){
+		thresholdValue=thVal;
 	}
 
 	

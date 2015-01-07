@@ -256,8 +256,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	// fit settings
 	JSpinner _xSpinner;
 	JSpinner _ySpinner;
-	JSpinner _thresholdSpinner;
-	public static JSpinner _chiSqTargetSpinner;
+	public static JSpinner _thresholdSpinner;
+	JSpinner _chiSqTargetSpinner;
 
 	JSpinner _scatterSpinner; // scatter experiment
 
@@ -1114,7 +1114,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					@Override
 					public void stateChanged(ChangeEvent e) {
 						//sagar added
-						SLIMProcessor.chi2MacroUsed=false;
+						SLIMProcessor.macroParams.chi2MacroUsed=false;
 						String chi2Value=_chiSqTargetSpinner.getValue().toString();
 						SLIMProcessor.record(SLIMProcessor.SET_CHI2_TARGET, chi2Value);
 						if (null != _listener) {
@@ -1189,7 +1189,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		JLabel t1Label1 = new JLabel(lifetimeLabel);
 		t1Label1.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(t1Label1);
-		_tParam1 = new JTextField(9);
+		_tParam1 = new JTextField(9 );
 		//_t1Param1.setEditable(false);
 		expPanel.add(_tParam1);
 		_tFix1 = new JCheckBox("Fix");
@@ -1755,10 +1755,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					@Override
 					public void focusGained(FocusEvent e) {
 						_text = textField.getText();
+						IJ.log("_focus ganied");
 					}
-
+					
 					@Override
 					public void focusLost(FocusEvent e) {
+						IJ.log("focus lost");
 						if (!_text.equals(textField.getText())) {
 							// trigger if just edited text
 							_listener.reFit();
@@ -1814,11 +1816,18 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				new ChangeListener() {
 					@Override
 					public void stateChanged(ChangeEvent e) {
+
+						
+
+						
 						SpinnerModel spinnerModel = thresholdSpinner.getModel();
 						if (spinnerModel instanceof SpinnerNumberModel) {
 							int threshold = (Integer)((SpinnerNumberModel) spinnerModel).getValue();
 							if (null != _thresholdListener) {
 								_thresholdListener.updateThreshold(threshold);
+								SLIMProcessor.macroParams.thresholdMacroUsed=false;
+								String threshValue=_thresholdSpinner.getValue().toString();
+								SLIMProcessor.record(SLIMProcessor.SET_THRESHOLD, threshValue);
 							}
 							if (null != _listener) {
 								if (FitRegion.SUMMED == getRegion()) {
@@ -2124,7 +2133,17 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 	@Override
 	public int getThreshold() {
-		return (Integer) _thresholdSpinner.getValue();
+		
+		if(SLIMProcessor.macroParams.thresholdMacroUsed){
+			return SLIMProcessor.macroParams.getThresholdValue();
+		}
+		else {
+			return (Integer) _thresholdSpinner.getValue();
+		}
+		
+		
+		
+		
 	}
 
 	@Override
@@ -2141,7 +2160,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	@Override
 	public double getChiSquareTarget() {
 		
-		if(SLIMProcessor.chi2MacroUsed){
+		if(SLIMProcessor.macroParams.chi2MacroUsed){
 			return SLIMProcessor.macroParams.getChiSquareTarget();
 		}
 		else {
