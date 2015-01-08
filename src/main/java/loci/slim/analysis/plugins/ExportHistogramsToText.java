@@ -39,8 +39,8 @@ import loci.slim.analysis.HistogramStatistics;
 import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
+import net.imagej.ImgPlus;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.plugin.Plugin;

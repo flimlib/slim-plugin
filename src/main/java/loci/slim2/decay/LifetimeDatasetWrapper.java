@@ -40,9 +40,9 @@ import javax.swing.JOptionPane;
 
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
+import net.imagej.ImgPlus;
+import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.AxisType;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
 import org.scijava.Context;

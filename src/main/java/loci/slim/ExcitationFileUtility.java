@@ -43,9 +43,9 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
-import net.imglib2.meta.CalibratedAxis;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imagej.axis.CalibratedAxis;
 
 /**
  * Loads and saves excitation files.

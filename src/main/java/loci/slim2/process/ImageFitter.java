@@ -39,10 +39,10 @@ import loci.slim2.fitting.GlobalFitParams;
 import loci.slim2.fitting.LocalFitParams;
 import loci.slim2.fitting.ThreadedFittingEngine;
 import loci.slim2.heuristics.DefaultFitterEstimator;
+import net.imagej.ImgPlus;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.img.planar.PlanarImgs;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;

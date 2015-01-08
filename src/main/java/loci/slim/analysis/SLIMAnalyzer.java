@@ -25,7 +25,7 @@ package loci.slim.analysis;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
-import net.imglib2.meta.ImgPlus;
+import net.imagej.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.plugin.SciJavaPlugin;

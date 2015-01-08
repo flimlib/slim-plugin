@@ -42,7 +42,7 @@ import loci.slim2.analysis.batch.ExportSummaryToText;
 import loci.slim2.process.BatchProcessor;
 import loci.slim2.process.FitSettings;
 import loci.slim2.process.ImageFitter;
-import net.imglib2.meta.ImgPlus;
+import net.imagej.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;

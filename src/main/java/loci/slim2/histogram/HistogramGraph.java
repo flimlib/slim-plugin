@@ -27,10 +27,10 @@ import net.imagej.ChannelCollection;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
 import net.imagej.DrawingTool;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imagej.plugins.commands.display.ShowLUT;
 import net.imagej.render.RenderingService;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
 
 import org.scijava.util.Colors;
 
