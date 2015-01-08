@@ -68,8 +68,8 @@ import loci.slim2.process.interactive.ui.UserInterfacePanel;
 import loci.slim2.process.interactive.ui.UserInterfacePanelListener;
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.AxisType;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;

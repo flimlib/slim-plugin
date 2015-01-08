@@ -25,16 +25,16 @@ package loci.slim2.histogram;
 
 import net.imagej.Dataset;
 import net.imagej.DatasetService;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imagej.command.InteractiveImageCommand;
 import net.imagej.display.DatasetView;
 import net.imagej.plugins.commands.display.interactive.BrightnessContrast;
 import net.imagej.render.RenderingService;
-import net.imglib2.Binning;
 import net.imglib2.Cursor;
 import net.imglib2.algorithm.stats.ComputeMinMax;
-import net.imglib2.meta.Axes;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Binning;
 
 import org.scijava.Context;
 import org.scijava.ItemIO;

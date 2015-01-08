@@ -25,8 +25,8 @@ package loci.slim;
 
 import loci.slim.fitting.IDecayImage;
 import loci.slim.preprocess.IProcessor;
+import net.imagej.ImgPlus;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
 /**

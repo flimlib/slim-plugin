@@ -100,10 +100,10 @@ import loci.slim.ui.IDecayGraph;
 import loci.slim.ui.IUserInterfacePanel;
 import loci.slim.ui.IUserInterfacePanelListener;
 import loci.slim.ui.UserInterfacePanel;
+import net.imagej.ImgPlus;
+import net.imagej.axis.CalibratedAxis;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.CalibratedAxis;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 

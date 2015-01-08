@@ -26,8 +26,8 @@ package loci.slim.analysis.batch;
 import ij.IJ;
 import loci.curvefitter.ICurveFitter;
 import loci.slim.analysis.Binning;
+import net.imagej.ImgPlus;
 import net.imglib2.RandomAccess;
-import net.imglib2.meta.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
 /**
