@@ -216,8 +216,18 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_NOISE_MODEL="setNoiseModel";
 	public static final String SET_CHI2_TARGET="setChi2Target";
 	public static final String SET_THRESHOLD="setThersholdValue";
+	///single exponetial recorder macro
+	public static final String SET_A1_VALUE="setA1value";
+	public static final String SET_T1_VALUE="setT1value";
+	//double exponetnial recroder macro
+	public static final String SET_A2_VALUE="setA2value";
+	public static final String SET_T2_VALUE="setT2value";
+	//triple exponential recorder macro
+	public static final String SET_A3_VALUE="setA3value";
+	public static final String SET_T3_VALUE="setT3value";
 	
-	
+	public static final String SET_Z1_VALUE="setZ1value";
+	public static final String SET_H1_VALUE="setH1value";
 
 	public static FitInfo fitInfo =new FitInfo();
 	
@@ -2017,6 +2027,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		title += _file.substring(0, _file.lastIndexOf('.'));
 		showDecayGraph(title, uiPanel, _fittingCursor,
 			dataArray[visibleChannel], photons);
+		
+		
 		//TODO AIC experimental code; second parameter is actually AIC
 		uiPanel.setParameters(dataArray[visibleChannel].getParams(), dataArray[visibleChannel].getChiSquare());
 
@@ -2141,6 +2153,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		}
 		imagePlus.show();
 
+		
 		// update UI parameters
 		//TODO AIC experimental code; second parameter is actually AIC
 		uiPanel.setParameters(dataArray[0].getParams(), dataArray[0].getChiSquare()); //TODO, just picked first ROI here!
@@ -2272,6 +2285,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 		if (_fitAllChannels) {
 			visibleChannel = _channel;
 		}
+		
+		
+		
 		showDecayGraph(title, uiPanel, _fittingCursor,
 			dataArray[visibleChannel], photons); //TODO ARG this s/b the photon count for the appropriate channel; currently it will sum all channels.
 
@@ -2967,12 +2983,100 @@ public class SLIMProcessor <T extends RealType<T>> {
 		}
 		
 		macroParams.setThresholdValue(Integer.parseInt(arg));
-		macroParams.thresholdMacroUsed=true;
+		macroParams.a1macroused=true;
 		
 		
 	}
 
+	
+	////single exponential parameter macros
 
+	public static void setA1value(String arg){
+		
+
+		
+		macroParams.a1macroused=true;
+		macroParams.seta1(Double.parseDouble(arg));
+		
+		
+	}
+	
+	
+	public static void setT1value(String arg){
+		
+
+		
+		macroParams.t1macroused=true;
+		macroParams.sett1(Double.parseDouble(arg));
+		
+		
+	}
+	
+	
+	///double exponential parameter macros
+	
+	public static void setA2value(String arg){
+		
+		
+		macroParams.a2macroused=true;
+		macroParams.seta2(Double.parseDouble(arg));
+		
+		
+	}
+	
+	
+	public static void setT2value(String arg){
+		
+
+		
+		macroParams.t2macroused=true;
+		macroParams.sett2(Double.parseDouble(arg));
+		
+		
+	}
+	
+	
+	///triple exponential parameter recorder macros
+	
+	public static void setA3value(String arg){
+		
+		
+		macroParams.a3macroused=true;
+		macroParams.seta3(Double.parseDouble(arg));
+		
+		
+	}
+	
+	
+	public static void setT3value(String arg){
+		
+
+		
+		macroParams.t3macroused=true;
+		macroParams.sett3(Double.parseDouble(arg));
+		
+		
+	}
+	
+	///shift recorder macro
+	
+	public static void setZ1value(String arg){
+
+		
+		macroParams.z1macroused=true;
+		macroParams.setz1(Double.parseDouble(arg));
+		
+		
+	}
+
+	public static void setH1value(String arg){
+
+		
+		macroParams.h1macroused=true;
+		macroParams.seth1(Double.parseDouble(arg));
+		
+		
+	}
 	
 	
 

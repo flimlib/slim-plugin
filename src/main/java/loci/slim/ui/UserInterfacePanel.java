@@ -268,7 +268,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 	// single exponential fit
 	JTextField _aParam1;
-	JCheckBox _aFix1;
+	public static JCheckBox _aFix1;
 	JTextField _tParam1;
 	JCheckBox _tFix1;
 	JTextField _zParam1;
@@ -1184,7 +1184,13 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_aFix1 = new JCheckBox("Fix");
 		//_a1Fix1.addItemListener(this);
 		expPanel.add(_aFix1);
-		refitUponStateChange(_aParam1, _aFix1);
+		refitUponStateChangeA1(_aParam1, _aFix1);
+		
+		//sagar
+
+		
+		
+		
 
 		JLabel t1Label1 = new JLabel(lifetimeLabel);
 		t1Label1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1195,8 +1201,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_tFix1 = new JCheckBox("Fix");
 		//_t1Fix1.addItemListener(this);
 		expPanel.add(_tFix1);
-		refitUponStateChange(_tParam1, _tFix1);
-
+		refitUponStateChangeT1(_tParam1, _tFix1);
+		//refitUponStateChange(_aParam1, _aFix1);
+		
+		
 		JLabel zLabel1 = new JLabel("Z");
 		zLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(zLabel1);
@@ -1206,7 +1214,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_zFix1 = new JCheckBox("Fix");
 		//_zFix1.addItemListener(this);
 		expPanel.add(_zFix1);
-		refitUponStateChange(_zParam1, _zFix1);
+		refitUponStateChangeZ1(_zParam1, _zFix1);
 
 		JLabel chiSqLabel1 = new JLabel("" + CHI + SQUARE + SUB_R);
 		chiSqLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1275,7 +1283,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_a1Fix2 = new JCheckBox("Fix");
 		//_a1Fix2.addItemListener(this);
 		expPanel.add(_a1Fix2);
-		refitUponStateChange(_a1Param2, _a1Fix2);
+		//refitUponStateChange(_a1Param2, _a1Fix2)
+		refitUponStateChangeA1(_a1Param2, _a1Fix2);//sagar
 
 		JLabel t1Label2 = new JLabel(lifetimeLabel + SUB_1);
 		t1Label2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1286,7 +1295,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_t1Fix2 = new JCheckBox("Fix");
 		//_t1Fix2.addItemListener(this);
 		expPanel.add(_t1Fix2);
-		refitUponStateChange(_t1Param2, _t1Fix2);
+		//refitUponStateChange(_t1Param2, _t1Fix2);//sagar
+		refitUponStateChangeT1(_t1Param2, _t1Fix2);
 
 		JLabel a2Label2 = new JLabel("A" + SUB_2);
 		a2Label2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1297,7 +1307,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_a2Fix2 = new JCheckBox("Fix");
 		//_a2Fix2.addItemListener(this);
 		expPanel.add(_a2Fix2);
-		refitUponStateChange(_a2Param2, _a2Fix2);
+		//refitUponStateChange(_a2Param2, _a2Fix2);//sagar
+		refitUponStateChangeA2(_a2Param2, _a2Fix2);//sagar
 
 		JLabel t2Label2 = new JLabel(lifetimeLabel + SUB_2);
 		t2Label2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1308,7 +1319,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_t2Fix2 = new JCheckBox("Fix");
 		//_t2Fix2.addItemListener(this);
 		expPanel.add(_t2Fix2);
-		refitUponStateChange(_t2Param2, _t2Fix2);
+		//refitUponStateChange(_t2Param2, _t2Fix2);//sagar
+		refitUponStateChangeT2(_t2Param2, _t2Fix2);//sagar
 
 		JLabel zLabel2 = new JLabel("Z");
 		zLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1319,7 +1331,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_zFix2 = new JCheckBox("Fix");
 		//_zFix2.addItemListener(this);
 		expPanel.add(_zFix2);
-		refitUponStateChange(_zParam2, _zFix2);
+//		refitUponStateChange(_zParam2, _zFix2);
+		refitUponStateChangeZ1(_zParam2, _zFix2);
 
 		JLabel chiSqLabel2 = new JLabel("" + CHI + SQUARE + SUB_R);
 		chiSqLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1389,7 +1402,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_a1Fix3 = new JCheckBox("Fix");
 		//_a1Fix3.addItemListener(this);
 		expPanel.add(_a1Fix3);
-		refitUponStateChange(_a1Param3, _a1Fix3);
+		//refitUponStateChange(_a1Param3, _a1Fix3);//sagar
+		refitUponStateChangeA1(_a1Param3, _a1Fix3);
 
 		JLabel t1Label3 = new JLabel(lifetimeLabel + SUB_1);
 		t1Label3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1400,7 +1414,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_t1Fix3 = new JCheckBox("Fix");
 		//_t1Fix3.addItemListener(this);
 		expPanel.add(_t1Fix3);
-		refitUponStateChange(_t1Param3, _t1Fix3);
+		//refitUponStateChange(_t1Param3, _t1Fix3);//sagar
+		refitUponStateChangeT1(_t1Param3, _t1Fix3);
 
 		JLabel a2Label3 = new JLabel("A" + SUB_2);
 		a2Label3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1411,7 +1426,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_a2Fix3 = new JCheckBox("Fix");
 		//_a2Fix3.addItemListener(this);
 		expPanel.add(_a2Fix3);
-		refitUponStateChange(_a2Param3, _a2Fix3);
+		//refitUponStateChange(_a2Param3, _a2Fix3);
+		
+		refitUponStateChangeA2(_a2Param3, _a2Fix3);
 
 		JLabel t2Label3 = new JLabel(lifetimeLabel + SUB_2);
 		t2Label3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1422,7 +1439,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_t2Fix3 = new JCheckBox("Fix");
 		//_t2Fix3.addItemListener(this);
 		expPanel.add(_t2Fix3);
-		refitUponStateChange(_t2Param3, _t2Fix3);
+		//refitUponStateChange(_t2Param3, _t2Fix3);//sagar
+		refitUponStateChangeT2(_t2Param3, _t2Fix3);
 
 		JLabel a3Label3 = new JLabel("A" + SUB_3);
 		a3Label3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1433,7 +1451,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_a3Fix3 = new JCheckBox("Fix");
 		//_a3Fix3.addItemListener(this);
 		expPanel.add(_a3Fix3);
-		refitUponStateChange(_a3Param3, _a3Fix3);
+		//refitUponStateChange(_a3Param3, _a3Fix3);
+		refitUponStateChangeA3(_a3Param3, _a3Fix3);
 
 		JLabel t3Label3 = new JLabel(lifetimeLabel + SUB_3);
 		t3Label3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1444,7 +1463,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_t3Fix3 = new JCheckBox("Fix");
 		//_t3Fix3.addItemListener(this);
 		expPanel.add(_t3Fix3);
-		refitUponStateChange(_t3Param3, _t3Fix3);
+		//refitUponStateChange(_t3Param3, _t3Fix3);
+		refitUponStateChangeT3(_t3Param3, _t3Fix3);
 
 		JLabel zLabel3 = new JLabel("Z");
 		zLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1455,7 +1475,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_zFix3 = new JCheckBox("Fix");
 		//_zFix3.addItemListener(this);
 		expPanel.add(_zFix3);
-		refitUponStateChange(_zParam3, _zFix3);
+//		refitUponStateChange(_zParam3, _zFix3);//sagar
+		refitUponStateChangeZ1(_zParam3, _zFix3);
 
 		JLabel chiSqLabel3 = new JLabel("" + CHI + SQUARE + SUB_R);
 		chiSqLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1527,7 +1548,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_aFix4 = new JCheckBox("Fix");
 		//_a1Fix1.addItemListener(this);
 		expPanel.add(_aFix4);
-		refitUponStateChange(_aParam4, _aFix4);
+		//refitUponStateChange(_aParam4, _aFix4);//SAGAR
+		refitUponStateChangeA1(_aParam4, _aFix4);
 
 		JLabel tLabel4 = new JLabel(lifetimeLabel);
 		tLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1538,7 +1560,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_tFix4 = new JCheckBox("Fix");
 		//_t1Fix1.addItemListener(this);
 		expPanel.add(_tFix4);
-		refitUponStateChange(_tParam4, _tFix4);
+		//refitUponStateChange(_tParam4, _tFix4);//sagar
+		refitUponStateChangeT1(_tParam4, _tFix4);
 
 		JLabel hLabel4 = new JLabel("H");
 		hLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1549,7 +1572,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_hFix4 = new JCheckBox("Fix");
 		//_hFix4.addItemListener(this);
 		expPanel.add(_hFix4);
-		refitUponStateChange(_hParam4, _hFix4);
+		//refitUponStateChange(_hParam4, _hFix4);
+		refitUponStateChangeH1(_hParam4, _hFix4);
 
 		JLabel zLabel1 = new JLabel("Z");
 		zLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1560,7 +1584,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_zFix4 = new JCheckBox("Fix");
 		//_zFix1.addItemListener(this);
 		expPanel.add(_zFix4);
-		refitUponStateChange(_zParam4, _zFix4);
+		//refitUponStateChange(_zParam4, _zFix4);//sagar
+		refitUponStateChangeZ1(_zParam4, _zFix4);
 
 		JLabel chiSqLabel4 = new JLabel("" + CHI + SQUARE + SUB_R);
 		chiSqLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -1755,13 +1780,15 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					@Override
 					public void focusGained(FocusEvent e) {
 						_text = textField.getText();
-						IJ.log("_focus ganied");
 					}
 					
 					@Override
 					public void focusLost(FocusEvent e) {
-						IJ.log("focus lost");
+						
 						if (!_text.equals(textField.getText())) {
+							//sagar added
+							//SLIMProcessor.record(SLIMProcessor.SET_A_VALUE,_text);
+							
 							// trigger if just edited text
 							_listener.reFit();
 						}
@@ -1784,11 +1811,453 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					public void itemStateChanged(ItemEvent e) {
 						// definitely trigger if DESELECTED
 						// also if SELECTED, in case text field already edited
+						//IJ.log("reached");
+						_listener.reFit();
+					}
+				});
+	}
+	
+	void refitUponStateChangeZ1( final JTextField textField,  JCheckBox checkBox) {
+
+
+		textField.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// trigger if just edited text
+						_listener.reFit();
+					}
+				});
+		textField.addFocusListener(
+				new FocusListener() {
+					private String _text;
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						_text = textField.getText();
+
+					}
+
+					@Override
+					public void focusLost(FocusEvent e) {
+
+						if (!_text.equals(textField.getText())) {
+							//sagar 
+							//SLIMProcessor.record(SLIMProcessor.SET_A_VALUE,_text);
+
+							// trigger if just edited text
+							_listener.reFit();
+							SLIMProcessor.record(SLIMProcessor.SET_Z1_VALUE,textField.getText());
+							SLIMProcessor.macroParams.z1macroused=false;
+						}
+					}
+				});
+
+
+		checkBox.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						// definitely trigger if DESELECTED
+						// also if SELECTED, in case text field already edited
+						//IJ.log("reached");
 						_listener.reFit();
 					}
 				});
 	}
 
+ 
+	void refitUponStateChangeH1( final JTextField textField,  JCheckBox checkBox) {
+
+
+		textField.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// trigger if just edited text
+						_listener.reFit();
+					}
+				});
+		textField.addFocusListener(
+				new FocusListener() {
+					private String _text;
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						_text = textField.getText();
+
+					}
+
+					@Override
+					public void focusLost(FocusEvent e) {
+
+						if (!_text.equals(textField.getText())) {
+							//sagar 
+							//SLIMProcessor.record(SLIMProcessor.SET_A_VALUE,_text);
+
+							// trigger if just edited text
+							_listener.reFit();
+							SLIMProcessor.record(SLIMProcessor.SET_H1_VALUE,textField.getText());
+							SLIMProcessor.macroParams.h1macroused=false;
+						}
+					}
+				});
+
+
+		checkBox.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						// definitely trigger if DESELECTED
+						// also if SELECTED, in case text field already edited
+						//IJ.log("reached");
+						_listener.reFit();
+					}
+				});
+	}
+
+	
+	
+	void refitUponStateChangeT1( final JTextField textField,  JCheckBox checkBox) {
+
+
+		textField.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// trigger if just edited text
+						_listener.reFit();
+					}
+				});
+		textField.addFocusListener(
+				new FocusListener() {
+					private String _text;
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						_text = textField.getText();
+
+					}
+
+					@Override
+					public void focusLost(FocusEvent e) {
+
+						if (!_text.equals(textField.getText())) {
+							//sagar 
+							//SLIMProcessor.record(SLIMProcessor.SET_A_VALUE,_text);
+
+							// trigger if just edited text
+							_listener.reFit();
+							if(!SLIMProcessor.macroParams.isa1MacroRecording)
+							{
+								SLIMProcessor.macroParams.ist1MacroRecording=true;
+								
+								SLIMProcessor.record(SLIMProcessor.SET_T1_VALUE,textField.getText());
+								SLIMProcessor.macroParams.t1macroused=false;
+							}
+							
+							SLIMProcessor.macroParams.isa1MacroRecording=false;
+						}
+					}
+				});
+
+
+		checkBox.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						// definitely trigger if DESELECTED
+						// also if SELECTED, in case text field already edited
+						//IJ.log("reached");
+						_listener.reFit();
+					}
+				});
+	}
+	
+	
+	
+	void refitUponStateChangeA1( final JTextField textField,  JCheckBox checkBox) {
+
+
+		textField.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// trigger if just edited text
+						_listener.reFit();
+					}
+				});
+		textField.addFocusListener(
+				new FocusListener() {
+					private String _text;
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						_text = textField.getText();
+
+					}
+					
+					@Override
+					public void focusLost(FocusEvent e) {
+						
+						if (!_text.equals(textField.getText())) {
+							//sagar 
+							//SLIMProcessor.record(SLIMProcessor.SET_A_VALUE,_text);
+
+							// trigger if just edited text
+							_listener.reFit();
+							
+							if(!SLIMProcessor.macroParams.ist1MacroRecording){
+								
+								SLIMProcessor.macroParams.isa1MacroRecording=true;
+								
+								
+								SLIMProcessor.record(SLIMProcessor.SET_A1_VALUE,textField.getText());
+								SLIMProcessor.macroParams.a1macroused=false;
+							}
+							SLIMProcessor.macroParams.ist1MacroRecording=false;
+						}
+					}
+				});
+		
+		
+		checkBox.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						// definitely trigger if DESELECTED
+						// also if SELECTED, in case text field already edited
+						//IJ.log("reached");
+						_listener.reFit();
+					}
+				});
+	}
+
+
+	void refitUponStateChangeT2( final JTextField textField,  JCheckBox checkBox) {
+
+
+		textField.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// trigger if just edited text
+						_listener.reFit();
+					}
+				});
+		textField.addFocusListener(
+				new FocusListener() {
+					private String _text;
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						_text = textField.getText();
+
+					}
+
+					@Override
+					public void focusLost(FocusEvent e) {
+
+						if (!_text.equals(textField.getText())) {
+							//sagar 
+
+							// trigger if just edited text
+							_listener.reFit();
+							
+							if(!SLIMProcessor.macroParams.isa2MacroRecording){
+								SLIMProcessor.macroParams.ist2MacroRecording=true;
+								
+								SLIMProcessor.record(SLIMProcessor.SET_T2_VALUE,textField.getText());
+								SLIMProcessor.macroParams.t2macroused=false;
+							}
+							SLIMProcessor.macroParams.isa2MacroRecording=false;
+							
+						}
+					}
+				});
+
+
+		checkBox.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						// definitely trigger if DESELECTED
+						// also if SELECTED, in case text field already edited
+						_listener.reFit();
+					}
+				});
+	}
+	
+	void refitUponStateChangeA2( final JTextField textField,  JCheckBox checkBox) {
+
+
+		textField.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// trigger if just edited text
+						_listener.reFit();
+					}
+				});
+		textField.addFocusListener(
+				new FocusListener() {
+					private String _text;
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						_text = textField.getText();
+
+					}
+					
+					@Override
+					public void focusLost(FocusEvent e) {
+						
+						if (!_text.equals(textField.getText())) {
+							//sagar 
+							//SLIMProcessor.record(SLIMProcessor.SET_A_VALUE,_text);
+
+							// trigger if just edited text
+							_listener.reFit();
+							
+							if(!SLIMProcessor.macroParams.ist2MacroRecording){
+								SLIMProcessor.macroParams.isa2MacroRecording=true;
+								SLIMProcessor.record(SLIMProcessor.SET_A2_VALUE,textField.getText());
+								SLIMProcessor.macroParams.a2macroused=false;
+							
+							}
+							
+							SLIMProcessor.macroParams.ist2MacroRecording=false;
+						}
+					}
+				});
+		
+		
+		checkBox.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						// definitely trigger if DESELECTED
+						// also if SELECTED, in case text field already edited
+						//IJ.log("reached");
+						_listener.reFit();
+					}
+				});
+	}
+	
+	void refitUponStateChangeT3( final JTextField textField,  JCheckBox checkBox) {
+
+
+		textField.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// trigger if just edited text
+						_listener.reFit();
+					}
+				});
+		textField.addFocusListener(
+				new FocusListener() {
+					private String _text;
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						_text = textField.getText();
+
+					}
+
+					@Override
+					public void focusLost(FocusEvent e) {
+
+						if (!_text.equals(textField.getText())) {
+							//sagar 
+							//SLIMProcessor.record(SLIMProcessor.SET_A_VALUE,_text);
+
+							// trigger if just edited text
+							_listener.reFit();
+							
+							if(!SLIMProcessor.macroParams.isa3MacroRecording){
+								SLIMProcessor.macroParams.ist3MacroRecording=true;
+								SLIMProcessor.record(SLIMProcessor.SET_T3_VALUE,textField.getText());
+								SLIMProcessor.macroParams.t3macroused=false;
+							}
+							SLIMProcessor.macroParams.isa3MacroRecording=false;
+						}
+					}
+				});
+
+
+		checkBox.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						// definitely trigger if DESELECTED
+						// also if SELECTED, in case text field already edited
+						//IJ.log("reached");
+						_listener.reFit();
+					}
+				});
+	}
+	
+
+	
+
+
+	
+	void refitUponStateChangeA3( final JTextField textField,  JCheckBox checkBox) {
+
+
+		textField.addActionListener(
+				new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						// trigger if just edited text
+						_listener.reFit();
+					}
+				});
+		textField.addFocusListener(
+				new FocusListener() {
+					private String _text;
+
+					@Override
+					public void focusGained(FocusEvent e) {
+						_text = textField.getText();
+
+					}
+					
+					@Override
+					public void focusLost(FocusEvent e) {
+						
+						if (!_text.equals(textField.getText())) {
+							//sagar 
+							//SLIMProcessor.record(SLIMProcessor.SET_A_VALUE,_text);
+
+							// trigger if just edited text
+							_listener.reFit();
+							if(!SLIMProcessor.macroParams.ist3MacroRecording){
+								SLIMProcessor.macroParams.isa3MacroRecording=true;
+
+								SLIMProcessor.record(SLIMProcessor.SET_A3_VALUE,textField.getText());
+								SLIMProcessor.macroParams.a3macroused=false;
+
+							}
+							
+							SLIMProcessor.macroParams.ist3MacroRecording=false;
+						}
+					}
+				});
+		
+		
+		checkBox.addItemListener(
+				new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent e) {
+						// definitely trigger if DESELECTED
+						// also if SELECTED, in case text field already edited
+						//IJ.log("reached");
+						_listener.reFit();
+					}
+				});
+	}
 	/**
 	 * Triggers refit if spinner value changes.
 	 * 
@@ -2233,34 +2702,85 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				String function = (String) _functionComboBox.getSelectedItem();
 				if (function.equals(SINGLE_EXPONENTIAL)) {
 					parameters = new double[4];
-					parameters[2] = Double.valueOf(_aParam1.getText());
-					parameters[3] = Double.valueOf(_tParam1.getText());
-					parameters[1] = Double.valueOf(_zParam1.getText());
+					/*
+//					parameters[2] = Double.valueOf(_aParam1.getText());
+//					parameters[3] = Double.valueOf(_tParam1.getText());
+//					parameters[1] = Double.valueOf(_zParam1.getText());
+//					*/
+					
+					//sagar
+					
+					
+					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_aParam1.getText());
+					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_tParam1.getText());
+					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam1.getText());
+					
+		
+				//	parameters[1] = Double.valueOf(_zParam1.getText());
+					
+					
+					
 				}
 				else if (function.equals(DOUBLE_EXPONENTIAL)) {
 					parameters = new double[6];
-					parameters[2] = Double.valueOf(_a1Param2.getText());
-					parameters[3] = Double.valueOf(_t1Param2.getText());
-					parameters[4] = Double.valueOf(_a2Param2.getText());
-					parameters[5] = Double.valueOf(_t2Param2.getText());
-					parameters[1] = Double.valueOf(_zParam2.getText());
+//					parameters[2] = Double.valueOf(_a1Param2.getText());
+//					parameters[3] = Double.valueOf(_t1Param2.getText());
+//					parameters[4] = Double.valueOf(_a2Param2.getText());
+//					parameters[5] = Double.valueOf(_t2Param2.getText());
+//					parameters[1] = Double.valueOf(_zParam2.getText());
+					
+					
+					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_a1Param2.getText());
+					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_t1Param2.getText());
+					parameters[4] = SLIMProcessor.macroParams.a2macroused?SLIMProcessor.macroParams.geta2(): Double.valueOf(_a2Param2.getText());
+					parameters[5] = SLIMProcessor.macroParams.t2macroused?SLIMProcessor.macroParams.gett2(): Double.valueOf(_t2Param2.getText());
+					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam2.getText());
+					
+					
+					
 				}
 				else if (function.equals(TRIPLE_EXPONENTIAL)) {
 					parameters = new double[8];
-					parameters[2] = Double.valueOf(_a1Param3.getText());
-					parameters[3] = Double.valueOf(_t1Param3.getText());
-					parameters[4] = Double.valueOf(_a2Param3.getText());
-					parameters[5] = Double.valueOf(_t2Param3.getText());
-					parameters[6] = Double.valueOf(_a3Param3.getText());
-					parameters[7] = Double.valueOf(_t3Param3.getText());
-					parameters[1] = Double.valueOf(_zParam3.getText());
+//					parameters[2] = Double.valueOf(_a1Param3.getText());
+//					parameters[3] = Double.valueOf(_t1Param3.getText());
+//					parameters[4] = Double.valueOf(_a2Param3.getText());
+//					parameters[5] = Double.valueOf(_t2Param3.getText());
+//					parameters[6] = Double.valueOf(_a3Param3.getText());
+//					parameters[7] = Double.valueOf(_t3Param3.getText());
+//					parameters[1] = Double.valueOf(_zParam3.getText());
+					
+					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_a1Param3.getText());
+					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_t1Param3.getText());
+					parameters[4] = SLIMProcessor.macroParams.a2macroused?SLIMProcessor.macroParams.geta2(): Double.valueOf(_a2Param3.getText());
+					parameters[5] = SLIMProcessor.macroParams.t2macroused?SLIMProcessor.macroParams.gett2(): Double.valueOf(_t2Param3.getText());
+					parameters[6] = SLIMProcessor.macroParams.a3macroused?SLIMProcessor.macroParams.geta3(): Double.valueOf(_a3Param3.getText());
+					parameters[7] = SLIMProcessor.macroParams.t3macroused?SLIMProcessor.macroParams.gett3(): Double.valueOf(_t3Param3.getText());
+					
+					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam3.getText());
+					
+					
+					
+					//sagar
+
+
 				}
 				else if (function.equals(STRETCHED_EXPONENTIAL)) {
 					parameters = new double[5];
-					parameters[2] = Double.valueOf(_aParam4.getText());
-					parameters[3] = Double.valueOf(_tParam4.getText());
-					parameters[4] = Double.valueOf(_hParam4.getText());
-					parameters[1] = Double.valueOf(_zParam4.getText());
+//					parameters[2] = Double.valueOf(_aParam4.getText());
+//					parameters[3] = Double.valueOf(_tParam4.getText());
+//					parameters[4] = Double.valueOf(_hParam4.getText());
+//					parameters[1] = Double.valueOf(_zParam4.getText());
+					//sagar
+					
+					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_aParam4.getText());
+					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_tParam4.getText());
+					parameters[4] = SLIMProcessor.macroParams.h1macroused?SLIMProcessor.macroParams.geth1(): Double.valueOf(_hParam4.getText());
+					
+					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam4.getText());
+					
+					IJ.log(Double.toString(parameters[4]));
+					
+
 				}
 			}
 			catch (NumberFormatException e) {
