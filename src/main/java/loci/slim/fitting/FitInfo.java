@@ -23,8 +23,6 @@
 
 package loci.slim.fitting;
 
-import ij.IJ;
-
 import java.awt.image.IndexColorModel;
 
 import loci.curvefitter.ICurveFitter.FitAlgorithm;

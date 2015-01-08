@@ -23,13 +23,10 @@
 
 package loci.slim2.process.interactive.grayscale;
 
-import java.util.List;
-
 import net.imagej.Dataset;
 import net.imagej.display.ImageDisplay;
 import net.imagej.display.ImageDisplayService;
 import net.imagej.overlay.ThresholdOverlay;
-import net.imagej.threshold.ThresholdMethod;
 import net.imagej.threshold.ThresholdService;
 
 import org.scijava.Context;

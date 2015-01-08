@@ -25,9 +25,9 @@ package loci.slim;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
+import ij.plugin.frame.Recorder;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import io.scif.img.ImgOpener;
@@ -45,7 +45,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
-import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
@@ -109,17 +108,6 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;
-
-
-
-
-
-
-
-
-
-
-import ij.plugin.frame.Recorder;
 
 
 /**
