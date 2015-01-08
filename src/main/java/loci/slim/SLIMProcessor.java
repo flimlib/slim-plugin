@@ -27,6 +27,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
+import ij.plugin.frame.Recorder;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import io.scif.img.ImgOpener;
