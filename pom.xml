@@ -33,6 +33,11 @@
 		<url>https://slim-curve.github.io/</url>
 	</organization>
 
+	<!-- FIXME: Switch curve-fitter to release dependency! -->
+	<properties>
+		<enforcer.skip>true</enforcer.skip>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>slim-curve</groupId>
