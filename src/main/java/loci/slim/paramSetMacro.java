@@ -27,6 +27,11 @@ public class paramSetMacro {
 	private double z1;
 	private double h1;
 	
+	
+	private double transientStart;
+	private double transientStop;
+	private double dataStart;
+	
 	/// flags fro using macro or gui values
 	public static boolean chi2MacroUsed=false;
 	
@@ -54,6 +59,16 @@ public class paramSetMacro {
 	
 	public boolean isa3MacroRecording=false;
 	public boolean ist3MacroRecording=false;
+	
+	public boolean firstTimeRecordTransientStart=true;
+	public boolean firstTimeRecordTransientStop=true;
+	public boolean firstTimeRecordDataStart=true;
+	
+	
+	public boolean transientStartMacroUsed=false;
+	public boolean transientStopMacroUsed=false;
+	public boolean DataStartMacroUsed=false;
+	
 	
 	private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA",
 			SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD",
@@ -211,6 +226,33 @@ public class paramSetMacro {
 	public double geth1(){
 		return h1;
 	}
-
+///getter
+	public double getTransientStartFromMacro(){
+		return transientStart;
+	}
 	
+	public double getTransientStopFromMacro(){
+		return transientStop;
+		
+	}
+	
+	public double getDataStartFromMacro(){
+		return dataStart;
+	}
+	
+	
+	//setter
+	public void setTransientStartFromMacro(double macroVal){
+		transientStart=macroVal;
+	}
+	
+	public void setTransientStopFromMacro(double macroVal){
+		transientStop=macroVal;
+		
+	}
+	
+	public void setDataStartFromMacro(double macroVal){
+		dataStart=macroVal;
+	}
 }
+

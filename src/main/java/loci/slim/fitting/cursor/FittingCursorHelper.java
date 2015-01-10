@@ -23,6 +23,8 @@
 
 package loci.slim.fitting.cursor;
 
+import ij.IJ;
+
 /**
  * This is a helper class for the user interface for setting and displaying
  * the fitting cursor start and stop values.  This listens for changes and
@@ -156,6 +158,7 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	 */
 	@Override
 	public void setTransientStop(String transientStop) {
+		
 		_fittingCursor.setTransientStop(transientStop);
 	}
 

@@ -786,10 +786,25 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		cursorPanel.add(transStartLabel);
 		_transientStartModel = new SpinnerNumberModel(0.0, 0.0, _maxBin * _xInc, _xInc);
 		_transientStartSpinner = new JSpinner(_transientStartModel);
+		
+		//_fittingCursorHelper.setTransientStart(getTransientStart());
+		
 		_transientStartSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
+				//IJ.log(getTransientStart());
+				//ADD recorder here
+				
+				SLIMProcessor.macroParams.transientStartMacroUsed=false;
 				_fittingCursorHelper.setTransientStart(getTransientStart());
+				
+				
+				if(!SLIMProcessor.macroParams.firstTimeRecordTransientStart){
+					SLIMProcessor.record(SLIMProcessor.SET_TRANSIENT_START,getTransientStart() );
+					
+				}
+				SLIMProcessor.macroParams.firstTimeRecordTransientStart=false;
+
 			}
 		});
 		cursorPanel.add(_transientStartSpinner);
@@ -802,7 +817,17 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_dataStartSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
+				
+			
 				_fittingCursorHelper.setDataStart(getDataStart());
+				SLIMProcessor.macroParams.DataStartMacroUsed=false;
+				
+				if(!SLIMProcessor.macroParams.firstTimeRecordDataStart)
+				{
+					SLIMProcessor.record(SLIMProcessor.SET_DATA_START,getDataStart());
+				
+				}
+				SLIMProcessor.macroParams.firstTimeRecordDataStart=false;
 			}
 		});
 		cursorPanel.add(_dataStartSpinner);
@@ -815,7 +840,16 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_transientStopSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
+
+				
 				_fittingCursorHelper.setTransientStop(getTransientStop());
+				SLIMProcessor.macroParams.transientStopMacroUsed=false;
+				
+				if(!SLIMProcessor.macroParams.firstTimeRecordTransientStop)
+				{
+					SLIMProcessor.record(SLIMProcessor.SET_TRANSIENT_STOP,getTransientStop());
+				}
+				SLIMProcessor.macroParams.firstTimeRecordTransientStop=false;
 			}
 		});
 		cursorPanel.add(_transientStopSpinner);
@@ -829,6 +863,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				_fittingCursorHelper.setPromptDelay(getPromptDelay());
+
 			}
 		});
 		cursorPanel.add(_promptDelaySpinner);
@@ -2778,7 +2813,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					
 					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam4.getText());
 					
-					IJ.log(Double.toString(parameters[4]));
+		
 					
 
 				}
@@ -3039,6 +3074,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	 */ 
 	@Override
 	public String getDataStart() {
+		
 		return _dataStartSpinner.getValue().toString();
 	}
 

@@ -204,6 +204,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_NOISE_MODEL="setNoiseModel";
 	public static final String SET_CHI2_TARGET="setChi2Target";
 	public static final String SET_THRESHOLD="setThersholdValue";
+	public static final String SET_TRANSIENT_START="setTransientStart";
+	public static final String SET_TRANSIENT_STOP="setTransientStop";
+	public static final String SET_DATA_START="setDataStart";
 	///single exponetial recorder macro
 	public static final String SET_A1_VALUE="setA1value";
 	public static final String SET_T1_VALUE="setT1value";
@@ -3066,6 +3069,25 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 	}
 	
+	public static void setTransientStart(String arg){
+		
+		macroParams.transientStartMacroUsed=true;
+//		double startVal=Double.parseDouble(arg);
+//		
+//		if(startVal<macroParams.get)
+		macroParams.setTransientStartFromMacro(Double.parseDouble(arg));
+	}
+	
+	public static void setTransientStop(String arg){
+		
+		macroParams.transientStopMacroUsed=true;
+		macroParams.setTransientStopFromMacro(Double.parseDouble(arg));
+	}
+	public static void setDataStart(String arg){
+		
+		macroParams.DataStartMacroUsed=true;
+		macroParams.setDataStartFromMacro(Double.parseDouble(arg));
+	}
 	
 
 }

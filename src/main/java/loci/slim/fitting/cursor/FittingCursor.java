@@ -23,11 +23,14 @@
 
 package loci.slim.fitting.cursor;
 
+import ij.IJ;
+
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Set;
 
 import loci.curvefitter.IFitterEstimator;
+import loci.slim.SLIMProcessor;
 import loci.slim.heuristics.FitterEstimator;
 
 /**
@@ -497,7 +500,13 @@ public class FittingCursor {
 	 * @return 
 	 */
 	public int getTransientStartBin() {
-		return _transientStartBin;
+		
+		if(SLIMProcessor.macroParams.transientStartMacroUsed){
+			return _fitterEstimator.valueToBin(SLIMProcessor.macroParams.getTransientStartFromMacro(), _inc);
+		}
+		else
+			return _transientStartBin;
+
 	}
 
 	/**
@@ -543,6 +552,7 @@ public class FittingCursor {
 				if (value >= _transientStartValue && value <= _transientStopValue) {
 					_dataStartValue = value;
 					_dataStartBin = _fitterEstimator.valueToBin(value, _inc);
+					IJ.log(Double.toString(_dataStartBin));
 				}
 			}
 		}
@@ -584,7 +594,18 @@ public class FittingCursor {
 	 * @return 
 	 */
 	public int getDataStartBin() {
-		return _dataStartBin;
+		//return _dataStartBin;
+		
+		
+		if(SLIMProcessor.macroParams.DataStartMacroUsed){
+			return _fitterEstimator.valueToBin(SLIMProcessor.macroParams.getDataStartFromMacro(), _inc);
+		}
+		else
+			return _dataStartBin;
+		
+
+
+		
 	}
 
 	/**
@@ -670,7 +691,15 @@ public class FittingCursor {
 	 * @return 
 	 */
 	public int getTransientStopBin() {
-		return _transientStopBin;
+		
+		
+		
+		if(SLIMProcessor.macroParams.transientStopMacroUsed){
+			return _fitterEstimator.valueToBin(SLIMProcessor.macroParams.getTransientStopFromMacro(), _inc);
+		}
+		else
+			return  _transientStopBin;
+
 	}
 
 	/**

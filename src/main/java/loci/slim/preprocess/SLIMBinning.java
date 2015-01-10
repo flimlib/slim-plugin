@@ -76,7 +76,7 @@ public class SLIMBinning {
 
 	public SLIMBinner createBinner(final String name) {
 		for (final PluginInfo<SLIMBinner> binner : binners) {
-			if (name.equals(getName(binner))) {
+			if (binner != null && name.equals(getName(binner))) {
 				return pluginService().createInstance(binner);
 			}
 		}
