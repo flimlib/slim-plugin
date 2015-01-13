@@ -552,7 +552,6 @@ public class FittingCursor {
 				if (value >= _transientStartValue && value <= _transientStopValue) {
 					_dataStartValue = value;
 					_dataStartBin = _fitterEstimator.valueToBin(value, _inc);
-					IJ.log(Double.toString(_dataStartBin));
 				}
 			}
 		}
