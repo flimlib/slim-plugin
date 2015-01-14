@@ -165,6 +165,8 @@ public class FittingCursor {
 	 * @param promptDelay 
 	 */
 	public void setPromptDelay(String promptDelay) {
+		
+		
 		Double promptDelayValue = null;
 		if (_showBins) {
 			Integer parsedInteger = getIntegerValue(promptDelay);
@@ -189,6 +191,9 @@ public class FittingCursor {
 		// either update others with new valid value or undo our invalid value
 		notifyListeners();
 	}
+
+
+
 
 	/**
 	 * Gets the start of the prompt as a string showing prompt delay.  Handles

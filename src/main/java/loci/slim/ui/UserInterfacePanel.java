@@ -249,9 +249,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	SpinnerNumberModel _transientStopModel;
 	JSpinner _transientStopSpinner;
 	SpinnerNumberModel _promptDelayModel;
-	JSpinner _promptDelaySpinner;
+	public static JSpinner _promptDelaySpinner;
 	SpinnerNumberModel _promptWidthModel;
-	JSpinner _promptWidthSpinner;
+	public static JSpinner _promptWidthSpinner;
 
 	// fit settings
 	JSpinner _xSpinner;
@@ -779,6 +779,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				_fittingCursorHelper.setPromptBaseline(getPromptBaseline());
 				
 				SLIMProcessor.macroParams.isMacroUsedForExcitation=false;
+				//SLIMProcessor.macroParams.setPromptBaseLine(Double.parseDouble(getPromptBaseline()));
 				SLIMProcessor.record(SLIMProcessor.SET_PROMPT_BASELINE, _promptBaselineSpinner.getValue().toString());
 				//IJ.log(_promptBaselineSpinner.getValue().toString());
 			}
@@ -868,7 +869,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				_fittingCursorHelper.setPromptDelay(getPromptDelay());
-				IJ.log("reached here dealy balchal");
+				//sagar//record the delay time 
+				SLIMProcessor.record(SLIMProcessor.SET_DELAY_PROMPT, getPromptDelay());
+				SLIMProcessor.macroParams.isDelayExcitationMacroused=false;
 
 			}
 		});
@@ -883,7 +886,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				_fittingCursorHelper.setPromptWidth(getPromptWidth());
-				IJ.log("reached here prompt width balchal");
+				SLIMProcessor.record(SLIMProcessor.SET_WIDTH_PROMPT, getPromptWidth());
+				
+				
 			}
 		});
 		cursorPanel.add(_promptWidthSpinner);

@@ -220,7 +220,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_Z1_VALUE="setZ1value";
 	public static final String SET_H1_VALUE="setH1value";
 	public static final String SET_PROMPT_BASELINE="setPrompBaseLine";
-	
+	public static final String SET_DELAY_PROMPT="setDelayPrompt";
+	public static final String SET_WIDTH_PROMPT="setWidthPrompt";
 	
 	
 	public static final String SET_EXCITATION="setExcitation";
@@ -3105,6 +3106,18 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static void setPrompBaseLine(String arg){
 		macroParams.isPromptBaseLineMacroused=true;
 		macroParams.setPromptBaseLine(Double.parseDouble(arg));
+	}
+	
+	
+	public static void setDelayPrompt(String arg){
+		macroParams.isDelayExcitationMacroused=true;
+		macroParams.setDelayPrompt(Double.parseDouble(arg));
+		UserInterfacePanel._promptDelaySpinner.setValue(Double.parseDouble(arg));
+	}
+	
+	public static void setWidthPrompt(String arg){
+
+		UserInterfacePanel._promptWidthSpinner.setValue(Double.parseDouble(arg));
 	}
 
 }

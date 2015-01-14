@@ -33,6 +33,7 @@ public class paramSetMacro {
 	private double dataStart;
 	
 	private double promptBaseLine;
+	private double delayPrompt;
 	
 	/// flags fro using macro or gui values
 	public static boolean chi2MacroUsed=false;
@@ -72,6 +73,7 @@ public class paramSetMacro {
 	public boolean DataStartMacroUsed=false;
 	
 	public boolean isPromptBaseLineMacroused=false;
+	public boolean isDelayExcitationMacroused=false;
 	
 	public String excitationFileName=null;
 	public boolean isMacroUsedForExcitation=false;
@@ -273,6 +275,16 @@ public class paramSetMacro {
 	
 	public double getPromptBaseLine(){
 		return promptBaseLine;
+	}
+	
+	
+	
+	public void setDelayPrompt(double value){
+		delayPrompt=value;
+	}
+	
+	public double getPromptDelay(){
+		return delayPrompt;
 	}
 }
 
