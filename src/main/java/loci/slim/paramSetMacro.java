@@ -32,6 +32,8 @@ public class paramSetMacro {
 	private double transientStop;
 	private double dataStart;
 	
+	private double promptBaseLine;
+	
 	/// flags fro using macro or gui values
 	public static boolean chi2MacroUsed=false;
 	
@@ -68,6 +70,11 @@ public class paramSetMacro {
 	public boolean transientStartMacroUsed=false;
 	public boolean transientStopMacroUsed=false;
 	public boolean DataStartMacroUsed=false;
+	
+	public boolean isPromptBaseLineMacroused=false;
+	
+	public String excitationFileName=null;
+	public boolean isMacroUsedForExcitation=false;
 	
 	
 	private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA",
@@ -253,6 +260,19 @@ public class paramSetMacro {
 	
 	public void setDataStartFromMacro(double macroVal){
 		dataStart=macroVal;
+	}
+	
+	public void setExcitationFileName(String name){
+		excitationFileName=name;
+		
+	}
+	
+	public void setPromptBaseLine(double value){
+		promptBaseLine=value;
+	}
+	
+	public double getPromptBaseLine(){
+		return promptBaseLine;
 	}
 }
 

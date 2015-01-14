@@ -219,6 +219,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 	
 	public static final String SET_Z1_VALUE="setZ1value";
 	public static final String SET_H1_VALUE="setH1value";
+	public static final String SET_PROMPT_BASELINE="setPrompBaseLine";
+	
+	
+	
+	public static final String SET_EXCITATION="setExcitation";
 
 	public static FitInfo fitInfo =new FitInfo();
 	
@@ -3089,5 +3094,17 @@ public class SLIMProcessor <T extends RealType<T>> {
 		macroParams.setDataStartFromMacro(Double.parseDouble(arg));
 	}
 	
+	
+	public static void setExcitation(String args){
+		macroParams.setExcitationFileName(args);
+		macroParams.isMacroUsedForExcitation=true;
+		UserInterfacePanel._promptComboBox.setSelectedItem("Load from File");
+		
+	}
+	
+	public static void setPrompBaseLine(String arg){
+		macroParams.isPromptBaseLineMacroused=true;
+		macroParams.setPromptBaseLine(Double.parseDouble(arg));
+	}
 
 }

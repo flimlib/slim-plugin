@@ -230,13 +230,13 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	
 	// cursor settings
 	JTextField _promptBaselineField;
-	JTextField _transientStartField;
-	JTextField _dataStartField;
-	JTextField _transientStopField;
-	JTextField _promptDelayField;
-	JTextField _promptWidthField;
+	//JTextField _transientStartField;
+	//JTextField _dataStartField;
+	//JTextField _transientStopField;
+	//JTextField _promptDelayField;
+	//JTextField _promptWidthField;
 	JCheckBox _showBins;
-	JComboBox _promptComboBox;
+	public static JComboBox _promptComboBox;
 	JButton _estimateCursorsButton;
 
 	// cursor settings
@@ -777,7 +777,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				_fittingCursorHelper.setPromptBaseline(getPromptBaseline());
+				
+				SLIMProcessor.macroParams.isMacroUsedForExcitation=false;
+				SLIMProcessor.record(SLIMProcessor.SET_PROMPT_BASELINE, _promptBaselineSpinner.getValue().toString());
+				//IJ.log(_promptBaselineSpinner.getValue().toString());
 			}
+
 		});
 		cursorPanel.add(_promptBaselineSpinner);
 
@@ -863,6 +868,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				_fittingCursorHelper.setPromptDelay(getPromptDelay());
+				IJ.log("reached here dealy balchal");
 
 			}
 		});
@@ -877,6 +883,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				_fittingCursorHelper.setPromptWidth(getPromptWidth());
+				IJ.log("reached here prompt width balchal");
 			}
 		});
 		cursorPanel.add(_promptWidthSpinner);
@@ -977,6 +984,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		});
 		cursorPanel.add(_promptWidthField);*/
 
+		
 		JLabel dummyLabel = new JLabel("");
 		dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		cursorPanel.add(dummyLabel);
@@ -1027,12 +1035,26 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						String selectedItem = (String) _promptComboBox.getSelectedItem();
 						boolean isExcitationLoaded = false;
 						if (EXCITATION_FILE.equals(selectedItem)) {
-							OpenDialog dialog = new OpenDialog("Load Excitation File", "");
-							String directory = dialog.getDirectory();
-							String fileName = dialog.getFileName();
-							if (null != fileName && !fileName.equals("") && null != _listener) {
-								isExcitationLoaded = _listener.loadExcitation(directory + fileName);
+							//sagar
+							if(!SLIMProcessor.macroParams.isMacroUsedForExcitation){
+								OpenDialog dialog = new OpenDialog("Load Excitation File", "");
+								String directory = dialog.getDirectory();
+								String fileName = dialog.getFileName();
+								if (null != fileName && !fileName.equals("") && null != _listener) {
+									isExcitationLoaded = _listener.loadExcitation(directory + fileName);
+								}
+
+
+								////add recorder for using that specific IRF file
+								SLIMProcessor.record(SLIMProcessor.SET_EXCITATION,dialog.getPath());
+
 							}
+							
+							else {
+								isExcitationLoaded = _listener.loadExcitation(SLIMProcessor.macroParams.excitationFileName);
+							}
+							
+
 						}
 						else if (EXCITATION_CREATE.equals(selectedItem)) {
 							SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");

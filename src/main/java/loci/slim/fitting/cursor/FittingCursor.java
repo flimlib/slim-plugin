@@ -429,10 +429,17 @@ public class FittingCursor {
 	 */
 	public double getPromptBaselineValue() {
 		double returnValue = 0.0;
-		if (_hasPrompt) {
-			returnValue = _fitterEstimator.roundToDecimalPlaces(_promptBaselineValue, DECIMAL_PLACES);
+
+		if(!SLIMProcessor.macroParams.isPromptBaseLineMacroused){
+			if (_hasPrompt) {
+				returnValue = _fitterEstimator.roundToDecimalPlaces(_promptBaselineValue, DECIMAL_PLACES);
+			}
+			return returnValue;
 		}
-		return returnValue;
+
+		else {
+			return _fitterEstimator.roundToDecimalPlaces(SLIMProcessor.macroParams.getPromptBaseLine(), DECIMAL_PLACES);
+		}
 	}
 
 	/**
