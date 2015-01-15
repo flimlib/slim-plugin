@@ -1121,6 +1121,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 							////read file name for default location
 							try {
 								FileReader configFileReader=new FileReader(workingDirectory+"configDefaultExcitation.txt");
+								FileReader configFileReaderTime=new FileReader(workingDirectory+"configExcitationTime.txt");
+								
+								
+								
 								
 //								configFileReader.
 								BufferedReader br=new BufferedReader(configFileReader);
@@ -1129,8 +1133,30 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 								if(defaultIRFPath!=null){
 									isExcitationLoaded=_listener.loadExcitation(defaultIRFPath);
 								}
-								else
+								else{
 									IJ.log("nothing found as default excitation. Please try to save default excitation again");
+								}
+								br=new BufferedReader(configFileReaderTime);
+								String str1=br.readLine();
+								String str2=br.readLine();
+								String str3=br.readLine();
+								
+								///check for exception when fiel does not have 3 values should go here//
+								
+								if(str1!=null){
+									///set the _promptBaselineSpinner
+									_promptBaselineSpinner.setValue(Double.parseDouble(str1));
+								}
+								if(str2!=null){
+									//set the _promptWidthSpinner
+									_promptWidthSpinner.setValue(Double.parseDouble(str2));
+								}
+								if(str3!=null){
+									// set the _promptDelaySpinner
+									_promptDelaySpinner.setValue(Double.parseDouble(str3));
+								}
+								
+								IJ.log(str1+"  "+str2+"   "+str3);
 								
 							} catch (FileNotFoundException e1) {
 								// TODO Auto-generated catch block
