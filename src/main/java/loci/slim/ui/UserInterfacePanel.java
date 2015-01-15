@@ -808,7 +808,6 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		_transientStartSpinner = new JSpinner(_transientStartModel);
 		
 		//_fittingCursorHelper.setTransientStart(getTransientStart());
-		
 		_transientStartSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -1063,6 +1062,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 								OpenDialog dialog = new OpenDialog("Load Excitation File", "");
 								String directory = dialog.getDirectory();
 								String fileName = dialog.getFileName();
+								
+								
 								if (null != fileName && !fileName.equals("") && null != _listener) {
 									isExcitationLoaded = _listener.loadExcitation(directory + fileName);
 								}
