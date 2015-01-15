@@ -63,7 +63,7 @@ public interface IUserInterfacePanel {
 	/**
 	 * Resets the UI after a fit.
 	 */
-	void reset();
+	void  reset();
 
 	/**
 	 * Disables the UI buttons.

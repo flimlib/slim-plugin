@@ -887,7 +887,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 						catch (InterruptedException e) {
 
 						}
-						if (_quit) {
+						if (_quit) { 
 							hideUIPanel(uiPanel);
 							return;
 						}
