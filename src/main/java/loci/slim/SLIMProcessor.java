@@ -133,7 +133,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private static final String Y = "Y";
 	private static final String LIFETIME = "Lifetime";
 	private static final String CHANNELS = "Channels";
-	private static final boolean TABBED = true;
+	private static final boolean TABBED = false;
 	private static final boolean USE_TAU = true;
 	private static final boolean USE_LAMBDA = false;
 
@@ -567,6 +567,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 			USE_TAU, _bins, _timeRange, _analysis.getChoices(),
 			_binning.getChoices(), fittingCursorHelper, fitterEstimator);
 		_uiPanel = uiPanel; //TODO almost got by having it just be a local variable
+		
+		//UserInterfacePanel._promptComboBox.setSelectedItem("load deafult");
+		
 		uiPanel.setX(0);
 		uiPanel.setY(0);
 		uiPanel.setThreshold(estimator.getThreshold());

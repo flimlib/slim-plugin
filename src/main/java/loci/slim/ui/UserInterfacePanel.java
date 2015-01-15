@@ -39,6 +39,12 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -119,9 +125,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 	private static final String EXCITATION_NONE = "None",
 			EXCITATION_FILE = "Load from File",
-			EXCITATION_CREATE = "Use current X Y",
+			EXCITATION_CREATE = "Create from current X Y",
 			EXCITATION_ESTIMATE = "Estimate from current X Y",
-			EXCITATION_GAUSSIAN = "Gaussian";
+			EXCITATION_GAUSSIAN = "Gaussian",
+			LOAD_DEFAULT="Use default Excitation",
+			SET_AS_DEFAULT= "Set as default";
+			///add something to add default excitation
+			///option:save as default //save as drop down box
+			///option: load default  //check box would be fine I guess
 
 	private static final String FIT_IMAGE = "Fit Images",
 			FIT_PIXEL = "Fit Pixel",
@@ -169,7 +180,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 	public static final String STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, NONE };
 
-	private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE, EXCITATION_ESTIMATE, EXCITATION_GAUSSIAN };
+	private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE,LOAD_DEFAULT,SET_AS_DEFAULT, EXCITATION_FILE, EXCITATION_CREATE, EXCITATION_ESTIMATE, EXCITATION_GAUSSIAN };
 
 	private static final int X_VALUE = 0,
 			X_MAX = 64000,
@@ -332,6 +343,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	JButton _quitButton;
 	JButton _fitButton;
 	String _fitButtonText = FIT_IMAGE;
+	
+	String defaultExcitationPath;
+	boolean setAsDefault=false;
 
 	public UserInterfacePanel(boolean tabbed, boolean showTau,
 			int maxBin, double xInc,
@@ -1032,7 +1046,11 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		JLabel excitationLabel = new JLabel("Excitation");
 		excitationLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		cursorPanel.add(excitationLabel);
+		
+		
 		_promptComboBox = new JComboBox(EXCITATION_ITEMS);
+		_promptComboBox.setSelectedIndex(0);
+		
 		_promptComboBox.addActionListener(
 				new ActionListener() {
 					@Override
@@ -1058,15 +1076,22 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 							else {
 								isExcitationLoaded = _listener.loadExcitation(SLIMProcessor.macroParams.excitationFileName);
 							}
-							
+					
 
 						}
 						else if (EXCITATION_CREATE.equals(selectedItem)) {
 							SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
 							String directory = dialog.getDirectory();
 							String fileName = dialog.getFileName();
+							
+							defaultExcitationPath=directory+fileName;
+							
+							
 							if (null != fileName && !fileName.equals("") && null != _listener) {
 								isExcitationLoaded = _listener.createExcitation(directory + fileName);
+								
+								///here add the code to write the working deafultIRF's path in the workingDirectory path
+
 							}
 						}
 						else if (EXCITATION_ESTIMATE.equals(selectedItem)) {
@@ -1084,6 +1109,94 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 							if (null != fileName && !fileName.equals("") && null != _listener) {
 								isExcitationLoaded = _listener.gaussianExcitation(directory + fileName);
 							}
+						}
+						
+						else if (LOAD_DEFAULT.equals(selectedItem)) {
+							//should load everything with dealy, width, baseline
+							String workingDirectory=System.getProperty("user.dir");
+							workingDirectory+="\\plugins\\Analyze\\";
+							
+							String defaultIRFPath=null;
+							////read file name for default location
+							try {
+								FileReader configFileReader=new FileReader(workingDirectory+"configDefaultExcitation.txt");
+								
+//								configFileReader.
+								BufferedReader br=new BufferedReader(configFileReader);
+								defaultIRFPath=br.readLine();
+								br.close();
+								if(defaultIRFPath!=null){
+									isExcitationLoaded=_listener.loadExcitation(defaultIRFPath);
+								}
+								else
+									IJ.log("nothing found as default excitation. Please try to save default excitation again");
+								
+							} catch (FileNotFoundException e1) {
+								// TODO Auto-generated catch block
+								
+								IJ.log("Config file not found in /plugins/Analyze/. Try saving the deafult IRF again");
+								//e1.printStackTrace();
+							} catch (IOException e1) {
+								// TODO Auto-generated catch block
+								//e1.printStackTrace();
+							}
+							
+							
+							
+							
+							
+							
+						}
+						
+						else if(SET_AS_DEFAULT.equals(selectedItem)){
+							//set the default configuration with transient start, end and width 
+							String workingDirectory=System.getProperty("user.dir");
+							workingDirectory+="\\plugins\\Analyze\\";
+
+							//code for writing the fiel name and excitaiton
+							//isExcitationLoaded = _listener.createExcitation(workingDirectory + "DefaultExcitation.irf");
+
+							if(_promptDelaySpinner.isEnabled()){
+								String baseDefaultExcitation=_promptBaselineSpinner.getValue().toString();
+								String widthDefaultExcitation=_promptWidthSpinner.getValue().toString();
+								String delayDefaultExcitation=_promptDelaySpinner.getValue().toString();
+								
+								
+								IJ.log(delayDefaultExcitation+"    "+widthDefaultExcitation+"     "+baseDefaultExcitation);
+								IJ.log(delayDefaultExcitation);
+
+
+								///write the transient times
+
+								if(defaultExcitationPath!=null){
+									try {
+										
+										
+										BufferedWriter writer=new BufferedWriter(new FileWriter(workingDirectory+"configDefaultExcitation.txt"));
+										BufferedWriter writerTime=new BufferedWriter(new FileWriter(workingDirectory+"configExcitationTime.txt"));
+										writer.write(defaultExcitationPath);
+										
+										///writing the timing values for the default excitation
+										
+										writerTime.write(baseDefaultExcitation);
+										writerTime.newLine();
+										writerTime.write(widthDefaultExcitation);
+										writerTime.newLine();
+										writerTime.write(delayDefaultExcitation);
+										
+										writer.close();
+										writerTime.close();
+
+									} catch (IOException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+								}
+							}
+							else{
+								IJ.log("nothing to save as default");
+							}
+							
 						}
 
 						if (isExcitationLoaded) {
@@ -1109,8 +1222,18 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					}
 				}
 				);
+		/////deafult excitation load
+		//C:\Users\Sagar\Desktop\wqe.irf
+//		_listener.createExcitation("C:\\Users\\Sagar\\Desktop\\wqe.irf");
+//		_promptComboBox.setSelectedItem(EXCITATION_FILE);
+		//enablePromptCursors(true);
+		//_promptComboBox.setSelectedItem(LOAD_DEFAULT);
+		///default excitation load ends
+		
 		cursorPanel.add(_promptComboBox);
 
+		
+		
 		JLabel dummyLabel2 = new JLabel("");
 		dummyLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
 		cursorPanel.add(dummyLabel2);
