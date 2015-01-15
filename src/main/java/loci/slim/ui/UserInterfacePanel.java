@@ -341,7 +341,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 	JButton _openButton;
 	JButton _quitButton;
-	JButton _fitButton;
+	public static JButton _fitButton;
 	String _fitButtonText = FIT_IMAGE;
 	
 	String defaultExcitationPath;
@@ -453,21 +453,17 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
+						
 						String text = e.getActionCommand();
+						IJ.log("action performed"+text);
 						if (text.equals(_fitButtonText)) {
 							enableAll(false);
 							setFitButtonState(false);
 							if (null != _listener) {
+								///macro recorder for start fitting
+								IJ.log("are we really here");
+								SLIMProcessor.record(SLIMProcessor.SET_START_FITTING,"");
 								_listener.doFit();
-								String[] arg = {"0","0"};
-								//arg=
-//								SLIMProcessor.record(SLIMProcessor.FIT_IMAGE_FN, arg);
-								//test code
-//								IJ.log("reached");
-//								int a=SLIMProcessor.macroParams.algotype;
-//								IJ.log(Integer.toString(a));
-								///test code ends
-
 							}
 						}
 						else{
@@ -1156,7 +1152,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 									_promptDelaySpinner.setValue(Double.parseDouble(str3));
 								}
 								
-								IJ.log(str1+"  "+str2+"   "+str3);
+								//IJ.log(str1+"  "+str2+"   "+str3);
 								
 							} catch (FileNotFoundException e1) {
 								// TODO Auto-generated catch block

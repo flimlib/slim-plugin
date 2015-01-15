@@ -156,10 +156,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 	private final Object _synchFit = new Object();
 	private volatile boolean _quit;
-	private volatile boolean _cancel;
-	private volatile boolean _fitInProgress;
-//	static volatile boolean _cancel;
-//	static volatile boolean _fitInProgress;
+//	private volatile boolean _cancel;
+//	private volatile boolean _fitInProgress;
+	static volatile boolean _cancel;
+	static volatile boolean _fitInProgress;
 	private volatile boolean _fitted;
 	private volatile boolean _summed;
 	private volatile boolean _refit;
@@ -222,6 +222,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_PROMPT_BASELINE="setPrompBaseLine";
 	public static final String SET_DELAY_PROMPT="setDelayPrompt";
 	public static final String SET_WIDTH_PROMPT="setWidthPrompt";
+	public static final String SET_START_FITTING="startFitting";
+	
+	
 	
 	
 	public static final String SET_EXCITATION="setExcitation";
@@ -2860,9 +2863,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		IJ.log(slimProc._file);
 		slimProc.doFits();
-		
-//		_cancel = false;
-//		_fitInProgress = true;
+
 	}
 	
 	public  void setExponentNo(String arg ){
@@ -3121,6 +3122,19 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static void setWidthPrompt(String arg){
 
 		UserInterfacePanel._promptWidthSpinner.setValue(Double.parseDouble(arg));
+	}
+
+	public static void startFitting(String args){
+		///set the _fitButton action listener to the desired state in UI 452
+		//UserInterfacePanel._fitButton.set
+		//_cancel = false;
+		//_fitInProgress = true;
+		
+		
+		//UserInterfacePanel._fitButton.setEnabled(false);
+		//UserInterfacePanel._fitButton.setText("Cancel Fit");
+//		UserInterfacePanel._fitButton.setActionCommand("Fit Images");
+		UserInterfacePanel._fitButton.doClick();
 	}
 
 }
