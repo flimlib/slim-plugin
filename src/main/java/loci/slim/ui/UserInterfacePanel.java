@@ -24,6 +24,7 @@
 package loci.slim.ui;
 
 import ij.IJ;
+import ij.Prefs;
 import ij.io.OpenDialog;
 import ij.io.SaveDialog;
 
@@ -133,6 +134,16 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			///add something to add default excitation
 			///option:save as default //save as drop down box
 			///option: load default  //check box would be fine I guess
+	
+	///keys for excitation storign and retrieving
+	
+	public static final String KEY_EXCITATION="key.excitation";
+	public static final String KEY_BASE_PROMPT="key.basePrompt";
+	public static final String KEY_DELAY_TIME="key.delaytime";
+	public static final String KEY_WIDTH="key.width";
+	
+	
+	
 
 	private static final String FIT_IMAGE = "Fit Images",
 			FIT_PIXEL = "Fit Pixel",
@@ -1118,60 +1129,43 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 							
 							String defaultIRFPath=null;
 							////read file name for default location
-							try {
-								FileReader configFileReader=new FileReader(workingDirectory+"configDefaultExcitation.txt");
-								FileReader configFileReaderTime=new FileReader(workingDirectory+"configExcitationTime.txt");
+
 								
 								
 								
-								
-//								configFileReader.
-								BufferedReader br=new BufferedReader(configFileReader);
-								defaultIRFPath=br.readLine();
-								br.close();
-								if(defaultIRFPath!=null){
-									isExcitationLoaded=_listener.loadExcitation(defaultIRFPath);
-								}
-								else{
-									IJ.log("nothing found as default excitation. Please try to save default excitation again");
-								}
-								br=new BufferedReader(configFileReaderTime);
-								String str1=br.readLine();
-								String str2=br.readLine();
-								String str3=br.readLine();
-								
-								///check for exception when fiel does not have 3 values should go here//
-								
-								if(str1!=null){
-									///set the _promptBaselineSpinner
-									_promptBaselineSpinner.setValue(Double.parseDouble(str1));
-								}
-								if(str2!=null){
-									//set the _promptWidthSpinner
-									_promptWidthSpinner.setValue(Double.parseDouble(str2));
-								}
-								if(str3!=null){
-									// set the _promptDelaySpinner
-									_promptDelaySpinner.setValue(Double.parseDouble(str3));
-								}
-								
-								//IJ.log(str1+"  "+str2+"   "+str3);
-								
-							} catch (FileNotFoundException e1) {
-								// TODO Auto-generated catch block
-								
-								IJ.log("Config file not found in /plugins/Analyze/. Try saving the deafult IRF again");
-								//e1.printStackTrace();
-							} catch (IOException e1) {
-								// TODO Auto-generated catch block
-								//e1.printStackTrace();
+
+							defaultIRFPath=Prefs.get(KEY_EXCITATION, null);
+
+							if(defaultIRFPath!=null){
+								isExcitationLoaded=_listener.loadExcitation(defaultIRFPath); 
 							}
-							
-							
-							
-							
-							
-							
+							else{
+								IJ.log("nothing found as default excitation. Please try to save default excitation again");
+							}
+
+
+
+							String str1=Prefs.get(KEY_BASE_PROMPT, null);
+							String str2=Prefs.get(KEY_WIDTH, null);
+							String str3=Prefs.get(KEY_DELAY_TIME, null);
+
+							///check for exception when field does not have 3 values should go here//
+
+							if(str1!=null){
+								///set the _promptBaselineSpinner
+								_promptBaselineSpinner.setValue(Double.parseDouble(str1));
+							}
+							if(str2!=null){
+								//set the _promptWidthSpinner
+								_promptWidthSpinner.setValue(Double.parseDouble(str2));
+							}
+							if(str3!=null){
+								// set the _promptDelaySpinner
+								_promptDelaySpinner.setValue(Double.parseDouble(str3));
+							}
+
+
+
 						}
 						
 						else if(SET_AS_DEFAULT.equals(selectedItem)){
@@ -1187,37 +1181,45 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 								String widthDefaultExcitation=_promptWidthSpinner.getValue().toString();
 								String delayDefaultExcitation=_promptDelaySpinner.getValue().toString();
 								
-								
-								IJ.log(delayDefaultExcitation+"    "+widthDefaultExcitation+"     "+baseDefaultExcitation);
-								IJ.log(delayDefaultExcitation);
 
 
 								///write the transient times
+								///these should be static values
 
-								if(defaultExcitationPath!=null){
-									try {
-										
-										
-										BufferedWriter writer=new BufferedWriter(new FileWriter(workingDirectory+"configDefaultExcitation.txt"));
-										BufferedWriter writerTime=new BufferedWriter(new FileWriter(workingDirectory+"configExcitationTime.txt"));
-										writer.write(defaultExcitationPath);
-										
-										///writing the timing values for the default excitation
-										
-										writerTime.write(baseDefaultExcitation);
-										writerTime.newLine();
-										writerTime.write(widthDefaultExcitation);
-										writerTime.newLine();
-										writerTime.write(delayDefaultExcitation);
-										
-										writer.close();
-										writerTime.close();
-
-									} catch (IOException e1) {
-										// TODO Auto-generated catch block
-										e1.printStackTrace();
-									}
-								}
+								Prefs.set(KEY_EXCITATION, defaultExcitationPath);
+								Prefs.set(KEY_BASE_PROMPT, baseDefaultExcitation);
+								Prefs.set(KEY_WIDTH , widthDefaultExcitation);
+								Prefs.set(KEY_DELAY_TIME, delayDefaultExcitation);
+								
+								
+								
+								
+								
+								//Prefs.set(key, text);
+//								if(defaultExcitationPath!=null){
+//									try {
+//										
+//										
+//										BufferedWriter writer=new BufferedWriter(new FileWriter(workingDirectory+"configDefaultExcitation.txt"));
+//										BufferedWriter writerTime=new BufferedWriter(new FileWriter(workingDirectory+"configExcitationTime.txt"));
+//										writer.write(defaultExcitationPath);
+//										
+//										///writing the timing values for the default excitation
+//										
+//										writerTime.write(baseDefaultExcitation);
+//										writerTime.newLine();
+//										writerTime.write(widthDefaultExcitation);
+//										writerTime.newLine();
+//										writerTime.write(delayDefaultExcitation);
+//										
+//										writer.close();
+//										writerTime.close();
+//
+//									} catch (IOException e1) {
+//										// TODO Auto-generated catch block
+//										e1.printStackTrace();
+//									}
+//								}
 							}
 							else{
 								IJ.log("nothing to save as default");
