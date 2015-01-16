@@ -464,6 +464,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 								IJ.log("are we really here");
 								SLIMProcessor.record(SLIMProcessor.SET_START_FITTING,"");
 								_listener.doFit();
+								
+								//Prefs.set(key, value);
+								
 							}
 						}
 						else{

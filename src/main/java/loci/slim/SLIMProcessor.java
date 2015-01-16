@@ -3135,6 +3135,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		//UserInterfacePanel._fitButton.setText("Cancel Fit");
 //		UserInterfacePanel._fitButton.setActionCommand("Fit Images");
 		UserInterfacePanel._fitButton.doClick();
+		
+		
 	}
 
 }
