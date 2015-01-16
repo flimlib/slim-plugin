@@ -25,6 +25,7 @@ package loci.slim;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.plugin.frame.Recorder;
@@ -224,10 +225,16 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_WIDTH_PROMPT="setWidthPrompt";
 	public static final String SET_START_FITTING="startFitting";
 	
-	
-	
-	
 	public static final String SET_EXCITATION="setExcitation";
+	
+	//batch processign macro
+	
+	public static final String SET_BATCH_MODE="batchModeSet";
+	public static final String KEY_BATCH_MODE_FILE_NUMBER="Batch.NoofFiles";
+	public static final String KEY_FILE_NAMES="key.fileNum";
+	public static final String EXPORT_FILE="exportFileSet";
+	public static final String SET_START_BATCH="startBatch";
+	
 
 	public static FitInfo fitInfo =new FitInfo();
 	
@@ -627,41 +634,70 @@ public class SLIMProcessor <T extends RealType<T>> {
 				 */
 				@Override
 				public void openFile() {
-					File[] files = showFileDialog(getPathFromPreferences());
-					// were multiple files opened?
-					if (1 < files.length) {
-						batchProcessingWithUI(files);
-					}
-					// was a single file opened? (skip cancellations)
-					else if (1 == files.length) {
-						String savePath = _path;
-						String saveFile = _file;
+					if(!macroParams.isBatchMacroUsed){
+						File[] files = showFileDialog(getPathFromPreferences());
+						// were multiple files opened?
+						if (1 < files.length) {
+							//macro recorder for Batch processing
 
-						String[] pathAndFile = getPathAndFile(files[0]);
-						_path = pathAndFile[0];
-						_file = pathAndFile[1];
-
-						_image = loadImage(_path, _file);
-						if (null == _image) {
-							showError("Error", "Could not load image");
+							macroParams.storeFilesName(files);
+							SLIMProcessor.record(SLIMProcessor.SET_BATCH_MODE,"true");
+							
+							batchProcessingWithUI(files);
 						}
-						else {
-							if (getImageInfo(_image)) {
-								savePathInPreferences(_path);
+						// was a single file opened? (skip cancellations) Normal fitting operation
+						else if (1 == files.length) {
 
-								// close existing grayscale and hook up a new one
-								_uiPanel.setThresholdListener(null);
-								_grayScaleImage.close();
-								_grayScaleImage = null;
-								showGrayScaleAndFit(uiPanel);
+
+							String savePath = _path;
+							String saveFile = _file;
+
+							String[] pathAndFile = getPathAndFile(files[0]);
+							_path = pathAndFile[0];
+							_file = pathAndFile[1];
+
+							_image = loadImage(_path, _file);
+							if (null == _image) {
+								showError("Error", "Could not load image");
 							}
 							else {
-								// kludgy way to reset
-								_path = savePath;
-								_file = saveFile;
-								_image = loadImage(_path, _file);
-								getImageInfo(_image);
+								if (getImageInfo(_image)) {
+									savePathInPreferences(_path);
+
+									// close existing grayscale and hook up a new one
+									_uiPanel.setThresholdListener(null);
+									_grayScaleImage.close();
+									_grayScaleImage = null;
+									showGrayScaleAndFit(uiPanel);
+								}
+								else {
+									// kludgy way to reset
+									_path = savePath;
+									_file = saveFile;
+									_image = loadImage(_path, _file);
+									getImageInfo(_image);
+								}
 							}
+						}
+
+					}
+					
+					else{
+						
+						int noOfFIles=Integer.parseInt(Prefs.get(KEY_BATCH_MODE_FILE_NUMBER, null));
+						
+						IJ.log(Integer.toString(noOfFIles));
+						
+						IJ.log(Prefs.get(KEY_FILE_NAMES+Integer.toString(0),null));
+						
+						if(noOfFIles!=0){
+							
+							for(int i=0;i<noOfFIles;i++){
+								String path=Prefs.get(KEY_FILE_NAMES+Integer.toString(i),null);
+								macroParams.batchFileList[i]=new File(path);
+								IJ.log(path);
+							}
+							batchProcessingWithUI(macroParams.batchFileList);
 						}
 					}
 				}
@@ -1006,48 +1042,73 @@ public class SLIMProcessor <T extends RealType<T>> {
 		boolean defCSV = prefs.getBoolean(CSV_KEY, false);
 
 		// TODO - Consolidate this logic with same in DefaultBatchProcessor!
-		GenericDialog dialog = new GenericDialog("Batch Processing");
-		dialog.addCheckbox("Export_Pixels", defExportPixels);
-		dialog.addStringField("Pixels_File", defPixelsFile);
-		dialog.addCheckbox("Export_Histograms", defExportHistograms);
-		dialog.addStringField("Histogram_File", defHistogramsFile);
-		dialog.addCheckbox("Export_Summary_Histogram", defExportSummary);
-		dialog.addStringField("Summary_File", defSummaryFile);
-		dialog.addCheckbox("Comma_Separated", defCSV);
-		dialog.showDialog();
-		if (dialog.wasCanceled()) {
-			return;
+		
+		if(!macroParams.isExportFilemacroUsed){
+			GenericDialog dialog = new GenericDialog("Batch Processing");
+			dialog.addCheckbox("Export_Pixels", defExportPixels);
+			dialog.addStringField("Pixels_File", defPixelsFile);
+			dialog.addCheckbox("Export_Histograms", defExportHistograms);
+			dialog.addStringField("Histogram_File", defHistogramsFile);
+			dialog.addCheckbox("Export_Summary_Histogram", defExportSummary);
+			dialog.addStringField("Summary_File", defSummaryFile);
+			dialog.addCheckbox("Comma_Separated", defCSV);
+			dialog.showDialog();
+			if (dialog.wasCanceled()) {
+				return;
+			}
+
+			final boolean exportPixels = dialog.getNextBoolean();
+			String tmpPixelsFile = dialog.getNextString();
+			final boolean exportHistograms = dialog.getNextBoolean();
+			String tmpHistogramsFile = dialog.getNextString();
+			final boolean exportSummary = dialog.getNextBoolean();
+			String tmpSummaryFile = dialog.getNextString();
+			final boolean csv = dialog.getNextBoolean();
+			final String pixelsFile = checkSuffix(tmpPixelsFile, csv);
+			final String histogramsFile = checkSuffix(tmpHistogramsFile, csv);
+			final String summaryFile = checkSuffix(tmpSummaryFile, csv);
+
+
+
+			// make sure output file suffix is appropriate
+
+			prefs.putBoolean(EXPORT_PIXELS_KEY, exportPixels);
+			prefs.put(PIXELS_FILE_KEY, pixelsFile);
+			prefs.putBoolean(EXPORT_HISTOS_KEY, exportHistograms);
+			prefs.put(HISTOS_FILE_KEY, histogramsFile);
+			prefs.putBoolean(EXPORT_SUMMARY_KEY, exportSummary);
+			prefs.put(SUMMARY_FILE_KEY, summaryFile);
+
+			record(EXPORT_FILE,pixelsFile,histogramsFile,summaryFile);
+			
+			new Thread() {
+				@Override
+				public void run() {
+					batchProcessing(exportPixels, pixelsFile,
+							exportHistograms, histogramsFile,
+							exportSummary, summaryFile,
+							files, csv);
+				}
+			}.start();
+		}
+		else{
+			
+			final String tmpPixelsFile = macroParams.exportPixelFileName;
+			final String tmpHistogramsFile = macroParams.exportHistofileName;
+			final String tmpSummaryFile = macroParams.exportSummaryFileName;
+
+			new Thread() {
+				@Override
+				public void run() {
+					batchProcessing(true,tmpPixelsFile,
+							true,tmpHistogramsFile,
+							true, tmpSummaryFile,
+							files, true);
+				}
+			}.start();
 		}
 
-		final boolean exportPixels = dialog.getNextBoolean();
-		String tmpPixelsFile = dialog.getNextString();
-		final boolean exportHistograms = dialog.getNextBoolean();
-		String tmpHistogramsFile = dialog.getNextString();
-		final boolean exportSummary = dialog.getNextBoolean();
-		String tmpSummaryFile = dialog.getNextString();
-		final boolean csv = dialog.getNextBoolean();
 
-		// make sure output file suffix is appropriate
-		final String pixelsFile = checkSuffix(tmpPixelsFile, csv);
-		final String histogramsFile = checkSuffix(tmpHistogramsFile, csv);
-		final String summaryFile = checkSuffix(tmpSummaryFile, csv);
-
-		prefs.putBoolean(EXPORT_PIXELS_KEY, exportPixels);
-		prefs.put(PIXELS_FILE_KEY, pixelsFile);
-		prefs.putBoolean(EXPORT_HISTOS_KEY, exportHistograms);
-		prefs.put(HISTOS_FILE_KEY, histogramsFile);
-		prefs.putBoolean(EXPORT_SUMMARY_KEY, exportSummary);
-		prefs.put(SUMMARY_FILE_KEY, summaryFile);
-
-		new Thread() {
-			@Override
-			public void run() {
-				batchProcessing(exportPixels, pixelsFile,
-					exportHistograms, histogramsFile,
-					exportSummary, summaryFile,
-					files, csv);
-			}
-		}.start();
 	}
 
 	/**
@@ -3137,6 +3198,27 @@ public class SLIMProcessor <T extends RealType<T>> {
 		UserInterfacePanel._fitButton.doClick();
 		
 		
+	}
+	
+	public static void  batchModeSet(String args){
+		//args should have all the file name
+		
+		macroParams.isBatchMacroUsed=Boolean.parseBoolean(args);
+		macroParams.isExportFilemacroUsed=Boolean.parseBoolean(args);
+		//Prefs.set(args, args);
+		
+		
+	}
+	
+	
+	public static void exportFileSet(String arg1, String arg2, String arg3){
+		macroParams.exportPixelFileName=arg1;
+		macroParams.exportHistofileName=arg2;
+		macroParams.exportSummaryFileName=arg3;
+	}
+	
+	public static void startBatch(String arg){
+		UserInterfacePanel._openButton.doClick();
 	}
 
 }

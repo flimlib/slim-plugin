@@ -350,7 +350,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	JLabel _errorLabel4;
 	JCheckBox _startParam4;
 
-	JButton _openButton;
+	public static JButton _openButton;
 	JButton _quitButton;
 	public static JButton _fitButton;
 	String _fitButtonText = FIT_IMAGE;
@@ -439,6 +439,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (null != _listener) {
+							SLIMProcessor.record(SLIMProcessor.SET_START_BATCH,"");
 							_listener.openFile();
 						}
 					}
@@ -466,17 +467,13 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					public void actionPerformed(ActionEvent e) {
 						
 						String text = e.getActionCommand();
-						IJ.log("action performed"+text);
 						if (text.equals(_fitButtonText)) {
 							enableAll(false);
 							setFitButtonState(false);
 							if (null != _listener) {
 								///macro recorder for start fitting
-								IJ.log("are we really here");
 								SLIMProcessor.record(SLIMProcessor.SET_START_FITTING,"");
 								_listener.doFit();
-								
-								//Prefs.set(key, value);
 								
 							}
 						}
@@ -1124,8 +1121,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						
 						else if (LOAD_DEFAULT.equals(selectedItem)) {
 							//should load everything with dealy, width, baseline
-							String workingDirectory=System.getProperty("user.dir");
-							workingDirectory+="\\plugins\\Analyze\\";
+
 							
 							String defaultIRFPath=null;
 							////read file name for default location

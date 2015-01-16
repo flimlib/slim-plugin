@@ -1,5 +1,11 @@
 package loci.slim;
 
+import ij.IJ;
+import ij.Prefs;
+
+import java.io.File;
+import java.nio.file.Files;
+
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 
@@ -77,6 +83,17 @@ public class paramSetMacro {
 	
 	public String excitationFileName=null;
 	public boolean isMacroUsedForExcitation=false;
+	
+	
+	public int noOfFilesBatchProcessing=0;
+	public boolean isBatchMacroUsed=false;
+	
+	public File []batchFileList=null;
+	public boolean isExportFilemacroUsed=false;
+	
+	String exportPixelFileName=null;
+	String exportHistofileName=null;
+	String exportSummaryFileName=null;
 	
 	
 	private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA",
@@ -285,6 +302,19 @@ public class paramSetMacro {
 	
 	public double getPromptDelay(){
 		return delayPrompt;
+	}
+	
+	public void storeFilesName (File[] files){
+		batchFileList=files;
+		noOfFilesBatchProcessing=files.length;
+		IJ.log(Integer.toString(noOfFilesBatchProcessing));
+		Prefs.set(SLIMProcessor.KEY_BATCH_MODE_FILE_NUMBER,noOfFilesBatchProcessing);//stores the number of files
+		IJ.log("obtaned value after setting"+Prefs.get(SLIMProcessor.KEY_BATCH_MODE_FILE_NUMBER, null));
+		
+		for(int i=0; i<files.length;i++){
+			String key=SLIMProcessor.KEY_FILE_NAMES+Integer.toString(i);//generates the key
+			Prefs.set(key,files[i].toString());//this stores the path for the batch mode file read with macro
+		}
 	}
 }
 
