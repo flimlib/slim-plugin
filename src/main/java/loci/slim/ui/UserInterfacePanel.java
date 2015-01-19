@@ -717,6 +717,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		
 		fitPanel.add(_colorizeGrayScale);
 
+		//IJ.log("lenght"+Integer.toString(analysisChoices.length));
 		int choices = analysisChoices.length;
 		if (choices > 0) {
 			List<JCheckBox> checkBoxList = new ArrayList<JCheckBox>();

@@ -339,5 +339,7 @@ public class paramSetMacro {
 			Prefs.set(key,files[i].toString());//this stores the path for the batch mode file read with macro
 		}
 	}
+	
+
 }
 
