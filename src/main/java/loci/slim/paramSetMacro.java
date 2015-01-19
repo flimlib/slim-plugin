@@ -94,7 +94,30 @@ public class paramSetMacro {
 	String exportPixelFileName=null;
 	String exportHistofileName=null;
 	String exportSummaryFileName=null;
+
+	String []analysisType={"Export Histograms to Text",
+			"Export Histograms to Text",
+			"Export Pixels to Text",
+			"Export Pixels to Text"
+	};
 	
+	public boolean isAnalysisListUsed=false;
+	public int noOfAnalysisList=0;
+	
+	
+	public String exportPixelFileNameSingleFile=null;
+	public String exportPixelFileNameSingleFileSeperator=null;
+	
+	public String exportPixelFileNameSingleFileSLIM2=null;
+	public String exportPixelFileNameSingleFileSeperatorSLIM2=null;
+	
+	public String exportHistoFileNameSingleFile=null;
+	public String exportHistoFileNameSingleFileSeperator=null;
+	
+	public String exportHistoFileNameSingleFileSLIM2=null;
+	public String exportHistoFileNameSingleFileSeperatorSLIM2=null;
+	
+
 	
 	private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA",
 			SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD",

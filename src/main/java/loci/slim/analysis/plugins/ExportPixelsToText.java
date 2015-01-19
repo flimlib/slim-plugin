@@ -38,6 +38,7 @@ import java.util.prefs.Preferences;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
+import loci.slim.SLIMProcessor;
 import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
@@ -74,26 +75,42 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 
 	@Override
 	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
-		boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
-		if (export && null != fileName) {
-			char separator;
-			if (csv) {
-				separator = COMMA;
-				if (!fileName.endsWith(CSV_SUFFIX)) {
-					fileName += CSV_SUFFIX;
+		char separator=COMMA;
+		if(!SLIMProcessor.macroParams.isAnalysisListUsed){
+			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
+			if (export && null != fileName) {
+				
+				if (csv) {
+					separator = COMMA;
+					if (!fileName.endsWith(CSV_SUFFIX)) {
+						fileName += CSV_SUFFIX;
+					}
 				}
-			}
-			else {
-				separator = TAB;
-				if (!fileName.endsWith(TSV_SUFFIX)) {
-					fileName += TSV_SUFFIX;
+				else {
+					separator = TAB;
+					if (!fileName.endsWith(TSV_SUFFIX)) {
+						fileName += TSV_SUFFIX;
+					}
 				}
+				saveFileInPreferences(fileName);
+				saveAppendInPreferences(append);
+				saveCSVInPreferences(csv);
+				String recordingCharString=Character.toString(separator);
+				SLIMProcessor.record(SLIMProcessor.SET_EXPORT_PIXEL_FILE_NAME, fileName,recordingCharString);
 			}
+		}
+		else{
+			fileName=SLIMProcessor.macroParams.exportPixelFileNameSingleFile;
+			separator=SLIMProcessor.macroParams.exportPixelFileNameSingleFileSeperator.charAt(0);
+			IJ.log(Character.toString(separator));
 			saveFileInPreferences(fileName);
 			saveAppendInPreferences(append);
 			saveCSVInPreferences(csv);
-			export(fileName, append, image, region, function, parameters, separator);
+			
 		}
+		
+		export(fileName, append, image, region, function, parameters, separator);
+
 	}
 
 	public void export(String fileName, boolean append, ImgPlus<DoubleType> image,

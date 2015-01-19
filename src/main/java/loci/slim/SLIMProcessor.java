@@ -234,6 +234,19 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String KEY_FILE_NAMES="key.fileNum";
 	public static final String EXPORT_FILE="exportFileSet";
 	public static final String SET_START_BATCH="startBatch";
+	public static final String SET_ANALYSIS_SET="setAnalysisList";
+	
+	
+	public static final String KEY_ANALYSIS_LIST="key.analysis";
+	public static final String KEY_ANALYSIS_NUMBER="key.analysisNumber";
+	
+	public static final String SET_EXPORT_PIXEL_FILE_NAME="exportPixelFileName";
+	public static final String SET_EXPORT_PIXEL_FILE_NAME_SLIM2="exportPixelFileNameSLIM2";
+	
+	public static final String SET_EXPORT_HISTO_FILE_NAME="exportHistoFileName";
+	public static final String SET_EXPORT_HISTO_FILE_NAME_SLIM2="exportHistoFileNameSLIM2";
+	
+	
 	
 
 	public static FitInfo fitInfo =new FitInfo();
@@ -1616,9 +1629,43 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}
 		}
 		if (null != fittedImage) {
-			for (String analysis : uiPanel.getAnalysisList()) {
-				_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction(), uiPanel.getFittedImages());//sagar
-				//_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), SLIMProcessor.macroParams.getFunction(), uiPanel.getFittedImages());
+			
+			//IJ.log("I am inside fitted image");
+			
+			int i=0;
+			if(!macroParams.isAnalysisListUsed){
+				boolean flagMacroRecord=false;
+				for (String analysis : uiPanel.getAnalysisList()) {
+					flagMacroRecord=true;
+					IJ.log("my analysis set "+analysis);
+					Prefs.set(KEY_ANALYSIS_LIST+Integer.toString(i++),analysis);
+
+					_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction(), uiPanel.getFittedImages());//sagar
+					//_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), SLIMProcessor.macroParams.getFunction(), uiPanel.getFittedImages());
+				}
+				Prefs.set(KEY_ANALYSIS_NUMBER, Integer.toString(i));
+				if(flagMacroRecord){
+					record(SET_ANALYSIS_SET, "true");
+				}
+			}
+
+			else {
+				String noOfAnalysisObtained=Prefs.get(KEY_ANALYSIS_NUMBER, "0");
+				IJ.log("no of anaysis"+ noOfAnalysisObtained);
+	
+				int noOfAnalysis=Integer.parseInt(noOfAnalysisObtained);
+				if(noOfAnalysis!=0){
+
+					for(int j=0;j<noOfAnalysis;j++){
+						String analysis=Prefs.get(KEY_ANALYSIS_LIST+Integer.toString(j),null);
+						IJ.log(analysis);
+						if(analysis!=null){
+							_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction(), uiPanel.getFittedImages());
+						}
+						
+					}
+				}
+
 			}
 		}
 	}
@@ -3220,5 +3267,30 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static void startBatch(String arg){
 		UserInterfacePanel._openButton.doClick();
 	}
+	
+	public static void setAnalysisList(String arg){
+		macroParams.isAnalysisListUsed=Boolean.parseBoolean(arg);
+		
+	}
 
+	public static void exportPixelFileName(String arg1,String arg2){
+		macroParams.exportPixelFileNameSingleFile=arg1;
+		macroParams.exportPixelFileNameSingleFileSeperator=arg2;
+	}
+	
+	public static void exportPixelFileNameSLIM2(String arg1,String arg2){
+		macroParams.exportPixelFileNameSingleFileSLIM2=arg1;
+		macroParams.exportPixelFileNameSingleFileSeperatorSLIM2=arg2;
+	}
+	
+	public static void exportHistoFileName(String arg1,String arg2){
+		macroParams.exportHistoFileNameSingleFile=arg1;
+		macroParams.exportHistoFileNameSingleFileSeperator=arg2;
+	}
+	
+	public static void exportHistoFileNameSLIM2(String arg1,String arg2){
+		macroParams.exportHistoFileNameSingleFileSLIM2=arg1;
+		macroParams.exportHistoFileNameSingleFileSeperatorSLIM2=arg2;
+	}
+	
 }

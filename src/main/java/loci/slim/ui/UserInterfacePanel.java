@@ -246,7 +246,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	public static JComboBox _noiseModelComboBox;
 
 	JCheckBox _colorizeGrayScale;
-	JCheckBox[] _analysisCheckBoxList;
+	public static JCheckBox[] _analysisCheckBoxList;
 	JCheckBox _fitAllChannels;
 
 	
@@ -377,6 +377,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		JPanel outerPanel = new JPanel();
 		outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.Y_AXIS));
 
+		//test
+		String analysisChoiceTemp[]={analysisChoices[0],analysisChoices[2]};
+		
 		if (tabbed) {
 			JTabbedPane tabbedPane = new JTabbedPane();
 
@@ -2710,12 +2713,17 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 	@Override
 	public String[] getAnalysisList() {
+		
 		List<String> analysisList = new ArrayList<String>();
+		int i=0;
 		for (JCheckBox checkBox : _analysisCheckBoxList) {
 			if (checkBox.isSelected()) {
 				analysisList.add(checkBox.getText());
+				//Prefs.set(SLIMProcessor.KEY_ANALYSIS_LIST+Integer.toString(i++),checkBox.getText());
 			}
 		}
+		
+
 		return analysisList.toArray(new String[0]);
 	}
 
