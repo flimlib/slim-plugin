@@ -144,7 +144,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	
 	
 	
-
+	int countForExcitationCheck=0;
 	private static final String FIT_IMAGE = "Fit Images",
 			FIT_PIXEL = "Fit Pixel",
 			FIT_SUMMED_PIXELS = "Fit Summed Pixels",
@@ -407,7 +407,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			JPanel innerPanel = new JPanel();
 			innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.X_AXIS));
 
-			JPanel fitPanel = createFitPanel(analysisChoices);
+			JPanel fitPanel = createFitPanel(analysisChoiceTemp);//done to avoid Imagej2 configs
 			fitPanel.setBorder(border("Fit"));
 			innerPanel.add(fitPanel);
 
@@ -442,8 +442,9 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						if (null != _listener) {
-							SLIMProcessor.record(SLIMProcessor.SET_START_BATCH,"");
+							
 							_listener.openFile();
+							SLIMProcessor.record(SLIMProcessor.SET_START_BATCH,"");
 						}
 					}
 				}
@@ -803,10 +804,13 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 			public void stateChanged(ChangeEvent e) {
 				_fittingCursorHelper.setPromptBaseline(getPromptBaseline());
 				
-				SLIMProcessor.macroParams.isMacroUsedForExcitation=false;
-				//SLIMProcessor.macroParams.setPromptBaseLine(Double.parseDouble(getPromptBaseline()));
-				SLIMProcessor.record(SLIMProcessor.SET_PROMPT_BASELINE, _promptBaselineSpinner.getValue().toString());
-				//IJ.log(_promptBaselineSpinner.getValue().toString());
+				if(!SLIMProcessor.macroParams.isExcitationChanging){
+					SLIMProcessor.macroParams.isMacroUsedForExcitation=false;
+					//SLIMProcessor.macroParams.setPromptBaseLine(Double.parseDouble(getPromptBaseline()));
+					//TODO add check for excitaiton file being loaded
+					SLIMProcessor.record(SLIMProcessor.SET_PROMPT_BASELINE, _promptBaselineSpinner.getValue().toString());
+				}
+
 			}
 
 		});
@@ -825,15 +829,19 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				//IJ.log(getTransientStart());
 				//ADD recorder here
 				
-				SLIMProcessor.macroParams.transientStartMacroUsed=false;
-				_fittingCursorHelper.setTransientStart(getTransientStart());
 				
-				
-				if(!SLIMProcessor.macroParams.firstTimeRecordTransientStart){
-					SLIMProcessor.record(SLIMProcessor.SET_TRANSIENT_START,getTransientStart() );
-					
+				if(!SLIMProcessor.macroParams.isExcitationChanging){
+					SLIMProcessor.macroParams.transientStartMacroUsed=false;
+					_fittingCursorHelper.setTransientStart(getTransientStart());
+
+
+					if(!SLIMProcessor.macroParams.firstTimeRecordTransientStart){
+						SLIMProcessor.record(SLIMProcessor.SET_TRANSIENT_START,getTransientStart() );
+
+					}
+					SLIMProcessor.macroParams.firstTimeRecordTransientStart=false;
 				}
-				SLIMProcessor.macroParams.firstTimeRecordTransientStart=false;
+				
 
 			}
 		});
@@ -850,14 +858,19 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				
 			
 				_fittingCursorHelper.setDataStart(getDataStart());
-				SLIMProcessor.macroParams.DataStartMacroUsed=false;
-				
-				if(!SLIMProcessor.macroParams.firstTimeRecordDataStart)
-				{
-					SLIMProcessor.record(SLIMProcessor.SET_DATA_START,getDataStart());
-				
+
+				if(!SLIMProcessor.macroParams.isExcitationChanging){///added for avoiding auto recording during excitation change
+					SLIMProcessor.macroParams.DataStartMacroUsed=false;
+
+					if(!SLIMProcessor.macroParams.firstTimeRecordDataStart)
+					{
+						SLIMProcessor.record(SLIMProcessor.SET_DATA_START,getDataStart());
+
+					}
+					SLIMProcessor.macroParams.firstTimeRecordDataStart=false;
 				}
-				SLIMProcessor.macroParams.firstTimeRecordDataStart=false;
+				
+
 			}
 		});
 		cursorPanel.add(_dataStartSpinner);
@@ -1065,6 +1078,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
+						
+						SLIMProcessor.macroParams.isExcitationChanging=true;
 						String selectedItem = (String) _promptComboBox.getSelectedItem();
 						boolean isExcitationLoaded = false;
 						if (EXCITATION_FILE.equals(selectedItem)) {
@@ -1125,14 +1140,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						
 						else if (LOAD_DEFAULT.equals(selectedItem)) {
 							//should load everything with dealy, width, baseline
+							if(!SLIMProcessor.macroParams.isMacroUsedForDefaultExcitation){
 
-							
+
+								SLIMProcessor.record(SLIMProcessor.DEFAULT_EXCITATION_LOAD, "true");
+							}
 							String defaultIRFPath=null;
 							////read file name for default location
 
-								
-								
-								
 
 							defaultIRFPath=Prefs.get(KEY_EXCITATION, null);
 
@@ -1163,7 +1178,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 								// set the _promptDelaySpinner
 								_promptDelaySpinner.setValue(Double.parseDouble(str3));
 							}
-
+						//	}
 
 
 						}
@@ -1247,6 +1262,8 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 							}
 						}
 						_listener.reFit();
+						
+						SLIMProcessor.macroParams.isExcitationChanging=false;
 					}
 				}
 				);
@@ -1415,7 +1432,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 		//_t1Fix1.addItemListener(this);
 		expPanel.add(_tFix1);
 		refitUponStateChangeT1(_tParam1, _tFix1);
-		//refitUponStateChange(_aParam1, _aFix1);
+	//	refitUponStateChange(_aParam1, _aFix1);
 		
 		
 		JLabel zLabel1 = new JLabel("Z");

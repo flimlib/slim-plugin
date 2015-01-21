@@ -157,10 +157,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 	private final Object _synchFit = new Object();
 	private volatile boolean _quit;
-//	private volatile boolean _cancel;
-//	private volatile boolean _fitInProgress;
-	static volatile boolean _cancel;
-	static volatile boolean _fitInProgress;
+	private volatile boolean _cancel;
+	private volatile boolean _fitInProgress;
+
 	private volatile boolean _fitted;
 	private volatile boolean _summed;
 	private volatile boolean _refit;
@@ -226,6 +225,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_START_FITTING="startFitting";
 	
 	public static final String SET_EXCITATION="setExcitation";
+	public static final String DEFAULT_EXCITATION_LOAD="loadDefaultExcitation";
 	
 	//batch processign macro
 	
@@ -245,7 +245,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	
 	public static final String SET_EXPORT_HISTO_FILE_NAME="exportHistoFileName";
 	public static final String SET_EXPORT_HISTO_FILE_NAME_SLIM2="exportHistoFileNameSLIM2";
-	
+	public static final String START_SLIM_CURVE="startSLIMCurve";
 	
 	
 
@@ -340,18 +340,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		// Load initial image
 		boolean success = false;
-		File[] files = showFileDialog(getPathFromPreferences());
-		if (files.length > 1) {
-			showError("Error in Batch Processing", "Need to fit a sample image first");
+		String[] pathAndFile=null;
+		///this following section is for macro starting 
+		if(macroParams.startSLIMCurveWithMacro){
+			_path=macroParams.startPathName;
+			_file=macroParams.startFileName;
 			
-		}
-		else {
-			
-			recordRun("","");
-			String[] pathAndFile = getPathAndFile(files[0]);
-			_path = pathAndFile[0];
-			_file = pathAndFile[1];
-
 			_image = loadImage(_path, _file);
 			if (null == _image) {
 				showError("Error", "Could not load image");
@@ -362,7 +356,41 @@ public class SLIMProcessor <T extends RealType<T>> {
 					success = true;
 				}
 			}
+			//macro starting ends here
 		}
+		
+		else{
+			File[] files = showFileDialog(getPathFromPreferences());
+			if (files.length > 1) {
+				showError("Error in Batch Processing", "Need to fit a sample image first");
+				
+			}
+			else {
+				
+				//recordRun("","");
+
+				pathAndFile = getPathAndFile(files[0]);
+				_path = pathAndFile[0];
+				_file = pathAndFile[1];
+				record(START_SLIM_CURVE,"true",_path,_file );
+
+
+				_image = loadImage(_path, _file);
+				if (null == _image) {
+					showError("Error", "Could not load image");
+				}
+				else {
+					if (getImageInfo(_image)) {
+						savePathInPreferences(_path);
+						success = true;
+					}
+				}
+			}
+		}
+		
+		
+		
+
 
 		if (success) {
 			// show the UI; do fits
@@ -2934,7 +2962,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static void recordRun(String command, String... args) 
 	{
 		//command = "run(\"loci.slim.SLIMPlugin(\"\")\")\n";
-		command = "run(\"SLIM Curve\")\n";
+		command = "run(\"SLIM Curve\");\n";
 		
 //		for(int i = 0; i < args.length; i++)
 //			command += "\", \"" + args[i];
@@ -3057,27 +3085,30 @@ public class SLIMProcessor <T extends RealType<T>> {
 			UserInterfacePanel._noiseModelComboBox.setSelectedItem( arg);
 		}
 	}
+
 	
+	/**
+	 * Works independent of the GUI, uses its own data type
+	 * @param arg
+	 */
 	
 	public static void setChi2Target(String arg){
 		
 		
 		///macro recorder for algorithm change
-		
-		
-		
-		//setChiSquareTarget
-		
-//		if(guiUpdateWithMacro){
-//			UserInterfacePanel._chiSqTargetSpinner.setValue((String)arg);
-//		}
-		
+
 		macroParams.setChiSquareTarget(Double.parseDouble(arg));
 		macroParams.chi2MacroUsed=true;
 		
 		
 	}
 	
+	
+	/**
+	 * 
+	 * Works independent of the GUI, uses its own data type
+	 * @param arg
+	 */
 	public static void setThersholdValue(String arg){
 		
 		
@@ -3187,20 +3218,31 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 	}
 	
+	/**
+	 * This macro does not update the GUI, instead updates a value for transient start time and uses that value for fitting
+	 * @param arg
+	 */
 	public static void setTransientStart(String arg){
 		
 		macroParams.transientStartMacroUsed=true;
-//		double startVal=Double.parseDouble(arg);
-//		
-//		if(startVal<macroParams.get)
 		macroParams.setTransientStartFromMacro(Double.parseDouble(arg));
 	}
 	
+	
+	/**
+	 * This macro calling function works independent for the GUI, updates its own data structure value
+	 * @param arg
+	 */
 	public static void setTransientStop(String arg){
 		
 		macroParams.transientStopMacroUsed=true;
 		macroParams.setTransientStopFromMacro(Double.parseDouble(arg));
 	}
+	
+	/**
+	 * Independent of the GUI like setTransientStop and setTransientStart
+	 * @param arg
+	 */
 	public static void setDataStart(String arg){
 		
 		macroParams.DataStartMacroUsed=true;
@@ -3214,6 +3256,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 		UserInterfacePanel._promptComboBox.setSelectedItem("Load from File");
 		
 	}
+	
+	public static void loadDefaultExcitation(String arg){
+		macroParams.isMacroUsedForDefaultExcitation=true;
+		UserInterfacePanel._promptComboBox.setSelectedItem("Use default Excitation");
+	}
+	
+
 	
 	public static void setPrompBaseLine(String arg){
 		macroParams.isPromptBaseLineMacroused=true;
@@ -3291,6 +3340,17 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static void exportHistoFileNameSLIM2(String arg1,String arg2){
 		macroParams.exportHistoFileNameSingleFileSLIM2=arg1;
 		macroParams.exportHistoFileNameSingleFileSeperatorSLIM2=arg2;
+	}
+	
+	
+	/**
+	 * macro for starting slim curve by automatic loading of file name
+	 * 
+	 */
+	public static void startSLIMCurve(String arg1, String arg2,String arg3){
+		macroParams.startSLIMCurveWithMacro=Boolean.parseBoolean(arg1);
+		macroParams.startPathName=arg2;
+		macroParams.startFileName=arg3;
 	}
 	
 }

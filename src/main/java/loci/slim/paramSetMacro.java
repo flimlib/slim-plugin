@@ -83,6 +83,7 @@ public class paramSetMacro {
 	
 	public String excitationFileName=null;
 	public boolean isMacroUsedForExcitation=false;
+	public boolean isMacroUsedForDefaultExcitation=false;
 	
 	
 	public int noOfFilesBatchProcessing=0;
@@ -117,7 +118,12 @@ public class paramSetMacro {
 	public String exportHistoFileNameSingleFileSLIM2=null;
 	public String exportHistoFileNameSingleFileSeperatorSLIM2=null;
 	
-
+	public boolean isExcitationChanging=false;
+	
+	//variables for starting SLIM with macro
+	public boolean startSLIMCurveWithMacro=false;
+	public String startPathName=null;
+	public String startFileName=null;
 	
 	private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA",
 			SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD",
