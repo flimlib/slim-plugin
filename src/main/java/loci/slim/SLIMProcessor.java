@@ -246,7 +246,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_EXPORT_HISTO_FILE_NAME="exportHistoFileName";
 	public static final String SET_EXPORT_HISTO_FILE_NAME_SLIM2="exportHistoFileNameSLIM2";
 	public static final String START_SLIM_CURVE="startSLIMCurve";
-	
+	public static final String SET_APPEND_MODE="setAppendMode";
+	public static final String SET_APPEND_MODE_PIXEL="isAppendUsedPixel";
 	
 
 	public static FitInfo fitInfo =new FitInfo();
@@ -1664,7 +1665,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			//IJ.log("I am inside fitted image");
 			
 			int i=0;
-			if(!macroParams.isAnalysisListUsed){
+			if(!macroParams.isAnalysisListUsed){///macro NOT used. normal execution flow
 				boolean flagMacroRecord=false;
 				for (String analysis : uiPanel.getAnalysisList()) {
 					flagMacroRecord=true;
@@ -1680,7 +1681,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 				}
 			}
 
-			else {
+			else {//macro used
 				String noOfAnalysisObtained=Prefs.get(KEY_ANALYSIS_NUMBER, "0");
 				IJ.log("no of anaysis"+ noOfAnalysisObtained);
 	
@@ -2951,7 +2952,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static void record(String command, String... args) 
 	{
 		if(firstTime){
-			WaitRecord(3000);
+			waitRecord(500);
 			//recordFirstTime();
 			firstTime=false;
 		}
@@ -2994,7 +2995,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			Recorder.recordString(command);
 	}
 	
-	public static void WaitRecord(int waitTime) 
+	public static void waitRecord(int waitTime) 
 	{
 		//command = "run(\"loci.slim.SLIMPlugin(\"\")\")\n";
 		String timeWait=Integer.toString(waitTime);
@@ -3355,7 +3356,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		UserInterfacePanel._openButton.doClick();
 	}
 	
-	/////////////Batch processing macro ends//////////
+	/////////////Batch processing macro ends///////////////////
 	
 	
 	public static void setAnalysisList(String arg){
@@ -3394,4 +3395,14 @@ public class SLIMProcessor <T extends RealType<T>> {
 		macroParams.startFileName=arg3;
 	}
 	
+	public static void setAppendMode(){
+		macroParams.isAppendUsed=true;
+	}
+	
+	public static void setAppendModePixel(){
+		macroParams.isAppendUsedPixel=true;
+		
+	}
+	
 }
+

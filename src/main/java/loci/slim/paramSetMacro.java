@@ -125,6 +125,11 @@ public class paramSetMacro {
 	public String startPathName=null;
 	public String startFileName=null;
 	
+	
+	////append
+	public boolean isAppendUsed=false;
+	public boolean isAppendUsedPixel=false;
+	
 	private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA",
 			SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD",
 			SLIM_CURVE_LMA_ALGORITHM = "SLIMCurve LMA",
@@ -346,6 +351,90 @@ public class paramSetMacro {
 		}
 	}
 	
+	/**
+	 * this macro disables all the macro when SLIM Curve is exiting, so that normal operation can resume when restarted
+	 */
+	public void disableMacro(){
+		startSLIMCurveWithMacro=false;
+		isBatchMacroUsed=false;
+		isAnalysisListUsed=false;
+		
+		a1macroused=false;
+		t1macroused=false;
+		//double exponential macro
+		a2macroused=false;
+		t2macroused=false;
+
+		//triple exponential macro
+		a3macroused=false;
+		t3macroused=false;
+		z1macroused=false;
+		h1macroused=false;
+		///macro-being-recorded to check to avoid double recorduing macro 
+		isa1MacroRecording=false;
+		ist1MacroRecording=false;
+
+
+		isa2MacroRecording=false;
+		ist2MacroRecording=false;
+
+		isa3MacroRecording=false;
+		ist3MacroRecording=false;
+
+
+		firstTimeRecordTransientStart=true;
+		firstTimeRecordTransientStop=true;
+		firstTimeRecordDataStart=true;
+
+
+		transientStartMacroUsed=false;
+		transientStopMacroUsed=false;
+		DataStartMacroUsed=false;
+
+		isPromptBaseLineMacroused=false;
+		isDelayExcitationMacroused=false;
+
+		excitationFileName=null;
+		isMacroUsedForExcitation=false;
+		isMacroUsedForDefaultExcitation=false;
+
+
+		noOfFilesBatchProcessing=0;
+
+
+		batchFileList=null;
+		isExportFilemacroUsed=false;
+
+		exportPixelFileName=null;
+		exportHistofileName=null;
+		exportSummaryFileName=null;
+
+
+
+		noOfAnalysisList=0;
+
+
+		exportPixelFileNameSingleFile=null;
+		exportPixelFileNameSingleFileSeperator=null;
+
+		exportPixelFileNameSingleFileSLIM2=null;
+		exportPixelFileNameSingleFileSeperatorSLIM2=null;
+
+		exportHistoFileNameSingleFile=null;
+		exportHistoFileNameSingleFileSeperator=null;
+
+		exportHistoFileNameSingleFileSLIM2=null;
+		exportHistoFileNameSingleFileSeperatorSLIM2=null;
+
+		isExcitationChanging=false;
+
+		//variables for starting SLIM with macro
+		startPathName=null;
+		startFileName=null;
+		isAppendUsed=false;
+		isAppendUsedPixel=false;
+	}
+
 
 }
 

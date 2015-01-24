@@ -76,7 +76,7 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 	@Override
 	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
 		char separator=COMMA;
-		if(!SLIMProcessor.macroParams.isAnalysisListUsed){
+		if(!SLIMProcessor.macroParams.isAnalysisListUsed){////macro NOT used, normal execution flow
 			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
 			if (export && null != fileName) {
 				
@@ -99,9 +99,10 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 				SLIMProcessor.record(SLIMProcessor.SET_EXPORT_PIXEL_FILE_NAME, fileName,recordingCharString);
 			}
 		}
-		else{
+		else{//macro used
 			fileName=SLIMProcessor.macroParams.exportPixelFileNameSingleFile;
 			separator=SLIMProcessor.macroParams.exportPixelFileNameSingleFileSeperator.charAt(0);
+			append=SLIMProcessor.macroParams.isAppendUsedPixel;
 			IJ.log(Character.toString(separator));
 			saveFileInPreferences(fileName);
 			saveAppendInPreferences(append);
@@ -129,6 +130,7 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 				break;
 			case STRETCHED_EXPONENTIAL:
 				//TODO fix stretched; how many components?
+				///it was 1 as far as I remember
 				break;
 		}
 		FittedValue[] fittedValues = FittedValueFactory.createFittedValues(parameters, components);
@@ -346,6 +348,9 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 		fileName = dialog.getNextString();
 		append   = dialog.getNextBoolean();
 		csv      = dialog.getNextBoolean();
+		if(append){
+			SLIMProcessor.record(SLIMProcessor.SET_APPEND_MODE_PIXEL);
+		}
 		return true;
 	}
 

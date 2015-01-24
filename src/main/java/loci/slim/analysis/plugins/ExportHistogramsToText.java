@@ -100,7 +100,7 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
 		if (FitRegion.EACH == region) {
 			char separator=COMMA;
-			if(!SLIMProcessor.macroParams.isAnalysisListUsed){
+			if(!SLIMProcessor.macroParams.isAnalysisListUsed){//macro NOT used, normal execution flow
 
 				boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
 				if (export && null != fileName) {
@@ -124,9 +124,10 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 					SLIMProcessor.record(SLIMProcessor.SET_EXPORT_HISTO_FILE_NAME, fileName,recordingCharString);
 				}
 			}
-			else{
+			else{///macro used
 				fileName=SLIMProcessor.macroParams.exportHistoFileNameSingleFile;
 				separator=SLIMProcessor.macroParams.exportHistoFileNameSingleFileSeperator.charAt(0);
+				append=SLIMProcessor.macroParams.isAppendUsed;
 				IJ.log(Character.toString(separator));
 				saveFileInPreferences(fileName);
 				saveAppendInPreferences(append);
@@ -519,6 +520,10 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 		fileName = dialog.getNextString();
 		append   = dialog.getNextBoolean();
 		csv      = dialog.getNextBoolean();
+		
+		if(append){
+			SLIMProcessor.record(SLIMProcessor.SET_APPEND_MODE);
+		}
 		return true;
 	}
 }
