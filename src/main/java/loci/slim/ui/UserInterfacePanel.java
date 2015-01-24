@@ -542,7 +542,10 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	@Override
 	public void reset() {
 		enableAll(true);
+		//sagar
 		setFitButtonState(true);
+		SLIMProcessor.macroParams.startSLIMCurveWithMacro=false;
+		SLIMProcessor.macroParams.isBatchMacroUsed=false;
 	}
 
 	@Override
@@ -1097,6 +1100,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 								////add recorder for using that specific IRF file
 								SLIMProcessor.record(SLIMProcessor.SET_EXCITATION,dialog.getPath());
+								SLIMProcessor.WaitRecord(2000);
 
 							}
 							
@@ -1144,6 +1148,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 
 								SLIMProcessor.record(SLIMProcessor.DEFAULT_EXCITATION_LOAD, "true");
+								SLIMProcessor.WaitRecord(2000);
 							}
 							String defaultIRFPath=null;
 							////read file name for default location

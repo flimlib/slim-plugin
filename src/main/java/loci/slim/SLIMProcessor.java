@@ -166,8 +166,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 	private static final String FILE_KEY = "file";
 	private static final String PATH_KEY = "path";
-	private String _file;
-	private String _path;
+	private  String _file;
+	private  String _path;
 
 	private static final String EXPORT_PIXELS_KEY = "exportpixels";
 	private static final String PIXELS_FILE_KEY = "pixelsfile";
@@ -190,7 +190,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	/////Macro specific keys for better recordability
 	public static boolean guiUpdateWithMacro=true;
 	
-	
+	public static boolean firstTime=true;
 	
 	public static final String PLUGIN_NAME = "SLIM pluguin";
 	public static final String FIT_IMAGE_FN= "fitImages";
@@ -233,7 +233,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String KEY_BATCH_MODE_FILE_NUMBER="Batch.NoofFiles";
 	public static final String KEY_FILE_NAMES="key.fileNum";
 	public static final String EXPORT_FILE="exportFileSet";
-	public static final String SET_START_BATCH="startBatch";
+	public static final String SET_START_BATCH="startBatchMacro";
 	public static final String SET_ANALYSIS_SET="setAnalysisList";
 	
 	
@@ -367,14 +367,14 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}
 			else {
 				
-				//recordRun("","");
+		
 
 				pathAndFile = getPathAndFile(files[0]);
 				_path = pathAndFile[0];
 				_file = pathAndFile[1];
-				record(START_SLIM_CURVE,"true",_path,_file );
 
-
+				recordFirstTime(START_SLIM_CURVE,"true",_path,_file );
+				
 				_image = loadImage(_path, _file);
 				if (null == _image) {
 					showError("Error", "Could not load image");
@@ -396,6 +396,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			// show the UI; do fits
 			doFits();
 		}
+
 	}
 
 	static final private void showError(String title, String message) {
@@ -675,13 +676,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 				 */
 				@Override
 				public void openFile() {
-					if(!macroParams.isBatchMacroUsed){
+				//	if(!macroParams.isBatchMacroUsed){//macro not being used for batch processing
 						File[] files = showFileDialog(getPathFromPreferences());
 						// were multiple files opened?
 						if (1 < files.length) {
 							//macro recorder for Batch processing
 
-							macroParams.storeFilesName(files);
+							macroParams.storeFilesName(files);//store the file names for batch processing
 							SLIMProcessor.record(SLIMProcessor.SET_BATCH_MODE,"true");
 							
 							batchProcessingWithUI(files);
@@ -721,11 +722,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 							}
 						}
 
-					}
-					
+			//		}
+					/*
 					else{
 						
-						int noOfFIles=Integer.parseInt(Prefs.get(KEY_BATCH_MODE_FILE_NUMBER, null));
+						int noOfFIles=Integer.parseInt(Prefs.get(KEY_BATCH_MODE_FILE_NUMBER, null));///gets the number of file batch processing
 						
 						IJ.log(Integer.toString(noOfFIles));
 						
@@ -740,7 +741,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 							}
 							batchProcessingWithUI(macroParams.batchFileList);
 						}
-					}
+					}*/
 				}
 
 				/**
@@ -1032,7 +1033,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 								uiPanel.setX(x);
 								uiPanel.setY(y);
-								getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
+								getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);///this is getting all the parameters from GUI, this needs to be replaced
 								// fit on the pixel clicked
 								fitPixel(uiPanel, _fittingCursor);
 							}
@@ -1067,7 +1068,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 	}
 
 	/**
-	 * Handles UI for batch processing.  Invokes batch processing.
+	 * Handles UI for batch processing.  Invokes batch processing. 
+	 * This method does not open the fitting windows. Rather shows does the fitting in the background.
 	 * 
 	 * @param files 
 	 */
@@ -1084,7 +1086,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		// TODO - Consolidate this logic with same in DefaultBatchProcessor!
 		
-		if(!macroParams.isExportFilemacroUsed){
+		if(!macroParams.isExportFilemacroUsed){//normal exccution flow when macro is not being used
 			GenericDialog dialog = new GenericDialog("Batch Processing");
 			dialog.addCheckbox("Export_Pixels", defExportPixels);
 			dialog.addStringField("Pixels_File", defPixelsFile);
@@ -1133,7 +1135,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}.start();
 		}
 		else{
-			
+			///macro mode operation, when macro mode is used, the filenames are obtained from the macro
 			final String tmpPixelsFile = macroParams.exportPixelFileName;
 			final String tmpHistogramsFile = macroParams.exportHistofileName;
 			final String tmpSummaryFile = macroParams.exportSummaryFileName;
@@ -1458,6 +1460,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		return success;
 	}
 
+	
 	private void getFitSettings(IGrayScaleImage grayScalePanel, IUserInterfacePanel uiPanel, FittingCursor cursor) {
 		_channel        = grayScalePanel.getChannel();
 
@@ -1906,7 +1909,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		globalFitParams.setStartPrompt(fitInfo.getStartPrompt());
 		globalFitParams.setStopPrompt(fitInfo.getStopPrompt());
 		globalFitParams.setChiSquareTarget(fitInfo.getChiSquareTarget());
-		globalFitParams.setFree(fitInfo.getFree());
+		globalFitParams.setFree(fitInfo.getFree());// this free function is obstacle to GUI free opreation
 
 		// initialize class used for 'chunky pixel' effect
 		IChunkyPixelTable chunkyPixelTable = new ChunkyPixelTableImpl();
@@ -2314,10 +2317,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 		int y = uiPanel.getY();
 		_startBin = fittingCursor.getDataStartBin();
 		_stopBin = fittingCursor.getTransientStopBin();
-//		IJ.log("_startBin is " + _startBin + " _stopBin " + _stopBin);
-//		IJ.log("FYI FWIW prompt delay is " + _fittingCursor.getPromptDelay());
-//		IJ.log("prompt start is " + _fittingCursor.getPromptStartValue() + " stop " + _fittingCursor.getPromptStopValue());
-//		IJ.log("_fittingCursor start value " + _fittingCursor.getTransientStartValue() + " bin " + _fittingCursor.getTransientStartBin() + " stop value " + _fittingCursor.getTransientStopValue() + " bin " + _fittingCursor.getTransientStopBin());
 		return fitPixel(uiPanel, x, y);
 	}
 
@@ -2412,7 +2411,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		IJ.log("****TRIAL*****");
 		rld.trialRldFit(curveFitter, dataArray[0]); */
 
-		int returnValue = getCurveFitter(uiPanel).fitData(dataArray);
+		/// this is where the fitting call is made dataArray is the one which holds the fitted data
+		int returnValue = getCurveFitter(uiPanel).fitData(dataArray);///fitting library called here
 
 		// show decay graph for visible channel
 		int index = _file.lastIndexOf('.');
@@ -2738,8 +2738,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 		return (int)(blend * (end - start) + start);
 	}
 
-	/*
-	 * Gets the appropriate curve fitter for the current fit.
+	/**
+	 * Gets the appropriate curve fitter for the current fit.  
+	 * 
+	 * This gets all the data from the GUI. Change the parameters to read from ows DS //TODO
 	 *
 	 * @param uiPanel has curve fitter selection
 	 */
@@ -2782,7 +2784,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		curveFitter.setFitFunction(fitFunction);
 		curveFitter.setNoiseModel(uiPanel.getNoiseModel());
 		curveFitter.setXInc(_timeRange);
-		curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+		curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));// this is one of the main problem for getting rid of the GUI dependence
 		//curveFitter.setFree(translateFree(SLIMProcessor.macroParams.getFunction(), uiPanel.getFree()));//sagar
 		
 		if (null != _excitationPanel) {
@@ -2948,6 +2950,11 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 */
 	public static void record(String command, String... args) 
 	{
+		if(firstTime){
+			WaitRecord(3000);
+			//recordFirstTime();
+			firstTime=false;
+		}
 		command = "call(\"loci.slim.SLIMProcessor." + command;
 		for(int i = 0; i < args.length; i++)
 			command += "\", \"" + args[i];
@@ -2959,10 +2966,39 @@ public class SLIMProcessor <T extends RealType<T>> {
 			Recorder.recordString(command);
 	}
 	
+	public void recordFirstTime(String command, String... args){
+		
+		command = "call(\"loci.slim.SLIMProcessor." + command;
+		for(int i = 0; i < args.length; i++)
+			command += "\", \"" + args[i];
+		command += "\");\n";
+		// in Windows systems, replace backslashes by double ones
+		if( IJ.isWindows() )
+			command = command.replaceAll( "\\\\", "\\\\\\\\" );
+		if(Recorder.record)
+			Recorder.recordString(command);
+		
+	}
 	public static void recordRun(String command, String... args) 
 	{
 		//command = "run(\"loci.slim.SLIMPlugin(\"\")\")\n";
 		command = "run(\"SLIM Curve\");\n";
+		
+//		for(int i = 0; i < args.length; i++)
+//			command += "\", \"" + args[i];
+//		command += "\");\n";
+		// in Windows systems, replace backslashes by double ones
+		if( IJ.isWindows() )
+			command = command.replaceAll( "\\\\", "\\\\\\\\" );
+		if(Recorder.record)
+			Recorder.recordString(command);
+	}
+	
+	public static void WaitRecord(int waitTime) 
+	{
+		//command = "run(\"loci.slim.SLIMPlugin(\"\")\")\n";
+		String timeWait=Integer.toString(waitTime);
+		String command = "wait("+timeWait+");\n";
 		
 //		for(int i = 0; i < args.length; i++)
 //			command += "\", \"" + args[i];
@@ -3296,6 +3332,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 	}
 	
+	
+	///////////////Batch Processing///////////////////////////
 	public static void  batchModeSet(String args){
 		//args should have all the file name
 		
@@ -3313,9 +3351,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 		macroParams.exportSummaryFileName=arg3;
 	}
 	
-	public static void startBatch(String arg){
+	public static void startBatchMacro(String arg){
 		UserInterfacePanel._openButton.doClick();
 	}
+	
+	/////////////Batch processing macro ends//////////
+	
 	
 	public static void setAnalysisList(String arg){
 		macroParams.isAnalysisListUsed=Boolean.parseBoolean(arg);
