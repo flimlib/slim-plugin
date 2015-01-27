@@ -289,62 +289,62 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 	boolean _noFit;
 
 	// single exponential fit
-	JTextField _aParam1;
+	public static JTextField _aParam1;
 	public static JCheckBox _aFix1;
-	JTextField _tParam1;
-	JCheckBox _tFix1;
-	JTextField _zParam1;
-	JCheckBox _zFix1;
+	public static JTextField _tParam1;
+	public static JCheckBox _tFix1;
+	public static JTextField _zParam1;
+	public static JCheckBox _zFix1;
 	JTextField _chiSqParam1;
 	JTextField _AICParam1;
 	JLabel _errorLabel1;
 	JCheckBox _startParam1;
 
-	// double exponential fit
-	JTextField _a1Param2;
-	JCheckBox _a1Fix2;
-	JTextField _a2Param2;
-	JCheckBox _a2Fix2;
-	JTextField _t1Param2;
-	JCheckBox _t1Fix2;
-	JTextField _t2Param2;
-	JCheckBox _t2Fix2;
-	JTextField _zParam2;
-	JCheckBox _zFix2;
+	// double exponential fit///////////
+	public static JTextField _a1Param2;
+	public static JCheckBox _a1Fix2;
+	public static JTextField _a2Param2;
+	public static JCheckBox _a2Fix2;
+	public static JTextField _t1Param2;
+	public static JCheckBox _t1Fix2;
+	public static JTextField _t2Param2;
+	public static JCheckBox _t2Fix2;
+	public static JTextField _zParam2;
+	public static JCheckBox _zFix2;
 	JTextField _chiSqParam2;
 	JTextField _AICParam2;
 	JLabel _errorLabel2;
 	JCheckBox _startParam2;
 
-	// triple exponential fit
-	JTextField _a1Param3;
-	JCheckBox _a1Fix3;
-	JTextField _a2Param3;
-	JCheckBox _a2Fix3;
-	JTextField _a3Param3;
-	JCheckBox _a3Fix3;
-	JTextField _t1Param3;
-	JCheckBox _t1Fix3;
-	JTextField _t2Param3;
-	JCheckBox _t2Fix3;
-	JTextField _t3Param3;
-	JCheckBox _t3Fix3;
-	JTextField _zParam3;
-	JCheckBox _zFix3;
+	// triple exponential fit//////////////
+	public static JTextField _a1Param3;
+	public static JCheckBox _a1Fix3;
+	public static JTextField _a2Param3;
+	public static JCheckBox _a2Fix3;
+	public static JTextField _a3Param3;
+	public static JCheckBox _a3Fix3;
+	public static JTextField _t1Param3;
+	public static JCheckBox _t1Fix3;
+	public static JTextField _t2Param3;
+	public static JCheckBox _t2Fix3;
+	public static JTextField _t3Param3;
+	public static JCheckBox _t3Fix3;
+	public static JTextField _zParam3;
+	public static JCheckBox _zFix3;
 	JTextField _chiSqParam3;
 	JTextField _AICParam3;
 	JLabel _errorLabel3;
 	JCheckBox _startParam3;
 
 	// stretched exponential fit
-	JTextField _aParam4;
-	JCheckBox _aFix4;
-	JTextField _tParam4;
-	JCheckBox _tFix4;
-	JTextField _hParam4;
-	JCheckBox _hFix4;
-	JTextField _zParam4;
-	JCheckBox _zFix4;
+	public static JTextField _aParam4;
+	public static JCheckBox _aFix4;
+	public static JTextField _tParam4;
+	public static JCheckBox _tFix4;
+	public static JTextField _hParam4;
+	public static JCheckBox _hFix4;
+	public static JTextField _zParam4;
+	public static JCheckBox _zFix4;
 	JTextField _chiSqParam4;
 	JTextField _AICParam4;
 	JLabel _errorLabel4;
@@ -2055,7 +2055,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				});
 	}
 	
-	void refitUponStateChangeZ1( final JTextField textField,  JCheckBox checkBox) {
+	void refitUponStateChangeZ1( final JTextField textField,  final JCheckBox checkBox) {
 
 
 		textField.addActionListener(
@@ -2100,12 +2100,16 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						// also if SELECTED, in case text field already edited
 						//IJ.log("reached");
 						_listener.reFit();
+						
+						////macro recorder
+						SLIMProcessor.record(SLIMProcessor.SET_Z1_FIX, Boolean.toString(checkBox.isSelected()));
+						
 					}
 				});
 	}
 
  
-	void refitUponStateChangeH1( final JTextField textField,  JCheckBox checkBox) {
+	void refitUponStateChangeH1( final JTextField textField,  final JCheckBox checkBox) {
 
 
 		textField.addActionListener(
@@ -2150,13 +2154,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						// also if SELECTED, in case text field already edited
 						//IJ.log("reached");
 						_listener.reFit();
+						SLIMProcessor.record(SLIMProcessor.SET_H_FIX, Boolean.toString(checkBox.isSelected()));
 					}
 				});
 	}
 
 	
 	
-	void refitUponStateChangeT1( final JTextField textField,  JCheckBox checkBox) {
+	void refitUponStateChangeT1( final JTextField textField,  final JCheckBox checkBox) {
 
 
 		textField.addActionListener(
@@ -2208,13 +2213,14 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						// also if SELECTED, in case text field already edited
 						//IJ.log("reached");
 						_listener.reFit();
+						SLIMProcessor.record(SLIMProcessor.SET_T1_FIX, Boolean.toString(checkBox.isSelected()));
 					}
 				});
 	}
 	
 	
 	
-	void refitUponStateChangeA1( final JTextField textField,  JCheckBox checkBox) {
+	void refitUponStateChangeA1( final JTextField textField,  final JCheckBox checkBox) {
 
 
 		textField.addActionListener(
@@ -2267,12 +2273,13 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						// also if SELECTED, in case text field already edited
 						//IJ.log("reached");
 						_listener.reFit();
+						SLIMProcessor.record(SLIMProcessor.SET_A1_FIX, Boolean.toString(checkBox.isSelected()));
 					}
 				});
 	}
 
 
-	void refitUponStateChangeT2( final JTextField textField,  JCheckBox checkBox) {
+	void refitUponStateChangeT2( final JTextField textField,  final JCheckBox checkBox) {
 
 
 		textField.addActionListener(
@@ -2322,11 +2329,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						// definitely trigger if DESELECTED
 						// also if SELECTED, in case text field already edited
 						_listener.reFit();
+						SLIMProcessor.record(SLIMProcessor.SET_T2_FIX, Boolean.toString(checkBox.isSelected()));
 					}
 				});
 	}
 	
-	void refitUponStateChangeA2( final JTextField textField,  JCheckBox checkBox) {
+	void refitUponStateChangeA2( final JTextField textField,  final JCheckBox checkBox) {
 
 
 		textField.addActionListener(
@@ -2378,11 +2386,12 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						// also if SELECTED, in case text field already edited
 						//IJ.log("reached");
 						_listener.reFit();
+						SLIMProcessor.record(SLIMProcessor.SET_A2_FIX, Boolean.toString(checkBox.isSelected()));
 					}
 				});
 	}
 	
-	void refitUponStateChangeT3( final JTextField textField,  JCheckBox checkBox) {
+	void refitUponStateChangeT3( final JTextField textField,  final JCheckBox checkBox) {
 
 
 		textField.addActionListener(
@@ -2432,6 +2441,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						// also if SELECTED, in case text field already edited
 						//IJ.log("reached");
 						_listener.reFit();
+						SLIMProcessor.record(SLIMProcessor.SET_T3_FIX, Boolean.toString(checkBox.isSelected()));
 					}
 				});
 	}
@@ -2441,7 +2451,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 
 
 	
-	void refitUponStateChangeA3( final JTextField textField,  JCheckBox checkBox) {
+	void refitUponStateChangeA3( final JTextField textField,  final JCheckBox checkBox) {
 
 
 		textField.addActionListener(
@@ -2493,6 +2503,7 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 						// also if SELECTED, in case text field already edited
 						//IJ.log("reached");
 						_listener.reFit();
+						SLIMProcessor.record(SLIMProcessor.SET_A3_FIX, Boolean.toString(checkBox.isSelected()));
 					}
 				});
 	}
@@ -2945,61 +2956,61 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				String function = (String) _functionComboBox.getSelectedItem();
 				if (function.equals(SINGLE_EXPONENTIAL)) {
 					parameters = new double[4];
-					/*
-//					parameters[2] = Double.valueOf(_aParam1.getText());
-//					parameters[3] = Double.valueOf(_tParam1.getText());
-//					parameters[1] = Double.valueOf(_zParam1.getText());
-//					*/
+					
+					parameters[2] = Double.valueOf(_aParam1.getText());
+					parameters[3] = Double.valueOf(_tParam1.getText());
+					parameters[1] = Double.valueOf(_zParam1.getText());
+//					
 					
 					//sagar
 					
+					//will be needed in gui free operation
+//					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_aParam1.getText());
+//					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_tParam1.getText());
+//					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam1.getText());
 					
-					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_aParam1.getText());
-					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_tParam1.getText());
-					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam1.getText());
-					
-		
-				//	parameters[1] = Double.valueOf(_zParam1.getText());
+
 					
 					
 					
 				}
 				else if (function.equals(DOUBLE_EXPONENTIAL)) {
 					parameters = new double[6];
-//					parameters[2] = Double.valueOf(_a1Param2.getText());
-//					parameters[3] = Double.valueOf(_t1Param2.getText());
-//					parameters[4] = Double.valueOf(_a2Param2.getText());
-//					parameters[5] = Double.valueOf(_t2Param2.getText());
-//					parameters[1] = Double.valueOf(_zParam2.getText());
+					parameters[2] = Double.valueOf(_a1Param2.getText());
+					parameters[3] = Double.valueOf(_t1Param2.getText());
+					parameters[4] = Double.valueOf(_a2Param2.getText());
+					parameters[5] = Double.valueOf(_t2Param2.getText());
+					parameters[1] = Double.valueOf(_zParam2.getText());
 					
-					
-					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_a1Param2.getText());
-					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_t1Param2.getText());
-					parameters[4] = SLIMProcessor.macroParams.a2macroused?SLIMProcessor.macroParams.geta2(): Double.valueOf(_a2Param2.getText());
-					parameters[5] = SLIMProcessor.macroParams.t2macroused?SLIMProcessor.macroParams.gett2(): Double.valueOf(_t2Param2.getText());
-					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam2.getText());
+					//will be needed in gui free operation
+//					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_a1Param2.getText());
+//					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_t1Param2.getText());
+//					parameters[4] = SLIMProcessor.macroParams.a2macroused?SLIMProcessor.macroParams.geta2(): Double.valueOf(_a2Param2.getText());
+//					parameters[5] = SLIMProcessor.macroParams.t2macroused?SLIMProcessor.macroParams.gett2(): Double.valueOf(_t2Param2.getText());
+//					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam2.getText());
 					
 					
 					
 				}
 				else if (function.equals(TRIPLE_EXPONENTIAL)) {
 					parameters = new double[8];
-//					parameters[2] = Double.valueOf(_a1Param3.getText());
-//					parameters[3] = Double.valueOf(_t1Param3.getText());
-//					parameters[4] = Double.valueOf(_a2Param3.getText());
-//					parameters[5] = Double.valueOf(_t2Param3.getText());
-//					parameters[6] = Double.valueOf(_a3Param3.getText());
-//					parameters[7] = Double.valueOf(_t3Param3.getText());
-//					parameters[1] = Double.valueOf(_zParam3.getText());
+					parameters[2] = Double.valueOf(_a1Param3.getText());
+					parameters[3] = Double.valueOf(_t1Param3.getText());
+					parameters[4] = Double.valueOf(_a2Param3.getText());
+					parameters[5] = Double.valueOf(_t2Param3.getText());
+					parameters[6] = Double.valueOf(_a3Param3.getText());
+					parameters[7] = Double.valueOf(_t3Param3.getText());
+					parameters[1] = Double.valueOf(_zParam3.getText());
 					
-					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_a1Param3.getText());
-					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_t1Param3.getText());
-					parameters[4] = SLIMProcessor.macroParams.a2macroused?SLIMProcessor.macroParams.geta2(): Double.valueOf(_a2Param3.getText());
-					parameters[5] = SLIMProcessor.macroParams.t2macroused?SLIMProcessor.macroParams.gett2(): Double.valueOf(_t2Param3.getText());
-					parameters[6] = SLIMProcessor.macroParams.a3macroused?SLIMProcessor.macroParams.geta3(): Double.valueOf(_a3Param3.getText());
-					parameters[7] = SLIMProcessor.macroParams.t3macroused?SLIMProcessor.macroParams.gett3(): Double.valueOf(_t3Param3.getText());
-					
-					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam3.getText());
+					//will be needed in gui free operation
+//					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_a1Param3.getText());
+//					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_t1Param3.getText());
+//					parameters[4] = SLIMProcessor.macroParams.a2macroused?SLIMProcessor.macroParams.geta2(): Double.valueOf(_a2Param3.getText());
+//					parameters[5] = SLIMProcessor.macroParams.t2macroused?SLIMProcessor.macroParams.gett2(): Double.valueOf(_t2Param3.getText());
+//					parameters[6] = SLIMProcessor.macroParams.a3macroused?SLIMProcessor.macroParams.geta3(): Double.valueOf(_a3Param3.getText());
+//					parameters[7] = SLIMProcessor.macroParams.t3macroused?SLIMProcessor.macroParams.gett3(): Double.valueOf(_t3Param3.getText());
+//					
+//					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam3.getText());
 					
 					
 					
@@ -3009,17 +3020,17 @@ public class UserInterfacePanel implements IUserInterfacePanel, IFittingCursorUI
 				}
 				else if (function.equals(STRETCHED_EXPONENTIAL)) {
 					parameters = new double[5];
-//					parameters[2] = Double.valueOf(_aParam4.getText());
-//					parameters[3] = Double.valueOf(_tParam4.getText());
-//					parameters[4] = Double.valueOf(_hParam4.getText());
-//					parameters[1] = Double.valueOf(_zParam4.getText());
+					parameters[2] = Double.valueOf(_aParam4.getText());
+					parameters[3] = Double.valueOf(_tParam4.getText());
+					parameters[4] = Double.valueOf(_hParam4.getText());
+					parameters[1] = Double.valueOf(_zParam4.getText());
 					//sagar
-					
-					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_aParam4.getText());
-					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_tParam4.getText());
-					parameters[4] = SLIMProcessor.macroParams.h1macroused?SLIMProcessor.macroParams.geth1(): Double.valueOf(_hParam4.getText());
-					
-					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam4.getText());
+					//will be needed in gui free operation
+//					parameters[2] = SLIMProcessor.macroParams.a1macroused?SLIMProcessor.macroParams.geta1(): Double.valueOf(_aParam4.getText());
+//					parameters[3] = SLIMProcessor.macroParams.t1macroused?SLIMProcessor.macroParams.gett1(): Double.valueOf(_tParam4.getText());
+//					parameters[4] = SLIMProcessor.macroParams.h1macroused?SLIMProcessor.macroParams.geth1(): Double.valueOf(_hParam4.getText());
+//					
+//					parameters[1] = SLIMProcessor.macroParams.z1macroused?SLIMProcessor.macroParams.getz1(): Double.valueOf(_zParam4.getText());
 					
 		
 					

@@ -190,6 +190,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 	/////Macro specific keys for better recordability
 	public static boolean guiUpdateWithMacro=true;
 	
+	public static boolean guiUsedforValues=true;
+	
 	public static boolean firstTime=true;
 	
 	public static final String PLUGIN_NAME = "SLIM pluguin";
@@ -249,7 +251,19 @@ public class SLIMProcessor <T extends RealType<T>> {
 	public static final String SET_APPEND_MODE="setAppendMode";
 	public static final String SET_APPEND_MODE_PIXEL="isAppendUsedPixel";
 	
-
+	////check box recorder macros
+	public static final String SET_Z1_FIX="fixZ";
+	public static final String SET_A1_FIX="fixA1";
+	public static final String SET_A2_FIX="fixA2";
+	public static final String SET_A3_FIX="fixA3";
+	
+	public static final String SET_T1_FIX="fixT1";
+	public static final String SET_T2_FIX="fixT2";
+	public static final String SET_T3_FIX="fixT3";
+	
+	public static final String SET_H_FIX="fixH";
+	
+	
 	public static FitInfo fitInfo =new FitInfo();
 	
 	public static paramSetMacro macroParams =new paramSetMacro();
@@ -1677,15 +1691,16 @@ public class SLIMProcessor <T extends RealType<T>> {
 				}
 				Prefs.set(KEY_ANALYSIS_NUMBER, Integer.toString(i));
 				if(flagMacroRecord){
-					record(SET_ANALYSIS_SET, "true");
+					//record(SET_ANALYSIS_NUMBER,Integer.toString(i));
+					record(SET_ANALYSIS_SET, "true",Integer.toString(i));
 				}
 			}
 
 			else {//macro used
-				String noOfAnalysisObtained=Prefs.get(KEY_ANALYSIS_NUMBER, "0");
-				IJ.log("no of anaysis"+ noOfAnalysisObtained);
+				//String noOfAnalysisObtained=Prefs.get(KEY_ANALYSIS_NUMBER, "0");
+				//IJ.log("no of anaysis"+ noOfAnalysisObtained);
 	
-				int noOfAnalysis=Integer.parseInt(noOfAnalysisObtained);
+				int noOfAnalysis=macroParams.noOfAnalysisList;
 				if(noOfAnalysis!=0){
 
 					for(int j=0;j<noOfAnalysis;j++){
@@ -3136,123 +3151,214 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		macroParams.setChiSquareTarget(Double.parseDouble(arg));
 		macroParams.chi2MacroUsed=true;
-		
-		
+
+
 	}
-	
-	
+
+
 	/**
 	 * 
 	 * Works independent of the GUI, uses its own data type
 	 * @param arg
 	 */
 	public static void setThersholdValue(String arg){
-		
-		
+
+
 		///macro recorder for algorithm change
-		
-		
-		
+
+
+
 		//setChiSquareTarget
-		
+
 		if(guiUpdateWithMacro){
 			UserInterfacePanel._thresholdSpinner.setValue(Integer.parseInt(arg));
 		}
-		
+
 		macroParams.setThresholdValue(Integer.parseInt(arg));
 		macroParams.a1macroused=true;
-		
-		
+
+
 	}
 
-	
+
 	////single exponential parameter macros
 
 	public static void setA1value(String arg){
-		
 
-		
-		macroParams.a1macroused=true;
-		macroParams.seta1(Double.parseDouble(arg));
-		
-		
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==0){
+				UserInterfacePanel._aParam1.setText(arg);
+			}
+			else if(index==1){
+				UserInterfacePanel._a1Param2.setText(arg);
+			}
+			else if(index==2){
+				UserInterfacePanel._a1Param3.setText(arg);
+			}
+			else if(index==3){
+				UserInterfacePanel._aParam4.setText(arg);
+			}
+		}
+		else{
+
+			macroParams.a1macroused=true;
+			macroParams.seta1(Double.parseDouble(arg));
+
+		}
 	}
-	
-	
+
+
 	public static void setT1value(String arg){
-		
 
-		
-		macroParams.t1macroused=true;
-		macroParams.sett1(Double.parseDouble(arg));
-		
-		
+		if(guiUsedforValues){
+			
+			if(guiUsedforValues){
+				int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+				if(index==0){
+					UserInterfacePanel._tParam1.setText(arg);
+				}
+				else if(index==1){
+					UserInterfacePanel._t1Param2.setText(arg);
+				}
+				else if(index==2){
+					UserInterfacePanel._t1Param3.setText(arg);
+				}
+				else if(index==3){
+					UserInterfacePanel._tParam4.setText(arg);
+				}
+			}
+			
+		}
+		else{
+
+			macroParams.t1macroused=true;
+			macroParams.sett1(Double.parseDouble(arg));
+		}
+
 	}
-	
-	
+
+
 	///double exponential parameter macros
-	
+
 	public static void setA2value(String arg){
-		
-		
-		macroParams.a2macroused=true;
-		macroParams.seta2(Double.parseDouble(arg));
-		
-		
+
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==1){
+				IJ.log("in 1");
+				UserInterfacePanel._a2Param2.setText(arg);
+			}
+			else if(index==2){
+				IJ.log("in 2");
+				UserInterfacePanel._a2Param3.setText(arg);
+			}
+		}
+		else{
+			macroParams.a2macroused=true;
+			macroParams.seta2(Double.parseDouble(arg));
+		}
+
 	}
-	
-	
+
+
 	public static void setT2value(String arg){
-		
 
-		
-		macroParams.t2macroused=true;
-		macroParams.sett2(Double.parseDouble(arg));
-		
-		
+
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==1){
+				UserInterfacePanel._t2Param2.setText(arg);
+			}
+			else if(index==2){
+				UserInterfacePanel._t2Param3.setText(arg);
+			}
+		}
+		else{
+			macroParams.t2macroused=true;
+			macroParams.sett2(Double.parseDouble(arg));
+
+		}
 	}
-	
-	
+
+
 	///triple exponential parameter recorder macros
-	
-	public static void setA3value(String arg){
-		
-		
-		macroParams.a3macroused=true;
-		macroParams.seta3(Double.parseDouble(arg));
-		
-		
-	}
-	
-	
-	public static void setT3value(String arg){
-		
 
-		
-		macroParams.t3macroused=true;
-		macroParams.sett3(Double.parseDouble(arg));
-		
-		
+	public static void setA3value(String arg){
+
+		if(guiUsedforValues){
+			//int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+				UserInterfacePanel._a3Param3.setText(arg);
+			//}
+		}
+		else{
+			macroParams.a3macroused=true;
+			macroParams.seta3(Double.parseDouble(arg));
+		}
+
 	}
-	
+
+
+	public static void setT3value(String arg){
+
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==2){
+				UserInterfacePanel._t3Param3.setText(arg);
+			}
+		}
+		else{
+
+			macroParams.t3macroused=true;
+			macroParams.sett3(Double.parseDouble(arg));
+		}
+	}
+
 	///shift recorder macro
-	
+
 	public static void setZ1value(String arg){
 
-		
-		macroParams.z1macroused=true;
-		macroParams.setz1(Double.parseDouble(arg));
-		
-		
+
+	
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==0){
+				UserInterfacePanel._zParam1.setText(arg);
+			}
+			else if(index==1){
+				UserInterfacePanel._zParam2.setText(arg);
+			}
+			else if(index==2){
+				UserInterfacePanel._zParam3.setText(arg);
+			}
+			else if(index==3){
+				UserInterfacePanel._zParam4.setText(arg);
+			}
+		}
+		else{
+
+			macroParams.z1macroused=true;
+			macroParams.setz1(Double.parseDouble(arg));
+		}
+
+
+
 	}
 
 	public static void setH1value(String arg){
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==3){
+				UserInterfacePanel._hParam4.setText(arg);
+			}
+		}
+		else{
 
-		
-		macroParams.h1macroused=true;
-		macroParams.seth1(Double.parseDouble(arg));
-		
-		
+			macroParams.h1macroused=true;
+			macroParams.seth1(Double.parseDouble(arg));
+		}
+
 	}
 	
 	/**
@@ -3359,8 +3465,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 	/////////////Batch processing macro ends///////////////////
 	
 	
-	public static void setAnalysisList(String arg){
-		macroParams.isAnalysisListUsed=Boolean.parseBoolean(arg);
+	public static void setAnalysisList(String arg1, String arg2){
+		macroParams.isAnalysisListUsed=Boolean.parseBoolean(arg1);
+		macroParams.noOfAnalysisList=Integer.parseInt(arg2);
 		
 	}
 
@@ -3403,6 +3510,125 @@ public class SLIMProcessor <T extends RealType<T>> {
 		macroParams.isAppendUsedPixel=true;
 		
 	}
+	
+	
+	////check box selection macros/////////
+	
+	public static void fixZ(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+		if(index==0){
+			UserInterfacePanel._zFix1.setSelected(state);
+		}
+		else if(index==1){
+			UserInterfacePanel._zFix2.setSelected(state);
+		}
+		else if(index==2){
+			UserInterfacePanel._zFix3.setSelected(state);
+		}
+		else if(index==3){
+			UserInterfacePanel._zFix4.setSelected(state);
+		}
+		
+	}
+	
+	
+	public static void fixA1(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+		if(index==0){
+			UserInterfacePanel._aFix1.setSelected(state);
+		}
+		else if(index==1){
+			UserInterfacePanel._a1Fix2.setSelected(state);
+		}
+		else if(index==2){
+			UserInterfacePanel._a1Fix3.setSelected(state);
+		}
+		else if(index==3){
+			UserInterfacePanel._aFix4.setSelected(state);
+		}
+		
+	}
+	
+	public static void fixA2(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+		if(index==1){
+			UserInterfacePanel._a2Fix2.setSelected(state);
+		}
+		else if(index==2){
+			UserInterfacePanel._a2Fix3.setSelected(state);
+		}
+
+	}
+	
+	public static void fixA3(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+
+		if(index==2){
+			UserInterfacePanel._a3Fix3.setSelected(state);
+		}
+
+	}
+	
+	public static void fixT1(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+		if(index==0){
+			UserInterfacePanel._tFix1.setSelected(state);
+		}
+		else if(index==1){
+			UserInterfacePanel._t1Fix2.setSelected(state);
+		}
+		else if(index==2){
+			UserInterfacePanel._t3Fix3.setSelected(state);
+		}
+		else if(index==3){
+			UserInterfacePanel._tFix4.setSelected(state);
+		}
+		
+	}
+	
+	public static void fixT2(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+		if(index==1){
+			UserInterfacePanel._t1Fix2.setSelected(state);
+		}
+		else if(index==2){
+			UserInterfacePanel._t3Fix3.setSelected(state);
+		}
+
+	}
+	
+	public static void fixT3(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+
+		if(index==2){
+			UserInterfacePanel._t3Fix3.setSelected(state);
+		}
+
+	}
+	
+	public static void fixH(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+
+		if(index==3){
+			UserInterfacePanel._hFix4.setSelected(state);
+		}
+
+	}
+	
+	
 	
 }
 
