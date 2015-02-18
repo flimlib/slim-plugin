@@ -122,6 +122,8 @@
 				<configuration>
 					<licenseName>gpl_v3</licenseName>
 					<projectName>SLIM Curve plugin for combined spectral-lifetime image analysis.</projectName>
+					<organizationName>Board of Regents of the University of
+Wisconsin-Madison.</organizationName>
 				</configuration>
 			</plugin>
 		</plugins>
