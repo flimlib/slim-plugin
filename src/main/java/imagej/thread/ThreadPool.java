@@ -35,19 +35,20 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 
 /**
- * Manages a FixedThreadPool to parallelize Callable tasks.  The type parameter
- * T represents the type of the task result.
- * 
+ * Manages a FixedThreadPool to parallelize Callable tasks. The type parameter T
+ * represents the type of the task result.
+ *
  * @author Aivar Grislis
  */
 public class ThreadPool<T> {
+
 	private static int _threadPoolCounter = 0;
 	private static int THREADS = 4;
 	private int _threads = THREADS;
 	private ExecutorService _executorService = null;
-	private ThreadPoolThreadFactory _threadFactory
-			= new ThreadPoolThreadFactory();
-	private int _threadPoolNumber;
+	private final ThreadPoolThreadFactory _threadFactory =
+		new ThreadPoolThreadFactory();
+	private final int _threadPoolNumber;
 	private int _threadNumber;
 
 	public ThreadPool() {
@@ -64,10 +65,10 @@ public class ThreadPool<T> {
 
 	/**
 	 * Sets number of threads to use.
-	 * 
-	 * @param threads 
+	 *
+	 * @param threads
 	 */
-	public synchronized void setThreads(int threads) {
+	public synchronized void setThreads(final int threads) {
 		if (threads != _threads) {
 			shutdownExecutorService();
 			_threads = threads;
@@ -75,27 +76,28 @@ public class ThreadPool<T> {
 	}
 
 	/**
-	 * Given a List of Callables defining tasks, execute them in parallel
-	 * chunks using the thread pool.
-	 * 
+	 * Given a List of Callables defining tasks, execute them in parallel chunks
+	 * using the thread pool.
+	 *
 	 * @param callableArray array of tasks
 	 * @return array of results
 	 */
-	public synchronized List<T> process
-			(final List<? extends Callable<T>> callableList) {
+	public synchronized List<T> process(
+		final List<? extends Callable<T>> callableList)
+	{
 		// use to build return value array
-		List<T> returnList = new ArrayList<T>();
+		final List<T> returnList = new ArrayList<T>();
 
 		// how many threads needed?
 		if (1 == _threads || 1 == callableList.size()) {
 			// if single thread sufficient just use current thread
-			for (Callable<T> callable : callableList) {
+			for (final Callable<T> callable : callableList) {
 				T result = null;
 				try {
 					result = callable.call();
 				}
-				catch (Exception e) {
-					IJ.log("Exception " + e.getMessage()); //TODO IJ.log it!
+				catch (final Exception e) {
+					IJ.log("Exception " + e.getMessage()); // TODO IJ.log it!
 				}
 				returnList.add(result);
 			}
@@ -105,8 +107,8 @@ public class ThreadPool<T> {
 
 			// lazily instantiate ExecutorService
 			if (null == _executorService) {
-				_executorService
-						= Executors.newFixedThreadPool(_threads, _threadFactory);
+				_executorService =
+					Executors.newFixedThreadPool(_threads, _threadFactory);
 			}
 
 			// execute given tasks: apportion among threads, wait for completion
@@ -115,22 +117,22 @@ public class ThreadPool<T> {
 
 				futureList = _executorService.invokeAll(callableList);
 			}
-			catch (InterruptedException e) {
+			catch (final InterruptedException e) {
 				IJ.log("ExecutorService.invokeAll was interrupted " + e.getMessage());
-				//TODO just IJ.log it
+				// TODO just IJ.log it
 			}
 
-			 // get results
-			for (Future<T> future: futureList) {
+			// get results
+			for (final Future<T> future : futureList) {
 				try {
-					T result = future.get();
+					final T result = future.get();
 					returnList.add(result);
 				}
-				catch (ExecutionException e) {
+				catch (final ExecutionException e) {
 					IJ.log("ExecutionException " + e.getMessage());
-					//TODO just IJ.log it
+					// TODO just IJ.log it
 				}
-				catch (InterruptedException e) {
+				catch (final InterruptedException e) {
 					IJ.log("InterruptedException " + e.getMessage());
 					// TODO just IJ.log it
 				}
@@ -153,13 +155,12 @@ public class ThreadPool<T> {
 	 * Thread factory inner class that names the threads.
 	 */
 	private class ThreadPoolThreadFactory implements ThreadFactory {
+
 		@Override
 		public Thread newThread(final Runnable r) {
-			final String threadName =
-					"ImageJ-" /* + getContext().getID() */
-					+ "ThreadPool-" + _threadPoolNumber
-					+ "-Thread-" + _threadNumber++;
-			//IJ.log("NEW THREAD");
+			final String threadName = "ImageJ-" /* + getContext().getID() */
+				+ "ThreadPool-" + _threadPoolNumber + "-Thread-" + _threadNumber++;
+			// IJ.log("NEW THREAD");
 			return new Thread(r, threadName);
 		}
 	}

@@ -25,14 +25,14 @@ package loci.slim.mask;
 
 /**
  * Interface to a listener for a mask node.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface IMaskNodeListener {
 
 	/**
 	 * Tells listener other & total masks have been updated.
-	 * 
+	 *
 	 * @param otherMask may be null
 	 * @param totalMask may be null
 	 */

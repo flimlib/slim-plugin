@@ -24,136 +24,136 @@
 package loci.slim2.fitting;
 
 /**
- * Interface for container for local fitted results for current pixel.  Also
+ * Interface for container for local fitted results for current pixel. Also
  * contains some inputs to the fit that are displayed with results.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface FitResults {
 
 	/**
 	 * Sets error code (or 0 for no error).
-	 * 
-	 * @param errorCode 
+	 *
+	 * @param errorCode
 	 */
 	public void setErrorCode(int errorCode);
 
 	/**
 	 * Gets error code.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getErrorCode();
 
 	/**
 	 * Sets fitted chi square result.
-	 * 
-	 * @param chiSquare 
+	 *
+	 * @param chiSquare
 	 */
 	public void setChiSquare(double chiSquare);
 
 	/**
 	 * Gets fitted chi square result.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getChiSquare();
 
 	/**
 	 * Sets fitted parameters.
-	 * 
+	 *
 	 * @param params or null
 	 */
 	public void setParams(double[] params);
 
 	/**
 	 * Gets fitted parameters.
-	 * 
+	 *
 	 * @return null or fitted params
 	 */
 	public double[] getParams();
 
 	/**
 	 * Sets fitted curve.
-	 * 
-	 * @param yFitted 
+	 *
+	 * @param yFitted
 	 */
 	public void setYFitted(double[] yFitted);
 
 	/**
 	 * Gets fitted curve.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getYFitted();
 
 	/**
 	 * Sets incoming transient data.
-	 * 
-	 * @param decay 
+	 *
+	 * @param decay
 	 */
 	public void setTransient(double[] trans);
 
 	/**
 	 * Gets incoming transient data.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getTransient();
 
 	/**
 	 * Sets total photon count in decay.
-	 * 
+	 *
 	 * @param photonCount
 	 */
 	public void setPhotonCount(int photonCount);
 
 	/**
 	 * Gets total photon count in decay.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getPhotonCount();
 
 	/**
 	 * Sets start of transient (bin index in decay).
-	 * 
-	 * @param transStart 
+	 *
+	 * @param transStart
 	 */
 	public void setTransStart(int transStart);
 
 	/**
 	 * Gets start of transient.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getTransStart();
 
 	/**
 	 * Sets start of data.
-	 * 
-	 * @param dataStart 
+	 *
+	 * @param dataStart
 	 */
 	public void setDataStart(int dataStart);
 
 	/**
 	 * Gets start of data.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getDataStart();
 
 	/**
 	 * Sets end of transient.
-	 * 
-	 * @param transStop 
+	 *
+	 * @param transStop
 	 */
 	public void setTransStop(int transStop);
 
 	/**
 	 * Gets end of transient.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getTransStop();
 

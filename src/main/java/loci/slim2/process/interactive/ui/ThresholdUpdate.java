@@ -25,17 +25,18 @@ package loci.slim2.process.interactive.ui;
 
 /**
  * An interface to allow updated threshold values to be communicated.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface ThresholdUpdate {
 
 	/**
 	 * Update the threshold values.
-	 * 
+	 *
 	 * @param thresholdMin
 	 * @param thresholdMax
 	 * @param summed
 	 */
-	public void updateThreshold(int thresholdMin, int thresholdMax, boolean summed);
+	public void
+		updateThreshold(int thresholdMin, int thresholdMax, boolean summed);
 }

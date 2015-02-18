@@ -27,23 +27,23 @@ import loci.slim.mask.Mask;
 
 /**
  * Defines a listener for error mask changes.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface IErrorListener {
 
 	/**
 	 * Clears error mask.
-	 * 
+	 *
 	 * @param channel
 	 */
 	public void resetErrorMask(int channel);
 
 	/**
 	 * Updates the mask that defines error pixels.
-	 * 
+	 *
 	 * @param mask
-	 * @param channel 
+	 * @param channel
 	 */
 	public void updateErrorMask(Mask mask, int channel);
 

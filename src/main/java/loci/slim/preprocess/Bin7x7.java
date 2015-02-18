@@ -32,8 +32,9 @@ import org.scijava.plugin.Plugin;
  */
 @Plugin(type = SLIMBinner.class, name = "7 x 7")
 public class Bin7x7 extends SquareBinner implements SLIMBinner {
+
 	@Override
-	public void init(int width, int height) {
+	public void init(final int width, final int height) {
 		super.init(3, width, height);
 	}
 }

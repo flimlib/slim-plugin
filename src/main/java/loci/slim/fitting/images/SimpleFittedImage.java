@@ -34,7 +34,8 @@ import loci.slim.mask.IMaskGroup;
  * @author Aivar Grislis
  */
 public class SimpleFittedImage extends AbstractBaseFittedImage {
-	private int _parameterIndex;
+
+	private final int _parameterIndex;
 
 	/**
 	 * Constructor, giving index of input parameter to display
@@ -47,23 +48,24 @@ public class SimpleFittedImage extends AbstractBaseFittedImage {
 	 * @param grayScalePixelValue;
 	 * @param maskGroup;
 	 */
-	public SimpleFittedImage(String title, int[] dimension,
-			IndexColorModel indexColorModel, int parameterIndex,
-			boolean colorizeGrayScale, IGrayScaleImage grayScaleImage,
-			IMaskGroup[] maskGroup) {
-		super(title, dimension, indexColorModel, colorizeGrayScale,
-				grayScaleImage, maskGroup);
+	public SimpleFittedImage(final String title, final int[] dimension,
+		final IndexColorModel indexColorModel, final int parameterIndex,
+		final boolean colorizeGrayScale, final IGrayScaleImage grayScaleImage,
+		final IMaskGroup[] maskGroup)
+	{
+		super(title, dimension, indexColorModel, colorizeGrayScale, grayScaleImage,
+			maskGroup);
 		_parameterIndex = parameterIndex;
 	}
 
 	/**
 	 * Given the array of fitted parameters, get the value for this image.
-	 * 
+	 *
 	 * @param parameters
-	 * @return 
+	 * @return
 	 */
 	@Override
-	public double getValue(double[] parameters) {
+	public double getValue(final double[] parameters) {
 		return parameters[_parameterIndex];
 	}
 }

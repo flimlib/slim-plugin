@@ -40,7 +40,9 @@ public class ImageUtils {
 
 	// -- ImageUtils methods --
 
-	public static ImgPlus<DoubleType> create(String title, long... dims) {
+	public static ImgPlus<DoubleType> create(final String title,
+		final long... dims)
+	{
 		final ImgPlus<DoubleType> img =
 			new ImgPlus<DoubleType>(PlanarImgs.doubles(dims));
 		img.setName(title);

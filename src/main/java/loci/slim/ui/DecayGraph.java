@@ -23,8 +23,6 @@
 
 package loci.slim.ui;
 
-import ij.IJ;
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -69,29 +67,25 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.RectangleEdge;
 
-
 /**
- * This is the chart that shows the transient decay data, the fitted model,
- * and the residuals.
- *
- * It also has a user interface to set the start and stop of the fit.
+ * This is the chart that shows the transient decay data, the fitted model, and
+ * the residuals. It also has a user interface to set the start and stop of the
+ * fit.
  *
  * @author Aivar Grislis
  */
 public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
+
 	// Unicode special characters
-	private static final Character CHI    = '\u03c7',
-			SQUARE = '\u00b2',
-			TAU    = '\u03c4',
-			SUB_1  = '\u2081',
-			SUB_2  = '\u2082',
-			SUB_3  = '\u2083',
-			SUB_R  = '\u1d63';
+	private static final Character CHI = '\u03c7', SQUARE = '\u00b2',
+			TAU = '\u03c4', SUB_1 = '\u2081', SUB_2 = '\u2082', SUB_3 = '\u2083',
+			SUB_R = '\u1d63';
 	static final String WIDTH_KEY = "width";
 	static final String HEIGHT_KEY = "height";
 	static final Dimension SIZE = new Dimension(500, 270);
 	static final Dimension FRAME_SIZE = new Dimension(450, 450);
-	static final Dimension MAX_SIZE = new Dimension(961, 724); // see getDataArea( ) below
+	static final Dimension MAX_SIZE = new Dimension(961, 724); // see getDataArea(
+																															// ) below
 	static final Dimension MIN_SIZE = new Dimension(313, 266);
 	static final String PHOTON_AXIS_LABEL = "Photons";
 	static final String TIME_AXIS_LABEL = "Time";
@@ -169,12 +163,12 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * @return frame
 	 */
 	@Override
-	public JFrame init(final JFrame frame, final int bins, final double timeInc, ICursorListener cursorListener) {
-		boolean create = false;
-		if (null == _frame
-				|| !_frame.isVisible()
-				|| _bins != bins
-				|| _timeInc != timeInc)
+	public JFrame init(final JFrame frame, final int bins, final double timeInc,
+		final ICursorListener cursorListener)
+	{
+		final boolean create = false;
+		if (null == _frame || !_frame.isVisible() || _bins != bins ||
+			_timeInc != timeInc)
 		{
 			// save incoming parameters
 			_bins = bins;
@@ -189,35 +183,35 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			}
 
 			// create the combined chart
-			JFreeChart chart = createCombinedChart(bins, timeInc);
-			ChartPanel panel = new ChartPanel
-					(chart, true, true, true, false, true);
+			final JFreeChart chart = createCombinedChart(bins, timeInc);
+			final ChartPanel panel =
+				new ChartPanel(chart, true, true, true, false, true);
 			panel.setDomainZoomable(false);
 			panel.setRangeZoomable(false);
 			panel.setPreferredSize(SIZE);
 
 			// add start/stop vertical bar handling
 			_dataStart = _transStop = null;
-			JXLayer<JComponent> layer = new JXLayer<JComponent>(panel);
+			final JXLayer<JComponent> layer = new JXLayer<JComponent>(panel);
 			_startStopDraggingUI =
-					new StartStopDraggingUI<JComponent>
-			(panel, _decaySubPlot, this, _maxValue);
+				new StartStopDraggingUI<JComponent>(panel, _decaySubPlot, this,
+					_maxValue);
 			layer.setUI(_startStopDraggingUI);
 
 			// create a frame for the chart
 			_frame = new JFrame();
-			Container container = _frame.getContentPane();
+			final Container container = _frame.getContentPane();
 			container.setLayout(new BorderLayout());
 			container.add(layer, BorderLayout.CENTER);
 
-			JPanel miscPane = new JPanel();
+			final JPanel miscPane = new JPanel();
 			miscPane.setLayout(new FlowLayout());
-			JLabel label1 = new JLabel(CHI_SQUARE);
+			final JLabel label1 = new JLabel(CHI_SQUARE);
 			miscPane.add(label1);
 			_chiSqTextField = new JTextField(7);
 			_chiSqTextField.setEditable(false);
 			miscPane.add(_chiSqTextField);
-			JLabel label2 = new JLabel(PHOTON_COUNT);
+			final JLabel label2 = new JLabel(PHOTON_COUNT);
 			miscPane.add(label2);
 			_photonTextField = new JTextField(7);
 			_photonTextField.setEditable(false);
@@ -225,8 +219,9 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			_logCheckBox = new JCheckBox(LOGARITHMIC);
 			_logCheckBox.setSelected(_logarithmic);
 			_logCheckBox.addItemListener(new ItemListener() {
+
 				@Override
-				public void itemStateChanged(ItemEvent e) {
+				public void itemStateChanged(final ItemEvent e) {
 					_logarithmic = _logCheckBox.isSelected();
 					NumberAxis photonAxis;
 					if (_logarithmic) {
@@ -241,27 +236,30 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			miscPane.add(_logCheckBox);
 			container.add(miscPane, BorderLayout.SOUTH);
 
-			//IJ.log("size from prefs " + getSizeFromPreferences());
-			//_frame.setSize(getSizeFromPreferences());
-			//_frame.setMaximumSize(MAX_SIZE); // doesn't work; bug in Java
+			// IJ.log("size from prefs " + getSizeFromPreferences());
+			// _frame.setSize(getSizeFromPreferences());
+			// _frame.setMaximumSize(MAX_SIZE); // doesn't work; bug in Java
 			_frame.pack();
 			_frame.setLocationRelativeTo(frame);
 			_frame.setVisible(true);
 			_frame.addComponentListener(new ComponentListener() {
+
 				@Override
-				public void componentHidden(ComponentEvent e) {
+				public void componentHidden(final ComponentEvent e) {
 
 				}
+
 				@Override
-				public void componentMoved(ComponentEvent e) {
+				public void componentMoved(final ComponentEvent e) {
 
 				}
+
 				@Override
-				public void componentResized(ComponentEvent e) {
+				public void componentResized(final ComponentEvent e) {
 					// constrain maximum size
 					boolean resize = false;
-					Dimension size = _frame.getSize();
-					//IJ.log("COMPONENT RESIZED incoming size " + size);
+					final Dimension size = _frame.getSize();
+					// IJ.log("COMPONENT RESIZED incoming size " + size);
 					if (size.width > MAX_SIZE.width) {
 						size.width = MAX_SIZE.width;
 						resize = true;
@@ -281,18 +279,19 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 					if (resize) {
 						_frame.setSize(size);
 					}
-					//IJ.log("save resized " + resize + " size " + size);
+					// IJ.log("save resized " + resize + " size " + size);
 					saveSizeInPreferences(size);
 				}
 
 				@Override
-				public void componentShown(ComponentEvent e) {
+				public void componentShown(final ComponentEvent e) {
 
 				}
 			});
 			_frame.addWindowListener(new WindowAdapter() {
+
 				@Override
-				public void windowClosing(WindowEvent e) {
+				public void windowClosing(final WindowEvent e) {
 					_cursorListener.hideCursor();
 				}
 			});
@@ -302,13 +301,13 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	}
 
 	/**
-	 * Sets the fitting cursor, which keeps track of prompt and transient
-	 * start and stop cursors.
-	 * 
-	 * @param fittingCursor 
+	 * Sets the fitting cursor, which keeps track of prompt and transient start
+	 * and stop cursors.
+	 *
+	 * @param fittingCursor
 	 */
 	@Override
-	public void setFittingCursor(FittingCursor fittingCursor) {
+	public void setFittingCursor(final FittingCursor fittingCursor) {
 		if (null == _fittingCursor) {
 			_fittingCursorListener = new FittingCursorListener();
 		}
@@ -321,8 +320,8 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 
 	/**
 	 * Set or change the title.
-	 * 
-	 * @param title 
+	 *
+	 * @param title
 	 */
 	@Override
 	public void setTitle(final String title) {
@@ -337,38 +336,40 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * @param data
 	 */
 	@Override
-	public void setData(int promptIndex, double[] prompt, ICurveFitData data) {
+	public void setData(final int promptIndex, final double[] prompt,
+		final ICurveFitData data)
+	{
 		createDatasets(_bins, _timeInc, promptIndex, prompt, data);
 
 	}
 
 	/**
 	 * Sets the reduced chi square.
-	 * 
-	 * @param chiSquare 
+	 *
+	 * @param chiSquare
 	 */
 	@Override
-	public void setChiSquare(double chiSquare) {
-		String text = "" + roundToDecimalPlaces(chiSquare, 6);
+	public void setChiSquare(final double chiSquare) {
+		final String text = "" + roundToDecimalPlaces(chiSquare, 6);
 		_chiSqTextField.setText(text);
 	}
 
 	/**
 	 * Sets the displayed photon count.
-	 * 
-	 * @param photons 
+	 *
+	 * @param photons
 	 */
 	@Override
-	public void setPhotons(int photons) {
+	public void setPhotons(final int photons) {
 		_photonTextField.setText("" + photons);
 	}
 
 	/*
 	 * Sets whether vertical axis should be logarithmic.
-	 * 
+	 *
 	 * @param logarithmic
 	 */
-	public void setLogarithmic(boolean logarithmic) {
+	public void setLogarithmic(final boolean logarithmic) {
 		_logarithmic = logarithmic;
 	}
 
@@ -380,38 +381,38 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * @param transStop
 	 */
 	@Override
-	public void setStartStop(double transStart, double dataStart, double transStop) {
+	public void setStartStop(final double transStart, final double dataStart,
+		final double transStop)
+	{
 		_startStopDraggingUI.setStartStopValues(transStart, dataStart, transStop);
 	}
 
 	/**
-	 * Sets stop and start time bins, based on proportions 0.0..1.0.  This is called from
-	 * the UI layer that lets user drag the start and stop vertical bars.  Validates
-	 * and passes changes on to external listener.
+	 * Sets stop and start time bins, based on proportions 0.0..1.0. This is
+	 * called from the UI layer that lets user drag the start and stop vertical
+	 * bars. Validates and passes changes on to external listener.
 	 *
 	 * @param transStartProportion
 	 * @param dataStartProportion
 	 * @param transStopProportion
 	 */
 	@Override
-	public void setStartStopProportion(
-		double transStartProportion,
-		double dataStartProportion,
-		double transStopProportion)
+	public void setStartStopProportion(final double transStartProportion,
+		final double dataStartProportion, final double transStopProportion)
 	{
 		// calculate new start and stop
-		double transStart = transStartProportion * _maxValue;
-		double dataStart  = dataStartProportion  * _maxValue;
-		double transStop  = transStopProportion  * _maxValue;
+		final double transStart = transStartProportion * _maxValue;
+		final double dataStart = dataStartProportion * _maxValue;
+		final double transStop = transStopProportion * _maxValue;
 
 		// if changed, notify cursor listeners
-		if (null == _transStart || transStart != _transStart
-				|| null == _dataStart || dataStart != _dataStart
-				|| null == _transStop || transStop != _transStop)
+		if (null == _transStart || transStart != _transStart ||
+			null == _dataStart || dataStart != _dataStart || null == _transStop ||
+			transStop != _transStop)
 		{
 			_transStart = transStart;
-			_dataStart  = dataStart;
-			_transStop  = transStop;
+			_dataStart = dataStart;
+			_transStop = transStop;
 
 			if (null != _fittingCursor) {
 				_fittingCursor.setTransientStartValue(transStart);
@@ -428,19 +429,19 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * @param timeInc time increment per bin
 	 * @return the chart
 	 */
-	JFreeChart createCombinedChart(int bins, double timeInc) {
+	JFreeChart createCombinedChart(final int bins, final double timeInc) {
 
 		// create empty chart data sets
 		_decayDataset = new XYSeriesCollection();
 		_residualDataset = new XYSeriesCollection();
 
 		// make a common horizontal axis for both sub-plots
-		NumberAxis timeAxis = new NumberAxis(TIME_AXIS_LABEL);
+		final NumberAxis timeAxis = new NumberAxis(TIME_AXIS_LABEL);
 		timeAxis.setLabel(UNITS_LABEL);
 		timeAxis.setRange(0.0, (bins - 1) * timeInc);
 
 		// make a vertically combined plot
-		CombinedDomainXYPlot parent = new CombinedDomainXYPlot(timeAxis);
+		final CombinedDomainXYPlot parent = new CombinedDomainXYPlot(timeAxis);
 
 		// create decay sub-plot
 		NumberAxis photonAxis;
@@ -450,19 +451,18 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		else {
 			photonAxis = new NumberAxis(PHOTON_AXIS_LABEL);
 		}
-		XYSplineRenderer decayRenderer = new XYSplineRenderer();
+		final XYSplineRenderer decayRenderer = new XYSplineRenderer();
 		decayRenderer.setSeriesShapesVisible(0, false);
 		decayRenderer.setSeriesShapesVisible(1, false);
 		decayRenderer.setSeriesLinesVisible(2, false);
-		decayRenderer.setSeriesShape
-		(2, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f, 2.0f));
+		decayRenderer.setSeriesShape(2, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f,
+			2.0f));
 
 		decayRenderer.setSeriesPaint(0, PROMPT_COLOR);
 		decayRenderer.setSeriesPaint(1, FITTED_COLOR);
 		decayRenderer.setSeriesPaint(2, DECAY_COLOR);
 
-		_decaySubPlot = new XYPlot
-				(_decayDataset, null, photonAxis, decayRenderer);
+		_decaySubPlot = new XYPlot(_decayDataset, null, photonAxis, decayRenderer);
 		_decaySubPlot.setDomainCrosshairVisible(true);
 		_decaySubPlot.setRangeCrosshairVisible(true);
 
@@ -470,15 +470,15 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		parent.add(_decaySubPlot, DECAY_WEIGHT);
 
 		// create residual sub-plot
-		NumberAxis residualAxis = new NumberAxis(RESIDUAL_AXIS_LABEL);
-		XYSplineRenderer residualRenderer = new XYSplineRenderer();
+		final NumberAxis residualAxis = new NumberAxis(RESIDUAL_AXIS_LABEL);
+		final XYSplineRenderer residualRenderer = new XYSplineRenderer();
 		residualRenderer.setSeriesPaint(0, RESIDUAL_COLOR);
 		residualRenderer.setSeriesLinesVisible(0, false);
-		residualRenderer.setSeriesShape
-		(0, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f, 2.0f));
+		residualRenderer.setSeriesShape(0, new Ellipse2D.Float(-1.0f, -1.0f, 2.0f,
+			2.0f));
 
-		XYPlot residualSubPlot = new XYPlot
-				(_residualDataset, null, residualAxis, residualRenderer);
+		final XYPlot residualSubPlot =
+			new XYPlot(_residualDataset, null, residualAxis, residualRenderer);
 		residualSubPlot.setDomainCrosshairVisible(true);
 		residualSubPlot.setRangeCrosshairVisible(true);
 		residualSubPlot.setFixedLegendItems(null);
@@ -487,8 +487,8 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		parent.add(residualSubPlot, RESIDUAL_WEIGHT);
 
 		// now make the top level JFreeChart
-		JFreeChart chart = new JFreeChart
-				(null, JFreeChart.DEFAULT_TITLE_FONT, parent, true);
+		final JFreeChart chart =
+			new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, parent, true);
 		chart.removeLegend();
 
 		return chart;
@@ -503,12 +503,13 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * @param prompt prompt curve
 	 * @param data from the fit
 	 */
-	private void createDatasets(int bins, double timeInc, int promptIndex, double[] prompt, ICurveFitData data)
+	private void createDatasets(final int bins, final double timeInc,
+		final int promptIndex, final double[] prompt, final ICurveFitData data)
 	{
-		XYSeries series1 = new XYSeries("Prompt");
-		XYSeries series2 = new XYSeries("Fitted");
-		XYSeries series3 = new XYSeries("Data");
-		XYSeries series4 = new XYSeries("Residuals");
+		final XYSeries series1 = new XYSeries("Prompt");
+		final XYSeries series2 = new XYSeries("Fitted");
+		final XYSeries series3 = new XYSeries("Data");
+		final XYSeries series4 = new XYSeries("Residuals");
 		double xCurrent;
 
 		// show transient data; find the maximum transient data in this pass
@@ -516,7 +517,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		xCurrent = 0.0;
 		for (int i = 0; i < bins; ++i) {
 			// show transient data
-			double yData = data.getTransient()[i];
+			final double yData = data.getTransient()[i];
 
 			// keep track of maximum
 			if (yData > yDataMax) {
@@ -535,7 +536,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			double yPromptMax = -Double.MAX_VALUE;
 			for (int i = 0; i < prompt.length; ++i) {
 				// debugging
-				//IJ.log(" " + prompt[i]);
+				// IJ.log(" " + prompt[i]);
 
 				// find max
 				if (prompt[i] > yPromptMax) {
@@ -563,11 +564,9 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			}
 		}
 
-
-
-		int transStart = data.getTransStartIndex();
-		int dataStart  = data.getDataStartIndex();
-		int transEnd   = data.getTransEndIndex();
+		final int transStart = data.getTransStartIndex();
+		final int dataStart = data.getDataStartIndex();
+		final int transEnd = data.getTransEndIndex();
 
 		// show fitted & residuals
 		xCurrent = 0.0;
@@ -575,7 +574,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			// only within cursors
 			if (transStart <= i && i <= transEnd) {
 				// from transStart..transEnd show fitted
-				double yFitted = data.getYFitted()[i - transStart];
+				final double yFitted = data.getYFitted()[i - transStart];
 
 				// don't allow fitted to grow the chart downward or upward
 				if (1.0 <= yFitted && yFitted <= yDataMax) {
@@ -587,7 +586,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 
 				// from dataStart..transEnd show residuals
 				if (dataStart <= i && 0.0 < yFitted) {
-					double yData = data.getTransient()[i];
+					final double yData = data.getTransient()[i];
 					series4.add(xCurrent, yData - yFitted);
 				}
 				else {
@@ -619,9 +618,9 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * @return size
 	 */
 	private Dimension getSizeFromPreferences() {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-		return new Dimension(prefs.getInt(WIDTH_KEY, FRAME_SIZE.width),
-			prefs.getInt(HEIGHT_KEY, FRAME_SIZE.height));
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		return new Dimension(prefs.getInt(WIDTH_KEY, FRAME_SIZE.width), prefs
+			.getInt(HEIGHT_KEY, FRAME_SIZE.height));
 	}
 
 	/**
@@ -629,36 +628,39 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 *
 	 * @param size
 	 */
-	private void saveSizeInPreferences(Dimension size) {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	private void saveSizeInPreferences(final Dimension size) {
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putInt(WIDTH_KEY, size.width);
 		prefs.putInt(HEIGHT_KEY, size.height);
 	}
 
-	private double roundToDecimalPlaces(double value, int decimalPlaces) {
-		double decimalTerm = Math.pow(10.0, decimalPlaces);
-		int tmp = (int) Math.round(value * decimalTerm);
-		double rounded = tmp / decimalTerm;
+	private double roundToDecimalPlaces(final double value,
+		final int decimalPlaces)
+	{
+		final double decimalTerm = Math.pow(10.0, decimalPlaces);
+		final int tmp = (int) Math.round(value * decimalTerm);
+		final double rounded = tmp / decimalTerm;
 		return rounded;
 	}
 
 	/**
-	 * Inner class, UI which allows us to paint on top of the components,
-	 * using JXLayer.
+	 * Inner class, UI which allows us to paint on top of the components, using
+	 * JXLayer.
 	 *
 	 * @param <V> component
 	 */
-	static class StartStopDraggingUI<V extends JComponent>
-	extends AbstractLayerUI<V>
+	static class StartStopDraggingUI<V extends JComponent> extends
+		AbstractLayerUI<V>
 	{
+
 		private static final int CLOSE_ENOUGH = 4; // pizels
-		private ChartPanel _panel;
-		private XYPlot _plot;
-		private IStartStopProportionListener _listener;
-		private double _maxValue;
+		private final ChartPanel _panel;
+		private final XYPlot _plot;
+		private final IStartStopProportionListener _listener;
+		private final double _maxValue;
 		private boolean _dragTransStartMarker = false;
-		private boolean _dragDataStartMarker  = false;
-		private boolean _dragTransStopMarker  = false;
+		private boolean _dragDataStartMarker = false;
+		private boolean _dragTransStopMarker = false;
 		private volatile Double _transStartMarkerProportion;
 		private volatile Double _dataStartMarkerProportion;
 		private volatile Double _transStopMarkerProportion;
@@ -676,35 +678,34 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		 * @param listener to be notified when user drags start/stop vertical bars
 		 * @param maxValue used to scale cursors
 		 */
-		StartStopDraggingUI(ChartPanel panel, XYPlot plot,
-			IStartStopProportionListener listener, double maxValue)
-			{
-			_panel    = panel;
-			_plot     = plot;
+		StartStopDraggingUI(final ChartPanel panel, final XYPlot plot,
+			final IStartStopProportionListener listener, final double maxValue)
+		{
+			_panel = panel;
+			_plot = plot;
 			_listener = listener;
 			_maxValue = maxValue;
-			}
-
-		void setStartStopValues
-		(double transStartValue, double dataStartValue,
-			double transStopValue)
-		{
-			_transStartMarkerProportion = transStartValue / _maxValue;
-			_dataStartMarkerProportion  = dataStartValue  / _maxValue;
-			_transStopMarkerProportion  = transStopValue  / _maxValue;
 		}
 
+		void setStartStopValues(final double transStartValue,
+			final double dataStartValue, final double transStopValue)
+		{
+			_transStartMarkerProportion = transStartValue / _maxValue;
+			_dataStartMarkerProportion = dataStartValue / _maxValue;
+			_transStopMarkerProportion = transStopValue / _maxValue;
+		}
 
 		/**
-		 * Used to draw the start/stop vertical bars.
-		 *
-		 * Overrides 'paintLayer()', not 'paint()'.
+		 * Used to draw the start/stop vertical bars. Overrides 'paintLayer()', not
+		 * 'paint()'.
 		 *
 		 * @param g2D
 		 * @param layer
 		 */
 		@Override
-		protected void paintLayer(Graphics2D g2D, JXLayer<? extends V> layer) {
+		protected void paintLayer(final Graphics2D g2D,
+			final JXLayer<? extends V> layer)
+		{
 			// synchronized with chart data update
 			synchronized (_synchObject) {
 				// this paints chart layer as is
@@ -712,22 +713,24 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			}
 
 			if (null != _transStartMarkerProportion &&
-					null != _dataStartMarkerProportion &&
-					null != _transStopMarkerProportion)
+				null != _dataStartMarkerProportion &&
+				null != _transStopMarkerProportion)
 			{
 				// adjust to current size
-				Rectangle2D area = getDataArea();
-				double x = area.getX();
+				final Rectangle2D area = getDataArea();
+				final double x = area.getX();
 				_y0 = (int) area.getY();
 				_y1 = (int) (area.getY() + area.getHeight());
-				double width = area.getWidth();
-				//IJ.log("x " + area.getX() + " y " + area.getY() + " width " + area.getWidth() + " height " + area.getHeight());
-				_xTransStart = (int) Math.round(x + width * _transStartMarkerProportion)
-						+ HORZ_TWEAK;
-				_xDataStart = (int) Math.round(x + width * _dataStartMarkerProportion)
-						+ HORZ_TWEAK;
-				_xTransStop = (int) Math.round(x + width * _transStopMarkerProportion)
-						+ HORZ_TWEAK;
+				final double width = area.getWidth();
+				// IJ.log("x " + area.getX() + " y " + area.getY() + " width " +
+				// area.getWidth() + " height " + area.getHeight());
+				_xTransStart =
+					(int) Math.round(x + width * _transStartMarkerProportion) +
+						HORZ_TWEAK;
+				_xDataStart =
+					(int) Math.round(x + width * _dataStartMarkerProportion) + HORZ_TWEAK;
+				_xTransStop =
+					(int) Math.round(x + width * _transStopMarkerProportion) + HORZ_TWEAK;
 
 				// custom painting is here
 				g2D.setStroke(new BasicStroke(2f));
@@ -747,14 +750,15 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		 * @param layer
 		 */
 		@Override
-		protected void processMouseMotionEvent
-		(MouseEvent event, JXLayer<? extends V> layer)
+		protected void processMouseMotionEvent(final MouseEvent event,
+			final JXLayer<? extends V> layer)
 		{
 			super.processMouseMotionEvent(event, layer);
 			if (event.getID() == MouseEvent.MOUSE_DRAGGED) {
-				if (_dragTransStartMarker || _dragDataStartMarker
-						|| _dragTransStopMarker) {
-					double newProportion = getDraggedProportion(event);
+				if (_dragTransStartMarker || _dragDataStartMarker ||
+					_dragTransStopMarker)
+				{
+					final double newProportion = getDraggedProportion(event);
 					if (_dragTransStartMarker) {
 						if (newProportion <= _dataStartMarkerProportion) {
 							_transStartMarkerProportion = newProportion;
@@ -790,23 +794,23 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			}
 		}
 
-		private Color XORvalue(Color color) {
-			int drawRGB = color.getRGB();
-			int backRGB = BACK_COLOR.getRGB();
+		private Color XORvalue(final Color color) {
+			final int drawRGB = color.getRGB();
+			final int backRGB = BACK_COLOR.getRGB();
 			return new Color(drawRGB ^ backRGB);
 		}
 
 		/**
-		 * Gets the currently dragged horizontal value as a proportion,
-		 * a value between 0.0 and 1.0.
+		 * Gets the currently dragged horizontal value as a proportion, a value
+		 * between 0.0 and 1.0.
 		 *
 		 * @param e
 		 * @return proportion
 		 */
-		private double getDraggedProportion(MouseEvent e) {
-			Rectangle2D dataArea =
-					_panel.getChartRenderingInfo().getPlotInfo().getDataArea();
-			Rectangle2D area = getDataArea();
+		private double getDraggedProportion(final MouseEvent e) {
+			final Rectangle2D dataArea =
+				_panel.getChartRenderingInfo().getPlotInfo().getDataArea();
+			final Rectangle2D area = getDataArea();
 			double proportion = (e.getX() - area.getX()) / area.getWidth();
 			if (proportion < 0.0) {
 				proportion = 0.0;
@@ -819,16 +823,21 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 
 		/**
 		 * Mouse listener, catches mouse button events.
+		 * 
 		 * @param e
 		 * @param l
 		 */
 		@Override
-		protected void processMouseEvent(MouseEvent e, JXLayer<? extends V> l) {
+		protected void processMouseEvent(final MouseEvent e,
+			final JXLayer<? extends V> l)
+		{
 			super.processMouseEvent(e, l);
-			if (null != _transStartMarkerProportion && null != _transStopMarkerProportion) {
+			if (null != _transStartMarkerProportion &&
+				null != _transStopMarkerProportion)
+			{
 				if (e.getID() == MouseEvent.MOUSE_PRESSED) {
-					int x = e.getX();
-					int y = e.getY();
+					final int x = e.getX();
+					final int y = e.getY();
 					if (y > _y0 - CLOSE_ENOUGH && y < _y1 + CLOSE_ENOUGH) {
 						if (Math.abs(x - _xTransStart) < CLOSE_ENOUGH) {
 							// check for superimposition
@@ -889,34 +898,31 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 					}
 				}
 				if (e.getID() == MouseEvent.MOUSE_RELEASED) {
-					_dragTransStartMarker = _dragDataStartMarker = _dragTransStopMarker = false;
-					SwingUtilities.invokeLater(
-						new Runnable() {
-							@Override
-							public void run() {
-								if (null != _listener) {
-									_listener.setStartStopProportion
-									(_transStartMarkerProportion,
-										_dataStartMarkerProportion,
-										_transStopMarkerProportion);
-								}
+					_dragTransStartMarker =
+						_dragDataStartMarker = _dragTransStopMarker = false;
+					SwingUtilities.invokeLater(new Runnable() {
+
+						@Override
+						public void run() {
+							if (null != _listener) {
+								_listener.setStartStopProportion(_transStartMarkerProportion,
+									_dataStartMarkerProportion, _transStopMarkerProportion);
 							}
-						});
+						}
+					});
 				}
 			}
 		}
 
 		/**
-		 * Gets the area of the chart panel.
-		 * 
-		 * As you resize larger and larger the maximum value returned for height
-		 * is 724 and the maximum width 961.
+		 * Gets the area of the chart panel. As you resize larger and larger the
+		 * maximum value returned for height is 724 and the maximum width 961.
 		 *
 		 * @return 2D rectangle area
 		 */
 		private Rectangle2D getDataArea() {
-			Rectangle2D dataArea =
-					_panel.getChartRenderingInfo().getPlotInfo().getDataArea();
+			final Rectangle2D dataArea =
+				_panel.getChartRenderingInfo().getPlotInfo().getDataArea();
 			return dataArea;
 		}
 
@@ -927,18 +933,19 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		 * @return chart value
 		 */
 
-		private double screenToValue(int x) {
-			return _plot.getDomainAxis().java2DToValue(
-				x, getDataArea(), RectangleEdge.TOP);
+		private double screenToValue(final int x) {
+			return _plot.getDomainAxis().java2DToValue(x, getDataArea(),
+				RectangleEdge.TOP);
 		}
 	}
 
 	private class FittingCursorListener implements IFittingCursorListener {
+
 		@Override
-		public void cursorChanged(FittingCursor cursor) {
-			double transStart = cursor.getTransientStartValue();
-			double dataStart  = cursor.getDataStartValue();
-			double transStop  = cursor.getTransientStopValue();
+		public void cursorChanged(final FittingCursor cursor) {
+			final double transStart = cursor.getTransientStartValue();
+			final double dataStart = cursor.getDataStartValue();
+			final double transStop = cursor.getTransientStopValue();
 			setStartStop(transStart, dataStart, transStop);
 			_frame.repaint();
 		}
@@ -946,13 +953,13 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 }
 
 /**
- * Used only within DecayGraph, to get results from StartStopDraggingUI inner class.
+ * Used only within DecayGraph, to get results from StartStopDraggingUI inner
+ * class.
  *
  * @author Aivar Grislis
  */
 interface IStartStopProportionListener {
-	public void setStartStopProportion(
-			double transStartProportion,
-			double dataStartProportion,
-			double transStopProportion);
+
+	public void setStartStopProportion(double transStartProportion,
+		double dataStartProportion, double transStopProportion);
 }

@@ -36,37 +36,38 @@ import java.awt.event.AdjustmentListener;
  * @author Aivar Grislis
  */
 public class MyStackWindow extends StackWindow {
+
 	private int m_slice = 1;
 	private int m_height;
 
-	public MyStackWindow(ImagePlus imp) {
+	public MyStackWindow(final ImagePlus imp) {
 		super(imp);
-		//IJ.log("MyStackWindow " + imp.getTitle());
+		// IJ.log("MyStackWindow " + imp.getTitle());
 		m_height = imp.getHeight();
 		if (null != sliceSelector) {
-			sliceSelector.addAdjustmentListener(
-				new AdjustmentListener() {
-					@Override
-					public void adjustmentValueChanged(AdjustmentEvent e) {
-						if (e.getValue() != m_slice) {
-							//IJ.log("Show slice " + e.getValue());
-							m_slice = e.getValue();
-							//TODO this does affect the scrollbar, but not the ImagePlus!
-							showSlice(m_slice);
-						}
+			sliceSelector.addAdjustmentListener(new AdjustmentListener() {
+
+				@Override
+				public void adjustmentValueChanged(final AdjustmentEvent e) {
+					if (e.getValue() != m_slice) {
+						// IJ.log("Show slice " + e.getValue());
+						m_slice = e.getValue();
+						// TODO this does affect the scrollbar, but not the ImagePlus!
+						showSlice(m_slice);
 					}
 				}
-					);
+			});
 		}
 	}
 
-	public MyStackWindow(ImagePlus imp, ImageCanvas ic) {
+	public MyStackWindow(final ImagePlus imp, final ImageCanvas ic) {
 		super(imp, ic);
 	}
 
 	public int getSlice() {
-		//TODO this approach did not work; StackWindow doesn't keep slice up to date.
-		//return slice;
+		// TODO this approach did not work; StackWindow doesn't keep slice up to
+		// date.
+		// return slice;
 		return m_slice;
 	}
 

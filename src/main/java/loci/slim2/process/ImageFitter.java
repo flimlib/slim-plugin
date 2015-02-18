@@ -48,41 +48,49 @@ import net.imglib2.type.numeric.real.DoubleType;
 import org.scijava.Context;
 
 /**
- * Fits an entire image.  Useful for batch processing.
- * 
+ * Fits an entire image. Useful for batch processing.
+ *
  * @author Aivar Grislis
  */
 public class ImageFitter {
-	public enum ErrorCode { NONE, IO_EXCEPTION, NO_LIFETIME_AXIS, BIN_COUNT_MISMATCH }
-	private int IMPOSSIBLE_VALUE = -1;
-	private int X_INDEX = 0;
-	private int Y_INDEX = 1;
-	private int PARAM_INDEX = 2;
+
+	public enum ErrorCode {
+		NONE, IO_EXCEPTION, NO_LIFETIME_AXIS, BIN_COUNT_MISMATCH
+	}
+
+	private final int IMPOSSIBLE_VALUE = -1;
+	private final int X_INDEX = 0;
+	private final int Y_INDEX = 1;
+	private final int PARAM_INDEX = 2;
 	private ErrorCode errorCode;
 	private int bins;
 	private FittingEngine fittingEngine;
 
 	/**
 	 * Creates a fitted image.
-	 * 
+	 *
 	 * @param context
 	 * @param file
 	 * @return fitted image or null; if null, errorCode is set
 	 */
-	public ImgPlus<DoubleType> fit(Context context, FitSettings fitSettings, File file) {
+	public ImgPlus<DoubleType> fit(final Context context,
+		final FitSettings fitSettings, final File file)
+	{
 		return fit(context, fitSettings, file, IMPOSSIBLE_VALUE);
 	}
 
 	/**
-	 * Creates a fitted image.  This version checks the bin count
-	 * for consistency when batch processing.
-	 * 
+	 * Creates a fitted image. This version checks the bin count for consistency
+	 * when batch processing.
+	 *
 	 * @param context
 	 * @param file
 	 * @param batchBins
 	 * @return fitted image or null; if null, errorCode is set
 	 */
-	public ImgPlus<DoubleType> fit(Context context, FitSettings fitSettings, File file, int batchBins) {
+	public ImgPlus<DoubleType> fit(final Context context,
+		final FitSettings fitSettings, final File file, final int batchBins)
+	{
 		errorCode = ErrorCode.NONE;
 
 		// load the lifetime dataset
@@ -90,11 +98,11 @@ public class ImageFitter {
 		try {
 			lifetime = new LifetimeDatasetWrapper(context, file);
 		}
-		catch (IOException e) {
+		catch (final IOException e) {
 			errorCode = ErrorCode.IO_EXCEPTION;
 			return null;
 		}
-		catch (NoLifetimeAxisFoundException e) {
+		catch (final NoLifetimeAxisFoundException e) {
 			errorCode = ErrorCode.NO_LIFETIME_AXIS;
 			return null;
 		}
@@ -107,40 +115,39 @@ public class ImageFitter {
 				return null;
 			}
 		}
-		GlobalFitParams params = fitSettings.getGlobalFitParams();
+		final GlobalFitParams params = fitSettings.getGlobalFitParams();
 
 		// create output image
-		long[] srcDims = lifetime.getDims();
-		int parameterCount = getParameterCount(params.getFitFunction());
-		long[] dstDims = new long[] { srcDims[X_INDEX], srcDims[Y_INDEX], parameterCount };
-		ImgPlus<DoubleType> outputImage = new ImgPlus<DoubleType>(PlanarImgs.doubles(dstDims));
-		outputImage.setName("outputImage"); //TODO ARG for now
+		final long[] srcDims = lifetime.getDims();
+		final int parameterCount = getParameterCount(params.getFitFunction());
+		final long[] dstDims =
+			new long[] { srcDims[X_INDEX], srcDims[Y_INDEX], parameterCount };
+		final ImgPlus<DoubleType> outputImage =
+			new ImgPlus<DoubleType>(PlanarImgs.doubles(dstDims));
+		outputImage.setName("outputImage"); // TODO ARG for now
 
 		// fill image with NaNs
-		Cursor<DoubleType> cursor = outputImage.cursor();
+		final Cursor<DoubleType> cursor = outputImage.cursor();
 		while (cursor.hasNext()) {
 			cursor.fwd();
 			cursor.get().set(Double.NaN);
 		}
 
 		// set up fitting engine
-		boolean[] free = new boolean[parameterCount];
+		final boolean[] free = new boolean[parameterCount];
 		for (int i = 0; i < parameterCount; ++i) {
 			free[i] = true;
 		}
-		FittingEngine fittingEngine = getFittingEngine(
-				params.getFitAlgorithm(),
-				params.getFitFunction(),
-				params.getNoiseModel(),
-				fitSettings.getTimeInc(),
-				free);
+		final FittingEngine fittingEngine =
+			getFittingEngine(params.getFitAlgorithm(), params.getFitFunction(),
+				params.getNoiseModel(), fitSettings.getTimeInc(), free);
 
 		// do the fit
-		int binSize = fitSettings.getBinningFactor();
-		long[] dims = lifetime.getDims();
-		long[] srcPosition = new long[dims.length];
-		RandomAccess<DoubleType> randomAccess = outputImage.randomAccess();
-		long[] dstPosition = new long[3];
+		final int binSize = fitSettings.getBinningFactor();
+		final long[] dims = lifetime.getDims();
+		final long[] srcPosition = new long[dims.length];
+		final RandomAccess<DoubleType> randomAccess = outputImage.randomAccess();
+		final long[] dstPosition = new long[3];
 		for (long y = 0; y < dims[Y_INDEX]; ++y) {
 			for (long x = 0; x < dims[X_INDEX]; ++x) {
 				srcPosition[X_INDEX] = x;
@@ -150,8 +157,8 @@ public class ImageFitter {
 				dstPosition[X_INDEX] = x;
 				dstPosition[Y_INDEX] = y;
 
-				double[] decay = lifetime.getBinnedDecay(binSize, srcPosition);
-				FitResults fitResults = fitDecay(fittingEngine, params, decay);
+				final double[] decay = lifetime.getBinnedDecay(binSize, srcPosition);
+				final FitResults fitResults = fitDecay(fittingEngine, params, decay);
 				for (int param = 0; param < parameterCount; ++param) {
 					dstPosition[PARAM_INDEX] = param;
 					randomAccess.setPosition(dstPosition);
@@ -164,19 +171,21 @@ public class ImageFitter {
 
 	/**
 	 * Helper routine to do the fit.
-	 * 
+	 *
 	 * @param params
 	 * @param decay
-	 * @return 
+	 * @return
 	 */
-	private FitResults fitDecay(FittingEngine fittingEngine, GlobalFitParams params, double[] decay) {
-		LocalFitParams data = new DefaultLocalFitParams();
+	private FitResults fitDecay(final FittingEngine fittingEngine,
+		final GlobalFitParams params, final double[] decay)
+	{
+		final LocalFitParams data = new DefaultLocalFitParams();
 		data.setY(decay);
 		data.setSig(null);
 
-		int paramCount = getParameterCount(params.getFitFunction());
+		final int paramCount = getParameterCount(params.getFitFunction());
 		data.setParams(new double[paramCount]);
-		double[] yFitted = new double[bins];
+		final double[] yFitted = new double[bins];
 		data.setYFitted(yFitted);
 
 		return fittingEngine.fit(params, data);
@@ -184,8 +193,8 @@ public class ImageFitter {
 
 	/**
 	 * Gets the error code of the last execution.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public ErrorCode getErrorCode() {
 		return errorCode;
@@ -193,8 +202,8 @@ public class ImageFitter {
 
 	/**
 	 * Gets the bin count of the last execution.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getBins() {
 		return bins;
@@ -202,19 +211,19 @@ public class ImageFitter {
 
 	/**
 	 * Helper routine to get and set up fitting engine.
-	 * 
+	 *
 	 * @param fitAlgorithm
 	 * @param fitFunction
 	 * @param noiseModel
 	 * @param timeInc
 	 * @param free
-	 * @return 
+	 * @return
 	 */
 	public FittingEngine getFittingEngine(
-				ICurveFitter.FitAlgorithm fitAlgorithm,
-				ICurveFitter.FitFunction fitFunction,
-				ICurveFitter.NoiseModel noiseModel,
-				double timeInc, boolean[] free)
+		final ICurveFitter.FitAlgorithm fitAlgorithm,
+		final ICurveFitter.FitFunction fitFunction,
+		final ICurveFitter.NoiseModel noiseModel, final double timeInc,
+		final boolean[] free)
 	{
 		if (null == fittingEngine) {
 			fittingEngine = new ThreadedFittingEngine();
@@ -234,7 +243,8 @@ public class ImageFitter {
 				break;
 			case SLIMCURVE_RLD_LMA:
 				curveFitter = new SLIMCurveFitter();
-				curveFitter.setFitAlgorithm(ICurveFitter.FitAlgorithm.SLIMCURVE_RLD_LMA);
+				curveFitter
+					.setFitAlgorithm(ICurveFitter.FitAlgorithm.SLIMCURVE_RLD_LMA);
 				break;
 		}
 		curveFitter.setEstimator(new DefaultFitterEstimator());
@@ -242,7 +252,7 @@ public class ImageFitter {
 		curveFitter.setNoiseModel(noiseModel);
 		curveFitter.setXInc(timeInc);
 		curveFitter.setFree(free);
-		//TODO ARG PROMPT get prompt working again:
+		// TODO ARG PROMPT get prompt working again:
 		/* if (null != _excitationPanel) {
 			double[] excitation = null;
 			int startIndex = _fittingCursor.getPromptStartBin();
@@ -255,7 +265,7 @@ public class ImageFitter {
 		return fittingEngine;
 	}
 
-	public int getParameterCount(FitFunction fitFunction) {
+	public int getParameterCount(final FitFunction fitFunction) {
 		int count = 0;
 		switch (fitFunction) {
 			case SINGLE_EXPONENTIAL:

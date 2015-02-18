@@ -32,12 +32,13 @@ import loci.slim.fitting.params.IGlobalFitParams;
 import loci.slim.fitting.params.ILocalFitParams;
 
 /**
- * This class brings together everything needed to fit one pixel.  It is a 
+ * This class brings together everything needed to fit one pixel. It is a
  * Callable, meant to be called from multiple threads.
  *
  * @author Aivar Grislis
  */
 public class FittingEngineCallable implements IFittingEngineCallable {
+
 	private ICurveFitter _curveFitter;
 	private IGlobalFitParams _globalParams;
 	private ILocalFitParams _localParams;
@@ -45,8 +46,8 @@ public class FittingEngineCallable implements IFittingEngineCallable {
 
 	@Override
 	public void setup(final ICurveFitter curveFitter,
-			final IGlobalFitParams globalParams,
-			final ILocalFitParams localParams) {
+		final IGlobalFitParams globalParams, final ILocalFitParams localParams)
+	{
 		_curveFitter = curveFitter;
 		_globalParams = globalParams;
 		_localParams = localParams;
@@ -62,19 +63,21 @@ public class FittingEngineCallable implements IFittingEngineCallable {
 		_curveFitter.setXInc(_globalParams.getXInc());
 		_curveFitter.setFree(_globalParams.getFree());
 
-		ICurveFitData curveFitData = new CurveFitData();
+		final ICurveFitData curveFitData = new CurveFitData();
 		curveFitData.setChiSquareTarget(_globalParams.getChiSquareTarget());
 		curveFitData.setYCount(_localParams.getY());
 		curveFitData.setTransStartIndex(_globalParams.getTransientStart());
 		curveFitData.setDataStartIndex(_globalParams.getDataStart());
 		curveFitData.setTransEndIndex(_globalParams.getTransientStop());
 		curveFitData.setSig(_localParams.getSig());
-		curveFitData.setParams(_localParams.getParams().clone()); // params is overwritten
+		curveFitData.setParams(_localParams.getParams().clone()); // params is
+																															// overwritten
 		curveFitData.setYFitted(_localParams.getYFitted());
 
-		ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData };
+		final ICurveFitData[] curveFitDataArray =
+			new ICurveFitData[] { curveFitData };
 
-		int returnValue = _curveFitter.fitData(curveFitDataArray);
+		final int returnValue = _curveFitter.fitData(curveFitDataArray);
 
 		_result = new FitResults();
 		_result.setParams(curveFitData.getParams());
@@ -86,7 +89,7 @@ public class FittingEngineCallable implements IFittingEngineCallable {
 		else {
 			// failed to fit
 			_result.setChiSquare(0.0);
-			_result.setYFitted(new double[] { });
+			_result.setYFitted(new double[] {});
 		}
 
 		return _result;

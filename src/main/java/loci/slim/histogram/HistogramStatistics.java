@@ -25,10 +25,11 @@ package loci.slim.histogram;
 
 /**
  * Container class for some histogram related statistics.
- * 
+ *
  * @author Aivar Grislis
  */
 public class HistogramStatistics {
+
 	private int[] _bins;
 	private double[] _binValues;
 	private double[] _quartiles;
@@ -38,8 +39,8 @@ public class HistogramStatistics {
 
 	/**
 	 * Gets the histogram bins
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int[] getBins() {
 		return _bins;
@@ -47,17 +48,17 @@ public class HistogramStatistics {
 
 	/**
 	 * Sets histogram bins
-	 * 
-	 * @param bins 
+	 *
+	 * @param bins
 	 */
-	public void setBins(int[] bins) {
+	public void setBins(final int[] bins) {
 		_bins = bins;
 	}
 
 	/**
 	 * Gets values characterizing bins
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getBinValues() {
 		return _binValues;
@@ -65,17 +66,17 @@ public class HistogramStatistics {
 
 	/**
 	 * Sets values characterizing bins
-	 * 
-	 * @param binValues 
+	 *
+	 * @param binValues
 	 */
-	public void setBinValues(double[] binValues) {
+	public void setBinValues(final double[] binValues) {
 		_binValues = binValues;
 	}
 
 	/**
 	 * Gets the quartile values
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getQuartiles() {
 		return _quartiles;
@@ -83,17 +84,17 @@ public class HistogramStatistics {
 
 	/**
 	 * Sets the quartile values
-	 * 
-	 * @param quartiles 
+	 *
+	 * @param quartiles
 	 */
-	public void setQuartiles(double[] quartiles) {
+	public void setQuartiles(final double[] quartiles) {
 		_quartiles = quartiles;
 	}
 
 	/**
 	 * Gets the indices of the quartile values
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int[] getQuartileIndices() {
 		return _quartileIndices;
@@ -101,25 +102,26 @@ public class HistogramStatistics {
 
 	/**
 	 * Sets the indices of the quartile values
-	 * 
-	 * @param quartileIndices 
+	 *
+	 * @param quartileIndices
 	 */
-	public void setQuartileIndices(int[] quartileIndices) {
+	public void setQuartileIndices(final int[] quartileIndices) {
 		_quartileIndices = quartileIndices;
 	}
 
 	/**
 	 * Gets the 'fences' that demarcate outliers.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getFences() {
 		double[] fences = null;
 		if (null != _quartiles) {
 			fences = new double[2];
-			double interquartileRange = _quartiles[2] - _quartiles[0];
+			final double interquartileRange = _quartiles[2] - _quartiles[0];
 
-			// 1.5 factor is rule of thumb by John Tukey, inventor of box-and-whisker plots.
+			// 1.5 factor is rule of thumb by John Tukey, inventor of box-and-whisker
+			// plots.
 			// "Why 1.5?" JT: "Because 1 is too small and 2 is too large."
 			fences[0] = _quartiles[0] - 1.5 * interquartileRange;
 			fences[1] = _quartiles[2] + 1.5 * interquartileRange;
@@ -129,8 +131,8 @@ public class HistogramStatistics {
 
 	/**
 	 * Gets standard deviation values
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getStdDev() {
 		return _stdDev;
@@ -138,17 +140,17 @@ public class HistogramStatistics {
 
 	/**
 	 * Sets standard deviation values
-	 * 
-	 * @param stdDev 
+	 *
+	 * @param stdDev
 	 */
-	public void setStdDev(double[] stdDev) {
+	public void setStdDev(final double[] stdDev) {
 		_stdDev = stdDev;
 	}
 
 	/**
 	 * Gets indices of standard deviation values
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int[] getStdDevIndices() {
 		return _stdDevIndices;
@@ -156,10 +158,10 @@ public class HistogramStatistics {
 
 	/**
 	 * Sets indices of standard deviation values
-	 * 
-	 * @param stdDevIndices 
+	 *
+	 * @param stdDevIndices
 	 */
-	public void setStdDevIndices(int[] stdDevIndices) {
+	public void setStdDevIndices(final int[] stdDevIndices) {
 		_stdDevIndices = stdDevIndices;
 	}
 }

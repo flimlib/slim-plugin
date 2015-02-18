@@ -36,5 +36,7 @@ import org.scijava.plugin.SciJavaPlugin;
  * @author Aivar Grislis
  */
 public interface SLIMAnalyzer extends SciJavaPlugin {
-	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters);
+
+	public void analyze(ImgPlus<DoubleType> image, FitRegion region,
+		FitFunction function, String parameters);
 }

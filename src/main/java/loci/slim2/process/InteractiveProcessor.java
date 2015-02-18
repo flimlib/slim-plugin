@@ -33,14 +33,14 @@ import org.scijava.display.DisplayService;
 
 /**
  * Interface for lifetime processing with interactive UI.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface InteractiveProcessor {
 
 	/**
 	 * Initializes with required services.
-	 * 
+	 *
 	 * @param context
 	 * @param commandService
 	 * @param datasetService
@@ -49,19 +49,19 @@ public interface InteractiveProcessor {
 	 * @param estimator
 	 */
 	public void init(Context context, CommandService commandService,
-			DatasetService datasetService, DisplayService displayService,
-			Estimator estimator);
+		DatasetService datasetService, DisplayService displayService,
+		Estimator estimator);
 
 	/**
 	 * Gets current fit settings.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public FitSettings getFitSettings();
 
 	/**
 	 * Processes a {@link LifetimeDatasetWrapper}.
-	 * 
+	 *
 	 * @param lifetime
 	 * @return whether to quit (true) or load new lifetime (false)
 	 */

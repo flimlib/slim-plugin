@@ -39,29 +39,32 @@ import loci.slim.heuristics.ExcitationScaler;
  * @author Aivar Grislis
  */
 public class ExcitationPanel extends JFrame {
-	private static final String TITLE = "Instrument Response Function";
-	private Excitation _excitation;
-	private int _bins;
-	private double _timeInc;
 
-	public ExcitationPanel(Excitation excitation, final FittingCursor fittingCursor) {
+	private static final String TITLE = "Instrument Response Function";
+	private final Excitation _excitation;
+	private final int _bins;
+	private final double _timeInc;
+
+	public ExcitationPanel(final Excitation excitation,
+		final FittingCursor fittingCursor)
+	{
 
 		_excitation = excitation;
 
 		this.setTitle(TITLE);
 
-		double start = fittingCursor.getPromptStartValue();
-		double stop  = fittingCursor.getPromptStopValue();
-		double base = fittingCursor.getPromptBaselineValue();
+		final double start = fittingCursor.getPromptStartValue();
+		final double stop = fittingCursor.getPromptStopValue();
+		final double base = fittingCursor.getPromptBaselineValue();
 
-		double[] values = excitation.getValues();
+		final double[] values = excitation.getValues();
 		_bins = values.length;
 		_timeInc = excitation.getTimeInc();
-		ExcitationGraph excitationGraph = new ExcitationGraph(start, stop, base,
-			_bins, values, _timeInc);
+		final ExcitationGraph excitationGraph =
+			new ExcitationGraph(start, stop, base, _bins, values, _timeInc);
 		excitationGraph.setFittingCursor(fittingCursor);
 
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.add("North", createTopPanel());
 		panel.add("Center", excitationGraph.getComponent());
 
@@ -82,33 +85,35 @@ public class ExcitationPanel extends JFrame {
 
 	/**
 	 * Gets the excitation values scaled for a particular start/stop/base cursor.
-	 * 
+	 *
 	 * @param startIndex
 	 * @param stopIndex
 	 * @param base;
-	 * @return 
+	 * @return
 	 */
-	public double[] getValues(int startIndex, int stopIndex, double base) {
-		return ExcitationScaler.scale(_excitation.getValues(),
-			startIndex, stopIndex, base, _timeInc, _bins);
+	public double[] getValues(final int startIndex, final int stopIndex,
+		final double base)
+	{
+		return ExcitationScaler.scale(_excitation.getValues(), startIndex,
+			stopIndex, base, _timeInc, _bins);
 	}
 
 	/*
 	 * Creates a panel with file name.
 	 */
 	private JPanel createTopPanel() {
-		JPanel panel = new JPanel();
+		final JPanel panel = new JPanel();
 		// panel.setBorder(new EmptyBorder(0, 0, 8, 8));
 		// panel.setLayout(new SpringLayout());
 
-		//JLabel fileLabel = new JLabel("File");
-		//fileLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		//panel.add(fileLabel);
+		// JLabel fileLabel = new JLabel("File");
+		// fileLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		// panel.add(fileLabel);
 
 		panel.add(new JLabel(_excitation.getFileName()));
 
 		// rows, cols, initX, initY, xPad, yPad
-		//SpringUtilities.makeCompactGrid(panel, 1, 2, 4, 4, 4, 4);
+		// SpringUtilities.makeCompactGrid(panel, 1, 2, 4, 4, 4, 4);
 
 		return panel;
 	}

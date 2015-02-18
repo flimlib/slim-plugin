@@ -26,7 +26,6 @@ package imagej.charts;
 import java.awt.Rectangle;
 
 /**
- *
  * @author Aivar Grislis
  */
 public interface IChartRectangleListener {

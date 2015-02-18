@@ -29,17 +29,17 @@ import javax.swing.JPanel;
 import loci.slim.analysis.HistogramStatistics;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class HistogramStatisticsPanel extends JPanel {
 
-	private HistogramPanel histogramPanel;
-	private StatisticsPanel statisticsPanel;
+	private final HistogramPanel histogramPanel;
+	private final StatisticsPanel statisticsPanel;
 
-	public HistogramStatisticsPanel(HistogramStatistics histogramStatistics) {
+	public HistogramStatisticsPanel(final HistogramStatistics histogramStatistics)
+	{
 		super();
-		BoxLayout boxLayout = new BoxLayout(this, BoxLayout.Y_AXIS);
+		final BoxLayout boxLayout = new BoxLayout(this, BoxLayout.Y_AXIS);
 		setLayout(boxLayout);
 		histogramPanel = new HistogramPanel(histogramStatistics);
 		add(histogramPanel);

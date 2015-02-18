@@ -51,10 +51,13 @@ import org.jfree.ui.RectangleEdge;
 /**
  * Graph that displays the excitation (also known as the prompt, instrument
  * response function, or lamp function).
- * 
+ *
  * @author Aivar Grislis
  */
-public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBaseProportionListener {
+public class DefaultExcitationGraph implements ExcitationGraph,
+	IStartStopBaseProportionListener
+{
+
 	static final Dimension SIZE = new java.awt.Dimension(500, 270);
 	static final String PHOTON_AXIS_LABEL = "Photons";
 	static final String TIME_AXIS_LABEL = "Time";
@@ -94,8 +97,10 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 	 * @param timeInc time increment per bin
 	 * @param values
 	 */
-	DefaultExcitationGraph(final double start, final double stop, final double base,
-			final int bins, double[] values, final double timeInc) {
+	DefaultExcitationGraph(final double start, final double stop,
+		final double base, final int bins, final double[] values,
+		final double timeInc)
+	{
 		this.start = start;
 		this.stop = stop;
 		this.base = base;
@@ -104,24 +109,25 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 		// compute maximum values for width and height
 		maxHorzValue = timeInc * bins;
 		maxVertValue = 0.0f;
-		for (double value : values) {
+		for (final double value : values) {
 			if (value > maxVertValue) {
 				maxVertValue = value;
 			}
 		}
 
 		// create the chart
-		JFreeChart chart = createChart(bins, timeInc, values);
-		ChartPanel chartPanel = new ChartPanel
-				(chart, true, true, true, false, true);
+		final JFreeChart chart = createChart(bins, timeInc, values);
+		final ChartPanel chartPanel =
+			new ChartPanel(chart, true, true, true, false, true);
 		chartPanel.setDomainZoomable(false);
 		chartPanel.setRangeZoomable(false);
 		chartPanel.setPreferredSize(SIZE);
 
 		// Add JXLayer to draw/drag start/stop bars
 		layer = new JXLayer<JComponent>(chartPanel);
-		startStopBaseDraggingUI = new StartStopBaseDraggingUI<JComponent>
-				(chartPanel, excitationPlot, this, maxHorzValue, maxVertValue);
+		startStopBaseDraggingUI =
+			new StartStopBaseDraggingUI<JComponent>(chartPanel, excitationPlot, this,
+				maxHorzValue, maxVertValue);
 		layer.setUI(startStopBaseDraggingUI);
 
 		// initialize the vertical bars that show start and stop time bins and
@@ -135,7 +141,7 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 	}
 
 	@Override
-	public void setFittingCursor(FittingCursor fittingCursor) {
+	public void setFittingCursor(final FittingCursor fittingCursor) {
 		if (null == this.fittingCursor) {
 			// first time, make a listener
 			fittingCursorListener = new FittingCursorListenerImpl();
@@ -151,28 +157,26 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 	}
 
 	/**
-	 * Sets stop and start time bins, based on proportions 0.0..1.0.  This is called from
-	 * the UI layer that lets user drag the start and stop vertical bars.  Validates
-	 * and passes changes on to external listener.
+	 * Sets stop and start time bins, based on proportions 0.0..1.0. This is
+	 * called from the UI layer that lets user drag the start and stop vertical
+	 * bars. Validates and passes changes on to external listener.
 	 *
 	 * @param startProportion
 	 * @param stopProportion
 	 */
 	@Override
-	public void setStartStopBaseProportion(
-			double startProportion,
-			double stopProportion,
-			double baseProportion)
+	public void setStartStopBaseProportion(final double startProportion,
+		final double stopProportion, final double baseProportion)
 	{
 		// calculate new start, stop and base
-		double newStart = startProportion * maxHorzValue;
-		double newStop  = stopProportion  * maxHorzValue;
-		double newBase  = baseProportion  * maxVertValue;
+		final double newStart = startProportion * maxHorzValue;
+		final double newStop = stopProportion * maxHorzValue;
+		final double newBase = baseProportion * maxVertValue;
 
 		if (start != newStart || stop != newStop || base != newBase) {
 			start = newStart;
-			stop  = newStop;
-			base  = newBase;
+			stop = newStop;
+			base = newBase;
 
 			if (null != fittingCursor) {
 				fittingCursor.setPromptStartTime(start);
@@ -190,13 +194,15 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 	 * @param data fitted data
 	 * @return the chart
 	 */
-	JFreeChart createChart(int bins, double timeInc, double[] values) {
+	JFreeChart createChart(final int bins, final double timeInc,
+		final double[] values)
+	{
 
 		// create chart data
 		createDataset(bins, timeInc, values);
 
 		// make a horizontal axis
-		NumberAxis timeAxis = new NumberAxis(TIME_AXIS_LABEL);
+		final NumberAxis timeAxis = new NumberAxis(TIME_AXIS_LABEL);
 		timeAxis.setLabel(UNITS_LABEL);
 		timeAxis.setRange(0.0, (bins - 1) * timeInc);
 
@@ -210,16 +216,18 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 		}
 
 		// make an excitation plot
-		XYSplineRenderer excitationRenderer = new XYSplineRenderer();
+		final XYSplineRenderer excitationRenderer = new XYSplineRenderer();
 		excitationRenderer.setSeriesShapesVisible(0, false);
 		excitationRenderer.setSeriesPaint(0, EXCITATION_COLOR);
 
-		excitationPlot = new XYPlot(excitationDataset, timeAxis, photonAxis, excitationRenderer);
+		excitationPlot =
+			new XYPlot(excitationDataset, timeAxis, photonAxis, excitationRenderer);
 		excitationPlot.setDomainCrosshairVisible(true);
 		excitationPlot.setRangeCrosshairVisible(true);
 
 		// now make the top level JFreeChart
-		JFreeChart chart = new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, excitationPlot, true);
+		final JFreeChart chart =
+			new JFreeChart(null, JFreeChart.DEFAULT_TITLE_FONT, excitationPlot, true);
 		chart.removeLegend();
 
 		return chart;
@@ -232,9 +240,12 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 	 * @param timeInc time increment per time bin
 	 * @param data from the fit
 	 */
-	private void createDataset(int bins, double timeInc, double[] values) {
-		XYSeries series = new XYSeries("Data");
-		double yData, yFitted;
+	private void createDataset(final int bins, final double timeInc,
+		final double[] values)
+	{
+		final XYSeries series = new XYSeries("Data");
+		double yData;
+		final double yFitted;
 		double xCurrent = 0;
 		for (int i = 0; i < bins; ++i) {
 			yData = values[i];
@@ -257,15 +268,16 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 	 *
 	 * @param <V> component
 	 */
-	static class StartStopBaseDraggingUI<V extends JComponent>
-			extends AbstractLayerUI<V>
+	static class StartStopBaseDraggingUI<V extends JComponent> extends
+		AbstractLayerUI<V>
 	{
+
 		private static final int CLOSE_ENOUGH = 4; // pizels
-		private ChartPanel panel;
-		private XYPlot plot;
-		private double maxHorzValue;
-		private double maxVertValue;
-		private IStartStopBaseProportionListener listener;
+		private final ChartPanel panel;
+		private final XYPlot plot;
+		private final double maxHorzValue;
+		private final double maxVertValue;
+		private final IStartStopBaseProportionListener listener;
 		boolean draggingStartMarker = false;
 		boolean draggingStopMarker = false;
 		boolean draggingBaseMarker = false;
@@ -287,58 +299,58 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 		 * @param plot within the chart
 		 * @param listener to be notified when user drags start/stop/base bars
 		 */
-		StartStopBaseDraggingUI(ChartPanel panel, XYPlot plot,
-				IStartStopBaseProportionListener listener,
-				double maxHorzValue, double maxVertValue)
+		StartStopBaseDraggingUI(final ChartPanel panel, final XYPlot plot,
+			final IStartStopBaseProportionListener listener,
+			final double maxHorzValue, final double maxVertValue)
 		{
-			this.panel        = panel;
-			this.plot         = plot;
-			this.listener     = listener;
+			this.panel = panel;
+			this.plot = plot;
+			this.listener = listener;
 			this.maxHorzValue = maxHorzValue;
 			this.maxVertValue = maxVertValue;
 		}
 
-		void setStartStopBaseValues
-				(double startValue, double stopValue, double baseValue)
+		void setStartStopBaseValues(final double startValue,
+			final double stopValue, final double baseValue)
 		{
 			startMarkerProportion = startValue / maxHorzValue;
-			stopMarkerProportion  = stopValue  / maxHorzValue;
-			baseMarkerProportion  = baseValue  / maxVertValue;
+			stopMarkerProportion = stopValue / maxHorzValue;
+			baseMarkerProportion = baseValue / maxVertValue;
 		}
 
 		/**
-		 * Used to draw the start/stop vertical bars.
-		 *
-		 * Overrides 'paintLayer()', not 'paint()'.
+		 * Used to draw the start/stop vertical bars. Overrides 'paintLayer()', not
+		 * 'paint()'.
 		 *
 		 * @param g2D
 		 * @param l
 		 */
 		@Override
-		protected void paintLayer(Graphics2D g2D, JXLayer<? extends V> l) {
+		protected void
+			paintLayer(final Graphics2D g2D, final JXLayer<? extends V> l)
+		{
 			// this paints layer as is
 			super.paintLayer(g2D, l);
 
-			if (null != startMarkerProportion
-					&& null != stopMarkerProportion
-					&& null != baseMarkerProportion)
+			if (null != startMarkerProportion && null != stopMarkerProportion &&
+				null != baseMarkerProportion)
 			{
 				// adjust to current size
-				Rectangle2D area = getDataArea();
-				double x = area.getX();
-				double y = area.getY();
+				final Rectangle2D area = getDataArea();
+				final double x = area.getX();
+				final double y = area.getY();
 				x0 = (int) area.getX();
 				y0 = (int) area.getY();
 				x1 = (int) (area.getX() + area.getWidth());
 				y1 = (int) (area.getY() + area.getHeight());
-				double width = area.getWidth();
-				double height = area.getHeight();
-				xStart = (int) Math.round(x + width * startMarkerProportion)
-						+ HORZ_TWEAK;
-				xStop  = (int) Math.round(x + width * stopMarkerProportion)
-						+ HORZ_TWEAK;
-				yBase  = (int) Math.round(y + height * (1.0 - baseMarkerProportion))
-						+ VERT_TWEAK;
+				final double width = area.getWidth();
+				final double height = area.getHeight();
+				xStart =
+					(int) Math.round(x + width * startMarkerProportion) + HORZ_TWEAK;
+				xStop = (int) Math.round(x + width * stopMarkerProportion) + HORZ_TWEAK;
+				yBase =
+					(int) Math.round(y + height * (1.0 - baseMarkerProportion)) +
+						VERT_TWEAK;
 
 				// custom painting is here
 				g2D.setStroke(new BasicStroke(2f));
@@ -359,11 +371,13 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 		 * @param l
 		 */
 		@Override
-		protected void processMouseMotionEvent(MouseEvent e, JXLayer<? extends V> l) {
+		protected void processMouseMotionEvent(final MouseEvent e,
+			final JXLayer<? extends V> l)
+		{
 			super.processMouseMotionEvent(e, l);
 			if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
 				if (draggingStartMarker || draggingStopMarker) {
-					double newProportion = getHorzDraggedProportion(e);
+					final double newProportion = getHorzDraggedProportion(e);
 					if (draggingStartMarker) {
 						if (newProportion <= stopMarkerProportion) {
 							startMarkerProportion = newProportion;
@@ -392,25 +406,24 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 			}
 		}
 
-		private Color XORvalue(Color color) {
-			int drawRGB = color.getRGB();
-			int backRGB = BACK_COLOR.getRGB();
+		private Color XORvalue(final Color color) {
+			final int drawRGB = color.getRGB();
+			final int backRGB = BACK_COLOR.getRGB();
 			return new Color(drawRGB ^ backRGB);
 		}
 
 		/**
-		 * Gets the currently dragged horizontal value as a proportion,
-		 * a value between 0.0 and 1.0.
+		 * Gets the currently dragged horizontal value as a proportion, a value
+		 * between 0.0 and 1.0.
 		 *
 		 * @param e
 		 * @return proportion
 		 */
-		private double getHorzDraggedProportion(MouseEvent e) {
-			Rectangle2D dataArea =
-					panel.getChartRenderingInfo().getPlotInfo().getDataArea();
-			Rectangle2D area = getDataArea();
-			double proportion = (e.getX() - area.getX())
-					/ area.getWidth();
+		private double getHorzDraggedProportion(final MouseEvent e) {
+			final Rectangle2D dataArea =
+				panel.getChartRenderingInfo().getPlotInfo().getDataArea();
+			final Rectangle2D area = getDataArea();
+			double proportion = (e.getX() - area.getX()) / area.getWidth();
 			if (proportion < 0.0) {
 				proportion = 0.0;
 			}
@@ -421,20 +434,20 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 		}
 
 		/**
-		 * Gets the currently dragged vertical value as a proportion,
-		 * a value between 0.0 and 1.0.
+		 * Gets the currently dragged vertical value as a proportion, a value
+		 * between 0.0 and 1.0.
 		 *
 		 * @param e
 		 * @return proportion
 		 */
-		private double getVertDraggedProportion(MouseEvent e) {
-			Rectangle2D dataArea =
-					panel.getChartRenderingInfo().getPlotInfo().getDataArea();
-			Rectangle2D area = getDataArea();
-			//double proportion = ((double) e.getY() - area.getY()) / area.getHeight();
+		private double getVertDraggedProportion(final MouseEvent e) {
+			final Rectangle2D dataArea =
+				panel.getChartRenderingInfo().getPlotInfo().getDataArea();
+			final Rectangle2D area = getDataArea();
+			// double proportion = ((double) e.getY() - area.getY()) /
+			// area.getHeight();
 			double proportion =
-					(area.getY() + area.getHeight() - e.getY())
-						/ area.getHeight();
+				(area.getY() + area.getHeight() - e.getY()) / area.getHeight();
 			if (proportion < 0.0) {
 				proportion = 0.0;
 			}
@@ -446,27 +459,32 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 
 		/**
 		 * Mouse listener, catches mouse button events.
+		 * 
 		 * @param e
 		 * @param l
 		 */
 		@Override
-		protected void processMouseEvent(MouseEvent e, JXLayer<? extends V> l) {
+		protected void processMouseEvent(final MouseEvent e,
+			final JXLayer<? extends V> l)
+		{
 			super.processMouseEvent(e, l);
-			if (null != startMarkerProportion && null != stopMarkerProportion && null != baseMarkerProportion) {
+			if (null != startMarkerProportion && null != stopMarkerProportion &&
+				null != baseMarkerProportion)
+			{
 				if (e.getID() == MouseEvent.MOUSE_PRESSED) {
-					int x = e.getX();
-					int y = e.getY();
+					final int x = e.getX();
+					final int y = e.getY();
 					if (y > y0 - CLOSE_ENOUGH && y < y1 + CLOSE_ENOUGH) {
 						if (Math.abs(x - xStart) < CLOSE_ENOUGH) {
 							// check for superimposition
 							if (xStart == xStop) {
 								// both superimposed
-								if ( x < xStart) {
+								if (x < xStart) {
 									// start dragging start line
 									draggingStartMarker = true;
 								}
 								else {
-									 // start dragging stop line
+									// start dragging stop line
 									draggingStopMarker = true;
 								}
 							}
@@ -486,17 +504,14 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 					}
 				}
 				if (e.getID() == MouseEvent.MOUSE_RELEASED) {
-					draggingStartMarker = draggingStopMarker
-							= draggingBaseMarker = false;
-					SwingUtilities.invokeLater(
-							new Runnable() {
-								@Override
-								public void run() {
-									listener.setStartStopBaseProportion(
-											startMarkerProportion,
-											stopMarkerProportion,
-											baseMarkerProportion);
-								}
+					draggingStartMarker = draggingStopMarker = draggingBaseMarker = false;
+					SwingUtilities.invokeLater(new Runnable() {
+
+						@Override
+						public void run() {
+							listener.setStartStopBaseProportion(startMarkerProportion,
+								stopMarkerProportion, baseMarkerProportion);
+						}
 					});
 				}
 			}
@@ -507,9 +522,12 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 		 *
 		 * @return 2D rectangle area
 		 */
-		@Deprecated  //TODO ARG why deprecate stuff I'm using myself ?????
-		private Rectangle2D getDataArea() {
-			Rectangle2D dataArea = panel.getChartRenderingInfo().getPlotInfo().getDataArea();
+		@Deprecated
+		// TODO ARG why deprecate stuff I'm using myself ?????
+			private
+			Rectangle2D getDataArea() {
+			final Rectangle2D dataArea =
+				panel.getChartRenderingInfo().getPlotInfo().getDataArea();
 			return dataArea;
 		}
 
@@ -520,8 +538,9 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 		 * @return chart value
 		 */
 		@Deprecated
-		private double horzScreenToValue(int x) {
-			return plot.getDomainAxis().java2DToValue(x, getDataArea(), RectangleEdge.TOP);
+		private double horzScreenToValue(final int x) {
+			return plot.getDomainAxis().java2DToValue(x, getDataArea(),
+				RectangleEdge.TOP);
 		}
 
 		/**
@@ -531,42 +550,42 @@ public class DefaultExcitationGraph implements ExcitationGraph, IStartStopBasePr
 		 * @return chart value
 		 */
 		@Deprecated
-		private double vertScreenToValue(int y) {
-			return plot.getRangeAxis().java2DToValue(y, getDataArea(), RectangleEdge.LEFT);
+		private double vertScreenToValue(final int y) {
+			return plot.getRangeAxis().java2DToValue(y, getDataArea(),
+				RectangleEdge.LEFT);
 		}
 	}
 
 	private class FittingCursorListenerImpl implements FittingCursorListener {
+
 		@Override
-		public void cursorChanged(FittingCursor cursor) {
-			double promptStart    = cursor.getPromptStartTime();
-			double promptStop     = cursor.getPromptStopTime();
-			double promptBaseline = cursor.getPromptBaselineValue();
-			startStopBaseDraggingUI.setStartStopBaseValues(promptStart, promptStop, promptBaseline);
+		public void cursorChanged(final FittingCursor cursor) {
+			final double promptStart = cursor.getPromptStartTime();
+			final double promptStop = cursor.getPromptStopTime();
+			final double promptBaseline = cursor.getPromptBaselineValue();
+			startStopBaseDraggingUI.setStartStopBaseValues(promptStart, promptStop,
+				promptBaseline);
 			layer.repaint();
 		}
 	}
 }
 
 /**
- * Used within DefaultExcitationGraph, to get results from StartStopBaseDraggingUI
- * inner class.
+ * Used within DefaultExcitationGraph, to get results from
+ * StartStopBaseDraggingUI inner class.
  *
  * @author Aivar Grislis
  */
 interface IStartStopBaseProportionListener {
 
 	/**
-	 * Sets stop and start time bins, based on proportions 0.0..1.0.  This is called from
-	 * the UI layer that lets user drag the start and stop vertical bars.  Validates
-	 * and passes changes on to external listener.
+	 * Sets stop and start time bins, based on proportions 0.0..1.0. This is
+	 * called from the UI layer that lets user drag the start and stop vertical
+	 * bars. Validates and passes changes on to external listener.
 	 *
 	 * @param startProportion
 	 * @param stopProportion
 	 */
-	public void setStartStopBaseProportion(
-			double startProportion,
-			double stopProportion,
-			double baseProportion);
+	public void setStartStopBaseProportion(double startProportion,
+		double stopProportion, double baseProportion);
 }
-

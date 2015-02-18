@@ -26,38 +26,36 @@ package loci.slim.fitting;
 import net.imagej.ImgPlus;
 import net.imglib2.type.numeric.real.DoubleType;
 
-
 /**
- *
  * @author Aivar Grislis
  */
 public interface IFittedImage {
 
 	/**
 	 * Gets width of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getWidth();
 
 	/**
 	 * Gets height of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getHeight();
 
 	/**
 	 * Gets number of channels of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getChannels();
 
 	/**
 	 * Gets number of parameters of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getParameters();
 
@@ -86,8 +84,8 @@ public interface IFittedImage {
 
 	/**
 	 * Gets associated image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public ImgPlus<DoubleType> getImage();
 }

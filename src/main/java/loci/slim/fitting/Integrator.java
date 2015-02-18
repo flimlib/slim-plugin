@@ -24,9 +24,10 @@
 package loci.slim.fitting;
 
 /**
- *
  * @author Aivar Grislis
  */
 public interface Integrator {
-	public double integrate(double[] function, double offset, double inc, int start, int stop);
+
+	public double integrate(double[] function, double offset, double inc,
+		int start, int stop);
 }

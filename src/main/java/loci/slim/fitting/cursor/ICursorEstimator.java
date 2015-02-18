@@ -24,13 +24,13 @@
 package loci.slim.fitting.cursor;
 
 /**
- *
  * @author Aivar Grislis
  */
 public interface ICursorEstimator {
 
 	public IFittingCursorListener globalCursor(double[] prompt, double[] decay);
 
-	public IFittingCursorListener localCursor(FittingCursor global, double[] prompt, double[] decay);
+	public IFittingCursorListener localCursor(FittingCursor global,
+		double[] prompt, double[] decay);
 
 }

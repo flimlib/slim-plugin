@@ -26,16 +26,17 @@ package loci.slim.histogram;
 import loci.slim.fitting.images.IFittedImage;
 
 /**
- * Keeps an array of HistogramDataNodes for a given image.  Builds the 
- * histogram data as appropriate.  Handles updates as the fitted results are
- * available.  Handles optional auto-ranging.
- * 
+ * Keeps an array of HistogramDataNodes for a given image. Builds the histogram
+ * data as appropriate. Handles updates as the fitted results are available.
+ * Handles optional auto-ranging.
+ *
  * @author Aivar Grislis
  */
 public class HistogramDataGroup {
-	private IFittedImage _image;
-	private String _title;
-	private HistogramDataNode[] _channel;
+
+	private final IFittedImage _image;
+	private final String _title;
+	private final HistogramDataNode[] _channel;
 	private int _channelIndex;
 	private boolean _autoRange;
 	private boolean _excludePixels;
@@ -54,11 +55,12 @@ public class HistogramDataGroup {
 
 	/**
 	 * Constructor, takes an array of HistogramChannels.
-	 * 
-	 * @param channel 
+	 *
+	 * @param channel
 	 */
-	public HistogramDataGroup(IFittedImage image, String title,
-			HistogramDataNode[] channel) {
+	public HistogramDataGroup(final IFittedImage image, final String title,
+		final HistogramDataNode[] channel)
+	{
 		_image = image;
 		_title = title;
 		_channel = channel;
@@ -68,25 +70,25 @@ public class HistogramDataGroup {
 		_displayChannels = hasChannels();
 		_channelIndex = 0;
 		_minView = _maxView = 0.0;
-		_minLUT  = _maxLUT  = 0.0;
+		_minLUT = _maxLUT = 0.0;
 		_minData = _maxData = 0.0;
 		_minDataCurrent = _maxDataCurrent = 0.0;
 		_listener = null;
 	}
 
 	/**
-	 * Sets a listener for histogram data changes.  Listener is unique.
-	 * 
-	 * @param listener 
+	 * Sets a listener for histogram data changes. Listener is unique.
+	 *
+	 * @param listener
 	 */
-	public void setListener(IHistogramDataListener listener) {
+	public void setListener(final IHistogramDataListener listener) {
 		_listener = listener;
 	}
 
 	/**
 	 * Gets a descriptive title to display on histogram UI for this data.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public String getTitle() {
 		return _title;
@@ -94,8 +96,8 @@ public class HistogramDataGroup {
 
 	/**
 	 * Gets current channel index.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getChannelIndex() {
 		return _channelIndex;
@@ -103,16 +105,16 @@ public class HistogramDataGroup {
 
 	/**
 	 * Sets current channel index.
-	 * 
-	 * @param channelIndex 
+	 *
+	 * @param channelIndex
 	 */
-	public void setChannelIndex(int channelIndex) {
+	public void setChannelIndex(final int channelIndex) {
 		_channelIndex = channelIndex;
 	}
 
 	/**
 	 * Gets whether or not histogram should automatically scale to values.
-	 * 
+	 *
 	 * @return whether automatically scales
 	 */
 	public boolean getAutoRange() {
@@ -121,26 +123,26 @@ public class HistogramDataGroup {
 
 	/**
 	 * Sets whether or not histogram should automatically scale to values.
-	 * 
+	 *
 	 * @param autoRange whether automatically scales
 	 */
-	public void setAutoRange(boolean autoRange) {
+	public void setAutoRange(final boolean autoRange) {
 		update(autoRange, _combineChannels);
 	}
 
 	/**
 	 * Sets whether or not we should hide out-of-range pixels.
-	 * 
-	 * @param excludePixels 
+	 *
+	 * @param excludePixels
 	 */
-	public void setExcludePixels(boolean excludePixels) {
+	public void setExcludePixels(final boolean excludePixels) {
 		_excludePixels = excludePixels;
 	}
 
 	/**
 	 * Sets whether or not we should hide out-of-range pixels.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean getExcludePixels() {
 		return _excludePixels;
@@ -148,7 +150,7 @@ public class HistogramDataGroup {
 
 	/**
 	 * Gets whether or not histogram should combine all the channels.
-	 * 
+	 *
 	 * @return whether to combine all the channels
 	 */
 	public boolean getCombineChannels() {
@@ -157,17 +159,17 @@ public class HistogramDataGroup {
 
 	/**
 	 * Sets whether or not histogram should combine all the channels.
-	 * 
+	 *
 	 * @param combineChannels
 	 */
-	public void setCombineChannels(boolean combineChannels) {
+	public void setCombineChannels(final boolean combineChannels) {
 		update(_autoRange, combineChannels);
 	}
 
 	/**
 	 * Gets whether or not histogram should display all channels.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean getDisplayChannels() {
 		return _displayChannels;
@@ -175,17 +177,17 @@ public class HistogramDataGroup {
 
 	/**
 	 * Sets whether or not histogram should display all channels.
-	 * 
-	 * @param displayChannels 
+	 *
+	 * @param displayChannels
 	 */
-	public void setDisplayChannels(boolean displayChannels) {
+	public void setDisplayChannels(final boolean displayChannels) {
 		_displayChannels = displayChannels;
 	}
 
 	/**
 	 * Returns whether or not histogram has channels.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean hasChannels() {
 		return _channel.length > 1;
@@ -194,14 +196,14 @@ public class HistogramDataGroup {
 	/*
 	 * Helper function to update autoranging or channel combination setting.
 	 */
-	private void update(boolean autoRange, boolean combineChannels) {
+	private void update(final boolean autoRange, final boolean combineChannels) {
 		if (_autoRange != autoRange || _combineChannels != combineChannels) {
 			double minView = _minView;
 			double maxView = _maxView;
 			double minLUT = _minLUT;
 			double maxLUT = _maxLUT;
 
-			_autoRange       = autoRange;
+			_autoRange = autoRange;
 			_combineChannels = combineChannels;
 
 			if (_autoRange) {
@@ -231,7 +233,7 @@ public class HistogramDataGroup {
 			else {
 				// set min/max view/LUT to quartile-based fences
 				if (null != _statistics) {
-					double[] fences = _statistics.getFences();
+					final double[] fences = _statistics.getFences();
 					minView = minLUT = fences[0];
 					maxView = maxLUT = fences[1];
 					if (minView < _minData) {
@@ -244,8 +246,9 @@ public class HistogramDataGroup {
 			}
 
 			// did anything really change?
-			if (_minView != minView || _maxView != maxView
-					|| _minLUT != minLUT || _maxLUT != maxLUT) {
+			if (_minView != minView || _maxView != maxView || _minLUT != minLUT ||
+				_maxLUT != maxLUT)
+			{
 				_minView = minView;
 				_maxView = maxView;
 				_minLUT = minLUT;
@@ -261,8 +264,8 @@ public class HistogramDataGroup {
 
 	/**
 	 * Gets minimum and maximum extents of the view.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getMinMaxView() {
 		return new double[] { _minView, _maxView };
@@ -274,15 +277,15 @@ public class HistogramDataGroup {
 	 * @param min
 	 * @param max
 	 */
-	public void setMinMaxView(double min, double max) {
+	public void setMinMaxView(final double min, final double max) {
 		_minView = min;
 		_maxView = max;
 	}
 
 	/**
 	 * Gets minimum and maximum extents of the LUT.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getMinMaxLUT() {
 		return new double[] { _minLUT, _maxLUT };
@@ -294,7 +297,7 @@ public class HistogramDataGroup {
 	 * @param min
 	 * @param max
 	 */
-	public void setMinMaxLUT(double min, double max) {
+	public void setMinMaxLUT(final double min, final double max) {
 		_minLUT = min;
 		_maxLUT = max;
 		redisplay();
@@ -302,29 +305,29 @@ public class HistogramDataGroup {
 
 	/**
 	 * Gets minimum and maximum extents of the data.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getMinMaxData() {
 		return new double[] { _minData, _maxData };
 	}
 
-	//TODO
+	// TODO
 	// this is setting exclude pixels on/off once you are viewing the histogram
 	// if you click on another image and the histogram shows data for that image
 	// that doesn't necessarily trigger mask propagation.
 	//
-	// Note that this is just setting up pixel masking for one channel.  Shouldn't
-	// this pertain to all channels?  (With different mask for each channel).
+	// Note that this is just setting up pixel masking for one channel. Shouldn't
+	// this pertain to all channels? (With different mask for each channel).
 	// The other UI is not channel-specific, so neither should this checkbox be.
 	// When/if we do have different LUTs for each channel this will get even more
 	// complicated.
 	//
 	// Note also that if this is to work during the fit process it gets more
-	// complicated.  As more and more pixels are drawn, we need to build newer
+	// complicated. As more and more pixels are drawn, we need to build newer
 	// exclusion masks and propagate them.
 
-	public void excludePixels(boolean excludePixels) {
+	public void excludePixels(final boolean excludePixels) {
 		setExcludePixels(excludePixels);
 		if (excludePixels) {
 			_channel[_channelIndex].propagateMask(_minLUT, _maxLUT);
@@ -335,15 +338,12 @@ public class HistogramDataGroup {
 	}
 
 	/**
-	 * Sets the current min and max automatically if need be.
+	 * Sets the current min and max automatically if need be. Called periodically
+	 * during the fit process. Updates listener as a side effect.
 	 *
-	 * Called periodically during the fit process.
-	 *
-	 * Updates listener as a side effect.
-	 * 
 	 * @return min and max of the LUT
 	 */
-	//TODO these recalculation events need to be synchronized so that they
+	// TODO these recalculation events need to be synchronized so that they
 	// don't step on other ways to change min/maxLUT/View
 	// Perhaps this class should have a synch object that also has a getter.
 	public double[] updateRanges() {
@@ -414,12 +414,12 @@ public class HistogramDataGroup {
 		_image.redisplay();
 	}
 
-	public HistogramStatistics getStatistics(int binCount) {
+	public HistogramStatistics getStatistics(final int binCount) {
 		_statistics = new HistogramStatistics();
 		int[] bins = null;
 		double[] binValues = null;
-		double[] quartiles = new double[3];
-		int[] quartileIndices = new int[3];
+		final double[] quartiles = new double[3];
+		final int[] quartileIndices = new int[3];
 
 		if (_displayChannels) {
 			// start new histogram bins
@@ -430,7 +430,8 @@ public class HistogramDataGroup {
 
 			// add all channels to histogram
 			for (int i = 0; i < _channel.length; ++i) {
-				int[] channelBins = _channel[i].binValues(binCount, _minView, _maxView);
+				final int[] channelBins =
+					_channel[i].binValues(binCount, _minView, _maxView);
 				for (int j = 0; j < binCount; ++j) {
 					bins[j] += channelBins[j];
 				}
@@ -448,8 +449,8 @@ public class HistogramDataGroup {
 		}
 
 		// get median and quartiles of current channel
-		_channel[_channelIndex].findQuartiles(quartiles, quartileIndices,
-				binCount, _minView, _maxView);
+		_channel[_channelIndex].findQuartiles(quartiles, quartileIndices, binCount,
+			_minView, _maxView);
 
 		// report results
 		_statistics.setBins(bins);

@@ -31,93 +31,98 @@ import net.imglib2.type.numeric.RealType;
  *
  * @author Aivar Grislis
  */
+/**
+ * Class that describes a single member of the output set.
+ * 
+ * @param <T> type of the values
+ * @author Aivar Grislis
+ */
+public class OutputSetMember<T extends RealType<T> & NativeType<T>> {
+
+	// TODO ARG find Y index constant somewhere in Imglib2, + 1; also, is Z
+	// s'posed to be 2???
+	private final int POST_XY_INDEX = 2;
+	private final String label;
+	private final int index;
+	private final MemberFormula formula;
+	private boolean combined;
+	private RandomAccess<T> randomAccess;
+
 	/**
-	 * Class that describes a single member of the output set.
+	 * Constructor.
 	 * 
-	 * @param <T> type of the values
-	 * 
-	 * @author Aivar Grislis
+	 * @param label name of this index value
+	 * @param index index in output (used for combined images)
+	 * @param formula used to derive index value
 	 */
-	public class OutputSetMember <T extends RealType<T> & NativeType<T>> {
-		//TODO ARG find Y index constant somewhere in Imglib2, + 1; also, is Z s'posed to be 2???
-		private final int POST_XY_INDEX = 2;
-		private final String label;
-		private final int index;
-		private final MemberFormula formula;
-		private boolean combined;
-		private RandomAccess<T> randomAccess;
+	public OutputSetMember(final String label, final int index,
+		final MemberFormula formula)
+	{
+		this.label = label;
+		this.index = index;
+		this.formula = formula;
+	}
 
-		/**
-		 * Constructor.
-		 * 
-		 * @param label name of this index value
-		 * @param index index in output (used for combined images)
-		 * @param formula used to derive index value
-		 */
-		public OutputSetMember(String label, int index, MemberFormula formula) {
-			this.label = label;
-			this.index = index;
-			this.formula = formula;
-		}
+	public String getLabel() {
+		return label;
+	}
 
-		public String getLabel() {
-			return label;
-		}
+	public int getIndex() {
+		return index;
+	}
 
-		public int getIndex() {
-			return index;
-		}
+	public MemberFormula getFormula() {
+		return formula;
+	}
 
-		public MemberFormula getFormula() {
-			return formula;
-		}
+	public void setCombined(final boolean combined) {
+		this.combined = combined;
+	}
 
-		public void setCombined(boolean combined) {
-			this.combined = combined;
-		}
+	public void setRandomAccess(final RandomAccess<T> randomAccess) {
+		this.randomAccess = randomAccess;
+	}
 
-		public void setRandomAccess(RandomAccess<T> randomAccess) {
-			this.randomAccess = randomAccess;
-		}
+	public void setPixelValue(final double[] values, final long[] position) {
+		final double value = formula.compute(values);
+		setPixelValue(value, position);
+	}
 
-		public void setPixelValue(double[] values, long[] position) {
-			double value = formula.compute(values);
-			setPixelValue(value, position);
-		}
-
-		public void setPixelValue(double[] values, long[] position, int[] chunkyPixelSize) {
-			double value = formula.compute(values);
-			long x = position[0];
-			long y = position[1];
-			for (int i = 0; i < chunkyPixelSize[0]; ++i) {
-				for (int j = 0; j < chunkyPixelSize[1]; ++j) {
-					position[0] = x + i;
-					position[1] = y + j;
-					setPixelValue(value, position);
-				}
+	public void setPixelValue(final double[] values, final long[] position,
+		final int[] chunkyPixelSize)
+	{
+		final double value = formula.compute(values);
+		final long x = position[0];
+		final long y = position[1];
+		for (int i = 0; i < chunkyPixelSize[0]; ++i) {
+			for (int j = 0; j < chunkyPixelSize[1]; ++j) {
+				position[0] = x + i;
+				position[1] = y + j;
+				setPixelValue(value, position);
 			}
-		}
-
-		public void setPixelValue(double value, long[] position) {
-			if (combined) {
-				// adjust position for combined stack
-				position = expandPosition(position, POST_XY_INDEX);
-				position[POST_XY_INDEX] = index;
-			}
-			randomAccess.setPosition(position);
-			randomAccess.get().setReal(value);
-		}
-
-		private long[] expandPosition(long[] position, int index) {
-			long[] expandedPosition = new long[position.length + 1];
-			for (int i = 0; i < expandedPosition.length; ++i) {
-				if (i < index) {
-					expandedPosition[i] = position[i];
-				}
-				else {
-					expandedPosition[i] = position[i - 1];
-				}
-			}
-			return expandedPosition;
 		}
 	}
+
+	public void setPixelValue(final double value, long[] position) {
+		if (combined) {
+			// adjust position for combined stack
+			position = expandPosition(position, POST_XY_INDEX);
+			position[POST_XY_INDEX] = index;
+		}
+		randomAccess.setPosition(position);
+		randomAccess.get().setReal(value);
+	}
+
+	private long[] expandPosition(final long[] position, final int index) {
+		final long[] expandedPosition = new long[position.length + 1];
+		for (int i = 0; i < expandedPosition.length; ++i) {
+			if (i < index) {
+				expandedPosition[i] = position[i];
+			}
+			else {
+				expandedPosition[i] = position[i - 1];
+			}
+		}
+		return expandedPosition;
+	}
+}

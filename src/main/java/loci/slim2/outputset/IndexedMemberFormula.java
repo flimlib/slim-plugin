@@ -26,18 +26,19 @@ package loci.slim2.outputset;
 /**
  * This is the simplest {@link MemberFormula} that just takes the input value at
  * a given index.
- * 
+ *
  * @author Aivar Grislis
  */
 public class IndexedMemberFormula implements MemberFormula {
-	private int index;
 
-	public IndexedMemberFormula(int index) {
+	private final int index;
+
+	public IndexedMemberFormula(final int index) {
 		this.index = index;
 	}
 
 	@Override
-	public double compute(double[] values) {
+	public double compute(final double[] values) {
 		return values[index];
 	}
 }

@@ -81,7 +81,7 @@ public interface IUserInterfacePanelListener {
 
 	/**
 	 * Creates excitation curve from gaussian.
-	 * 
+	 *
 	 * @param fileName
 	 * @return whether successful
 	 */

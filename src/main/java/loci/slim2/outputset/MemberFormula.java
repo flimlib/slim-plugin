@@ -25,14 +25,14 @@ package loci.slim2.outputset;
 
 /**
  * A formula for calculating the value of a member of an output set.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface MemberFormula {
 
 	/**
 	 * Formula for calculating a value for this tuple dimension.
-	 * 
+	 *
 	 * @param values array
 	 * @return calculated value
 	 */

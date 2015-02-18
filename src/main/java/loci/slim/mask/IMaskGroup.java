@@ -25,36 +25,36 @@ package loci.slim.mask;
 
 /**
  * This is an interface for a group of associated mask nodes.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface IMaskGroup {
 
 	/**
 	 * Adds a mask node to group.
-	 * 
-	 * @param node 
+	 *
+	 * @param node
 	 */
 	public void addNode(IMaskNode node);
 
 	/**
 	 * Removes a mask node from group.
-	 * 
-	 * @param node 
+	 *
+	 * @param node
 	 */
 	public void removeNode(IMaskNode node);
 
 	/**
 	 * Updates the mask, notifies group.
-	 * 
+	 *
 	 * @param node originating node
 	 */
 	public void updateMask(IMaskNode node);
 
 	/**
 	 * Gets the current total mask for this group.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public Mask getMask();
 }

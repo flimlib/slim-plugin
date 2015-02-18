@@ -31,7 +31,7 @@ import loci.slim.fitting.cursor.FittingCursor;
 
 /**
  * Interface for a decay chart.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface IDecayGraph {
@@ -44,19 +44,20 @@ public interface IDecayGraph {
 	 * @param grayScale
 	 * @return frame
 	 */
-	public JFrame init(final JFrame frame, final int bins, final double timeInc, ICursorListener cursorListener);
+	public JFrame init(final JFrame frame, final int bins, final double timeInc,
+		ICursorListener cursorListener);
 
 	/**
 	 * Changes (or initializes) the cursor (start/stop bins/values) for the fit.
-	 * 
-	 * @param fittingCursor 
+	 *
+	 * @param fittingCursor
 	 */
 	public void setFittingCursor(FittingCursor fittingCursor);
 
 	/**
 	 * Changes (or initializes) the title of the graph.
-	 * 
-	 * @param title 
+	 *
+	 * @param title
 	 */
 	public void setTitle(final String title);
 
@@ -71,14 +72,14 @@ public interface IDecayGraph {
 
 	/**
 	 * Sets reduced chi square of fit.
-	 * 
-	 * @param chiSquare 
+	 *
+	 * @param chiSquare
 	 */
 	public void setChiSquare(double chiSquare);
 
 	/**
 	 * Sets number of photons in fit.
-	 * 
+	 *
 	 * @param photons
 	 */
 	public void setPhotons(int photons);
@@ -90,5 +91,6 @@ public interface IDecayGraph {
 	 * @param dataStart
 	 * @param transientStop
 	 */
-	public void setStartStop(double transientStart, double dataStart, double transientStop);
+	public void setStartStop(double transientStart, double dataStart,
+		double transientStop);
 }

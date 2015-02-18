@@ -27,18 +27,18 @@ import loci.slim.fitting.IErrorListener;
 import loci.slim.mask.IMaskGroup;
 import loci.slim.mask.IMaskGroupListener;
 
-
 /**
- * Interface for the GrayScaleImage UI.  Allows user to click on a pixel and
- * set the current channel selection.  Used for thresholding.
+ * Interface for the GrayScaleImage UI. Allows user to click on a pixel and set
+ * the current channel selection. Used for thresholding.
  *
  * @author Aivar Grislis
  */
-public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate, ICursorListener, IErrorListener, IMaskGroupListener {
+public interface IGrayScaleImage extends IGrayScalePixelValue,
+	IThresholdUpdate, ICursorListener, IErrorListener, IMaskGroupListener
+{
 
 	/**
 	 * Closes down the grayscale image window.
-	 * 
 	 */
 	public void close();
 
@@ -64,33 +64,31 @@ public interface IGrayScaleImage extends IGrayScalePixelValue, IThresholdUpdate,
 	public void enable(boolean enable);
 
 	/**
-	 * Gets the minimum, non-zero photon count encountered in the image.
-	 * 
-	 * Usually 1.0, but sometimes its 10.0 and all photon counts are multiples
-	 * of 10.0.
-	 * 
-	 * @return 
+	 * Gets the minimum, non-zero photon count encountered in the image. Usually
+	 * 1.0, but sometimes its 10.0 and all photon counts are multiples of 10.0.
+	 *
+	 * @return
 	 */
 	public double getMinNonZeroPhotonCount();
 
 	/**
 	 * Gets the photon count of the brightest point in the image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getMaxTotalPhotons();
 
 	/**
 	 * Gets the coordinates of the brightest point in the image.
-	 * 
+	 *
 	 * @return { x, y }
 	 */
 	public int[] getBrightestPoint();
 
 	/**
 	 * Sets a mask group to listen for changes.
-	 * 
-	 * @param maskGroup 
+	 *
+	 * @param maskGroup
 	 */
 	@Override
 	public void listenToMaskGroup(IMaskGroup maskGroup);

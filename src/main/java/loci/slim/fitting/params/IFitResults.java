@@ -25,50 +25,50 @@ package loci.slim.fitting.params;
 
 /**
  * Interface for container for local fitted results for current pixel.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface IFitResults {
 
 	/**
 	 * Sets fitted chi square result.
-	 * 
-	 * @param chiSquare 
+	 *
+	 * @param chiSquare
 	 */
 	public void setChiSquare(double chiSquare);
 
 	/**
 	 * Gets fitted chi square result.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getChiSquare();
 
 	/**
 	 * Sets fitted parameters.
-	 * 
+	 *
 	 * @param params or null
 	 */
 	public void setParams(double[] params);
 
 	/**
 	 * Gets fitted parameters.
-	 * 
+	 *
 	 * @return null or fitted params
 	 */
 	public double[] getParams();
 
 	/**
 	 * Sets fitted curve.
-	 * 
-	 * @param yFitted 
+	 *
+	 * @param yFitted
 	 */
 	public void setYFitted(double[] yFitted);
 
 	/**
 	 * Gets fitted curve.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getYFitted();
 }

@@ -28,17 +28,21 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class Cursor {
+
 	public static final int LEFT = 0;
 	public static final int RIGHT = 1;
 	public static final int UPPER = 0;
 	public static final int LOWER = 1;
 	public static final int SINGLE = 1;
 	public static final int PAIR = 2;
-	public enum Orientation { HORZ, VERT }
+
+	public enum Orientation {
+		HORZ, VERT
+	}
+
 	int _ids;
 	Orientation _orientation;
 	private volatile boolean _dragListening;
@@ -53,15 +57,15 @@ public class Cursor {
 		init(1, Orientation.HORZ);
 	}
 
-	public Cursor(int ids) {
+	public Cursor(final int ids) {
 		init(ids, Orientation.HORZ);
 	}
 
-	public Cursor(int ids, Orientation orientation) {
+	public Cursor(final int ids, final Orientation orientation) {
 		init(ids, orientation);
 	}
 
-	private void init(int ids, Orientation orientation) {
+	private void init(final int ids, final Orientation orientation) {
 		_ids = ids;
 		_dragListening = _moveListening = _stretchListening = false;
 		_dragListener = new HashSet<ICursorDragListener>();
@@ -70,45 +74,49 @@ public class Cursor {
 		_rectangle = null;
 	}
 
-	public void addCursorDragListener(ICursorDragListener dragListener) {
+	public void addCursorDragListener(final ICursorDragListener dragListener) {
 		_dragListener.add(dragListener);
 		_dragListening = true;
 	}
 
-	public void removeCursorDragListener(ICursorDragListener dragListener) {
+	public void removeCursorDragListener(final ICursorDragListener dragListener) {
 		_dragListener.remove(dragListener);
 		_dragListening = _dragListener.size() > 0;
 	}
 
-	public void addCursorMoveListener(ICursorMoveListener moveListener) {
+	public void addCursorMoveListener(final ICursorMoveListener moveListener) {
 		_moveListener.add(moveListener);
 		_moveListening = true;
 	}
 
-	public void removeCursorMoveListener(ICursorMoveListener moveListener) {
+	public void removeCursorMoveListener(final ICursorMoveListener moveListener) {
 		_moveListener.remove(moveListener);
 		_moveListening = _moveListener.size() > 0;
 	}
 
-	public void addCursorStretchListener(ICursorStretchListener stretchListener) {
+	public void addCursorStretchListener(
+		final ICursorStretchListener stretchListener)
+	{
 		_stretchListener.add(stretchListener);
 		_stretchListening = true;
 	}
 
-	public void removeCursorStretchListener(ICursorStretchListener stretchListener) {
+	public void removeCursorStretchListener(
+		final ICursorStretchListener stretchListener)
+	{
 		_stretchListener.remove(stretchListener);
 		_stretchListening = _stretchListener.size() > 0;
 	}
 
-	public void setRectangle(Rectangle rectangle) {
+	public void setRectangle(final Rectangle rectangle) {
 		_rectangle = rectangle;
 	}
 
-	public boolean mouseDragged(int x, int y) {
+	public boolean mouseDragged(final int x, final int y) {
 		return false;
 	}
 
-	public boolean mouseMoved(int x, int y) {
+	public boolean mouseMoved(final int x, final int y) {
 		return false;
 	}
 

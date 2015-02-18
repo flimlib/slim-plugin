@@ -25,14 +25,15 @@ package loci.slim.fitted;
 
 /**
  * Abstract base class for dealing with fitted values.
- * 
+ *
  * @author Aivar Grislis
  */
 public abstract class AbstractFittedValue implements FittedValue {
+
 	private String title;
 
 	@Override
-	public void setTitle(String title) {
+	public void setTitle(final String title) {
 		this.title = title;
 	}
 

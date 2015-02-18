@@ -29,15 +29,17 @@ import java.math.RoundingMode;
 
 /**
  * Builds a maximum or minimum value, rounding and formatting appropriately.
- * 
+ *
  * @author Aivar Grislis
  */
 public class DoubleFormatter {
+
 	public static final char INFINITY = '\u221E';
 	double _value;
 	String _text;
 
-	public DoubleFormatter(boolean min, int digits, double value) {
+	public DoubleFormatter(final boolean min, final int digits, final double value)
+	{
 		if (Double.isInfinite(value)) {
 			if (value < 0.0) {
 				_text = "-" + INFINITY;
@@ -48,12 +50,15 @@ public class DoubleFormatter {
 		}
 		else {
 			try {
-				MathContext context = new MathContext(digits, min ? RoundingMode.FLOOR : RoundingMode.CEILING);
-				BigDecimal bigDecimalValue = BigDecimal.valueOf(value).round(context);
+				final MathContext context =
+					new MathContext(digits, min ? RoundingMode.FLOOR
+						: RoundingMode.CEILING);
+				final BigDecimal bigDecimalValue =
+					BigDecimal.valueOf(value).round(context);
 				_value = bigDecimalValue.doubleValue();
 				_text = bigDecimalValue.toEngineeringString();
 			}
-			catch (NumberFormatException e) {
+			catch (final NumberFormatException e) {
 				_value = 0.0;
 				_text = "0.0";
 			}
@@ -75,7 +80,7 @@ public class DoubleFormatter {
 	 * @return formatted string
 	 */
 	public String getText() {
-		int index = _text.indexOf("-");
+		final int index = _text.indexOf("-");
 		if (index > 0) {
 			if ('E' != _text.charAt(index - 1)) {
 				ij.IJ.log("Funny text " + _text);

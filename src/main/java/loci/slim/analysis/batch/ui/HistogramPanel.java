@@ -32,18 +32,18 @@ import javax.swing.JPanel;
 import loci.slim.analysis.HistogramStatistics;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class HistogramPanel extends JPanel {
 
 	private static final int HISTO_WIDTH = 256;
 	private static final int HISTO_HEIGHT = 256;
-	private static final Dimension PREFERRED_SIZE = new Dimension(HISTO_WIDTH, HISTO_HEIGHT);
+	private static final Dimension PREFERRED_SIZE = new Dimension(HISTO_WIDTH,
+		HISTO_HEIGHT);
 	private static final int SINGLE_PIXEL = 1;
-	private HistogramStatistics histogramStatistics;
+	private final HistogramStatistics histogramStatistics;
 
-	public HistogramPanel(HistogramStatistics histogramStatistics) {
+	public HistogramPanel(final HistogramStatistics histogramStatistics) {
 		super();
 		this.histogramStatistics = histogramStatistics;
 		repaint();
@@ -55,9 +55,9 @@ public class HistogramPanel extends JPanel {
 	}
 
 	@Override
-	public void paintComponent(Graphics g) {
+	public void paintComponent(final Graphics g) {
 		super.paintComponent(g);
-		long[] histogram = histogramStatistics.getHistogram();
+		final long[] histogram = histogramStatistics.getHistogram();
 		if (null != histogram) {
 			// find maximum count for scaling
 			long maxCount = Long.MIN_VALUE;
@@ -78,7 +78,9 @@ public class HistogramPanel extends JPanel {
 			for (int i = 0; i < HISTO_WIDTH; ++i) {
 				if (0 != histogram[i]) {
 					// make sure values of one show at least a single pixel
-					height = (int)((HISTO_HEIGHT - SINGLE_PIXEL) * histogram[i] / maxCount) + SINGLE_PIXEL;
+					height =
+						(int) ((HISTO_HEIGHT - SINGLE_PIXEL) * histogram[i] / maxCount) +
+							SINGLE_PIXEL;
 					if (height > HISTO_HEIGHT) {
 						height = HISTO_HEIGHT;
 					}

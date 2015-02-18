@@ -49,10 +49,11 @@ import org.scijava.Context;
 
 /**
  * Handles batch fitting of lifetime images.
- * 
+ *
  * @author Aivar Grislis
  */
 public class DefaultBatchProcessor implements BatchProcessor {
+
 	private static final String CSV_SUFFIX = ".csv";
 	private static final String TSV_SUFFIX = ".tsv";
 	private static final String EXPORT_PIXELS_KEY = "exportpixels";
@@ -67,18 +68,21 @@ public class DefaultBatchProcessor implements BatchProcessor {
 	private static final String BATCH_ERROR = "Error in Batch Processing";
 
 	@Override
-	public void process(final Context context, final int bins, final File[] files, final FitSettings fitSettings) {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
-		boolean defExportPixels = prefs.getBoolean(EXPORT_PIXELS_KEY, true);
-		String defPixelsFile = prefs.get(PIXELS_FILE_KEY, "pixels");
-		boolean defExportHistograms = prefs.getBoolean(EXPORT_HISTOS_KEY, true);
-		String defHistogramsFile = prefs.get(HISTOS_FILE_KEY, "histograms");
-		boolean defExportSummary = prefs.getBoolean(EXPORT_SUMMARY_KEY, true);
-		String defSummaryFile = prefs.get(SUMMARY_FILE_KEY, "summary");
-		boolean defCSV = prefs.getBoolean(CSV_KEY, false);
+	public void process(final Context context, final int bins,
+		final File[] files, final FitSettings fitSettings)
+	{
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		final boolean defExportPixels = prefs.getBoolean(EXPORT_PIXELS_KEY, true);
+		final String defPixelsFile = prefs.get(PIXELS_FILE_KEY, "pixels");
+		final boolean defExportHistograms =
+			prefs.getBoolean(EXPORT_HISTOS_KEY, true);
+		final String defHistogramsFile = prefs.get(HISTOS_FILE_KEY, "histograms");
+		final boolean defExportSummary = prefs.getBoolean(EXPORT_SUMMARY_KEY, true);
+		final String defSummaryFile = prefs.get(SUMMARY_FILE_KEY, "summary");
+		final boolean defCSV = prefs.getBoolean(CSV_KEY, false);
 
 		// TODO - Consolidate this logic with same in SLIMProcessor!
-		GenericDialog dialog = new GenericDialog("Batch Processing");
+		final GenericDialog dialog = new GenericDialog("Batch Processing");
 		dialog.addCheckbox("Export_Pixels", defExportPixels);
 		dialog.addStringField("Pixels_File", defPixelsFile);
 		dialog.addCheckbox("Export_Histograms", defExportHistograms);
@@ -92,11 +96,11 @@ public class DefaultBatchProcessor implements BatchProcessor {
 		}
 
 		final boolean exportPixels = dialog.getNextBoolean();
-		String tmpPixelsFile = dialog.getNextString();
+		final String tmpPixelsFile = dialog.getNextString();
 		final boolean exportHistograms = dialog.getNextBoolean();
-		String tmpHistogramsFile = dialog.getNextString();
+		final String tmpHistogramsFile = dialog.getNextString();
 		final boolean exportSummary = dialog.getNextBoolean();
-		String tmpSummaryFile = dialog.getNextString();
+		final String tmpSummaryFile = dialog.getNextString();
 		final boolean csv = dialog.getNextBoolean();
 
 		// make sure output file suffix is appropriate
@@ -111,22 +115,19 @@ public class DefaultBatchProcessor implements BatchProcessor {
 		prefs.putBoolean(EXPORT_SUMMARY_KEY, exportSummary);
 		prefs.put(SUMMARY_FILE_KEY, summaryFile);
 
-		batchProcessing(context, bins,
-						exportPixels, pixelsFile,
-						exportHistograms, histogramsFile,
-						exportSummary, summaryFile,
-						fitSettings, files, csv);
+		batchProcessing(context, bins, exportPixels, pixelsFile, exportHistograms,
+			histogramsFile, exportSummary, summaryFile, fitSettings, files, csv);
 	}
 
 	/**
 	 * Use appropriate file name suffix for comma- and tab-separated values.
 	 */
-	private String checkSuffix(String file, boolean csv) {
-		String suffix = csv ? CSV_SUFFIX : TSV_SUFFIX;
-		String otherSuffix = csv ? TSV_SUFFIX : CSV_SUFFIX;
+	private String checkSuffix(String file, final boolean csv) {
+		final String suffix = csv ? CSV_SUFFIX : TSV_SUFFIX;
+		final String otherSuffix = csv ? TSV_SUFFIX : CSV_SUFFIX;
 		if (!file.endsWith(suffix)) {
 			if (file.endsWith(otherSuffix)) {
-				int i = file.indexOf(otherSuffix);
+				final int i = file.indexOf(otherSuffix);
 				file = file.substring(0, i);
 			}
 			file += suffix;
@@ -136,7 +137,7 @@ public class DefaultBatchProcessor implements BatchProcessor {
 
 	/**
 	 * Does the batch processing.
-	 * 
+	 *
 	 * @param context
 	 * @param exportPixels
 	 * @param pixelsFile
@@ -148,20 +149,20 @@ public class DefaultBatchProcessor implements BatchProcessor {
 	 * @param files
 	 * @param csv
 	 */
-	private void batchProcessing(Context context, int batchBins,
-			boolean exportPixels, String pixelsFile,
-			boolean exportHistograms, String histogramsFile,
-			boolean exportSummary, String summaryFile,
-			FitSettings fitSettings, File[] files, boolean csv)
+	private void batchProcessing(final Context context, final int batchBins,
+		final boolean exportPixels, final String pixelsFile,
+		final boolean exportHistograms, final String histogramsFile,
+		final boolean exportSummary, final String summaryFile,
+		final FitSettings fitSettings, final File[] files, final boolean csv)
 	{
 		ExportPixelsToText pixels = null;
 		ExportHistogramsToText histograms = null;
 		ExportSummaryToText summary = null;
 
-		String fittedImages = fitSettings.getFittedImages();
-		FitFunction fitFunction = fitSettings.getGlobalFitParams().getFitFunction();
-		FitRegion fitRegion = FitRegion.EACH;
-
+		final String fittedImages = fitSettings.getFittedImages();
+		final FitFunction fitFunction =
+			fitSettings.getGlobalFitParams().getFitFunction();
+		final FitRegion fitRegion = FitRegion.EACH;
 
 		// validate file names
 		if (exportPixels) {
@@ -181,10 +182,11 @@ public class DefaultBatchProcessor implements BatchProcessor {
 				return;
 			}
 			summary = new ExportSummaryToText();
-			BatchHistogramListener listener = new BatchHistogramListener() {
+			final BatchHistogramListener listener = new BatchHistogramListener() {
+
 				@Override
-				public void swapImage(String filePath) {
-					//TODO ARG
+				public void swapImage(final String filePath) {
+					// TODO ARG
 					// this all pertainsi to IJ1 version:
 					// in IJ1 version the current image c/b swapped merely by
 					// changing a few globals, rebuilding grayscale, etc.
@@ -231,7 +233,8 @@ public class DefaultBatchProcessor implements BatchProcessor {
 					components = 1;
 					break;
 			}
-			FittedValue[] values = FittedValueFactory.createFittedValues(fittedImages, components);
+			final FittedValue[] values =
+				FittedValueFactory.createFittedValues(fittedImages, components);
 			summary.init(fitFunction, values, listener);
 		}
 
@@ -241,16 +244,18 @@ public class DefaultBatchProcessor implements BatchProcessor {
 				separator = COMMA_SEPARATOR;
 			}
 
-			ImageFitter imageFitter = new ImageFitter();
+			final ImageFitter imageFitter = new ImageFitter();
 
 			for (int i = 0; i < files.length; ++i) {
-				File file = files[i];
+				final File file = files[i];
 
-				ImgPlus<DoubleType> fittedImage = imageFitter.fit(context, fitSettings, file, batchBins);
+				final ImgPlus<DoubleType> fittedImage =
+					imageFitter.fit(context, fitSettings, file, batchBins);
 				if (null == fittedImage) {
-					ImageFitter.ErrorCode errorCode = imageFitter.getErrorCode();
+					final ImageFitter.ErrorCode errorCode = imageFitter.getErrorCode();
 					String imageName = file.getCanonicalPath();
-					imageName = imageName.substring(imageName.lastIndexOf(File.separatorChar) + 1);
+					imageName =
+						imageName.substring(imageName.lastIndexOf(File.separatorChar) + 1);
 					String message = null;
 
 					switch (errorCode) {
@@ -261,8 +266,10 @@ public class DefaultBatchProcessor implements BatchProcessor {
 							message = "" + imageName + " has no lifetime dimension.";
 							break;
 						case BIN_COUNT_MISMATCH:
-							int bins = imageFitter.getBins();
-							message = "Settings are for " + batchBins + " bins, " + imageName + " has " + bins + " bins.";
+							final int bins = imageFitter.getBins();
+							message =
+								"Settings are for " + batchBins + " bins, " + imageName +
+									" has " + bins + " bins.";
 							break;
 						default:
 							message = "Unknown error";
@@ -279,10 +286,12 @@ public class DefaultBatchProcessor implements BatchProcessor {
 				}
 				else {
 					if (exportPixels) {
-						pixels.export(pixelsFile, true, fittedImage, fitRegion, fitFunction, fittedImages, separator);
+						pixels.export(pixelsFile, true, fittedImage, fitRegion,
+							fitFunction, fittedImages, separator);
 					}
 					if (exportHistograms) {
-						histograms.export(histogramsFile, true, fittedImage, fitFunction, fittedImages, separator);
+						histograms.export(histogramsFile, true, fittedImage, fitFunction,
+							fittedImages, separator);
 					}
 					if (exportSummary) {
 						summary.process(file.getCanonicalPath(), fittedImage);
@@ -295,23 +304,23 @@ public class DefaultBatchProcessor implements BatchProcessor {
 				summary.export(summaryFile, separator);
 			}
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			IJ.handleException(e);
 		}
 
-		//TODO ARG need IJ2 version:
-		//IJ.showProgress(0,0);
+		// TODO ARG need IJ2 version:
+		// IJ.showProgress(0,0);
 	}
 
-	private boolean checkFileName(String fileName) {
+	private boolean checkFileName(final String fileName) {
 		try {
 			// open and truncate
-			FileWriter fileWriter = new FileWriter(fileName, false);
+			final FileWriter fileWriter = new FileWriter(fileName, false);
 			fileWriter.flush();
 			fileWriter.close();
 			return true;
 		}
-		catch (IOException e) {
+		catch (final IOException e) {
 			IJ.showMessage("Error in Batch Processing", "Problem writing to file: " +
 				fileName);
 			return false;

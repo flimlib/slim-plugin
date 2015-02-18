@@ -23,16 +23,16 @@
 
 package loci.slim.fitting.cursor;
 
-import ij.IJ;
 
 /**
- * This is a helper class for the user interface for setting and displaying
- * the fitting cursor start and stop values.  This listens for changes and
- * keeps the user interface display up to date.
- * 
+ * This is a helper class for the user interface for setting and displaying the
+ * fitting cursor start and stop values. This listens for changes and keeps the
+ * user interface display up to date.
+ *
  * @author Aivar Grislis
  */
 public class FittingCursorHelper implements IFittingCursorUI {
+
 	private FittingCursor _fittingCursor;
 	private IFittingCursorListener _fittingCursorListener;
 	private IFittingCursorUI _fittingCursorUI;
@@ -40,20 +40,20 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Sets the UI source and destination of fitting cursor strings, e.g. a
 	 * wrapper around some JTextField.
-	 * 
-	 * @param promptCursorUI 
+	 *
+	 * @param promptCursorUI
 	 */
-	public void setFittingCursorUI(IFittingCursorUI fittingCursorUI) {
+	public void setFittingCursorUI(final IFittingCursorUI fittingCursorUI) {
 		_fittingCursorUI = fittingCursorUI;
 		showFittingCursor();
 	}
 
 	/**
 	 * Sets the fitting cursor that is keeping track of cursor settings.
-	 * 
-	 * @param fittingCursor 
+	 *
+	 * @param fittingCursor
 	 */
-	public void setFittingCursor(FittingCursor fittingCursor) {
+	public void setFittingCursor(final FittingCursor fittingCursor) {
 		if (null == _fittingCursor) {
 			_fittingCursorListener = new FittingCursorListener();
 		}
@@ -66,8 +66,8 @@ public class FittingCursorHelper implements IFittingCursorUI {
 
 	/**
 	 * Gets whether to show bins or time values for cursors.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean getShowBins() {
 		return _fittingCursor.getShowBins();
@@ -75,27 +75,27 @@ public class FittingCursorHelper implements IFittingCursorUI {
 
 	/**
 	 * Sets whether to show bins or time values for cursors.
-	 * 
-	 * @param showBins 
+	 *
+	 * @param showBins
 	 */
-	public void setShowBins(boolean showBins) {
+	public void setShowBins(final boolean showBins) {
 		_fittingCursor.setShowBins(showBins);
 		showFittingCursor();
 	}
 
 	/**
 	 * Turns on/off prompt cursors.
-	 * 
-	 * @param enable 
+	 *
+	 * @param enable
 	 */
-	public void enablePrompt(boolean enable) {
+	public void enablePrompt(final boolean enable) {
 		_fittingCursor.setHasPrompt(enable);
 	}
 
 	/**
 	 * Gets whether there is a prompt.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean getPrompt() {
 		return _fittingCursor.getHasPrompt();
@@ -103,8 +103,8 @@ public class FittingCursorHelper implements IFittingCursorUI {
 
 	/**
 	 * Gets the transient start cursor.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public String getTransientStart() {
@@ -113,18 +113,18 @@ public class FittingCursorHelper implements IFittingCursorUI {
 
 	/**
 	 * Sets the transient start cursor.
-	 * 
-	 * @param transientStart 
+	 *
+	 * @param transientStart
 	 */
 	@Override
-	public void setTransientStart(String transientStart) {
+	public void setTransientStart(final String transientStart) {
 		_fittingCursor.setTransientStart(transientStart);
 	}
 
 	/**
 	 * Gets the data start cursor.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public String getDataStart() {
@@ -133,18 +133,18 @@ public class FittingCursorHelper implements IFittingCursorUI {
 
 	/**
 	 * Sets the data start cursor.
-	 * 
-	 * @param transientBaseline 
+	 *
+	 * @param transientBaseline
 	 */
 	@Override
-	public void setDataStart(String dataStart) {
+	public void setDataStart(final String dataStart) {
 		_fittingCursor.setDataStart(dataStart);
 	}
 
 	/**
 	 * Gets the transient end cursor.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public String getTransientStop() {
@@ -153,19 +153,19 @@ public class FittingCursorHelper implements IFittingCursorUI {
 
 	/**
 	 * Sets the transient end cursor.
-	 * 
-	 * @param transientStop 
+	 *
+	 * @param transientStop
 	 */
 	@Override
-	public void setTransientStop(String transientStop) {
-		
+	public void setTransientStop(final String transientStop) {
+
 		_fittingCursor.setTransientStop(transientStop);
 	}
 
 	/**
 	 * Gets the prompt delay cursor.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public String getPromptDelay() {
@@ -174,18 +174,18 @@ public class FittingCursorHelper implements IFittingCursorUI {
 
 	/**
 	 * Sets the prompt delay cursor.
-	 * 
-	 * @param promptStart 
+	 *
+	 * @param promptStart
 	 */
 	@Override
-	public void setPromptDelay(String promptDelay) {
+	public void setPromptDelay(final String promptDelay) {
 		_fittingCursor.setPromptDelay(promptDelay);
 	}
 
 	/**
 	 * Gets the prompt width cursor.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public String getPromptWidth() {
@@ -194,17 +194,18 @@ public class FittingCursorHelper implements IFittingCursorUI {
 
 	/**
 	 * Sets the prompt width cursor.
-	 * 
+	 *
 	 * @param promptWidth
 	 */
 	@Override
-	public void setPromptWidth(String promptWidth) {
+	public void setPromptWidth(final String promptWidth) {
 		_fittingCursor.setPromptWidth(promptWidth);
 	}
 
 	/**
 	 * Gets the prompt baseline cursor as a string.
-	 * @return 
+	 * 
+	 * @return
 	 */
 	@Override
 	public String getPromptBaseline() {
@@ -213,11 +214,11 @@ public class FittingCursorHelper implements IFittingCursorUI {
 
 	/**
 	 * Sets the prompt baseline cursor as a string.
-	 * 
-	 * @param promptBaseline 
+	 *
+	 * @param promptBaseline
 	 */
 	@Override
-	public void setPromptBaseline(String promptBaseline) {
+	public void setPromptBaseline(final String promptBaseline) {
 		_fittingCursor.setPromptBaseline(promptBaseline);
 	}
 
@@ -239,8 +240,9 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	 * Inner listener for cursor changes.
 	 */
 	private class FittingCursorListener implements IFittingCursorListener {
+
 		@Override
-		public void cursorChanged(FittingCursor cursor) {
+		public void cursorChanged(final FittingCursor cursor) {
 			showFittingCursor();
 		}
 	}

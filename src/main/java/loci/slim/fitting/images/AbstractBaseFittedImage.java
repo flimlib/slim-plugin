@@ -46,36 +46,34 @@ import loci.slim.mask.Mask;
 
 /**
  * Base class for the fitted images.
- * 
+ *
  * @author Aivar Grislis
  */
 abstract public class AbstractBaseFittedImage implements IFittedImage {
+
 	private static final int UNKNOWN_CHANNEL = -1;
-	private String _title;
-	private int _width;
-	private int _height;
-	private int _channels;
+	private final String _title;
+	private final int _width;
+	private final int _height;
+	private final int _channels;
 	private int _channel;
-	private boolean _colorizeGrayScale;
-	private IGrayScaleImage _grayScaleImage;
-	private IMaskGroup _maskGroup[];
-	private ImageStack _imageStack;
-	private ImagePlus _imagePlus;
-	private MyStackWindow _stackWindow;
+	private final boolean _colorizeGrayScale;
+	private final IGrayScaleImage _grayScaleImage;
+	private final IMaskGroup _maskGroup[];
+	private final ImageStack _imageStack;
+	private final ImagePlus _imagePlus;
+	private final MyStackWindow _stackWindow;
 	private double _values[][];
-	private IFittedImageSlice[] _fittedImages;
-	private HistogramDataNode[] _dataChannels;
-	private HistogramDataGroup _histogramData;
+	private final IFittedImageSlice[] _fittedImages;
+	private final HistogramDataNode[] _dataChannels;
+	private final HistogramDataGroup _histogramData;
 	private IFittedImageSlice _fittedImage;
 	private Mask _mask;
 
-	public AbstractBaseFittedImage(
-		String title,
-		int[] dimension,
-		IndexColorModel indexColorModel,
-		boolean colorizeGrayScale,
-		IGrayScaleImage grayScaleImage,
-		IMaskGroup[] maskGroup) {
+	public AbstractBaseFittedImage(final String title, final int[] dimension,
+		final IndexColorModel indexColorModel, final boolean colorizeGrayScale,
+		final IGrayScaleImage grayScaleImage, final IMaskGroup[] maskGroup)
+	{
 		_title = title;
 		_width = dimension[0];
 		_height = dimension[1];
@@ -89,26 +87,25 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 		_imageStack = new ImageStack(_width, _height);
 
 		// building a list of displayed images
-		List<IFittedImageSlice> fittedImageList
-		= new ArrayList<IFittedImageSlice>();
+		final List<IFittedImageSlice> fittedImageList =
+			new ArrayList<IFittedImageSlice>();
 
 		// building a list of HistogramDataChannels
-		List<HistogramDataNode> dataChannelList
-		= new ArrayList<HistogramDataNode>();
+		final List<HistogramDataNode> dataChannelList =
+			new ArrayList<HistogramDataNode>();
 
 		for (int c = 0; c < _channels; ++c) {
 			// build the histogram data
 			_values = new double[_width][_height];
 			clear(_values);
-			HistogramDataNode histogramDataChannel
-			= new HistogramDataNode(this, _values);
+			final HistogramDataNode histogramDataChannel =
+				new HistogramDataNode(this, _values);
 			dataChannelList.add(histogramDataChannel);
 
 			// build the actual displayed image
 			IFittedImageSlice fittedImage = null;
 			if (colorizeGrayScale) {
-				fittedImage
-				= new ColorizedFittedImage(grayScaleImage, _values);
+				fittedImage = new ColorizedFittedImage(grayScaleImage, _values);
 			}
 			else {
 				fittedImage = new FloatFittedImage();
@@ -124,14 +121,15 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 		_stackWindow = new MyStackWindow(_imagePlus);
 		_stackWindow.setVisible(true);
 		_stackWindow.addFocusListener(new FocusListener() {
+
 			@Override
-			public void focusGained(FocusEvent e) {
+			public void focusGained(final FocusEvent e) {
 				// what channel is active?
-				int channelIndex = _stackWindow.getSlice() - 1;
+				final int channelIndex = _stackWindow.getSlice() - 1;
 				_histogramData.setChannelIndex(channelIndex);
 
 				// show our data with histogram tool
-				HistogramTool histogramTool = HistogramTool.getInstance();
+				final HistogramTool histogramTool = HistogramTool.getInstance();
 				histogramTool.setHistogramData(_histogramData);
 
 				// make sure grayscale image is hooked up also
@@ -139,11 +137,12 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 			}
 
 			@Override
-			public void focusLost(FocusEvent e) { }
+			public void focusLost(final FocusEvent e) {}
 		});
 		_stackWindow.addWindowListener(new WindowAdapter() {
+
 			@Override
-			public void windowClosing(WindowEvent e) {
+			public void windowClosing(final WindowEvent e) {
 				// when closing, delete all masks
 				for (int i = 0; i < _dataChannels.length; ++i) {
 					_dataChannels[i].rescindMask();
@@ -151,10 +150,8 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 			}
 		});
 
-		_fittedImages
-		= fittedImageList.toArray(new IFittedImageSlice[0]);
-		_dataChannels
-		= dataChannelList.toArray(new HistogramDataNode[0]);
+		_fittedImages = fittedImageList.toArray(new IFittedImageSlice[0]);
+		_dataChannels = dataChannelList.toArray(new HistogramDataNode[0]);
 
 		for (int i = 0; i < _dataChannels.length; ++i) {
 			_dataChannels[i].setMaskGroup(maskGroup[i]);
@@ -165,8 +162,8 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 
 	/**
 	 * Gets the title of the fitted image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public String getTitle() {
@@ -175,18 +172,19 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 
 	/**
 	 * Sets the color model used to display values.
-	 * 
-	 * @param colorModel 
+	 *
+	 * @param colorModel
 	 */
 	@Override
-	public void setColorModel(IndexColorModel colorModel) {
-		for (IFittedImageSlice fittedImage : _fittedImages) {
+	public void setColorModel(final IndexColorModel colorModel) {
+		for (final IFittedImageSlice fittedImage : _fittedImages) {
 			fittedImage.setColorModel(colorModel);
 		}
 	}
 
 	/**
 	 * Gets the associated histogram data object.
+	 * 
 	 * @return
 	 */
 	@Override
@@ -198,15 +196,13 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * Begins a fit.
 	 */
 	@Override
-	public void beginFit() {
-	}
+	public void beginFit() {}
 
 	/**
 	 * Ends a fit.
 	 */
 	@Override
-	public void endFit() {
-	}
+	public void endFit() {}
 
 	/**
 	 * Cancels a fit.
@@ -218,12 +214,12 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	}
 
 	/**
-	 * Recalculates the image histogram and resets the palette.  Called
-	 * periodically during the fit.  Redisplays the image.
+	 * Recalculates the image histogram and resets the palette. Called
+	 * periodically during the fit. Redisplays the image.
 	 */
 	@Override
 	public void updateRanges() {
-		double[] minMaxLUT = _histogramData.updateRanges();
+		final double[] minMaxLUT = _histogramData.updateRanges();
 
 		if (null != minMaxLUT) {
 			redisplay(minMaxLUT);
@@ -231,23 +227,23 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	}
 
 	/**
-	 * Called from the histogram tool.  Redisplays the image after LUT ranges
-	 * have changed.
+	 * Called from the histogram tool. Redisplays the image after LUT ranges have
+	 * changed.
 	 */
 	@Override
 	public void redisplay() {
-		double[] minMaxLUT = _histogramData.getMinMaxLUT();
+		final double[] minMaxLUT = _histogramData.getMinMaxLUT();
 		redisplay(minMaxLUT);
 	}
 
 	/**
-	 * Redraws the entire image after a masking change.  Mask shows all pixels
+	 * Redraws the entire image after a masking change. Mask shows all pixels
 	 * masked by all nodes combined, including this node.
-	 * 
+	 *
 	 * @param mask
 	 */
 	@Override
-	public void updateMask(Mask mask) {
+	public void updateMask(final Mask mask) {
 		if (mask != _mask) {
 			_mask = mask;
 
@@ -270,7 +266,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 		}
 	}
 
-	private String debugMask(Mask mask) {
+	private String debugMask(final Mask mask) {
 		if (null == mask) {
 			return "NULL";
 		}
@@ -285,7 +281,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 		if (null != _fittedImage) {
 			if (_colorizeGrayScale) {
 				// redraw all images with new LUT
-				for (IFittedImageSlice fittedImage : _fittedImages) {
+				for (final IFittedImageSlice fittedImage : _fittedImages) {
 					fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
 				}
 			}
@@ -294,11 +290,11 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 				_fittedImage.setMinAndMax(minMaxLUT[0], minMaxLUT[1]);
 			}
 
-			//TODO ARG KLUDGE
-			//  This is a workaround to redisplay after the LUT range changes.
-			//  Hopefully it will go away in IJ2.
-			//  Maybe update(ImageProcessor ip) would work.
-			//  "Updates this stack so its attributes such as min max calibration table and color model, are the same as 'ip'"
+			// TODO ARG KLUDGE
+			// This is a workaround to redisplay after the LUT range changes.
+			// Hopefully it will go away in IJ2.
+			// Maybe update(ImageProcessor ip) would work.
+			// "Updates this stack so its attributes such as min max calibration table and color model, are the same as 'ip'"
 			_imagePlus.setProcessor(_fittedImage.getImageProcessor().duplicate());
 		}
 	}
@@ -310,7 +306,7 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * @param parameters null signals error
 	 */
 	@Override
-	public void updatePixel(int[] location, double[] parameters) {
+	public void updatePixel(final int[] location, final double[] parameters) {
 		double value;
 
 		if (null == parameters) {
@@ -321,9 +317,9 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 			value = getValue(parameters);
 		}
 
-		int x       = location[0];
-		int y       = location[1];
-		int channel = location[2];
+		final int x = location[0];
+		final int y = location[1];
+		final int channel = location[2];
 
 		// check for channel change
 		if (_channel != channel) {
@@ -345,16 +341,16 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	}
 
 	/**
-	 * Updates the fitted parameters for a pixel.  The pixel is drawn
-	 * outsized at first.
+	 * Updates the fitted parameters for a pixel. The pixel is drawn outsized at
+	 * first.
 	 *
 	 * @param location
 	 * @param dimension
 	 * @param parameters
 	 */
 	@Override
-	public void updateChunkyPixel(int[] location, int[] dimension,
-		double[] parameters)
+	public void updateChunkyPixel(final int[] location, final int[] dimension,
+		final double[] parameters)
 	{
 		// TODO for now, draw w/o chunkiness:
 		updatePixel(location, parameters);
@@ -362,19 +358,19 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 
 	/**
 	 * Given the array of fitted parameters, get the value for this image.
-	 * 
+	 *
 	 * @param parameters
-	 * @return 
+	 * @return
 	 */
 	@Override
 	abstract public double getValue(double[] parameters);
 
 	/*
 	 * Clears the values for this slice.
-	 * 
-	 * @param values 
+	 *
+	 * @param values
 	 */
-	private void clear(double[][] values) {
+	private void clear(final double[][] values) {
 		for (int y = 0; y < values[0].length; ++y) {
 			for (int x = 0; x < values.length; ++x) {
 				values[x][y] = Double.NaN;

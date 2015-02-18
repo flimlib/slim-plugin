@@ -25,10 +25,11 @@ package loci.slim2.fitting;
 
 /**
  * Container for local fitted results for current pixel.
- * 
+ *
  * @author Aivar Grislis
  */
 public class DefaultFitResults implements FitResults {
+
 	int errorCode;
 	double chiSquare;
 	double[] params;
@@ -40,7 +41,7 @@ public class DefaultFitResults implements FitResults {
 	int transStop;
 
 	@Override
-	public void setErrorCode(int errorCode) {
+	public void setErrorCode(final int errorCode) {
 		this.errorCode = errorCode;
 	}
 
@@ -50,7 +51,7 @@ public class DefaultFitResults implements FitResults {
 	}
 
 	@Override
-	public void setChiSquare(double chiSquare) {
+	public void setChiSquare(final double chiSquare) {
 		this.chiSquare = chiSquare;
 	}
 
@@ -60,7 +61,7 @@ public class DefaultFitResults implements FitResults {
 	}
 
 	@Override
-	public void setParams(double[] params) {
+	public void setParams(final double[] params) {
 		this.params = params;
 	}
 
@@ -70,7 +71,7 @@ public class DefaultFitResults implements FitResults {
 	}
 
 	@Override
-	public void setYFitted(double[] yFitted) {
+	public void setYFitted(final double[] yFitted) {
 		this.yFitted = yFitted;
 	}
 
@@ -80,7 +81,7 @@ public class DefaultFitResults implements FitResults {
 	}
 
 	@Override
-	public void setTransient(double[] trans) {
+	public void setTransient(final double[] trans) {
 		this.trans = trans;
 	}
 
@@ -90,7 +91,7 @@ public class DefaultFitResults implements FitResults {
 	}
 
 	@Override
-	public void setPhotonCount(int photonCount) {
+	public void setPhotonCount(final int photonCount) {
 		this.photonCount = photonCount;
 	}
 
@@ -100,7 +101,7 @@ public class DefaultFitResults implements FitResults {
 	}
 
 	@Override
-	public void setTransStart(int transStart) {
+	public void setTransStart(final int transStart) {
 		this.transStart = transStart;
 	}
 
@@ -110,7 +111,7 @@ public class DefaultFitResults implements FitResults {
 	}
 
 	@Override
-	public void setDataStart(int dataStart) {
+	public void setDataStart(final int dataStart) {
 		this.dataStart = dataStart;
 	}
 
@@ -120,7 +121,7 @@ public class DefaultFitResults implements FitResults {
 	}
 
 	@Override
-	public void setTransStop(int transStop) {
+	public void setTransStop(final int transStop) {
 		this.transStop = transStop;
 	}
 

@@ -25,16 +25,18 @@ package loci.slim.mask;
 
 /**
  * Mask node class.
- * 
+ *
  * @author Aivar Grislis
  */
 public class MaskNode implements IMaskNode {
+
 	IMaskGroup _maskGroup;
 	IMaskNodeListener _listener;
 	Mask _selfMask;
 	Mask _otherMask;
 
-	public MaskNode(IMaskGroup maskGroup, IMaskNodeListener listener) {
+	public MaskNode(final IMaskGroup maskGroup, final IMaskNodeListener listener)
+	{
 		_maskGroup = maskGroup;
 		_listener = listener;
 		_selfMask = _otherMask = null;
@@ -43,11 +45,11 @@ public class MaskNode implements IMaskNode {
 
 	/**
 	 * This method should be called when node has changed its mask.
-	 * 
+	 *
 	 * @param mask may be null
 	 */
 	@Override
-	public void updateSelfMask(Mask selfMask) {
+	public void updateSelfMask(final Mask selfMask) {
 		_selfMask = selfMask;
 
 		// show changes locally
@@ -59,7 +61,7 @@ public class MaskNode implements IMaskNode {
 
 	/**
 	 * Gets the current mask created by this node.
-	 * 
+	 *
 	 * @return mask may be null
 	 */
 	@Override
@@ -69,17 +71,17 @@ public class MaskNode implements IMaskNode {
 
 	/**
 	 * This method notifies this node that other nodes have changed masks.
-	 * 
+	 *
 	 * @param otherMask may be null
 	 */
 	@Override
-	public void updateOtherMask(Mask otherMask) {
+	public void updateOtherMask(final Mask otherMask) {
 		_otherMask = otherMask;
 
 		_listener.updateMasks(_otherMask, getTotalMask());
 	}
 
-	String debugMask(Mask mask) {
+	String debugMask(final Mask mask) {
 		if (null == mask) {
 			return "NULL";
 		}
@@ -88,7 +90,7 @@ public class MaskNode implements IMaskNode {
 
 	/**
 	 * Gets the current mask created by all other nodes.
-	 * 
+	 *
 	 * @return mask may be null
 	 */
 	@Override
@@ -98,7 +100,7 @@ public class MaskNode implements IMaskNode {
 
 	/**
 	 * Gets the current total mask.
-	 * 
+	 *
 	 * @return mask may be null
 	 */
 	@Override

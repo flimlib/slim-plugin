@@ -32,33 +32,34 @@ import java.util.Set;
 import javax.swing.JPanel;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class CursorLayer {
-	private volatile Rectangle _rectangle = null;
-	private JPanel _panel;
-	private Set<Cursor> _cursorSet;
 
-	public CursorLayer(JPanel panel) {
+	private volatile Rectangle _rectangle = null;
+	private final JPanel _panel;
+	private final Set<Cursor> _cursorSet;
+
+	public CursorLayer(final JPanel panel) {
 		_panel = panel;
 		_cursorSet = new HashSet<Cursor>();
 	}
 
-	public void addCursor(Cursor cursor) {
+	public void addCursor(final Cursor cursor) {
 		_cursorSet.add(cursor);
 	}
 
-	public void removeCursor(Cursor cursor) {
+	public void removeCursor(final Cursor cursor) {
 		_cursorSet.remove(cursor);
 	}
 
 	public IChartRectangleListener getChartRectangleListener() {
-		return new IChartRectangleListener () {
+		return new IChartRectangleListener() {
+
 			@Override
-			public void setRectangle(Rectangle rectangle) {
+			public void setRectangle(final Rectangle rectangle) {
 				_rectangle = rectangle;
-				for (Cursor cursor : _cursorSet) {
+				for (final Cursor cursor : _cursorSet) {
 					cursor.setRectangle(rectangle);
 				}
 				repaint();
@@ -69,6 +70,5 @@ public class CursorLayer {
 	private void repaint() {
 		_panel.repaint();
 	}
-
 
 }

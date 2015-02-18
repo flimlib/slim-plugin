@@ -25,28 +25,32 @@ package loci.slim2.heuristics;
 
 /**
  * A class with static functions for working with the excitation.
- * 
+ *
  * @author Aivar Grislis
  */
 public class ExcitationScaler {
+
 	// use to create data for ExcitationScalerTest
 	private static final boolean createTestData = false;
 
 	/**
 	 * This is based on TRCursors.c UpdatePrompt in TRI2.
-	 * 
+	 *
 	 * @param decay
 	 * @param start
 	 * @param stop
 	 * @param base
 	 * @param timeInc
 	 * @param bins
-	 * @return 
+	 * @return
 	 */
-	public static double[] scale(double[] decay, int startIndex, int stopIndex, double base, double timeInc, int bins) {
+	public static double[]
+		scale(final double[] decay, final int startIndex, final int stopIndex,
+			final double base, final double timeInc, final int bins)
+	{
 
 		// stop index is exclusive
-		double[] values = new double[stopIndex - startIndex];
+		final double[] values = new double[stopIndex - startIndex];
 		double scaling = 0.0;
 		for (int i = 0; i < values.length; ++i) {
 			if (startIndex + i < decay.length) {

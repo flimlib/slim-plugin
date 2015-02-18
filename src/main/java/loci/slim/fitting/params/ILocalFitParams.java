@@ -26,7 +26,7 @@ package loci.slim.fitting.params;
 /**
  * Interface for container for the local fitting parameters, i.e. those valid
  * for the current pixel.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface ILocalFitParams {
@@ -43,9 +43,9 @@ public interface ILocalFitParams {
 
 	public double[] getParams();
 
-	//TODO ARG not really a fit param
+	// TODO ARG not really a fit param
 	public void setYFitted(double[] yFitted);
 
-	//TODO ARG not really a fit param
+	// TODO ARG not really a fit param
 	public double[] getYFitted();
 }

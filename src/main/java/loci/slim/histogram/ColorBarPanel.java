@@ -32,16 +32,17 @@ import java.awt.Graphics;
 import javax.swing.JPanel;
 
 /**
- * Displays a color bar with the current colorization scheme.  Live,
- * reflects ongoing changes.
+ * Displays a color bar with the current colorization scheme. Live, reflects
+ * ongoing changes.
  *
  * @author Aivar Grislis
  */
 public class ColorBarPanel extends JPanel {
+
 	private final Object _synchObject = new Object();
-	private int _width;
-	private int _height;
-	private int _inset;
+	private final int _width;
+	private final int _height;
+	private final int _inset;
 	private Color[] _color;
 	double _minView;
 	double _maxView;
@@ -49,14 +50,14 @@ public class ColorBarPanel extends JPanel {
 	double _maxLUT;
 
 	/**
-	 * Constructor.  Note that for best results width should be 254, so that
-	 * there is a 1:1 relationship between colors and pixels.
+	 * Constructor. Note that for best results width should be 254, so that there
+	 * is a 1:1 relationship between colors and pixels.
 	 *
 	 * @param width
 	 * @param inset
 	 * @param height
 	 */
-	public ColorBarPanel(int width, int inset, int height) {
+	public ColorBarPanel(final int width, final int inset, final int height) {
 		super();
 
 		_width = width;
@@ -70,10 +71,10 @@ public class ColorBarPanel extends JPanel {
 
 	/**
 	 * Changes the color look-up table and redraws.
-	 * 
-	 * @param lut 
+	 *
+	 * @param lut
 	 */
-	public void setLUT(LUT lut) {
+	public void setLUT(final LUT lut) {
 		synchronized (_synchObject) {
 			_color = colorsFromLUT(lut);
 		}
@@ -82,14 +83,15 @@ public class ColorBarPanel extends JPanel {
 
 	/**
 	 * Changes the values and redraws.
-	 * 
+	 *
 	 * @param minView
 	 * @param maxView
 	 * @param minLUT
 	 * @param maxLUT
 	 */
-	public void setMinMax(double minView, double maxView,
-			double minLUT, double maxLUT) {
+	public void setMinMax(final double minView, final double maxView,
+		final double minLUT, final double maxLUT)
+	{
 		synchronized (_synchObject) {
 			_minView = minView;
 			_maxView = maxView;
@@ -101,11 +103,11 @@ public class ColorBarPanel extends JPanel {
 
 	/**
 	 * Changes the LUT ranges and redraws.
-	 * 
+	 *
 	 * @param minLUT
 	 * @param maxLUT
 	 */
-	public void setMinMaxLUT(double minLUT, double maxLUT) {
+	public void setMinMaxLUT(final double minLUT, final double maxLUT) {
 		synchronized (_synchObject) {
 			_minLUT = minLUT;
 			_maxLUT = maxLUT;
@@ -114,13 +116,13 @@ public class ColorBarPanel extends JPanel {
 	}
 
 	@Override
-	public void paintComponent(Graphics g) {
+	public void paintComponent(final Graphics g) {
 		super.paintComponent(g);
 		if (null != _color) {
 			synchronized (_synchObject) {
 				for (int i = 0; i < _width; ++i) {
 					g.setColor(colorize(i));
-					g.drawLine(_inset + i, 0, _inset + i, _height-1);
+					g.drawLine(_inset + i, 0, _inset + i, _height - 1);
 				}
 			}
 		}
@@ -132,15 +134,15 @@ public class ColorBarPanel extends JPanel {
 	 * @param lut
 	 * @return
 	 */
-	private Color[] colorsFromLUT(LUT lut) {
-		byte[] bytes = lut.getBytes();
-		int numberColors = bytes.length / 3;
-		//TODO make sure numberColors is 256!
-		Color[] color = new Color[numberColors];
+	private Color[] colorsFromLUT(final LUT lut) {
+		final byte[] bytes = lut.getBytes();
+		final int numberColors = bytes.length / 3;
+		// TODO make sure numberColors is 256!
+		final Color[] color = new Color[numberColors];
 		for (int n = 0; n < numberColors; ++n) {
-			int red   = 0xff & bytes[n];
-			int green = 0xff & bytes[256 + n];
-			int blue  = 0xff & bytes[512 + n];
+			final int red = 0xff & bytes[n];
+			final int green = 0xff & bytes[256 + n];
+			final int blue = 0xff & bytes[512 + n];
 			color[n] = new Color(red, green, blue);
 		}
 		return color;
@@ -148,11 +150,11 @@ public class ColorBarPanel extends JPanel {
 
 	/*
 	 * Given a pixel value 0..253 show appropriate color.
-	 * 
+	 *
 	 * @param i
 	 * @return
 	 */
-	private Color colorize(int i) {
+	private Color colorize(final int i) {
 		// default color
 		Color color = _color[0];
 
@@ -160,14 +162,14 @@ public class ColorBarPanel extends JPanel {
 		if (_minView < _maxView) {
 
 			// what is the value for this pixel?
-			double value = _minView + (_maxView - _minView) * i / _width;
+			final double value = _minView + (_maxView - _minView) * i / _width;
 
 			// if value within palette range
 			if (value >= _minLUT && value <= _maxLUT) {
 
 				// compute color index
-				int index = 1 + (int)((value - _minLUT)
-						* _color.length / (_maxLUT - _minLUT));
+				int index =
+					1 + (int) ((value - _minLUT) * _color.length / (_maxLUT - _minLUT));
 
 				// constrain to 1..253
 				index = Math.max(index, 1);

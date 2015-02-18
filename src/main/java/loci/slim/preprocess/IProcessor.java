@@ -32,14 +32,14 @@ public interface IProcessor {
 
 	/**
 	 * Specifies a source IProcessor to be chained to this one.
-	 * 
-	 * @param processor 
+	 *
+	 * @param processor
 	 */
 	public void chain(IProcessor processor);
 
 	/**
 	 * Gets input pixel value.
-	 * 
+	 *
 	 * @param location array, i.e. { x, y, channel }
 	 * @return null or pixel value
 	 */

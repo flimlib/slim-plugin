@@ -27,7 +27,7 @@ import org.scijava.plugin.SciJavaPlugin;
 
 /**
  * Interface for an input processor that does binning.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface SLIMBinner extends IProcessor, SciJavaPlugin {

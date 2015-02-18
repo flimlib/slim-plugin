@@ -23,17 +23,21 @@
 
 package loci.slim.fitted;
 
-
 /**
  * Extracts Fractional Intensity fitted value.
- * 
+ *
  * @author Aivar Grislis
  */
-public class FractionalIntensityFittedValue extends AbstractFittedValue implements FittedValue {
+public class FractionalIntensityFittedValue extends AbstractFittedValue
+	implements FittedValue
+{
+
 	private int components;
 	private int fittedParamIndex;
 
-	public void init(String title, int component, int components) {
+	public void
+		init(final String title, final int component, final int components)
+	{
 		setTitle(title);
 		this.components = components;
 		switch (component) {
@@ -50,7 +54,7 @@ public class FractionalIntensityFittedValue extends AbstractFittedValue implemen
 	}
 
 	@Override
-	public double getValue(double[] values) {
+	public double getValue(final double[] values) {
 		double sum = values[FittedValue.A1_INDEX];
 		if (components > 1) {
 			sum += values[FittedValue.A2_INDEX];

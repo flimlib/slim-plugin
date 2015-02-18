@@ -30,6 +30,7 @@ package loci.slim;
  * @author Aivar Grislis
  */
 public class ChunkyPixel {
+
 	final int _x;
 	final int _y;
 	final int _width;
@@ -39,13 +40,14 @@ public class ChunkyPixel {
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param width
-	 * @param height 
+	 * @param height
 	 */
-	public ChunkyPixel(int x, int y, int width, int height) {
+	public ChunkyPixel(final int x, final int y, final int width, final int height)
+	{
 		_x = x;
 		_y = y;
 		_width = width;
@@ -56,8 +58,8 @@ public class ChunkyPixel {
 
 	/**
 	 * Gets the x location.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getX() {
 		return _x;
@@ -65,8 +67,8 @@ public class ChunkyPixel {
 
 	/**
 	 * Gets the y location.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getY() {
 		return _y;
@@ -74,8 +76,8 @@ public class ChunkyPixel {
 
 	/**
 	 * Gets the width to draw the pixel.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getWidth() {
 		return _width;
@@ -83,8 +85,8 @@ public class ChunkyPixel {
 
 	/**
 	 * Gets the height to draw the pixel.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getHeight() {
 		return _height;
@@ -92,17 +94,17 @@ public class ChunkyPixel {
 
 	/**
 	 * Sets the location of the pixel in the input image.
-	 * 
-	 * @param location 
+	 *
+	 * @param location
 	 */
-	public void setInputLocation(int[] location) {
+	public void setInputLocation(final int[] location) {
 		_inputLocation = location;
 	}
 
 	/**
 	 * Gets the location of the pixel in the input image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int[] getInputLocation() {
 		return _inputLocation;
@@ -110,17 +112,17 @@ public class ChunkyPixel {
 
 	/**
 	 * Sets the location of the pixel in the output image.
-	 * 
-	 * @param location 
+	 *
+	 * @param location
 	 */
-	public void setOutputLocation(int[] location) {
+	public void setOutputLocation(final int[] location) {
 		_outputLocation = location;
 	}
 
 	/**
 	 * Gets the location of the pixel in the output image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int[] getOutputLocation() {
 		return _outputLocation;

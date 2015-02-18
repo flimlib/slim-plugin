@@ -53,10 +53,13 @@ import net.imagej.axis.CalibratedAxis;
  * @author Aivar Grislis
  */
 public class ExcitationFileUtility {
+
 	private static final String ICS = ".ics";
 	private static final String IRF = ".irf";
 
-	public static Excitation loadExcitation(String fileName, double timeInc) {
+	public static Excitation
+		loadExcitation(String fileName, final double timeInc)
+	{
 		Excitation excitation = null;
 		double values[] = null;
 		if (fileName.toLowerCase().endsWith(ICS)) {
@@ -74,7 +77,9 @@ public class ExcitationFileUtility {
 		return excitation;
 	}
 
-	public static Excitation createExcitation(String fileName, double[] values, double timeInc) {
+	public static Excitation createExcitation(String fileName,
+		final double[] values, final double timeInc)
+	{
 		Excitation excitation = null;
 		boolean success = false;
 		if (fileName.endsWith(ICS)) {
@@ -92,22 +97,24 @@ public class ExcitationFileUtility {
 		return excitation;
 	}
 
-	private static double[] loadICSExcitationFile(String fileName) {
+	private static double[] loadICSExcitationFile(final String fileName) {
 		double[] results = null;
 		try {
 			final SCIFIO scifio = new SCIFIO();
-			final ReaderFilter reader = scifio.initializer().initializeReader(fileName);
+			final ReaderFilter reader =
+				scifio.initializer().initializeReader(fileName);
 			reader.enable(PlaneSeparator.class).separate(axesToSplit(reader));
 			final ImageMetadata meta = reader.getMetadata().get(0);
 			final int bitsPerPixel = meta.getBitsPerPixel();
 			final boolean littleEndian = meta.isLittleEndian();
 			// CTR FIXME use ChannelSeparator to prevent interleaved
 			final boolean interleaved = false; // meta.isInterleaved();
-			long lifetimeLength = meta.getAxisLength(SCIFIOAxes.LIFETIME);
+			final long lifetimeLength = meta.getAxisLength(SCIFIOAxes.LIFETIME);
 			if (lifetimeLength > Integer.MAX_VALUE) {
-				throw new IllegalArgumentException("Lifetime dimension too large: " + lifetimeLength);
+				throw new IllegalArgumentException("Lifetime dimension too large: " +
+					lifetimeLength);
 			}
-			int bins = (int) lifetimeLength;
+			final int bins = (int) lifetimeLength;
 			results = new double[bins];
 			byte bytes[];
 
@@ -118,17 +125,19 @@ public class ExcitationFileUtility {
 			}
 			reader.close();
 		}
-		catch (IOException e) {
+		catch (final IOException e) {
 			IJ.log("IOException " + e.getMessage());
 		}
-		catch (FormatException e) {
+		catch (final FormatException e) {
 			IJ.log("FormatException " + e.getMessage());
 		}
 		return results;
 	}
 
-	//TODO doesn't work; needed to interoperate with TRI2
-	private static boolean saveICSExcitationFile(String fileName, double[] values) {
+	// TODO doesn't work; needed to interoperate with TRI2
+	private static boolean saveICSExcitationFile(final String fileName,
+		final double[] values)
+	{
 		boolean success = false;
 		final SCIFIO scifio = new SCIFIO();
 		// NB: Use a fake string as a shorthand for metadata values.
@@ -137,7 +146,7 @@ public class ExcitationFileUtility {
 				"&axes=X,Y,Lifetime.fake";
 		try {
 			final Writer writer =
-					scifio.initializer().initializeWriter(source, fileName);
+				scifio.initializer().initializeWriter(source, fileName);
 			// TODO: Writer may require bytes to be structured according to a
 			// particular endianness. But at this point, is it possible yet to
 			// interrogate the writer to ask for its desired endianness?
@@ -149,20 +158,20 @@ public class ExcitationFileUtility {
 			}
 			success = true;
 		}
-		catch (IOException e) {
+		catch (final IOException e) {
 			IJ.log("IOException " + e.getMessage());
 		}
-		catch (FormatException e) {
+		catch (final FormatException e) {
 			IJ.log("FormatException " + e.getMessage());
 		}
 		return success;
 	}
 
-	private static double[] loadIRFExcitationFile(String fileName) {
+	private static double[] loadIRFExcitationFile(final String fileName) {
 		double[] values = null;
 		try {
-			ArrayList<Float> valuesArrayList = new ArrayList<Float>();
-			Scanner scanner = new Scanner(new FileReader(fileName));
+			final ArrayList<Float> valuesArrayList = new ArrayList<Float>();
+			final Scanner scanner = new Scanner(new FileReader(fileName));
 			String line = null;
 			while (scanner.hasNextLine()) {
 				line = scanner.nextLine();
@@ -173,16 +182,18 @@ public class ExcitationFileUtility {
 				values[i] = valuesArrayList.get(i);
 			}
 		}
-		catch (Exception e) {
+		catch (final Exception e) {
 			IJ.log("Exception " + e.getMessage());
 		}
 		return values;
 	}
 
-	private static boolean saveIRFExcitationFile(String fileName, double[] values) {
+	private static boolean saveIRFExcitationFile(final String fileName,
+		final double[] values)
+	{
 		boolean success = false;
 		try {
-			FileWriter writer = new FileWriter(fileName);
+			final FileWriter writer = new FileWriter(fileName);
 			for (int i = 0; i < values.length; ++i) {
 				if (i > 0) {
 					writer.append('\n');
@@ -193,7 +204,7 @@ public class ExcitationFileUtility {
 			writer.close();
 			success = true;
 		}
-		catch (IOException e) {
+		catch (final IOException e) {
 			IJ.log("IOException " + e.getMessage());
 		}
 		return success;

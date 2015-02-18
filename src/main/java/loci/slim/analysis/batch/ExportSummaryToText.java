@@ -49,10 +49,11 @@ import net.imglib2.type.numeric.real.DoubleType;
 
 /**
  * Exports a summary histogram in batch mode.
- * 
+ *
  * @author Aivar Grislis
  */
 public class ExportSummaryToText {
+
 	private ICurveFitter.FitFunction function;
 	private BatchHistogramListener listener;
 	private FittedValue[] parameters;
@@ -61,16 +62,18 @@ public class ExportSummaryToText {
 	private int[] indices;
 	private BatchHistogramsFrame frame;
 	// combine histograms in horizontal columns
-	private boolean combined = true;
+	private final boolean combined = true;
 
 	/**
 	 * Initializes for given fitting function.
-	 * 
+	 *
 	 * @param parameters
-	 * @param function 
+	 * @param function
 	 * @param listener
 	 */
-	public void init(ICurveFitter.FitFunction function, FittedValue[] parameters, BatchHistogramListener listener) {
+	public void init(final ICurveFitter.FitFunction function,
+		final FittedValue[] parameters, final BatchHistogramListener listener)
+	{
 		this.function = function;
 		this.listener = listener;
 		this.parameters = parameters;
@@ -80,21 +83,21 @@ public class ExportSummaryToText {
 
 	/**
 	 * Processes each image in batch job.
-	 * 
+	 *
 	 * @param fileName
-	 * @param image 
+	 * @param image
 	 */
-	public void process(String fileName, ImgPlus<DoubleType> image) {
-		long[] dimensions = new long[image.numDimensions()];
+	public void process(final String fileName, final ImgPlus<DoubleType> image) {
+		final long[] dimensions = new long[image.numDimensions()];
 		image.dimensions(dimensions);
-		int fittedParameters = (int) dimensions[3];
-		RandomAccess<DoubleType> cursor = image.randomAccess();
+		final int fittedParameters = (int) dimensions[3];
+		final RandomAccess<DoubleType> cursor = image.randomAccess();
 
 		// build array of BatchHistogram for this image
-		BatchHistogram[] imageHistograms = buildBatchHistograms(parameters);
+		final BatchHistogram[] imageHistograms = buildBatchHistograms(parameters);
 
 		// traverse all pixels
-		int[] position = new int[dimensions.length];
+		final int[] position = new int[dimensions.length];
 		for (int y = 0; y < dimensions[1]; ++y) {
 			for (int x = 0; x < dimensions[0]; ++x) {
 				// set position
@@ -103,7 +106,7 @@ public class ExportSummaryToText {
 				// non-xy dimensions remain at zero
 
 				// get all fitted values
-				double[] values = new double[fittedParameters];
+				final double[] values = new double[fittedParameters];
 				for (int i = 0; i < fittedParameters; ++i) {
 					position[3] = i;
 					cursor.setPosition(position);
@@ -111,29 +114,30 @@ public class ExportSummaryToText {
 				}
 
 				// update histograms for this image
-				for (BatchHistogram histogram : imageHistograms) {
+				for (final BatchHistogram histogram : imageHistograms) {
 					histogram.process(values);
 				}
 
 				// update all batch histograms
-				for (BatchHistogram histogram : histograms) {
+				for (final BatchHistogram histogram : histograms) {
 					histogram.process(values);
 				}
 			}
 		}
 
-
 		// build list of histogram statistics for the current image
-		List<HistogramStatistics> imageList = new ArrayList<HistogramStatistics>();
-		for (BatchHistogram histogram : imageHistograms) {
-			HistogramStatistics imageStatistics = histogram.getStatistics();
+		final List<HistogramStatistics> imageList =
+			new ArrayList<HistogramStatistics>();
+		for (final BatchHistogram histogram : imageHistograms) {
+			final HistogramStatistics imageStatistics = histogram.getStatistics();
 			imageList.add(imageStatistics);
 		}
 
 		// build list of summarized histogram statistics
-		List<HistogramStatistics> summaryList = new ArrayList<HistogramStatistics>();
-		for (BatchHistogram histogram : histograms) {
-			HistogramStatistics summaryStatistics = histogram.getStatistics();
+		final List<HistogramStatistics> summaryList =
+			new ArrayList<HistogramStatistics>();
+		for (final BatchHistogram histogram : histograms) {
+			final HistogramStatistics summaryStatistics = histogram.getStatistics();
 			summaryList.add(summaryStatistics);
 		}
 
@@ -142,24 +146,23 @@ public class ExportSummaryToText {
 			frame = new BatchHistogramsFrame(listener);
 		}
 		// show new image statistics and update summary
-		frame.update(
-			fileName,
-			imageList.toArray(new HistogramStatistics[imageList.size()]),
-			summaryList.toArray(new HistogramStatistics[summaryList.size()]));
+		frame.update(fileName, imageList.toArray(new HistogramStatistics[imageList
+			.size()]), summaryList
+			.toArray(new HistogramStatistics[summaryList.size()]));
 	}
 
 	/**
 	 * Exports the summary to a file.
-	 * 
+	 *
 	 * @param fileName
 	 * @param separator
 	 */
-	public void export(String fileName, char separator) {
+	public void export(final String fileName, final char separator) {
 		BufferedWriter bufferedWriter = null;
 		try {
 			bufferedWriter = new BufferedWriter(new FileWriter(fileName, true));
 		}
-		catch (IOException e) {
+		catch (final IOException e) {
 			IJ.log("exception opening file " + fileName);
 			IJ.handleException(e);
 		}
@@ -172,15 +175,16 @@ public class ExportSummaryToText {
 				bufferedWriter.newLine();
 
 				if (combined) {
-					HistogramStatistics[] statistics = new HistogramStatistics[histograms.length];
+					final HistogramStatistics[] statistics =
+						new HistogramStatistics[histograms.length];
 					for (int i = 0; i < statistics.length; ++i) {
 						statistics[i] = histograms[i].getStatistics();
 					}
 					HistogramStatistics.export(statistics, bufferedWriter, separator);
 				}
 				else {
-					for (BatchHistogram histogram : histograms) {
-						HistogramStatistics statistics = histogram.getStatistics();
+					for (final BatchHistogram histogram : histograms) {
+						final HistogramStatistics statistics = histogram.getStatistics();
 						statistics.export(bufferedWriter, separator);
 					}
 				}
@@ -188,7 +192,7 @@ public class ExportSummaryToText {
 				bufferedWriter.newLine();
 				bufferedWriter.close();
 			}
-			catch (IOException exception) {
+			catch (final IOException exception) {
 				IJ.log("exception writing to file " + fileName);
 				IJ.handleException(exception);
 			}
@@ -196,15 +200,17 @@ public class ExportSummaryToText {
 	}
 
 	/**
-	 * Given an array of FittedValue creates a corresponding array of BatchHistogram.
-	 * 
+	 * Given an array of FittedValue creates a corresponding array of
+	 * BatchHistogram.
+	 *
 	 * @param parameters
-	 * @return 
+	 * @return
 	 */
-	private BatchHistogram[] buildBatchHistograms(FittedValue[] parameters) {
+	private BatchHistogram[] buildBatchHistograms(final FittedValue[] parameters)
+	{
 		// go through list of fitted values and build corresponding batch histograms
-		List<BatchHistogram> histogramsList = new ArrayList<BatchHistogram>();
-		for (FittedValue parameter : parameters) {
+		final List<BatchHistogram> histogramsList = new ArrayList<BatchHistogram>();
+		for (final FittedValue parameter : parameters) {
 			BatchHistogram histogram = null;
 
 			if (parameter instanceof ChiSqFittedValue) {
@@ -228,7 +234,7 @@ public class ExportSummaryToText {
 			else if (parameter instanceof TMeanFittedValue) {
 				histogram = new TauBatchHistogram();
 			}
-			//TODO 'h' parameter for stretched
+			// TODO 'h' parameter for stretched
 
 			if (null != histogram) {
 				histogram.init(parameter);

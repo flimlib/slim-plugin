@@ -27,16 +27,17 @@ import loci.slim2.process.FitSettings;
 
 /**
  * Fit settings.
- * 
+ *
  * @author Aivar Grislis
  */
-public class DefaultFitSettings extends BaseFitSettings implements FitSettings  {
+public class DefaultFitSettings extends BaseFitSettings implements FitSettings {
+
 	private double chiSqTarget;
 
 	/**
 	 * Gets the target reduced chi square.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getChiSqTarget() {
 		return chiSqTarget;
@@ -44,10 +45,10 @@ public class DefaultFitSettings extends BaseFitSettings implements FitSettings  
 
 	/**
 	 * Sets the target reduced chi square.
-	 * 
-	 * @param chiSqTarget 
+	 *
+	 * @param chiSqTarget
 	 */
-	public void setChiSqTarget(double chiSqTarget) {
+	public void setChiSqTarget(final double chiSqTarget) {
 		this.chiSqTarget = chiSqTarget;
 	}
 }

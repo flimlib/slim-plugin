@@ -33,15 +33,15 @@ import loci.slim.fitting.engine.ThreadedFittingEngine;
 import loci.slim.heuristics.FitterEstimator;
 
 /**
- * Handles configuration specific to the SLIM Curve plugin for ImageJ.
- * 
- * A singleton so only one configuration.//TODO
- * 
+ * Handles configuration specific to the SLIM Curve plugin for ImageJ. A
+ * singleton so only one configuration.//TODO
+ *
  * @author Aivar Grislis
  */
 public class Configuration extends ConfigurationHelper {
+
 	private static Configuration _instance = null;
-	private int _threads = 8;
+	private final int _threads = 8;
 	private IFittingEngine _fittingEngine;
 	private ICurveFitter _curveFitter;
 	private IFitterEstimator _cursorEstimator;
@@ -49,8 +49,7 @@ public class Configuration extends ConfigurationHelper {
 	/**
 	 * Private constructor for singleton pattern.
 	 */
-	private Configuration() {
-	}
+	private Configuration() {}
 
 	public static synchronized Configuration getInstance() {
 		if (null == _instance) {

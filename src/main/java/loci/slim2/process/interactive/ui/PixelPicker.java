@@ -24,16 +24,17 @@
 package loci.slim2.process.interactive.ui;
 
 /**
- * Interface for the UI to pick a pixel to fit.  Shows/hides a crosshair cursor.
+ * Interface for the UI to pick a pixel to fit. Shows/hides a crosshair cursor.
+ * 
  * @author Aivar Grislis
  */
 public interface PixelPicker {
 
 	/**
 	 * Show the cursor at fitted point.
-	 * 
+	 *
 	 * @param x
-	 * @param y 
+	 * @param y
 	 */
 	public void showCursor(int x, int y);
 

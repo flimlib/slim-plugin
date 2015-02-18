@@ -31,6 +31,7 @@ import java.util.Iterator;
  * @author Aivar Grislis
  */
 public class ChunkyPixelEffectIterator implements Iterator {
+
 	IChunkyPixelTable _table;
 	int _width;
 	int _height;
@@ -42,12 +43,14 @@ public class ChunkyPixelEffectIterator implements Iterator {
 	/**
 	 * Constructor, sets up the chunky pixel iterator with a table of chunky
 	 * pixels and the width and height of the image being processed.
-	 * 
+	 *
 	 * @param table
 	 * @param width
-	 * @param height 
+	 * @param height
 	 */
-	public ChunkyPixelEffectIterator(IChunkyPixelTable table, int width, int height) {
+	public ChunkyPixelEffectIterator(final IChunkyPixelTable table,
+		final int width, final int height)
+	{
 		_table = table;
 		_width = width;
 		_height = height;
@@ -68,7 +71,7 @@ public class ChunkyPixelEffectIterator implements Iterator {
 
 	@Override
 	public ChunkyPixel next() {
-		ChunkyPixel chunkyPixel = _chunkyPixel;
+		final ChunkyPixel chunkyPixel = _chunkyPixel;
 		_chunkyPixel = getNextChunkyPixel();
 		return chunkyPixel;
 	}
@@ -80,7 +83,7 @@ public class ChunkyPixelEffectIterator implements Iterator {
 
 	/*
 	 * Gets the next chunky pixel from the table.
-	 * 
+	 *
 	 */
 	ChunkyPixel getNextChunkyPixel() {
 		// get the relative chunky pixel from the table
@@ -106,10 +109,10 @@ public class ChunkyPixelEffectIterator implements Iterator {
 		}
 
 		// convert relative to absolute
-		int x = _x + relChunkyPixel.getX();
-		int y = _y + relChunkyPixel.getY();
-		ChunkyPixel absChunkyPixel = new ChunkyPixel(x, y,
-				Math.min(relChunkyPixel.getWidth(), _width - x),
+		final int x = _x + relChunkyPixel.getX();
+		final int y = _y + relChunkyPixel.getY();
+		final ChunkyPixel absChunkyPixel =
+			new ChunkyPixel(x, y, Math.min(relChunkyPixel.getWidth(), _width - x),
 				Math.min(relChunkyPixel.getHeight(), _height - y));
 
 		// set up for next call

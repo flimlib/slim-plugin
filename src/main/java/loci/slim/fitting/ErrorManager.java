@@ -28,21 +28,22 @@ import loci.slim.mask.Mask;
 /**
  * This class keeps track of bit masks that define which pixels have a fitting
  * error.
- * 
+ *
  * @author Aivar Grislis
  */
 public class ErrorManager {
+
 	Mask errorMasks[];
 	IErrorListener listener;
 
 	/**
 	 * Creates a handler for a set of bit masks by channel.
-	 * 
+	 *
 	 * @param width
 	 * @param height
-	 * @param channels 
+	 * @param channels
 	 */
-	public ErrorManager(int width, int height, int channels) {
+	public ErrorManager(final int width, final int height, final int channels) {
 		errorMasks = new Mask[channels];
 		for (int c = 0; c < channels; ++c) {
 			errorMasks[c] = new Mask(width, height);
@@ -51,21 +52,21 @@ public class ErrorManager {
 
 	/**
 	 * Defines an error mask listener.
-	 * 
-	 * @param listener 
+	 *
+	 * @param listener
 	 */
-	public void setListener(IErrorListener listener) {
+	public void setListener(final IErrorListener listener) {
 		this.listener = listener;
 	}
 
 	/**
 	 * Sets an error mask bit.
-	 * 
+	 *
 	 * @param x
 	 * @param y
-	 * @param channel 
+	 * @param channel
 	 */
-	public void noteError(int x, int y, int channel) {
+	public void noteError(final int x, final int y, final int channel) {
 		errorMasks[channel].set(x, y);
 		if (null != listener) {
 			listener.updateErrorMask(errorMasks[channel], channel);
@@ -73,9 +74,8 @@ public class ErrorManager {
 	}
 
 	/**
-	 * Updates the entire set of error masks when a new set of fitted images
-	 * gets focus.
-	 * 
+	 * Updates the entire set of error masks when a new set of fitted images gets
+	 * focus.
 	 */
 	public void getFocus() {
 		if (null != listener) {

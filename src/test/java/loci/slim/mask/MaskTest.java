@@ -35,68 +35,62 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class MaskTest {
 
-	public MaskTest() {
-	}
+	public MaskTest() {}
 
 	@BeforeClass
-	public static void setUpClass() {
-	}
+	public static void setUpClass() {}
 
 	@AfterClass
-	public static void tearDownClass() {
-	}
+	public static void tearDownClass() {}
 
 	@Before
-	public void setUp() {
-	}
+	public void setUp() {}
 
 	@After
-	public void tearDown() {
-	}
+	public void tearDown() {}
 
 	@Test
 	public void testConstructors() {
 		// construct at given size
-		Mask mask1 = new Mask(400, 300);
+		final Mask mask1 = new Mask(400, 300);
 		for (int y = 0; y < 300; ++y) {
 			for (int x = 0; x < 400; ++x) {
-				assert(!mask1.test(x, y));
+				assert (!mask1.test(x, y));
 			}
 		}
 
 		// construct with given bits
-		boolean[][] bits = new boolean[500][400];
-		Mask mask2 = new Mask(bits);
+		final boolean[][] bits = new boolean[500][400];
+		final Mask mask2 = new Mask(bits);
 		for (int y = 0; y < 400; ++y) {
 			for (int x = 0; x < 500; ++x) {
-				assert(!mask2.test(x, y));
+				assert (!mask2.test(x, y));
 			}
 		}
 	}
 
 	@Test
 	public void testClone() {
-		Mask mask1 = new Mask(400, 300);
-		Mask mask2 = mask1.clone();
+		final Mask mask1 = new Mask(400, 300);
+		final Mask mask2 = mask1.clone();
 
 		// setting flag in original should not affect clone
-		mask1.set(0,0);
-		assert(!mask2.test(0, 0));
+		mask1.set(0, 0);
+		assert (!mask2.test(0, 0));
 	}
 
 	@Test
 	public void testAdd1() {
-		Mask mask1 = new Mask(10, 10);
-		Mask mask2 = new Mask(10, 10);
+		final Mask mask1 = new Mask(10, 10);
+		final Mask mask2 = new Mask(10, 10);
 		for (int y = 0; y < 10; ++y) {
 			for (int x = 0; x < 10; ++x) {
-				boolean yEven = y % 2 == 0;
-				boolean xEven = x % 2 == 0;
+				final boolean yEven = y % 2 == 0;
+				final boolean xEven = x % 2 == 0;
 				if (yEven == xEven) {
 					mask1.set(x, y);
 				}
@@ -108,21 +102,21 @@ public class MaskTest {
 		Mask mask3 = mask1.add(mask2);
 		for (int y = 0; y < 10; ++y) {
 			for (int x = 0; x < 10; ++x) {
-				assert(!mask3.test(x, y));
+				assert (!mask3.test(x, y));
 			}
 		}
 		mask3 = mask2.add(mask1);
 		for (int y = 0; y < 10; ++y) {
 			for (int x = 0; x < 10; ++x) {
-				assert(!mask3.test(x, y));
+				assert (!mask3.test(x, y));
 			}
 		}
 	}
 
 	@Test
 	public void testAdd2() {
-		Mask mask1 = new Mask(10, 10);
-		Mask mask2 = new Mask(10, 10);
+		final Mask mask1 = new Mask(10, 10);
+		final Mask mask2 = new Mask(10, 10);
 		for (int y = 0; y < 10; ++y) {
 			for (int x = 0; x < 10; ++x) {
 				mask1.set(x, y);
@@ -132,32 +126,32 @@ public class MaskTest {
 		Mask mask3 = mask1.add(mask2);
 		for (int y = 0; y < 10; ++y) {
 			for (int x = 0; x < 10; ++x) {
-				assert(mask3.test(x, y));
+				assert (mask3.test(x, y));
 			}
 		}
 		mask3 = mask2.add(mask1);
 		for (int y = 0; y < 10; ++y) {
 			for (int x = 0; x < 10; ++x) {
-				assert(mask3.test(x, y));
+				assert (mask3.test(x, y));
 			}
 		}
 	}
 
 	@Test
 	public void testAddMasks() {
-		Mask mask1 = new Mask(3, 3);
+		final Mask mask1 = new Mask(3, 3);
 		mask1.set(0, 0);
 		mask1.set(1, 0);
 		mask1.set(2, 0);
-		Mask mask2 = new Mask(3, 3);
+		final Mask mask2 = new Mask(3, 3);
 		mask2.set(0, 0);
 		mask2.set(0, 1);
 		mask2.set(0, 2);
-		Mask mask3 = new Mask(3, 3);
+		final Mask mask3 = new Mask(3, 3);
 		mask3.set(0, 0);
 		mask3.set(1, 1);
 		mask3.set(2, 2);
-		Mask mask4 = new Mask(3, 3);
+		final Mask mask4 = new Mask(3, 3);
 		mask4.set(0, 0);
 		mask4.set(2, 0);
 		mask4.set(1, 1);
@@ -172,43 +166,43 @@ public class MaskTest {
 		masks.add(mask1);
 		masks.add(mask2);
 		mask = Mask.addMasks(masks);
-		assert(mask.test(0, 0));
-		assert(!mask.test(1, 0));
-		assert(!mask.test(2, 0));
-		assert(!mask.test(0, 1));
-		assert(!mask.test(1, 1));
-		assert(!mask.test(2, 1));
-		assert(!mask.test(0, 2));
-		assert(!mask.test(1, 2));
-		assert(!mask.test(2, 2));
+		assert (mask.test(0, 0));
+		assert (!mask.test(1, 0));
+		assert (!mask.test(2, 0));
+		assert (!mask.test(0, 1));
+		assert (!mask.test(1, 1));
+		assert (!mask.test(2, 1));
+		assert (!mask.test(0, 2));
+		assert (!mask.test(1, 2));
+		assert (!mask.test(2, 2));
 
 		masks = new ArrayList<Mask>();
 		masks.add(mask1);
 		masks.add(mask2);
 		masks.add(mask3);
 		mask = Mask.addMasks(masks);
-		assert(mask.test(0, 0));
-		assert(!mask.test(1, 0));
-		assert(!mask.test(2, 0));
-		assert(!mask.test(0, 1));
-		assert(!mask.test(1, 1));
-		assert(!mask.test(2, 1));
-		assert(!mask.test(0, 2));
-		assert(!mask.test(1, 2));
-		assert(!mask.test(2, 2));
+		assert (mask.test(0, 0));
+		assert (!mask.test(1, 0));
+		assert (!mask.test(2, 0));
+		assert (!mask.test(0, 1));
+		assert (!mask.test(1, 1));
+		assert (!mask.test(2, 1));
+		assert (!mask.test(0, 2));
+		assert (!mask.test(1, 2));
+		assert (!mask.test(2, 2));
 
 		masks = new ArrayList<Mask>();
 		masks.add(mask3);
 		masks.add(mask4);
 		mask = Mask.addMasks(masks);
-		assert(mask.test(0, 0));
-		assert(!mask.test(1, 0));
-		assert(!mask.test(2, 0));
-		assert(!mask.test(0, 1));
-		assert(mask.test(1, 1));
-		assert(!mask.test(2, 1));
-		assert(!mask.test(0, 2));
-		assert(!mask.test(1, 2));
-		assert(mask.test(2, 2));
+		assert (mask.test(0, 0));
+		assert (!mask.test(1, 0));
+		assert (!mask.test(2, 0));
+		assert (!mask.test(0, 1));
+		assert (mask.test(1, 1));
+		assert (!mask.test(2, 1));
+		assert (!mask.test(0, 2));
+		assert (!mask.test(1, 2));
+		assert (mask.test(2, 2));
 	}
 }

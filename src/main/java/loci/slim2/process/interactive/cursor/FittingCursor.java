@@ -31,12 +31,13 @@ import loci.curvefitter.IFitterEstimator;
 import loci.slim2.heuristics.DefaultFitterEstimator;
 
 /**
- * Keeps cursor information.  Cursors mark the sections of the excitation
+ * Keeps cursor information. Cursors mark the sections of the excitation
  * histogram and the transient histogram that will be used for fitting.
- * 
+ *
  * @author Aivar Grislis
  */
 public class FittingCursor {
+
 	private static final String DOUBLE_ZERO_STRING = "0.0";
 	private static final String INTEGER_ZERO_STRING = "0";
 	private static final int DECIMAL_PLACES = 4;
@@ -61,12 +62,14 @@ public class FittingCursor {
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param inc time increment per bin
 	 * @param bins total number of bins
 	 * @params fitterEstimator
 	 */
-	public FittingCursor(double inc, int bins, IFitterEstimator fitterEstimator) {
+	public FittingCursor(final double inc, final int bins,
+		final IFitterEstimator fitterEstimator)
+	{
 		this.inc = inc;
 		this.bins = bins;
 		this.fitterEstimator = fitterEstimator;
@@ -78,14 +81,15 @@ public class FittingCursor {
 
 	/**
 	 * Adds a listener for cursor changes.
-	 * 
-	 * @param listener 
+	 *
+	 * @param listener
 	 */
-	public void addListener(FittingCursorListener listener) {
-		//TODO ARG
-		if (null == listener) { System.out.println("FittingCursor.addListener is null");
-		 //TODO ARG just to show up bad listeners during development
-		 throw new RuntimeException("blah blah");
+	public void addListener(final FittingCursorListener listener) {
+		// TODO ARG
+		if (null == listener) {
+			System.out.println("FittingCursor.addListener is null");
+			// TODO ARG just to show up bad listeners during development
+			throw new RuntimeException("blah blah");
 		}
 		synchronized (listeners) {
 			// avoid duplicates
@@ -97,18 +101,18 @@ public class FittingCursor {
 
 	/**
 	 * Removes a listener for cursor changes.
-	 * 
-	 * @param listener 
+	 *
+	 * @param listener
 	 */
-	public void removeListener(FittingCursorListener listener) {
+	public void removeListener(final FittingCursorListener listener) {
 		synchronized (listeners) {
 			listeners.remove(listener);
 		}
 	}
 
 	/**
-	 * Temporarily suspends listener notifications.  Used when several cursors
-	 * change at the same time.  Call suspendNotifications followed by cursor
+	 * Temporarily suspends listener notifications. Used when several cursors
+	 * change at the same time. Call suspendNotifications followed by cursor
 	 * changes followed by sendNotifications.
 	 * <p>
 	 * Also suspends checking for cursor consistency.
@@ -127,17 +131,17 @@ public class FittingCursor {
 
 	/**
 	 * Sets whether the UI will display bins or time values.
-	 * 
-	 * @param showBins 
+	 *
+	 * @param showBins
 	 */
-	public void setShowBins(boolean showBins) {
+	public void setShowBins(final boolean showBins) {
 		this.showBins = showBins;
 	}
 
 	/**
 	 * Gets whether the UI will display bins or time values.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean getShowBins() {
 		return showBins;
@@ -145,17 +149,17 @@ public class FittingCursor {
 
 	/**
 	 * Returns whether or not a prompt has been loaded.
-	 * 
-	 * @param hasPrompt 
+	 *
+	 * @param hasPrompt
 	 */
-	public void setHasPrompt(boolean hasPrompt) {
+	public void setHasPrompt(final boolean hasPrompt) {
 		this.hasPrompt = hasPrompt;
 	}
 
 	/**
 	 * Sets whether or not a prompt has been loaded.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean hasPrompt() {
 		return hasPrompt;
@@ -163,11 +167,12 @@ public class FittingCursor {
 
 	/**
 	 * Sets the prompt delay as a bin index.
-	 * 
-	 * @param promptDelay 
+	 *
+	 * @param promptDelay
 	 */
-	public void setPromptDelayIndex(int promptDelayIndex) {
-		double promptDelayTime = fitterEstimator.binToValue(promptDelayIndex, inc);
+	public void setPromptDelayIndex(final int promptDelayIndex) {
+		final double promptDelayTime =
+			fitterEstimator.binToValue(promptDelayIndex, inc);
 
 		// validate & notify
 		checkPromptDelay(promptDelayIndex, promptDelayTime);
@@ -175,11 +180,12 @@ public class FittingCursor {
 
 	/**
 	 * Sets the prompt delay as a time value.
-	 * 
-	 * @param promptDelayTime 
+	 *
+	 * @param promptDelayTime
 	 */
-	public void setPromptDelayTime(double promptDelayTime) {
-		int promptDelayIndex = fitterEstimator.valueToBin(promptDelayTime, inc);
+	public void setPromptDelayTime(final double promptDelayTime) {
+		final int promptDelayIndex =
+			fitterEstimator.valueToBin(promptDelayTime, inc);
 
 		// validate & notify
 		checkPromptDelay(promptDelayIndex, promptDelayTime);
@@ -187,14 +193,16 @@ public class FittingCursor {
 
 	/**
 	 * Validate & notify prompt delay changes.
-	 * 
+	 *
 	 * @param promptDelayIndex
-	 * @param promptDelayTime 
+	 * @param promptDelayTime
 	 */
-	private void checkPromptDelay(int promptDelayIndex, double promptDelayTime) {
+	private void checkPromptDelay(final int promptDelayIndex,
+		final double promptDelayTime)
+	{
 		// convert delay to start
-		double promptStartTime = promptDelayTime + transientStartTime;
-		int promptStartIndex = promptDelayIndex + transientStartIndex;
+		final double promptStartTime = promptDelayTime + transientStartTime;
+		final int promptStartIndex = promptDelayIndex + transientStartIndex;
 
 		// validate & notify
 		checkPromptStart(promptStartIndex, promptStartTime);
@@ -202,8 +210,8 @@ public class FittingCursor {
 
 	/**
 	 * Gets the start of the prompt as a bin index.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getPromptDelayIndex() {
 		int returnValue = 0;
@@ -212,55 +220,62 @@ public class FittingCursor {
 		}
 		return returnValue;
 	}
+
 	/**
 	 * Gets the start of the prompt as a time value.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getPromptDelayTime() {
 		double returnValue = 0.0;
 		if (hasPrompt) {
 			returnValue = getPromptStartTime() - getTransientStartTime();
-			returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
+			returnValue =
+				fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
 		}
 		return returnValue;
 	}
 
 	/**
 	 * Sets the start of the prompt as a bin index.
-	 * 
+	 *
 	 * @param index
 	 */
-	public void setPromptStartIndex(int promptStartIndex) {
-		double promptStartTime = fitterEstimator.binToValue(promptStartIndex, inc);
+	public void setPromptStartIndex(final int promptStartIndex) {
+		final double promptStartTime =
+			fitterEstimator.binToValue(promptStartIndex, inc);
 		checkPromptStart(promptStartIndex, promptStartTime);
 	}
 
 	/**
 	 * Sets the start of the prompt as a time value.
-	 * 
-	 * @param value 
+	 *
+	 * @param value
 	 */
-	public void setPromptStartTime(double promptStartTime) {
+	public void setPromptStartTime(final double promptStartTime) {
 		this.promptStartTime = promptStartTime;
 		notifyListeners();
 	}
 
 	/**
 	 * Validate & notify start of prompt changes.
-	 * 
+	 *
 	 * @param promptStartIndex
-	 * @param promptStartTime 
+	 * @param promptStartTime
 	 */
-	private void checkPromptStart(int promptStartIndex, double promptStartTime) {
+	private void checkPromptStart(final int promptStartIndex,
+		final double promptStartTime)
+	{
 		// some very rudimentary error-checking
-		if (suspend || (0.0 < promptStartTime && promptStartTime < transientStopTime)) {
-			double diffTime = promptStartTime - this.promptStartTime;
+		if (suspend ||
+			(0.0 < promptStartTime && promptStartTime < transientStopTime))
+		{
+			final double diffTime = promptStartTime - this.promptStartTime;
 			this.promptStartTime += diffTime;
-			promptStopTime       += diffTime;
-			int diffIndex = promptStartIndex - this.promptStartIndex;
+			promptStopTime += diffTime;
+			final int diffIndex = promptStartIndex - this.promptStartIndex;
 			this.promptStartIndex += diffIndex;
-			promptStopIndex       += diffIndex;
+			promptStopIndex += diffIndex;
 		}
 
 		// either update others with new valid value or undo our invalid value
@@ -269,11 +284,11 @@ public class FittingCursor {
 
 	/**
 	 * Gets the start of the prompt as a bin index.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getPromptStartIndex() {
-		int returnValue  = 0;
+		int returnValue = 0;
 		if (hasPrompt) {
 			returnValue = promptStartIndex;
 		}
@@ -282,25 +297,27 @@ public class FittingCursor {
 
 	/**
 	 * Gets the start of the prompt as a time value.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getPromptStartTime() {
 		double returnValue = 0.0;
 		if (hasPrompt) {
 			returnValue = promptStartTime;
-			returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
+			returnValue =
+				fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
 		}
 		return returnValue;
 	}
 
 	/**
 	 * Sets the end of the prompt based on a prompt width bin index.
-	 * 
-	 * @param promptWidth 
+	 *
+	 * @param promptWidth
 	 */
-	public void setPromptWidthIndex(int promptWidthIndex) {
-		double promptWidthTime = fitterEstimator.binToValue(promptWidthIndex, inc);
+	public void setPromptWidthIndex(final int promptWidthIndex) {
+		final double promptWidthTime =
+			fitterEstimator.binToValue(promptWidthIndex, inc);
 
 		// validate & notify
 		checkPromptWidth(promptWidthIndex, promptWidthTime);
@@ -308,11 +325,12 @@ public class FittingCursor {
 
 	/**
 	 * Sets the end of the prompt based on a prompt width time.
-	 * 
-	 * @param promptWidthTime 
+	 *
+	 * @param promptWidthTime
 	 */
-	public void setPromptWidthTime(double promptWidthTime) {
-		int promptWidthIndex = fitterEstimator.valueToBin(promptWidthTime, inc);
+	public void setPromptWidthTime(final double promptWidthTime) {
+		final int promptWidthIndex =
+			fitterEstimator.valueToBin(promptWidthTime, inc);
 
 		// validate & notify
 		checkPromptWidth(promptWidthIndex, promptWidthTime);
@@ -320,17 +338,19 @@ public class FittingCursor {
 
 	/**
 	 * Validate & notify prompt width changes.
-	 * 
+	 *
 	 * @param promptWidthIndex
-	 * @param promptWidthTime 
+	 * @param promptWidthTime
 	 */
-	private void checkPromptWidth(int promptWidthIndex, double promptWidthTime) {
-		int promptStopIndex = getPromptStartIndex() + promptWidthIndex;
-		double promptStopTime = getPromptStartTime() + promptWidthTime;
+	private void checkPromptWidth(final int promptWidthIndex,
+		final double promptWidthTime)
+	{
+		final int promptStopIndex = getPromptStartIndex() + promptWidthIndex;
+		final double promptStopTime = getPromptStartTime() + promptWidthTime;
 
 		if (suspend || (promptStopTime > 0.0 && promptStopTime < bins * inc)) {
 			this.promptStopIndex = promptStopIndex;
-			this.promptStopTime  = promptStopTime;
+			this.promptStopTime = promptStopTime;
 		}
 
 		// either update others with new valid value or undo our invalid value
@@ -339,8 +359,8 @@ public class FittingCursor {
 
 	/**
 	 * Gets the width of the prompt as an index.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getPromptWidthIndex() {
 		int returnValue = 0;
@@ -352,25 +372,27 @@ public class FittingCursor {
 
 	/**
 	 * Gets the width of the prompt as a time.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getPromptWidthTime() {
 		double returnValue = 0;
 		if (hasPrompt) {
 			returnValue = getPromptStopTime() - getPromptStartTime();
-			returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
+			returnValue =
+				fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
 		}
 		return returnValue;
 	}
 
 	/**
 	 * Sets the end of the prompt as an index.
-	 * 
-	 * @param promptStopIndex 
+	 *
+	 * @param promptStopIndex
 	 */
-	public void setPromptStopIndex(int promptStopIndex) {
-		double promptStopTime = fitterEstimator.binToValue(promptStopIndex, inc);
+	public void setPromptStopIndex(final int promptStopIndex) {
+		final double promptStopTime =
+			fitterEstimator.binToValue(promptStopIndex, inc);
 
 		// validate & notify
 		checkPromptStop(promptStopIndex, promptStopTime);
@@ -378,11 +400,11 @@ public class FittingCursor {
 
 	/**
 	 * Sets the end of the prompt as a time value.
-	 * 
-	 * @param promptStopTime 
+	 *
+	 * @param promptStopTime
 	 */
-	public void setPromptStopTime(double promptStopTime) {
-		int promptStopIndex = fitterEstimator.valueToBin(promptStopTime, inc);
+	public void setPromptStopTime(final double promptStopTime) {
+		final int promptStopIndex = fitterEstimator.valueToBin(promptStopTime, inc);
 
 		// validate & notify
 		checkPromptStop(promptStopIndex, promptStopTime);
@@ -390,14 +412,18 @@ public class FittingCursor {
 
 	/**
 	 * Validate & notify end of prompt changes.
-	 * 
+	 *
 	 * @param promptStopIndex
-	 * @param promptStopTime 
+	 * @param promptStopTime
 	 */
-	private void checkPromptStop(int promptStopIndex, double promptStopTime) {
-		if (suspend || (promptStopTime > getPromptStartTime() && promptStopTime < bins * inc)) {
+	private void checkPromptStop(final int promptStopIndex,
+		final double promptStopTime)
+	{
+		if (suspend ||
+			(promptStopTime > getPromptStartTime() && promptStopTime < bins * inc))
+		{
 			this.promptStopIndex = promptStopIndex;
-			this.promptStopTime  = promptStopTime;
+			this.promptStopTime = promptStopTime;
 		}
 
 		// either update others with new valid value or undo our invalid value
@@ -406,83 +432,91 @@ public class FittingCursor {
 
 	/**
 	 * Gets the end of the prompt as an index.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getPromptStopIndex() {
 		int returnValue = 0;
 		if (hasPrompt) {
-			returnValue = ((DefaultFitterEstimator) fitterEstimator).valueToBin(promptStopTime, inc);
+			returnValue =
+				((DefaultFitterEstimator) fitterEstimator).valueToBin(promptStopTime,
+					inc);
 		}
 		return returnValue;
 	}
 
 	/**
 	 * Gets the end of the prompt as a time value.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getPromptStopTime() {
 		double returnValue = 0.0;
 		if (hasPrompt) {
 			returnValue = promptStopTime;
-			returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
+			returnValue =
+				fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
 		}
 		return returnValue;
 	}
 
 	/**
-	 * Sets the baseline of the prompt.
-	 * 
-	 * Note that this value is actually a photon count and not based on bins or
-	 * time values.
-	 * 
-	 * @param promptBaselineValue 
+	 * Sets the baseline of the prompt. Note that this value is actually a photon
+	 * count and not based on bins or time values.
+	 *
+	 * @param promptBaselineValue
 	 */
-	public void setPromptBaselineValue(double promptBaselineValue) {
+	public void setPromptBaselineValue(final double promptBaselineValue) {
 		this.promptBaselineValue = promptBaselineValue;
 		notifyListeners();
 	}
 
 	/**
 	 * Gets the baseline of the prompt.
-	 * 
+	 *
 	 * @return
 	 */
 	public double getPromptBaselineValue() {
 		double returnValue = 0.0;
 		if (hasPrompt) {
 			returnValue = promptBaselineValue;
-			returnValue = fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
+			returnValue =
+				fitterEstimator.roundToDecimalPlaces(returnValue, DECIMAL_PLACES);
 		}
 		return returnValue;
 	}
 
 	/**
 	 * Sets the start of the transient as an index.
-	 * 
+	 *
 	 * @param transientStartIndex
 	 */
-	public void setTransientStartIndex(int transientStartIndex) {
-		double transientStartTime = fitterEstimator.binToValue(transientStartIndex, inc);
+	public void setTransientStartIndex(final int transientStartIndex) {
+		final double transientStartTime =
+			fitterEstimator.binToValue(transientStartIndex, inc);
 
 		checkTransientStart(transientStartIndex, transientStartTime);
 	}
 
-	public void setTransientStartTime(double transientStartTime) {
-		int transientStartIndex = fitterEstimator.valueToBin(transientStartTime, inc);
+	public void setTransientStartTime(final double transientStartTime) {
+		final int transientStartIndex =
+			fitterEstimator.valueToBin(transientStartTime, inc);
 
 		checkTransientStart(transientStartIndex, transientStartTime);
 	}
 
 	/**
 	 * Validate & notify start of transient changes.
-	 * 
+	 *
 	 * @param transientStartIndex
-	 * @param transientStartTime 
+	 * @param transientStartTime
 	 */
-	private void checkTransientStart(int transientStartIndex, double transientStartTime) {
-		if (suspend || (0 <= transientStartTime && transientStartTime <= getDataStartTime())) {
+	private void checkTransientStart(final int transientStartIndex,
+		final double transientStartTime)
+	{
+		if (suspend ||
+			(0 <= transientStartTime && transientStartTime <= getDataStartTime()))
+		{
 			this.transientStartIndex = transientStartIndex;
 			this.transientStartTime = transientStartTime;
 		}
@@ -491,11 +525,10 @@ public class FittingCursor {
 		notifyListeners();
 	}
 
-
 	/**
 	 * Gets the start of the transient as an index.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getTransientStartIndex() {
 		return transientStartIndex;
@@ -503,8 +536,8 @@ public class FittingCursor {
 
 	/**
 	 * Gets the start of the transient as a time.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getTransientStartTime() {
 		return transientStartTime;
@@ -512,11 +545,12 @@ public class FittingCursor {
 
 	/**
 	 * Set start of data as an index.
-	 * 
-	 * @param dataStartIndex 
+	 *
+	 * @param dataStartIndex
 	 */
-	public void setDataStartIndex(int dataStartIndex) {
-		double dataStartTime = fitterEstimator.binToValue(dataStartIndex, inc);
+	public void setDataStartIndex(final int dataStartIndex) {
+		final double dataStartTime =
+			fitterEstimator.binToValue(dataStartIndex, inc);
 
 		// validate & notify
 		checkDataStart(dataStartIndex, dataStartTime);
@@ -524,11 +558,11 @@ public class FittingCursor {
 
 	/**
 	 * Sets start of data as a time.
-	 * 
-	 * @param dataStartTime 
+	 *
+	 * @param dataStartTime
 	 */
-	public void setDataStartTime(double dataStartTime) {
-		int dataStartIndex = fitterEstimator.valueToBin(dataStartTime, inc);
+	public void setDataStartTime(final double dataStartTime) {
+		final int dataStartIndex = fitterEstimator.valueToBin(dataStartTime, inc);
 
 		// validate & notify
 		checkDataStart(dataStartIndex, dataStartTime);
@@ -536,14 +570,18 @@ public class FittingCursor {
 
 	/**
 	 * Validate & notify start of data changes.
-	 * 
+	 *
 	 * @param dataStartIndex
-	 * @param dataStartTime 
+	 * @param dataStartTime
 	 */
-	private void checkDataStart(int dataStartIndex, double dataStartTime) {
-		if (suspend || (transientStartTime <= dataStartTime && dataStartTime < transientStopTime)) {
+	private void checkDataStart(final int dataStartIndex,
+		final double dataStartTime)
+	{
+		if (suspend ||
+			(transientStartTime <= dataStartTime && dataStartTime < transientStopTime))
+		{
 			this.dataStartIndex = dataStartIndex;
-			this.dataStartTime  = dataStartTime;
+			this.dataStartTime = dataStartTime;
 		}
 
 		// either update others with new valid value or undo our invalid value
@@ -552,8 +590,8 @@ public class FittingCursor {
 
 	/**
 	 * Gets start of data as an index.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getDataStartIndex() {
 		return dataStartIndex;
@@ -561,21 +599,22 @@ public class FittingCursor {
 
 	/**
 	 * Gets start of data as a time.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getDataStartTime() {
-		//TODO ARG round it?
+		// TODO ARG round it?
 		return dataStartTime;
 	}
 
 	/**
 	 * Sets end of data as an index.
-	 * 
-	 * @param transientStopIndex 
+	 *
+	 * @param transientStopIndex
 	 */
-	public void setTransientStopIndex(int transientStopIndex) {
-		double transientStopTime = fitterEstimator.binToValue(transientStopIndex, inc);
+	public void setTransientStopIndex(final int transientStopIndex) {
+		final double transientStopTime =
+			fitterEstimator.binToValue(transientStopIndex, inc);
 
 		// validate & notify
 		checkTransientStop(transientStopIndex, transientStopTime);
@@ -583,20 +622,26 @@ public class FittingCursor {
 
 	/**
 	 * Sets end of data as a time.
-	 * 
-	 * @param transientStopTime 
+	 *
+	 * @param transientStopTime
 	 */
-	public void setTransientStopTime(double transientStopTime) {
-		int transientStopIndex = fitterEstimator.valueToBin(transientStopTime, inc);
+	public void setTransientStopTime(final double transientStopTime) {
+		final int transientStopIndex =
+			fitterEstimator.valueToBin(transientStopTime, inc);
 
 		// validate & notify
 		checkTransientStop(transientStopIndex, transientStopTime);
 	}
 
-	private void checkTransientStop(int transientStopIndex, double transientStopTime) {
-		if (suspend || (getDataStartTime() <= transientStopTime && transientStopTime < bins * inc)) {
+	private void checkTransientStop(final int transientStopIndex,
+		final double transientStopTime)
+	{
+		if (suspend ||
+			(getDataStartTime() <= transientStopTime && transientStopTime < bins *
+				inc))
+		{
 			this.transientStopIndex = transientStopIndex;
-			this.transientStopTime  = transientStopTime;
+			this.transientStopTime = transientStopTime;
 		}
 
 		// either update others with new valid value or undo our invalid value
@@ -620,9 +665,9 @@ public class FittingCursor {
 			while (!success) {
 				try {
 					synchronized (listeners) {
-						for (FittingCursorListener listener : listeners) {
+						for (final FittingCursorListener listener : listeners) {
 							if (null == listener) {
-								//TODO ARG error checking during development
+								// TODO ARG error checking during development
 								System.out.println("null listener for FC");
 							}
 							else {
@@ -632,11 +677,10 @@ public class FittingCursor {
 					}
 					success = true;
 				}
-				catch (ConcurrentModificationException e) {
+				catch (final ConcurrentModificationException e) {
 					// avoid timing issues
 				}
 			}
 		}
 	}
 }
-

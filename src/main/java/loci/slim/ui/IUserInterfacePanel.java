@@ -119,8 +119,8 @@ public interface IUserInterfacePanel {
 
 	/**
 	 * Returns whether to create colorized grayscale fitted images.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	boolean getColorizeGrayScale();
 
@@ -154,15 +154,15 @@ public interface IUserInterfacePanel {
 
 	/**
 	 * Gets chi square target for fit.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	double getChiSquareTarget();
 
 	/**
 	 * Sets chi square target for fit.
-	 * 
-	 * @param chiSqTarget 
+	 *
+	 * @param chiSqTarget
 	 */
 	void setChiSquareTarget(double chiSqTarget);
 
@@ -253,11 +253,11 @@ public interface IUserInterfacePanel {
 	boolean getRefineFit();
 
 	/**
-	 * Experimental: gets a scatter factor from UI.  SPC Image can fit an
+	 * Experimental: gets a scatter factor from UI. SPC Image can fit an
 	 * additional scatter parameter; this is an attempt to see if scatter
 	 * correction helps the fit.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	double getScatter();
 

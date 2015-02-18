@@ -34,10 +34,11 @@ import java.util.Map;
  * <p>
  * Note that mask changes are a results of user interaction using the single
  * histogram tool, so threading issues are unlikely.
- * 
+ *
  * @author Aivar Grislis
  */
 public class MaskGroup implements IMaskGroup {
+
 	List<IMaskNode> _nodeList;
 	Map<IMaskNode, Mask> _maskMap;
 	IMaskNode[] _nodes;
@@ -48,7 +49,7 @@ public class MaskGroup implements IMaskGroup {
 	}
 
 	@Override
-	public void addNode(IMaskNode node) {
+	public void addNode(final IMaskNode node) {
 		// avoid duplicate entries
 		if (!_nodeList.contains(node)) {
 			_nodeList.add(node);
@@ -56,30 +57,30 @@ public class MaskGroup implements IMaskGroup {
 	}
 
 	@Override
-	public void removeNode(IMaskNode node) {
+	public void removeNode(final IMaskNode node) {
 		_nodeList.remove(node);
 		_maskMap.put(node, null);
 	}
 
 	@Override
-	public void updateMask(IMaskNode node) {
+	public void updateMask(final IMaskNode node) {
 		// update map with node's new self mask
-		Mask selfMask = node.getSelfMask();
+		final Mask selfMask = node.getSelfMask();
 		_maskMap.put(node, selfMask);
 
 		// combine masks and notify other nodes
-		for (IMaskNode peerNode : _nodeList) {
+		for (final IMaskNode peerNode : _nodeList) {
 			// skip notifying the caller
 			if (peerNode != node) {
 				// combine all masks but the recipient's own
-				Mask peerSelfMask = _maskMap.get(peerNode);
-				Collection<Mask> masks = new ArrayList<Mask>(_maskMap.values());
+				final Mask peerSelfMask = _maskMap.get(peerNode);
+				final Collection<Mask> masks = new ArrayList<Mask>(_maskMap.values());
 				if (null != peerSelfMask) {
 					masks.remove(peerSelfMask);
 				}
 
 				// notify other node
-				Mask peerOtherMask = Mask.addMasks(masks);
+				final Mask peerOtherMask = Mask.addMasks(masks);
 				peerNode.updateOtherMask(peerOtherMask);
 			}
 		}

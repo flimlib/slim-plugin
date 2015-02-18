@@ -29,61 +29,64 @@ import loci.slim.IGrayScaleImage;
 import loci.slim.mask.IMaskGroup;
 
 /**
- * This class builds a fitted image that shows the tau mean.
- * 
- * Tau Mean Tmi = sum of all Fi * Ti, where Fi is the Fractional Intensity.
- * 
- * Fractional Intensity Fi = Ai / sum of all Aj.
+ * This class builds a fitted image that shows the tau mean. Tau Mean Tmi = sum
+ * of all Fi * Ti, where Fi is the Fractional Intensity. Fractional Intensity Fi
+ * = Ai / sum of all Aj.
  *
  * @author Aivar Grislis
  */
 public class TauMeanImage extends AbstractBaseFittedImage {
-	private int _component;
-	private int _components;
+
+	private final int _component;
+	private final int _components;
 
 	/**
-	 * Create the fitted image.  Specifies number of components which should
-	 * be 2 or 3 and the current component which is ignored.
-	 * respectively.
-	 * 
+	 * Create the fitted image. Specifies number of components which should be 2
+	 * or 3 and the current component which is ignored. respectively.
+	 *
 	 * @param title
 	 * @param dimension
 	 * @param component
-	 * @param components 
+	 * @param components
 	 */
-	public TauMeanImage(String title, int[] dimension,
-			IndexColorModel indexColorModel, int component, int components,
-			boolean colorizeGrayScale, IGrayScaleImage grayScaleImage,
-			IMaskGroup[] maskGroup) {
-		super(title, dimension, indexColorModel, colorizeGrayScale,
-				grayScaleImage, maskGroup);
+	public TauMeanImage(final String title, final int[] dimension,
+		final IndexColorModel indexColorModel, final int component,
+		final int components, final boolean colorizeGrayScale,
+		final IGrayScaleImage grayScaleImage, final IMaskGroup[] maskGroup)
+	{
+		super(title, dimension, indexColorModel, colorizeGrayScale, grayScaleImage,
+			maskGroup);
 		_component = component;
 		_components = components;
 	}
 
 	@Override
-	public double getValue(double[] parameters) {
+	public double getValue(final double[] parameters) {
 		double value = 0.0;
 		double sum = 0.0;
 		switch (_components) {
 			case 2:
-				sum = parameters[FittedImageFitter.A1_INDEX]
-						+ parameters[FittedImageFitter.A2_INDEX];
-				value = parameters[FittedImageFitter.A1_INDEX]
-							* parameters[FittedImageFitter.T1_INDEX]
-						+ parameters[FittedImageFitter.A2_INDEX]
-							* parameters[FittedImageFitter.T2_INDEX];
+				sum =
+					parameters[FittedImageFitter.A1_INDEX] +
+						parameters[FittedImageFitter.A2_INDEX];
+				value =
+					parameters[FittedImageFitter.A1_INDEX] *
+						parameters[FittedImageFitter.T1_INDEX] +
+						parameters[FittedImageFitter.A2_INDEX] *
+						parameters[FittedImageFitter.T2_INDEX];
 				break;
 			case 3:
-				sum = parameters[FittedImageFitter.A1_INDEX]
-						+ parameters[FittedImageFitter.A2_INDEX]
-						+ parameters[FittedImageFitter.A3_INDEX];
-				value = parameters[FittedImageFitter.A1_INDEX]
-							* parameters[FittedImageFitter.T1_INDEX]
-						+ parameters[FittedImageFitter.A2_INDEX]
-							* parameters[FittedImageFitter.T2_INDEX]
-						+ parameters[FittedImageFitter.A3_INDEX]
-							* parameters[FittedImageFitter.T3_INDEX];
+				sum =
+					parameters[FittedImageFitter.A1_INDEX] +
+						parameters[FittedImageFitter.A2_INDEX] +
+						parameters[FittedImageFitter.A3_INDEX];
+				value =
+					parameters[FittedImageFitter.A1_INDEX] *
+						parameters[FittedImageFitter.T1_INDEX] +
+						parameters[FittedImageFitter.A2_INDEX] *
+						parameters[FittedImageFitter.T2_INDEX] +
+						parameters[FittedImageFitter.A3_INDEX] *
+						parameters[FittedImageFitter.T3_INDEX];
 				break;
 		}
 		return value / sum;

@@ -31,26 +31,30 @@ import net.imglib2.type.numeric.RealType;
 
 /**
  * This class wraps an image that has a decay curve for each pixel.
- * 
+ *
  * @author Aivar Grislis
  */
-public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T> {
-	private ImgPlus<T> _image;
-	private int _width;
-	private int _height;
-	private int _channels;
-	private int _bins;
-	private int _binIndex;
-	private int _increment;
-	private RandomAccess<T> _cursor;
+public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T>
+{
 
-	public DecayImageWrapper(ImgPlus<T> image, int width, int height,
-			int channels, int bins, int binIndex, int increment) {
-		_image    = image;
-		_width    = width;
-		_height   = height;
+	private final ImgPlus<T> _image;
+	private final int _width;
+	private final int _height;
+	private final int _channels;
+	private final int _bins;
+	private final int _binIndex;
+	private final int _increment;
+	private final RandomAccess<T> _cursor;
+
+	public DecayImageWrapper(final ImgPlus<T> image, final int width,
+		final int height, final int channels, final int bins, final int binIndex,
+		final int increment)
+	{
+		_image = image;
+		_width = width;
+		_height = height;
 		_channels = channels;
-		_bins     = bins;
+		_bins = bins;
 		_binIndex = binIndex;
 		_increment = increment;
 
@@ -59,8 +63,8 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T> 
 
 	/**
 	 * Gets width of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public int getWidth() {
@@ -69,7 +73,8 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T> 
 
 	/**
 	 * Gets height of image.
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public int getHeight() {
@@ -78,8 +83,8 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T> 
 
 	/**
 	 * Gets number of channels of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public int getChannels() {
@@ -88,8 +93,8 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T> 
 
 	/**
 	 * Gets number of bins in decay curve of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public int getBins() {
@@ -98,26 +103,26 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T> 
 
 	/**
 	 * Specifies a source IProcessor to be chained to this one.
-	 * 
-	 * @param processor 
+	 *
+	 * @param processor
 	 */
 	@Override
-	public void chain(IProcessor processor) {
+	public void chain(final IProcessor processor) {
 		throw new UnsupportedOperationException("Can't chain to DecayImageWrapper");
 	}
 
 	/**
 	 * Gets input pixel decay curve.
-	 * 
+	 *
 	 * @param location
-	 * @return 
+	 * @return
 	 */
 	@Override
-	public double[] getPixel(int[] location) {
-		double[] decay = new double[_bins];
+	public double[] getPixel(final int[] location) {
+		final double[] decay = new double[_bins];
 
 		// add bins to location
-		int[] innerLocation = new int[location.length + 1];
+		final int[] innerLocation = new int[location.length + 1];
 		for (int i = 0; i < _binIndex; ++i) {
 			innerLocation[i] = location[i];
 		}

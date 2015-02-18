@@ -31,10 +31,11 @@ import loci.curvefitter.IFitterEstimator;
 /**
  * This contains the global fitting parameters, i.e. those valid for the whole
  * image.
- * 
+ *
  * @author Aivar Grislis
  */
 public class DefaultGlobalFitParams implements GlobalFitParams {
+
 	private IFitterEstimator estimator;
 	private FitAlgorithm fitAlgorithm;
 	private FitFunction fitFunction;
@@ -50,7 +51,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	private int transientStop;
 
 	@Override
-	public void setEstimator(IFitterEstimator estimator) {
+	public void setEstimator(final IFitterEstimator estimator) {
 		this.estimator = estimator;
 	}
 
@@ -60,7 +61,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setFitAlgorithm(FitAlgorithm fitAlgorithm) {
+	public void setFitAlgorithm(final FitAlgorithm fitAlgorithm) {
 		this.fitAlgorithm = fitAlgorithm;
 	}
 
@@ -70,7 +71,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setFitFunction(FitFunction fitFunction) {
+	public void setFitFunction(final FitFunction fitFunction) {
 		this.fitFunction = fitFunction;
 	}
 
@@ -80,7 +81,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setNoiseModel(NoiseModel noiseModel) {
+	public void setNoiseModel(final NoiseModel noiseModel) {
 		this.noiseModel = noiseModel;
 	}
 
@@ -90,7 +91,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setXInc(double xInc) {
+	public void setXInc(final double xInc) {
 		this.xInc = xInc;
 	}
 
@@ -100,7 +101,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setPrompt(double[] prompt) {
+	public void setPrompt(final double[] prompt) {
 		this.prompt = prompt;
 	}
 
@@ -110,7 +111,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setChiSquareTarget(double chiSquareTarget) {
+	public void setChiSquareTarget(final double chiSquareTarget) {
 		this.chiSquareTarget = chiSquareTarget;
 	}
 
@@ -120,7 +121,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setFree(boolean[] free) {
+	public void setFree(final boolean[] free) {
 		this.free = free;
 	}
 
@@ -130,7 +131,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setStartPrompt(int startPrompt) {
+	public void setStartPrompt(final int startPrompt) {
 		this.startPrompt = startPrompt;
 	}
 
@@ -140,7 +141,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setStopPrompt(int stopPrompt) {
+	public void setStopPrompt(final int stopPrompt) {
 		this.stopPrompt = stopPrompt;
 	}
 
@@ -150,7 +151,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setTransientStart(int transientStart) {
+	public void setTransientStart(final int transientStart) {
 		this.transientStart = transientStart;
 	}
 
@@ -160,7 +161,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setDataStart(int dataStart) {
+	public void setDataStart(final int dataStart) {
 		this.dataStart = dataStart;
 	}
 
@@ -170,7 +171,7 @@ public class DefaultGlobalFitParams implements GlobalFitParams {
 	}
 
 	@Override
-	public void setTransientStop(int transientStop) {
+	public void setTransientStop(final int transientStop) {
 		this.transientStop = transientStop;
 	}
 

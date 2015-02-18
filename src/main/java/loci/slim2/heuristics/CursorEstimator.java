@@ -29,42 +29,44 @@ import loci.curvefitter.ICurveFitter.NoiseModel;
 import loci.curvefitter.SLIMCurveFitter;
 
 /**
- * Based on TRI2 TRCursors.c.  Comments in quotes are from that source file.
+ * Based on TRI2 TRCursors.c. Comments in quotes are from that source file.
  *
  * @author Aivar Grislis
  */
 public class CursorEstimator {
-	public static final int PROMPT_START        = 0;
-	public static final int PROMPT_STOP         = 1;
-	public static final int PROMPT_BASELINE     = 2;
-	public static final int TRANSIENT_START     = 3;
-	public static final int DATA_START          = 4;
-	public static final int TRANSIENT_STOP      = 5;
+
+	public static final int PROMPT_START = 0;
+	public static final int PROMPT_STOP = 1;
+	public static final int PROMPT_BASELINE = 2;
+	public static final int TRANSIENT_START = 3;
+	public static final int DATA_START = 4;
+	public static final int TRANSIENT_STOP = 5;
 	private static final int ATTEMPTS = 10;
 	// used to create data for CursorEstimatorTest
 	private static final boolean createTestData = false;
 
 	/**
-	 * Provides estimation of decay cursors.
-	 * 
-	 * Note that TRI2 does not support this: there is no "Estimate Cursors"
-	 * button if you don't have a prompt.  TRI2 saves and restores the decay
-	 * cursor values even if you switch to a new image.
-	 * 
+	 * Provides estimation of decay cursors. Note that TRI2 does not support this:
+	 * there is no "Estimate Cursors" button if you don't have a prompt. TRI2
+	 * saves and restores the decay cursor values even if you switch to a new
+	 * image.
+	 *
 	 * @param xInc
 	 * @param decay
-	 * @return 
+	 * @return
 	 */
-	public static int[] estimateDecayCursors(double xInc, double[] decay) {
-		int maxIndex = findMax(decay);
-		double[] diffed = new double[maxIndex];
+	public static int[] estimateDecayCursors(final double xInc,
+		final double[] decay)
+	{
+		final int maxIndex = findMax(decay);
+		final double[] diffed = new double[maxIndex];
 		// "Differentiate"
 		for (int i = 0; i < maxIndex - 1; ++i) {
 			diffed[i] = decay[i + 1] - decay[i];
 		}
 		int steepIndex = findMax(diffed);
 		int startIndex = maxIndex + (maxIndex - steepIndex) / 3;
-		int stopIndex = 9 * decay.length / 10;
+		final int stopIndex = 9 * decay.length / 10;
 
 		// sanity check
 		if (startIndex > stopIndex) {
@@ -80,44 +82,45 @@ public class CursorEstimator {
 			steepIndex = 0;
 		}
 
-		int[] returnValue = new int[6];
+		final int[] returnValue = new int[6];
 		returnValue[TRANSIENT_START] = steepIndex;
-		returnValue[DATA_START]      = startIndex;
-		returnValue[TRANSIENT_STOP]  = stopIndex;
+		returnValue[DATA_START] = startIndex;
+		returnValue[TRANSIENT_STOP] = stopIndex;
 		return returnValue;
 	}
 
 	/**
-	 * Provides estimation of prompt and decay cursors.
-	 * 
-	 * Returns a double array so that the prompt baseline may be returned.
-	 * Other values are expressed in integer bins.
-	 * 
+	 * Provides estimation of prompt and decay cursors. Returns a double array so
+	 * that the prompt baseline may be returned. Other values are expressed in
+	 * integer bins.
+	 *
 	 * @param xInc
 	 * @param prompt
 	 * @param decay
 	 * @param chiSqTarget
-	 * @return 
+	 * @return
 	 */
-	public static double[] estimateCursors(double xInc, double[] prompt,
-			double[] decay, double chiSqTarget) {
-		double[] returnValue = new double[6];
+	public static double[] estimateCursors(final double xInc,
+		final double[] prompt, final double[] decay, final double chiSqTarget)
+	{
+		final double[] returnValue = new double[6];
 		double baseline;
-		double maxval; // TRCursors.c has "unsigned short maxsval, maxval; double maxfval, *diffed;"
+		double maxval; // TRCursors.c has
+										// "unsigned short maxsval, maxval; double maxfval, *diffed;"
 		int index;
 		int startp = 0;
 		int startt = 0;
 		int endp = 0;
-		int endt = 0;
+		final int endt = 0;
 		int i;
-		double[] diffed = new double[prompt.length];
+		final double[] diffed = new double[prompt.length];
 		int steepp;
 		int steept;
 		// "For Marquardt fitting"
-		double param[] = new double[4];
-		boolean free[] = new boolean[] { true, true, true };
-		double[] yFitted = new double[decay.length];
-		double[] chiSqTable = new double[2 * ATTEMPTS + 1];
+		final double param[] = new double[4];
+		final boolean free[] = new boolean[] { true, true, true };
+		final double[] yFitted = new double[decay.length];
+		final double[] chiSqTable = new double[2 * ATTEMPTS + 1];
 		int transStartIndex;
 		int transFitStartIndex;
 		int transEndIndex;
@@ -154,12 +157,12 @@ public class CursorEstimator {
 		index = findMax(prompt);
 		maxval = prompt[index];
 
-		if (index > prompt.length * 3 /4) { // "integer arithmetic"
+		if (index > prompt.length * 3 / 4) { // "integer arithmetic"
 			baseline = 0.0f;
 		}
 		else {
 			baseline = 0.0f;
-			int index2 = (index + prompt.length) / 2;
+			final int index2 = (index + prompt.length) / 2;
 			for (i = index2; i < prompt.length; ++i) {
 				baseline += prompt[i];
 			}
@@ -208,7 +211,7 @@ public class CursorEstimator {
 		index = findMax(decay);
 
 		// "Differentiate"
-		double[] diffedd = new double[decay.length];
+		final double[] diffedd = new double[decay.length];
 		for (i = 0; i < index; ++i) {
 			diffedd[i] = decay[i + 1] - decay[i];
 		}
@@ -230,41 +233,49 @@ public class CursorEstimator {
 		}
 		transEndIndex = 9 * decay.length / 10; // "90% of transient"
 		if (transEndIndex <= transStartIndex + 2 * ATTEMPTS) { // "oops"
-			//TODO ARG transStartIndex etc. are unitialized
-			//  do_estimate_resets restores values to previous, not this!
-			returnValue[PROMPT_START]    = startp;
-			returnValue[PROMPT_STOP]     = endp;
+			// TODO ARG transStartIndex etc. are unitialized
+			// do_estimate_resets restores values to previous, not this!
+			returnValue[PROMPT_START] = startp;
+			returnValue[PROMPT_STOP] = endp;
 			returnValue[PROMPT_BASELINE] = baseline;
 			returnValue[TRANSIENT_START] = transStartIndex;
-			returnValue[DATA_START]      = startt;
-			returnValue[TRANSIENT_STOP]  = transEndIndex;
+			returnValue[DATA_START] = startt;
+			returnValue[TRANSIENT_STOP] = transEndIndex;
 			checkValues(returnValue);
-			return returnValue; //TODO "do_estimate_resets; do_estimate_frees; "
+			return returnValue; // TODO "do_estimate_resets; do_estimate_frees; "
 		}
-		double[] adjustedPrompt = ExcitationScaler.scale(prompt, startp, endp, baseline, xInc, decay.length);
+		final double[] adjustedPrompt =
+			ExcitationScaler
+				.scale(prompt, startp, endp, baseline, xInc, decay.length);
 
 		for (i = 0; i < 2 * ATTEMPTS + 1; ++i, ++transStartIndex) {
 			transFitStartIndex = transStartIndex;
 
-			int fitStart = transFitStartIndex - transStartIndex; // e.g. always zero
-			int fitStop = transEndIndex - transStartIndex;
-			int nData = transEndIndex - transStartIndex;
+			final int fitStart = transFitStartIndex - transStartIndex; // e.g. always
+																																	// zero
+			final int fitStop = transEndIndex - transStartIndex;
+			final int nData = transEndIndex - transStartIndex;
 
-			CurveFitData curveFitData = new CurveFitData();
+			final CurveFitData curveFitData = new CurveFitData();
 			curveFitData.setParams(param);
 
-			double[] adjustedDecay = adjustDecay(decay, transStartIndex, transEndIndex);
+			final double[] adjustedDecay =
+				adjustDecay(decay, transStartIndex, transEndIndex);
 
 			curveFitData.setYCount(adjustedDecay);
 			curveFitData.setTransStartIndex(0);
 			curveFitData.setDataStartIndex(fitStart);
 			curveFitData.setTransEndIndex(fitStop);
-			curveFitData.setChiSquareTarget(chiSqTarget); //TODO this adjustment happens internally within SLIMCurveFitter * (fitStop - fitStart - 3));
+			curveFitData.setChiSquareTarget(chiSqTarget); // TODO this adjustment
+																										// happens internally within
+																										// SLIMCurveFitter *
+																										// (fitStop - fitStart -
+																										// 3));
 			curveFitData.setSig(null);
 			curveFitData.setYFitted(yFitted);
-			CurveFitData[] data = new CurveFitData[] { curveFitData };
+			final CurveFitData[] data = new CurveFitData[] { curveFitData };
 
-			SLIMCurveFitter curveFitter = new SLIMCurveFitter();
+			final SLIMCurveFitter curveFitter = new SLIMCurveFitter();
 			curveFitter.setFitAlgorithm(FitAlgorithm.SLIMCURVE_RLD);
 			curveFitter.setXInc(xInc);
 			curveFitter.setFree(free);
@@ -275,7 +286,7 @@ public class CursorEstimator {
 
 			if (ret < 0) {
 				param[1] = 0.0;
-				int j = findMax(decay, transFitStartIndex, transEndIndex);
+				final int j = findMax(decay, transFitStartIndex, transEndIndex);
 				param[2] = decay[j];
 				param[3] = 2.0;
 			}
@@ -285,7 +296,7 @@ public class CursorEstimator {
 			ret = curveFitter.fitData(data);
 
 			if (ret >= 0) {
-				double chiSq = data[0].getParams()[0];
+				final double chiSq = data[0].getParams()[0];
 				// want non-reduced chi square
 				chiSqTable[i] = chiSq * (fitStop - fitStart - 3);
 			}
@@ -297,18 +308,18 @@ public class CursorEstimator {
 		// "Find the minimum chisq in this range"
 		index = findMin(chiSqTable, 2 * ATTEMPTS + 1);
 
-		if (chiSqTable[index] > 9e9f) {  // "no luck here..."
-			returnValue[PROMPT_START]    = startp;
-			returnValue[PROMPT_STOP]     = endp;
+		if (chiSqTable[index] > 9e9f) { // "no luck here..."
+			returnValue[PROMPT_START] = startp;
+			returnValue[PROMPT_STOP] = endp;
 			returnValue[PROMPT_BASELINE] = baseline;
 			returnValue[TRANSIENT_START] = transStartIndex;
-			returnValue[DATA_START]      = startt;
-			returnValue[TRANSIENT_STOP]  = transEndIndex;
+			returnValue[DATA_START] = startt;
+			returnValue[TRANSIENT_STOP] = transEndIndex;
 
 			--returnValue[TRANSIENT_STOP];
 			checkValues(returnValue);
 
-			return returnValue; //TODO do estimate resets/frees???
+			return returnValue; // TODO do estimate resets/frees???
 		}
 
 		// "Then we're rolling!"
@@ -317,27 +328,28 @@ public class CursorEstimator {
 			transStartIndex = 0;
 		}
 		transStartIndex += index;
-		transFitStartIndex = transStartIndex + (transEndIndex - transStartIndex) / 20;
+		transFitStartIndex =
+			transStartIndex + (transEndIndex - transStartIndex) / 20;
 
-		returnValue[PROMPT_START]    = startp;
-		returnValue[PROMPT_STOP]     = endp;
+		returnValue[PROMPT_START] = startp;
+		returnValue[PROMPT_STOP] = endp;
 		returnValue[PROMPT_BASELINE] = baseline;
 		returnValue[TRANSIENT_START] = transStartIndex;
-		returnValue[DATA_START]      = transFitStartIndex;
-		returnValue[TRANSIENT_STOP]  = transEndIndex;
+		returnValue[DATA_START] = transFitStartIndex;
+		returnValue[TRANSIENT_STOP] = transEndIndex;
 		checkValues(returnValue);
 		return returnValue;
 	}
 
-	private static void checkValues(double[] value) {
-		//TODO ARG patches a bug!:
+	private static void checkValues(final double[] value) {
+		// TODO ARG patches a bug!:
 		if (value[DATA_START] < value[TRANSIENT_START]) {
 			if (value[DATA_START] < 0.0) {
 				System.out.println("Calculated data start is less than zero!!!");
 				value[DATA_START] = 0.0;
 
 			}
-			double tmp = value[DATA_START];
+			final double tmp = value[DATA_START];
 			value[DATA_START] = value[TRANSIENT_START];
 			value[TRANSIENT_START] = tmp;
 		}
@@ -358,9 +370,11 @@ public class CursorEstimator {
 		}
 	}
 
-	private static double[] adjustDecay(double[] decay, int startIndex, int endIndex) {
-		int size = endIndex - startIndex;
-		double[] adjusted = new double[size];
+	private static double[] adjustDecay(final double[] decay,
+		final int startIndex, final int endIndex)
+	{
+		final int size = endIndex - startIndex;
+		final double[] adjusted = new double[size];
 		for (int i = 0; i < size; ++i) {
 			adjusted[i] = decay[i + startIndex];
 		}
@@ -368,35 +382,39 @@ public class CursorEstimator {
 	}
 
 	/**
-	 * Calculates the Z background value looking at the prepulse
-	 * part of the decay curve.
-	 * (Based on calcBgFromPrepulse in TRfitting.c
+	 * Calculates the Z background value looking at the prepulse part of the decay
+	 * curve. (Based on calcBgFromPrepulse in TRfitting.c
+	 * 
 	 * @param prepulse
 	 * @param n
 	 * @return
 	 */
-	private static double calcBgFromPrepulse(double[] prepulse, int n) {
+	private static double
+		calcBgFromPrepulse(final double[] prepulse, final int n)
+	{
 		double z = 0.0f;
 
 		if (z > 0) {
 			double val = 0.0f;
-			for (int i = 0; i <n; ++i) {
+			for (int i = 0; i < n; ++i) {
 				val += prepulse[i];
 			}
-			z = val/n;
+			z = val / n;
 		}
 		return z;
 	}
 
-	private static int findMax(double[] values) {
+	private static int findMax(final double[] values) {
 		return findMax(values, 0, values.length);
 	}
 
-	private static int findMax(double[] values, int endIndex) {
+	private static int findMax(final double[] values, final int endIndex) {
 		return findMax(values, 0, endIndex);
 	}
 
-	private static int findMax(double[] values, int startIndex, int endIndex) {
+	private static int
+		findMax(final double[] values, int startIndex, int endIndex)
+	{
 		if (endIndex > values.length) {
 			endIndex = values.length;
 		}
@@ -417,11 +435,13 @@ public class CursorEstimator {
 		return index;
 	}
 
-	private static int findMin(double[] values, int endIndex) {
+	private static int findMin(final double[] values, final int endIndex) {
 		return findMin(values, 0, endIndex);
 	}
 
-	private static int findMin(double[] values, int startIndex, int endIndex) {
+	private static int findMin(final double[] values, final int startIndex,
+		final int endIndex)
+	{
 		int index = startIndex;
 		double min = values[startIndex];
 		for (int i = startIndex; i < endIndex; ++i) {

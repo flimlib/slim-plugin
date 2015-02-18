@@ -25,7 +25,7 @@ package loci.slim;
 
 /**
  * Interface for a grayscale pixel value getter.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface IGrayScalePixelValue {

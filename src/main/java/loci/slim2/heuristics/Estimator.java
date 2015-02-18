@@ -25,48 +25,48 @@ package loci.slim2.heuristics;
 
 /**
  * Interface for a class with estimates and rules of thumb.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface Estimator {
 
 	/**
 	 * Get a decay start estimate.
-	 * 
+	 *
 	 * @param bins
-	 * @return 
+	 * @return
 	 */
 	int getStart(int bins);
 
 	/**
 	 * Get a decay stop estimate.
-	 * 
+	 *
 	 * @param bins
-	 * @return 
+	 * @return
 	 */
 	int getStop(int bins);
 
 	/**
 	 * Get a default threshold amount.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	int getThreshold();
 
 	/**
 	 * Get a default chi square target.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	double getChiSquareTarget();
 
 	/**
 	 * Gets default parameters for given number of components or stretched
 	 * exponential.
-	 * 
+	 *
 	 * @param components
 	 * @param stretched
-	 * @return 
+	 * @return
 	 */
 	double[] getParameters(int components, boolean stretched);
 }

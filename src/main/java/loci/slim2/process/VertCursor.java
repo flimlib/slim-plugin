@@ -26,18 +26,18 @@ package loci.slim2.process;
 /**
  * Vertical decay cursor.
  * <p>
- * Could be used to specify a 'Z' level or vertically 
- * truncate an excitation.
- * 
+ * Could be used to specify a 'Z' level or vertically truncate an excitation.
+ *
  * @author Aivar Grislis
  */
 public class VertCursor {
+
 	private double photons;
 
 	/**
 	 * Gets vertical cursor position.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getPhotons() {
 		return photons;
@@ -45,10 +45,10 @@ public class VertCursor {
 
 	/**
 	 * Sets vertical cursor position.
-	 * 
-	 * @param photons 
+	 *
+	 * @param photons
 	 */
-	public void setPhotons(double photons) {
+	public void setPhotons(final double photons) {
 		this.photons = photons;
 	}
 }

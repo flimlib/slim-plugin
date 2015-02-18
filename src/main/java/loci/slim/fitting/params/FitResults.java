@@ -25,16 +25,17 @@ package loci.slim.fitting.params;
 
 /**
  * Interface for container for local fitted results for current pixel.
- * 
+ *
  * @author Aivar Grislis
  */
 public class FitResults implements IFitResults {
+
 	double _chiSquare;
 	double[] _params;
 	double[] _yFitted;
 
 	@Override
-	public void setChiSquare(double chiSquare) {
+	public void setChiSquare(final double chiSquare) {
 		_chiSquare = chiSquare;
 	}
 
@@ -44,7 +45,7 @@ public class FitResults implements IFitResults {
 	}
 
 	@Override
-	public void setParams(double[] params) {
+	public void setParams(final double[] params) {
 		_params = params;
 	}
 
@@ -54,7 +55,7 @@ public class FitResults implements IFitResults {
 	}
 
 	@Override
-	public void setYFitted(double[] yFitted) {
+	public void setYFitted(final double[] yFitted) {
 		_yFitted = yFitted;
 	}
 

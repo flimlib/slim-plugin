@@ -29,18 +29,19 @@ import ij.process.ImageProcessor;
 import java.awt.image.IndexColorModel;
 
 /**
- * 
  * @author Aivar Grislis
  */
 public class FloatFittedImage implements IFittedImageSlice {
+
 	int _width;
 	int _height;
 	int _channel;
 	FloatProcessor _imageProcessor;
 
 	@Override
-	public void init(int width, int height, int channel,
-			IndexColorModel indexColorModel) {
+	public void init(final int width, final int height, final int channel,
+		final IndexColorModel indexColorModel)
+	{
 		_width = width;
 		_height = height;
 		_channel = channel;
@@ -55,7 +56,7 @@ public class FloatFittedImage implements IFittedImageSlice {
 	}
 
 	@Override
-	public void setColorModel(IndexColorModel indexColorModel) {
+	public void setColorModel(final IndexColorModel indexColorModel) {
 		_imageProcessor.setColorModel(indexColorModel);
 	}
 
@@ -65,12 +66,12 @@ public class FloatFittedImage implements IFittedImageSlice {
 	}
 
 	@Override
-	public void setMinAndMax(double min, double max) {
+	public void setMinAndMax(final double min, final double max) {
 		_imageProcessor.setMinAndMax(min, max);
 	}
 
 	@Override
-	public void draw(int x, int y, double value) {
+	public void draw(final int x, final int y, final double value) {
 		_imageProcessor.setValue(value);
 		_imageProcessor.drawPixel(x, y);
 	}

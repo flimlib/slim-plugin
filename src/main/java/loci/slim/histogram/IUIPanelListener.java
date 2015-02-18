@@ -24,21 +24,20 @@
 package loci.slim.histogram;
 
 /**
- *
  * @author Aivar Grislis
  */
 public interface IUIPanelListener {
 
 	/**
 	 * User has clicked the auto ranging checkbox.
-	 * 
+	 *
 	 * @param autoRange
 	 */
 	public void setAutoRange(boolean autoRange);
 
 	/**
 	 * User has clicked the exclude pixels checkbox.
-	 * 
+	 *
 	 * @param excludePixels
 	 */
 	public void setExcludePixels(boolean excludePixels);
@@ -50,43 +49,43 @@ public interface IUIPanelListener {
 
 	/**
 	 * User has clicked the display channels checkbox.
-	 * 
-	 * @param displayChannels 
+	 *
+	 * @param displayChannels
 	 */
 	public void setDisplayChannels(boolean displayChannels);
 
 	/**
 	 * User has clicked the logarithmic display checkbox.
-	 * 
+	 *
 	 * @param log
 	 */
 	public void setLogarithmicDisplay(boolean log);
 
 	/**
 	 * User has clicked the smoothing checkbox.
-	 * 
-	 * @param smooth 
+	 *
+	 * @param smooth
 	 */
 	public void setSmoothing(boolean smooth);
 
 	/**
 	 * User has entered new bandwidth (used for smoothing).
-	 * 
-	 * @param bandwidth 
+	 *
+	 * @param bandwidth
 	 */
 	public void setBandwidth(double bandwidth);
 
 	/**
 	 * User has clicked the family style 1 checkbox.
-	 * 
+	 *
 	 * @param on
 	 */
 	public void setFamilyStyle1(boolean on);
 
 	/**
 	 * User has clicked the family style 1 checkbox.
-	 * 
-	 * @param on 
+	 *
+	 * @param on
 	 */
 	public void setFamilyStyle2(boolean on);
 

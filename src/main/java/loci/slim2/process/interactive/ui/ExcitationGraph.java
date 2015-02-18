@@ -29,7 +29,7 @@ import loci.slim2.process.interactive.cursor.FittingCursor;
 
 /**
  * Interface for the graph showing the excitation curve.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface ExcitationGraph {
@@ -43,8 +43,8 @@ public interface ExcitationGraph {
 
 	/**
 	 * Sets the fitting cursor.
-	 * 
-	 * @param fittingCursor 
+	 *
+	 * @param fittingCursor
 	 */
 	public void setFittingCursor(FittingCursor fittingCursor);
 }

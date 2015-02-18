@@ -32,21 +32,24 @@ import net.imglib2.type.numeric.RealType;
 
 /**
  * Builds a grayscale version of the lifetime decay image.
- * 
+ *
  * @author Aivar Grislis
  */
 public class LifetimeGrayscaleDataset {
+
 	private final Dataset grayscaleDataset;
 	private final long[] maxPosition;
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param datasetService
 	 * @param lifetimeDatasetWrapper
 	 * @param bins
 	 */
-	public LifetimeGrayscaleDataset(DatasetService datasetService, LifetimeDatasetWrapper lifetimeDatasetWrapper) {
+	public LifetimeGrayscaleDataset(final DatasetService datasetService,
+		final LifetimeDatasetWrapper lifetimeDatasetWrapper)
+	{
 		// create grayscale image
 		final long[] dimensions = lifetimeDatasetWrapper.getDims();
 		final String name = lifetimeDatasetWrapper.getDataset().getName();
@@ -54,20 +57,23 @@ public class LifetimeGrayscaleDataset {
 		final int bpp = 32;
 		final boolean signed = true;
 		final boolean floating = false;
-		grayscaleDataset = datasetService.create(dimensions, name, axes, bpp, signed, floating);
+		grayscaleDataset =
+			datasetService.create(dimensions, name, axes, bpp, signed, floating);
 
 		// iterate through grayscale image
 		final ImgPlus imgPlus = grayscaleDataset.getImgPlus();
-		final Cursor<? extends RealType<?>> grayscaleCursor = imgPlus.localizingCursor();
+		final Cursor<? extends RealType<?>> grayscaleCursor =
+			imgPlus.localizingCursor();
 		final long[] position = new long[dimensions.length];
 		int maxSummed = Integer.MIN_VALUE;
 		maxPosition = new long[dimensions.length];
-		int binSize = 0;
+		final int binSize = 0;
 		while (grayscaleCursor.hasNext()) {
 			grayscaleCursor.fwd();
 			grayscaleCursor.localize(position);
 
-			final int summed = lifetimeDatasetWrapper.getSummedDecay(binSize, position);
+			final int summed =
+				lifetimeDatasetWrapper.getSummedDecay(binSize, position);
 			grayscaleCursor.get().setReal(summed);
 
 			// keep track of brightest pixel in first plane
@@ -82,8 +88,8 @@ public class LifetimeGrayscaleDataset {
 
 	/**
 	 * Gets the associated dataset.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public Dataset getDataset() {
 		return grayscaleDataset;
@@ -91,8 +97,8 @@ public class LifetimeGrayscaleDataset {
 
 	/**
 	 * Reports the full position of the brightest pixel in the first XY plane.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public long[] getBrightestPixel() {
 		return maxPosition;
@@ -100,11 +106,11 @@ public class LifetimeGrayscaleDataset {
 
 	/**
 	 * Reports whether this position is in the first XY plane.
-	 * 
+	 *
 	 * @param position
-	 * @return 
+	 * @return
 	 */
-	private boolean inFirstPlane(long[] position) {
+	private boolean inFirstPlane(final long[] position) {
 		for (int i = 2; i < position.length; ++i) {
 			if (0L != position[i]) {
 				return false;

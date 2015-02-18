@@ -36,13 +36,14 @@ import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 
 /**
- * This is a panel that represents a histogram.  Scale is logarithmic.  Cursors
+ * This is a panel that represents a histogram. Scale is logarithmic. Cursors
  * can be drawn and manipulated, representing the range of the LUT inside the
- * bounds of the view.  Dragging the cursor off the edge stretches those bounds.
+ * bounds of the view. Dragging the cursor off the edge stretches those bounds.
  *
  * @author Aivar Grislis
  */
 public class HistogramPanel extends JPanel {
+
 	public static final double DEFAULT_BANDWIDTH = 0.2;
 	private static final double LOG_ONE_FACTOR = Math.log(3) / Math.log(2);
 	private static final int SINGLE_PIXEL = 1;
@@ -53,9 +54,9 @@ public class HistogramPanel extends JPanel {
 	private static final Color DASHED_LINE_COLOR = new Color(10, 10, 10);
 	private IHistogramPanelListener _listener;
 	private final Object _synchObject = new Object();
-	private int _width;
+	private final int _width;
 	private int _height;
-	private int _inset;
+	private final int _inset;
 	private int[] _bins;
 	private double[] _binValues;
 	private int _maxBinCount;
@@ -72,7 +73,8 @@ public class HistogramPanel extends JPanel {
 	private double[] _kernelDensityEstimate;
 	private double[][] _kernelDensityEstimateFamily;
 	private double _bandwidth = DEFAULT_BANDWIDTH;
-	private double[] _bandwidthFamily = new double[] { 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35 };
+	private final double[] _bandwidthFamily = new double[] { 0.05, 0.10, 0.15,
+		0.20, 0.25, 0.30, 0.35 };
 
 	/**
 	 * Constructor
@@ -81,7 +83,7 @@ public class HistogramPanel extends JPanel {
 	 * @param inset
 	 * @param height
 	 */
-	public HistogramPanel(int width, int inset, int height) {
+	public HistogramPanel(final int width, final int inset, final int height) {
 		super();
 
 		_width = width;
@@ -100,8 +102,9 @@ public class HistogramPanel extends JPanel {
 
 		setPreferredSize(new Dimension(width + 2 * inset, height));
 		addMouseListener(new MouseListener() {
+
 			@Override
-			public void mousePressed(MouseEvent e) {
+			public void mousePressed(final MouseEvent e) {
 				synchronized (_synchObject) {
 					if (null != _minCursor && null != _maxCursor) {
 						// start dragging minimum or maximum cursor
@@ -116,7 +119,7 @@ public class HistogramPanel extends JPanel {
 			}
 
 			@Override
-			public void mouseReleased(MouseEvent e) {
+			public void mouseReleased(final MouseEvent e) {
 				boolean changed = false;
 				int min = 0; // makes the compiler happy
 				int max = 0;
@@ -162,23 +165,24 @@ public class HistogramPanel extends JPanel {
 			}
 
 			@Override
-			public void mouseEntered(MouseEvent e) { }
+			public void mouseEntered(final MouseEvent e) {}
 
 			@Override
-			public void mouseExited(MouseEvent e) {
+			public void mouseExited(final MouseEvent e) {
 				_listener.exited();
 			}
 
 			@Override
-			public void mouseClicked(MouseEvent e) { }
+			public void mouseClicked(final MouseEvent e) {}
 
 		});
 		addMouseMotionListener(new MouseMotionListener() {
-			@Override
-			public void mouseMoved(MouseEvent e) { }
 
 			@Override
-			public void mouseDragged(MouseEvent e) {
+			public void mouseMoved(final MouseEvent e) {}
+
+			@Override
+			public void mouseDragged(final MouseEvent e) {
 				boolean changed = false;
 				int min = 0;
 				int max = 0;
@@ -224,12 +228,12 @@ public class HistogramPanel extends JPanel {
 	}
 
 	@Override
-	public String getToolTipText(MouseEvent e) {
+	public String getToolTipText(final MouseEvent e) {
 		String suffix = null;
 		Double value = null;
-		int bin = e.getX() - _inset - 1;
+		final int bin = e.getX() - _inset - 1;
 		if (0 <= bin && bin < _bins.length) {
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			if (null != _quartileIndices && null != _quartiles) {
 				if (_quartileIndices[0] == bin) {
 					suffix = QUARTILE_1;
@@ -259,7 +263,7 @@ public class HistogramPanel extends JPanel {
 		return null;
 	}
 
-	private double round(double value) {
+	private double round(final double value) {
 		double result = value * 1000;
 		result = Math.round(result);
 		return result / 1000;
@@ -269,7 +273,7 @@ public class HistogramPanel extends JPanel {
 		return _log;
 	}
 
-	public void setLogarithmicDisplay(boolean log) {
+	public void setLogarithmicDisplay(final boolean log) {
 		_log = log;
 		repaint();
 	}
@@ -278,7 +282,7 @@ public class HistogramPanel extends JPanel {
 		return _smooth;
 	}
 
-	public void setSmoothing(boolean smooth) {
+	public void setSmoothing(final boolean smooth) {
 		_smooth = smooth;
 		repaint();
 	}
@@ -287,15 +291,16 @@ public class HistogramPanel extends JPanel {
 		return _bandwidth;
 	}
 
-	public void setBandwidth(double bandwidth) {
+	public void setBandwidth(final double bandwidth) {
 		IJ.log("bandwidth is " + bandwidth);
 		_family = false;
 		_bandwidth = bandwidth;
-		_kernelDensityEstimate = kernelDensityEstimation(_bins, _maxBinCount, _bandwidth);
+		_kernelDensityEstimate =
+			kernelDensityEstimation(_bins, _maxBinCount, _bandwidth);
 		repaint();
 	}
 
-	public void setFamily1(boolean on) {
+	public void setFamily1(final boolean on) {
 		if (on) {
 			_family = true;
 			_style1 = true;
@@ -303,7 +308,7 @@ public class HistogramPanel extends JPanel {
 		}
 	}
 
-	public void setFamily2(boolean on) {
+	public void setFamily2(final boolean on) {
 		if (on) {
 			_family = true;
 			_style1 = false;
@@ -316,16 +321,16 @@ public class HistogramPanel extends JPanel {
 	 *
 	 * @param listener
 	 */
-	public void setListener(IHistogramPanelListener listener) {
+	public void setListener(final IHistogramPanelListener listener) {
 		_listener = listener;
 	}
 
 	/**
 	 * Changes histogram counts and redraws.
-	 * 
-	 * @param bins 
+	 *
+	 * @param bins
 	 */
-	public void setBinValues(int[] bins) {
+	public void setBinValues(final int[] bins) {
 		synchronized (_synchObject) {
 			_bins = bins;
 			_maxBinCount = Integer.MIN_VALUE;
@@ -338,7 +343,7 @@ public class HistogramPanel extends JPanel {
 		repaint();
 	}
 
-	public void setStatistics(HistogramStatistics statistics) {
+	public void setStatistics(final HistogramStatistics statistics) {
 		synchronized (_synchObject) {
 			_bins = statistics.getBins();
 			_maxBinCount = Integer.MIN_VALUE;
@@ -352,31 +357,38 @@ public class HistogramPanel extends JPanel {
 			_quartiles = statistics.getQuartiles();
 		}
 		int count = 0;
-		for (int i = 0; i < _bins.length; ++i) { //TODO if this stays, incorporate in earlier loop
+		for (int i = 0; i < _bins.length; ++i) { // TODO if this stays, incorporate
+																							// in earlier loop
 			count += _bins[i];
 		}
-		//IJ.log("statistics.getStdDev is " + statistics.getStdDev());
-		//IJ.log("Silverman's rule bandwidth is count " + count + " bandwidth " + silvermansRule(0.27, count));
-		//IJ.log("estimate " + estimateBandwidth(statistics.getFences()[1] - statistics.getFences()[0], count));
-		_bandwidth = 5 * estimateBandwidth(statistics.getFences()[1] - statistics.getFences()[0], count);
-		_kernelDensityEstimate = kernelDensityEstimation(_bins, _maxBinCount, _bandwidth);
+		// IJ.log("statistics.getStdDev is " + statistics.getStdDev());
+		// IJ.log("Silverman's rule bandwidth is count " + count + " bandwidth " +
+		// silvermansRule(0.27, count));
+		// IJ.log("estimate " + estimateBandwidth(statistics.getFences()[1] -
+		// statistics.getFences()[0], count));
+		_bandwidth =
+			5 * estimateBandwidth(statistics.getFences()[1] -
+				statistics.getFences()[0], count);
+		_kernelDensityEstimate =
+			kernelDensityEstimation(_bins, _maxBinCount, _bandwidth);
 
-		_kernelDensityEstimateFamily = new double[_bins.length][_bandwidthFamily.length];
+		_kernelDensityEstimateFamily =
+			new double[_bins.length][_bandwidthFamily.length];
 		for (int i = 0; i < _bandwidthFamily.length; ++i) {
-			_kernelDensityEstimateFamily[i] = kernelDensityEstimation(_bins, _maxBinCount, _bandwidthFamily[i]);
+			_kernelDensityEstimateFamily[i] =
+				kernelDensityEstimation(_bins, _maxBinCount, _bandwidthFamily[i]);
 		}
 		repaint();
 	}
 
 	/**
-	 * Changes cursors and redraws.  Note that when they are both null no
-	 * cursor is displayed.  Otherwise if one is null only the other value
-	 * changes.
-	 * 
+	 * Changes cursors and redraws. Note that when they are both null no cursor is
+	 * displayed. Otherwise if one is null only the other value changes.
+	 *
 	 * @param minCursor null or minimum cursor position in pixels
 	 * @param maxCursor null or maximum cursor position in pixels
 	 */
-	public void setCursors(Integer minCursor, Integer maxCursor) {
+	public void setCursors(final Integer minCursor, final Integer maxCursor) {
 		synchronized (_synchObject) {
 			if (null == minCursor) {
 				if (null == maxCursor) {
@@ -416,13 +428,13 @@ public class HistogramPanel extends JPanel {
 	}
 
 	@Override
-	public void paintComponent(Graphics g) {
+	public void paintComponent(final Graphics g) {
 		super.paintComponent(g);
 		if (null != _bins) {
 			synchronized (_synchObject) {
 
 				// allow resize
-				Dimension size = getSize();
+				final Dimension size = getSize();
 				_height = size.height;
 
 				if (_smooth) {
@@ -430,7 +442,8 @@ public class HistogramPanel extends JPanel {
 						g.setColor(Color.DARK_GRAY);
 						double max = -Double.MAX_VALUE;
 						if (_style1) {
-							for (double[] kernelDensityEstimate : _kernelDensityEstimateFamily) {
+							for (final double[] kernelDensityEstimate : _kernelDensityEstimateFamily)
+							{
 								for (int x = 0; x < kernelDensityEstimate.length; ++x) {
 									if (kernelDensityEstimate[x] > max) {
 										max = kernelDensityEstimate[x];
@@ -438,7 +451,8 @@ public class HistogramPanel extends JPanel {
 								}
 							}
 						}
-						for (double[] kernelDensityEstimate : _kernelDensityEstimateFamily) {
+						for (final double[] kernelDensityEstimate : _kernelDensityEstimateFamily)
+						{
 							if (!_style1) {
 								max = -Double.MAX_VALUE;
 								for (int x = 0; x < kernelDensityEstimate.length; ++x) {
@@ -451,7 +465,9 @@ public class HistogramPanel extends JPanel {
 							int prevY = 0;
 							boolean firstPixel = true;
 							for (int x = 0; x < kernelDensityEstimate.length; ++x) {
-								int y = _height - 1 - (int) ((kernelDensityEstimate[x] * _height) / max);
+								final int y =
+									_height - 1 -
+										(int) ((kernelDensityEstimate[x] * _height) / max);
 								if (firstPixel) {
 									g.drawLine(_inset + x, y, _inset + x, y);
 								}
@@ -473,7 +489,9 @@ public class HistogramPanel extends JPanel {
 								}
 							}
 							for (int x = 0; x < _kernelDensityEstimate.length; ++x) {
-								int y = _height - 1 - (int) ((_kernelDensityEstimate[x] * _height) / max);
+								final int y =
+									_height - 1 -
+										(int) ((_kernelDensityEstimate[x] * _height) / max);
 								g.setColor(Color.WHITE);
 								g.drawLine(_inset + x, 0, _inset + x, y);
 								g.setColor(Color.DARK_GRAY);
@@ -488,8 +506,9 @@ public class HistogramPanel extends JPanel {
 					int logOneHeight = 0;
 					if (_log) {
 						// this is a hack just to get some proportionality
-						double logTwoHeight = (_height * Math.log(2)) / (Math.log(_maxBinCount) + 1);
-						logOneHeight = (int)(LOG_ONE_FACTOR * logTwoHeight);
+						final double logTwoHeight =
+							(_height * Math.log(2)) / (Math.log(_maxBinCount) + 1);
+						logOneHeight = (int) (LOG_ONE_FACTOR * logTwoHeight);
 					}
 
 					int height;
@@ -502,12 +521,17 @@ public class HistogramPanel extends JPanel {
 								height = logOneHeight;
 							}
 							else {
-								height = (int)((_height - logOneHeight) * Math.log(_bins[i]) / Math.log(_maxBinCount)) + logOneHeight;
+								height =
+									(int) ((_height - logOneHeight) * Math.log(_bins[i]) / Math
+										.log(_maxBinCount)) +
+										logOneHeight;
 							}
 						}
 						else {
 							// make sure values of one show at least a single pixel
-							height = (_height - SINGLE_PIXEL) * _bins[i] / _maxBinCount + SINGLE_PIXEL;
+							height =
+								(_height - SINGLE_PIXEL) * _bins[i] / _maxBinCount +
+									SINGLE_PIXEL;
 						}
 						if (height > _height) {
 							height = _height;
@@ -526,7 +550,7 @@ public class HistogramPanel extends JPanel {
 				}
 
 				if (null != _quartileIndices) {
-					for (int quartileIndex : _quartileIndices) {
+					for (final int quartileIndex : _quartileIndices) {
 						drawDashedLine(g, _inset + quartileIndex, 0, _height);
 					}
 				}
@@ -534,21 +558,25 @@ public class HistogramPanel extends JPanel {
 		}
 	}
 
-	private void drawDashedLine(Graphics g, int x, int y0, int y1) {
+	private void drawDashedLine(final Graphics g, final int x, final int y0,
+		final int y1)
+	{
 		g.setXORMode(DASHED_LINE_COLOR);
 		for (int y = y0; y < y1; y += 7) {
-			int yEnding = Math.min(y + 2, y1);
+			final int yEnding = Math.min(y + 2, y1);
 			g.drawLine(x, y, x, yEnding);
 		}
 	}
 
-	private double[] kernelDensityEstimation(int[] bins, int maxCount, double bandwidth) {
-		double[] fitted = new double[bins.length];
+	private double[] kernelDensityEstimation(final int[] bins,
+		final int maxCount, final double bandwidth)
+	{
+		final double[] fitted = new double[bins.length];
 		for (int i = 0; i < fitted.length; ++i) {
 			fitted[i] = 0.0;
 		}
 		for (int center = 0; center < bins.length; ++center) {
-			int count = bins[center];
+			final int count = bins[center];
 			for (int x = 0; x < bins.length; ++x) {
 				fitted[x] += gaussian(count, center, bandwidth, x);
 			}
@@ -556,16 +584,18 @@ public class HistogramPanel extends JPanel {
 		return fitted;
 	}
 
-	private double gaussian(double a, double b, double c, double x) {
+	private double gaussian(final double a, final double b, final double c,
+		final double x)
+	{
 		return a * Math.exp(-(x - b) * (x - b) / (2 * c * c));
 	}
 
-	private double silvermansRule(double standardDeviation, int n) {
+	private double silvermansRule(final double standardDeviation, final int n) {
 		return (1.06 * standardDeviation / Math.pow(n, 0.20));
 	}
 
-	private double estimateBandwidth(double range, int n) {
-		//IJ.log("range is " + range + " count " + n);
+	private double estimateBandwidth(final double range, final int n) {
+		// IJ.log("range is " + range + " count " + n);
 		return range / Math.sqrt(n);
 	}
 }

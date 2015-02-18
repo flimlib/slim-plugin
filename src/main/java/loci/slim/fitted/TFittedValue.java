@@ -23,17 +23,16 @@
 
 package loci.slim.fitted;
 
-
-
 /**
  * Extracts T fitted values.
- * 
+ *
  * @author Aivar Grislis
  */
 public class TFittedValue extends AbstractFittedValue implements FittedValue {
+
 	private int fittedParamIndex;
 
-	public void init(String title, int component) {
+	public void init(final String title, final int component) {
 		setTitle(title);
 		switch (component) {
 			case 1:
@@ -49,7 +48,7 @@ public class TFittedValue extends AbstractFittedValue implements FittedValue {
 	}
 
 	@Override
-	public double getValue(double[] values) {
+	public double getValue(final double[] values) {
 		return values[fittedParamIndex];
 	}
 }

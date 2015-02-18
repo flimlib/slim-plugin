@@ -28,12 +28,13 @@ import loci.curvefitter.ICurveFitData;
 import loci.curvefitter.ICurveFitter;
 
 /**
- * This class brings together everything needed to fit one pixel.  It is a 
+ * This class brings together everything needed to fit one pixel. It is a
  * Callable, meant to be called from multiple threads.
  *
  * @author Aivar Grislis
  */
 public class DefaultFittingCallable implements FittingCallable {
+
 	private ICurveFitter curveFitter;
 	private GlobalFitParams globalParams;
 	private LocalFitParams localParams;
@@ -41,8 +42,8 @@ public class DefaultFittingCallable implements FittingCallable {
 
 	@Override
 	public void setup(final ICurveFitter curveFitter,
-			final GlobalFitParams globalParams,
-			final LocalFitParams localParams) {
+		final GlobalFitParams globalParams, final LocalFitParams localParams)
+	{
 		this.curveFitter = curveFitter;
 		this.globalParams = globalParams;
 		this.localParams = localParams;
@@ -63,7 +64,7 @@ public class DefaultFittingCallable implements FittingCallable {
 		curveFitter.setXInc(globalParams.getXInc());
 		curveFitter.setFree(globalParams.getFree());
 
-		ICurveFitData curveFitData = new CurveFitData();
+		final ICurveFitData curveFitData = new CurveFitData();
 		curveFitData.setChiSquareTarget(globalParams.getChiSquareTarget());
 		decay = localParams.getY();
 		curveFitData.setYCount(decay);
@@ -73,12 +74,14 @@ public class DefaultFittingCallable implements FittingCallable {
 		transientStop = globalParams.getTransientStop();
 		curveFitData.setTransEndIndex(transientStop);
 		curveFitData.setSig(localParams.getSig());
-		curveFitData.setParams(localParams.getParams().clone()); // params is overwritten
+		curveFitData.setParams(localParams.getParams().clone()); // params is
+																															// overwritten
 		curveFitData.setYFitted(localParams.getYFitted());
 
-		ICurveFitData[] curveFitDataArray = new ICurveFitData[] { curveFitData }; //TODO refactor to non-array
+		final ICurveFitData[] curveFitDataArray =
+			new ICurveFitData[] { curveFitData }; // TODO refactor to non-array
 
-		int returnValue = curveFitter.fitData(curveFitDataArray);
+		final int returnValue = curveFitter.fitData(curveFitDataArray);
 
 		result = new DefaultFitResults();
 		result.setErrorCode(returnValue);

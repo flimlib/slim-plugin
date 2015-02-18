@@ -30,15 +30,16 @@ import org.scijava.display.Display;
 
 /**
  * Keeps track of various entities during the fit process.
- * 
+ *
  * @author Aivar Grislis
  */
 public class FittingContext {
+
 	private LifetimeDatasetWrapper datasetWrapper;
 	private LifetimeGrayscaleDataset grayscaleDataset;
 	private Display<?> grayscaleDisplay;
 
-	public void setDatasetWrapper(LifetimeDatasetWrapper wrapper) {
+	public void setDatasetWrapper(final LifetimeDatasetWrapper wrapper) {
 		datasetWrapper = wrapper;
 	}
 
@@ -46,7 +47,7 @@ public class FittingContext {
 		return datasetWrapper;
 	}
 
-	public void setGrayscaleDataset(LifetimeGrayscaleDataset dataset) {
+	public void setGrayscaleDataset(final LifetimeGrayscaleDataset dataset) {
 		grayscaleDataset = dataset;
 	}
 
@@ -54,7 +55,7 @@ public class FittingContext {
 		return grayscaleDataset;
 	}
 
-	public void setGrayscaleDisplay(Display<?> display) {
+	public void setGrayscaleDisplay(final Display<?> display) {
 		grayscaleDisplay = display;
 	}
 

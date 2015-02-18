@@ -25,7 +25,7 @@ package loci.slim.analysis.batch.ui;
 
 /**
  * Used to load images from the batch histogram UI.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface BatchHistogramListener {

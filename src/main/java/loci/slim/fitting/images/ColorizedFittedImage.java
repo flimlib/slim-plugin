@@ -34,10 +34,11 @@ import loci.slim.IGrayScalePixelValue;
 /**
  * This class maintains a colorized grayscale fitted image, similar to those in
  * SPCImage software.
- * 
+ *
  * @author Aivar Grislis
  */
 public class ColorizedFittedImage implements IFittedImageSlice {
+
 	private static final float SATURATION = 0.75f;
 	IGrayScalePixelValue _grayScalePixelValue;
 	double[][] _values;
@@ -49,16 +50,17 @@ public class ColorizedFittedImage implements IFittedImageSlice {
 	double _min;
 	double _max;
 
-	public ColorizedFittedImage(IGrayScalePixelValue grayScalePixelValue,
-			double[][] values)
+	public ColorizedFittedImage(final IGrayScalePixelValue grayScalePixelValue,
+		final double[][] values)
 	{
 		_grayScalePixelValue = grayScalePixelValue;
 		_values = values;
 	}
 
 	@Override
-	public void init(int width, int height, int channel,
-			IndexColorModel indexColorModel) {
+	public void init(final int width, final int height, final int channel,
+		final IndexColorModel indexColorModel)
+	{
 		_width = width;
 		_height = height;
 		_channel = channel;
@@ -66,8 +68,8 @@ public class ColorizedFittedImage implements IFittedImageSlice {
 		_colorProcessor = new ColorProcessor(width, height);
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
-				int grayValue = _grayScalePixelValue.getGrayValue(channel, x, y);
-				Color gray = getGrayColor(grayValue);
+				final int grayValue = _grayScalePixelValue.getGrayValue(channel, x, y);
+				final Color gray = getGrayColor(grayValue);
 				_colorProcessor.setColor(gray);
 				_colorProcessor.drawPixel(x, y);
 			}
@@ -75,7 +77,7 @@ public class ColorizedFittedImage implements IFittedImageSlice {
 	}
 
 	@Override
-	public void setColorModel(IndexColorModel indexColorModel) {
+	public void setColorModel(final IndexColorModel indexColorModel) {
 		_indexColorModel = indexColorModel;
 	}
 
@@ -85,7 +87,7 @@ public class ColorizedFittedImage implements IFittedImageSlice {
 	}
 
 	@Override
-	public void setMinAndMax(double min, double max) {
+	public void setMinAndMax(final double min, final double max) {
 		if (min != _min || max != _max) {
 			_min = min;
 			_max = max;
@@ -94,8 +96,9 @@ public class ColorizedFittedImage implements IFittedImageSlice {
 			for (int y = 0; y < _height; ++y) {
 				for (int x = 0; x < _width; ++x) {
 					Color color = null;
-					int grayValue = _grayScalePixelValue.getGrayValue(_channel, x, y);
-					double value = _values[x][y];
+					final int grayValue =
+						_grayScalePixelValue.getGrayValue(_channel, x, y);
+					final double value = _values[x][y];
 					if (min <= value && value <= max) {
 						color = getColorizedGrayColor(grayValue, value);
 					}
@@ -110,47 +113,45 @@ public class ColorizedFittedImage implements IFittedImageSlice {
 	}
 
 	@Override
-	public void draw(int x, int y, double value) {
-		int grayValue = _grayScalePixelValue.getGrayValue(_channel, x, y);
-		Color colorizedGray = getColorizedGrayColor(grayValue, value);
+	public void draw(final int x, final int y, final double value) {
+		final int grayValue = _grayScalePixelValue.getGrayValue(_channel, x, y);
+		final Color colorizedGray = getColorizedGrayColor(grayValue, value);
 		_colorProcessor.setColor(colorizedGray);
 		_colorProcessor.drawPixel(x, y);
 	}
 
-	private Color getGrayColor(int grayValue) {
+	private Color getGrayColor(final int grayValue) {
 		return new Color(grayValue, grayValue, grayValue);
 	}
 
 	/*
 	 * This method does the actual colorization.  Given a gray level and
 	 * a value to display, returns the colorized Color.
-	 * 
+	 *
 	 */
-	private Color getColorizedGrayColor(int grayValue, double value) {
-		if (_max == _min
-				|| Double.isNaN(value)
-				|| value < _min || value > _max) {
+	private Color getColorizedGrayColor(final int grayValue, double value) {
+		if (_max == _min || Double.isNaN(value) || value < _min || value > _max) {
 			return getGrayColor(grayValue);
 		}
 
 		// convert value to 0.0..1.0
 		value = (value - _min) / (_max - _min);
 
-		//TODO ARG problem here; the only value that results in index 254 is _max.
+		// TODO ARG problem here; the only value that results in index 254 is _max.
 		// convert 0.0..1.0 to 1..254 (colors 0 and 255 have a special use)
-		int index = 1 + (int) (value * 253);
+		final int index = 1 + (int) (value * 253);
 
 		// get color
-		Color color = new Color(_indexColorModel.getRGB(index));
+		final Color color = new Color(_indexColorModel.getRGB(index));
 
 		// decompose color
-		float[] hsv = new float[3];
+		final float[] hsv = new float[3];
 		Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), hsv);
 
 		// synthesize new color, using grayValue brightness
-		float hue        = hsv[0];
-		float saturation = SATURATION;
-		float brightness = grayValue / 255.0f; // 0..255 -> 0.0..1.0
+		final float hue = hsv[0];
+		final float saturation = SATURATION;
+		final float brightness = grayValue / 255.0f; // 0..255 -> 0.0..1.0
 		return Color.getHSBColor(hue, saturation, brightness);
 	}
 }

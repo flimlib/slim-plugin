@@ -23,18 +23,17 @@
 
 package loci.slim2.process.interactive.cursor;
 
-
 /**
  * Listener interface for fitting cursor changes.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface FittingCursorListener {
 
 	/**
 	 * Callback when the cursor changes.
-	 * 
-	 * @param cursor 
+	 *
+	 * @param cursor
 	 */
 	public void cursorChanged(FittingCursor cursor);
 }

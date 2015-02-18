@@ -48,11 +48,12 @@ import org.scijava.plugin.Plugin;
 
 /**
  * Exports histogram values as text for further analysis of SLIM Curve results.
- * 
+ *
  * @author Aivar Grislis
  */
 @Plugin(type = SLIMAnalyzer.class, name = "Export Histograms to Text")
 public class ExportHistogramsToText implements SLIMAnalyzer {
+
 	private static final int BINS = 256;
 	private static final long MIN_COUNT = 3;
 	private static final String FILE_KEY = "export_histograms_to_text/file";
@@ -67,7 +68,7 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 	private boolean append;
 	private boolean csv;
 	private BufferedWriter bufferedWriter;
-	private boolean combined = true;
+	private final boolean combined = true;
 
 //	@Override
 //	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
@@ -95,14 +96,20 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 //			}
 //		}
 //	}
-//	
+//
 	@Override
-	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
+	public void analyze(final ImgPlus<DoubleType> image, final FitRegion region,
+		final FitFunction function, final String parameters)
+	{
 		if (FitRegion.EACH == region) {
-			char separator=COMMA;
-			if(!SLIMProcessor.macroParams.isAnalysisListUsed){//macro NOT used, normal execution flow
+			char separator = COMMA;
+			if (!SLIMProcessor.macroParams.isAnalysisListUsed) {// macro NOT used,
+																													// normal execution
+																													// flow
 
-				boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
+				final boolean export =
+					showFileDialog(getFileFromPreferences(), getAppendFromPreferences(),
+						getCSVFromPreferences());
 				if (export && null != fileName) {
 
 					if (csv) {
@@ -120,14 +127,17 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 					saveFileInPreferences(fileName);
 					saveAppendInPreferences(append);
 					saveCSVInPreferences(csv);
-					String recordingCharString=Character.toString(separator);
-					SLIMProcessor.record(SLIMProcessor.SET_EXPORT_HISTO_FILE_NAME, fileName,recordingCharString);
+					final String recordingCharString = Character.toString(separator);
+					SLIMProcessor.record(SLIMProcessor.SET_EXPORT_HISTO_FILE_NAME,
+						fileName, recordingCharString);
 				}
 			}
-			else{///macro used
-				fileName=SLIMProcessor.macroParams.exportHistoFileNameSingleFile;
-				separator=SLIMProcessor.macroParams.exportHistoFileNameSingleFileSeperator.charAt(0);
-				append=SLIMProcessor.macroParams.isAppendUsed;
+			else {// /macro used
+				fileName = SLIMProcessor.macroParams.exportHistoFileNameSingleFile;
+				separator =
+					SLIMProcessor.macroParams.exportHistoFileNameSingleFileSeperator
+						.charAt(0);
+				append = SLIMProcessor.macroParams.isAppendUsed;
 				IJ.log(Character.toString(separator));
 				saveFileInPreferences(fileName);
 				saveAppendInPreferences(append);
@@ -139,9 +149,9 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 		}
 	}
 
-
-	public void export(String fileName, boolean append, ImgPlus<DoubleType> image,
-		FitFunction function, String parameters, char separator)
+	public void export(final String fileName, final boolean append,
+		final ImgPlus<DoubleType> image, final FitFunction function,
+		final String parameters, final char separator)
 	{
 		int params = 0;
 		int components = 0;
@@ -161,15 +171,16 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 			case STRETCHED_EXPONENTIAL:
 				params = 5;
 
-				//TODO fix stretched; how many components?
+				// TODO fix stretched; how many components?
 				break;
 		}
-		FittedValue[] fittedValues = FittedValueFactory.createFittedValues(parameters, components);
+		final FittedValue[] fittedValues =
+			FittedValueFactory.createFittedValues(parameters, components);
 
 		try {
 			bufferedWriter = new BufferedWriter(new FileWriter(fileName, append));
 		}
-		catch (IOException e) {
+		catch (final IOException e) {
 			IJ.log("exception opening file " + fileName);
 			IJ.handleException(e);
 		}
@@ -182,9 +193,9 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 				bufferedWriter.newLine();
 
 				// look at image dimensions
-				long[] dimensions = new long[image.numDimensions()];
+				final long[] dimensions = new long[image.numDimensions()];
 				image.dimensions(dimensions);
-				int channels = (int) dimensions[CHANNEL_INDEX];
+				final int channels = (int) dimensions[CHANNEL_INDEX];
 
 				// for all channels
 				for (int channel = 0; channel < channels; ++channel) {
@@ -194,16 +205,19 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 						bufferedWriter.newLine();
 					}
 
-					HistogramStatistics[] statisticsArray = new HistogramStatistics[fittedValues.length];
+					final HistogramStatistics[] statisticsArray =
+						new HistogramStatistics[fittedValues.length];
 					for (int i = 0; i < fittedValues.length; ++i) {
-						statisticsArray[i] = getStatistics(image, channel, params, fittedValues[i]);
+						statisticsArray[i] =
+							getStatistics(image, channel, params, fittedValues[i]);
 					}
 
 					if (combined) {
-						HistogramStatistics.export(statisticsArray, bufferedWriter, separator);
+						HistogramStatistics.export(statisticsArray, bufferedWriter,
+							separator);
 					}
 					else {
-						for (HistogramStatistics statistics : statisticsArray) {
+						for (final HistogramStatistics statistics : statisticsArray) {
 							// end early if count is too low
 							if (!statistics.export(bufferedWriter, separator)) {
 								break;
@@ -214,7 +228,7 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 				bufferedWriter.newLine();
 				bufferedWriter.close();
 			}
-			catch (IOException exception) {
+			catch (final IOException exception) {
 				IJ.log("exception writing to file " + fileName);
 				IJ.handleException(exception);
 			}
@@ -223,26 +237,31 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 
 	/**
 	 * Builds statistics from image and single FittedValue.
-	 * 
+	 *
 	 * @param image
 	 * @param channel
 	 * @param params
 	 * @param fittedValue
-	 * @return 
+	 * @return
 	 */
-	public HistogramStatistics getStatistics(ImgPlus<DoubleType> image, int channel, int params, FittedValue fittedValue) {
+	public HistogramStatistics getStatistics(final ImgPlus<DoubleType> image,
+		final int channel, final int params, final FittedValue fittedValue)
+	{
 		// first pass through image
-		Statistics1 statistics1 = getStatistics1(image, channel, params, fittedValue);
+		final Statistics1 statistics1 =
+			getStatistics1(image, channel, params, fittedValue);
 
 		// second pass through the image
-		Statistics2 statistics2 = getStatistics2(image, channel, params, fittedValue, statistics1.mean, statistics1.range, BINS);
+		final Statistics2 statistics2 =
+			getStatistics2(image, channel, params, fittedValue, statistics1.mean,
+				statistics1.range, BINS);
 
-		HistogramStatistics statistics = new HistogramStatistics();
+		final HistogramStatistics statistics = new HistogramStatistics();
 		statistics.setTitle(fittedValue.getTitle());
 		statistics.setCount(statistics1.count);
 		statistics.setMin(statistics1.min);
 		statistics.setMax(statistics1.max);
-		//TODO handle this better
+		// TODO handle this better
 		if (null == statistics1.quartile) {
 			statistics.setFirstQuartile(0.0);
 			statistics.setMedian(0.0);
@@ -273,28 +292,31 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 
 	/**
 	 * First pass through the image, gathering statistics.
-	 * 
+	 *
 	 * @param image
 	 * @param channel
 	 * @param params
 	 * @param fittedValue
 	 * @return container of various statistics
 	 */
-	private Statistics1 getStatistics1(ImgPlus<DoubleType> image, int channel, int params, FittedValue fittedValue) {
+	private Statistics1 getStatistics1(final ImgPlus<DoubleType> image,
+		final int channel, final int params, final FittedValue fittedValue)
+	{
 		long count = 0;
 		double min = Double.MAX_VALUE;
 		double max = -Double.MAX_VALUE;
 		double sum = 0.0;
 		double[] quartile = null;
 		double[] range = null;
-		long[] dimensions = new long[image.numDimensions()];
+		final long[] dimensions = new long[image.numDimensions()];
 		image.dimensions(dimensions);
-		RandomAccess<DoubleType> cursor = image.randomAccess();
+		final RandomAccess<DoubleType> cursor = image.randomAccess();
 
 		// collect & sort non-NaN values
-		double[] values = new double[(int) dimensions[0] * (int) dimensions[1]];
+		final double[] values =
+			new double[(int) dimensions[0] * (int) dimensions[1]];
 		int index = 0;
-		int[] position = new int[dimensions.length];
+		final int[] position = new int[dimensions.length];
 		for (int y = 0; y < dimensions[1]; ++y) {
 			for (int x = 0; x < dimensions[0]; ++x) {
 				// set position
@@ -303,16 +325,16 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 				position[2] = channel;
 
 				// grab all fitted parameters
-				double[] fittedParameters = new double[params];
+				final double[] fittedParameters = new double[params];
 				for (int p = 0; p < params; ++p) {
 					position[3] = p;
 					cursor.setPosition(position);
-					double value = cursor.get().getRealDouble();
+					final double value = cursor.get().getRealDouble();
 					fittedParameters[p] = value;
 				}
 
 				// get value for this fitted parameter & account for it
-				double value = fittedValue.getValue(fittedParameters);
+				final double value = fittedValue.getValue(fittedParameters);
 				if (!Double.isNaN(value)) {
 					values[index++] = value;
 					if (value < min) {
@@ -346,7 +368,8 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 				// take the mean of middle two values
 				lowerTopHalfIndex = index / 2;
 				upperBottomHalfIndex = lowerTopHalfIndex - 1;
-				quartile[1] = (values[lowerTopHalfIndex] + values[upperBottomHalfIndex]) / 2;
+				quartile[1] =
+					(values[lowerTopHalfIndex] + values[upperBottomHalfIndex]) / 2;
 			}
 
 			if (upperBottomHalfIndex % 2 == 0) {
@@ -371,7 +394,7 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 
 			// calculate range
 			range = new double[2];
-			double iqr = quartile[2] - quartile[0];
+			final double iqr = quartile[2] - quartile[0];
 			range[0] = quartile[0] - 1.5 * iqr;
 			range[1] = quartile[2] + 1.5 * iqr;
 		}
@@ -380,7 +403,7 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 			min = max = Double.NaN;
 		}
 
-		Statistics1 statistics = new Statistics1();
+		final Statistics1 statistics = new Statistics1();
 		statistics.count = count;
 		statistics.min = min;
 		statistics.max = max;
@@ -392,7 +415,7 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 
 	/**
 	 * Second pass through the image, gathering statistics.
-	 * 
+	 *
 	 * @param image
 	 * @param channel
 	 * @param params
@@ -402,20 +425,24 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 	 * @param bins
 	 * @return container of various statistics
 	 */
-	private Statistics2 getStatistics2(ImgPlus<DoubleType> image, int channel, int params, FittedValue fittedValue, double mean, double[] range, int bins) {
+	private Statistics2 getStatistics2(final ImgPlus<DoubleType> image,
+		final int channel, final int params, final FittedValue fittedValue,
+		final double mean, final double[] range, final int bins)
+	{
 		double diffSquaredSum = 0.0;
 		long count = 0;
 		long histogramCount = 0;
-		long[] histogram = new long[bins];
+		final long[] histogram = new long[bins];
 
-		long[] dimensions = new long[image.numDimensions()];
+		final long[] dimensions = new long[image.numDimensions()];
 		image.dimensions(dimensions);
-		RandomAccess<DoubleType> cursor = image.randomAccess();
+		final RandomAccess<DoubleType> cursor = image.randomAccess();
 
 		// collect & histogram non-NaN values
-		double[] values = new double[(int) dimensions[0] * (int) dimensions[1]];
-		int index = 0;
-		int[] position = new int[dimensions.length];
+		final double[] values =
+			new double[(int) dimensions[0] * (int) dimensions[1]];
+		final int index = 0;
+		final int[] position = new int[dimensions.length];
 		for (int y = 0; y < dimensions[1]; ++y) {
 			for (int x = 0; x < dimensions[0]; ++x) {
 				// set position
@@ -424,23 +451,24 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 				position[2] = channel;
 
 				// grab all fitted parameters
-				double[] fittedParameters = new double[params];
+				final double[] fittedParameters = new double[params];
 				for (int p = 0; p < params; ++p) {
 					position[3] = p;
 					cursor.setPosition(position);
-					double value = cursor.get().getRealDouble();
+					final double value = cursor.get().getRealDouble();
 					fittedParameters[p] = value;
 				}
 
 				// get value for this fitted parameter & account for it
-				double value = fittedValue.getValue(fittedParameters);
+				final double value = fittedValue.getValue(fittedParameters);
 				if (!Double.isNaN(value)) {
 					// compute standard deviation from mean
-					double diff = mean - value;
+					final double diff = mean - value;
 					diffSquaredSum += diff * diff;
 					++count;
 
-					int bin = Binning.exclusiveValueToBin(bins, range[0], range[1], value);
+					final int bin =
+						Binning.exclusiveValueToBin(bins, range[0], range[1], value);
 					if (0 <= bin && bin < bins) {
 						++histogram[bin];
 						++histogramCount;
@@ -449,7 +477,7 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 			}
 		}
 
-		Statistics2 statistics = new Statistics2();
+		final Statistics2 statistics = new Statistics2();
 		statistics.standardDeviation = Math.sqrt(diffSquaredSum / count);
 		statistics.histogramCount = histogramCount;
 		statistics.histogram = histogram;
@@ -460,6 +488,7 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 	 * Container for first batch of statistics.
 	 */
 	private class Statistics1 {
+
 		public long count;
 		public double min;
 		public double max;
@@ -472,44 +501,47 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 	 * Container for second batch of statistics.
 	 */
 	private class Statistics2 {
+
 		public double standardDeviation;
 		public long histogramCount;
 		public long[] histogram;
 	}
 
 	private String getFileFromPreferences() {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		return prefs.get(FILE_KEY, fileName);
 	}
 
-	private void saveFileInPreferences(String fileName) {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	private void saveFileInPreferences(final String fileName) {
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.put(FILE_KEY, fileName);
 	}
 
 	private boolean getAppendFromPreferences() {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		return prefs.getBoolean(APPEND_KEY, append);
 	}
 
-	private void saveAppendInPreferences(boolean append) {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	private void saveAppendInPreferences(final boolean append) {
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putBoolean(APPEND_KEY, append);
 	}
 
 	private boolean getCSVFromPreferences() {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		return prefs.getBoolean(CSV_KEY, csv);
 	}
 
-	private void saveCSVInPreferences(boolean csv) {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	private void saveCSVInPreferences(final boolean csv) {
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putBoolean(CSV_KEY, csv);
 	}
 
-	private boolean showFileDialog(String defaultFile, boolean defaultAppend, boolean defaultCSV) {
+	private boolean showFileDialog(final String defaultFile,
+		final boolean defaultAppend, final boolean defaultCSV)
+	{
 		// TODO: Consolidate logic with same in ExportPixelsToText!
-		GenericDialog dialog = new GenericDialog("Export Histograms to Text");
+		final GenericDialog dialog = new GenericDialog("Export Histograms to Text");
 		dialog.addStringField("Save_As", defaultFile, 24);
 		dialog.addCheckbox("Append", defaultAppend);
 		dialog.addCheckbox("Comma_Separated", defaultCSV);
@@ -518,10 +550,10 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 			return false;
 		}
 		fileName = dialog.getNextString();
-		append   = dialog.getNextBoolean();
-		csv      = dialog.getNextBoolean();
-		
-		if(append){
+		append = dialog.getNextBoolean();
+		csv = dialog.getNextBoolean();
+
+		if (append) {
 			SLIMProcessor.record(SLIMProcessor.SET_APPEND_MODE);
 		}
 		return true;

@@ -56,6 +56,7 @@ import org.scijava.plugin.Plugin;
  */
 @Plugin(type = SLIMAnalyzer.class, name = "Export Pixels to Text")
 public class ExportPixelsToText implements SLIMAnalyzer {
+
 	private static final String FILE_KEY = "export_pixels_to_text/file";
 	private static final String APPEND_KEY = "export_pixels_to_text/append";
 	private static final String CSV_KEY = "export_pixels_to_text/csv";
@@ -71,15 +72,20 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 	private boolean append;
 	private boolean csv;
 	private BufferedWriter bufferedWriter;
-	private MathContext context = new MathContext(4, RoundingMode.FLOOR);
+	private final MathContext context = new MathContext(4, RoundingMode.FLOOR);
 
 	@Override
-	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
-		char separator=COMMA;
-		if(!SLIMProcessor.macroParams.isAnalysisListUsed){////macro NOT used, normal execution flow
-			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
+	public void analyze(final ImgPlus<DoubleType> image, final FitRegion region,
+		final FitFunction function, final String parameters)
+	{
+		char separator = COMMA;
+		if (!SLIMProcessor.macroParams.isAnalysisListUsed) {// //macro NOT used,
+																												// normal execution flow
+			final boolean export =
+				showFileDialog(getFileFromPreferences(), getAppendFromPreferences(),
+					getCSVFromPreferences());
 			if (export && null != fileName) {
-				
+
 				if (csv) {
 					separator = COMMA;
 					if (!fileName.endsWith(CSV_SUFFIX)) {
@@ -95,27 +101,31 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 				saveFileInPreferences(fileName);
 				saveAppendInPreferences(append);
 				saveCSVInPreferences(csv);
-				String recordingCharString=Character.toString(separator);
-				SLIMProcessor.record(SLIMProcessor.SET_EXPORT_PIXEL_FILE_NAME, fileName,recordingCharString);
+				final String recordingCharString = Character.toString(separator);
+				SLIMProcessor.record(SLIMProcessor.SET_EXPORT_PIXEL_FILE_NAME,
+					fileName, recordingCharString);
 			}
 		}
-		else{//macro used
-			fileName=SLIMProcessor.macroParams.exportPixelFileNameSingleFile;
-			separator=SLIMProcessor.macroParams.exportPixelFileNameSingleFileSeperator.charAt(0);
-			append=SLIMProcessor.macroParams.isAppendUsedPixel;
+		else {// macro used
+			fileName = SLIMProcessor.macroParams.exportPixelFileNameSingleFile;
+			separator =
+				SLIMProcessor.macroParams.exportPixelFileNameSingleFileSeperator
+					.charAt(0);
+			append = SLIMProcessor.macroParams.isAppendUsedPixel;
 			IJ.log(Character.toString(separator));
 			saveFileInPreferences(fileName);
 			saveAppendInPreferences(append);
 			saveCSVInPreferences(csv);
-			
+
 		}
-		
+
 		export(fileName, append, image, region, function, parameters, separator);
 
 	}
 
-	public void export(String fileName, boolean append, ImgPlus<DoubleType> image,
-		FitRegion region, FitFunction function, String parameters, char separator)
+	public void export(final String fileName, final boolean append,
+		final ImgPlus<DoubleType> image, final FitRegion region,
+		final FitFunction function, final String parameters, final char separator)
 	{
 		int components = 0;
 		switch (function) {
@@ -129,16 +139,17 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 				components = 3;
 				break;
 			case STRETCHED_EXPONENTIAL:
-				//TODO fix stretched; how many components?
-				///it was 1 as far as I remember
+				// TODO fix stretched; how many components?
+				// /it was 1 as far as I remember
 				break;
 		}
-		FittedValue[] fittedValues = FittedValueFactory.createFittedValues(parameters, components);
+		final FittedValue[] fittedValues =
+			FittedValueFactory.createFittedValues(parameters, components);
 
 		// get list of current ROIs
 		boolean hasRois = false;
 		Roi[] rois = {};
-		RoiManager manager = RoiManager.getInstance();
+		final RoiManager manager = RoiManager.getInstance();
 		if (null != manager) {
 			hasRois = true;
 			rois = manager.getRoisAsArray();
@@ -146,7 +157,8 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 
 		try {
 			bufferedWriter = new BufferedWriter(new FileWriter(fileName, append));
-		} catch (IOException e) {
+		}
+		catch (final IOException e) {
 			IJ.log("exception opening file " + fileName);
 			IJ.handleException(e);
 		}
@@ -159,15 +171,16 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 				bufferedWriter.newLine();
 
 				// look at image dimensions
-				long dimensions[] = new long[image.numDimensions()];
+				final long dimensions[] = new long[image.numDimensions()];
 				image.dimensions(dimensions);
-				int width    = (int) dimensions[X_INDEX];
-				int height   = (int) dimensions[Y_INDEX];
-				int channels = (int) dimensions[C_INDEX];
-				int params   = (int) dimensions[P_INDEX];
+				final int width = (int) dimensions[X_INDEX];
+				final int height = (int) dimensions[Y_INDEX];
+				final int channels = (int) dimensions[C_INDEX];
+				final int params = (int) dimensions[P_INDEX];
 
 				// write headers
-				if (channels > 2) { //TODO s/b 1; workaround for ImgLib bug -> always get 2 channels
+				if (channels > 2) { // TODO s/b 1; workaround for ImgLib bug -> always
+														// get 2 channels
 					writeChannelHeader(separator);
 				}
 				switch (region) {
@@ -187,8 +200,8 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 
 				// traverse the image
 				final RandomAccess<?> cursor = image.randomAccess();
-				int dimForCursor[] = new int[4];
-				double paramArray[] = new double[params];
+				final int dimForCursor[] = new int[4];
+				final double paramArray[] = new double[params];
 
 				// get the parameters for each pixel,
 				for (int c = 0; c < channels; ++c) {
@@ -210,9 +223,10 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 							}
 
 							// if point has been fitted
-							//TODO distinguish between not fitted and error in fit!
+							// TODO distinguish between not fitted and error in fit!
 							if (!Double.isNaN(paramArray[0])) {
-								if (channels > 2) { //TODO see above; this is a hacky workaround for a bug; s/b " > 1"
+								if (channels > 2) { // TODO see above; this is a hacky
+																		// workaround for a bug; s/b " > 1"
 									writeChannel(c + 1, separator);
 								}
 
@@ -241,7 +255,7 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 				bufferedWriter.newLine();
 				bufferedWriter.close();
 			}
-			catch (IOException e) {
+			catch (final IOException e) {
 				IJ.log("Error writing file " + e.getMessage());
 				IJ.log("exception writing file");
 				IJ.handleException(e);
@@ -249,17 +263,21 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 		}
 	}
 
-	private void writeChannelHeader(char separator) throws IOException {
+	private void writeChannelHeader(final char separator) throws IOException {
 		bufferedWriter.write("c" + separator);
 	}
 
-	private void writeChannel(int channel, char separator) throws IOException {
+	private void writeChannel(final int channel, final char separator)
+		throws IOException
+	{
 		bufferedWriter.write("" + channel + separator);
 	}
 
-	private void writeHeader(FittedValue[] fittedValues, char separator) throws IOException {
+	private void writeHeader(final FittedValue[] fittedValues,
+		final char separator) throws IOException
+	{
 		boolean firstTime = true;
-		for (FittedValue fittedValue : fittedValues) {
+		for (final FittedValue fittedValue : fittedValues) {
 			if (firstTime) {
 				firstTime = false;
 			}
@@ -271,9 +289,11 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 		bufferedWriter.newLine();
 	}
 
-	private void writeParams(double[] paramArray, FittedValue[] fittedValues, char separator) throws IOException {
+	private void writeParams(final double[] paramArray,
+		final FittedValue[] fittedValues, final char separator) throws IOException
+	{
 		boolean firstTime = true;
-		for (FittedValue fittedValue : fittedValues) {
+		for (final FittedValue fittedValue : fittedValues) {
 			if (firstTime) {
 				firstTime = false;
 			}
@@ -285,59 +305,64 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 		bufferedWriter.newLine();
 	}
 
-	private double normalize(double A, double sum) {
+	private double normalize(final double A, final double sum) {
 		return (100.0 * A) / sum;
 	}
 
-	private void writeROIsHeader(char separator) throws IOException {
+	private void writeROIsHeader(final char separator) throws IOException {
 		bufferedWriter.write("roi" + separator);
 	}
 
-	private void writeROI(int roi, char separator) throws IOException {
+	private void writeROI(final int roi, final char separator) throws IOException
+	{
 		bufferedWriter.write("" + roi + separator);
 	}
 
-	private void writeXYHeader(char separator) throws IOException {
+	private void writeXYHeader(final char separator) throws IOException {
 		bufferedWriter.write("x" + separator + "y" + separator);
 	}
 
-	private void writeXY(int x, int y, char separator) throws IOException {
+	private void writeXY(final int x, final int y, final char separator)
+		throws IOException
+	{
 		bufferedWriter.write("" + x + separator + y + separator);
 	}
 
 	private String getFileFromPreferences() {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		return prefs.get(FILE_KEY, fileName);
 	}
 
-	private void saveFileInPreferences(String fileName) {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	private void saveFileInPreferences(final String fileName) {
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.put(FILE_KEY, fileName);
 	}
 
 	private boolean getAppendFromPreferences() {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		return prefs.getBoolean(APPEND_KEY, append);
 	}
 
-	private void saveAppendInPreferences(boolean append) {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	private void saveAppendInPreferences(final boolean append) {
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putBoolean(APPEND_KEY, append);
 	}
 
 	private boolean getCSVFromPreferences() {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		return prefs.getBoolean(CSV_KEY, csv);
 	}
 
-	private void saveCSVInPreferences(boolean csv) {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	private void saveCSVInPreferences(final boolean csv) {
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putBoolean(CSV_KEY, csv);
 	}
 
-	private boolean showFileDialog(String defaultFile, boolean defaultAppend, boolean defaultCSV) {
+	private boolean showFileDialog(final String defaultFile,
+		final boolean defaultAppend, final boolean defaultCSV)
+	{
 		// TODO: Consolidate logic with same in ExportHistogramsToText!
-		GenericDialog dialog = new GenericDialog("Export Pixels to Text");
+		final GenericDialog dialog = new GenericDialog("Export Pixels to Text");
 		dialog.addStringField("Save_As", defaultFile, 24);
 		dialog.addCheckbox("Append", defaultAppend);
 		dialog.addCheckbox("Comma_Separated", defaultCSV);
@@ -346,15 +371,15 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 			return false;
 		}
 		fileName = dialog.getNextString();
-		append   = dialog.getNextBoolean();
-		csv      = dialog.getNextBoolean();
-		if(append){
+		append = dialog.getNextBoolean();
+		csv = dialog.getNextBoolean();
+		if (append) {
 			SLIMProcessor.record(SLIMProcessor.SET_APPEND_MODE_PIXEL);
 		}
 		return true;
 	}
 
-	private String showParameter(double parameter) {
+	private String showParameter(final double parameter) {
 		return BigDecimal.valueOf(parameter).round(context).toEngineeringString();
 	}
 }

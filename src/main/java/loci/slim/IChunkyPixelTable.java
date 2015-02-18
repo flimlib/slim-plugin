@@ -39,21 +39,21 @@ public interface IChunkyPixelTable {
 
 	/**
 	 * Get pixel width.
-	 * 
+	 *
 	 * @return width
 	 */
 	public int getWidth();
 
 	/**
 	 * Get pixel height.
-	 * 
+	 *
 	 * @return height;
 	 */
 	public int getHeight();
 
 	/**
 	 * Get table entry at index.
-	 * 
+	 *
 	 * @param index
 	 * @return ChunkyPixel
 	 */

@@ -23,24 +23,28 @@
 
 package loci.slim.fitted;
 
-
 /**
  * Extracts Fractional Intensity fitted value.
- * 
+ *
  * @author Aivar Grislis
  */
-public class FractionalContributionFittedValue extends AbstractFittedValue implements FittedValue {
+public class FractionalContributionFittedValue extends AbstractFittedValue
+	implements FittedValue
+{
+
 	private int component;
 	private int components;
 
-	public void init(String title, int component, int components) {
+	public void
+		init(final String title, final int component, final int components)
+	{
 		setTitle(title);
 		this.component = component;
 		this.components = components;
 	}
 
 	@Override
-	public double getValue(double[] values) {
+	public double getValue(final double[] values) {
 		double numerator = 0.0;
 		switch (component) {
 			case 1:
@@ -53,12 +57,15 @@ public class FractionalContributionFittedValue extends AbstractFittedValue imple
 				numerator = values[FittedValue.A3_INDEX] * values[FittedValue.T3_INDEX];
 				break;
 		}
-		double denominator = values[FittedValue.A1_INDEX] * values[FittedValue.T1_INDEX];
+		double denominator =
+			values[FittedValue.A1_INDEX] * values[FittedValue.T1_INDEX];
 		if (components > 1) {
-			denominator += values[FittedValue.A2_INDEX] * values[FittedValue.T2_INDEX];
+			denominator +=
+				values[FittedValue.A2_INDEX] * values[FittedValue.T2_INDEX];
 		}
 		if (components > 2) {
-			denominator += values[FittedValue.A3_INDEX] * values[FittedValue.T3_INDEX];
+			denominator +=
+				values[FittedValue.A3_INDEX] * values[FittedValue.T3_INDEX];
 		}
 		return numerator / denominator;
 	}

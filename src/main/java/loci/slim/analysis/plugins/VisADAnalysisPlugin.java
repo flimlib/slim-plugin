@@ -31,20 +31,21 @@ import net.imagej.ImgPlus;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.real.DoubleType;
 
-
 /**
- * Runs the VisADPlugin to analyze SLIM Curve results.
- *
- * This will run on a separate thread, control returns to the caller right away.
+ * Runs the VisADPlugin to analyze SLIM Curve results. This will run on a
+ * separate thread, control returns to the caller right away.
  *
  * @author Aivar Grislis
  */
 //TODO ARG 9/21/12 disabled the VisAD plugin since it doesn't function
 //@SLIMAnalyzer(name="VisAD")
-public class VisADAnalysisPlugin /*implements ISLIMAnalyzer*/ {
-	//@Override
-	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function) {
-		ImagePlus imp = ImageJFunctions.show(image);
+public class VisADAnalysisPlugin /*implements ISLIMAnalyzer*/{
+
+	// @Override
+	public void analyze(final ImgPlus<DoubleType> image, final FitRegion region,
+		final FitFunction function)
+	{
+		final ImagePlus imp = ImageJFunctions.show(image);
 		imp.setTitle("Fitted results");
 		IJ.runPlugIn(imp, "imagej.visad.VisADPlugin", "");
 	}

@@ -31,15 +31,17 @@ import java.math.RoundingMode;
 
 /**
  * A histogram statistics class used for export to text.
- * 
+ *
  * @author Aivar Grislis
  */
 //TODO reconcile with loci.slim.histogram.HistogramStatistics
 
 public class HistogramStatistics {
+
 	private static final int MIN_COUNT = 3;
 	private static final String NAN = "NaN";
-	private static final MathContext context = new MathContext(4, RoundingMode.FLOOR);
+	private static final MathContext context = new MathContext(4,
+		RoundingMode.FLOOR);
 	String title;
 	private long count;
 	private double min;
@@ -64,7 +66,7 @@ public class HistogramStatistics {
 	/**
 	 * @param title the title to set
 	 */
-	public void setTitle(String title) {
+	public void setTitle(final String title) {
 		this.title = title;
 	}
 
@@ -78,7 +80,7 @@ public class HistogramStatistics {
 	/**
 	 * @param count the count of pixels to set
 	 */
-	public void setCount(long count) {
+	public void setCount(final long count) {
 		this.count = count;
 	}
 
@@ -92,7 +94,7 @@ public class HistogramStatistics {
 	/**
 	 * @param min the minimum fitted value to set
 	 */
-	public void setMin(double min) {
+	public void setMin(final double min) {
 		this.min = min;
 	}
 
@@ -106,7 +108,7 @@ public class HistogramStatistics {
 	/**
 	 * @param max the maximum fitted value to set
 	 */
-	public void setMax(double max) {
+	public void setMax(final double max) {
 		this.max = max;
 	}
 
@@ -120,7 +122,7 @@ public class HistogramStatistics {
 	/**
 	 * @param firstQuartile the first quartile value to set
 	 */
-	public void setFirstQuartile(double firstQuartile) {
+	public void setFirstQuartile(final double firstQuartile) {
 		this.firstQuartile = firstQuartile;
 	}
 
@@ -134,7 +136,7 @@ public class HistogramStatistics {
 	/**
 	 * @param median the median value to set
 	 */
-	public void setMedian(double median) {
+	public void setMedian(final double median) {
 		this.median = median;
 	}
 
@@ -148,7 +150,7 @@ public class HistogramStatistics {
 	/**
 	 * @param thirdQuartile the third quartile value to set
 	 */
-	public void setThirdQuartile(double thirdQuartile) {
+	public void setThirdQuartile(final double thirdQuartile) {
 		this.thirdQuartile = thirdQuartile;
 	}
 
@@ -162,7 +164,7 @@ public class HistogramStatistics {
 	/**
 	 * @param mean the mean value to set
 	 */
-	public void setMean(double mean) {
+	public void setMean(final double mean) {
 		this.mean = mean;
 	}
 
@@ -176,7 +178,7 @@ public class HistogramStatistics {
 	/**
 	 * @param standardDeviation the standard deviation value to set
 	 */
-	public void setStandardDeviation(double standardDeviation) {
+	public void setStandardDeviation(final double standardDeviation) {
 		this.standardDeviation = standardDeviation;
 	}
 
@@ -190,7 +192,7 @@ public class HistogramStatistics {
 	/**
 	 * @param histogramCount the count of pixels in the histogram to set
 	 */
-	public void setHistogramCount(long histogramCount) {
+	public void setHistogramCount(final long histogramCount) {
 		this.histogramCount = histogramCount;
 	}
 
@@ -204,7 +206,7 @@ public class HistogramStatistics {
 	/**
 	 * @param minRange the minimum value in the histogram to set
 	 */
-	public void setMinRange(double minRange) {
+	public void setMinRange(final double minRange) {
 		this.minRange = minRange;
 	}
 
@@ -218,7 +220,7 @@ public class HistogramStatistics {
 	/**
 	 * @param maxRange the maximum value in the histogram to set
 	 */
-	public void setMaxRange(double maxRange) {
+	public void setMaxRange(final double maxRange) {
 		this.maxRange = maxRange;
 	}
 
@@ -232,19 +234,21 @@ public class HistogramStatistics {
 	/**
 	 * @param histogram the histogram counts to set
 	 */
-	public void setHistogram(long[] histogram) {
+	public void setHistogram(final long[] histogram) {
 		this.histogram = histogram;
 	}
 
 	/**
 	 * Exports the histogram statistics using a BufferedWriter.
-	 * 
+	 *
 	 * @param writer
 	 * @param separator
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public boolean export(BufferedWriter writer, char separator) throws IOException {
+	public boolean export(final BufferedWriter writer, final char separator)
+		throws IOException
+	{
 		if (getCount() < MIN_COUNT) {
 			writer.write("Count" + separator + getCount());
 			writer.newLine();
@@ -267,17 +271,20 @@ public class HistogramStatistics {
 		writer.newLine();
 		writer.write("Mean" + separator + showParameter(getMean()));
 		writer.newLine();
-		writer.write("Standard Deviation" + separator + showParameter(getStandardDeviation()));
+		writer.write("Standard Deviation" + separator +
+			showParameter(getStandardDeviation()));
 		writer.newLine();
-		writer.write("1st Quartile" + separator + showParameter(getFirstQuartile()));
+		writer
+			.write("1st Quartile" + separator + showParameter(getFirstQuartile()));
 		writer.newLine();
 		writer.write("Median" + separator + showParameter(getMedian()));
 		writer.newLine();
-		writer.write("3rd Quartile" + separator + showParameter(getThirdQuartile()));
+		writer
+			.write("3rd Quartile" + separator + showParameter(getThirdQuartile()));
 		writer.newLine();
 
 		// put out histogram
-		long[] histo = getHistogram();
+		final long[] histo = getHistogram();
 		writer.write("Histogram");
 		writer.newLine();
 		writer.write("Bins" + separator + histo.length);
@@ -289,7 +296,8 @@ public class HistogramStatistics {
 		writer.write("Count" + separator + getHistogramCount());
 		writer.newLine();
 
-		double[] values = Binning.centerValuesPerBin(histo.length, getMinRange(), getMaxRange());
+		final double[] values =
+			Binning.centerValuesPerBin(histo.length, getMinRange(), getMaxRange());
 		for (int j = 0; j < histo.length; ++j) {
 			writer.write(showParameter(values[j]) + separator + histo[j]);
 			writer.newLine();
@@ -300,16 +308,18 @@ public class HistogramStatistics {
 
 	/**
 	 * Exports a set of histograms.
-	 * 
+	 *
 	 * @param statistics
 	 * @param writer
 	 * @param separator
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
-	public static boolean export(HistogramStatistics[] statistics, BufferedWriter writer, char separator) throws IOException {
+	public static boolean export(final HistogramStatistics[] statistics,
+		final BufferedWriter writer, final char separator) throws IOException
+	{
 		// check for degenerate case
-		long count = statistics[0].getCount();
+		final long count = statistics[0].getCount();
 		if (count < MIN_COUNT) {
 			writer.write("Count" + separator + count);
 			writer.newLine();
@@ -322,7 +332,7 @@ public class HistogramStatistics {
 		}
 
 		boolean firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
@@ -332,7 +342,7 @@ public class HistogramStatistics {
 		writer.newLine();
 
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
@@ -342,7 +352,7 @@ public class HistogramStatistics {
 		writer.newLine();
 
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
@@ -351,9 +361,8 @@ public class HistogramStatistics {
 		}
 		writer.newLine();
 
-
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
@@ -363,7 +372,7 @@ public class HistogramStatistics {
 		writer.newLine();
 
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
@@ -373,28 +382,29 @@ public class HistogramStatistics {
 		writer.newLine();
 
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
 			firstTime = false;
-			writer.write("Standard Deviation" + separator + showParameter(statistic.getStandardDeviation()));
+			writer.write("Standard Deviation" + separator +
+				showParameter(statistic.getStandardDeviation()));
 		}
 		writer.newLine();
 
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
 			firstTime = false;
-			writer.write("1st Quartile" + separator + showParameter(statistic.getFirstQuartile()));
+			writer.write("1st Quartile" + separator +
+				showParameter(statistic.getFirstQuartile()));
 		}
 		writer.newLine();
 
-
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
@@ -404,29 +414,32 @@ public class HistogramStatistics {
 		writer.newLine();
 
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
 			firstTime = false;
-			writer.write("3rd Quartile" + separator + showParameter(statistic.getThirdQuartile()));
+			writer.write("3rd Quartile" + separator +
+				showParameter(statistic.getThirdQuartile()));
 		}
 		writer.newLine();
 
 		// get all of the histograms into memory
 		int maxHistosLength = Integer.MIN_VALUE;
-		long[][] histos = new long[statistics.length][];
-		double[][] centers = new double[statistics.length][];
+		final long[][] histos = new long[statistics.length][];
+		final double[][] centers = new double[statistics.length][];
 		for (int i = 0; i < statistics.length; ++i) {
 			histos[i] = statistics[i].getHistogram();
 			if (histos[i].length > maxHistosLength) {
 				maxHistosLength = histos[i].length;
 			}
-			centers[i] = Binning.centerValuesPerBin(histos[i].length, statistics[i].getMinRange(), statistics[i].getMaxRange());
+			centers[i] =
+				Binning.centerValuesPerBin(histos[i].length, statistics[i]
+					.getMinRange(), statistics[i].getMaxRange());
 		}
 
 		firstTime = true;
-		for (long[] histo : histos) {
+		for (final long[] histo : histos) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
@@ -436,32 +449,35 @@ public class HistogramStatistics {
 		writer.newLine();
 
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
 			firstTime = false;
-			writer.write("Histogram Min" + separator + showParameter(statistic.getMinRange()));
+			writer.write("Histogram Min" + separator +
+				showParameter(statistic.getMinRange()));
 		}
 		writer.newLine();
 
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
 			firstTime = false;
-			writer.write("Histogram Max" + separator + showParameter(statistic.getMaxRange()));
+			writer.write("Histogram Max" + separator +
+				showParameter(statistic.getMaxRange()));
 		}
 		writer.newLine();
 
 		firstTime = true;
-		for (HistogramStatistics statistic : statistics) {
+		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
 			firstTime = false;
-			writer.write("Histogram Count" + separator + statistic.getHistogramCount());
+			writer.write("Histogram Count" + separator +
+				statistic.getHistogramCount());
 		}
 		writer.newLine();
 
@@ -473,7 +489,8 @@ public class HistogramStatistics {
 				}
 				firstTime = false;
 				if (bin < histos[i].length) {
-					writer.write("" + showParameter(centers[i][bin]) + separator + histos[i][bin]);
+					writer.write("" + showParameter(centers[i][bin]) + separator +
+						histos[i][bin]);
 				}
 				else {
 					writer.write(separator);
@@ -485,11 +502,11 @@ public class HistogramStatistics {
 		return true;
 	}
 
-
-	private static String showParameter(double parameter) {
+	private static String showParameter(final double parameter) {
 		String returnValue = NAN;
 		if (!Double.isNaN(parameter)) {
-			returnValue = BigDecimal.valueOf(parameter).round(context).toEngineeringString();
+			returnValue =
+				BigDecimal.valueOf(parameter).round(context).toEngineeringString();
 		}
 		return returnValue;
 	}

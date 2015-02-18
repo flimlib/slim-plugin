@@ -51,15 +51,15 @@ import net.imglib2.RandomAccess;
 import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.RealType;
 
-
 /**
- * The GrayScaleImage shows a grayscale representation of the input data.  It
+ * The GrayScaleImage shows a grayscale representation of the input data. It
  * also allows the user to look at all the channels and pick a channel for the
  * fit.
  *
  * @author Aivar Grislis
  */
 public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
+
 	private static final String ZOOM_KEY = "zoom";
 	private static final int CURSOR_WIDTH = 11;
 	private static final int CURSOR_HEIGHT = 11;
@@ -71,13 +71,13 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	private static final int THRESHOLD_TRANSPARENCY = 0xa0;
 	private static final int HIDDEN_TRANSPARENCY = 0xa0;
 	private static final int ERROR_TRANSPARENCY = 0xff;
-	private int _width;
-	private int _height;
-	private ImagePlus _imagePlus;
-	private ImageStack _imageStack;
+	private final int _width;
+	private final int _height;
+	private final ImagePlus _imagePlus;
+	private final ImageStack _imageStack;
 	private MyStackWindow _stackWindow;
 	private ISelectListener _listener;
-	private short[][] _saveOutPixels;
+	private final short[][] _saveOutPixels;
 	private double _minNonZeroPhotonCount;
 	private double _maxTotalPhotons;
 	private int[] _brightestPoint;
@@ -89,22 +89,22 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	private Roi _errorRoi;
 	private Roi _hiddenRoi;
 	private Roi _thresholdRoi;
-	private Overlay _overlay;
-	private Set<IMaskGroup> _maskGroupSet;
+	private final Overlay _overlay;
+	private final Set<IMaskGroup> _maskGroupSet;
 
-	public GrayScaleImage(ImgPlus<T> image) {
+	public GrayScaleImage(final ImgPlus<T> image) {
 		String title = image.getName();
-		int spaceIndex = title.indexOf(" ");
+		final int spaceIndex = title.indexOf(" ");
 		if (0 < spaceIndex) {
 			title = title.substring(0, spaceIndex);
 		}
 
-		int numDimensions = image.numDimensions();
-		long dimensions[] = new long[numDimensions];
+		final int numDimensions = image.numDimensions();
+		final long dimensions[] = new long[numDimensions];
 		image.dimensions(dimensions);
 		_width = (int) dimensions[0];
 		_height = (int) dimensions[1];
-		int bins = (int) dimensions[2];
+		final int bins = (int) dimensions[2];
 		int channels = 1;
 		if (numDimensions > 3) {
 			channels = (int) dimensions[3];
@@ -114,9 +114,9 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		_imageStack = new ImageStack(_width, _height);
 		_saveOutPixels = new short[channels][];
 
-		RandomAccess cursor = image.randomAccess();
-		double[][] pixels = new double[_width][_height];
-		int[] position = new int[numDimensions];
+		final RandomAccess cursor = image.randomAccess();
+		final double[][] pixels = new double[_width][_height];
+		final int[] position = new int[numDimensions];
 
 		// keep track of minimum count; usually 1.0 but can be 10.0, etc.
 		_minNonZeroPhotonCount = Double.MAX_VALUE;
@@ -124,7 +124,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 			if (numDimensions > 3) {
 				position[3] = c;
 			}
-			short[] outPixels = new short[_width * _height];
+			final short[] outPixels = new short[_width * _height];
 
 			// sum photon counts
 			double maxPixel = 0.0;
@@ -137,7 +137,8 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 						position[2] = b;
 
 						cursor.setPosition(position);
-						double photonCount = ((ComplexType) cursor.get()).getRealDouble();
+						final double photonCount =
+							((ComplexType) cursor.get()).getRealDouble();
 						pixels[x][y] += photonCount;
 
 						// keep track of minimum
@@ -151,7 +152,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 						if (maxPixel > _maxTotalPhotons) {
 							_maxTotalPhotons = maxPixel;
 						}
-						_brightestPoint = new int[] { x , y };
+						_brightestPoint = new int[] { x, y };
 					}
 				}
 			}
@@ -173,54 +174,58 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		_imagePlus = new ImagePlus(title, _imageStack);
 		_stackWindow = new MyStackWindow(_imagePlus);
 		_stackWindow.addWindowListener(new WindowAdapter() {
+
 			@Override
-			public void windowClosing(WindowEvent e) {
-				float zoomFactor = _stackWindow.getZoomFactor();
+			public void windowClosing(final WindowEvent e) {
+				final float zoomFactor = _stackWindow.getZoomFactor();
 				saveZoomFactorInPreferences(zoomFactor);
 			}
 		});
-		float zoomFactor = getZoomFactorFromPreferences();
+		final float zoomFactor = getZoomFactorFromPreferences();
 		while (zoomFactor < _stackWindow.getZoomFactor()) {
 			IJ.run("In");
 		}
 		_stackWindow.setVisible(true);
 
-		//IJ.log("minNonZeroPhotonCount is " + _minNonZeroPhotonCount);
+		// IJ.log("minNonZeroPhotonCount is " + _minNonZeroPhotonCount);
 
-		//IJ.log("Channel selector " + _stackWindow.getChannelSelector());
-		//IJ.log("Slice selector " + _stackWindow.getSliceSelector());
-		//IJ.log("Frame selector " + _stackWindow.getFrameSelector());
+		// IJ.log("Channel selector " + _stackWindow.getChannelSelector());
+		// IJ.log("Slice selector " + _stackWindow.getSliceSelector());
+		// IJ.log("Frame selector " + _stackWindow.getFrameSelector());
 
 		// hook up mouse listener
-		ImageCanvas canvas = _stackWindow.getCanvas();
-		canvas.addMouseListener(
-			new MouseListener() {
-				@Override
-				public void mousePressed(MouseEvent e) {}
-				@Override
-				public void mouseExited(MouseEvent e) {}
-				@Override
-				public void mouseClicked(MouseEvent e) {}
-				@Override
-				public void mouseEntered(MouseEvent e) {}
-				@Override
-				public void mouseReleased(MouseEvent e) {
-					// note if you are in zoom tool mode and this click is
-					// also zooming you in, x and y will be wrong
-					if (null != _listener) {
-						float zoomFactor = _stackWindow.getZoomFactor();
-						int x = (int)(e.getX() * zoomFactor);
-						int y = (int)(e.getY() * zoomFactor);
-						_listener.selected(getChannel(), x, y);
-					}
+		final ImageCanvas canvas = _stackWindow.getCanvas();
+		canvas.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mousePressed(final MouseEvent e) {}
+
+			@Override
+			public void mouseExited(final MouseEvent e) {}
+
+			@Override
+			public void mouseClicked(final MouseEvent e) {}
+
+			@Override
+			public void mouseEntered(final MouseEvent e) {}
+
+			@Override
+			public void mouseReleased(final MouseEvent e) {
+				// note if you are in zoom tool mode and this click is
+				// also zooming you in, x and y will be wrong
+				if (null != _listener) {
+					final float zoomFactor = _stackWindow.getZoomFactor();
+					final int x = (int) (e.getX() * zoomFactor);
+					final int y = (int) (e.getY() * zoomFactor);
+					_listener.selected(getChannel(), x, y);
 				}
 			}
-				);
+		});
 
 		_overlay = createOverlay(_imagePlus);
 		_imagePlus.setOverlay(_overlay);
 
-		int threshold = estimateThreshold();
+		final int threshold = estimateThreshold();
 		updateThreshold(threshold);
 
 		_maskGroupSet = new HashSet<IMaskGroup>();
@@ -230,7 +235,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	public void close() {
 		// run once
 		if (null != _stackWindow) {
-			float zoomFactor = _stackWindow.getZoomFactor();
+			final float zoomFactor = _stackWindow.getZoomFactor();
 			saveZoomFactorInPreferences(zoomFactor);
 			_stackWindow.close();
 			_stackWindow = null;
@@ -251,16 +256,18 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		_imagePlus.draw();
 	}
 
-	private Overlay createOverlay(ImagePlus imagePlus) {
-		int width = imagePlus.getWidth();
-		int height = imagePlus.getHeight();
+	private Overlay createOverlay(final ImagePlus imagePlus) {
+		final int width = imagePlus.getWidth();
+		final int height = imagePlus.getHeight();
 
 		_cursorImage = createCursorImage();
-		_errorImage  = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		_hiddenImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		_thresholdImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		_errorImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		_hiddenImage =
+			new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		_thresholdImage =
+			new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
-		Overlay overlay = new Overlay();
+		final Overlay overlay = new Overlay();
 		_errorRoi = new ImageRoi(0, 0, _errorImage);
 		overlay.add(_errorRoi);
 		_thresholdRoi = new ImageRoi(0, 0, _thresholdImage);
@@ -274,9 +281,11 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	}
 
 	private BufferedImage createCursorImage() {
-		int color = getColor(CURSOR_COLOR, 0xff);
-		int black = getColor(Color.GRAY, 0xff);
-		BufferedImage cursorImage = new BufferedImage(CURSOR_WIDTH, CURSOR_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		final int color = getColor(CURSOR_COLOR, 0xff);
+		final int black = getColor(Color.GRAY, 0xff);
+		final BufferedImage cursorImage =
+			new BufferedImage(CURSOR_WIDTH, CURSOR_HEIGHT,
+				BufferedImage.TYPE_INT_ARGB);
 		for (int y = 0; y < CURSOR_HEIGHT; ++y) {
 			for (int x = 0; x < CURSOR_WIDTH; ++x) {
 				if (x == CURSOR_WIDTH / 2 - 1 || x == CURSOR_WIDTH / 2 + 1) {
@@ -306,10 +315,10 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 		return cursorImage;
 	}
 
-	private int getColor(Color color, int alpha) {
-		int red   = color.getRed();
-		int green = color.getGreen();
-		int blue  = color.getBlue();
+	private int getColor(final Color color, final int alpha) {
+		final int red = color.getRed();
+		final int green = color.getGreen();
+		final int blue = color.getBlue();
 		return (alpha << 24) | (red << 16) | (green << 8) | blue;
 	}
 
@@ -319,7 +328,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	 * @param listener
 	 */
 	@Override
-	public void setListener(ISelectListener listener) {
+	public void setListener(final ISelectListener listener) {
 		_listener = listener;
 	}
 
@@ -329,7 +338,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	 * @return channel
 	 */
 	@Override
-	public int getChannel(){
+	public int getChannel() {
 		// covert 1...n to 0...n-1
 		return _stackWindow.getSlice() - 1;
 	}
@@ -340,7 +349,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	 * @param enable
 	 */
 	@Override
-	public void enable(boolean enable) {
+	public void enable(final boolean enable) {
 		_stackWindow.setEnabled(enable);
 	}
 
@@ -353,9 +362,11 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	 * @return unsigned byte expressed as an integer, 0...255
 	 */
 	@Override
-	public int getGrayValue(int channel, int x, int y) {
+	public int getGrayValue(final int channel, final int x, final int y) {
 		// (a * 255 / b) is 255 only when a == b, so we need to multiply by 256
-		int returnValue = _saveOutPixels[channel][y * _width + x] * 256 / (int) getMaxTotalPhotons();
+		int returnValue =
+			_saveOutPixels[channel][y * _width + x] * 256 /
+				(int) getMaxTotalPhotons();
 		if (returnValue > 255) {
 			returnValue = 255;
 		}
@@ -383,7 +394,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	}
 
 	@Override
-	public void updateThreshold(int threshold) {
+	public void updateThreshold(final int threshold) {
 		for (int y = 0; y < _height; ++y) {
 			for (int x = 0; x < _width; ++x) {
 				int alpha = TRANSPARENT;
@@ -397,12 +408,12 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	}
 
 	@Override
-	public void resetErrorMask(int channel) {
+	public void resetErrorMask(final int channel) {
 		updateErrorMask(new Mask(_width, _height), channel);
 	}
 
 	@Override
-	public void updateErrorMask(Mask mask, int channel) {
+	public void updateErrorMask(final Mask mask, final int channel) {
 		for (int y = 0; y < _height; ++y) {
 			for (int x = 0; x < _width; ++x) {
 				int alpha = TRANSPARENT;
@@ -416,7 +427,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	}
 
 	@Override
-	public void listenToMaskGroup(IMaskGroup maskGroup) {
+	public void listenToMaskGroup(final IMaskGroup maskGroup) {
 		// apply the group mask
 		applyMask(maskGroup.getMask());
 
@@ -425,17 +436,19 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 			_maskGroupSet.add(maskGroup);
 
 			// create a new mask node that listens to the group
-			IMaskNode maskNode = new MaskNode(maskGroup, new IMaskNodeListener () {
-				// listen for mask changes
-				@Override
-				public void updateMasks(Mask otherMask, Mask totalMask) {
-					applyMask(otherMask);
-				}
-			});
+			final IMaskNode maskNode =
+				new MaskNode(maskGroup, new IMaskNodeListener() {
+
+					// listen for mask changes
+					@Override
+					public void updateMasks(final Mask otherMask, final Mask totalMask) {
+						applyMask(otherMask);
+					}
+				});
 		}
 	}
 
-	private void applyMask(Mask mask) {
+	private void applyMask(final Mask mask) {
 		for (int y = 0; y < _height; ++y) {
 			for (int x = 0; x < _width; ++x) {
 				int alpha = HIDDEN_TRANSPARENCY;
@@ -455,7 +468,7 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	 * @return String with path name
 	 */
 	private float getZoomFactorFromPreferences() {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		return prefs.getFloat(ZOOM_KEY, 1.0f);
 	}
 
@@ -464,8 +477,8 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	 *
 	 * @param path
 	 */
-	private void saveZoomFactorInPreferences(float zoomFactor) {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	private void saveZoomFactorInPreferences(final float zoomFactor) {
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.putFloat(ZOOM_KEY, zoomFactor);
 	}
 }

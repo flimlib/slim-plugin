@@ -23,20 +23,21 @@
 
 package loci.slim.fitted;
 
-
 /**
  * Extracts Chi Square fitted values.
- * 
+ *
  * @author Aivar Grislis
  */
-public class ChiSqFittedValue extends AbstractFittedValue implements FittedValue {
+public class ChiSqFittedValue extends AbstractFittedValue implements
+	FittedValue
+{
 
-	public void init(String title) {
+	public void init(final String title) {
 		setTitle(title);
 	}
 
 	@Override
-	public double getValue(double[] values) {
+	public double getValue(final double[] values) {
 		return values[FittedValue.CHI_SQ_INDEX];
 	}
 }

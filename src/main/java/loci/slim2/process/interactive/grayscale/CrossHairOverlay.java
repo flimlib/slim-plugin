@@ -31,28 +31,27 @@ import net.imagej.overlay.PointOverlay;
 import org.scijava.Context;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class CrossHairOverlay extends PointOverlay {
+
 	private final Dataset dataset;
 
 	/**
 	 * Construct a {@link CrossHairOverlay} given a {@link Context} context.
 	 */
-	public CrossHairOverlay(Context context, Dataset dataset)
-	{
+	public CrossHairOverlay(final Context context, final Dataset dataset) {
 		super(context);
 		this.dataset = dataset;
 	}
 
 	/**
 	 * Sets the point.
-	 * 
+	 *
 	 * @param point
 	 */
-	public void setPoint(double[] point) {
-		List<double[]> pts = super.getPoints();
+	public void setPoint(final double[] point) {
+		final List<double[]> pts = super.getPoints();
 		pts.add(0, point);
 		super.setPoints(pts);
 		dataset.rebuild();

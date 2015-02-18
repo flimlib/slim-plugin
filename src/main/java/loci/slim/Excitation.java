@@ -26,10 +26,11 @@ package loci.slim;
 /**
  * This class is a container for values for the excitation (also known as the
  * prompt, instrument response function, or lamp function).
- * 
+ *
  * @author Aivar Grislis
  */
 public class Excitation {
+
 	private final String fileName;
 	private final double[] values;
 	private final double timeInc;
@@ -43,7 +44,9 @@ public class Excitation {
 	 * @param fileName
 	 * @param values
 	 */
-	public Excitation(String fileName, double[] values, double timeInc) {
+	public Excitation(final String fileName, final double[] values,
+		final double timeInc)
+	{
 		this.fileName = fileName;
 		this.values = values;
 		this.timeInc = timeInc;
@@ -81,7 +84,7 @@ public class Excitation {
 	 *
 	 * @param start
 	 */
-	public void setStart(int start) {
+	public void setStart(final int start) {
 		this.start = start;
 	}
 
@@ -96,10 +99,10 @@ public class Excitation {
 
 	/**
 	 * Sets the stop cursor.
-	 * 
+	 *
 	 * @param stop
 	 */
-	public void setStop(int stop) {
+	public void setStop(final int stop) {
 		this.stop = stop;
 	}
 
@@ -117,7 +120,7 @@ public class Excitation {
 	 *
 	 * @param base
 	 */
-	public void setBase(double base) {
+	public void setBase(final double base) {
 		this.base = base;
 	}
 

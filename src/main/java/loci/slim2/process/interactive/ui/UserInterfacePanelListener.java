@@ -25,7 +25,7 @@ package loci.slim2.process.interactive.ui;
 
 /**
  * Listens to UI panel.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface UserInterfacePanelListener {
@@ -81,7 +81,7 @@ public interface UserInterfacePanelListener {
 
 	/**
 	 * Creates excitation curve from gaussian.
-	 * 
+	 *
 	 * @param fileName
 	 * @return whether successful
 	 */
@@ -97,4 +97,3 @@ public interface UserInterfacePanelListener {
 	 */
 	public void estimateCursors();
 }
-

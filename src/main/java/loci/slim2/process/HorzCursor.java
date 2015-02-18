@@ -24,28 +24,29 @@
 package loci.slim2.process;
 
 /**
- * Horizontal decay cursor.  Divides decay into two regions for fitting.
- * 
+ * Horizontal decay cursor. Divides decay into two regions for fitting.
+ *
  * @author Aivar Grislis
  */
 public class HorzCursor {
+
 	private final double timeInc;
 	private int bin;
 	private double time;
 
 	/**
 	 * Constructor, specifies time increment per bin.
-	 * 
-	 * @param timeInc 
+	 *
+	 * @param timeInc
 	 */
-	public HorzCursor(double timeInc) {
+	public HorzCursor(final double timeInc) {
 		this.timeInc = timeInc;
 	}
 
 	/**
 	 * Get bin number.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getBin() {
 		return bin;
@@ -53,18 +54,18 @@ public class HorzCursor {
 
 	/**
 	 * Set bin number.
-	 * 
-	 * @param bin 
+	 *
+	 * @param bin
 	 */
-	public void setBin(int bin) {
+	public void setBin(final int bin) {
 		this.bin = bin;
 		time = bin * timeInc;
 	}
 
 	/**
 	 * Get time value.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getTime() {
 		return time;
@@ -72,10 +73,10 @@ public class HorzCursor {
 
 	/**
 	 * Set time value.
-	 * 
-	 * @param time 
+	 *
+	 * @param time
 	 */
-	public void setTime(double time) {
+	public void setTime(final double time) {
 		this.time = time;
 		bin = (int) (time / timeInc);
 	}

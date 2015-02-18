@@ -70,117 +70,104 @@ import loci.slim2.process.interactive.cursor.FittingCursorListener;
 
 /**
  * Default implementation of main UI panel.
- * 
+ *
  * @author Aivar Grislis
  */
 public class DefaultUserInterfacePanel implements UserInterfacePanel {
+
 	private static final String TITLE = "SLIM Curve";
 
 	private static final String SUM_REGION = "Sum All Pixels",
-								ROIS_REGION = "Sum Each ROI",
-								PIXEL_REGION = "Single Pixel",
-								ALL_REGION = "Images";
+			ROIS_REGION = "Sum Each ROI", PIXEL_REGION = "Single Pixel",
+			ALL_REGION = "Images";
 
 	private static final String JAOLHO_LMA_ALGORITHM = "Jaolho LMA",
-								SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD",
-								SLIM_CURVE_LMA_ALGORITHM = "SLIMCurve LMA",
-								SLIM_CURVE_RLD_LMA_ALGORITHM = "SLIMCurve RLD+LMA";
+			SLIM_CURVE_RLD_ALGORITHM = "SLIMCurve RLD",
+			SLIM_CURVE_LMA_ALGORITHM = "SLIMCurve LMA",
+			SLIM_CURVE_RLD_LMA_ALGORITHM = "SLIMCurve RLD+LMA";
 
 	private static final String SINGLE_EXPONENTIAL = "Single Exponential",
-								DOUBLE_EXPONENTIAL = "Double Exponential",
-								TRIPLE_EXPONENTIAL = "Triple Exponential",
-								STRETCHED_EXPONENTIAL = "Stretched Exponential";
+			DOUBLE_EXPONENTIAL = "Double Exponential",
+			TRIPLE_EXPONENTIAL = "Triple Exponential",
+			STRETCHED_EXPONENTIAL = "Stretched Exponential";
 
 	private static final String GAUSSIAN_FIT = "Gaussian Fit",
-								POISSON_FIT = "Poisson Fit",
-								POISSON_DATA = "Poisson Data",
-								MAXIMUM_LIKELIHOOD = "Max. Likelihood Est.";
+			POISSON_FIT = "Poisson Fit", POISSON_DATA = "Poisson Data",
+			MAXIMUM_LIKELIHOOD = "Max. Likelihood Est.";
 
-	private static final String CHI_SQ_TARGET = "" + CHI + SQUARE + SUB_R + " Target";
+	private static final String CHI_SQ_TARGET = "" + CHI + SQUARE + SUB_R +
+		" Target";
 
 	private static final String EXCITATION_NONE = "None",
-								EXCITATION_FILE = "Load from File",
-								EXCITATION_CREATE = "Use current X Y",
-								EXCITATION_ESTIMATE = "Estimate from current X Y",
-								EXCITATION_GAUSSIAN = "Gaussian";
+			EXCITATION_FILE = "Load from File",
+			EXCITATION_CREATE = "Use current X Y",
+			EXCITATION_ESTIMATE = "Estimate from current X Y",
+			EXCITATION_GAUSSIAN = "Gaussian";
 
 	private static final String FIT_IMAGE = "Fit Images",
-								FIT_PIXEL = "Fit Pixel",
-								FIT_SUMMED_PIXELS = "Fit Summed Pixels",
-								FIT_SUMMED_ROIS = "Fit Summed ROIs",
-								CANCEL_FIT = "Cancel Fit";
+			FIT_PIXEL = "Fit Pixel", FIT_SUMMED_PIXELS = "Fit Summed Pixels",
+			FIT_SUMMED_ROIS = "Fit Summed ROIs", CANCEL_FIT = "Cancel Fit";
 
-	private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(10, 10, 10, 10),
-								ETCHED_BORDER = BorderFactory.createEtchedBorder();
+	private static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder(
+		10, 10, 10, 10), ETCHED_BORDER = BorderFactory.createEtchedBorder();
 
-	//TODO ARG fitting a series of ROIs is broken, so omit that possibility, for now:
-	private static final String REGION_ITEMS[] = { SUM_REGION, /*ROIS_REGION,*/ PIXEL_REGION, ALL_REGION },
-								ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM, SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM, SLIM_CURVE_RLD_LMA_ALGORITHM },
-								FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL, DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL },
-								NOISE_MODEL_ITEMS[] = { GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA, MAXIMUM_LIKELIHOOD };
+	// TODO ARG fitting a series of ROIs is broken, so omit that possibility, for
+	// now:
+	private static final String REGION_ITEMS[] = { SUM_REGION, /*ROIS_REGION,*/
+		PIXEL_REGION, ALL_REGION }, ALGORITHM_ITEMS[] = { JAOLHO_LMA_ALGORITHM,
+		SLIM_CURVE_RLD_ALGORITHM, SLIM_CURVE_LMA_ALGORITHM,
+		SLIM_CURVE_RLD_LMA_ALGORITHM }, FUNCTION_ITEMS[] = { SINGLE_EXPONENTIAL,
+		DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL },
+			NOISE_MODEL_ITEMS[] = { GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA,
+				MAXIMUM_LIKELIHOOD };
 
 	private static final String A_T_Z_X2 = "A " + TAU_CHAR + " Z " + CHISQUARE,
-								A_T_X2 = "A " + TAU_CHAR + " " + CHISQUARE,
-								A_T = "A " + TAU_CHAR,
-								F_UPPER_T_Z_X2 = F_UPPER + TAU_CHAR + " Z " + CHISQUARE,
-								F_UPPER_T_X2 = F_UPPER + TAU_CHAR + " " + CHISQUARE,
-								F_UPPER_T = F_UPPER + TAU_CHAR,
-								F_LOWER_T_Z_X2 = F_LOWER + TAU_CHAR + " Z " + CHISQUARE,
-								F_LOWER_T_X2 = F_LOWER + TAU_CHAR + " " + CHISQUARE,
-								F_LOWER_T = F_LOWER + TAU_CHAR,
-								T_X2 = TAU_CHAR + " " + CHISQUARE,
-								T = "" + TAU_CHAR,
-								TAU_MEAN_X2 = TAU_MEAN + CHISQUARE,
-								A_T_H_Z_X2 = "A " + TAU_CHAR + " H Z " + CHISQUARE,
-								A_T_H_X2 = "A " + TAU_CHAR + " H " + CHISQUARE,
-								A_T_H = "A " + TAU_CHAR + " H",
-								T_H_X2 = TAU_CHAR + " H " + CHISQUARE,
-								T_H = TAU_CHAR + " H",
-								NONE = " ";
+			A_T_X2 = "A " + TAU_CHAR + " " + CHISQUARE, A_T = "A " + TAU_CHAR,
+			F_UPPER_T_Z_X2 = F_UPPER + TAU_CHAR + " Z " + CHISQUARE,
+			F_UPPER_T_X2 = F_UPPER + TAU_CHAR + " " + CHISQUARE, F_UPPER_T = F_UPPER +
+				TAU_CHAR, F_LOWER_T_Z_X2 = F_LOWER + TAU_CHAR + " Z " + CHISQUARE,
+			F_LOWER_T_X2 = F_LOWER + TAU_CHAR + " " + CHISQUARE, F_LOWER_T = F_LOWER +
+				TAU_CHAR, T_X2 = TAU_CHAR + " " + CHISQUARE, T = "" + TAU_CHAR,
+			TAU_MEAN_X2 = TAU_MEAN + CHISQUARE, A_T_H_Z_X2 = "A " + TAU_CHAR +
+				" H Z " + CHISQUARE, A_T_H_X2 = "A " + TAU_CHAR + " H " + CHISQUARE,
+			A_T_H = "A " + TAU_CHAR + " H", T_H_X2 = TAU_CHAR + " H " + CHISQUARE,
+			T_H = TAU_CHAR + " H", NONE = " ";
 
-	private static final String FITTING_ERROR = "Fitting Error",
-								NO_FIT = "--";
+	private static final String FITTING_ERROR = "Fitting Error", NO_FIT = "--";
 
-	private static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, T_X2, T, NONE },
-								DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, F_UPPER_T_Z_X2, F_UPPER_T_X2, F_UPPER_T, F_LOWER_T_Z_X2, F_LOWER_T_X2, F_LOWER_T, T_X2, T, TAU_MEAN_X2, TAU_MEAN, NONE },
-								TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, F_UPPER_T_Z_X2, F_UPPER_T_X2, F_UPPER_T, F_LOWER_T_Z_X2, F_LOWER_T_X2, F_LOWER_T, T_X2, T, TAU_MEAN_X2, TAU_MEAN, NONE },
-								STRETCHED_FITTED_IMAGE_ITEMS[] = { A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, NONE };
+	private static final String SINGLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2,
+		A_T, T_X2, T, NONE }, DOUBLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2,
+		A_T, F_UPPER_T_Z_X2, F_UPPER_T_X2, F_UPPER_T, F_LOWER_T_Z_X2, F_LOWER_T_X2,
+		F_LOWER_T, T_X2, T, TAU_MEAN_X2, TAU_MEAN, NONE },
+			TRIPLE_FITTED_IMAGE_ITEMS[] = { A_T_Z_X2, A_T_X2, A_T, F_UPPER_T_Z_X2,
+				F_UPPER_T_X2, F_UPPER_T, F_LOWER_T_Z_X2, F_LOWER_T_X2, F_LOWER_T, T_X2,
+				T, TAU_MEAN_X2, TAU_MEAN, NONE }, STRETCHED_FITTED_IMAGE_ITEMS[] = {
+				A_T_H_Z_X2, A_T_H_X2, A_T_H, T_H_X2, T_H, T, NONE };
 
-	private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE, EXCITATION_FILE, EXCITATION_CREATE, EXCITATION_ESTIMATE, EXCITATION_GAUSSIAN };
+	private static final String EXCITATION_ITEMS[] = { EXCITATION_NONE,
+		EXCITATION_FILE, EXCITATION_CREATE, EXCITATION_ESTIMATE,
+		EXCITATION_GAUSSIAN };
 
-	private static final int X_VALUE = 0,
-							 X_MAX = 64000,
-							 X_MIN = 0,
-							 X_INC = 1;
+	private static final int X_VALUE = 0, X_MAX = 64000, X_MIN = 0, X_INC = 1;
 
-	private static final int Y_VALUE = 0,
-							 Y_MAX = 64000,
-							 Y_MIN = 0,
-							 Y_INC = 1;
+	private static final int Y_VALUE = 0, Y_MAX = 64000, Y_MIN = 0, Y_INC = 1;
 
-	private static final int THRESH_VALUE = 0,
-							 THRESH_MAX = 64000,
-							 THRESH_MIN = 0,
-							 THRESH_INC = 1;
+	private static final int THRESH_VALUE = 0, THRESH_MAX = 64000,
+			THRESH_MIN = 0, THRESH_INC = 1;
 
-	private static final double CHISQ_VALUE = 1.5,
-								CHISQ_MAX = 5.0,
-								CHISQ_MIN = 1.0,
-								CHISQ_INC = 0.25;
+	private static final double CHISQ_VALUE = 1.5, CHISQ_MAX = 5.0,
+			CHISQ_MIN = 1.0, CHISQ_INC = 0.25;
 
-	private static final double SCATTER_VALUE = 0.0,
-								SCATTER_MAX = 2.0,
-								SCATTER_MIN = 0.0,
-								SCATTER_INC = 0.001;
+	private static final double SCATTER_VALUE = 0.0, SCATTER_MAX = 2.0,
+			SCATTER_MIN = 0.0, SCATTER_INC = 0.001;
 
-	private static final String CURSOR_TIME = "Time",
-								CURSOR_BINS = "Bins";
+	private static final String CURSOR_TIME = "Time", CURSOR_BINS = "Bins";
 
-	private FittingCursor fittingCursor;
-	private FittingCursorListener fittingCursorListener;
-	private IFitterEstimator fitterEstimator;
-	private int maxBin;
-	private double xInc;
+	private final FittingCursor fittingCursor;
+	private final FittingCursorListener fittingCursorListener;
+	private final IFitterEstimator fitterEstimator;
+	private final int maxBin;
+	private final double xInc;
 
 	private UserInterfacePanelListener listener;
 	private ThresholdUpdate thresholdListener;
@@ -203,14 +190,14 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	JCheckBox fitAllChannels;
 
 	// cursor settings
-	//   model A - time increments
+	// model A - time increments
 	JSpinner promptBaselineSpinnerA;
 	JSpinner transientStartSpinnerA;
 	JSpinner dataStartSpinnerA;
 	JSpinner transientStopSpinnerA;
 	JSpinner promptDelaySpinnerA;
 	JSpinner promptWidthSpinnerA;
-	//  model B - bin index increments
+	// model B - bin index increments
 	JSpinner promptBaselineSpinnerB;
 	JSpinner transientStartSpinnerB;
 	JSpinner dataStartSpinnerB;
@@ -302,13 +289,12 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	JButton fitButton;
 	String fitButtonText = FIT_IMAGE;
 
-	public DefaultUserInterfacePanel(boolean tabbed, boolean showTau,
-			int maxBin, double xInc,
-			String[] analysisChoices, String[] binningChoices,
-			FittingCursor fittingCursor,
-			IFitterEstimator fitterEstimator)
+	public DefaultUserInterfacePanel(final boolean tabbed, final boolean showTau,
+		final int maxBin, final double xInc, final String[] analysisChoices,
+		final String[] binningChoices, final FittingCursor fittingCursor,
+		final IFitterEstimator fitterEstimator)
 	{
-		String lifetimeLabel = "" + (showTau ? TAU_CHAR : LAMBDA);
+		final String lifetimeLabel = "" + (showTau ? TAU_CHAR : LAMBDA);
 
 		this.fittingCursor = fittingCursor;
 		this.fitterEstimator = fitterEstimator;
@@ -318,130 +304,135 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		frame = new JFrame(TITLE);
 
 		// create outer panel
-		JPanel outerPanel = new JPanel();
+		final JPanel outerPanel = new JPanel();
 		outerPanel.setLayout(new BoxLayout(outerPanel, BoxLayout.Y_AXIS));
 
 		if (tabbed) {
-			JTabbedPane tabbedPane = new JTabbedPane();
+			final JTabbedPane tabbedPane = new JTabbedPane();
 
-			JPanel fitPanel = createFitPanel(analysisChoices);
+			final JPanel fitPanel = createFitPanel(analysisChoices);
 			tabbedPane.addTab("Fit", fitPanel);
 
-			JPanel cursorPanel = createCursorPanel();
+			final JPanel cursorPanel = createCursorPanel();
 			tabbedPane.addTab("Cursors", cursorPanel);
 
-			JPanel controlPanel = createControlPanel(binningChoices);
+			final JPanel controlPanel = createControlPanel(binningChoices);
 			tabbedPane.addTab("Control", controlPanel);
 
 			// Create cards and the panel that contains the cards
 			cardPanel = new JPanel(new CardLayout());
-			cardPanel.add(createSingleExponentialPanel(lifetimeLabel), SINGLE_EXPONENTIAL);
-			cardPanel.add(createDoubleExponentialPanel(lifetimeLabel), DOUBLE_EXPONENTIAL);
-			cardPanel.add(createTripleExponentialPanel(lifetimeLabel), TRIPLE_EXPONENTIAL);
-			cardPanel.add(createStretchedExponentialPanel(lifetimeLabel), STRETCHED_EXPONENTIAL);
+			cardPanel.add(createSingleExponentialPanel(lifetimeLabel),
+				SINGLE_EXPONENTIAL);
+			cardPanel.add(createDoubleExponentialPanel(lifetimeLabel),
+				DOUBLE_EXPONENTIAL);
+			cardPanel.add(createTripleExponentialPanel(lifetimeLabel),
+				TRIPLE_EXPONENTIAL);
+			cardPanel.add(createStretchedExponentialPanel(lifetimeLabel),
+				STRETCHED_EXPONENTIAL);
 			tabbedPane.addTab("Params", cardPanel);
 
 			outerPanel.add(tabbedPane);
 		}
 		else {
 			// create inner panel
-			JPanel innerPanel = new JPanel();
+			final JPanel innerPanel = new JPanel();
 			innerPanel.setLayout(new BoxLayout(innerPanel, BoxLayout.X_AXIS));
 
-			JPanel fitPanel = createFitPanel(analysisChoices);
+			final JPanel fitPanel = createFitPanel(analysisChoices);
 			fitPanel.setBorder(border("Fit"));
 			innerPanel.add(fitPanel);
 
-			JPanel cursorPanel = createCursorPanel();
+			final JPanel cursorPanel = createCursorPanel();
 			cursorPanel.setBorder(border("Cursors & Excitation"));
 			innerPanel.add(cursorPanel);
 
-			JPanel controlPanel = createControlPanel(binningChoices);
+			final JPanel controlPanel = createControlPanel(binningChoices);
 			controlPanel.setBorder(border("Control"));
 			innerPanel.add(controlPanel);
 
 			// Create cards and the panel that contains the cards
 			cardPanel = new JPanel(new CardLayout());
-			cardPanel.add(createSingleExponentialPanel(lifetimeLabel), SINGLE_EXPONENTIAL);
-			cardPanel.add(createDoubleExponentialPanel(lifetimeLabel), DOUBLE_EXPONENTIAL);
-			cardPanel.add(createTripleExponentialPanel(lifetimeLabel), TRIPLE_EXPONENTIAL);
-			cardPanel.add(createStretchedExponentialPanel(lifetimeLabel), STRETCHED_EXPONENTIAL);
+			cardPanel.add(createSingleExponentialPanel(lifetimeLabel),
+				SINGLE_EXPONENTIAL);
+			cardPanel.add(createDoubleExponentialPanel(lifetimeLabel),
+				DOUBLE_EXPONENTIAL);
+			cardPanel.add(createTripleExponentialPanel(lifetimeLabel),
+				TRIPLE_EXPONENTIAL);
+			cardPanel.add(createStretchedExponentialPanel(lifetimeLabel),
+				STRETCHED_EXPONENTIAL);
 			cardPanel.setBorder(border("Params"));
 			innerPanel.add(cardPanel);
 
 			outerPanel.add(innerPanel);
 		}
 
-		//Lay out the buttons from left to right.
-		JPanel buttonPanel = new JPanel();
+		// Lay out the buttons from left to right.
+		final JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
 		buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 		buttonPanel.add(Box.createHorizontalGlue());
 		openButton = new JButton("New File/Batch");
-		openButton.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (null != listener) {
-						listener.openFile();
-					}
+		openButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				if (null != listener) {
+					listener.openFile();
 				}
 			}
-		);
+		});
 		buttonPanel.add(openButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 		quitButton = new JButton("Quit");
-		quitButton.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (null != listener) {
-						listener.quit();
-					}
+		quitButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				if (null != listener) {
+					listener.quit();
 				}
 			}
-		);
+		});
 		buttonPanel.add(quitButton);
 		buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 		fitButton = new JButton(fitButtonText);
-		fitButton.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					boolean summed;
-					System.out.println("fitbutton event e " + e);
-					if (null != listener) {
-						switch (getRegion()) {
-							case EACH:
-								System.out.println("region is each");
-								if (getFitButtonState()) {
-									System.out.println("getFBS was true; fit");
-									enableAll(false);
-									setFitButtonState(false);
-									listener.fitImages();
-								}
-								else {
-									System.out.println("getFBS was false; cancel");
-									enableAll(true);
-									setFitButtonState(true);
-									listener.cancelFit();
-								}
-								break;
-							case POINT:
-								summed = false;
-								listener.fitSingleDecay(summed);
-								break;
-							case ROI:
-								break;
-							case SUMMED:
-								summed = true;
-								listener.fitSingleDecay(summed);
-								break;
-						}
+		fitButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				boolean summed;
+				System.out.println("fitbutton event e " + e);
+				if (null != listener) {
+					switch (getRegion()) {
+						case EACH:
+							System.out.println("region is each");
+							if (getFitButtonState()) {
+								System.out.println("getFBS was true; fit");
+								enableAll(false);
+								setFitButtonState(false);
+								listener.fitImages();
+							}
+							else {
+								System.out.println("getFBS was false; cancel");
+								enableAll(true);
+								setFitButtonState(true);
+								listener.cancelFit();
+							}
+							break;
+						case POINT:
+							summed = false;
+							listener.fitSingleDecay(summed);
+							break;
+						case ROI:
+							break;
+						case SUMMED:
+							summed = true;
+							listener.fitSingleDecay(summed);
+							break;
 					}
 				}
 			}
-		);
+		});
 		buttonPanel.add(fitButton);
 
 		outerPanel.add(buttonPanel);
@@ -450,17 +441,17 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		frame.pack();
 		final Dimension preferred = frame.getPreferredSize();
 		frame.setMinimumSize(preferred);
-		frame.addComponentListener(
-				new ComponentAdapter() {
-					@Override
-					public void componentResized(ComponentEvent e) {
-						// allow horizontal but not vertical resize
-						int width = frame.getWidth();
-						if (width < (int) preferred.getWidth()) {
-							width = (int) preferred.getWidth();
-						}
-						frame.setSize(width, (int) preferred.getHeight());
-					}
+		frame.addComponentListener(new ComponentAdapter() {
+
+			@Override
+			public void componentResized(final ComponentEvent e) {
+				// allow horizontal but not vertical resize
+				int width = frame.getWidth();
+				if (width < (int) preferred.getWidth()) {
+					width = (int) preferred.getWidth();
+				}
+				frame.setSize(width, (int) preferred.getHeight());
+			}
 
 		});
 
@@ -478,12 +469,12 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	@Override
-	public void setListener(UserInterfacePanelListener listener) {
+	public void setListener(final UserInterfacePanelListener listener) {
 		this.listener = listener;
 	}
 
 	@Override
-	public void setThresholdListener(ThresholdUpdate thresholdListener) {
+	public void setThresholdListener(final ThresholdUpdate thresholdListener) {
 		this.thresholdListener = thresholdListener;
 	}
 
@@ -508,48 +499,48 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		enableButtons(true);
 	}
 
-	private JPanel createFitPanel(String[] analysisChoices) {
-		JPanel fitPanel = new JPanel();
+	private JPanel createFitPanel(final String[] analysisChoices) {
+		final JPanel fitPanel = new JPanel();
 		fitPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
 		fitPanel.setLayout(new SpringLayout());
 
-		JLabel regionLabel = new JLabel("Region");
+		final JLabel regionLabel = new JLabel("Region");
 		regionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		fitPanel.add(regionLabel);
-		//TODO all these comboboxes are problematical:
-		//  if you click on the containing window & move it the combo list
-		//  doesn't close and remains active & drawn in original spot.
+		// TODO all these comboboxes are problematical:
+		// if you click on the containing window & move it the combo list
+		// doesn't close and remains active & drawn in original spot.
 		// See:
 		// http://stackoverflow.com/questions/10982273/swt-awt-new-frame-jcombobox-never-lose-focus-when-window-is-moved
-		// (but in that case problem was mixing SWT/AWT/Swing; this is just a JComboBox in a JPanel in a JTabbedPane.)
+		// (but in that case problem was mixing SWT/AWT/Swing; this is just a
+		// JComboBox in a JPanel in a JTabbedPane.)
 		regionComboBox = new JComboBox(REGION_ITEMS);
 		regionComboBox.setSelectedItem(ALL_REGION);
-		regionComboBox.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() == ItemEvent.SELECTED) {
-						String item = (String) e.getItem();
-						if (SUM_REGION.equals(item)) {
-							fitButtonText = FIT_SUMMED_PIXELS;
-						}
-						else if (ROIS_REGION.equals(item)) {
-							fitButtonText = FIT_SUMMED_ROIS;
-						}
-						else if (PIXEL_REGION.equals(item)) {
-							fitButtonText = FIT_PIXEL;
-						}
-						else if (ALL_REGION.equals(item)) {
-							fitButtonText = FIT_IMAGE;
-						}
-						fitButton.setText(fitButtonText);
+		regionComboBox.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(final ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					final String item = (String) e.getItem();
+					if (SUM_REGION.equals(item)) {
+						fitButtonText = FIT_SUMMED_PIXELS;
 					}
+					else if (ROIS_REGION.equals(item)) {
+						fitButtonText = FIT_SUMMED_ROIS;
+					}
+					else if (PIXEL_REGION.equals(item)) {
+						fitButtonText = FIT_PIXEL;
+					}
+					else if (ALL_REGION.equals(item)) {
+						fitButtonText = FIT_IMAGE;
+					}
+					fitButton.setText(fitButtonText);
 				}
 			}
-		);
+		});
 		fitPanel.add(regionComboBox);
 
-		JLabel algorithmLabel = new JLabel("Algorithm");
+		final JLabel algorithmLabel = new JLabel("Algorithm");
 		algorithmLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		fitPanel.add(algorithmLabel);
 		algorithmComboBox = new JComboBox(ALGORITHM_ITEMS);
@@ -557,28 +548,27 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		refitUponStateChange(algorithmComboBox);
 		fitPanel.add(algorithmComboBox);
 
-		JLabel functionLabel = new JLabel("Function");
+		final JLabel functionLabel = new JLabel("Function");
 		functionLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		fitPanel.add(functionLabel);
 		functionComboBox = new JComboBox(FUNCTION_ITEMS);
-		functionComboBox.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() == ItemEvent.SELECTED) {
-						String item = (String) e.getItem();
-						CardLayout cl = (CardLayout)(cardPanel.getLayout());
-						cl.show(cardPanel, item);
-						reconcileStartParam();
-						updateFittedImagesComboBox(FUNCTION_ITEMS, item);
-					}
+		functionComboBox.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(final ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					final String item = (String) e.getItem();
+					final CardLayout cl = (CardLayout) (cardPanel.getLayout());
+					cl.show(cardPanel, item);
+					reconcileStartParam();
+					updateFittedImagesComboBox(FUNCTION_ITEMS, item);
 				}
 			}
-		);
+		});
 		refitUponStateChange(functionComboBox);
 		fitPanel.add(functionComboBox);
 
-		JLabel noiseModelLabel = new JLabel("Noise Model");
+		final JLabel noiseModelLabel = new JLabel("Noise Model");
 		noiseModelLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		fitPanel.add(noiseModelLabel);
 		noiseModelComboBox = new JComboBox(NOISE_MODEL_ITEMS);
@@ -586,29 +576,29 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		refitUponStateChange(noiseModelComboBox);
 		fitPanel.add(noiseModelComboBox);
 
-		JLabel fittedImagesLabel = new JLabel("Fitted Images");
+		final JLabel fittedImagesLabel = new JLabel("Fitted Images");
 		fittedImagesLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		fitPanel.add(fittedImagesLabel);
 		fittedImagesComboBox = new JComboBox(SINGLE_FITTED_IMAGE_ITEMS);
 		fitPanel.add(fittedImagesComboBox);
 
-		JLabel dummyLabel = new JLabel("");
+		final JLabel dummyLabel = new JLabel("");
 		dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		fitPanel.add(dummyLabel);
 		colorizeGrayScale = new JCheckBox("Colorize grayscale");
 		fitPanel.add(colorizeGrayScale);
 
-		int choices = analysisChoices.length;
+		final int choices = analysisChoices.length;
 		if (choices > 0) {
-			List<JCheckBox> checkBoxList = new ArrayList<JCheckBox>();
+			final List<JCheckBox> checkBoxList = new ArrayList<JCheckBox>();
 			boolean firstChoice = true;
-			for (String analysisChoice : analysisChoices) {
-				String labelString = firstChoice ? "Analysis" : "";
+			for (final String analysisChoice : analysisChoices) {
+				final String labelString = firstChoice ? "Analysis" : "";
 				firstChoice = false;
-				JLabel choiceLabel = new JLabel(labelString);
+				final JLabel choiceLabel = new JLabel(labelString);
 				choiceLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 				fitPanel.add(choiceLabel);
-				JCheckBox checkBox = new JCheckBox(analysisChoice);
+				final JCheckBox checkBox = new JCheckBox(analysisChoice);
 				fitPanel.add(checkBox);
 				checkBoxList.add(checkBox);
 			}
@@ -618,7 +608,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		// rows, cols, initX, initY, xPad, yPad
 		SpringUtilities.makeCompactGrid(fitPanel, 6 + choices, 2, 4, 4, 4, 4);
 
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.add("North", fitPanel);
 
 		fitAllChannels = new JCheckBox("Fit all channels");
@@ -629,13 +619,15 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	/**
-	 * Used to build an appropriate list of fitted images, according to the
-	 * fit function selected.
-	 * 
+	 * Used to build an appropriate list of fitted images, according to the fit
+	 * function selected.
+	 *
 	 * @param items
-	 * @param selectedItem 
+	 * @param selectedItem
 	 */
-	private void updateFittedImagesComboBox(String[] items, String selectedItem) {
+	private void updateFittedImagesComboBox(final String[] items,
+		final String selectedItem)
+	{
 		if (SINGLE_EXPONENTIAL.equals(selectedItem)) {
 			updateComboBox(fittedImagesComboBox, SINGLE_FITTED_IMAGE_ITEMS);
 		}
@@ -653,111 +645,105 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/*
 	 * Updates a combo box with a new list of items.
 	 */
-	private void updateComboBox(JComboBox comboBox, String[] items) {
+	private void updateComboBox(final JComboBox comboBox, final String[] items) {
 		// Had problems with "comboBox.removeAll()":
 		for (int i = comboBox.getItemCount() - 1; i >= 0; --i) {
 			comboBox.removeItemAt(i);
 		}
-		for (String item : items) {
+		for (final String item : items) {
 			comboBox.addItem(item);
 		}
 		comboBox.setSelectedIndex(0);
 	}
 
 	private JPanel createCursorPanel() {
-		JPanel cursorPanel = new JPanel();
+		final JPanel cursorPanel = new JPanel();
 		cursorPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
 		cursorPanel.setLayout(new BoxLayout(cursorPanel, BoxLayout.Y_AXIS));
 
 		final CardLayout cursorCardLayout = new CardLayout();
 		final JPanel cardsPanel = new JPanel(cursorCardLayout);
-		JPanel subPanelA = createCursorSubPanelA();
+		final JPanel subPanelA = createCursorSubPanelA();
 		cardsPanel.add(subPanelA, CURSOR_TIME);
-		JPanel subPanelB = createCursorSubPanelB();
+		final JPanel subPanelB = createCursorSubPanelB();
 		cardsPanel.add(subPanelB, CURSOR_BINS);
 		cursorPanel.add(cardsPanel);
 
-		JPanel lowerPanel = new JPanel(new SpringLayout());
-		JLabel dummyLabel = new JLabel("");
+		final JPanel lowerPanel = new JPanel(new SpringLayout());
+		final JLabel dummyLabel = new JLabel("");
 		dummyLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		lowerPanel.add(dummyLabel);
 		showBins = new JCheckBox("Display as indices");
-		showBins.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					boolean showBins = e.getStateChange() == ItemEvent.SELECTED;
-					//TODO 4/2/13
-					/**
-					 * I tried having two models, one for bins and one for time
-					 * values and swapping them here.  Crashes when one model has
-					 * integer values and the other doubles.  So, switch to doubles
-					 * for all, but still doesn't work.  Same thing having a single
-					 * model that gets different min/max/inc.  In 'bins' mode I
-					 * could never get the spinner to work, or even type in new
-					 * values.
-					 * 
-					 * Therefore, for now, just disable these spinners altogether
-					 * when in 'bins' mode.
-					 */
-					System.out.println("showBins is " + showBins);
+		showBins.addItemListener(new ItemListener() {
 
-					cursorCardLayout.show(cardsPanel, showBins ? CURSOR_BINS : CURSOR_TIME);
+			@Override
+			public void itemStateChanged(final ItemEvent e) {
+				final boolean showBins = e.getStateChange() == ItemEvent.SELECTED;
+				// TODO 4/2/13
+				/**
+				 * I tried having two models, one for bins and one for time values and
+				 * swapping them here. Crashes when one model has integer values and the
+				 * other doubles. So, switch to doubles for all, but still doesn't work.
+				 * Same thing having a single model that gets different min/max/inc. In
+				 * 'bins' mode I could never get the spinner to work, or even type in
+				 * new values. Therefore, for now, just disable these spinners
+				 * altogether when in 'bins' mode.
+				 */
+				System.out.println("showBins is " + showBins);
 
-					fittingCursor.setShowBins(showBins);
-				}
+				cursorCardLayout.show(cardsPanel, showBins ? CURSOR_BINS : CURSOR_TIME);
+
+				fittingCursor.setShowBins(showBins);
 			}
-		);
-		//TODO 4/2/13
+		});
+		// TODO 4/2/13
 		// Swapping models doesn't work correctly.
-		// Failing that, I could either remove the JSpinner from cursor fields or else
+		// Failing that, I could either remove the JSpinner from cursor fields or
+		// else
 		// just disable the model swap.
 		// Let's go with the latter; we lose the ability to show the underlying bins
 		// unfortunately.
 		lowerPanel.add(showBins);
 
-		JLabel excitationLabel = new JLabel("Excitation");
+		final JLabel excitationLabel = new JLabel("Excitation");
 		excitationLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		lowerPanel.add(excitationLabel);
 		promptComboBox = new JComboBox(EXCITATION_ITEMS);
-		promptComboBox.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					final String selectedItem = (String) promptComboBox.getSelectedItem();
-					if (null == promptSelection || promptSelection != selectedItem) {
-						promptSelection = selectedItem;
-						if (!promptSelectionLock) {
-							promptSelectionLock = true;
-							SwingUtilities.invokeLater(
-								new Runnable() {
-									@Override
-									public void run() {
-										updatePrompt(selectedItem);
-									}
-								}
-							);
-						}
+		promptComboBox.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				final String selectedItem = (String) promptComboBox.getSelectedItem();
+				if (null == promptSelection || promptSelection != selectedItem) {
+					promptSelection = selectedItem;
+					if (!promptSelectionLock) {
+						promptSelectionLock = true;
+						SwingUtilities.invokeLater(new Runnable() {
+
+							@Override
+							public void run() {
+								updatePrompt(selectedItem);
+							}
+						});
 					}
 				}
 			}
-		);
+		});
 		lowerPanel.add(promptComboBox);
 
-		JLabel dummyLabel2 = new JLabel("");
+		final JLabel dummyLabel2 = new JLabel("");
 		dummyLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
 		lowerPanel.add(dummyLabel2);
 		estimateCursorsButton = new JButton("Estimate Cursors");
-		estimateCursorsButton.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (null != listener) {
-						listener.estimateCursors();
-					}
+		estimateCursorsButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				if (null != listener) {
+					listener.estimateCursors();
 				}
 			}
-		);
+		});
 		lowerPanel.add(estimateCursorsButton);
 
 		// rows, cols, initX, initY, xPad, yPad
@@ -765,92 +751,109 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 
 		cursorPanel.add(lowerPanel);
 
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.add("North", cursorPanel);
 
 		return panel;
 	}
 
 	private JPanel createCursorSubPanelA() {
-		JPanel subPanelA = new JPanel();
-		//subPanelB.setBorder(new EmptyBorder(0, 0, 8, 8));
+		final JPanel subPanelA = new JPanel();
+		// subPanelB.setBorder(new EmptyBorder(0, 0, 8, 8));
 		subPanelA.setLayout(new SpringLayout());
 
 		// emulating TRI2 cursor listing order here
-		JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
+		final JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
 		excitationBaselineLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelA.add(excitationBaselineLabel);
-		SpinnerNumberModel promptBaselineModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1);
+		final SpinnerNumberModel promptBaselineModel =
+			new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1);
 		promptBaselineSpinnerA = new JSpinner(promptBaselineModel);
 		promptBaselineSpinnerA.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursor.setPromptBaselineValue((Double) promptBaselineSpinnerA.getValue());
+			public void stateChanged(final ChangeEvent e) {
+				fittingCursor.setPromptBaselineValue((Double) promptBaselineSpinnerA
+					.getValue());
 			}
 		});
 		subPanelA.add(promptBaselineSpinnerA);
 
-		JLabel transStartLabel = new JLabel("Transient Start");
+		final JLabel transStartLabel = new JLabel("Transient Start");
 		transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelA.add(transStartLabel);
-		SpinnerNumberModel transientStartModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
+		final SpinnerNumberModel transientStartModel =
+			new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
 		transientStartSpinnerA = new JSpinner(transientStartModel);
 		transientStartSpinnerA.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursor.setTransientStartTime((Double) transientStartSpinnerA.getValue());
+			public void stateChanged(final ChangeEvent e) {
+				fittingCursor.setTransientStartTime((Double) transientStartSpinnerA
+					.getValue());
 			}
 		});
 		subPanelA.add(transientStartSpinnerA);
 
-		JLabel dataStartLabel = new JLabel("Data Start");
+		final JLabel dataStartLabel = new JLabel("Data Start");
 		dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelA.add(dataStartLabel);
-		SpinnerNumberModel dataStartModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
+		final SpinnerNumberModel dataStartModel =
+			new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
 		dataStartSpinnerA = new JSpinner(dataStartModel);
 		dataStartSpinnerA.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
+			public void stateChanged(final ChangeEvent e) {
 				fittingCursor.setDataStartTime((Double) dataStartSpinnerA.getValue());
 			}
 		});
 		subPanelA.add(dataStartSpinnerA);
 
-		JLabel transStopLabel = new JLabel("Transient End");
+		final JLabel transStopLabel = new JLabel("Transient End");
 		transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelA.add(transStopLabel);
-		SpinnerNumberModel transientStopModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
+		final SpinnerNumberModel transientStopModel =
+			new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
 		transientStopSpinnerA = new JSpinner(transientStopModel);
 		transientStopSpinnerA.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursor.setTransientStopTime((Double) transientStopSpinnerA.getValue());
+			public void stateChanged(final ChangeEvent e) {
+				fittingCursor.setTransientStopTime((Double) transientStopSpinnerA
+					.getValue());
 			}
 		});
 		subPanelA.add(transientStopSpinnerA);
 
-		JLabel excitationStartLabel = new JLabel("Excitation Delay");
+		final JLabel excitationStartLabel = new JLabel("Excitation Delay");
 		excitationStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelA.add(excitationStartLabel);
-		SpinnerNumberModel promptDelayModel = new SpinnerNumberModel(0.0, -maxBin * xInc, maxBin * xInc, xInc);
+		final SpinnerNumberModel promptDelayModel =
+			new SpinnerNumberModel(0.0, -maxBin * xInc, maxBin * xInc, xInc);
 		promptDelaySpinnerA = new JSpinner(promptDelayModel);
 		promptDelaySpinnerA.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursor.setPromptDelayTime((Double) promptDelaySpinnerA.getValue());
+			public void stateChanged(final ChangeEvent e) {
+				fittingCursor.setPromptDelayTime((Double) promptDelaySpinnerA
+					.getValue());
 			}
 		});
 		subPanelA.add(promptDelaySpinnerA);
 
-		JLabel excitationStopLabel = new JLabel("Excitation Width");
+		final JLabel excitationStopLabel = new JLabel("Excitation Width");
 		excitationStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelA.add(excitationStopLabel);
-		SpinnerNumberModel promptWidthModel = new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
+		final SpinnerNumberModel promptWidthModel =
+			new SpinnerNumberModel(0.0, 0.0, maxBin * xInc, xInc);
 		promptWidthSpinnerA = new JSpinner(promptWidthModel);
 		promptWidthSpinnerA.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursor.setPromptWidthTime((Double) promptWidthSpinnerA.getValue());
+			public void stateChanged(final ChangeEvent e) {
+				fittingCursor.setPromptWidthTime((Double) promptWidthSpinnerA
+					.getValue());
 			}
 		});
 		subPanelA.add(promptWidthSpinnerA);
@@ -862,85 +865,102 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	private JPanel createCursorSubPanelB() {
-		JPanel subPanelB = new JPanel();
-		//subPanelA.setBorder(new EmptyBorder(0, 0, 8, 8));
+		final JPanel subPanelB = new JPanel();
+		// subPanelA.setBorder(new EmptyBorder(0, 0, 8, 8));
 		subPanelB.setLayout(new SpringLayout());
 
 		// emulating TRI2 cursor listing order here
-		JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
+		final JLabel excitationBaselineLabel = new JLabel("Excitation Baseline");
 		excitationBaselineLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelB.add(excitationBaselineLabel);
-		SpinnerNumberModel promptBaselineModel = new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1);
+		final SpinnerNumberModel promptBaselineModel =
+			new SpinnerNumberModel(0.0, 0.0, 1000.0, 0.1);
 		promptBaselineSpinnerB = new JSpinner(promptBaselineModel);
 		promptBaselineSpinnerB.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursor.setPromptBaselineValue((Double) promptBaselineSpinnerB.getValue());
+			public void stateChanged(final ChangeEvent e) {
+				fittingCursor.setPromptBaselineValue((Double) promptBaselineSpinnerB
+					.getValue());
 			}
 		});
 		subPanelB.add(promptBaselineSpinnerB);
 
-		JLabel transStartLabel = new JLabel("Transient Start");
+		final JLabel transStartLabel = new JLabel("Transient Start");
 		transStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelB.add(transStartLabel);
-		SpinnerNumberModel transientStartModel = new SpinnerNumberModel(0, 0, maxBin, 1);
+		final SpinnerNumberModel transientStartModel =
+			new SpinnerNumberModel(0, 0, maxBin, 1);
 		transientStartSpinnerB = new JSpinner(transientStartModel);
 		transientStartSpinnerB.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursor.setTransientStartIndex((Integer) transientStartSpinnerB.getValue());
+			public void stateChanged(final ChangeEvent e) {
+				fittingCursor.setTransientStartIndex((Integer) transientStartSpinnerB
+					.getValue());
 			}
 		});
 		subPanelB.add(transientStartSpinnerB);
 
-		JLabel dataStartLabel = new JLabel("Data Start");
+		final JLabel dataStartLabel = new JLabel("Data Start");
 		dataStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelB.add(dataStartLabel);
-		SpinnerNumberModel dataStartModel = new SpinnerNumberModel(0, 0, maxBin, 1);
+		final SpinnerNumberModel dataStartModel =
+			new SpinnerNumberModel(0, 0, maxBin, 1);
 		dataStartSpinnerB = new JSpinner(dataStartModel);
 		dataStartSpinnerB.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
+			public void stateChanged(final ChangeEvent e) {
 				fittingCursor.setDataStartIndex((Integer) dataStartSpinnerB.getValue());
 			}
 		});
 		subPanelB.add(dataStartSpinnerB);
 
-		JLabel transStopLabel = new JLabel("Transient End");
+		final JLabel transStopLabel = new JLabel("Transient End");
 		transStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelB.add(transStopLabel);
-		SpinnerNumberModel transientStopModel = new SpinnerNumberModel(0, 0, maxBin, 1);
+		final SpinnerNumberModel transientStopModel =
+			new SpinnerNumberModel(0, 0, maxBin, 1);
 		transientStopSpinnerB = new JSpinner(transientStopModel);
 		transientStopSpinnerB.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursor.setTransientStopIndex((Integer) transientStopSpinnerB.getValue());
+			public void stateChanged(final ChangeEvent e) {
+				fittingCursor.setTransientStopIndex((Integer) transientStopSpinnerB
+					.getValue());
 			}
 		});
 		subPanelB.add(transientStopSpinnerB);
 
-		JLabel excitationStartLabel = new JLabel("Excitation Delay");
+		final JLabel excitationStartLabel = new JLabel("Excitation Delay");
 		excitationStartLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelB.add(excitationStartLabel);
-		SpinnerNumberModel promptDelayModel = new SpinnerNumberModel(0, -maxBin, maxBin, 1);
+		final SpinnerNumberModel promptDelayModel =
+			new SpinnerNumberModel(0, -maxBin, maxBin, 1);
 		promptDelaySpinnerB = new JSpinner(promptDelayModel);
 		promptDelaySpinnerB.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursor.setPromptDelayIndex((Integer) promptDelaySpinnerB.getValue());
+			public void stateChanged(final ChangeEvent e) {
+				fittingCursor.setPromptDelayIndex((Integer) promptDelaySpinnerB
+					.getValue());
 			}
 		});
 		subPanelB.add(promptDelaySpinnerB);
 
-		JLabel excitationStopLabel = new JLabel("Excitation Width");
+		final JLabel excitationStopLabel = new JLabel("Excitation Width");
 		excitationStopLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		subPanelB.add(excitationStopLabel);
-		SpinnerNumberModel promptWidthModel = new SpinnerNumberModel(0, 0, maxBin, 1);
+		final SpinnerNumberModel promptWidthModel =
+			new SpinnerNumberModel(0, 0, maxBin, 1);
 		promptWidthSpinnerB = new JSpinner(promptWidthModel);
 		promptWidthSpinnerB.addChangeListener(new ChangeListener() {
+
 			@Override
-			public void stateChanged(ChangeEvent e) {
-				fittingCursor.setPromptWidthIndex((Integer) promptWidthSpinnerB.getValue());
+			public void stateChanged(final ChangeEvent e) {
+				fittingCursor.setPromptWidthIndex((Integer) promptWidthSpinnerB
+					.getValue());
 			}
 		});
 		subPanelB.add(promptWidthSpinnerB);
@@ -953,39 +973,39 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 
 	/**
 	 * Update prompt based on new selection.
-	 * 
-	 * @param selectedItem 
+	 *
+	 * @param selectedItem
 	 */
-	private void updatePrompt(String selectedItem) {
+	private void updatePrompt(final String selectedItem) {
 		boolean isExcitationLoaded = false;
 		if (EXCITATION_FILE.equals(selectedItem)) {
-			OpenDialog dialog = new OpenDialog("Load Excitation File", "");
-			String directory = dialog.getDirectory();
-			String fileName = dialog.getFileName();
+			final OpenDialog dialog = new OpenDialog("Load Excitation File", "");
+			final String directory = dialog.getDirectory();
+			final String fileName = dialog.getFileName();
 			if (null != fileName && !fileName.equals("") && null != listener) {
 				isExcitationLoaded = listener.loadExcitation(directory + fileName);
 			}
 		}
 		else if (EXCITATION_CREATE.equals(selectedItem)) {
-			SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
-			String directory = dialog.getDirectory();
-			String fileName = dialog.getFileName();
+			final SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+			final String directory = dialog.getDirectory();
+			final String fileName = dialog.getFileName();
 			if (null != fileName && !fileName.equals("") && null != listener) {
 				isExcitationLoaded = listener.createExcitation(directory + fileName);
 			}
 		}
 		else if (EXCITATION_ESTIMATE.equals(selectedItem)) {
-			SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
-			String directory = dialog.getDirectory();
-			String fileName = dialog.getFileName();
+			final SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+			final String directory = dialog.getDirectory();
+			final String fileName = dialog.getFileName();
 			if (null != fileName && !fileName.equals("") && null != listener) {
 				isExcitationLoaded = listener.estimateExcitation(directory + fileName);
 			}
 		}
 		else if (EXCITATION_GAUSSIAN.equals(selectedItem)) {
-			SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
-			String directory = dialog.getDirectory();
-			String fileName = dialog.getFileName();
+			final SaveDialog dialog = new SaveDialog("Save Excitation File", "", "");
+			final String directory = dialog.getDirectory();
+			final String fileName = dialog.getFileName();
 			if (null != fileName && !fileName.equals("") && null != listener) {
 				isExcitationLoaded = listener.gaussianExcitation(directory + fileName);
 			}
@@ -1008,7 +1028,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 				listener.cancelExcitation();
 			}
 		}
-		boolean summed = false;
+		final boolean summed = false;
 		listener.fitSingleDecay(summed);
 
 		// done
@@ -1018,75 +1038,87 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/*
 	 * Creates a panel that has some settings that control the fit.
 	 */
-	private JPanel createControlPanel(String[] binningChoices) {
-		JPanel controlPanel = new JPanel();
+	private JPanel createControlPanel(final String[] binningChoices) {
+		final JPanel controlPanel = new JPanel();
 		controlPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
 		controlPanel.setLayout(new SpringLayout());
 
-		JLabel xLabel = new JLabel("X");
+		final JLabel xLabel = new JLabel("X");
 		xLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(xLabel);
-		xSpinner = new JSpinner(new SpinnerNumberModel(X_VALUE, X_MIN, X_MAX, X_INC));
+		xSpinner =
+			new JSpinner(new SpinnerNumberModel(X_VALUE, X_MIN, X_MAX, X_INC));
 		refitUponStateChange(xSpinner);
 		controlPanel.add(xSpinner);
 
-		JLabel yLabel = new JLabel("Y");
+		final JLabel yLabel = new JLabel("Y");
 		yLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(yLabel);
-		ySpinner = new JSpinner(new SpinnerNumberModel(Y_VALUE, Y_MIN, Y_MAX, Y_INC));
+		ySpinner =
+			new JSpinner(new SpinnerNumberModel(Y_VALUE, Y_MIN, Y_MAX, Y_INC));
 		refitUponStateChange(ySpinner);
 		controlPanel.add(ySpinner);
 
-		JLabel thresholdMinLabel = new JLabel("Threshold Min");
+		final JLabel thresholdMinLabel = new JLabel("Threshold Min");
 		thresholdMinLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(thresholdMinLabel);
-		thresholdMinSpinner = new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX, THRESH_INC));
+		thresholdMinSpinner =
+			new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX,
+				THRESH_INC));
 		updateThresholdChange(thresholdMinSpinner);
 		controlPanel.add(thresholdMinSpinner);
 
-		JLabel thresholdMaxLabel = new JLabel("Threshold Max");
+		final JLabel thresholdMaxLabel = new JLabel("Threshold Max");
 		thresholdMaxLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(thresholdMaxLabel);
-		thresholdMaxSpinner = new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX, THRESH_INC));
+		thresholdMaxSpinner =
+			new JSpinner(new SpinnerNumberModel(THRESH_VALUE, THRESH_MIN, THRESH_MAX,
+				THRESH_INC));
 		updateThresholdChange(thresholdMaxSpinner);
 		controlPanel.add(thresholdMaxSpinner);
 
-		JLabel chiSqTargetLabel = new JLabel(CHI_SQ_TARGET);
+		final JLabel chiSqTargetLabel = new JLabel(CHI_SQ_TARGET);
 		chiSqTargetLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(chiSqTargetLabel);
-		chiSqTargetSpinner = new JSpinner(new SpinnerNumberModel(CHISQ_VALUE, CHISQ_MIN, CHISQ_MAX, CHISQ_INC));
+		chiSqTargetSpinner =
+			new JSpinner(new SpinnerNumberModel(CHISQ_VALUE, CHISQ_MIN, CHISQ_MAX,
+				CHISQ_INC));
 		refitUponStateChange(chiSqTargetSpinner);
 		controlPanel.add(chiSqTargetSpinner);
 
-		JLabel binningLabel = new JLabel("Bin");
+		final JLabel binningLabel = new JLabel("Bin");
 		binningLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(binningLabel);
 		binningComboBox = new JComboBox(binningChoices);
 		refitUponStateChange(binningComboBox);
 		controlPanel.add(binningComboBox);
 
-		JLabel scatterLabel = new JLabel("Scatter"); //SCATTER
+		final JLabel scatterLabel = new JLabel("Scatter"); // SCATTER
 		scatterLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		controlPanel.add(scatterLabel);
 		scatterSpinner = new JSpinner();
-		// see http://implementsblog.com/2012/11/26/java-gotcha-jspinner-preferred-size/
-		Dimension size = scatterSpinner.getPreferredSize();
-		SpinnerNumberModel model = new SpinnerNumberModel(SCATTER_VALUE, SCATTER_MIN, SCATTER_MAX, SCATTER_INC);
+		// see
+		// http://implementsblog.com/2012/11/26/java-gotcha-jspinner-preferred-size/
+		final Dimension size = scatterSpinner.getPreferredSize();
+		final SpinnerNumberModel model =
+			new SpinnerNumberModel(SCATTER_VALUE, SCATTER_MIN, SCATTER_MAX,
+				SCATTER_INC);
 		scatterSpinner.setModel(model);
 		scatterSpinner.setPreferredSize(size);
 		refitUponStateChange(scatterSpinner);
 		controlPanel.add(scatterSpinner);
 
 		// rows, cols, initX, initY, xPad, yPad
-		SpringUtilities.makeCompactGrid(controlPanel, 7, 2, 4, 4, 4, 4); //SCATTER 5 -> 6
+		SpringUtilities.makeCompactGrid(controlPanel, 7, 2, 4, 4, 4, 4); // SCATTER
+																																			// 5 -> 6
 
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.add("North", controlPanel);
 
 		return panel;
 	}
 
-	//TODO the fitted parameter UI could have a JSpinner that only shows up when
+	// TODO the fitted parameter UI could have a JSpinner that only shows up when
 	// you fix a parameter.
 	// See: https://forums.oracle.com/forums/thread.jspa?threadID=1357061
 	// It's quite hacky though.
@@ -1094,454 +1126,453 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/*
 	 * Creates panel for the single exponential version of the fit parameters.
 	 */
-	private JPanel createSingleExponentialPanel(String lifetimeLabel) {
-		JPanel expPanel = new JPanel();
+	private JPanel createSingleExponentialPanel(final String lifetimeLabel) {
+		final JPanel expPanel = new JPanel();
 		expPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
 		expPanel.setLayout(new SpringLayout());
 
-		JLabel aLabel1 = new JLabel("A");
+		final JLabel aLabel1 = new JLabel("A");
 		aLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(aLabel1);
 		aParam1 = new JTextField(9);
-		//a1Param1.setEditable(false);
+		// a1Param1.setEditable(false);
 		expPanel.add(aParam1);
 		aFix1 = new JCheckBox("Fix");
-		//a1Fix1.addItemListener(this);
+		// a1Fix1.addItemListener(this);
 		expPanel.add(aFix1);
 		refitUponStateChange(aParam1, aFix1);
 
-		JLabel t1Label1 = new JLabel(lifetimeLabel);
+		final JLabel t1Label1 = new JLabel(lifetimeLabel);
 		t1Label1.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(t1Label1);
 		tParam1 = new JTextField(9);
-		//t1Param1.setEditable(false);
+		// t1Param1.setEditable(false);
 		expPanel.add(tParam1);
 		tFix1 = new JCheckBox("Fix");
-		//t1Fix1.addItemListener(this);
+		// t1Fix1.addItemListener(this);
 		expPanel.add(tFix1);
 		refitUponStateChange(tParam1, tFix1);
 
-		JLabel zLabel1 = new JLabel("Z");
+		final JLabel zLabel1 = new JLabel("Z");
 		zLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(zLabel1);
 		zParam1 = new JTextField(9);
-		//zParam1.setEditable(false);
+		// zParam1.setEditable(false);
 		expPanel.add(zParam1);
 		zFix1 = new JCheckBox("Fix");
-		//zFix1.addItemListener(this);
+		// zFix1.addItemListener(this);
 		expPanel.add(zFix1);
 		refitUponStateChange(zParam1, zFix1);
 
-		JLabel chiSqLabel1 = new JLabel("" + CHI + SQUARE + SUB_R);
+		final JLabel chiSqLabel1 = new JLabel("" + CHI + SQUARE + SUB_R);
 		chiSqLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(chiSqLabel1);
 		chiSqParam1 = new JTextField(9);
 		chiSqParam1.setEditable(false);
 		expPanel.add(chiSqParam1);
-		JLabel nullLabel1 = new JLabel("");
+		final JLabel nullLabel1 = new JLabel("");
 		expPanel.add(nullLabel1);
 
-		JLabel AICLabel1 = new JLabel("AIC");
+		final JLabel AICLabel1 = new JLabel("AIC");
 		AICLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(AICLabel1);
 		AICParam1 = new JTextField(9);
 		AICParam1.setEditable(false);
 		expPanel.add(AICParam1);
-		JLabel nullLabel2 = new JLabel("");
+		final JLabel nullLabel2 = new JLabel("");
 		expPanel.add(nullLabel2);
 
-		JLabel nullLabel3 = new JLabel("");
+		final JLabel nullLabel3 = new JLabel("");
 		expPanel.add(nullLabel3);
 		errorLabel1 = new JLabel(FITTING_ERROR);
 		errorLabel1.setVisible(false);
 		expPanel.add(errorLabel1);
-		JLabel nullLabel4 = new JLabel("");
+		final JLabel nullLabel4 = new JLabel("");
 		expPanel.add(nullLabel4);
 
-		//TODO:
+		// TODO:
 		// SLIMPlotter look & feel:
-		//Color fixColor = a1Param1.getBackground();
-		//Color floatColor = a1Label1.getBackground();
-		//a1Param1.setBackground(floatColor);
-		//t1Param1.setBackground(floatColor);
-		//zParam1.setBackground(floatColor);
-		//chiSqParam1.setBackground(floatColor);
+		// Color fixColor = a1Param1.getBackground();
+		// Color floatColor = a1Label1.getBackground();
+		// a1Param1.setBackground(floatColor);
+		// t1Param1.setBackground(floatColor);
+		// zParam1.setBackground(floatColor);
+		// chiSqParam1.setBackground(floatColor);
 
 		// rows, cols, initX, initY, xPad, yPad
 		SpringUtilities.makeCompactGrid(expPanel, 6, 3, 4, 4, 4, 4);
 
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.add("North", expPanel);
 
 		startParam1 = new JCheckBox("Use as starting parameters for fit");
 		startParam1.setSelected(true);
 		startParam1.setEnabled(false);
 
-		//TODO ARG 9/21/12 disabled non-functioning UI
-		//panel.add("South", startParam1);
+		// TODO ARG 9/21/12 disabled non-functioning UI
+		// panel.add("South", startParam1);
 		return panel;
 	}
 
 	/*
 	 * Creates panel for the double exponential version of the fit parameters.
 	 */
-	private JPanel createDoubleExponentialPanel(String lifetimeLabel) {
-		JPanel expPanel = new JPanel();
+	private JPanel createDoubleExponentialPanel(final String lifetimeLabel) {
+		final JPanel expPanel = new JPanel();
 		expPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
 		expPanel.setLayout(new SpringLayout());
 
-		JLabel a1Label2 = new JLabel("A" + SUB_1);
+		final JLabel a1Label2 = new JLabel("A" + SUB_1);
 		a1Label2.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(a1Label2);
 		a1Param2 = new JTextField(9);
-		//a1Param2.setEditable(false);
+		// a1Param2.setEditable(false);
 		expPanel.add(a1Param2);
 		a1Fix2 = new JCheckBox("Fix");
-		//a1Fix2.addItemListener(this);
+		// a1Fix2.addItemListener(this);
 		expPanel.add(a1Fix2);
 		refitUponStateChange(a1Param2, a1Fix2);
 
-		JLabel t1Label2 = new JLabel(lifetimeLabel + SUB_1);
+		final JLabel t1Label2 = new JLabel(lifetimeLabel + SUB_1);
 		t1Label2.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(t1Label2);
 		t1Param2 = new JTextField(9);
-		//t1Param2.setEditable(false);
+		// t1Param2.setEditable(false);
 		expPanel.add(t1Param2);
 		t1Fix2 = new JCheckBox("Fix");
-		//t1Fix2.addItemListener(this);
+		// t1Fix2.addItemListener(this);
 		expPanel.add(t1Fix2);
 		refitUponStateChange(t1Param2, t1Fix2);
 
-		JLabel a2Label2 = new JLabel("A" + SUB_2);
+		final JLabel a2Label2 = new JLabel("A" + SUB_2);
 		a2Label2.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(a2Label2);
 		a2Param2 = new JTextField(9);
-		//a2Param2.setEditable(false);
+		// a2Param2.setEditable(false);
 		expPanel.add(a2Param2);
 		a2Fix2 = new JCheckBox("Fix");
-		//a2Fix2.addItemListener(this);
+		// a2Fix2.addItemListener(this);
 		expPanel.add(a2Fix2);
 		refitUponStateChange(a2Param2, a2Fix2);
 
-		JLabel t2Label2 = new JLabel(lifetimeLabel + SUB_2);
+		final JLabel t2Label2 = new JLabel(lifetimeLabel + SUB_2);
 		t2Label2.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(t2Label2);
 		t2Param2 = new JTextField(9);
-		//t2Param2.setEditable(false);
+		// t2Param2.setEditable(false);
 		expPanel.add(t2Param2);
 		t2Fix2 = new JCheckBox("Fix");
-		//t2Fix2.addItemListener(this);
+		// t2Fix2.addItemListener(this);
 		expPanel.add(t2Fix2);
 		refitUponStateChange(t2Param2, t2Fix2);
 
-		JLabel zLabel2 = new JLabel("Z");
+		final JLabel zLabel2 = new JLabel("Z");
 		zLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(zLabel2);
 		zParam2 = new JTextField(9);
-		//zParam2.setEditable(false);
+		// zParam2.setEditable(false);
 		expPanel.add(zParam2);
 		zFix2 = new JCheckBox("Fix");
-		//zFix2.addItemListener(this);
+		// zFix2.addItemListener(this);
 		expPanel.add(zFix2);
 		refitUponStateChange(zParam2, zFix2);
 
-		JLabel chiSqLabel2 = new JLabel("" + CHI + SQUARE + SUB_R);
+		final JLabel chiSqLabel2 = new JLabel("" + CHI + SQUARE + SUB_R);
 		chiSqLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(chiSqLabel2);
 		chiSqParam2 = new JTextField(9);
 		chiSqParam2.setEditable(false);
 		expPanel.add(chiSqParam2);
-		JLabel nullLabel2 = new JLabel("");
+		final JLabel nullLabel2 = new JLabel("");
 		expPanel.add(nullLabel2);
 
-		JLabel AICLabel2 = new JLabel("AIC");
+		final JLabel AICLabel2 = new JLabel("AIC");
 		AICLabel2.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(AICLabel2);
 		AICParam2 = new JTextField(9);
 		AICParam2.setEditable(false);
 		expPanel.add(AICParam2);
-		JLabel nullLabel3 = new JLabel("");
+		final JLabel nullLabel3 = new JLabel("");
 		expPanel.add(nullLabel3);
 
-		JLabel nullLabel4 = new JLabel("");
+		final JLabel nullLabel4 = new JLabel("");
 		expPanel.add(nullLabel4);
 		errorLabel2 = new JLabel(FITTING_ERROR);
 		errorLabel2.setVisible(false);
 		expPanel.add(errorLabel2);
-		JLabel nullLabel5 = new JLabel("");
+		final JLabel nullLabel5 = new JLabel("");
 		expPanel.add(nullLabel5);
 
-		//TODO:
+		// TODO:
 		// From SLIMPlotter
-		//Color fixColor = a1Param2.getBackground();
-		//Color floatColor = a1Label2.getBackground();
-		//a1Param2.setBackground(floatColor);
-		//t1Param2.setBackground(floatColor);
-		//a2Param2.setBackground(floatColor);
-		//t2Param2.setBackground(floatColor);
-		//zParam2.setBackground(floatColor);
-		//chiSqParam2.setBackground(floatColor);
+		// Color fixColor = a1Param2.getBackground();
+		// Color floatColor = a1Label2.getBackground();
+		// a1Param2.setBackground(floatColor);
+		// t1Param2.setBackground(floatColor);
+		// a2Param2.setBackground(floatColor);
+		// t2Param2.setBackground(floatColor);
+		// zParam2.setBackground(floatColor);
+		// chiSqParam2.setBackground(floatColor);
 
 		// rows, cols, initX, initY, xPad, yPad
 		SpringUtilities.makeCompactGrid(expPanel, 8, 3, 4, 4, 4, 4);
 
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.add("North", expPanel);
 
 		startParam2 = new JCheckBox("Use as starting parameters for fit");
 		startParam2.setSelected(true);
 		startParam2.setEnabled(false);
-		//TODO ARG 9/21/12 disabled non-functioning UI
-		//panel.add("South", startParam2);
+		// TODO ARG 9/21/12 disabled non-functioning UI
+		// panel.add("South", startParam2);
 		return panel;
 	}
 
 	/*
 	 * Creates panel for the triple exponential version of the fit parameters.
 	 */
-	private JPanel createTripleExponentialPanel(String lifetimeLabel) {
-		JPanel expPanel = new JPanel();
+	private JPanel createTripleExponentialPanel(final String lifetimeLabel) {
+		final JPanel expPanel = new JPanel();
 		expPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
 		expPanel.setLayout(new SpringLayout());
 
-		JLabel a1Label3 = new JLabel("A" + SUB_1);
+		final JLabel a1Label3 = new JLabel("A" + SUB_1);
 		a1Label3.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(a1Label3);
 		a1Param3 = new JTextField(9);
-		//a1Param3.setEditable(false);
+		// a1Param3.setEditable(false);
 		expPanel.add(a1Param3);
 		a1Fix3 = new JCheckBox("Fix");
-		//a1Fix3.addItemListener(this);
+		// a1Fix3.addItemListener(this);
 		expPanel.add(a1Fix3);
 		refitUponStateChange(a1Param3, a1Fix3);
 
-		JLabel t1Label3 = new JLabel(lifetimeLabel + SUB_1);
+		final JLabel t1Label3 = new JLabel(lifetimeLabel + SUB_1);
 		t1Label3.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(t1Label3);
 		t1Param3 = new JTextField(9);
-		//t1Param3.setEditable(false);
+		// t1Param3.setEditable(false);
 		expPanel.add(t1Param3);
 		t1Fix3 = new JCheckBox("Fix");
-		//t1Fix3.addItemListener(this);
+		// t1Fix3.addItemListener(this);
 		expPanel.add(t1Fix3);
 		refitUponStateChange(t1Param3, t1Fix3);
 
-		JLabel a2Label3 = new JLabel("A" + SUB_2);
+		final JLabel a2Label3 = new JLabel("A" + SUB_2);
 		a2Label3.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(a2Label3);
 		a2Param3 = new JTextField(9);
-		//a2Param3.setEditable(false);
+		// a2Param3.setEditable(false);
 		expPanel.add(a2Param3);
 		a2Fix3 = new JCheckBox("Fix");
-		//a2Fix3.addItemListener(this);
+		// a2Fix3.addItemListener(this);
 		expPanel.add(a2Fix3);
 		refitUponStateChange(a2Param3, a2Fix3);
 
-		JLabel t2Label3 = new JLabel(lifetimeLabel + SUB_2);
+		final JLabel t2Label3 = new JLabel(lifetimeLabel + SUB_2);
 		t2Label3.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(t2Label3);
 		t2Param3 = new JTextField(9);
-		//t2Param3.setEditable(false);
+		// t2Param3.setEditable(false);
 		expPanel.add(t2Param3);
 		t2Fix3 = new JCheckBox("Fix");
-		//t2Fix3.addItemListener(this);
+		// t2Fix3.addItemListener(this);
 		expPanel.add(t2Fix3);
 		refitUponStateChange(t2Param3, t2Fix3);
 
-		JLabel a3Label3 = new JLabel("A" + SUB_3);
+		final JLabel a3Label3 = new JLabel("A" + SUB_3);
 		a3Label3.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(a3Label3);
 		a3Param3 = new JTextField(9);
-		//a3Param3.setEditable(false);
+		// a3Param3.setEditable(false);
 		expPanel.add(a3Param3);
 		a3Fix3 = new JCheckBox("Fix");
-		//a3Fix3.addItemListener(this);
+		// a3Fix3.addItemListener(this);
 		expPanel.add(a3Fix3);
 		refitUponStateChange(a3Param3, a3Fix3);
 
-		JLabel t3Label3 = new JLabel(lifetimeLabel + SUB_3);
+		final JLabel t3Label3 = new JLabel(lifetimeLabel + SUB_3);
 		t3Label3.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(t3Label3);
 		t3Param3 = new JTextField(9);
-		//t3Param3.setEditable(false);
+		// t3Param3.setEditable(false);
 		expPanel.add(t3Param3);
 		t3Fix3 = new JCheckBox("Fix");
-		//t3Fix3.addItemListener(this);
+		// t3Fix3.addItemListener(this);
 		expPanel.add(t3Fix3);
 		refitUponStateChange(t3Param3, t3Fix3);
 
-		JLabel zLabel3 = new JLabel("Z");
+		final JLabel zLabel3 = new JLabel("Z");
 		zLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(zLabel3);
 		zParam3 = new JTextField(9);
-		//zParam3.setEditable(false);
+		// zParam3.setEditable(false);
 		expPanel.add(zParam3);
 		zFix3 = new JCheckBox("Fix");
-		//zFix3.addItemListener(this);
+		// zFix3.addItemListener(this);
 		expPanel.add(zFix3);
 		refitUponStateChange(zParam3, zFix3);
 
-		JLabel chiSqLabel3 = new JLabel("" + CHI + SQUARE + SUB_R);
+		final JLabel chiSqLabel3 = new JLabel("" + CHI + SQUARE + SUB_R);
 		chiSqLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(chiSqLabel3);
 		chiSqParam3 = new JTextField(9);
 		chiSqParam3.setEditable(false);
 		expPanel.add(chiSqParam3);
-		JLabel nullLabel3 = new JLabel("");
+		final JLabel nullLabel3 = new JLabel("");
 		expPanel.add(nullLabel3);
 
-		JLabel AICLabel3 = new JLabel("AIC");
+		final JLabel AICLabel3 = new JLabel("AIC");
 		AICLabel3.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(AICLabel3);
 		AICParam3 = new JTextField(9);
 		AICParam3.setEditable(false);
 		expPanel.add(AICParam3);
-		JLabel nullLabel4 = new JLabel("");
+		final JLabel nullLabel4 = new JLabel("");
 		expPanel.add(nullLabel4);
 
-		JLabel nullLabel5 = new JLabel("");
+		final JLabel nullLabel5 = new JLabel("");
 		expPanel.add(nullLabel5);
 		errorLabel3 = new JLabel(FITTING_ERROR);
 		errorLabel3.setVisible(false);
 		expPanel.add(errorLabel3);
-		JLabel nullLabel6 = new JLabel("");
+		final JLabel nullLabel6 = new JLabel("");
 		expPanel.add(nullLabel6);
 
-		//TODO:
+		// TODO:
 		// SLIMPlotter look & feel:
-		//Color fixColor = a1Param3.getBackground();
-		//Color floatColor = a1Label3.getBackground();
-		//a1Param3.setBackground(floatColor);
-		//t1Param3.setBackground(floatColor);
-		//a2Param3.setBackground(floatColor);
-		//t2Param3.setBackground(floatColor);
-		//a3Param3.setBackground(floatColor);
-		//t3Param3.setBackground(floatColor);
-		//zParam3.setBackground(floatColor);
-		//chiSqParam3.setBackground(floatColor);
+		// Color fixColor = a1Param3.getBackground();
+		// Color floatColor = a1Label3.getBackground();
+		// a1Param3.setBackground(floatColor);
+		// t1Param3.setBackground(floatColor);
+		// a2Param3.setBackground(floatColor);
+		// t2Param3.setBackground(floatColor);
+		// a3Param3.setBackground(floatColor);
+		// t3Param3.setBackground(floatColor);
+		// zParam3.setBackground(floatColor);
+		// chiSqParam3.setBackground(floatColor);
 
 		// rows, cols, initX, initY, xPad, yPad
 		SpringUtilities.makeCompactGrid(expPanel, 10, 3, 4, 4, 4, 4);
 
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.add("North", expPanel);
 
 		startParam3 = new JCheckBox("Use as starting parameters for fit");
 		startParam3.setSelected(true);
 		startParam3.setEnabled(false);
-		//TODO ARG 9/21/12 disabled non-functioning UI
-		//panel.add("South", startParam3);
+		// TODO ARG 9/21/12 disabled non-functioning UI
+		// panel.add("South", startParam3);
 		return panel;
 	}
 
 	/*
 	 * Creates panel for the stretched exponential version of the fit parameters.
 	 */
-	private JPanel createStretchedExponentialPanel(String lifetimeLabel) {
-		JPanel expPanel = new JPanel();
+	private JPanel createStretchedExponentialPanel(final String lifetimeLabel) {
+		final JPanel expPanel = new JPanel();
 		expPanel.setBorder(new EmptyBorder(0, 0, 8, 8));
 		expPanel.setLayout(new SpringLayout());
 
-		JLabel a1Label4 = new JLabel("A");
+		final JLabel a1Label4 = new JLabel("A");
 		a1Label4.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(a1Label4);
 		aParam4 = new JTextField(9);
-		//a1Param1.setEditable(false);
+		// a1Param1.setEditable(false);
 		expPanel.add(aParam4);
 		aFix4 = new JCheckBox("Fix");
-		//a1Fix1.addItemListener(this);
+		// a1Fix1.addItemListener(this);
 		expPanel.add(aFix4);
 		refitUponStateChange(aParam4, aFix4);
 
-		JLabel tLabel4 = new JLabel(lifetimeLabel);
+		final JLabel tLabel4 = new JLabel(lifetimeLabel);
 		tLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(tLabel4);
 		tParam4 = new JTextField(9);
-		//t1Param1.setEditable(false);
+		// t1Param1.setEditable(false);
 		expPanel.add(tParam4);
 		tFix4 = new JCheckBox("Fix");
-		//t1Fix1.addItemListener(this);
+		// t1Fix1.addItemListener(this);
 		expPanel.add(tFix4);
 		refitUponStateChange(tParam4, tFix4);
 
-		JLabel hLabel4 = new JLabel("H");
+		final JLabel hLabel4 = new JLabel("H");
 		hLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(hLabel4);
 		hParam4 = new JTextField(9);
-		//hParam4.setEditable(false);
+		// hParam4.setEditable(false);
 		expPanel.add(hParam4);
 		hFix4 = new JCheckBox("Fix");
-		//hFix4.addItemListener(this);
+		// hFix4.addItemListener(this);
 		expPanel.add(hFix4);
 		refitUponStateChange(hParam4, hFix4);
 
-		JLabel zLabel1 = new JLabel("Z");
+		final JLabel zLabel1 = new JLabel("Z");
 		zLabel1.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(zLabel1);
 		zParam4 = new JTextField(9);
-		//zParam1.setEditable(false);
+		// zParam1.setEditable(false);
 		expPanel.add(zParam4);
 		zFix4 = new JCheckBox("Fix");
-		//zFix1.addItemListener(this);
+		// zFix1.addItemListener(this);
 		expPanel.add(zFix4);
 		refitUponStateChange(zParam4, zFix4);
 
-		JLabel chiSqLabel4 = new JLabel("" + CHI + SQUARE + SUB_R);
+		final JLabel chiSqLabel4 = new JLabel("" + CHI + SQUARE + SUB_R);
 		chiSqLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(chiSqLabel4);
 		chiSqParam4 = new JTextField(9);
 		chiSqParam4.setEditable(false);
 		expPanel.add(chiSqParam4);
-		JLabel nullLabel4 = new JLabel("");
+		final JLabel nullLabel4 = new JLabel("");
 		expPanel.add(nullLabel4);
 
-		JLabel AICLabel4 = new JLabel("AIC");
+		final JLabel AICLabel4 = new JLabel("AIC");
 		AICLabel4.setHorizontalAlignment(SwingConstants.RIGHT);
 		expPanel.add(AICLabel4);
 		AICParam4 = new JTextField(9);
 		AICParam4.setEditable(false);
 		expPanel.add(AICParam4);
-		JLabel nullLabel5 = new JLabel("");
+		final JLabel nullLabel5 = new JLabel("");
 		expPanel.add(nullLabel5);
 
-		JLabel nullLabel6 = new JLabel("");
+		final JLabel nullLabel6 = new JLabel("");
 		expPanel.add(nullLabel6);
 		errorLabel4 = new JLabel(FITTING_ERROR);
 		errorLabel4.setVisible(false);
 		expPanel.add(errorLabel4);
-		JLabel nullLabel7 = new JLabel("");
+		final JLabel nullLabel7 = new JLabel("");
 		expPanel.add(nullLabel7);
 
-		//TODO:
+		// TODO:
 		// SLIMPlotter look & feel:
-		//Color fixColor = a1Param1.getBackground();
-		//Color floatColor = a1Label1.getBackground();
-		//a1Param1.setBackground(floatColor);
-		//t1Param1.setBackground(floatColor);
-		//zParam1.setBackground(floatColor);
-		//chiSqParam1.setBackground(floatColor);
+		// Color fixColor = a1Param1.getBackground();
+		// Color floatColor = a1Label1.getBackground();
+		// a1Param1.setBackground(floatColor);
+		// t1Param1.setBackground(floatColor);
+		// zParam1.setBackground(floatColor);
+		// chiSqParam1.setBackground(floatColor);
 
 		// rows, cols, initX, initY, xPad, yPad
 		SpringUtilities.makeCompactGrid(expPanel, 7, 3, 4, 4, 4, 4);
 
-		JPanel panel = new JPanel(new BorderLayout());
+		final JPanel panel = new JPanel(new BorderLayout());
 		panel.add("North", expPanel);
 
 		startParam4 = new JCheckBox("Use as starting parameters for fit");
 		startParam4.setSelected(true);
 		startParam4.setEnabled(false);
-		//TODO ARG 9/21/12 disabled non-functioning UI
-		//panel.add("South", _startParam4);
+		// TODO ARG 9/21/12 disabled non-functioning UI
+		// panel.add("South", _startParam4);
 		return panel;
 	}
 
-	private Border border(String title) {
-		return BorderFactory.createCompoundBorder(
-				BorderFactory.createTitledBorder(ETCHED_BORDER, title),
-				EMPTY_BORDER);
+	private Border border(final String title) {
+		return BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder(
+			ETCHED_BORDER, title), EMPTY_BORDER);
 	}
 
-	private void setFitButtonState(boolean on) {
+	private void setFitButtonState(final boolean on) {
 		fitButton.setText(on ? fitButtonText : CANCEL_FIT);
 	}
 
@@ -1551,140 +1582,144 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 
 	/**
 	 * Triggers fitSingleDecay if drop-down list selection changes.
-	 * 
-	 * @param itemSelectable 
+	 *
+	 * @param itemSelectable
 	 */
-	private void refitUponStateChange(ItemSelectable itemSelectable) {
-		itemSelectable.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					if (e.getStateChange() == ItemEvent.SELECTED
-							&& null != listener) {
-						listener.fitSingleDecay(fitSummed());
-					}
+	private void refitUponStateChange(final ItemSelectable itemSelectable) {
+		itemSelectable.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(final ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.SELECTED && null != listener) {
+					listener.fitSingleDecay(fitSummed());
 				}
-			});
+			}
+		});
 	}
 
 	/**
 	 * Triggers fitSingleDecay if text field edited.
-	 * 
-	 * @param textField 
+	 *
+	 * @param textField
 	 */
 	private void refitUponStateChange(final JTextField textField) {
-		textField.addActionListener(
-			new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
+		textField.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				// trigger if just edited text
+				listener.fitSingleDecay(fitSummed());
+			}
+		});
+		textField.addFocusListener(new FocusListener() {
+
+			private String text;
+
+			@Override
+			public void focusGained(final FocusEvent e) {
+				text = textField.getText();
+			}
+
+			@Override
+			public void focusLost(final FocusEvent e) {
+				if (!text.equals(textField.getText())) {
 					// trigger if just edited text
 					listener.fitSingleDecay(fitSummed());
 				}
-			});
-		textField.addFocusListener(
-			new FocusListener() {
-				private String text;
-
-				@Override
-				public void focusGained(FocusEvent e) {
-					text = textField.getText();
-				}
-
-				@Override
-				public void focusLost(FocusEvent e) {
-					if (!text.equals(textField.getText())) {
-						// trigger if just edited text
-						listener.fitSingleDecay(fitSummed());
-					}
-				}
-			});
+			}
+		});
 	}
 
 	/**
 	 * Triggers fitSingleDecay if fitted parameter value or checkbox change.
-	 * 
+	 *
 	 * @param textField
-	 * @param checkBox 
+	 * @param checkBox
 	 */
-	private void refitUponStateChange(final JTextField textField, final JCheckBox checkBox) {
+	private void refitUponStateChange(final JTextField textField,
+		final JCheckBox checkBox)
+	{
 		refitUponStateChange(textField);
 
-		checkBox.addItemListener(
-			new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent e) {
-					// definitely trigger if DESELECTED
-					// also if SELECTED, in case text field already edited
-					listener.fitSingleDecay(fitSummed());
-				}
-			});
+		checkBox.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(final ItemEvent e) {
+				// definitely trigger if DESELECTED
+				// also if SELECTED, in case text field already edited
+				listener.fitSingleDecay(fitSummed());
+			}
+		});
 	}
 
 	/**
 	 * Triggers fitSingleDecay if spinner value changes.
-	 * 
-	 * @param spinner 
+	 *
+	 * @param spinner
 	 */
 	private void refitUponStateChange(final JSpinner spinner) {
-		spinner.addChangeListener(
-			new ChangeListener() {
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					if (null != listener) {
-						listener.fitSingleDecay(fitSummed());
-					}
+		spinner.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(final ChangeEvent e) {
+				if (null != listener) {
+					listener.fitSingleDecay(fitSummed());
 				}
-			});
+			}
+		});
 	}
 
 	/**
 	 * Propagates a threshold spinner value change.
-	 * 
-	 * @param thresholdMinSpinner 
+	 *
+	 * @param thresholdMinSpinner
 	 */
 	private void updateThresholdChange(final JSpinner thresholdSpinner) {
-		thresholdSpinner.addChangeListener(
-			new ChangeListener() {
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					SpinnerModel spinnerModel = thresholdSpinner.getModel();
-					if (spinnerModel instanceof SpinnerNumberModel) {
-						int threshold = (Integer)((SpinnerNumberModel) spinnerModel).getValue();
-						int thesholdMin, thresholdMax;
-						if (thresholdMinSpinner == (JSpinner) e.getSource()) {
-							thesholdMin = threshold;
-							thresholdMax = (Integer) thresholdMaxSpinner.getValue();
-							if (thesholdMin > thresholdMax) {
-								thresholdMax = thesholdMin;
-								thresholdMaxSpinner.setValue(thresholdMax);
-							}
+		thresholdSpinner.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(final ChangeEvent e) {
+				final SpinnerModel spinnerModel = thresholdSpinner.getModel();
+				if (spinnerModel instanceof SpinnerNumberModel) {
+					final int threshold =
+						(Integer) ((SpinnerNumberModel) spinnerModel).getValue();
+					int thesholdMin, thresholdMax;
+					if (thresholdMinSpinner == (JSpinner) e.getSource()) {
+						thesholdMin = threshold;
+						thresholdMax = (Integer) thresholdMaxSpinner.getValue();
+						if (thesholdMin > thresholdMax) {
+							thresholdMax = thesholdMin;
+							thresholdMaxSpinner.setValue(thresholdMax);
 						}
-						else {
-							thesholdMin = (Integer) thresholdMinSpinner.getValue();
-							thresholdMax = threshold;
-							if (thresholdMax < thesholdMin) {
-								thesholdMin = thresholdMax;
-								thresholdMinSpinner.setValue(thesholdMin);
-							}
+					}
+					else {
+						thesholdMin = (Integer) thresholdMinSpinner.getValue();
+						thresholdMax = threshold;
+						if (thresholdMax < thesholdMin) {
+							thesholdMin = thresholdMax;
+							thresholdMinSpinner.setValue(thesholdMin);
 						}
-						if (null != thresholdListener) {
-							thresholdListener.updateThreshold(thesholdMin, thresholdMax, fitSummed());
-						}
-						if (null != listener) {
-							if (fitSummed()) {
-								// threshold affects a summed fit, but not an ordingary single pixel fit
-								listener.fitSingleDecay(true);
-							}
+					}
+					if (null != thresholdListener) {
+						thresholdListener.updateThreshold(thesholdMin, thresholdMax,
+							fitSummed());
+					}
+					if (null != listener) {
+						if (fitSummed()) {
+							// threshold affects a summed fit, but not an ordingary single
+							// pixel fit
+							listener.fitSingleDecay(true);
 						}
 					}
 				}
-			});
+			}
+		});
 	}
 
 	/**
 	 * Returns whether fitting summed pixels (vs. single pixel).
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	private boolean fitSummed() {
 		return ICurveFitter.FitRegion.SUMMED == getRegion();
@@ -1695,7 +1730,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	 *
 	 * @param enable
 	 */
-	private void enableAll(boolean enable) {
+	private void enableAll(final boolean enable) {
 		// fit algorithm settings
 		regionComboBox.setEnabled(enable);
 		algorithmComboBox.setEnabled(enable);
@@ -1703,7 +1738,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		noiseModelComboBox.setEnabled(enable);
 		fittedImagesComboBox.setEnabled(enable);
 		colorizeGrayScale.setEnabled(enable);
-		for (JCheckBox checkBox : analysisCheckBoxList) {
+		for (final JCheckBox checkBox : analysisCheckBoxList) {
 			checkBox.setEnabled(enable);
 		}
 		fitAllChannels.setEnabled(enable);
@@ -1786,10 +1821,10 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 
 	/**
 	 * Disables and enables buttons.
-	 * 
-	 * @param enable 
+	 *
+	 * @param enable
 	 */
-	private void enableButtons(boolean enable) {
+	private void enableButtons(final boolean enable) {
 		openButton.setEnabled(enable);
 		quitButton.setEnabled(enable);
 		fitButton.setEnabled(enable);
@@ -1798,7 +1833,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	@Override
 	public ICurveFitter.FitRegion getRegion() {
 		ICurveFitter.FitRegion region = null;
-		String selected = (String) regionComboBox.getSelectedItem();
+		final String selected = (String) regionComboBox.getSelectedItem();
 		if (selected.equals(SUM_REGION)) {
 			region = ICurveFitter.FitRegion.SUMMED;
 		}
@@ -1817,7 +1852,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	@Override
 	public ICurveFitter.FitAlgorithm getAlgorithm() {
 		ICurveFitter.FitAlgorithm algorithm = null;
-		String selected = (String) algorithmComboBox.getSelectedItem();
+		final String selected = (String) algorithmComboBox.getSelectedItem();
 		if (selected.equals(JAOLHO_LMA_ALGORITHM)) {
 			algorithm = ICurveFitter.FitAlgorithm.JAOLHO;
 		}
@@ -1836,7 +1871,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	@Override
 	public ICurveFitter.FitFunction getFunction() {
 		ICurveFitter.FitFunction function = null;
-		String selected = (String) functionComboBox.getSelectedItem();
+		final String selected = (String) functionComboBox.getSelectedItem();
 		if (selected.equals(SINGLE_EXPONENTIAL)) {
 			function = ICurveFitter.FitFunction.SINGLE_EXPONENTIAL;
 		}
@@ -1854,8 +1889,8 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 
 	@Override
 	public String[] getAnalysisList() {
-		List<String> analysisList = new ArrayList<String>();
-		for (JCheckBox checkBox : analysisCheckBoxList) {
+		final List<String> analysisList = new ArrayList<String>();
+		for (final JCheckBox checkBox : analysisCheckBoxList) {
 			if (checkBox.isSelected()) {
 				analysisList.add(checkBox.getText());
 			}
@@ -1871,7 +1906,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	@Override
 	public ICurveFitter.NoiseModel getNoiseModel() {
 		ICurveFitter.NoiseModel noiseModel = null;
-		String selected = (String) noiseModelComboBox.getSelectedItem();
+		final String selected = (String) noiseModelComboBox.getSelectedItem();
 		if (selected.equals(GAUSSIAN_FIT)) {
 			noiseModel = ICurveFitter.NoiseModel.GAUSSIAN_FIT;
 		}
@@ -1894,12 +1929,12 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	 */
 	@Override
 	public String getFittedImages() {
-		StringBuffer returnValue = new StringBuffer();
-		String selected = (String) fittedImagesComboBox.getSelectedItem();
-		//System.out.println("selected is " + selected);
-		String[] fittedImages = selected.split(" ");
-		for (String fittedImage : fittedImages) {
-			boolean fit = true;
+		final StringBuffer returnValue = new StringBuffer();
+		final String selected = (String) fittedImagesComboBox.getSelectedItem();
+		// System.out.println("selected is " + selected);
+		final String[] fittedImages = selected.split(" ");
+		for (final String fittedImage : fittedImages) {
+			final boolean fit = true;
 			if ("A".equals(fittedImage)) {
 
 			}
@@ -1914,14 +1949,14 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 				returnValue.append(' ');
 			}
 		}
-		//System.out.println("changes to " + returnValue);
+		// System.out.println("changes to " + returnValue);
 		return returnValue.toString();
 	}
 
 	/**
 	 * Returns whether to create colorized grayscale fitted images.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public boolean getColorizeGrayScale() {
@@ -1939,7 +1974,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	@Override
-	public void setX(int x) {
+	public void setX(final int x) {
 		xSpinner.setValue(x);
 	}
 
@@ -1949,7 +1984,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	@Override
-	public void setY(int y) {
+	public void setY(final int y) {
 		ySpinner.setValue(y);
 	}
 
@@ -1959,7 +1994,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	@Override
-	public void setThresholdMinimum(int thresholdMin) {
+	public void setThresholdMinimum(final int thresholdMin) {
 		thresholdMinSpinner.setValue(thresholdMin);
 	}
 
@@ -1969,7 +2004,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	@Override
-	public void setThresholdMaximum(int thresholdMax) {
+	public void setThresholdMaximum(final int thresholdMax) {
 		thresholdMaxSpinner.setValue(thresholdMax);
 	}
 
@@ -1984,7 +2019,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	@Override
-	public void setChiSquareTarget(double chiSqTarget) {
+	public void setChiSquareTarget(final double chiSqTarget) {
 		chiSqTargetSpinner.setValue(chiSqTarget);
 	}
 
@@ -1996,7 +2031,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	@Override
 	public int getParameterCount() {
 		int count = 0;
-		String function = (String) functionComboBox.getSelectedItem();
+		final String function = (String) functionComboBox.getSelectedItem();
 		if (function.equals(SINGLE_EXPONENTIAL)) {
 			count = 4;
 		}
@@ -2013,7 +2048,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	@Override
-	public void setFittedParameterCount(int count) {
+	public void setFittedParameterCount(final int count) {
 		fittedParameterCount = count;
 	}
 
@@ -2021,7 +2056,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	public double[] getParameters() {
 		double parameters[] = null;
 		if (noFit) {
-			String function = (String) functionComboBox.getSelectedItem();
+			final String function = (String) functionComboBox.getSelectedItem();
 			if (function.equals(SINGLE_EXPONENTIAL)) {
 				parameters = new double[4];
 			}
@@ -2040,7 +2075,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 		}
 		else {
 			try {
-				String function = (String) functionComboBox.getSelectedItem();
+				final String function = (String) functionComboBox.getSelectedItem();
 				if (function.equals(SINGLE_EXPONENTIAL)) {
 					parameters = new double[4];
 					parameters[2] = Double.valueOf(aParam1.getText());
@@ -2073,8 +2108,8 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 					parameters[1] = Double.valueOf(zParam4.getText());
 				}
 			}
-			catch (NumberFormatException e) {
-				//TODO recover
+			catch (final NumberFormatException e) {
+				// TODO recover
 			}
 
 			parameters[0] = 0.0; // chiSquare
@@ -2083,11 +2118,11 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	@Override
-	public void setParameters(double params[], double AIC) {
+	public void setParameters(final double params[], final double AIC) {
 		// parameters NaN signals error
 		noFit = Double.isNaN(params[0]);
 
-		String function = (String) functionComboBox.getSelectedItem();
+		final String function = (String) functionComboBox.getSelectedItem();
 		if (function.equals(SINGLE_EXPONENTIAL)) {
 			String a, t, z, chiSq, aic;
 			if (noFit) {
@@ -2101,11 +2136,11 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 				chiSq = paramToString(params[0], 6);
 				aic = paramToString(AIC, 6);
 			}
-			aParam1.setText    (a);
-			tParam1.setText    (t);
-			zParam1.setText    (z);
+			aParam1.setText(a);
+			tParam1.setText(t);
+			zParam1.setText(z);
 			chiSqParam1.setText(chiSq);
-			AICParam1.setText  (aic);
+			AICParam1.setText(aic);
 
 			// show error message as appropriate
 			errorLabel1.setVisible(noFit);
@@ -2126,13 +2161,13 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 				aic = paramToString(AIC, 6);
 			}
 
-			a1Param2.setText   (a1);
-			t1Param2.setText   (t1);
-			a2Param2.setText   (a2);
-			t2Param2.setText   (t2);
-			zParam2.setText    (z);
+			a1Param2.setText(a1);
+			t1Param2.setText(t1);
+			a2Param2.setText(a2);
+			t2Param2.setText(t2);
+			zParam2.setText(z);
 			chiSqParam2.setText(chiSq);
-			AICParam2.setText  (aic);
+			AICParam2.setText(aic);
 
 			// show error message as appropriate
 			errorLabel2.setVisible(noFit);
@@ -2154,15 +2189,15 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 				chiSq = paramToString(params[0], 6);
 				aic = paramToString(AIC, 6);
 			}
-			a1Param3.setText   (a1);
-			t1Param3.setText   (t1);
-			a2Param3.setText   (a2);
-			t2Param3.setText   (t2);
-			a3Param3.setText   (a3);
-			t3Param3.setText   (t3);
-			zParam3.setText    (z);
+			a1Param3.setText(a1);
+			t1Param3.setText(t1);
+			a2Param3.setText(a2);
+			t2Param3.setText(t2);
+			a3Param3.setText(a3);
+			t3Param3.setText(t3);
+			zParam3.setText(z);
 			chiSqParam3.setText(chiSq);
-			AICParam3.setText  (aic);
+			AICParam3.setText(aic);
 
 			// show error message as appropriate
 			errorLabel3.setVisible(noFit);
@@ -2181,63 +2216,63 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 				chiSq = paramToString(params[0], 6);
 				aic = paramToString(AIC, 6);
 			}
-			aParam4.setText    (a);
-			tParam4.setText    (t);
-			hParam4.setText    (h);
-			zParam4.setText    (z);
+			aParam4.setText(a);
+			tParam4.setText(t);
+			hParam4.setText(h);
+			zParam4.setText(z);
 			chiSqParam4.setText(chiSq);
-			AICParam4.setText  (aic);
+			AICParam4.setText(aic);
 
 			// show error message as appropriate
 			errorLabel4.setVisible(noFit);
 		}
 	}
 
-	private String paramToString(double param, int places) {
+	private String paramToString(final double param, final int places) {
 		return "" + fitterEstimator.roundToDecimalPlaces(param, places);
 	}
 
 	/**
 	 * This version is used to initialize the parameters.
-	 * 
+	 *
 	 * @param function
-	 * @param params 
+	 * @param params
 	 */
 	@Override
-	public void setFunctionParameters(int function, double params[]) {
+	public void setFunctionParameters(final int function, final double params[]) {
 		switch (function) {
 			case 0:
-				aParam1.setText    ("" + (float) params[2]);
-				tParam1.setText    ("" + (float) params[3]);
-				zParam1.setText    ("" + (float) params[1]);
+				aParam1.setText("" + (float) params[2]);
+				tParam1.setText("" + (float) params[3]);
+				zParam1.setText("" + (float) params[1]);
 				chiSqParam1.setText("" + (float) params[0]);
 				errorLabel1.setVisible(false);
 				break;
 			case 1:
-				a1Param2.setText   ("" + (float) params[2]);
-				t1Param2.setText   ("" + (float) params[3]);
-				a2Param2.setText   ("" + (float) params[4]);
-				t2Param2.setText   ("" + (float) params[5]);
-				zParam2.setText    ("" + (float) params[1]);
+				a1Param2.setText("" + (float) params[2]);
+				t1Param2.setText("" + (float) params[3]);
+				a2Param2.setText("" + (float) params[4]);
+				t2Param2.setText("" + (float) params[5]);
+				zParam2.setText("" + (float) params[1]);
 				chiSqParam2.setText("" + (float) params[0]);
 				errorLabel2.setVisible(false);
 				break;
 			case 2:
-				a1Param3.setText   ("" + (float) params[2]);
-				t1Param3.setText   ("" + (float) params[3]);
-				a2Param3.setText   ("" + (float) params[4]);
-				t2Param3.setText   ("" + (float) params[5]);
-				a3Param3.setText   ("" + (float) params[6]);
-				t3Param3.setText   ("" + (float) params[7]);
-				zParam3.setText    ("" + (float) params[1]);
+				a1Param3.setText("" + (float) params[2]);
+				t1Param3.setText("" + (float) params[3]);
+				a2Param3.setText("" + (float) params[4]);
+				t2Param3.setText("" + (float) params[5]);
+				a3Param3.setText("" + (float) params[6]);
+				t3Param3.setText("" + (float) params[7]);
+				zParam3.setText("" + (float) params[1]);
 				chiSqParam3.setText("" + (float) params[0]);
 				errorLabel3.setVisible(false);
 				break;
 			case 3:
-				aParam4.setText    ("" + (float) params[0]);
-				tParam4.setText    ("" + (float) params[1]);
-				hParam4.setText    ("" + (float) params[2]);
-				zParam4.setText    ("" + (float) params[1]);
+				aParam4.setText("" + (float) params[0]);
+				tParam4.setText("" + (float) params[1]);
+				hParam4.setText("" + (float) params[2]);
+				zParam4.setText("" + (float) params[1]);
 				chiSqParam4.setText("" + (float) params[0]);
 				errorLabel4.setVisible(false);
 				break;
@@ -2247,7 +2282,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	@Override
 	public boolean[] getFree() {
 		boolean free[] = null;
-		String function = (String) functionComboBox.getSelectedItem();
+		final String function = (String) functionComboBox.getSelectedItem();
 		if (function.equals(SINGLE_EXPONENTIAL)) {
 			free = new boolean[3];
 			free[0] = !aFix1.isSelected();
@@ -2286,7 +2321,7 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	@Override
 	public boolean getRefineFit() {
 		JCheckBox checkBox = null;
-		String function = (String) functionComboBox.getSelectedItem();
+		final String function = (String) functionComboBox.getSelectedItem();
 		if (function.equals(SINGLE_EXPONENTIAL)) {
 			checkBox = startParam1;
 		}
@@ -2297,17 +2332,17 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 			checkBox = startParam3;
 		}
 		else if (function.equals(STRETCHED_EXPONENTIAL)) {
-			checkBox = startParam4; //TODO use an array of checkboxes, etc.
+			checkBox = startParam4; // TODO use an array of checkboxes, etc.
 		}
 		return !checkBox.isSelected();
 	}
 
-	private int parseInt(JTextField field) {
+	private int parseInt(final JTextField field) {
 		int value = 0;
 		try {
 			value = Integer.parseInt(field.getText());
 		}
-		catch (NumberFormatException e) {
+		catch (final NumberFormatException e) {
 			System.out.println("Error parsing " + field.getName());
 		}
 		return value;
@@ -2315,10 +2350,10 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 
 	/**
 	 * Gray out the prompt cursors if no prompt is loaded.
-	 * 
-	 * @param enable 
+	 *
+	 * @param enable
 	 */
-	private void enablePromptCursors(boolean enable) {
+	private void enablePromptCursors(final boolean enable) {
 		promptDelaySpinnerA.setEnabled(enable);
 		promptDelaySpinnerB.setEnabled(enable);
 		promptWidthSpinnerA.setEnabled(enable);
@@ -2328,12 +2363,12 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	}
 
 	/**
-	 * This decides whether the existing parameters could be used as the
-	 * initial values for another fit.
+	 * This decides whether the existing parameters could be used as the initial
+	 * values for another fit.
 	 */
 	private void reconcileStartParam() {
 		// parameter counts happen to be unique for each fit function
-		boolean enable = (fittedParameterCount == getParameterCount());
+		final boolean enable = (fittedParameterCount == getParameterCount());
 		startParam1.setEnabled(enable);
 		startParam2.setEnabled(enable);
 		startParam3.setEnabled(enable);
@@ -2342,19 +2377,19 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 
 	/**
 	 * Gets the path and name for a prompt file.
-	 * 
+	 *
 	 * @param title
-	 * @return 
+	 * @return
 	 */
-	private String getFileName(String title) {
-		OpenDialog dialog = new OpenDialog(title, "");
+	private String getFileName(final String title) {
+		final OpenDialog dialog = new OpenDialog(title, "");
 		return dialog.getDirectory() + dialog.getFileName();
 	}
 
 	private class FittingCursorListenerImpl implements FittingCursorListener {
 
 		@Override
-		public void cursorChanged(FittingCursor cursor) {
+		public void cursorChanged(final FittingCursor cursor) {
 			transientStartSpinnerA.setValue(cursor.getTransientStartTime());
 			transientStartSpinnerB.setValue(cursor.getTransientStartIndex());
 			dataStartSpinnerA.setValue(cursor.getDataStartTime());

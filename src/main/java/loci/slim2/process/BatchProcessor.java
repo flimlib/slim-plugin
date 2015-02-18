@@ -28,18 +28,18 @@ import java.io.File;
 import org.scijava.Context;
 
 /**
- *
  * @author Aivar Grislis
  */
 public interface BatchProcessor {
 
 	/**
 	 * Processes list of files with current settings.
-	 * 
-	 * @param context 
+	 *
+	 * @param context
 	 * @param bins
 	 * @param files
-	 * @param fitSettings 
+	 * @param fitSettings
 	 */
-	public void process(Context context, int bins, File[] files, FitSettings fitSettings);
+	public void process(Context context, int bins, File[] files,
+		FitSettings fitSettings);
 }

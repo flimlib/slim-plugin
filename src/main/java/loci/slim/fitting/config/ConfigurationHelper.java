@@ -24,12 +24,11 @@
 package loci.slim.fitting.config;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class ConfigurationHelper {
 
-	public void discoverInterface(String name, String label) {
+	public void discoverInterface(final String name, final String label) {
 
 	}
 
@@ -37,7 +36,7 @@ public class ConfigurationHelper {
 
 	}
 
-	public Object getInterface(String name) {
+	public Object getInterface(final String name) {
 		return null;
 	}
 

@@ -26,26 +26,26 @@ package loci.slim.preprocess;
 import ij.gui.Roi;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class RoiProcessor implements IProcessor {
-	private Roi[] _rois;
+
+	private final Roi[] _rois;
 	private IProcessor _processor;
 
-	public RoiProcessor(Roi[] rois) {
+	public RoiProcessor(final Roi[] rois) {
 		_rois = rois;
 	}
 
 	@Override
-	public void chain(IProcessor processor) {
+	public void chain(final IProcessor processor) {
 		_processor = processor;
 	}
 
 	@Override
-	public double[] getPixel(int[] location) {
-		double[] returnValue = _processor.getPixel(location);
-		for (Roi roi : _rois) {
+	public double[] getPixel(final int[] location) {
+		final double[] returnValue = _processor.getPixel(location);
+		for (final Roi roi : _rois) {
 			if (roi.contains(location[0], location[1])) {
 				return returnValue;
 			}

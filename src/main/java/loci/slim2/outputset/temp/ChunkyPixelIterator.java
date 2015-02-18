@@ -27,38 +27,56 @@ import java.util.Iterator;
 
 /**
  * Iterator for progressively rendering images.
- * 
+ *
  * @author Aivar Grislis
  */
 public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
+
 	private static final int X_INDEX = 0;
 	private static final int Y_INDEX = 1;
 	private static final int Z_INDEX = 2;
 	private final long[] dimensions;
-	private final Chunk[] chunkTable = new Chunk[] {
-		// offset, inc, size
-		new Chunk(new long[] { 0, 0 }, new long[] { 16, 16 }, new long[] { 16, 16 }), // 16 x 16 size
-		new Chunk(new long[] { 8, 0 }, new long[] { 16, 16 }, new long[] {  8, 16 }), // 8 x 16
-		new Chunk(new long[] { 0, 8 }, new long[] {  8, 16 }, new long[] {  8,  8 }), // 8 x 8
-		new Chunk(new long[] { 4, 0 }, new long[] {  8,  8 }, new long[] {  4,  8 }), // 4 x 8
-		new Chunk(new long[] { 0, 4 }, new long[] {  4,  8 }, new long[] {  4,  4 }), // 4 x 4
-		new Chunk(new long[] { 2, 0 }, new long[] {  4,  4 }, new long[] {  2,  4 }), // 2 x 4
-		new Chunk(new long[] { 0, 2 }, new long[] {  2,  4 }, new long[] {  2,  2 }), // 2 x 2
-		new Chunk(new long[] { 1, 0 }, new long[] {  2,  2 }, new long[] {  1,  2 }), // 1 x 2
-		new Chunk(new long[] { 0, 1 }, new long[] {  1,  2 }, new long[] {  1,  1 })  // 1 x 1
-	};
+	private final Chunk[] chunkTable =
+		new Chunk[] {
+			// offset, inc, size
+			new Chunk(new long[] { 0, 0 }, new long[] { 16, 16 },
+				new long[] { 16, 16 }), // 16 x 16 size
+			new Chunk(new long[] { 8, 0 }, new long[] { 16, 16 },
+				new long[] { 8, 16 }), // 8 x 16
+			new Chunk(new long[] { 0, 8 }, new long[] { 8, 16 }, new long[] { 8, 8 }), // 8
+																																									// x
+																																									// 8
+			new Chunk(new long[] { 4, 0 }, new long[] { 8, 8 }, new long[] { 4, 8 }), // 4
+																																								// x
+																																								// 8
+			new Chunk(new long[] { 0, 4 }, new long[] { 4, 8 }, new long[] { 4, 4 }), // 4
+																																								// x
+																																								// 4
+			new Chunk(new long[] { 2, 0 }, new long[] { 4, 4 }, new long[] { 2, 4 }), // 2
+																																								// x
+																																								// 4
+			new Chunk(new long[] { 0, 2 }, new long[] { 2, 4 }, new long[] { 2, 2 }), // 2
+																																								// x
+																																								// 2
+			new Chunk(new long[] { 1, 0 }, new long[] { 2, 2 }, new long[] { 1, 2 }), // 1
+																																								// x
+																																								// 2
+			new Chunk(new long[] { 0, 1 }, new long[] { 1, 2 }, new long[] { 1, 1 }) // 1
+																																								// x
+																																								// 1
+		};
 	private int chunkIndex;
 	private ChunkyPixel chunkyPixel;
-	private long[] tail;
+	private final long[] tail;
 	private long x;
 	private long y;
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param dimensions to iterate over
 	 */
-	public ChunkyPixelIterator(long[] dimensions) {
+	public ChunkyPixelIterator(final long[] dimensions) {
 		this.dimensions = dimensions;
 		x = y = 0;
 		chunkIndex = 0;
@@ -86,7 +104,7 @@ public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
 
 	/**
 	 * Gets the next {@link ChunkyPixel}.
-	 * 
+	 *
 	 * @return null or next chunky pixel information
 	 */
 	private ChunkyPixel getNext() {
@@ -111,10 +129,10 @@ public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
 			}
 		}
 		// have position and size of next chunky pixel
-		long[] position = getPosition(x, y);
-		long width  = chunkTable[chunkIndex].size[X_INDEX];
-		long height = chunkTable[chunkIndex].size[Y_INDEX];
-		ChunkyPixel returnValue = new ChunkyPixel(position, width, height);
+		final long[] position = getPosition(x, y);
+		final long width = chunkTable[chunkIndex].size[X_INDEX];
+		final long height = chunkTable[chunkIndex].size[Y_INDEX];
+		final ChunkyPixel returnValue = new ChunkyPixel(position, width, height);
 
 		// increment x for next time
 		x += chunkTable[chunkIndex].inc[X_INDEX];
@@ -124,7 +142,7 @@ public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
 
 	/**
 	 * Increments the tail position.
-	 * 
+	 *
 	 * @return whether increment possible
 	 */
 	private boolean incTail() {
@@ -143,13 +161,13 @@ public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
 
 	/**
 	 * Gets complete position (adds tail).
-	 * 
+	 *
 	 * @param x
 	 * @param y
-	 * @return 
+	 * @return
 	 */
-	private long[] getPosition(long x, long y) {
-		long[] position = new long[dimensions.length];
+	private long[] getPosition(final long x, final long y) {
+		final long[] position = new long[dimensions.length];
 		position[X_INDEX] = x;
 		position[Y_INDEX] = y;
 		for (int i = 0; i < tail.length; ++i) {
@@ -162,14 +180,15 @@ public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
 	 * Inner structure-type class used for table-driven approach.
 	 */
 	private class Chunk {
+
 		public long[] offset;
 		public long[] inc;
 		public long[] size;
 
-		public Chunk(long[] offset, long[] inc, long[] size) {
+		public Chunk(final long[] offset, final long[] inc, final long[] size) {
 			this.offset = offset;
-			this.inc    = inc;
-			this.size   = size;
+			this.inc = inc;
+			this.size = size;
 		}
 	}
 }

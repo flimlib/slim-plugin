@@ -31,10 +31,10 @@ import loci.curvefitter.ICurveFitter.FitRegion;
 import loci.curvefitter.ICurveFitter.NoiseModel;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class FitInfo {
+
 	private volatile boolean _cancel = false;
 	private int _channel;
 	private FitRegion _region;
@@ -50,7 +50,7 @@ public class FitInfo {
 	private int _dataStart;
 	private int _transientStop;
 	private double _xInc;
-	private int _threshold; //TODO this s/b accounted for by IInputImage
+	private int _threshold; // TODO this s/b accounted for by IInputImage
 	private double _chiSquareTarget;
 	private String _binning;
 	private int _x;
@@ -65,22 +65,22 @@ public class FitInfo {
 	private int _stopPrompt;
 	private int _lowerPrompt;
 
-	private double[] _sig; //TODO sig s/b specified for each pixel!!
+	private double[] _sig; // TODO sig s/b specified for each pixel!!
 
 	private IDecayImage _inputImage; // takes care of width/height/threshold/ROI
 	private IFittedImage _outputImage;
 
-	//TODO private IBob _cursorMunger;
+	// TODO private IBob _cursorMunger;
 
-	//HANDLE SOME OTHER WAY?:
+	// HANDLE SOME OTHER WAY?:
 	// analysisList/fittedImages (especially analysis c/b totally post fit)
 
 	public FitInfo() {}
 
 	/**
 	 * Gets whether to cancel current fit.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean getCancel() {
 		return _cancel;
@@ -88,17 +88,17 @@ public class FitInfo {
 
 	/**
 	 * Sets whether to cancel current fit.
-	 * 
-	 * @param cancel 
+	 *
+	 * @param cancel
 	 */
-	public void setCancel(boolean cancel) {
+	public void setCancel(final boolean cancel) {
 		_cancel = cancel;
 	}
 
 	/**
 	 * Gets current channel
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getChannel() {
 		return _channel;
@@ -106,10 +106,10 @@ public class FitInfo {
 
 	/**
 	 * Sets current channel
-	 * 
-	 * @param channel 
-	 */ 
-	public void setChannel(int channel) {
+	 *
+	 * @param channel
+	 */
+	public void setChannel(final int channel) {
 		_channel = channel;
 	}
 
@@ -124,10 +124,10 @@ public class FitInfo {
 
 	/**
 	 * Sets region the fit applies to.
-	 * 
-	 * @param region 
+	 *
+	 * @param region
 	 */
-	public void setRegion(FitRegion region) {
+	public void setRegion(final FitRegion region) {
 		_region = region;
 	}
 
@@ -142,10 +142,10 @@ public class FitInfo {
 
 	/**
 	 * Sets implementation & algorithm for the fit.
-	 * 
-	 * @param algorithm 
+	 *
+	 * @param algorithm
 	 */
-	public void setAlgorithm(FitAlgorithm algorithm) {
+	public void setAlgorithm(final FitAlgorithm algorithm) {
 		_algorithm = algorithm;
 	}
 
@@ -160,12 +160,12 @@ public class FitInfo {
 
 	/**
 	 * Sets function to be fitted.
-	 * 
-	 * @param function 
+	 *
+	 * @param function
 	 */
-	public void setFunction(FitFunction function) {
+	public void setFunction(final FitFunction function) {
 		_function = function;
-		
+
 	}
 
 	/**
@@ -179,10 +179,10 @@ public class FitInfo {
 
 	/**
 	 * Sets noise model for fit.
-	 * 
-	 * @param noiseModel 
+	 *
+	 * @param noiseModel
 	 */
-	public void setNoiseModel(NoiseModel noiseModel) {
+	public void setNoiseModel(final NoiseModel noiseModel) {
 		_noiseModel = noiseModel;
 	}
 
@@ -197,16 +197,16 @@ public class FitInfo {
 
 	/**
 	 * Sets list of fitted images to display.
-	 * 
-	 * @param fittedImages 
+	 *
+	 * @param fittedImages
 	 */
-	public void setFittedImages(String fittedImages) {
+	public void setFittedImages(final String fittedImages) {
 		_fittedImages = fittedImages;
 	}
 
 	/**
 	 * Returns color model for fitted images.
-	 * 
+	 *
 	 * @return
 	 */
 	public IndexColorModel getIndexColorModel() {
@@ -215,17 +215,17 @@ public class FitInfo {
 
 	/**
 	 * Sets color model for fitted images.
-	 * 
-	 * @param indexColorModel 
+	 *
+	 * @param indexColorModel
 	 */
-	public void setIndexColorModel(IndexColorModel indexColorModel) {
+	public void setIndexColorModel(final IndexColorModel indexColorModel) {
 		_indexColorModel = indexColorModel;
 	}
 
 	/**
 	 * Returns whether to create colorized grayscale images.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean getColorizeGrayScale() {
 		return _colorizeGrayScale;
@@ -233,10 +233,10 @@ public class FitInfo {
 
 	/**
 	 * Sets whether to create colorized grayscale images.
-	 * 
-	 * @param colorizeGrayScale 
+	 *
+	 * @param colorizeGrayScale
 	 */
-	public void setColorizeGrayScale(boolean colorizeGrayScale) {
+	public void setColorizeGrayScale(final boolean colorizeGrayScale) {
 		_colorizeGrayScale = colorizeGrayScale;
 	}
 
@@ -251,10 +251,10 @@ public class FitInfo {
 
 	/**
 	 * Sets analysis plugin names.
-	 * 
-	 * @param analysisList 
+	 *
+	 * @param analysisList
 	 */
-	public void setAnalysisList(String[] analysisList) {
+	public void setAnalysisList(final String[] analysisList) {
 		_analysisList = analysisList;
 	}
 
@@ -269,10 +269,10 @@ public class FitInfo {
 
 	/**
 	 * Sets whether or not to fit all channels.
-	 * 
-	 * @param fitAllChannels 
+	 *
+	 * @param fitAllChannels
 	 */
-	public void setFitAllChannels(boolean fitAllChannels) {
+	public void setFitAllChannels(final boolean fitAllChannels) {
 		_fitAllChannels = fitAllChannels;
 	}
 
@@ -290,14 +290,14 @@ public class FitInfo {
 	 *
 	 * @param bin
 	 */
-	public void setTransientStart(int bin) {
+	public void setTransientStart(final int bin) {
 		_transientStart = bin;
 	}
 
 	/**
 	 * Gets starting data bin of transient.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getDataStart() {
 		return _dataStart;
@@ -305,10 +305,10 @@ public class FitInfo {
 
 	/**
 	 * Sets starting data bin of transient.
-	 * 
+	 *
 	 * @param bin
 	 */
-	public void setDataStart(int bin) {
+	public void setDataStart(final int bin) {
 		_dataStart = bin;
 	}
 
@@ -326,14 +326,14 @@ public class FitInfo {
 	 *
 	 * @param bin
 	 */
-	public void setTransientStop(int bin) {
+	public void setTransientStop(final int bin) {
 		_transientStop = bin;
 	}
 
 	/**
 	 * Gets x increment for each bin.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getXInc() {
 		return _xInc;
@@ -341,7 +341,8 @@ public class FitInfo {
 
 	/**
 	 * Gets prompt or instrument response function.
-	 * @return 
+	 * 
+	 * @return
 	 */
 	public double[] getPrompt() {
 		return _prompt;
@@ -349,17 +350,17 @@ public class FitInfo {
 
 	/**
 	 * Sets prompt or instrument response function.
-	 * 
-	 * @param prompt 
+	 *
+	 * @param prompt
 	 */
-	public void setPrompt(double[] prompt) {
+	public void setPrompt(final double[] prompt) {
 		_prompt = prompt;
 	}
 
 	/**
 	 * Gets start of prompt.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getStartPrompt() {
 		return _startPrompt;
@@ -367,17 +368,17 @@ public class FitInfo {
 
 	/**
 	 * Sets start of prompt.
-	 * 
-	 * @param startPrompt 
+	 *
+	 * @param startPrompt
 	 */
-	public void setStartPrompt(int startPrompt) {
+	public void setStartPrompt(final int startPrompt) {
 		_startPrompt = startPrompt;
 	}
 
 	/**
 	 * Gets end of prompt.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getStopPrompt() {
 		return _stopPrompt;
@@ -385,19 +386,19 @@ public class FitInfo {
 
 	/**
 	 * Sets start of prompt.
-	 * 
-	 * @param stopPrompt 
+	 *
+	 * @param stopPrompt
 	 */
-	public void setStopPrompt(int stopPrompt) {
+	public void setStopPrompt(final int stopPrompt) {
 		_stopPrompt = stopPrompt;
 	}
 
 	/**
 	 * Sets x increment for each bin.
-	 * 
-	 * @param xInc 
+	 *
+	 * @param xInc
 	 */
-	public void setXInc(double xInc) {
+	public void setXInc(final double xInc) {
 		_xInc = xInc;
 	}
 
@@ -415,14 +416,14 @@ public class FitInfo {
 	 *
 	 * @param threshold
 	 */
-	public void setThreshold(int threshold) {
+	public void setThreshold(final int threshold) {
 		_threshold = threshold;
 	}
 
 	/**
 	 * Gets chi square target for fit.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getChiSquareTarget() {
 		return _chiSquareTarget;
@@ -430,10 +431,10 @@ public class FitInfo {
 
 	/**
 	 * Sets chi square target for fit.
-	 * 
-	 * @param chiSqTarget 
+	 *
+	 * @param chiSqTarget
 	 */
-	public void setChiSquareTarget(double chiSquareTarget) {
+	public void setChiSquareTarget(final double chiSquareTarget) {
 		_chiSquareTarget = chiSquareTarget;
 	}
 
@@ -448,10 +449,10 @@ public class FitInfo {
 
 	/**
 	 * Sets binning plugin name.
-	 * 
-	 * @param binning 
+	 *
+	 * @param binning
 	 */
-	public void setBinning(String binning) {
+	public void setBinning(final String binning) {
 		_binning = binning;
 	}
 
@@ -469,7 +470,7 @@ public class FitInfo {
 	 *
 	 * @param x
 	 */
-	public void setX(int x) {
+	public void setX(final int x) {
 		_x = x;
 	}
 
@@ -487,7 +488,7 @@ public class FitInfo {
 	 *
 	 * @param y
 	 */
-	public void setY(int y) {
+	public void setY(final int y) {
 		_y = y;
 	}
 
@@ -505,7 +506,7 @@ public class FitInfo {
 	 *
 	 * @param components
 	 */
-	public void setParameterCount(int count) {
+	public void setParameterCount(final int count) {
 		_parameterCount = count;
 	}
 
@@ -523,7 +524,7 @@ public class FitInfo {
 	 *
 	 * @param parameters
 	 */
-	public void setParameters(double parameters[]) {
+	public void setParameters(final double parameters[]) {
 		_parameters = parameters;
 	}
 
@@ -538,9 +539,8 @@ public class FitInfo {
 
 	/**
 	 * Sets which parameters aren't fixed.
-	 * 
 	 */
-	public void setFree(boolean[] free) {
+	public void setFree(final boolean[] free) {
 		_free = free;
 	}
 
@@ -555,17 +555,17 @@ public class FitInfo {
 
 	/**
 	 * Sets whether to start next fit with results of last fit.
-	 * 
-	 * @param refineFit 
+	 *
+	 * @param refineFit
 	 */
-	public void setRefineFit(boolean refineFit) {
+	public void setRefineFit(final boolean refineFit) {
 		_refineFit = refineFit;
 	}
 
 	/**
 	 * Gets number of exponential components.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getComponents() {
 		int components = 0;
@@ -605,8 +605,8 @@ public class FitInfo {
 
 	/**
 	 * Gets whether or not this is a stretched exponential fit.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public boolean getStretched() {
 		return FitFunction.STRETCHED_EXPONENTIAL == _function;

@@ -45,13 +45,15 @@ import loci.slim.analysis.batch.BatchHistogram;
  * @author Aivar Grislis
  */
 public class BatchHistogramsFrame extends JFrame {
+
 	public static final String SUMMARY = "Summary";
 	private static final String TITLE = "Batch Histograms";
-	private static final int SCROLLBAR_WIDTH = ((Integer) UIManager.get("ScrollBar.width")).intValue();
-	private BatchHistogramListener listener;
-	private BorderLayout layout;
-	private JPanel viewPanel;
-	private JScrollPane scrollPane;
+	private static final int SCROLLBAR_WIDTH = ((Integer) UIManager
+		.get("ScrollBar.width")).intValue();
+	private final BatchHistogramListener listener;
+	private final BorderLayout layout;
+	private final JPanel viewPanel;
+	private final JScrollPane scrollPane;
 	private JPanel scrollingPanel;
 	private BatchHistogramPanel summaryHistogramPanel;
 	private HistogramStatisticsRowPanel summaryStatisticsRow;
@@ -61,7 +63,7 @@ public class BatchHistogramsFrame extends JFrame {
 	 *
 	 * @param listener
 	 */
-	public BatchHistogramsFrame(BatchHistogramListener listener) {
+	public BatchHistogramsFrame(final BatchHistogramListener listener) {
 		super(TITLE);
 		this.listener = listener;
 		layout = new BorderLayout();
@@ -69,26 +71,37 @@ public class BatchHistogramsFrame extends JFrame {
 		viewPanel = new JPanel();
 		viewPanel.setLayout(new BoxLayout(viewPanel, BoxLayout.Y_AXIS));
 		scrollPane = new JScrollPane(viewPanel);
-		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scrollPane
+			.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scrollPane
+			.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		add(scrollPane, BorderLayout.CENTER);
 		setVisible(false);
 	}
 
-	public void update(String fileName, HistogramStatistics[] imageStatistics, HistogramStatistics[] summaryStatistics) {
-		HistogramStatisticsRowPanel imageStatisticsRow = new HistogramStatisticsRowPanel(fileName, imageStatistics, listener);
+	public void update(final String fileName,
+		final HistogramStatistics[] imageStatistics,
+		final HistogramStatistics[] summaryStatistics)
+	{
+		final HistogramStatisticsRowPanel imageStatisticsRow =
+			new HistogramStatisticsRowPanel(fileName, imageStatistics, listener);
 		viewPanel.add(imageStatisticsRow);
 		viewPanel.revalidate();
 		viewPanel.repaint();
-		HistogramStatisticsRowPanel summaryStatisticsRow = new HistogramStatisticsRowPanel(SUMMARY, summaryStatistics, null);
+		final HistogramStatisticsRowPanel summaryStatisticsRow =
+			new HistogramStatisticsRowPanel(SUMMARY, summaryStatistics, null);
 		this.summaryStatisticsRow = summaryStatisticsRow;
-		Component component = layout.getLayoutComponent(BorderLayout.SOUTH);
+		final Component component = layout.getLayoutComponent(BorderLayout.SOUTH);
 		if (null != component) {
 			remove(component);
 		}
 		add(summaryStatisticsRow, BorderLayout.SOUTH);
-		IJ.log("row width " + summaryStatisticsRow.getWidth() + " scrollbar width " + SCROLLBAR_WIDTH + " height " + summaryStatisticsRow.getHeight());
-		setSize(new Dimension(300, 700)); //summaryStatisticsRow.getWidth() + SCROLLBAR_WIDTH, 3 * summaryStatisticsRow.getHeight()));
+		IJ.log("row width " + summaryStatisticsRow.getWidth() +
+			" scrollbar width " + SCROLLBAR_WIDTH + " height " +
+			summaryStatisticsRow.getHeight());
+		setSize(new Dimension(300, 700)); // summaryStatisticsRow.getWidth() +
+																			// SCROLLBAR_WIDTH, 3 *
+																			// summaryStatisticsRow.getHeight()));
 		validate();
 		doLayout();
 		setVisible(true);

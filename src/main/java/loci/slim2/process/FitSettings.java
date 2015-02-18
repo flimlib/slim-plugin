@@ -28,10 +28,10 @@ import loci.slim2.fitting.GlobalFitParams;
 /**
  * Holds basic FLIM fit settings.
  * <p>
- * The intention here is to provide a basic set of fit settings that every
- * FLIM fitting implementation ought to need.  If it turns out some settings are
+ * The intention here is to provide a basic set of fit settings that every FLIM
+ * fitting implementation ought to need. If it turns out some settings are
  * irrelevant to a given fitting implementation they can simply be ignored.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface FitSettings {
@@ -46,49 +46,49 @@ public interface FitSettings {
 
 	/**
 	 * Get number of bins in time histogram.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getBins();
 
 	/**
 	 * Get time increment per time bin.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double getTimeInc();
 
 	/**
 	 * Get excitation decay values.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[] getExcitation();
 
 	/**
 	 * Gets horizontal cursor positions on excitation decay.
-	 * 
+	 *
 	 * @return null or array of cursors
 	 */
 	public HorzCursor[] getExcitationHorzCursors();
 
 	/**
 	 * Gets vertical cursor position on excitation decay.
-	 * 
+	 *
 	 * @return null or cursor
 	 */
 	public VertCursor getExcitationVertCursor();
 
 	/**
 	 * Gets horizontal cursor positions on decay.
-	 * 
+	 *
 	 * @return null or array of cursors
 	 */
 	public HorzCursor[] getDecayHorzCursors();
 
 	/**
 	 * Gets vertical cursor position on decay.
-	 * 
+	 *
 	 * @return null or cursor
 	 */
 	public VertCursor getDecayVertCursor();
@@ -97,7 +97,7 @@ public interface FitSettings {
 	 * Gets binning factor.
 	 * <p>
 	 * 0=no binning, 1=3x3, 2=5x5, etc.
-	 * 
+	 *
 	 * @return binning factor
 	 */
 	public int getBinningFactor();

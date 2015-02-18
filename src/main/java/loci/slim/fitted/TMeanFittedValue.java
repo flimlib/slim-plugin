@@ -23,22 +23,24 @@
 
 package loci.slim.fitted;
 
-
 /**
  * Extracts Tau Mean fitted values.
- * 
+ *
  * @author Aivar Grislis
  */
-public class TMeanFittedValue extends AbstractFittedValue implements FittedValue {
+public class TMeanFittedValue extends AbstractFittedValue implements
+	FittedValue
+{
+
 	private int components;
 
-	public void init(String title, int components) {
+	public void init(final String title, final int components) {
 		setTitle(title);
 		this.components = components;
 	}
 
 	@Override
-	public double getValue(double[] values) {
+	public double getValue(final double[] values) {
 		double value = 0.0;
 		switch (components) {
 			case 1:
@@ -48,7 +50,9 @@ public class TMeanFittedValue extends AbstractFittedValue implements FittedValue
 				value = values[FittedValue.T1_INDEX] + values[FittedValue.T2_INDEX];
 				break;
 			case 3:
-				value = values[FittedValue.T1_INDEX] + values[FittedValue.T2_INDEX] + values[FittedValue.T3_INDEX];
+				value =
+					values[FittedValue.T1_INDEX] + values[FittedValue.T2_INDEX] +
+						values[FittedValue.T3_INDEX];
 				break;
 		}
 		return value / components;

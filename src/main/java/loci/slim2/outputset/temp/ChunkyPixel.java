@@ -24,28 +24,30 @@
 package loci.slim2.outputset.temp;
 
 /**
- * Used to draw large but increasingly smaller "chunky pixels", to provide better 
- * feedback during a slow process.
+ * Used to draw large but increasingly smaller "chunky pixels", to provide
+ * better feedback during a slow process.
  * <p>
  * When a "chunky pixel" is drawn oversize only the upper left pixel is drawn
- * with the correct, final value.  All other pixels will be redrawn during
+ * with the correct, final value. All other pixels will be redrawn during
  * processing as further detail is filled in.
- * 
+ *
  * @author Aivar Grislis
  */
 public class ChunkyPixel {
+
 	private final long[] position;
 	private final long width;
 	private final long height;
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param position
 	 * @param width
-	 * @param height 
+	 * @param height
 	 */
-	public ChunkyPixel(long[] position, long width, long height) {
+	public ChunkyPixel(final long[] position, final long width, final long height)
+	{
 		this.position = position;
 		this.width = width;
 		this.height = height;
@@ -53,8 +55,8 @@ public class ChunkyPixel {
 
 	/**
 	 * Gets position of upper left pixel.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public long[] getPosition() {
 		return position;
@@ -62,8 +64,8 @@ public class ChunkyPixel {
 
 	/**
 	 * Gets width of pixel.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public long getWidth() {
 		return width;
@@ -71,8 +73,8 @@ public class ChunkyPixel {
 
 	/**
 	 * Gets height of pixel.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public long getHeight() {
 		return height;

@@ -30,15 +30,16 @@ import loci.slim.fitted.FittedValue;
 
 /**
  * Base class for a batch, cumulative histogram for a particular fitted
- * parameter.  These histograms have a large number of bins to cover the range
- * of expected values.  They accumulate statistics from any number of fitted
- * lifetime images.  At any time we can discard outliers using Tukey's Rule
- * http://www.edgarstat.com/tukeys_outliers_help.cfm
- * and zoom in and show the histogram distribution curve.
- * 
+ * parameter. These histograms have a large number of bins to cover the range of
+ * expected values. They accumulate statistics from any number of fitted
+ * lifetime images. At any time we can discard outliers using Tukey's Rule
+ * http://www.edgarstat.com/tukeys_outliers_help.cfm and zoom in and show the
+ * histogram distribution curve.
+ *
  * @author Aivar Grislis
  */
 public abstract class AbstractBatchHistogram implements BatchHistogram {
+
 	private FittedValue fittedValue;
 	private String title;
 	private double minRange;
@@ -63,14 +64,14 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	}
 
 	@Override
-	public void process(double[] values) {
+	public void process(final double[] values) {
 		process(fittedValue.getValue(values));
 	}
 
 	/**
 	 * Called periodically to get current statistics.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public HistogramStatistics getStatistics() {
@@ -82,8 +83,8 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 
 	/**
 	 * Returns scaled-down 256-bin histogram adjusted to interquartile range.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public long[] getScaledHistogram() {
@@ -92,29 +93,35 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 
 	/**
 	 * Returns scaled-down histogram adjusted to interquartile range.
-	 * 
+	 *
 	 * @param totalBins
-	 * @return 
+	 * @return
 	 */
 	@Override
-	public long[] getScaledHistogram(int binCount) {
+	public long[] getScaledHistogram(final int binCount) {
 		statistics = computeStatistics();
 
-		double iqr = statistics.getThirdQuartile() - statistics.getFirstQuartile();
-		double minSubRange = statistics.getMedian() - 1.5 * iqr;
-		double maxSubRange = statistics.getMedian() + 1.5 * iqr;
+		final double iqr =
+			statistics.getThirdQuartile() - statistics.getFirstQuartile();
+		final double minSubRange = statistics.getMedian() - 1.5 * iqr;
+		final double maxSubRange = statistics.getMedian() + 1.5 * iqr;
 
-		int minBin = Binning.valueToBin(totalBins, minRange, maxRange, minSubRange);
-		int maxBin = Binning.valueToBin(totalBins, minRange, maxRange, maxSubRange);
+		final int minBin =
+			Binning.valueToBin(totalBins, minRange, maxRange, minSubRange);
+		final int maxBin =
+			Binning.valueToBin(totalBins, minRange, maxRange, maxSubRange);
 		if (maxBin - minBin + 1 < binCount) {
-			IJ.log("getScaledHistogram scaling up from " + (maxBin - minBin + 1) + " to " + binCount);
+			IJ.log("getScaledHistogram scaling up from " + (maxBin - minBin + 1) +
+				" to " + binCount);
 		}
 
 		// character existing bins by center values
-		double[] srcCenterValues = Binning.centerValuesPerBin(totalBins, minRange, maxRange);
+		final double[] srcCenterValues =
+			Binning.centerValuesPerBin(totalBins, minRange, maxRange);
 		// allocate to destination bins by edge values
-		double[] dstEdgeValues = Binning.edgeValuesPerBin(binCount, minSubRange, maxSubRange);
-		long[] dstBins = new long[binCount];
+		final double[] dstEdgeValues =
+			Binning.edgeValuesPerBin(binCount, minSubRange, maxSubRange);
+		final long[] dstBins = new long[binCount];
 		int dstBin = 0;
 		for (int srcBin = minBin; srcBin <= maxBin; ++srcBin) {
 			// special handling for last destination bin
@@ -141,18 +148,19 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	}
 
 	@Override
-	public double[] getScaledCenterValues(int binCount) {
+	public double[] getScaledCenterValues(final int binCount) {
 		statistics = computeStatistics();
 
-		return Binning.centerValuesPerBin(binCount, statistics.getMinRange(), statistics.getMaxRange());
+		return Binning.centerValuesPerBin(binCount, statistics.getMinRange(),
+			statistics.getMaxRange());
 	}
 
-	void setFittedValue(FittedValue fittedValue) {
+	void setFittedValue(final FittedValue fittedValue) {
 		this.fittedValue = fittedValue;
 		this.title = fittedValue.getTitle();
 	}
 
-	void setMinMaxRange(double minRange, double maxRange) {
+	void setMinMaxRange(final double minRange, final double maxRange) {
 		this.minRange = minRange;
 		this.maxRange = maxRange;
 	}
@@ -161,7 +169,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		return new double[] { minRange, maxRange };
 	}
 
-	void setTotalBins(int totalBins) {
+	void setTotalBins(final int totalBins) {
 		this.totalBins = totalBins;
 		bins = new HistogramBin[totalBins];
 		for (int bin = 0; bin < totalBins; ++bin) {
@@ -175,10 +183,10 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 
 	/**
 	 * Account for a given value in the histogram.
-	 * 
-	 * @param value 
+	 *
+	 * @param value
 	 */
-	void process(double value) {
+	void process(final double value) {
 		if (Double.isNaN(value)) {
 			return;
 		}
@@ -211,7 +219,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			overMaxVarianceSum += value * value;
 		}
 		else {
-			int bin = Binning.valueToBin(totalBins, minRange, maxRange, value);
+			final int bin = Binning.valueToBin(totalBins, minRange, maxRange, value);
 			++bins[bin].count;
 			bins[bin].meanSum += value;
 			bins[bin].varianceSum += value * value;
@@ -239,7 +247,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			double s0 = 0.0;
 			double s1 = 0.0;
 			double s2 = 0.0;
-			for (HistogramBin histogramBin : bins) {
+			for (final HistogramBin histogramBin : bins) {
 				s0 += histogramBin.count;
 				s1 += histogramBin.meanSum;
 				s2 += histogramBin.varianceSum;
@@ -250,13 +258,13 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			s1 += overMaxSum;
 			s2 += underMinVarianceSum;
 			s2 += overMaxVarianceSum;
-			//IJ.log("s0 " + s0 + " (count " + count + ") s1 " + s1 + " s2 " + s2);
-			double standardDeviation = Math.sqrt(s0 * s2 - s1 * s1) / count;
+			// IJ.log("s0 " + s0 + " (count " + count + ") s1 " + s1 + " s2 " + s2);
+			final double standardDeviation = Math.sqrt(s0 * s2 - s1 * s1) / count;
 			statistics.setStandardDeviation(standardDeviation);
 
 			// quartiles
 			double quartile1 = countToValue(count / 4);
-			double quartile2 = countToValue(count / 2);
+			final double quartile2 = countToValue(count / 2);
 			double quartile3 = countToValue(3 * count / 4);
 
 			statistics.setFirstQuartile(quartile1);
@@ -272,7 +280,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 				// unable to compute third quartile, approximate
 				quartile3 = binToValue(totalBins - 1);
 			}
-			double iqr = quartile3 - quartile1;
+			final double iqr = quartile3 - quartile1;
 			statistics.setMinRange(quartile1 - 1.5 * iqr);
 			statistics.setMaxRange(quartile3 + 1.5 * iqr);
 
@@ -280,7 +288,7 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 			statistics.setHistogram(getScaledHistogram());
 
 			long totalCount = 0;
-			long[] histogram = statistics.getHistogram();
+			final long[] histogram = statistics.getHistogram();
 			for (int bin = 0; bin < histogram.length; ++bin) {
 				totalCount += histogram[bin];
 			}
@@ -290,22 +298,24 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	}
 
 	/**
-	 * Finds bin corresponding to the n-th value if values were ordered and 
+	 * Finds bin corresponding to the n-th value if values were ordered and
 	 * returns value for that bin.
-	 * 
+	 *
 	 * @param n
-	 * @return 
+	 * @return
 	 */
-	private double countToValue(long n) {
+	private double countToValue(final long n) {
 		// make sure that the bin for this count is within range
 		if (n < underMinCount) {
-			IJ.log("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
+			IJ.log("want " + n + "th value, underMinCount " + underMinCount +
+				" count " + count + " overMaxCount " + overMaxCount);
 			// computed values way out of reasonable range, report unknown statistic
 			return Double.NaN;
 		}
 		if (n > count - overMaxCount) {
 			// only (count - overMaxCount) values are actually binned
-			IJ.log("want " + n + "th value, underMinCount " + underMinCount + " count " + count + " overMaxCount " + overMaxCount);
+			IJ.log("want " + n + "th value, underMinCount " + underMinCount +
+				" count " + count + " overMaxCount " + overMaxCount);
 			// computed values way out of reasonable range, report unknown statistic
 			return Double.NaN;
 		}
@@ -325,7 +335,8 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 		}
 		else if (bin == totalBins) {
 			// this shouldn't happen
-			throw new RuntimeException("BatchHistogram quartile problem " + getTitle());
+			throw new RuntimeException("BatchHistogram quartile problem " +
+				getTitle());
 		}
 
 		// return value of bin
@@ -334,20 +345,21 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 
 	/**
 	 * Computes center value of a bin.
-	 * 
+	 *
 	 * @param bin
-	 * @return 
+	 * @return
 	 */
-	double binToValue(int bin) {
+	double binToValue(final int bin) {
 		return Binning.centerValuesPerBin(totalBins, minRange, maxRange)[bin];
 	}
 
 	/*
 	 * Inner class to keep track of count and also some sums.
-	 * 
+	 *
 	 * 24 bytes in size.
 	 */
 	private class HistogramBin {
+
 		public double meanSum;
 		public double varianceSum;
 		long count;

@@ -31,25 +31,24 @@ import loci.slim.fitting.params.IGlobalFitParams;
 import loci.slim.fitting.params.ILocalFitParams;
 
 /**
- *
  * @author Aivar Grislis
  */
 public interface IFittingEngineCallable extends Callable<IFitResults> {
 
 	/**
 	 * Set up for a fit.
-	 * 
+	 *
 	 * @param curveFitter
 	 * @param params
-	 * @param data 
+	 * @param data
 	 */
-	public void setup(ICurveFitter curveFitter,
-			IGlobalFitParams params, ILocalFitParams data);
+	public void setup(ICurveFitter curveFitter, IGlobalFitParams params,
+		ILocalFitParams data);
 
 	/**
 	 * Do the fit.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public IFitResults call();

@@ -33,34 +33,35 @@ import loci.slim.mask.Mask;
 import loci.slim.mask.MaskNode;
 
 /**
- * This class shadows a channel in a stack for a displayed image.  If the image
+ * This class shadows a channel in a stack for a displayed image. If the image
  * has only two dimensions there would be only one of these per HistogramData.
  *
  * @author Aivar Grislis
  */
 public class HistogramDataNode {
+
 	private static final int QUARTILE_MARGIN = 5;
 	private static final int IMPOSSIBLE_INDEX = -999;
-	private IFittedImage _fittedImage;
-	private double[][] _values;
+	private final IFittedImage _fittedImage;
+	private final double[][] _values;
 	private IMaskNode _maskNode;
 	private Mask _otherMask;
 	private Mask _totalMask;
 
 	/**
-	 * Constructor, takes the array of values.
-	 * 
-	 * This class keeps a separate array of values, rather than just referring
-	 * to the image values, for two reasons:
-	 * 1) If the 'chunky pixel' effect is used to draw the image, histogram
-	 * values will be temporarily incorrect until image is complete.
-	 * 2) If the image shows colorized grayscale, a la SPCImage, the image values
-	 * will be incorrect.
-	 * 
+	 * Constructor, takes the array of values. This class keeps a separate array
+	 * of values, rather than just referring to the image values, for two reasons:
+	 * 1) If the 'chunky pixel' effect is used to draw the image, histogram values
+	 * will be temporarily incorrect until image is complete. 2) If the image
+	 * shows colorized grayscale, a la SPCImage, the image values will be
+	 * incorrect.
+	 *
 	 * @param fittedImage
-	 * @param values 
+	 * @param values
 	 */
-	public HistogramDataNode(IFittedImage fittedImage, double[][] values) {
+	public HistogramDataNode(final IFittedImage fittedImage,
+		final double[][] values)
+	{
 		_fittedImage = fittedImage;
 		_values = values;
 		_otherMask = _totalMask = null;
@@ -68,15 +69,16 @@ public class HistogramDataNode {
 
 	/**
 	 * Assigns a mask group.
-	 * 
-	 * @param maskGroup 
+	 *
+	 * @param maskGroup
 	 */
-	public void setMaskGroup(IMaskGroup maskGroup) {
+	public void setMaskGroup(final IMaskGroup maskGroup) {
 		// create a new mask node that listens to the group
-		_maskNode = new MaskNode(maskGroup, new IMaskNodeListener () {
+		_maskNode = new MaskNode(maskGroup, new IMaskNodeListener() {
+
 			// listen for mask changes
 			@Override
-			public void updateMasks(Mask otherMask, Mask totalMask) {
+			public void updateMasks(final Mask otherMask, final Mask totalMask) {
 				_otherMask = otherMask;
 				_totalMask = totalMask;
 
@@ -87,19 +89,17 @@ public class HistogramDataNode {
 
 	/**
 	 * Gets the values array.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public double[][] getValues() {
 		return _values;
 	}
 
 	/**
-	 * Finds the actual minimum and maximum values.
-	 * Called initially and after values change.
-	 * 
-	 * This will exclude pixels masked by self or others.
-	 * 
+	 * Finds the actual minimum and maximum values. Called initially and after
+	 * values change. This will exclude pixels masked by self or others.
+	 *
 	 * @return array of { min, max }
 	 */
 	public double[] findMinMax() {
@@ -109,7 +109,7 @@ public class HistogramDataNode {
 		for (int y = 0; y < _values[0].length; ++y) {
 			for (int x = 0; x < _values.length; ++x) {
 				if (null == _totalMask || _totalMask.test(x, y)) {
-					double value = _values[x][y];
+					final double value = _values[x][y];
 					if (!Double.isNaN(value)) {
 						if (value < min) {
 							min = value;
@@ -130,28 +130,28 @@ public class HistogramDataNode {
 
 	/**
 	 * Creates an array of histogram values based on the current nominal min/max
-	 * range.
-	 * 
-	 * This histogram array should exclude pixels masked out by others but not 
-	 * by self.
-	 * 
+	 * range. This histogram array should exclude pixels masked out by others but
+	 * not by self.
+	 *
 	 * @param bins number of bins
 	 * @param nominalMin first value assigned to bin 0
 	 * @param nominalMax last value assigned to last bin
 	 * @return histogram array with counts per bin
 	 */
-	public int[] binValues(int bins, double nominalMin, double nominalMax) {
-		int[] results = new int[bins];
+	public int[] binValues(final int bins, final double nominalMin,
+		final double nominalMax)
+	{
+		final int[] results = new int[bins];
 		for (int i = 0; i < bins; ++i) {
 			results[i] = 0;
 		}
 		for (int y = 0; y < _values[0].length; ++y) {
 			for (int x = 0; x < _values.length; ++x) {
 				if (null == _otherMask || _otherMask.test(x, y)) {
-					double value = _values[x][y];
+					final double value = _values[x][y];
 					if (!Double.isNaN(value)) {
 						// assign each value to a bin
-						int bin = valueToBin(value, bins, nominalMin, nominalMax);
+						final int bin = valueToBin(value, bins, nominalMin, nominalMax);
 						if (0 <= bin && bin < bins) {
 							++results[bin];
 						}
@@ -163,27 +163,29 @@ public class HistogramDataNode {
 	}
 
 	/**
-	 * Finds the quartiles of the histogram distribution.  Uses the total mask,
+	 * Finds the quartiles of the histogram distribution. Uses the total mask,
 	 * ignores any pixels masked out by anyone.
-	 * 
+	 *
 	 * @param quartiles
 	 * @param quartileIndices
 	 * @param bins
 	 * @param min
-	 * @param max 
+	 * @param max
 	 */
-	public void findQuartiles(double[] quartiles, int[] quartileIndices,
-			int bins, double min, double max) {
+	public void findQuartiles(final double[] quartiles,
+		final int[] quartileIndices, final int bins, final double min,
+		final double max)
+	{
 
 		// create an array copy of masked, non-NaN values
-		int width = _values.length;
-		int height = _values[0].length;
-		double[] tmp = new double[width * height];
+		final int width = _values.length;
+		final int height = _values[0].length;
+		final double[] tmp = new double[width * height];
 		int tmpIndex = 0;
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
 				if (null == _totalMask || _totalMask.test(x, y)) {
-					double value = _values[x][y];
+					final double value = _values[x][y];
 					if (!Double.isNaN(value)) {
 						tmp[tmpIndex++] = value;
 					}
@@ -233,9 +235,9 @@ public class HistogramDataNode {
 		}
 
 		// An earlier, simpler approach:
-		//quartiles[0] = tmp[tmpIndex / 4];
-		//quartiles[1] = tmp[tmpIndex / 2];
-		//quartiles[2] = tmp[3 * tmpIndex / 4];
+		// quartiles[0] = tmp[tmpIndex / 4];
+		// quartiles[1] = tmp[tmpIndex / 2];
+		// quartiles[2] = tmp[3 * tmpIndex / 4];
 
 		// get bin indices for quartile values
 		quartileIndices[0] = getQuartileIndex(quartiles[0], bins, min, max);
@@ -244,33 +246,39 @@ public class HistogramDataNode {
 
 		// if quartile indices are too close together don't show quartiles
 		if (quartileIndices[1] - quartileIndices[0] < QUARTILE_MARGIN ||
-				quartileIndices[2] - quartileIndices[1] < QUARTILE_MARGIN) {
-			quartileIndices[0] = quartileIndices[1] = quartileIndices[2] = IMPOSSIBLE_INDEX;
+			quartileIndices[2] - quartileIndices[1] < QUARTILE_MARGIN)
+		{
+			quartileIndices[0] =
+				quartileIndices[1] = quartileIndices[2] = IMPOSSIBLE_INDEX;
 		}
 	}
 
 	/**
 	 * Given an array and inclusive start/stop indices, computes median value.
-	 * 
+	 *
 	 * @param values
 	 * @param start
 	 * @param stop
-	 * @return 
+	 * @return
 	 */
-	private double getMedian(double[] values, int start, int stop) {
+	private double getMedian(final double[] values, final int start,
+		final int stop)
+	{
 		return 0.0;
 	}
 
 	/**
 	 * Given a quartile value, looks up the bin index.
-	 * 
+	 *
 	 * @param value
 	 * @param bins
 	 * @param min
 	 * @param max
-	 * @return 
+	 * @return
 	 */
-	private int getQuartileIndex(double value, int bins, double min, double max) {
+	private int getQuartileIndex(final double value, final int bins,
+		final double min, final double max)
+	{
 		int index = valueToBin(value, bins, min, max);
 		if (index < 0 || index >= bins) {
 			index = IMPOSSIBLE_INDEX;
@@ -278,12 +286,14 @@ public class HistogramDataNode {
 		return index;
 	}
 
-	private int valueToBin(double value, int bins, double nominalMin, double nominalMax) {
+	private int valueToBin(final double value, final int bins,
+		final double nominalMin, final double nominalMax)
+	{
 		int bin;
 		if (nominalMin != nominalMax) {
 			if (value != nominalMax) {
 				// convert in-range values to 0.0..1.0
-				double temp = (value - nominalMin) / (nominalMax - nominalMin);
+				final double temp = (value - nominalMin) / (nominalMax - nominalMin);
 
 				// note multiply by bins, not (bins - 1)
 				// note floor is needed so that small negative values go to -1
@@ -304,17 +314,17 @@ public class HistogramDataNode {
 	/**
 	 * Builds a mask based on which values are within the LUT range and sends it
 	 * out to peer nodes.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
-	public void propagateMask(double minLUT, double maxLUT) {
+	public void propagateMask(final double minLUT, final double maxLUT) {
 		boolean masked = false;
-		int width = _values.length;
-		int height = _values[0].length;
-		boolean[][] bits = new boolean[width][height];
+		final int width = _values.length;
+		final int height = _values[0].length;
+		final boolean[][] bits = new boolean[width][height];
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) {
-				Double value = _values[x][y];
+				final Double value = _values[x][y];
 				bits[x][y] = false;
 				if (!value.isNaN()) {
 					if (minLUT <= value && value <= maxLUT) {
@@ -337,10 +347,9 @@ public class HistogramDataNode {
 
 	/**
 	 * Deletes our mask.
-	 * 
 	 */
 	public void rescindMask() {
-		Mask selfMask = null;
+		final Mask selfMask = null;
 		_maskNode.updateSelfMask(selfMask);
 	}
 }

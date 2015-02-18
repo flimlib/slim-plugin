@@ -25,72 +25,53 @@ package loci.slim.fitted;
 
 /**
  * Interface for dealing with fitted values.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface FittedValue {
 
 	// Unicode special characters
-	public static final Character CHI    = '\u03c7',
-			SQUARE = '\u00b2',
-			TAU    = '\u03c4',
-			LAMBDA = '\u03bb',
-			SIGMA  = '\u03c3',
-			SUB_1  = '\u2081',
-			SUB_2  = '\u2082',
-			SUB_3  = '\u2083',
-			SUB_M  = '\u2098', // Unicode 6.0.0 (October 2010)
-			SUB_R  = '\u1d63';
+	public static final Character CHI = '\u03c7', SQUARE = '\u00b2',
+			TAU = '\u03c4', LAMBDA = '\u03bb', SIGMA = '\u03c3', SUB_1 = '\u2081',
+			SUB_2 = '\u2082', SUB_3 = '\u2083', SUB_M = '\u2098', // Unicode 6.0.0
+																														// (October 2010)
+			SUB_R = '\u1d63';
 
 	// labels
-	public static final String CHI_SQ = "" + CHI + SQUARE, //TODO actually the reduced chi square: + SUB_R,
-			Z = "Z",
-			A = "A",
-			A1 = A + SUB_1,
-			A2 = A+ SUB_2,
-			A3 = A+ SUB_3,
-			T = "" + TAU,
-			T1 = T + SUB_1,
-			T2 = T + SUB_2,
-			T3 = T + SUB_3,
+	public static final String CHI_SQ = "" + CHI + SQUARE, // TODO actually the
+																													// reduced chi square:
+																													// + SUB_R,
+			Z = "Z", A = "A", A1 = A + SUB_1, A2 = A + SUB_2, A3 = A + SUB_3, T = "" +
+				TAU, T1 = T + SUB_1, T2 = T + SUB_2, T3 = T + SUB_3,
 			F_INT = "F",
-			F_INT1 = F_INT + SUB_1,
-			F_INT2 = F_INT + SUB_2,
+			F_INT1 = F_INT + SUB_1, F_INT2 = F_INT + SUB_2,
 			F_INT3 = F_INT + SUB_3,
-			F_CONT = "f",
-			F_CONT1 = F_CONT + SUB_1,
+			F_CONT = "f", F_CONT1 = F_CONT + SUB_1,
 			F_CONT2 = F_CONT + SUB_2,
-			F_CONT3 = F_CONT + SUB_3,
-			T_MEAN = "" + TAU + SUB_M;
+			F_CONT3 = F_CONT + SUB_3, T_MEAN = "" + TAU + SUB_M;
 
 	// indices
-	public static final int CHI_SQ_INDEX = 0,
-			Z_INDEX      = 1,
-			A1_INDEX     = 2,
-			T1_INDEX     = 3,
-			H_INDEX      = 4, // for stretched
-			A2_INDEX     = 4,
-			T2_INDEX     = 5,
-			A3_INDEX     = 6,
-			T3_INDEX     = 7;
+	public static final int CHI_SQ_INDEX = 0, Z_INDEX = 1, A1_INDEX = 2,
+			T1_INDEX = 3, H_INDEX = 4, // for stretched
+			A2_INDEX = 4, T2_INDEX = 5, A3_INDEX = 6, T3_INDEX = 7;
 
 	/**
 	 * Sets a title for a particular fitted value.
-	 * 
-	 * @param title 
+	 *
+	 * @param title
 	 */
 	public void setTitle(String title);
 
 	/**
 	 * Gets the title.
-	 * 
+	 *
 	 * @return title
 	 */
 	public String getTitle();
 
 	/**
 	 * Gets the fitted value.
-	 * 
+	 *
 	 * @param values tuple of fitted parameters
 	 * @return fitted value
 	 */

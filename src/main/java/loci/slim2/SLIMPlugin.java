@@ -22,6 +22,7 @@
  */
 
 package loci.slim2;
+
 //TODO ARG 'slim2' is just a temporary package name for IJ2 version to keep the two codebases separate
 
 import java.awt.Component;
@@ -80,13 +81,16 @@ import org.scijava.ui.UIService;
 
 /**
  * A command used to analyze time-based lifetime images.
- * 
+ *
  * @author Aivar Grislis
  */
 @Plugin(type = Command.class,
-	menuPath = "Analyze>Lifetime>Spectral Lifetime Analysis",
-	attrs = { @Attr(name = "no-legacy") })
-public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Command {
+	menuPath = "Analyze>Lifetime>Spectral Lifetime Analysis", attrs = { @Attr(
+		name = "no-legacy") })
+public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements
+	Command
+{
+
 	private static final String PATH_KEY = "path";
 	private static final String LIFETIME = "Lifetime";
 	private static final String SDT_SUFFIX = ".sdt";
@@ -142,7 +146,8 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 			// none found?
 			if (null == lifetime) {
 				// prompt for lifetime dataset name
-				File[] files = showFileDialog(parent, getPathFromPreferences());				System.out.println("back from showFileDialog");
+				final File[] files = showFileDialog(parent, getPathFromPreferences());
+				System.out.println("back from showFileDialog");
 				if (null == files) {
 					// dialog cancelled
 					if (null == activeLifetime) {
@@ -162,8 +167,12 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 						if (null != interactiveProcessor) {
 							// do some batch processing
 							final BatchProcessor batchProcessor = new DefaultBatchProcessor();
-							int batchBins = interactiveProcessor.getFitSettings().getBins(); // check for same number bins
-							batchProcessor.process(context, batchBins, files, interactiveProcessor.getFitSettings());
+							final int batchBins =
+								interactiveProcessor.getFitSettings().getBins(); // check for
+																																	// same number
+																																	// bins
+							batchProcessor.process(context, batchBins, files,
+								interactiveProcessor.getFitSettings());
 						}
 						else {
 							// error; no settings available yet
@@ -178,11 +187,13 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 						try {
 							lifetime = new LifetimeDatasetWrapper(context, files[0]);
 						}
-						catch (IOException e) {
-							showWarning("Problem reading " + files[0].getAbsolutePath() + " " + e.getMessage());
+						catch (final IOException e) {
+							showWarning("Problem reading " + files[0].getAbsolutePath() +
+								" " + e.getMessage());
 						}
-						catch (NoLifetimeAxisFoundException e) {
-							showWarning("No Lifetime Axis found in " + files[0].getAbsolutePath());
+						catch (final NoLifetimeAxisFoundException e) {
+							showWarning("No Lifetime Axis found in " +
+								files[0].getAbsolutePath());
 						}
 					}
 				}
@@ -194,9 +205,10 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 
 				// create processor first time through
 				if (null == interactiveProcessor) {
-					Estimator estimator = new DefaultEstimator();
+					final Estimator estimator = new DefaultEstimator();
 					interactiveProcessor = new DefaultInteractiveProcessor();
-					interactiveProcessor.init(context, commandService, datasetService, displayService, estimator);
+					interactiveProcessor.init(context, commandService, datasetService,
+						displayService, estimator);
 				}
 
 				// gives up control to load a new dataset or when done
@@ -217,16 +229,16 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 	 *
 	 * @param message
 	 */
-	private void showWarning(String message) {
+	private void showWarning(final String message) {
 		uiService.showDialog(message, DialogPrompt.MessageType.WARNING_MESSAGE);
 	}
 
 	/**
 	 * Throws up an error message dialog.
-	 * 
-	 * @param message 
+	 *
+	 * @param message
 	 */
-	private void showError(String message) {
+	private void showError(final String message) {
 		uiService.showDialog(message, DialogPrompt.MessageType.ERROR_MESSAGE);
 	}
 
@@ -236,7 +248,7 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 	 * @return String with path name
 	 */
 	private String getPathFromPreferences() {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		return prefs.get(PATH_KEY, "");
 	}
 
@@ -245,8 +257,8 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 	 *
 	 * @param path
 	 */
-	private void savePathInPreferences(String path) {
-		Preferences prefs = Preferences.userNodeForPackage(this.getClass());
+	private void savePathInPreferences(final String path) {
+		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 		prefs.put(PATH_KEY, path);
 	}
 
@@ -257,7 +269,9 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 	 * @param default path
 	 * @return null or array of Files
 	 */
-	private File[] showFileDialog(final Component parent, String defaultPath) {
+	private File[]
+		showFileDialog(final Component parent, final String defaultPath)
+	{
 		final JFileChooser chooser = new JFileChooser();
 		chooser.setCurrentDirectory(new File(defaultPath));
 		chooser.setDialogTitle("Open Lifetime Image(s)");
@@ -268,27 +282,25 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 		// run on event dispatch thread
 		final int[] returnCode = new int[1];
 		try {
-			SwingUtilities.invokeAndWait(
-				new Runnable() {
-					@Override
-					public void run() {
-						returnCode[0] = chooser.showOpenDialog(parent);
-					}
-				});
+			SwingUtilities.invokeAndWait(new Runnable() {
+
+				@Override
+				public void run() {
+					returnCode[0] = chooser.showOpenDialog(parent);
+				}
+			});
 		}
-		catch (InterruptedException e) {
-		}
-		catch (InvocationTargetException e) {
-		}
+		catch (final InterruptedException e) {}
+		catch (final InvocationTargetException e) {}
 
 		if (returnCode[0] == JFileChooser.APPROVE_OPTION) {
-			File[] files = chooser.getSelectedFiles();
-			List<File> fileList = new ArrayList<File>();
-			for (File file : files) {
+			final File[] files = chooser.getSelectedFiles();
+			final List<File> fileList = new ArrayList<File>();
+			for (final File file : files) {
 				if (file.isDirectory()) {
-					for (File f : file.listFiles()) {
-						if (f.getName().endsWith(ICS_SUFFIX)
-								|| f.getName().endsWith(SDT_SUFFIX))
+					for (final File f : file.listFiles()) {
+						if (f.getName().endsWith(ICS_SUFFIX) ||
+							f.getName().endsWith(SDT_SUFFIX))
 						{
 							fileList.add(f);
 						}
@@ -308,10 +320,11 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 	 * File filter for lifetime files.
 	 */
 	private class ShowFileDialogFilter extends FileFilter {
+
 		private static final String DESCRIPTION = "Lifetime .ics & .sdt";
 
 		@Override
-		public boolean accept(File file) {
+		public boolean accept(final File file) {
 			if (file.getName().endsWith(ICS_SUFFIX)) {
 				return true;
 			}
@@ -331,71 +344,83 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 	}
 
 	private void test() {
-		//TODO experimental
-		List<OutputSetMember> list = new ArrayList<OutputSetMember>();
+		// TODO experimental
+		final List<OutputSetMember> list = new ArrayList<OutputSetMember>();
 		int inputIndex;
 		int outputIndex;
 		inputIndex = 0;
 		outputIndex = 5;
-		IndexedMemberFormula formula1 = new IndexedMemberFormula(inputIndex);
-		OutputSetMember index1 = new OutputSetMember<T>("X2", outputIndex, formula1);
+		final IndexedMemberFormula formula1 = new IndexedMemberFormula(inputIndex);
+		final OutputSetMember index1 =
+			new OutputSetMember<T>("X2", outputIndex, formula1);
 		list.add(index1);
 		inputIndex = 1;
 		outputIndex = 4;
-		IndexedMemberFormula formula2 = new IndexedMemberFormula(inputIndex);
-		OutputSetMember index2 = new OutputSetMember<T>("A1", outputIndex, formula2);
+		final IndexedMemberFormula formula2 = new IndexedMemberFormula(inputIndex);
+		final OutputSetMember index2 =
+			new OutputSetMember<T>("A1", outputIndex, formula2);
 		list.add(index2);
 		inputIndex = 2;
 		outputIndex = 3;
-		IndexedMemberFormula formula3 = new IndexedMemberFormula(inputIndex);
-		OutputSetMember index3 = new OutputSetMember<T>("T1", outputIndex, formula3);
+		final IndexedMemberFormula formula3 = new IndexedMemberFormula(inputIndex);
+		final OutputSetMember index3 =
+			new OutputSetMember<T>("T1", outputIndex, formula3);
 		list.add(index3);
 		inputIndex = 3;
 		outputIndex = 2;
-		IndexedMemberFormula formula4 = new IndexedMemberFormula(inputIndex);
-		OutputSetMember index4 = new OutputSetMember<T>("A2", outputIndex, formula4);
+		final IndexedMemberFormula formula4 = new IndexedMemberFormula(inputIndex);
+		final OutputSetMember index4 =
+			new OutputSetMember<T>("A2", outputIndex, formula4);
 		list.add(index4);
 		inputIndex = 4;
 		outputIndex = 1;
-		IndexedMemberFormula formula5 = new IndexedMemberFormula(inputIndex);
-		OutputSetMember index5 = new OutputSetMember<T>("T2", outputIndex, formula5);
+		final IndexedMemberFormula formula5 = new IndexedMemberFormula(inputIndex);
+		final OutputSetMember index5 =
+			new OutputSetMember<T>("T2", outputIndex, formula5);
 		list.add(index5);
 		inputIndex = 5;
 		outputIndex = 0;
-		IndexedMemberFormula formula6 = new IndexedMemberFormula(inputIndex);
-		OutputSetMember index6 = new OutputSetMember<T>("Z", outputIndex, formula6);
+		final IndexedMemberFormula formula6 = new IndexedMemberFormula(inputIndex);
+		final OutputSetMember index6 =
+			new OutputSetMember<T>("Z", outputIndex, formula6);
 		list.add(index6);
 
-		boolean combined = false; //true; // create a stack
-		boolean useChannelDimension = false;
-		DoubleType type = new DoubleType();
-		long[] dimensions = new long[] { 400, 300, 5 }; // x y z
-		AxisType[] axes = new AxisType[3];
+		boolean combined = false; // true; // create a stack
+		final boolean useChannelDimension = false;
+		final DoubleType type = new DoubleType();
+		final long[] dimensions = new long[] { 400, 300, 5 }; // x y z
+		final AxisType[] axes = new AxisType[3];
 		axes[0] = Axes.X;
 		axes[1] = Axes.Y;
 		axes[2] = Axes.Z;
-		OutputSet imageSet = new OutputSet(commandService, datasetService, combined, useChannelDimension, type, dimensions, "Test", axes, list);
+		final OutputSet imageSet =
+			new OutputSet(commandService, datasetService, combined,
+				useChannelDimension, type, dimensions, "Test", axes, list);
 
-		List<Dataset> datasetList = imageSet.getDatasets();
+		final List<Dataset> datasetList = imageSet.getDatasets();
 		Display display = null;
-		for (Dataset d : datasetList) {
-			//TODO ARG just to see if this works; set min/max
+		for (final Dataset d : datasetList) {
+			// TODO ARG just to see if this works; set min/max
 			d.getImgPlus().setChannelMinimum(0, 0.0);
 			d.getImgPlus().setChannelMaximum(0, 1.0);
 			d.setDirty(true);
-			//d.getImgPlus().getImg().
+			// d.getImgPlus().getImg().
 			display = displayService.createDisplay(d);
 		}
 
 		// slightly easier way to create similar sets
-		combined = !combined; // try the other variant also (stack vs separate images)
+		combined = !combined; // try the other variant also (stack vs separate
+													// images)
 		System.out.println("!!! commandService is " + commandService);
 		System.out.println("!!! datasetService is " + datasetService);
-		OutputSet imageSet2 = new OutputSet(commandService, datasetService, combined, useChannelDimension, type, dimensions, "Test 2", axes, new String[] { "X2", "A1", "T1", "A2", "T2", "Z" });
-		List<Dataset> datasetList2 = imageSet2.getDatasets();
-		Display<?>[] displays = new Display<?>[datasetList2.size()];
+		final OutputSet imageSet2 =
+			new OutputSet(commandService, datasetService, combined,
+				useChannelDimension, type, dimensions, "Test 2", axes, new String[] {
+					"X2", "A1", "T1", "A2", "T2", "Z" });
+		final List<Dataset> datasetList2 = imageSet2.getDatasets();
+		final Display<?>[] displays = new Display<?>[datasetList2.size()];
 		int index = 0;
-		if (true) for (Dataset d : datasetList2) {
+		if (true) for (final Dataset d : datasetList2) {
 			d.getImgPlus().setChannelMinimum(0, 0.0);
 			d.getImgPlus().setChannelMaximum(0, 1.0);
 			d.setDirty(true);
@@ -403,42 +428,44 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 		}
 
 		// do some drawing
-		long width = dimensions[0];
-		long height = dimensions[1];
-		RampGenerator[] inputs = new RampGenerator[] {
-			new RampGenerator(RampGenerator.RampType.UPPER_LEFT, width, height),
-			new RampGenerator(RampGenerator.RampType.BOTTOM, width, height),
-			new RampGenerator(RampGenerator.RampType.LOWER_RIGHT, width, height),
-			new RampGenerator(RampGenerator.RampType.LEFT, width, height),
-			new RampGenerator(RampGenerator.RampType.UPPER_RIGHT, width, height),
-			new RampGenerator(RampGenerator.RampType.LOWER_LEFT, width, height)
-		};
-		double[] inputValues = new double[inputs.length];
+		final long width = dimensions[0];
+		final long height = dimensions[1];
+		final RampGenerator[] inputs =
+			new RampGenerator[] {
+				new RampGenerator(RampGenerator.RampType.UPPER_LEFT, width, height),
+				new RampGenerator(RampGenerator.RampType.BOTTOM, width, height),
+				new RampGenerator(RampGenerator.RampType.LOWER_RIGHT, width, height),
+				new RampGenerator(RampGenerator.RampType.LEFT, width, height),
+				new RampGenerator(RampGenerator.RampType.UPPER_RIGHT, width, height),
+				new RampGenerator(RampGenerator.RampType.LOWER_LEFT, width, height) };
+		final double[] inputValues = new double[inputs.length];
 
-		long time = System.currentTimeMillis();
-		ChunkyPixelIterator iterator = new ChunkyPixelIterator(dimensions);
+		final long time = System.currentTimeMillis();
+		final ChunkyPixelIterator iterator = new ChunkyPixelIterator(dimensions);
 		while (iterator.hasNext()) {
 			try {
 				Thread.sleep(1);
 			}
-			catch (Exception e) {
+			catch (final Exception e) {
 
 			}
-			ChunkyPixel chunkyPixel = iterator.next();
-			long[] position = chunkyPixel.getPosition();
-			long x = position[0];
-			long y = position[1];
+			final ChunkyPixel chunkyPixel = iterator.next();
+			final long[] position = chunkyPixel.getPosition();
+			final long x = position[0];
+			final long y = position[1];
 			for (int i = 0; i < inputs.length; ++i) {
 				inputValues[i] = inputs[i].getValue(x, y);
 			}
 			for (long z = 0; z < dimensions[2]; ++z) {
-				//TODO ARG how does this work?  why iterate over z when nothing changes within the loop????
+				// TODO ARG how does this work? why iterate over z when nothing changes
+				// within the loop????
 				imageSet.setPixelValue(inputValues, position);
 			}
 		}
-		System.out.println("Elapsed chunky pixel overhead time " + (System.currentTimeMillis() - time));
+		System.out.println("Elapsed chunky pixel overhead time " +
+			(System.currentTimeMillis() - time));
 
-		Dataset dd = datasetList.get(0);
+		final Dataset dd = datasetList.get(0);
 		System.out.println("dd name is " + dd.getName());
 		dd.getImgPlus().setChannelMaximum(0, 1.0);
 		dd.getImgPlus().setChannelMinimum(0, 0.0);
@@ -462,44 +489,42 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 		}
 		 */
 
-		//TODO ARG big problem here!
+		// TODO ARG big problem here!
 		// I should be able to createDisplay up above and just update here
-		//Display<?>[] displays = new Display<?>[datasetList2.size()];
-		//int index = 0;
-		//if (false) for (Dataset d : datasetList2) {
-		//	displays[index++] = displayService.createDisplay(d);
-		//}
+		// Display<?>[] displays = new Display<?>[datasetList2.size()];
+		// int index = 0;
+		// if (false) for (Dataset d : datasetList2) {
+		// displays[index++] = displayService.createDisplay(d);
+		// }
 
-		for (Display d : displays) {
+		for (final Display d : displays) {
 			if (d instanceof DefaultImageDisplay) {
-				DefaultImageDisplay defaultImageDisplay = (DefaultImageDisplay) d;
-				DataView dataView = defaultImageDisplay.getActiveView();
+				final DefaultImageDisplay defaultImageDisplay = (DefaultImageDisplay) d;
+				final DataView dataView = defaultImageDisplay.getActiveView();
 				dataView.update();
 				dataView.rebuild();
 			}
 			d.update(); // just monkeys with the axes
 		}
 
-		//displays[0].
+		// displays[0].
 
-		//display.update();
+		// display.update();
 
-		//private void setMinMax(final double min, final double max) {
-		//	view.setChannelRanges(min, max);
-		//	view.getProjector().map();
-		//	view.update();
-		//}
+		// private void setMinMax(final double min, final double max) {
+		// view.setChannelRanges(min, max);
+		// view.getProjector().map();
+		// view.update();
+		// }
 
-
-		Dataset dataset2 = (Dataset) imageSet2.getDatasets().get(0);
+		final Dataset dataset2 = (Dataset) imageSet2.getDatasets().get(0);
 		dataset2.setDirty(true);
 		System.out.println("FINIS");
-
 
 		// one more time; see if there's a timing issue with updates
 		display.update();
 
-		//TODO end experimental
+		// TODO end experimental
 	}
 
 	/**
@@ -508,10 +533,10 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 	 * Tool allows user to click on grayscale image to fit pixels.
 	 */
 	private void showTool() {
-		Tool tool = getTool();
+		final Tool tool = getTool();
 		if (null != tool) {
 			// show the tool
-			//TODO
+			// TODO
 		}
 	}
 
@@ -519,39 +544,39 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 	 * Hides lifetime tool in IJ toolbar.
 	 */
 	private void hideTool() {
-		Tool tool = getTool();
+		final Tool tool = getTool();
 		if (null != tool) {
 			// hide the tool
-			//TODO
+			// TODO
 		}
 	}
 
 	/**
 	 * Gets the lifetime tool from IJ toolbar.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	private Tool getTool() {
-		//TODO ARG find instance of LifetimeTool
+		// TODO ARG find instance of LifetimeTool
 		return toolService.getTool("aivar");
 	}
 
 	/**
 	 * Finds the first lifetime Dataset from the DisplayService and wraps it.
-	 * 
+	 *
 	 * @return null or lifetime dataset wrapper
 	 */
 	private LifetimeDatasetWrapper getLifetimeDatasetWrapper() {
-		List<Dataset> datasets = datasetService.getDatasets();
-		for (Dataset dataset : datasets) {
-			ImgPlus<?> img = dataset.getImgPlus();
+		final List<Dataset> datasets = datasetService.getDatasets();
+		for (final Dataset dataset : datasets) {
+			final ImgPlus<?> img = dataset.getImgPlus();
 			for (int i = 0; i < img.numDimensions(); ++i) {
 				if (LIFETIME.equals(img.axis(i).type().getLabel())) {
 					LifetimeDatasetWrapper lifetime = null;
 					try {
 						lifetime = new LifetimeDatasetWrapper(dataset);
 					}
-					catch (NoLifetimeAxisFoundException e) {
+					catch (final NoLifetimeAxisFoundException e) {
 						// we just determined that there is a LIFETIME axis
 					}
 					finally {

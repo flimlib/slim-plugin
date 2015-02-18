@@ -30,9 +30,9 @@ import net.imagej.ImageJ;
  */
 public class Main {
 
-	public static void main(String [] args) {
+	public static void main(final String[] args) {
 		new ImageJ().ui().showUI();
-		SLIM_PlugIn plugIn = new SLIM_PlugIn();
+		final SLIM_PlugIn plugIn = new SLIM_PlugIn();
 		plugIn.run("");
 	}
 

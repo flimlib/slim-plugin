@@ -31,10 +31,11 @@ import loci.curvefitter.IFitterEstimator;
 /**
  * This contains the global fitting parameters, i.e. those valid for the whole
  * image.
- * 
+ *
  * @author Aivar Grislis
  */
 public class GlobalFitParams implements IGlobalFitParams {
+
 	private IFitterEstimator _estimator;
 	private FitAlgorithm _fitAlgorithm;
 	private FitFunction _fitFunction;
@@ -48,9 +49,9 @@ public class GlobalFitParams implements IGlobalFitParams {
 	private int _transientStart;
 	private int _dataStart;
 	private int _transientStop;
-	
+
 	@Override
-	public void setEstimator(IFitterEstimator estimator) {
+	public void setEstimator(final IFitterEstimator estimator) {
 		_estimator = estimator;
 	}
 
@@ -60,7 +61,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setFitAlgorithm(FitAlgorithm fitAlgorithm) {
+	public void setFitAlgorithm(final FitAlgorithm fitAlgorithm) {
 		_fitAlgorithm = fitAlgorithm;
 	}
 
@@ -70,7 +71,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setFitFunction(FitFunction fitFunction) {
+	public void setFitFunction(final FitFunction fitFunction) {
 		_fitFunction = fitFunction;
 	}
 
@@ -80,7 +81,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setNoiseModel(NoiseModel noiseModel) {
+	public void setNoiseModel(final NoiseModel noiseModel) {
 		_noiseModel = noiseModel;
 	}
 
@@ -90,7 +91,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setXInc(double xInc) {
+	public void setXInc(final double xInc) {
 		_xInc = xInc;
 	}
 
@@ -100,7 +101,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setPrompt(double[] prompt) {
+	public void setPrompt(final double[] prompt) {
 		_prompt = prompt;
 	}
 
@@ -110,7 +111,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setChiSquareTarget(double chiSquareTarget) {
+	public void setChiSquareTarget(final double chiSquareTarget) {
 		_chiSquareTarget = chiSquareTarget;
 	}
 
@@ -120,7 +121,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setFree(boolean[] free) {
+	public void setFree(final boolean[] free) {
 		_free = free;
 	}
 
@@ -130,7 +131,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setStartPrompt(int startPrompt) {
+	public void setStartPrompt(final int startPrompt) {
 		_startPrompt = startPrompt;
 	}
 
@@ -140,7 +141,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setStopPrompt(int stopPrompt) {
+	public void setStopPrompt(final int stopPrompt) {
 		_stopPrompt = stopPrompt;
 	}
 
@@ -150,7 +151,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setTransientStart(int transientStart) {
+	public void setTransientStart(final int transientStart) {
 		_transientStart = transientStart;
 	}
 
@@ -160,7 +161,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setDataStart(int dataStart) {
+	public void setDataStart(final int dataStart) {
 		_dataStart = dataStart;
 	}
 
@@ -170,7 +171,7 @@ public class GlobalFitParams implements IGlobalFitParams {
 	}
 
 	@Override
-	public void setTransientStop(int transientStop) {
+	public void setTransientStop(final int transientStop) {
 		_transientStop = transientStop;
 	}
 

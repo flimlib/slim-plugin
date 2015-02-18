@@ -31,47 +31,48 @@ import net.imglib2.RandomAccess;
 import net.imglib2.type.numeric.real.DoubleType;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class ExportBatchHistogram2 {
+
 	private static final int BINS = 10000;
-	private int _paramT = 2;
-	private HistoBin[] _histoT = new HistoBin[BINS];
+	private final int _paramT = 2;
+	private final HistoBin[] _histoT = new HistoBin[BINS];
 	private long _histoTUnder = 0;
 	private long _histoTOver = 0;
-	private double _histoTMax = 10.0;
-	private double _histoTMin = 0.0;
+	private final double _histoTMax = 10.0;
+	private final double _histoTMin = 0.0;
 	private double totalSum = 0.0;
 	private long totalCount = 0;
 	private double sum = 0.0;
 	private long count = 0;
-	private double stdDev = 0.0;
+	private final double stdDev = 0.0;
 
 	public void start() {
 
 	}
 
-	public void export(ImgPlus<DoubleType> image,
-			ICurveFitter.FitFunction function) {
-		long[] dimensions = new long[image.numDimensions()];
+	public void export(final ImgPlus<DoubleType> image,
+		final ICurveFitter.FitFunction function)
+	{
+		final long[] dimensions = new long[image.numDimensions()];
 		image.dimensions(dimensions);
-		RandomAccess<DoubleType> cursor = image.randomAccess();
+		final RandomAccess<DoubleType> cursor = image.randomAccess();
 
-		int index = 0;
-		int[] position = new int[dimensions.length];
+		final int index = 0;
+		final int[] position = new int[dimensions.length];
 		for (int y = 0; y < dimensions[1]; ++y) {
 			for (int x = 0; x < dimensions[0]; ++x) {
 				// set position
 				position[0] = x;
 				position[1] = y;
-				position[2] = 1; //TODO ARG hardcoded channel
+				position[2] = 1; // TODO ARG hardcoded channel
 				position[3] = _paramT;
 				cursor.setPosition(position);
 
 				// account for value
-				double value = cursor.get().getRealDouble();
-				//IJ.log("value is " + value);
+				final double value = cursor.get().getRealDouble();
+				// IJ.log("value is " + value);
 				if (!Double.isNaN(value)) {
 					if (value < _histoTMin) {
 						++_histoTUnder;
@@ -80,12 +81,13 @@ public class ExportBatchHistogram2 {
 						++_histoTOver;
 					}
 					else {
-						int bin = Binning.valueToBin(BINS, _histoTMin, _histoTMax, value);
-						HistoBin histoBin = _histoT[bin];
+						final int bin =
+							Binning.valueToBin(BINS, _histoTMin, _histoTMax, value);
+						final HistoBin histoBin = _histoT[bin];
 						histoBin.meanSum += value;
 						histoBin.varianceSum += value * value;
 						++histoBin.count;
-						//IJ.log("--> bin " + bin);
+						// IJ.log("--> bin " + bin);
 						sum += value;
 						++count;
 					}
@@ -97,44 +99,51 @@ public class ExportBatchHistogram2 {
 
 	}
 
-	public void end(String fileName) {
+	public void end(final String fileName) {
 		IJ.log("actual mean in-range is " + sum / count + " count was " + count);
-		IJ.log("actual mean total is " + totalSum / totalCount + " totalCount was " + totalCount);
-		//IJ.log("mean from histo is " + meanFromHisto(_histoT));
+		IJ.log("actual mean total is " + totalSum / totalCount +
+			" totalCount was " + totalCount);
+		// IJ.log("mean from histo is " + meanFromHisto(_histoT));
 
 		IJ.log("in-range std dev is " + stdDev / count);
-		//IJ.log("total std dev is " + totalStdDev / totalCount);
+		// IJ.log("total std dev is " + totalStdDev / totalCount);
 
-		//IJ.log("std dev from histo is " + standardDeviationFromHisto(_histoT, meanFromHisto(_histoT)));
+		// IJ.log("std dev from histo is " + standardDeviationFromHisto(_histoT,
+		// meanFromHisto(_histoT)));
 	}
 
-	private double meanFromHisto(long[] histo) {
-		double sum = 0.0;
-		long count = 0;
-		long counter;
+	private double meanFromHisto(final long[] histo) {
+		final double sum = 0.0;
+		final long count = 0;
+		final long counter;
 		for (int i = 0; i < _histoT.length; ++i) {
-			//counter = _histoT[i];
-			//sum += counter * Binning.centerValuesPerBin(BINS, _histoTMin, _histoTMax)[i];
-			//count += counter;
+			// counter = _histoT[i];
+			// sum += counter * Binning.centerValuesPerBin(BINS, _histoTMin,
+			// _histoTMax)[i];
+			// count += counter;
 		}
 		IJ.log("histo count is " + count);
 		return sum / count;
 	}
 
-	private double standardDeviationFromHisto(long[] histo, double mean) {
-		double sum = 0.0;
-		long count = 0;
-		long counter;
+	private double standardDeviationFromHisto(final long[] histo,
+		final double mean)
+	{
+		final double sum = 0.0;
+		final long count = 0;
+		final long counter;
 		for (int i = 0; i < _histoT.length; ++i) {
-			//counter = _histoT[i];
-			//double value = Binning.centerValuesPerBin(BINS, _histoTMin, _histoTMax)[i];
-			//sum += counter * ((mean - value) * (mean - value));
-			//count += counter;
+			// counter = _histoT[i];
+			// double value = Binning.centerValuesPerBin(BINS, _histoTMin,
+			// _histoTMax)[i];
+			// sum += counter * ((mean - value) * (mean - value));
+			// count += counter;
 		}
 		return sum / count;
 	}
 
 	private class HistoBin {
+
 		public double meanSum;
 		public double varianceSum;
 		long count;

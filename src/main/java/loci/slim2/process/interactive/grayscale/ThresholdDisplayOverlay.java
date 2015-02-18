@@ -33,9 +33,11 @@ import org.scijava.util.Colors;
 
 /**
  * The ThresholdDisplayOverlay
+ * 
  * @author Aivar Grislis
  */
 public class ThresholdDisplayOverlay extends ThresholdOverlay {
+
 	private static final ColorRGB COLOR_LESS = Colors.AQUA;
 	private static final ColorRGB COLOR_WITHIN = Colors.PINK;
 	private static final ColorRGB COLOR_GREATER = Colors.ORANGE;
@@ -45,7 +47,8 @@ public class ThresholdDisplayOverlay extends ThresholdOverlay {
 	 * Construct a {@link ThresholdDisplayOverlay} on a {@link Dataset} given an
 	 * {@link Context} context.
 	 */
-	public ThresholdDisplayOverlay(Context context, Dataset dataset, int thresholdMin, int thresholdMax)
+	public ThresholdDisplayOverlay(final Context context, final Dataset dataset,
+		final int thresholdMin, final int thresholdMax)
 	{
 		super(context, dataset, thresholdMin, thresholdMax);
 		this.dataset = dataset;
@@ -53,21 +56,22 @@ public class ThresholdDisplayOverlay extends ThresholdOverlay {
 		dataset.update();
 
 		System.out.println("ThresholdDisplayOverlay ctor " + dataset);
-		//super.setColorLess(COLOR_LESS);
-		//super.setColorWithin(COLOR_WITHIN); //TODO ARG null);
-		//super.setColorGreater(COLOR_GREATER);
+		// super.setColorLess(COLOR_LESS);
+		// super.setColorWithin(COLOR_WITHIN); //TODO ARG null);
+		// super.setColorGreater(COLOR_GREATER);
 	}
 
 	/**
 	 * Sets the threshold value.
-	 * 
+	 *
 	 * @param thresholdMin
 	 * @param thresholdMax
 	 */
-	public void setThreshold(int thresholdMin, int thresholdMax) {
-		System.out.println("ThresholdDisplayOverlay " + thresholdMin + " " + thresholdMax);
+	public void setThreshold(final int thresholdMin, final int thresholdMax) {
+		System.out.println("ThresholdDisplayOverlay " + thresholdMin + " " +
+			thresholdMax);
 		super.setRange(thresholdMin, thresholdMax);
-		PointSet pointSet = getPointsWithin();
+		final PointSet pointSet = getPointsWithin();
 		System.out.println("pointSet size is " + pointSet.size());
 		dataset.rebuild();
 		dataset.update();

@@ -28,49 +28,49 @@ import net.imagej.ImgPlus;
 import net.imglib2.type.numeric.RealType;
 
 /**
- *
  * @author Aivar Grislis
  */
 public interface IDecayImage<T extends RealType<T>> extends IProcessor {
 
 	/**
 	 * Gets width of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getWidth();
 
 	/**
 	 * Gets height of image.
-	 * @return 
+	 * 
+	 * @return
 	 */
 	public int getHeight();
 
 	/**
 	 * Gets number of channels of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getChannels();
 
 	/**
 	 * Gets number of parameters of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int getBins();
 
 	/**
 	 * Specifies a source IProcessor to be chained to this one.
-	 * 
-	 * @param processor 
+	 *
+	 * @param processor
 	 */
 	@Override
 	public void chain(IProcessor processor);
 
 	/**
 	 * Gets input pixel value.
-	 * 
+	 *
 	 * @param x
 	 * @param y
 	 * @param channel
@@ -81,8 +81,8 @@ public interface IDecayImage<T extends RealType<T>> extends IProcessor {
 
 	/**
 	 * Gets associated image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public ImgPlus<T> getImage();
 }

@@ -26,20 +26,23 @@ package loci.slim.fitting;
 import ij.IJ;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class DefaultIntegrator implements Integrator {
+
 	@Override
-	public double integrate(double[] function, double offset, double inc, int start, int stop) {
+	public double integrate(final double[] function, final double offset,
+		final double inc, final int start, final int stop)
+	{
 		IJ.log("integrate " + start + " to " + stop);
 		// sum heights
 		float sum = 0.0f;
 		for (int i = start; i < stop; ++i) {
 			sum += function[i] - offset;
 		}
-		// convert to area; constant factor, doesn't affect results that much either way
+		// convert to area; constant factor, doesn't affect results that much either
+		// way
 		return sum * inc;
-		//return sum;
+		// return sum;
 	}
 }

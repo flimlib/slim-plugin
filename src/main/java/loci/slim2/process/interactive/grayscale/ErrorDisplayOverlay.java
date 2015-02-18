@@ -24,7 +24,6 @@
 package loci.slim2.process.interactive.grayscale;
 
 /**
- *
  * @author Aivar Grislis
  */
 public class ErrorDisplayOverlay {

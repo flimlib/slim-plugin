@@ -34,18 +34,18 @@ import java.util.Stack;
  * @author Aivar Grislis
  */
 public class SLIM_PlugIn implements PlugIn {
+
 	private static final String ONE = "1";
 	private static final Stack<SLIMProcessor> stack = new Stack<SLIMProcessor>();
 	private static volatile SLIMProcessor instance = null;
 
 	@Override
-	public void run(String arg) {
-		SLIMProcessor slimProcessor = new SLIMProcessor();
+	public void run(final String arg) {
+		final SLIMProcessor slimProcessor = new SLIMProcessor();
 		stack.push(slimProcessor);
 		slimProcessor.process(arg);
 		stack.pop();
 
-		
 	}
 
 	/**
@@ -69,15 +69,18 @@ public class SLIM_PlugIn implements PlugIn {
 
 	/**
 	 * Processes an input file in batch processing.
-	 * 
+	 *
 	 * @param input file name
 	 * @param output file name
 	 * @param exportPixels
-	 * @param exportText 
+	 * @param exportText
 	 */
-	public static void batch(String input, String output, String exportPixels, String exportText) {
+	public static void batch(final String input, final String output,
+		final String exportPixels, final String exportText)
+	{
 		if (null != instance) {
-			instance.batch(input, output, ONE.equals(exportPixels), ONE.equals(exportText));
+			instance.batch(input, output, ONE.equals(exportPixels), ONE
+				.equals(exportText));
 		}
 	}
 
@@ -91,8 +94,7 @@ public class SLIM_PlugIn implements PlugIn {
 		instance = null;
 	}
 
-
-	//TODO ARG EXPERIMENTAL
+	// TODO ARG EXPERIMENTAL
 	/**
 	 * Starts up batch processing.
 	 *
@@ -114,11 +116,11 @@ public class SLIM_PlugIn implements PlugIn {
 
 	/**
 	 * Processes an input file in batch processing.
-	 * 
+	 *
 	 * @param input file name
 	 * @param output file name
 	 */
-	public static void batchHisto(String input, String output) {
+	public static void batchHisto(final String input, final String output) {
 		if (null != instance) {
 			instance.batchHisto(input, output);
 		}

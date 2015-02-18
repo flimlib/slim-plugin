@@ -32,7 +32,7 @@ import loci.slim.fitting.params.ILocalFitParams;
 
 /**
  * Interface for a fitting engine.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface IFittingEngine {
@@ -44,21 +44,21 @@ public interface IFittingEngine {
 
 	/**
 	 * Sets number of threads to use in a fit.
-	 * 
-	 * @param threads 
+	 *
+	 * @param threads
 	 */
 	public void setThreads(int threads);
 
 	/**
 	 * Sets the ICurveFitter for the fitting engine to use.
-	 * 
-	 * @param curveFitter 
+	 *
+	 * @param curveFitter
 	 */
 	public void setCurveFitter(ICurveFitter curveFitter);
 
 	/**
 	 * Fit one pixel.
-	 * 
+	 *
 	 * @param params
 	 * @param data
 	 * @return fitted results
@@ -67,10 +67,11 @@ public interface IFittingEngine {
 
 	/**
 	 * Fits a list of pixels.
-	 * 
+	 *
 	 * @param params
 	 * @param dataList
-	 * @return 
+	 * @return
 	 */
-	public List<IFitResults> fit(IGlobalFitParams params, List<ILocalFitParams> dataList);
+	public List<IFitResults> fit(IGlobalFitParams params,
+		List<ILocalFitParams> dataList);
 }

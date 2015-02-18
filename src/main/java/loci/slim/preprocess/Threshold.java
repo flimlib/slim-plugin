@@ -25,35 +25,36 @@ package loci.slim.preprocess;
 
 /**
  * This class thresholds the image to a given photon count.
- * 
+ *
  * @author Aivar Grislis
  */
 public class Threshold implements IProcessor {
+
 	private final int _threshold;
 	private IProcessor _processor;
 
-	public Threshold(int threshold) {
+	public Threshold(final int threshold) {
 		_threshold = threshold;
 	}
 
 	/**
 	 * Specifies a source IProcessor to be chained to this one.
-	 * 
-	 * @param processor 
+	 *
+	 * @param processor
 	 */
 	@Override
-	public void chain(IProcessor processor) {
+	public void chain(final IProcessor processor) {
 		_processor = processor;
 	}
 
 	/**
 	 * Gets input pixel value.
-	 * 
+	 *
 	 * @param location
 	 * @return null or pixel value
 	 */
 	@Override
-	public double[] getPixel(int[] location) {
+	public double[] getPixel(final int[] location) {
 		double[] decay = _processor.getPixel(location);
 
 		// reject any pixels that have less than the threshold number of photons

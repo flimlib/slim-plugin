@@ -31,7 +31,7 @@ import loci.curvefitter.IFitterEstimator;
 /**
  * Interface for container for the global fitting parameters, i.e. those valid
  * for the whole image.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface GlobalFitParams {
@@ -88,4 +88,3 @@ public interface GlobalFitParams {
 
 	public void setTransientStop(int transientStop);
 }
-

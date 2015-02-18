@@ -25,15 +25,15 @@ package loci.slim.mask;
 
 /**
  * Listener interface to receive changes in which mask group is active.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface IMaskGroupListener {
 
 	/**
 	 * Sets a mask group to listen for changes.
-	 * 
-	 * @param maskGroup 
+	 *
+	 * @param maskGroup
 	 */
 	public void listenToMaskGroup(IMaskGroup maskGroup);
 }

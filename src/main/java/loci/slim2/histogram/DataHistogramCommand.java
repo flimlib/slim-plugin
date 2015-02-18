@@ -58,11 +58,12 @@ import org.scijava.plugin.Plugin;
 //  then I found normalizing the histogram is a good image technique
 
 @Plugin(type = Command.class, menu = {
-	@Menu(label = MenuConstants.ANALYZE_LABEL, weight = MenuConstants.ANALYZE_WEIGHT,
+	@Menu(label = MenuConstants.ANALYZE_LABEL,
+		weight = MenuConstants.ANALYZE_WEIGHT,
 		mnemonic = MenuConstants.ANALYZE_MNEMONIC),
-	@Menu(label = "Data Histogram...",
-		weight = 0) }, iconPath = "/icons/commands/contrast.png", headless = true,
-		initializer = "initValues")
+	@Menu(label = "Data Histogram...", weight = 0) },
+	iconPath = "/icons/commands/contrast.png", headless = true,
+	initializer = "initValues")
 public class DataHistogramCommand extends InteractiveImageCommand {
 
 	@Parameter
@@ -75,7 +76,8 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	private RenderingService renderingService;
 
 	@Parameter(type = ItemIO.BOTH, callback = "viewChanged")
-	private DatasetView view; // get "[WARNING] No widget found for input: view" unless a file has been loaded ahead of time
+	private DatasetView view; // get "[WARNING] No widget found for input: view"
+														// unless a file has been loaded ahead of time
 
 	@Parameter(label = "Minimum", persist = false, callback = "minMaxChanged")
 	private double min = Double.NaN;
@@ -89,11 +91,11 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 
 	@Parameter(label = "Logarithmic", persist = true,
 		callback = "logarithmicChanged")
-	private boolean logarithmic;
+	private final boolean logarithmic;
 
 	@Parameter(label = "Show low counts", persist = true,
 		callback = "showLowCountsChanged")
-	private boolean showLowCounts;
+	private final boolean showLowCounts;
 
 	/** The minimum and maximum values of the data itself. */
 	private double dataMin, dataMax;
@@ -120,14 +122,14 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	@Override
 	public void run() {
 		System.out.println("DataHistogramCommand.run, view is " + view);
-		//TODO ARG
-		// 'run' gets called again after every UI change.  This plugin should
+		// TODO ARG
+		// 'run' gets called again after every UI change. This plugin should
 		// stay active all the time.
 		if (!running) {
 			running = true;
 			if (null == histogramGraph) {
 				histogramGraph = new HistogramGraph(datasetService, renderingService);
-				Dataset dataset = histogramGraph.getDataset();
+				final Dataset dataset = histogramGraph.getDataset();
 				displayService.createDisplay(dataset);
 			}
 			else {
@@ -180,7 +182,9 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void viewChanged() {
 		// ignore clicks on the histogram graph itself
-		if (null != view && null != histogramGraph && view.getData() == histogramGraph.getDataset()) {
+		if (null != view && null != histogramGraph &&
+			view.getData() == histogramGraph.getDataset())
+		{
 			// restore previous view
 			view = saveView;
 			return;
@@ -194,14 +198,14 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 			final Dataset dataset = view.getData();
 			final ImgPlus img = dataset.getImgPlus();
 
-			//TODO ARG just autorange it for now
+			// TODO ARG just autorange it for now
 			computeDataMinMax(img);
 			min = dataMin;
 			max = dataMax;
 
 			updateHistogram(img);
 
-			long[] dims = new long[img.numDimensions()];
+			final long[] dims = new long[img.numDimensions()];
 			img.dimensions(dims);
 			long channels = 1;
 			final int channelIndex = img.dimensionIndex(Axes.CHANNEL);
@@ -209,14 +213,17 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 				channels = img.dimension(channelIndex);
 			}
 			for (int c = 0; c < channels; ++c) {
-				System.out.println("channel " + c + " min " + img.getChannelMinimum(c) + " max " + img.getChannelMaximum(c));
+				System.out.println("channel " + c + " min " + img.getChannelMinimum(c) +
+					" max " + img.getChannelMaximum(c));
 			}
-			System.out.println("data min " + dataMin + " max " + dataMax + " min " + min + " max " + max);
+			System.out.println("data min " + dataMin + " max " + dataMax + " min " +
+				min + " max " + max);
 			updateDisplay();
 		}
 	}
 
-	//TODO ARG having default min/max increments is not ideal for all min/max values; also no upper/lower limits on values
+	// TODO ARG having default min/max increments is not ideal for all min/max
+	// values; also no upper/lower limits on values
 	/** Called when min or max changes. Updates brightness and contrast. */
 	protected void minMaxChanged() {
 		System.out.println("min max changed " + min + " " + max);
@@ -225,7 +232,7 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 			final ImgPlus img = dataset.getImgPlus();
 			updateHistogram(img);
 			updateDisplay();
-			//TODO ARG etc?? see above
+			// TODO ARG etc?? see above
 		}
 	}
 
@@ -247,9 +254,9 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		System.out.println("LOW COUNTS CHANGED " + showLowCounts);
 		if (null != histogramGraph) {
 			histogramGraph.setDistinguishNonZero(showLowCounts);
-			long[] histogram = histogramGraph.getHistogram();
+			final long[] histogram = histogramGraph.getHistogram();
 			int i = 0;
-			for (long h : histogram) {
+			for (final long h : histogram) {
 				System.out.print(" " + h);
 				if (i++ % 10 == 0) System.out.println();
 			}
@@ -260,16 +267,16 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 
 	private <T extends RealType<T>> void updateHistogram(final ImgPlus<T> img) {
 		System.out.println("in updateHistogram and min max are " + min + " " + max);
-		//TODO ARG use statistics service
+		// TODO ARG use statistics service
 		if (null != histogramGraph) {
-			long[] histogram = new long[256];
-			Cursor<T> cursor = img.cursor();
+			final long[] histogram = new long[256];
+			final Cursor<T> cursor = img.cursor();
 			while (cursor.hasNext()) {
 				cursor.fwd();
-				double value = cursor.get().getRealDouble();
+				final double value = cursor.get().getRealDouble();
 				if (!Double.isNaN(value)) {
 					// 'exclusive' means don't count values outside the min/max range
-					int index = Binning.exclusiveValueToBin(256, min, max, value);
+					final int index = Binning.exclusiveValueToBin(256, min, max, value);
 					if (index >= 0 && index < histogram.length) {
 						++histogram[index];
 					}
@@ -286,14 +293,16 @@ public class DataHistogramCommand extends InteractiveImageCommand {
 		// the metadata, and if they aren't there, then compute them. Probably
 		// Dataset (not DatasetView) is a good place for it, because it is metadata
 		// independent of the visualization settings.
-		//TODO ARG we need 2 versions/options of min/max: one for the entire channel, one for current plane of channel
+		// TODO ARG we need 2 versions/options of min/max: one for the entire
+		// channel, one for current plane of channel
 		final T type = img.firstElement();
 		final ComputeMinMax<T> computeMinMax =
 			new ComputeMinMax<T>(img, type.createVariable(), type.createVariable());
 		computeMinMax.process();
 		dataMin = computeMinMax.getMin().getRealDouble();
 		dataMax = computeMinMax.getMax().getRealDouble();
-		log().debug("computeDataMinMax: dataMin=" + dataMin + ", dataMax=" + dataMax);
+		log().debug(
+			"computeDataMinMax: dataMin=" + dataMin + ", dataMax=" + dataMax);
 	}
 
 	/** Updates the displayed min/max range to match min and max values. */

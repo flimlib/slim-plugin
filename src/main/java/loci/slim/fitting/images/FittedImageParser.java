@@ -29,15 +29,16 @@ import java.util.List;
 import loci.slim.fitting.images.FittedImageFitter.FittedImageType;
 
 /**
- * This class parses a string containing a list of output images, such as 
+ * This class parses a string containing a list of output images, such as
  * "A T Z X2" and produces an array of ColorizedImageType.
- * 
+ *
  * @author Aivar Grislis
  */
 public class FittedImageParser {
-	private static final Character CHI    = '\u03c7';
+
+	private static final Character CHI = '\u03c7';
 	private static final Character SQUARE = '\u00b2';
-	private static final Character TAU    = '\u03c4';
+	private static final Character TAU = '\u03c4';
 	private static final String TAU_STRING = "" + TAU;
 	private static final String CHI_SQ_STRING = "" + CHI + SQUARE;
 	private static final String TAU_MEAN_STRING = "" + TAU + "m";
@@ -50,22 +51,23 @@ public class FittedImageParser {
 	private static final int A3_INDEX = 5;
 	private static final int T3_INDEX = 6;
 	private static final int MAX_INDEX = 6;
-	private String _input;
-	private int _components;
-	private boolean _stretched;
+	private final String _input;
+	private final int _components;
+	private final boolean _stretched;
 	private boolean[] _free;
 
 	/**
 	 * Creates an instance for a given input string, etc.
-	 * 
+	 *
 	 * @param input string with fitted images to produce
 	 * @param components number of exponential fit components
 	 * @param stretched whether it's a stretched exponential
 	 * @param free whether each parameter is free or fixed
 	 * @param ordinal distinguishes groups of fitted images
 	 */
-	public FittedImageParser(String input, int components, boolean stretched,
-		boolean[] free) {
+	public FittedImageParser(final String input, final int components,
+		final boolean stretched, final boolean[] free)
+	{
 		_input = input;
 		_components = components;
 		_stretched = stretched;
@@ -81,16 +83,16 @@ public class FittedImageParser {
 	}
 
 	/**
-	 * Parses the input string and creates array of FittedImageType.  Only
-	 * creates images which are appropriate for current fit.
-	 * 
-	 * @return 
+	 * Parses the input string and creates array of FittedImageType. Only creates
+	 * images which are appropriate for current fit.
+	 *
+	 * @return
 	 */
 	public FittedImageType[] getFittedImages() {
-		List<FittedImageType> list = new ArrayList<FittedImageType>();
-		String[] tokens = _input.split(" ");
-		for (String token : tokens) {
-			//IJ.log("TOKEN >" + token + "<");
+		final List<FittedImageType> list = new ArrayList<FittedImageType>();
+		final String[] tokens = _input.split(" ");
+		for (final String token : tokens) {
+			// IJ.log("TOKEN >" + token + "<");
 			if ("A".equals(token)) {
 				switch (_components) {
 					case 1:

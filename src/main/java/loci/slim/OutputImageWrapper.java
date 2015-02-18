@@ -30,37 +30,40 @@ import net.imglib2.RandomAccess;
 import net.imglib2.img.planar.PlanarImgs;
 import net.imglib2.type.numeric.real.DoubleType;
 
-
 /**
  * This class wraps an image that is being used as output from a fit.
- * 
+ *
  * @author Aivar Grislis
  */
 public class OutputImageWrapper implements IFittedImage {
-	private ImgPlus<DoubleType> _image;
-	private int _width;
-	private int _height;
-	private int _channels;
-	private int _parameters;
-	private int _parameterIndex;
-	private RandomAccess<DoubleType> _cursor;
-	private int[] _location;
+
+	private final ImgPlus<DoubleType> _image;
+	private final int _width;
+	private final int _height;
+	private final int _channels;
+	private final int _parameters;
+	private final int _parameterIndex;
+	private final RandomAccess<DoubleType> _cursor;
+	private final int[] _location;
 
 	/**
 	 * Creates a wrapper for an output image and initial image.
-	 * 
+	 *
 	 * @param width
 	 * @param height
 	 * @param channels
-	 * @param parameters 
+	 * @param parameters
 	 */
-	public OutputImageWrapper(String title, String fitTitle, int width, int height, int channels, int parameters) {
+	public OutputImageWrapper(final String title, final String fitTitle,
+		final int width, final int height, final int channels, final int parameters)
+	{
 		_width = width;
 		_height = height;
 		_channels = channels;
 		_parameters = parameters;
 
-		long[] dimensions = new long[] { width, height, channels, parameters };
+		final long[] dimensions =
+			new long[] { width, height, channels, parameters };
 		_parameterIndex = 3;
 		_location = new int[dimensions.length];
 
@@ -68,7 +71,7 @@ public class OutputImageWrapper implements IFittedImage {
 		_image.setName(title + " Fitted " + fitTitle);
 
 		// fill image with NaNs
-		Cursor<DoubleType> cursor = _image.cursor();
+		final Cursor<DoubleType> cursor = _image.cursor();
 		while (cursor.hasNext()) {
 			cursor.fwd();
 			cursor.get().set(Double.NaN);
@@ -79,8 +82,8 @@ public class OutputImageWrapper implements IFittedImage {
 
 	/**
 	 * Gets width of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public int getWidth() {
@@ -89,8 +92,8 @@ public class OutputImageWrapper implements IFittedImage {
 
 	/**
 	 * Gets height of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public int getHeight() {
@@ -99,8 +102,8 @@ public class OutputImageWrapper implements IFittedImage {
 
 	/**
 	 * Gets number of channels of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public int getChannels() {
@@ -109,8 +112,8 @@ public class OutputImageWrapper implements IFittedImage {
 
 	/**
 	 * Gets number of parameters of image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public int getParameters() {
@@ -119,16 +122,17 @@ public class OutputImageWrapper implements IFittedImage {
 
 	@Override
 	public int[] getDimension() {
-		int[] dimension = new int[] { _width, _height, _channels, _parameters };
+		final int[] dimension =
+			new int[] { _width, _height, _channels, _parameters };
 		return dimension;
 	}
 
 	@Override
-	public double[] getPixel(int[] location) {
+	public double[] getPixel(final int[] location) {
 		for (int i = 0; i < location.length; ++i) {
 			_location[i] = location[i];
 		}
-		double[] parameters = new double[_parameters];
+		final double[] parameters = new double[_parameters];
 		for (int i = 0; i < _parameters; ++i) {
 			_location[_parameterIndex] = i;
 			_cursor.setPosition(_location);
@@ -138,7 +142,7 @@ public class OutputImageWrapper implements IFittedImage {
 	}
 
 	@Override
-	public void setPixel(int[] location, double[] value) {
+	public void setPixel(final int[] location, final double[] value) {
 		for (int i = 0; i < location.length; ++i) {
 			_location[i] = location[i];
 		}
@@ -152,8 +156,8 @@ public class OutputImageWrapper implements IFittedImage {
 
 	/**
 	 * Gets associated image.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public ImgPlus<DoubleType> getImage() {

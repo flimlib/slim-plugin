@@ -29,7 +29,7 @@ import loci.curvefitter.ICurveFitter;
 
 /**
  * Interface for a fitting engine.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface FittingEngine {
@@ -41,21 +41,21 @@ public interface FittingEngine {
 
 	/**
 	 * Sets number of threads to use in a fit.
-	 * 
-	 * @param threads 
+	 *
+	 * @param threads
 	 */
 	public void setThreads(int threads);
 
 	/**
 	 * Sets the ICurveFitter for the fitting engine to use.
-	 * 
-	 * @param curveFitter 
+	 *
+	 * @param curveFitter
 	 */
 	public void setCurveFitter(ICurveFitter curveFitter);
 
 	/**
 	 * Fit one pixel.
-	 * 
+	 *
 	 * @param params
 	 * @param data
 	 * @return fitted results
@@ -64,10 +64,11 @@ public interface FittingEngine {
 
 	/**
 	 * Fits a list of pixels.
-	 * 
+	 *
 	 * @param params
 	 * @param dataList
-	 * @return 
+	 * @return
 	 */
-	public List<FitResults> fit(GlobalFitParams params, List<LocalFitParams> dataList);
+	public List<FitResults> fit(GlobalFitParams params,
+		List<LocalFitParams> dataList);
 }

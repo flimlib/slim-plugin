@@ -37,13 +37,14 @@ import loci.slim.fitting.params.ILocalFitParams;
 
 /**
  * Fitting engine that uses a thread pool.
- * 
+ *
  * @author Aivar Grislis
  */
 public class ThreadedFittingEngine implements IFittingEngine {
+
 	private static int THREADS = 4;
-	private int _threads = THREADS;
-	private ThreadPool<IFitResults> _threadPool;
+	private final int _threads = THREADS;
+	private final ThreadPool<IFitResults> _threadPool;
 	private ICurveFitter _curveFitter;
 
 	public ThreadedFittingEngine() {
@@ -60,64 +61,65 @@ public class ThreadedFittingEngine implements IFittingEngine {
 
 	/**
 	 * Sets number of threads to use.
-	 * 
-	 * @param threads 
+	 *
+	 * @param threads
 	 */
 	@Override
-	public synchronized void setThreads(int threads) {
+	public synchronized void setThreads(final int threads) {
 		_threadPool.setThreads(threads);
 	}
 
 	/**
 	 * Sets curve fitter to use.
-	 * 
-	 * @param curve fitter 
+	 *
+	 * @param curve fitter
 	 */
 	@Override
-	public synchronized void setCurveFitter(ICurveFitter curveFitter) {
+	public synchronized void setCurveFitter(final ICurveFitter curveFitter) {
 		_curveFitter = curveFitter;
 	}
 
 	/**
-	 * Fits a single pixel with given parameters.
-	 * 
-	 * Nothing to parallelize, doesn't use the ThreadPool.
-	 * 
+	 * Fits a single pixel with given parameters. Nothing to parallelize, doesn't
+	 * use the ThreadPool.
+	 *
 	 * @param params
 	 * @param data
 	 * @return results
 	 */
 	@Override
-	public synchronized IFitResults fit
-			(final IGlobalFitParams params, final ILocalFitParams data) {
-		IFittingEngineCallable callable
-				= Configuration.getInstance().newFittingEngineCallable();
+	public synchronized IFitResults fit(final IGlobalFitParams params,
+		final ILocalFitParams data)
+	{
+		final IFittingEngineCallable callable =
+			Configuration.getInstance().newFittingEngineCallable();
 		callable.setup(_curveFitter, params, data);
 		return callable.call();
 	}
 
 	/**
 	 * Fit one or more pixels with given parameters.
-	 * 
+	 *
 	 * @param params given parameters
 	 * @param data one or more pixels data
 	 * @return results one or more pixels results
 	 */
 	@Override
-	public synchronized List<IFitResults> fit
-			(final IGlobalFitParams params, final List<ILocalFitParams> dataList) {
+	public synchronized List<IFitResults> fit(final IGlobalFitParams params,
+		final List<ILocalFitParams> dataList)
+	{
 
-		List<IFittingEngineCallable> callableList
-				= new ArrayList<IFittingEngineCallable>();
+		final List<IFittingEngineCallable> callableList =
+			new ArrayList<IFittingEngineCallable>();
 
-		for (ILocalFitParams data : dataList) {
-			IFittingEngineCallable callable
-					= Configuration.getInstance().newFittingEngineCallable();
+		for (final ILocalFitParams data : dataList) {
+			final IFittingEngineCallable callable =
+				Configuration.getInstance().newFittingEngineCallable();
 			callable.setup(_curveFitter, params, data);
 			callableList.add(callable);
 		}
 
-		List<IFitResults> resultList = _threadPool.process(callableList);
+		final List<IFitResults> resultList = _threadPool.process(callableList);
 		return resultList;
 	}
 }

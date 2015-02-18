@@ -28,60 +28,59 @@ import java.util.List;
 
 /**
  * Creates FittedValues.
- * 
+ *
  * @author Aivar Grislis
  */
 public class FittedValueFactory {
 
 	/**
 	 * Creates array of FittedValue from String descriptor.
-	 * 
+	 *
 	 * @param fittedValueDescriptor
 	 * @param components
-	 * @return 
+	 * @return
 	 */
-	public static FittedValue[] createFittedValues(String fittedValueDescriptor, int components) {
-		List<FittedValue> fittedValues = new ArrayList<FittedValue>();
-		String[] descriptors = fittedValueDescriptor.split(" ");
-		for (String descriptor : descriptors) {
+	public static FittedValue[] createFittedValues(
+		final String fittedValueDescriptor, final int components)
+	{
+		final List<FittedValue> fittedValues = new ArrayList<FittedValue>();
+		final String[] descriptors = fittedValueDescriptor.split(" ");
+		for (final String descriptor : descriptors) {
 			if (FittedValue.CHI_SQ.equals(descriptor)) {
-				ChiSqFittedValue fittedValue = new ChiSqFittedValue();
+				final ChiSqFittedValue fittedValue = new ChiSqFittedValue();
 				fittedValue.init("X2");
 				fittedValues.add(fittedValue);
 			}
 			else if (FittedValue.Z.equals(descriptor)) {
-				ZFittedValue fittedValue = new ZFittedValue();
+				final ZFittedValue fittedValue = new ZFittedValue();
 				fittedValue.init(FittedValue.Z);
 				fittedValues.add(fittedValue);
 			}
 			else if (FittedValue.A.equals(descriptor)) {
 				switch (components) {
-					case 1:
-					{
-						AFittedValue fittedValue = new AFittedValue();
+					case 1: {
+						final AFittedValue fittedValue = new AFittedValue();
 						fittedValue.init(FittedValue.A, 1);
 						fittedValues.add(fittedValue);
 						break;
 					}
-					case 2:
-					{
-						AFittedValue fittedValue1 = new AFittedValue();
+					case 2: {
+						final AFittedValue fittedValue1 = new AFittedValue();
 						fittedValue1.init(FittedValue.A1, 1);
 						fittedValues.add(fittedValue1);
-						AFittedValue fittedValue2 = new AFittedValue();
+						final AFittedValue fittedValue2 = new AFittedValue();
 						fittedValue2.init(FittedValue.A2, 2);
 						fittedValues.add(fittedValue2);
 						break;
 					}
-					case 3:
-					{
-						AFittedValue fittedValue1 = new AFittedValue();
+					case 3: {
+						final AFittedValue fittedValue1 = new AFittedValue();
 						fittedValue1.init(FittedValue.A1, 1);
 						fittedValues.add(fittedValue1);
-						AFittedValue fittedValue2 = new AFittedValue();
+						final AFittedValue fittedValue2 = new AFittedValue();
 						fittedValue2.init(FittedValue.A2, 2);
 						fittedValues.add(fittedValue2);
-						AFittedValue fittedValue3 = new AFittedValue();
+						final AFittedValue fittedValue3 = new AFittedValue();
 						fittedValue2.init(FittedValue.A3, 3);
 						fittedValues.add(fittedValue3);
 						break;
@@ -90,32 +89,29 @@ public class FittedValueFactory {
 			}
 			else if (FittedValue.T.equals(descriptor)) {
 				switch (components) {
-					case 1:
-					{
-						TFittedValue fittedValue = new TFittedValue();
+					case 1: {
+						final TFittedValue fittedValue = new TFittedValue();
 						fittedValue.init("T", 1);
 						fittedValues.add(fittedValue);
 						break;
 					}
-					case 2:
-					{
-						TFittedValue fittedValue1 = new TFittedValue();
+					case 2: {
+						final TFittedValue fittedValue1 = new TFittedValue();
 						fittedValue1.init("T1", 1);
 						fittedValues.add(fittedValue1);
-						TFittedValue fittedValue2 = new TFittedValue();
+						final TFittedValue fittedValue2 = new TFittedValue();
 						fittedValue2.init("T2", 2);
 						fittedValues.add(fittedValue2);
 						break;
 					}
-					case 3:
-					{
-						TFittedValue fittedValue1 = new TFittedValue();
+					case 3: {
+						final TFittedValue fittedValue1 = new TFittedValue();
 						fittedValue1.init("T1", 1);
 						fittedValues.add(fittedValue1);
-						TFittedValue fittedValue2 = new TFittedValue();
+						final TFittedValue fittedValue2 = new TFittedValue();
 						fittedValue2.init("T2", 2);
 						fittedValues.add(fittedValue2);
-						TFittedValue fittedValue3 = new TFittedValue();
+						final TFittedValue fittedValue3 = new TFittedValue();
 						fittedValue2.init("T3", 3);
 						fittedValues.add(fittedValue3);
 						break;
@@ -124,32 +120,35 @@ public class FittedValueFactory {
 			}
 			else if (FittedValue.F_INT.equals(descriptor)) {
 				switch (components) {
-					case 1:
-					{
-						FractionalIntensityFittedValue fittedValue = new FractionalIntensityFittedValue();
+					case 1: {
+						final FractionalIntensityFittedValue fittedValue =
+							new FractionalIntensityFittedValue();
 						fittedValue.init(FittedValue.F_INT, 1, components);
 						fittedValues.add(fittedValue);
 						break;
 					}
-					case 2:
-					{
-						FractionalIntensityFittedValue fittedValue1 = new FractionalIntensityFittedValue();
+					case 2: {
+						final FractionalIntensityFittedValue fittedValue1 =
+							new FractionalIntensityFittedValue();
 						fittedValue1.init(FittedValue.F_INT1, 1, components);
 						fittedValues.add(fittedValue1);
-						FractionalIntensityFittedValue fittedValue2 = new FractionalIntensityFittedValue();
+						final FractionalIntensityFittedValue fittedValue2 =
+							new FractionalIntensityFittedValue();
 						fittedValue2.init(FittedValue.F_INT2, 2, components);
 						fittedValues.add(fittedValue2);
 						break;
 					}
-					case 3:
-					{
-						FractionalIntensityFittedValue fittedValue1 = new FractionalIntensityFittedValue();
+					case 3: {
+						final FractionalIntensityFittedValue fittedValue1 =
+							new FractionalIntensityFittedValue();
 						fittedValue1.init(FittedValue.F_INT1, 1, components);
 						fittedValues.add(fittedValue1);
-						FractionalIntensityFittedValue fittedValue2 = new FractionalIntensityFittedValue();
+						final FractionalIntensityFittedValue fittedValue2 =
+							new FractionalIntensityFittedValue();
 						fittedValue2.init(FittedValue.F_INT2, 2, components);
 						fittedValues.add(fittedValue2);
-						FractionalIntensityFittedValue fittedValue3 = new FractionalIntensityFittedValue();
+						final FractionalIntensityFittedValue fittedValue3 =
+							new FractionalIntensityFittedValue();
 						fittedValue2.init(FittedValue.F_INT3, 3, components);
 						fittedValues.add(fittedValue3);
 						break;
@@ -158,32 +157,35 @@ public class FittedValueFactory {
 			}
 			else if (FittedValue.F_CONT.equals(descriptor)) {
 				switch (components) {
-					case 1:
-					{
-						FractionalContributionFittedValue fittedValue = new FractionalContributionFittedValue();
+					case 1: {
+						final FractionalContributionFittedValue fittedValue =
+							new FractionalContributionFittedValue();
 						fittedValue.init(FittedValue.F_CONT, 1, components);
 						fittedValues.add(fittedValue);
 						break;
 					}
-					case 2:
-					{
-						FractionalContributionFittedValue fittedValue1 = new FractionalContributionFittedValue();
+					case 2: {
+						final FractionalContributionFittedValue fittedValue1 =
+							new FractionalContributionFittedValue();
 						fittedValue1.init(FittedValue.F_CONT1, 1, components);
 						fittedValues.add(fittedValue1);
-						FractionalContributionFittedValue fittedValue2 = new FractionalContributionFittedValue();
+						final FractionalContributionFittedValue fittedValue2 =
+							new FractionalContributionFittedValue();
 						fittedValue2.init(FittedValue.F_CONT2, 2, components);
 						fittedValues.add(fittedValue2);
 						break;
 					}
-					case 3:
-					{
-						FractionalContributionFittedValue fittedValue1 = new FractionalContributionFittedValue();
+					case 3: {
+						final FractionalContributionFittedValue fittedValue1 =
+							new FractionalContributionFittedValue();
 						fittedValue1.init(FittedValue.F_CONT1, 1, components);
 						fittedValues.add(fittedValue1);
-						FractionalContributionFittedValue fittedValue2 = new FractionalContributionFittedValue();
+						final FractionalContributionFittedValue fittedValue2 =
+							new FractionalContributionFittedValue();
 						fittedValue2.init(FittedValue.F_CONT2, 2, components);
 						fittedValues.add(fittedValue2);
-						FractionalContributionFittedValue fittedValue3 = new FractionalContributionFittedValue();
+						final FractionalContributionFittedValue fittedValue3 =
+							new FractionalContributionFittedValue();
 						fittedValue2.init(FittedValue.F_CONT3, 3, components);
 						fittedValues.add(fittedValue3);
 						break;
@@ -191,7 +193,7 @@ public class FittedValueFactory {
 				}
 			}
 			else if (FittedValue.T_MEAN.equals(descriptor)) {
-				TMeanFittedValue fittedValue = new TMeanFittedValue();
+				final TMeanFittedValue fittedValue = new TMeanFittedValue();
 				fittedValue.init("Tm", components);
 				fittedValues.add(fittedValue);
 			}

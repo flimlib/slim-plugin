@@ -24,12 +24,13 @@
 package loci.slim.fitting.params;
 
 /**
- * Container for  the local fitting parameters, i.e. those valid for the current
+ * Container for the local fitting parameters, i.e. those valid for the current
  * pixel.
- * 
+ *
  * @author Aivar Grislis
  */
 public class LocalFitParams implements ILocalFitParams {
+
 	private double[] _y;
 	private double[] _sig;
 	private int _fitStart;
@@ -38,7 +39,7 @@ public class LocalFitParams implements ILocalFitParams {
 	private double[] _yFitted;
 
 	@Override
-	public void setY(double[] y) {
+	public void setY(final double[] y) {
 		_y = y;
 	}
 
@@ -48,7 +49,7 @@ public class LocalFitParams implements ILocalFitParams {
 	}
 
 	@Override
-	public void setSig(double[] sig) {
+	public void setSig(final double[] sig) {
 		_sig = sig;
 	}
 
@@ -58,7 +59,7 @@ public class LocalFitParams implements ILocalFitParams {
 	}
 
 	@Override
-	public void setParams(double[] params) {
+	public void setParams(final double[] params) {
 		_params = params;
 	}
 
@@ -68,7 +69,7 @@ public class LocalFitParams implements ILocalFitParams {
 	}
 
 	@Override
-	public void setYFitted(double[] yFitted) {
+	public void setYFitted(final double[] yFitted) {
 		_yFitted = yFitted;
 	}
 

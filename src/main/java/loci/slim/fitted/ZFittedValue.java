@@ -23,20 +23,19 @@
 
 package loci.slim.fitted;
 
-
 /**
  * Extracts Z fitted values.
- * 
+ *
  * @author Aivar Grislis
  */
 public class ZFittedValue extends AbstractFittedValue implements FittedValue {
 
-	public void init(String title) {
+	public void init(final String title) {
 		setTitle(title);
 	}
 
 	@Override
-	public double getValue(double[] values) {
+	public double getValue(final double[] values) {
 		return values[FittedValue.Z_INDEX];
 	}
 }

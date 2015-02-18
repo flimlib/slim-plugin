@@ -27,27 +27,25 @@ import java.util.concurrent.Callable;
 
 import loci.curvefitter.ICurveFitter;
 
-
 /**
- *
  * @author Aivar Grislis
  */
 public interface FittingCallable extends Callable<FitResults> {
 
 	/**
 	 * Set up for a fit.
-	 * 
+	 *
 	 * @param curveFitter
 	 * @param params
-	 * @param data 
+	 * @param data
 	 */
-	public void setup(ICurveFitter curveFitter,
-			GlobalFitParams params, LocalFitParams data);
+	public void setup(ICurveFitter curveFitter, GlobalFitParams params,
+		LocalFitParams data);
 
 	/**
 	 * Do the fit.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	@Override
 	public FitResults call();

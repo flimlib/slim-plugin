@@ -25,22 +25,22 @@ package loci.slim;
 
 /**
  * An interface to allow updated threshold values to be communicated.
- * 
+ *
  * @author Aivar Grislis
  */
 public interface IThresholdUpdate {
 
 	/**
 	 * Gets an initial threshold estimate.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public int estimateThreshold();
 
 	/**
 	 * Update the threshold value.
-	 * 
-	 * @param threshold 
+	 *
+	 * @param threshold
 	 */
 	public void updateThreshold(int threshold);
 }

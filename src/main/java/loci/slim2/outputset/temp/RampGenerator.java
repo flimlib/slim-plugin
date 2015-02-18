@@ -25,28 +25,33 @@ package loci.slim2.outputset.temp;
 
 //TODO ARG this class exists only for testing
 /**
- *
  * @author Aivar Grislis
  */
 public class RampGenerator {
-	public enum RampType { UPPER_LEFT, UPPER_RIGHT, LOWER_LEFT, LOWER_RIGHT, TOP, LEFT, RIGHT, BOTTOM }
+
+	public enum RampType {
+		UPPER_LEFT, UPPER_RIGHT, LOWER_LEFT, LOWER_RIGHT, TOP, LEFT, RIGHT, BOTTOM
+	}
+
 	private final RampType rampType;
 	private final long width;
 	private final long height;
 	private final long diagonal;
 
-	public RampGenerator(RampType rampType, long width, long height) {
+	public RampGenerator(final RampType rampType, final long width,
+		final long height)
+	{
 		this.rampType = rampType;
 		this.height = height;
 		this.width = width;
 		this.diagonal = getDiagonal(width, height);
 	}
 
-	public double getValue(long[] position) {
+	public double getValue(final long[] position) {
 		return getValue(position[0], position[1]);
 	}
 
-	public double getValue(long x, long y) {
+	public double getValue(final long x, final long y) {
 		long i = 0;
 		long j = diagonal;
 		switch (rampType) {
@@ -79,16 +84,17 @@ public class RampGenerator {
 				j = height;
 				break;
 		}
-		//TODO ARG just checking if LUT range will vary for this plane
+		// TODO ARG just checking if LUT range will vary for this plane
 		if (RampType.BOTTOM == rampType) {
 			return ((double) i) / (j * 2);
 		}
 		return ((double) i) / j;
 	}
 
-	private long getDiagonal(long width, long height) {
-		long returnValue = (long) Math.sqrt(width * width + height * height);
-		//System.out.println("width " + width + " HEIGHt " + height + " returnValue " + returnValue);
+	private long getDiagonal(final long width, final long height) {
+		final long returnValue = (long) Math.sqrt(width * width + height * height);
+		// System.out.println("width " + width + " HEIGHt " + height +
+		// " returnValue " + returnValue);
 		return returnValue;
 	}
 }

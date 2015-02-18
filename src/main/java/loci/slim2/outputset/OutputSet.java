@@ -40,14 +40,15 @@ import net.imglib2.type.numeric.RealType;
 import org.scijava.command.CommandService;
 
 /**
- * Builds a set of related images.  In these images corresponding pixels
- * describe different attributes measured or computed at the same pixel position.
- * 
+ * Builds a set of related images. In these images corresponding pixels describe
+ * different attributes measured or computed at the same pixel position.
+ *
  * @author Aivar Grislis
  */
 //TODO ARG Views hyperslice and addDimension are similar, but I don't want shared data
 //TODO ARG recursive generic not appropriate, just want some kind of common RealType, don't all have to be the same Type
-public class OutputSet <T extends RealType<T> & NativeType<T>> {
+public class OutputSet<T extends RealType<T> & NativeType<T>> {
+
 	private static final int POST_XY_DIMENSION = 2;
 	private static final String DIMENSION_LABEL = "parameters";
 	private String name;
@@ -58,9 +59,9 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	private List<Dataset> list;
 
 	/**
-	 * Creates an images set.  This variant uses {@link MemberFormula} which
-	 * allows deriving values from a formula.
-	 * 
+	 * Creates an images set. This variant uses {@link MemberFormula} which allows
+	 * deriving values from a formula.
+	 *
 	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined whether images should be in a stack
@@ -71,14 +72,20 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param axes
 	 * @param indices list of information per output index
 	 */
-	public OutputSet(CommandService commandService, DatasetService datasetService, boolean combined, boolean useChannelDimension, T type, long[] dimensions, String name, AxisType[] axes, List<OutputSetMember> indices) {
-		init(commandService, datasetService, combined, useChannelDimension, type, dimensions, name, axes, indices);
+	public OutputSet(final CommandService commandService,
+		final DatasetService datasetService, final boolean combined,
+		final boolean useChannelDimension, final T type, final long[] dimensions,
+		final String name, final AxisType[] axes,
+		final List<OutputSetMember> indices)
+	{
+		init(commandService, datasetService, combined, useChannelDimension, type,
+			dimensions, name, axes, indices);
 	}
 
 	/**
-	 * Creates a set of images.  This variant uses an array of value labels.
-	 * The index of the label is also used to derive the value.
-	 * 
+	 * Creates a set of images. This variant uses an array of value labels. The
+	 * index of the label is also used to derive the value.
+	 *
 	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined whether images should be in a stack
@@ -89,13 +96,18 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param axes
 	 * @param labels array of names per output index
 	 */
-	public OutputSet(CommandService commandService, DatasetService datasetService, boolean combined, boolean useChannelDimension, T type, long[] dimensions, String name, AxisType[] axes, String[] labels) {
-		init(commandService, datasetService, combined, useChannelDimension, type, dimensions, name, axes, labels);
+	public OutputSet(final CommandService commandService,
+		final DatasetService datasetService, final boolean combined,
+		final boolean useChannelDimension, final T type, final long[] dimensions,
+		final String name, final AxisType[] axes, final String[] labels)
+	{
+		init(commandService, datasetService, combined, useChannelDimension, type,
+			dimensions, name, axes, labels);
 	}
 
 	/**
 	 * Creates a set of images.
-	 * 
+	 *
 	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined whether images should be in a stack
@@ -104,20 +116,26 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param dataset sample Dataset of same dimensionality as outputs
 	 * @param labels array of names
 	 */
-	//TODO ARG can't you get T type from the Dataset somehow??
-	public OutputSet(CommandService commandService, DatasetService datasetService, boolean combined, boolean useChannelDimension, T type, Dataset dataset, String[] labels) {
-		ImgPlus<?> img = dataset.getImgPlus();
-		long[] dimensions = new long[img.numDimensions()];
+	// TODO ARG can't you get T type from the Dataset somehow??
+	public OutputSet(final CommandService commandService,
+		final DatasetService datasetService, final boolean combined,
+		final boolean useChannelDimension, final T type, final Dataset dataset,
+		final String[] labels)
+	{
+		final ImgPlus<?> img = dataset.getImgPlus();
+		final long[] dimensions = new long[img.numDimensions()];
 		img.dimensions(dimensions);
-		String name = dataset.getName();
-		AxisType[] axes = new AxisType[img.numDimensions()];
-		for (int i=0; i<axes.length; i++) axes[i] = img.axis(i).type();
-		init(commandService, datasetService, combined, useChannelDimension, type, dimensions, name, axes, labels);
+		final String name = dataset.getName();
+		final AxisType[] axes = new AxisType[img.numDimensions()];
+		for (int i = 0; i < axes.length; i++)
+			axes[i] = img.axis(i).type();
+		init(commandService, datasetService, combined, useChannelDimension, type,
+			dimensions, name, axes, labels);
 	}
 
 	/**
 	 * Creates a set of images.
-	 * 
+	 *
 	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined is true if images should be in a stack
@@ -125,35 +143,41 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param dataset sample {@link Dataset} of same dimensionality as output
 	 * @param indices list of information per output index
 	 */
-	public OutputSet(CommandService commandService, DatasetService datasetService, boolean combined, boolean useChannelDimension, T type, Dataset dataset, List<OutputSetMember> indices) {
-		ImgPlus<?> img = dataset.getImgPlus();
-		long[] dimensions = new long[img.numDimensions()];
+	public OutputSet(final CommandService commandService,
+		final DatasetService datasetService, final boolean combined,
+		final boolean useChannelDimension, final T type, final Dataset dataset,
+		final List<OutputSetMember> indices)
+	{
+		final ImgPlus<?> img = dataset.getImgPlus();
+		final long[] dimensions = new long[img.numDimensions()];
 		img.dimensions(dimensions);
-		String name = dataset.getName();
-		AxisType[] axes = new AxisType[img.numDimensions()];
-		for (int i=0; i<axes.length; i++) axes[i] = img.axis(i).type();
-		init(commandService, datasetService, combined, useChannelDimension, type, dimensions, name, axes, indices);
+		final String name = dataset.getName();
+		final AxisType[] axes = new AxisType[img.numDimensions()];
+		for (int i = 0; i < axes.length; i++)
+			axes[i] = img.axis(i).type();
+		init(commandService, datasetService, combined, useChannelDimension, type,
+			dimensions, name, axes, indices);
 	}
 
 	/**
 	 * Gets list of datasets.
-	 * 
-	 * @return 
+	 *
+	 * @return
 	 */
 	public List<Dataset> getDatasets() {
 		return list;
 	}
 
 	/**
-	 * Inputs an array of values at a given position.  These values are then used
+	 * Inputs an array of values at a given position. These values are then used
 	 * singly or in some combining formula to yield the output set images pixel
 	 * values.
-	 * 
+	 *
 	 * @param values
-	 * @param position 
+	 * @param position
 	 */
-	public void setPixelValue(double[] values, long[] position) {
-		for (OutputSetMember index : indices) {
+	public void setPixelValue(final double[] values, final long[] position) {
+		for (final OutputSetMember index : indices) {
 			index.setPixelValue(values, position);
 		}
 	}
@@ -161,24 +185,26 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	/**
 	 * Inputs an array of values at a given position.
 	 * <p>
-	 * This variant allows drawing fat pixels.  With this scheme pixels are
-	 * drawn very coarse and sparse initially but later in increasingly finer
-	 * detail.  This is for use when outputs are displayed and the process is
-	 * very time-consuming.
-	 * 
+	 * This variant allows drawing fat pixels. With this scheme pixels are drawn
+	 * very coarse and sparse initially but later in increasingly finer detail.
+	 * This is for use when outputs are displayed and the process is very
+	 * time-consuming.
+	 *
 	 * @param values
 	 * @param position
-	 * @param chunkySize 
+	 * @param chunkySize
 	 */
-	public void setPixelValue(double[] values, long[] position, int[] chunkySize) {
-		for (OutputSetMember index : indices) {
+	public void setPixelValue(final double[] values, final long[] position,
+		final int[] chunkySize)
+	{
+		for (final OutputSetMember index : indices) {
 			index.setPixelValue(values, position, chunkySize);
 		}
 	}
 
 	/**
 	 * Initialization method with array of labels.
-	 * 
+	 *
 	 * @param commandService
 	 * @param datasetService
 	 * @param combined
@@ -187,20 +213,26 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param dimensions
 	 * @param name
 	 * @param axes
-	 * @param labels 
+	 * @param labels
 	 */
-	private void init(CommandService commandService, DatasetService datasetService, boolean combined, boolean useChannelDimension, T type, long[] dimensions, String name, AxisType[] axes, String[] labels) {
-		List<OutputSetMember> indices = new ArrayList<OutputSetMember>();
+	private void init(final CommandService commandService,
+		final DatasetService datasetService, final boolean combined,
+		final boolean useChannelDimension, final T type, final long[] dimensions,
+		final String name, final AxisType[] axes, final String[] labels)
+	{
+		final List<OutputSetMember> indices = new ArrayList<OutputSetMember>();
 		for (int i = 0; i < labels.length; ++i) {
-			OutputSetMember tupleIndex = new OutputSetMember(labels[i], i, new IndexedMemberFormula(i) );
+			final OutputSetMember tupleIndex =
+				new OutputSetMember(labels[i], i, new IndexedMemberFormula(i));
 			indices.add(tupleIndex);
 		}
-		init(commandService, datasetService, combined, useChannelDimension, type, dimensions, name, axes, indices);
+		init(commandService, datasetService, combined, useChannelDimension, type,
+			dimensions, name, axes, indices);
 	}
 
 	/**
 	 * Initialization method with list of indices.
-	 * 
+	 *
 	 * @param commandService
 	 * @param datasetService
 	 * @param combined
@@ -209,22 +241,28 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 	 * @param dimensions
 	 * @param name
 	 * @param axes
-	 * @param indices 
+	 * @param indices
 	 */
-	private void init(CommandService commandService, DatasetService datasetService, boolean combined, boolean useChannelDimension, T type, long[] dimensions, String name, AxisType[] axes, List<OutputSetMember> indices) {
+	private void init(final CommandService commandService,
+		final DatasetService datasetService, final boolean combined,
+		final boolean useChannelDimension, final T type, final long[] dimensions,
+		final String name, final AxisType[] axes,
+		final List<OutputSetMember> indices)
+	{
 		this.combined = combined;
 		this.useChannelDimension = useChannelDimension;
 		this.dimensions = dimensions;
 		this.name = name;
 		this.indices = indices;
 		list = new ArrayList<Dataset>();
-		for (OutputSetMember index : indices) {
+		for (final OutputSetMember index : indices) {
 			index.setCombined(combined);
 			if (!combined) {
 				// create separate dataset for index
-				String subName = index.getLabel() + " " + name;
-				Dataset dataset = datasetService.create(type, dimensions, subName, axes);
-				Cursor<? extends RealType> cursor = dataset.getImgPlus().cursor();
+				final String subName = index.getLabel() + " " + name;
+				final Dataset dataset =
+					datasetService.create(type, dimensions, subName, axes);
+				final Cursor<? extends RealType> cursor = dataset.getImgPlus().cursor();
 				while (cursor.hasNext()) {
 					cursor.fwd();
 					cursor.get().setReal(Double.NaN);
@@ -235,11 +273,13 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 		}
 		// combine into one dataset
 		if (combined) {
-			long[] combinedDimensions = addCombinedDimension(dimensions, indices.size());
-			AxisType[] combinedAxes = addCombinedAxis(axes);
-			Dataset dataset = datasetService.create(type, combinedDimensions, name, combinedAxes);
+			final long[] combinedDimensions =
+				addCombinedDimension(dimensions, indices.size());
+			final AxisType[] combinedAxes = addCombinedAxis(axes);
+			final Dataset dataset =
+				datasetService.create(type, combinedDimensions, name, combinedAxes);
 			list.add(dataset);
-			for (OutputSetMember index : indices) {
+			for (final OutputSetMember index : indices) {
 				index.setRandomAccess(dataset.getImgPlus().randomAccess());
 			}
 		}
@@ -251,13 +291,15 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 
 	/**
 	 * Adds a new dimension when combining datasets into one.
-	 * 
+	 *
 	 * @param dimensions
 	 * @param dimension
-	 * @return 
+	 * @return
 	 */
-	private long[] addCombinedDimension(long[] dimensions, long dimension) {
-		long[] combinedDimensions = new long[dimensions.length + 1];
+	private long[] addCombinedDimension(final long[] dimensions,
+		final long dimension)
+	{
+		final long[] combinedDimensions = new long[dimensions.length + 1];
 		for (int i = 0; i < combinedDimensions.length; ++i) {
 			if (POST_XY_DIMENSION > i) {
 				combinedDimensions[i] = dimensions[i];
@@ -274,12 +316,12 @@ public class OutputSet <T extends RealType<T> & NativeType<T>> {
 
 	/**
 	 * Adds a new axis when combining datasets into one.
-	 * 
+	 *
 	 * @param axes
-	 * @return 
+	 * @return
 	 */
-	private AxisType[] addCombinedAxis(AxisType[] axes) {
-		AxisType[] combinedAxes = new AxisType[axes.length + 1];
+	private AxisType[] addCombinedAxis(final AxisType[] axes) {
+		final AxisType[] combinedAxes = new AxisType[axes.length + 1];
 		for (int i = 0; i < combinedAxes.length; ++i) {
 			if (POST_XY_DIMENSION > i) {
 				combinedAxes[i] = axes[i];

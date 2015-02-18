@@ -25,12 +25,12 @@ package loci.slim2.decay;
 
 /**
  * Exception to throw when the lifetime file has no lifetime axis.
- * 
+ *
  * @author Aivar Grislis
  */
 public class NoLifetimeAxisFoundException extends Exception {
 
-	public NoLifetimeAxisFoundException(String msg) {
+	public NoLifetimeAxisFoundException(final String msg) {
 		super(msg);
 	}
 }

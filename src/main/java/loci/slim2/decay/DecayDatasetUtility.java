@@ -33,21 +33,23 @@ import net.imglib2.type.numeric.RealType;
 
 /**
  * Utility class to convert lifetime images to grayscale by summing the photons.
- * 
+ *
  * @author Aivar Grislis
  */
 public class DecayDatasetUtility {
 
 	/**
 	 * Converts lifetime image to grayscale.
-	 * 
+	 *
 	 * @param datasetService
 	 * @param dataset
 	 * @param lifetimeDimension
 	 * @return grayscale version
 	 */
-	public static Dataset convert(final DatasetService datasetService, final Dataset dataset, final int lifetimeDimension, final int factor) {
-		ImgPlus img = dataset.getImgPlus();
+	public static Dataset convert(final DatasetService datasetService,
+		final Dataset dataset, final int lifetimeDimension, final int factor)
+	{
+		final ImgPlus img = dataset.getImgPlus();
 		final int bins = (int) img.dimension(lifetimeDimension);
 
 		// want same dimensions & axes except without lifetime
@@ -58,19 +60,23 @@ public class DecayDatasetUtility {
 		final int bpp = 16;
 		final boolean signed = false;
 		final boolean floating = false;
-		final Dataset returnValue = datasetService.create(dimensions, dataset.getName(), axes, bpp, signed, floating);
+		final Dataset returnValue =
+			datasetService.create(dimensions, dataset.getName(), axes, bpp, signed,
+				floating);
 
 		// iterate through grayscale image
 		final double[] decay = new double[bins];
 		final ImgPlus imgPlus = returnValue.getImgPlus();
-		final Cursor<? extends RealType<?>> grayscaleCursor = imgPlus.localizingCursor();
-		final RandomAccess<? extends RealType<?>> decayRandomAccess = dataset.getImgPlus().randomAccess();
+		final Cursor<? extends RealType<?>> grayscaleCursor =
+			imgPlus.localizingCursor();
+		final RandomAccess<? extends RealType<?>> decayRandomAccess =
+			dataset.getImgPlus().randomAccess();
 		final long[] position = new long[dimensions.length];
 		while (grayscaleCursor.hasNext()) {
 			grayscaleCursor.fwd();
 			grayscaleCursor.localize(position);
 			getDecay(decayRandomAccess, decay, position, lifetimeDimension);
-			int summed = sum(decay, factor);
+			final int summed = sum(decay, factor);
 			grayscaleCursor.get().setReal(summed);
 		}
 		return returnValue;
@@ -78,12 +84,13 @@ public class DecayDatasetUtility {
 
 	/**
 	 * Deletes a dimension at given dimensional index.
-	 * 
+	 *
 	 * @param dimensions
 	 * @param dimension
-	 * @return 
+	 * @return
 	 */
-	private static long[] deleteDimension(ImgPlus img, int dimension) {
+	private static long[] deleteDimension(final ImgPlus img, final int dimension)
+	{
 		final long[] returnValue = new long[img.numDimensions() - 1];
 		int i = 0;
 		for (int j = 0; j < img.numDimensions(); ++j) {
@@ -96,12 +103,14 @@ public class DecayDatasetUtility {
 
 	/**
 	 * Deletes an {@link AxisType} at given dimensional index.
-	 * 
+	 *
 	 * @param axes
 	 * @param dimension
-	 * @return 
+	 * @return
 	 */
-	private static AxisType[] deleteAxisType(ImgPlus<?> img, int dimension) {
+	private static AxisType[] deleteAxisType(final ImgPlus<?> img,
+		final int dimension)
+	{
 		final AxisType[] returnValue = new AxisType[img.numDimensions() - 1];
 		int i = 0;
 		for (int j = 0; j < img.numDimensions(); ++j) {
@@ -114,24 +123,27 @@ public class DecayDatasetUtility {
 
 	/**
 	 * Gets the lifetime decay histogram.
-	 * 
+	 *
 	 * @param randomAccess
 	 * @param decay
 	 * @param position
-	 * @param dimension 
+	 * @param dimension
 	 */
-	private static void getDecay(RandomAccess<? extends RealType<?>> randomAccess, double[] decay, long[] position, int dimension) {
-		long[] expandedPosition = expandPosition(position, dimension);
+	private static void getDecay(
+		final RandomAccess<? extends RealType<?>> randomAccess,
+		final double[] decay, final long[] position, final int dimension)
+	{
+		final long[] expandedPosition = expandPosition(position, dimension);
 		for (int i = 0; i < decay.length; ++i) {
 			expandedPosition[dimension] = i;
-			//dumpPosition(expandedPosition);
+			// dumpPosition(expandedPosition);
 			randomAccess.setPosition(expandedPosition);
 			decay[i] = randomAccess.get().getRealDouble();
 		}
 	}
 
-	private static void dumpPosition(long[] position) {
-		for (long p : position) {
+	private static void dumpPosition(final long[] position) {
+		for (final long p : position) {
 			System.out.print(" " + p);
 		}
 		System.out.println();
@@ -139,14 +151,14 @@ public class DecayDatasetUtility {
 
 	/**
 	 * Sums up the decay photons at a pixel.
-	 * 
+	 *
 	 * @param decay
 	 * @param factor
-	 * @return 
+	 * @return
 	 */
-	private static int sum(double[] decay, int factor) {
+	private static int sum(final double[] decay, final int factor) {
 		long returnValue = 0;
-		for (double d : decay) {
+		for (final double d : decay) {
 			returnValue += (d / factor);
 		}
 		if (returnValue > Integer.MAX_VALUE) {
@@ -157,12 +169,14 @@ public class DecayDatasetUtility {
 
 	/**
 	 * Expands the position at a given dimensional index.
-	 * 
+	 *
 	 * @param position
 	 * @param dimension
-	 * @return 
+	 * @return
 	 */
-	private static long[] expandPosition(long[] position, int dimension) {
+	private static long[] expandPosition(final long[] position,
+		final int dimension)
+	{
 		final long[] returnValue = new long[position.length + 1];
 		int i = 0;
 		for (int j = 0; j < position.length; ++j) {
