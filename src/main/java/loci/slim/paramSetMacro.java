@@ -4,7 +4,6 @@ import ij.IJ;
 import ij.Prefs;
 
 import java.io.File;
-import java.nio.file.Files;
 
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
