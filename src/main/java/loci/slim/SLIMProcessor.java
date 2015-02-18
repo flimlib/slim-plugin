@@ -25,6 +25,7 @@ package loci.slim;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.gui.Roi;
 import ij.plugin.frame.Recorder;
@@ -109,6 +110,7 @@ import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;
 
+
 /**
  * SLIMProcessor is the main class of the SLIM Curve plugin for ImageJ. It was
  * originally just thrown together to get something working, with some
@@ -132,7 +134,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private static final String Y = "Y";
 	private static final String LIFETIME = "Lifetime";
 	private static final String CHANNELS = "Channels";
-	private static final boolean TABBED = true;
+	private static final boolean TABBED = false;
 	private static final boolean USE_TAU = true;
 	private static final boolean USE_LAMBDA = false;
 
@@ -157,14 +159,15 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private volatile boolean _quit;
 	private volatile boolean _cancel;
 	private volatile boolean _fitInProgress;
+
 	private volatile boolean _fitted;
 	private volatile boolean _summed;
 	private volatile boolean _refit;
 
 	private static final String FILE_KEY = "file";
 	private static final String PATH_KEY = "path";
-	private String _file;
-	private String _path;
+	private  String _file;
+	private  String _path;
 
 	private static final String EXPORT_PIXELS_KEY = "exportpixels";
 	private static final String PIXELS_FILE_KEY = "pixelsfile";
@@ -177,7 +180,94 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private static final String GAUSSIAN_A_KEY = "a";
 	private static final String GAUSSIAN_B_KEY = "b";
 	private static final String GAUSSIAN_C_KEY = "c";
-
+	
+	
+	private static final String SINGLE_EXPONENTIAL = "Single Exponential",
+			DOUBLE_EXPONENTIAL = "Double Exponential",
+			TRIPLE_EXPONENTIAL = "Triple Exponential",
+			STRETCHED_EXPONENTIAL = "Stretched Exponential";
+	
+	/////Macro specific keys for better recordability
+	public static boolean guiUpdateWithMacro=true;
+	
+	public static boolean guiUsedforValues=true;
+	
+	public static boolean firstTime=true;
+	
+	public static final String PLUGIN_NAME = "SLIM pluguin";
+	public static final String FIT_IMAGE_FN= "fitImages";
+	public static final String SET_OF_EXPONENTS= "setExponentNo";
+	
+	public static final String SET_FUNCTION_TYPE= "setFunctionType";
+	public static final String SET_ALGORITHM_TYPE="setAlgorithmType";
+	public static final String SET_BINNING="setBinnning";
+	public static final String SET_FITTED_IMAGES="setFittedImagesType";
+	public static final String SET_REGION_TYPE="setRegionType";
+	public static final String SET_NOISE_MODEL="setNoiseModel";
+	public static final String SET_CHI2_TARGET="setChi2Target";
+	public static final String SET_THRESHOLD="setThersholdValue";
+	public static final String SET_TRANSIENT_START="setTransientStart";
+	public static final String SET_TRANSIENT_STOP="setTransientStop";
+	public static final String SET_DATA_START="setDataStart";
+	///single exponetial recorder macro
+	public static final String SET_A1_VALUE="setA1value";
+	public static final String SET_T1_VALUE="setT1value";
+	//double exponetnial recroder macro
+	public static final String SET_A2_VALUE="setA2value";
+	public static final String SET_T2_VALUE="setT2value";
+	//triple exponential recorder macro
+	public static final String SET_A3_VALUE="setA3value";
+	public static final String SET_T3_VALUE="setT3value";
+	
+	public static final String SET_Z1_VALUE="setZ1value";
+	public static final String SET_H1_VALUE="setH1value";
+	public static final String SET_PROMPT_BASELINE="setPrompBaseLine";
+	public static final String SET_DELAY_PROMPT="setDelayPrompt";
+	public static final String SET_WIDTH_PROMPT="setWidthPrompt";
+	public static final String SET_START_FITTING="startFitting";
+	
+	public static final String SET_EXCITATION="setExcitation";
+	public static final String DEFAULT_EXCITATION_LOAD="loadDefaultExcitation";
+	
+	//batch processign macro
+	
+	public static final String SET_BATCH_MODE="batchModeSet";
+	public static final String KEY_BATCH_MODE_FILE_NUMBER="Batch.NoofFiles";
+	public static final String KEY_FILE_NAMES="key.fileNum";
+	public static final String EXPORT_FILE="exportFileSet";
+	public static final String SET_START_BATCH="startBatchMacro";
+	public static final String SET_ANALYSIS_SET="setAnalysisList";
+	
+	
+	public static final String KEY_ANALYSIS_LIST="key.analysis";
+	public static final String KEY_ANALYSIS_NUMBER="key.analysisNumber";
+	
+	public static final String SET_EXPORT_PIXEL_FILE_NAME="exportPixelFileName";
+	public static final String SET_EXPORT_PIXEL_FILE_NAME_SLIM2="exportPixelFileNameSLIM2";
+	
+	public static final String SET_EXPORT_HISTO_FILE_NAME="exportHistoFileName";
+	public static final String SET_EXPORT_HISTO_FILE_NAME_SLIM2="exportHistoFileNameSLIM2";
+	public static final String START_SLIM_CURVE="startSLIMCurve";
+	public static final String SET_APPEND_MODE="setAppendMode";
+	public static final String SET_APPEND_MODE_PIXEL="isAppendUsedPixel";
+	
+	////check box recorder macros
+	public static final String SET_Z1_FIX="fixZ";
+	public static final String SET_A1_FIX="fixA1";
+	public static final String SET_A2_FIX="fixA2";
+	public static final String SET_A3_FIX="fixA3";
+	
+	public static final String SET_T1_FIX="fixT1";
+	public static final String SET_T2_FIX="fixT2";
+	public static final String SET_T3_FIX="fixT3";
+	
+	public static final String SET_H_FIX="fixH";
+	
+	
+	public static FitInfo fitInfo =new FitInfo();
+	
+	public static paramSetMacro macroParams =new paramSetMacro();
+	
 	private static final char TAB = '\t';
 
 	private SCIFIOImgPlus<T> _image;
@@ -265,15 +355,12 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		// Load initial image
 		boolean success = false;
-		File[] files = showFileDialog(getPathFromPreferences());
-		if (files.length > 1) {
-			showError("Error in Batch Processing", "Need to fit a sample image first");
-		}
-		else {
-			String[] pathAndFile = getPathAndFile(files[0]);
-			_path = pathAndFile[0];
-			_file = pathAndFile[1];
-
+		String[] pathAndFile=null;
+		///this following section is for macro starting 
+		if(macroParams.startSLIMCurveWithMacro){
+			_path=macroParams.startPathName;
+			_file=macroParams.startFileName;
+			
 			_image = loadImage(_path, _file);
 			if (null == _image) {
 				showError("Error", "Could not load image");
@@ -284,12 +371,47 @@ public class SLIMProcessor <T extends RealType<T>> {
 					success = true;
 				}
 			}
+			//macro starting ends here
 		}
+		
+		else{
+			File[] files = showFileDialog(getPathFromPreferences());
+			if (files.length > 1) {
+				showError("Error in Batch Processing", "Need to fit a sample image first");
+				
+			}
+			else {
+				
+		
+
+				pathAndFile = getPathAndFile(files[0]);
+				_path = pathAndFile[0];
+				_file = pathAndFile[1];
+
+				recordFirstTime(START_SLIM_CURVE,"true",_path,_file );
+				
+				_image = loadImage(_path, _file);
+				if (null == _image) {
+					showError("Error", "Could not load image");
+				}
+				else {
+					if (getImageInfo(_image)) {
+						savePathInPreferences(_path);
+						success = true;
+					}
+				}
+			}
+		}
+		
+		
+		
+
 
 		if (success) {
 			// show the UI; do fits
 			doFits();
 		}
+
 	}
 
 	static final private void showError(String title, String message) {
@@ -494,6 +616,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 	 *
 	 * @param uiPanel
 	 */
+	//public static void doFits() {
 	private void doFits() {
 		// heuristics
 		IEstimator estimator = new Estimator();
@@ -511,6 +634,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 			USE_TAU, _bins, _timeRange, _analysis.getChoices(),
 			_binning.getChoices(), fittingCursorHelper, fitterEstimator);
 		_uiPanel = uiPanel; //TODO almost got by having it just be a local variable
+		
+		//UserInterfacePanel._promptComboBox.setSelectedItem("load deafult");
+		
 		uiPanel.setX(0);
 		uiPanel.setY(0);
 		uiPanel.setThreshold(estimator.getThreshold());
@@ -565,43 +691,72 @@ public class SLIMProcessor <T extends RealType<T>> {
 				 */
 				@Override
 				public void openFile() {
-					File[] files = showFileDialog(getPathFromPreferences());
-					// were multiple files opened?
-					if (1 < files.length) {
-						batchProcessingWithUI(files);
-					}
-					// was a single file opened? (skip cancellations)
-					else if (1 == files.length) {
-						String savePath = _path;
-						String saveFile = _file;
+				//	if(!macroParams.isBatchMacroUsed){//macro not being used for batch processing
+						File[] files = showFileDialog(getPathFromPreferences());
+						// were multiple files opened?
+						if (1 < files.length) {
+							//macro recorder for Batch processing
 
-						String[] pathAndFile = getPathAndFile(files[0]);
-						_path = pathAndFile[0];
-						_file = pathAndFile[1];
-
-						_image = loadImage(_path, _file);
-						if (null == _image) {
-							showError("Error", "Could not load image");
+							macroParams.storeFilesName(files);//store the file names for batch processing
+							SLIMProcessor.record(SLIMProcessor.SET_BATCH_MODE,"true");
+							
+							batchProcessingWithUI(files);
 						}
-						else {
-							if (getImageInfo(_image)) {
-								savePathInPreferences(_path);
+						// was a single file opened? (skip cancellations) Normal fitting operation
+						else if (1 == files.length) {
 
-								// close existing grayscale and hook up a new one
-								_uiPanel.setThresholdListener(null);
-								_grayScaleImage.close();
-								_grayScaleImage = null;
-								showGrayScaleAndFit(uiPanel);
+
+							String savePath = _path;
+							String saveFile = _file;
+
+							String[] pathAndFile = getPathAndFile(files[0]);
+							_path = pathAndFile[0];
+							_file = pathAndFile[1];
+
+							_image = loadImage(_path, _file);
+							if (null == _image) {
+								showError("Error", "Could not load image");
 							}
 							else {
-								// kludgy way to reset
-								_path = savePath;
-								_file = saveFile;
-								_image = loadImage(_path, _file);
-								getImageInfo(_image);
+								if (getImageInfo(_image)) {
+									savePathInPreferences(_path);
+
+									// close existing grayscale and hook up a new one
+									_uiPanel.setThresholdListener(null);
+									_grayScaleImage.close();
+									_grayScaleImage = null;
+									showGrayScaleAndFit(uiPanel);
+								}
+								else {
+									// kludgy way to reset
+									_path = savePath;
+									_file = saveFile;
+									_image = loadImage(_path, _file);
+									getImageInfo(_image);
+								}
 							}
 						}
-					}
+
+			//		}
+					/*
+					else{
+						
+						int noOfFIles=Integer.parseInt(Prefs.get(KEY_BATCH_MODE_FILE_NUMBER, null));///gets the number of file batch processing
+						
+						IJ.log(Integer.toString(noOfFIles));
+						
+						IJ.log(Prefs.get(KEY_FILE_NAMES+Integer.toString(0),null));
+						
+						if(noOfFIles!=0){
+							
+							for(int i=0;i<noOfFIles;i++){
+								String path=Prefs.get(KEY_FILE_NAMES+Integer.toString(i),null);
+								macroParams.batchFileList[i]=new File(path);
+								IJ.log(path);
+							}
+							batchProcessingWithUI(macroParams.batchFileList);
+						}
+					}*/
 				}
 
 				/**
@@ -812,47 +967,57 @@ public class SLIMProcessor <T extends RealType<T>> {
 		showGrayScaleAndFit(uiPanel);
 
 		// processing loop; waits for UI panel input
-		while (!_quit) {
-			while (!_fitInProgress) {
-				try {
-					Thread.sleep(1000);
-				}
-				catch (InterruptedException e) {
+		
+		new Thread(new Runnable(){
 
+			@Override
+			public void run() {
+				while (!_quit) {
+					while (!_fitInProgress) {
+						try {
+							Thread.sleep(100);
+						}
+						catch (InterruptedException e) {
+
+						}
+						if (_quit) { 
+							hideUIPanel(uiPanel);
+							return;
+						}
+					}
+
+					//uiPanel.enable(false); //TODO this might be better to be same as grayScalePanel
+					_grayScaleImage.enable(false);
+
+					// get settings of requested fit
+					getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
+
+					if (_refit) {
+						if (_summed) {
+							fitSummed(_uiPanel, _fittingCursor);
+						}
+						else {
+							fitPixel(_uiPanel, _fittingCursor);
+						}
+						_refit = false;
+					}
+					else {
+						// do the fit
+						fitData(uiPanel);
+						_summed = uiPanel.getRegion() == FitRegion.SUMMED;
+					}
+
+					_fitInProgress = false;
+					//uiPanel.enable(true);
+					_grayScaleImage.enable(true);
+					uiPanel.reset();
 				}
-				if (_quit) {
-					hideUIPanel(uiPanel);
-					return;
-				}
+				hideUIPanel(uiPanel);
 			}
+			
+		},"SLIM-Processor").start();
 
-			//uiPanel.enable(false); //TODO this might be better to be same as grayScalePanel
-			_grayScaleImage.enable(false);
-
-			// get settings of requested fit
-			getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
-
-			if (_refit) {
-				if (_summed) {
-					fitSummed(_uiPanel, _fittingCursor);
-				}
-				else {
-					fitPixel(_uiPanel, _fittingCursor);
-				}
-				_refit = false;
-			}
-			else {
-				// do the fit
-				fitData(uiPanel);
-				_summed = uiPanel.getRegion() == FitRegion.SUMMED;
-			}
-
-			_fitInProgress = false;
-			//uiPanel.enable(true);
-			_grayScaleImage.enable(true);
-			uiPanel.reset();
-		}
-		hideUIPanel(uiPanel);
+		
 	}
 
 	private double gaussian(double a, double b, double c, double x) {
@@ -883,7 +1048,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 								uiPanel.setX(x);
 								uiPanel.setY(y);
-								getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);
+								getFitSettings(_grayScaleImage, uiPanel, _fittingCursor);///this is getting all the parameters from GUI, this needs to be replaced
 								// fit on the pixel clicked
 								fitPixel(uiPanel, _fittingCursor);
 							}
@@ -918,7 +1083,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 	}
 
 	/**
-	 * Handles UI for batch processing.  Invokes batch processing.
+	 * Handles UI for batch processing.  Invokes batch processing. 
+	 * This method does not open the fitting windows. Rather shows does the fitting in the background.
 	 * 
 	 * @param files 
 	 */
@@ -934,48 +1100,73 @@ public class SLIMProcessor <T extends RealType<T>> {
 		boolean defCSV = prefs.getBoolean(CSV_KEY, false);
 
 		// TODO - Consolidate this logic with same in DefaultBatchProcessor!
-		GenericDialog dialog = new GenericDialog("Batch Processing");
-		dialog.addCheckbox("Export_Pixels", defExportPixels);
-		dialog.addStringField("Pixels_File", defPixelsFile);
-		dialog.addCheckbox("Export_Histograms", defExportHistograms);
-		dialog.addStringField("Histogram_File", defHistogramsFile);
-		dialog.addCheckbox("Export_Summary_Histogram", defExportSummary);
-		dialog.addStringField("Summary_File", defSummaryFile);
-		dialog.addCheckbox("Comma_Separated", defCSV);
-		dialog.showDialog();
-		if (dialog.wasCanceled()) {
-			return;
+		
+		if(!macroParams.isExportFilemacroUsed){//normal exccution flow when macro is not being used
+			GenericDialog dialog = new GenericDialog("Batch Processing");
+			dialog.addCheckbox("Export_Pixels", defExportPixels);
+			dialog.addStringField("Pixels_File", defPixelsFile);
+			dialog.addCheckbox("Export_Histograms", defExportHistograms);
+			dialog.addStringField("Histogram_File", defHistogramsFile);
+			dialog.addCheckbox("Export_Summary_Histogram", defExportSummary);
+			dialog.addStringField("Summary_File", defSummaryFile);
+			dialog.addCheckbox("Comma_Separated", defCSV);
+			dialog.showDialog();
+			if (dialog.wasCanceled()) {
+				return;
+			}
+
+			final boolean exportPixels = dialog.getNextBoolean();
+			String tmpPixelsFile = dialog.getNextString();
+			final boolean exportHistograms = dialog.getNextBoolean();
+			String tmpHistogramsFile = dialog.getNextString();
+			final boolean exportSummary = dialog.getNextBoolean();
+			String tmpSummaryFile = dialog.getNextString();
+			final boolean csv = dialog.getNextBoolean();
+			final String pixelsFile = checkSuffix(tmpPixelsFile, csv);
+			final String histogramsFile = checkSuffix(tmpHistogramsFile, csv);
+			final String summaryFile = checkSuffix(tmpSummaryFile, csv);
+
+
+
+			// make sure output file suffix is appropriate
+
+			prefs.putBoolean(EXPORT_PIXELS_KEY, exportPixels);
+			prefs.put(PIXELS_FILE_KEY, pixelsFile);
+			prefs.putBoolean(EXPORT_HISTOS_KEY, exportHistograms);
+			prefs.put(HISTOS_FILE_KEY, histogramsFile);
+			prefs.putBoolean(EXPORT_SUMMARY_KEY, exportSummary);
+			prefs.put(SUMMARY_FILE_KEY, summaryFile);
+
+			record(EXPORT_FILE,pixelsFile,histogramsFile,summaryFile);
+			
+			new Thread() {
+				@Override
+				public void run() {
+					batchProcessing(exportPixels, pixelsFile,
+							exportHistograms, histogramsFile,
+							exportSummary, summaryFile,
+							files, csv);
+				}
+			}.start();
+		}
+		else{
+			///macro mode operation, when macro mode is used, the filenames are obtained from the macro
+			final String tmpPixelsFile = macroParams.exportPixelFileName;
+			final String tmpHistogramsFile = macroParams.exportHistofileName;
+			final String tmpSummaryFile = macroParams.exportSummaryFileName;
+
+			new Thread() {
+				@Override
+				public void run() {
+					batchProcessing(true,tmpPixelsFile,
+							true,tmpHistogramsFile,
+							true, tmpSummaryFile,
+							files, true);
+				}
+			}.start();
 		}
 
-		final boolean exportPixels = dialog.getNextBoolean();
-		String tmpPixelsFile = dialog.getNextString();
-		final boolean exportHistograms = dialog.getNextBoolean();
-		String tmpHistogramsFile = dialog.getNextString();
-		final boolean exportSummary = dialog.getNextBoolean();
-		String tmpSummaryFile = dialog.getNextString();
-		final boolean csv = dialog.getNextBoolean();
 
-		// make sure output file suffix is appropriate
-		final String pixelsFile = checkSuffix(tmpPixelsFile, csv);
-		final String histogramsFile = checkSuffix(tmpHistogramsFile, csv);
-		final String summaryFile = checkSuffix(tmpSummaryFile, csv);
-
-		prefs.putBoolean(EXPORT_PIXELS_KEY, exportPixels);
-		prefs.put(PIXELS_FILE_KEY, pixelsFile);
-		prefs.putBoolean(EXPORT_HISTOS_KEY, exportHistograms);
-		prefs.put(HISTOS_FILE_KEY, histogramsFile);
-		prefs.putBoolean(EXPORT_SUMMARY_KEY, exportSummary);
-		prefs.put(SUMMARY_FILE_KEY, summaryFile);
-
-		new Thread() {
-			@Override
-			public void run() {
-				batchProcessing(exportPixels, pixelsFile,
-					exportHistograms, histogramsFile,
-					exportSummary, summaryFile,
-					files, csv);
-			}
-		}.start();
 	}
 
 	/**
@@ -1284,12 +1475,14 @@ public class SLIMProcessor <T extends RealType<T>> {
 		return success;
 	}
 
+	
 	private void getFitSettings(IGrayScaleImage grayScalePanel, IUserInterfacePanel uiPanel, FittingCursor cursor) {
 		_channel        = grayScalePanel.getChannel();
 
 		_region         = uiPanel.getRegion();
 		_algorithm      = uiPanel.getAlgorithm();
 		_function       = uiPanel.getFunction();
+		//_function		= SLIMProcessor.macroParams.getFunction();//sagar
 		_fitAllChannels = uiPanel.getFitAllChannels();
 
 		_x              = uiPanel.getX();
@@ -1482,8 +1675,44 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}
 		}
 		if (null != fittedImage) {
-			for (String analysis : uiPanel.getAnalysisList()) {
-				_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction(), uiPanel.getFittedImages());
+			
+			//IJ.log("I am inside fitted image");
+			
+			int i=0;
+			if(!macroParams.isAnalysisListUsed){///macro NOT used. normal execution flow
+				boolean flagMacroRecord=false;
+				for (String analysis : uiPanel.getAnalysisList()) {
+					flagMacroRecord=true;
+					IJ.log("my analysis set "+analysis);
+					Prefs.set(KEY_ANALYSIS_LIST+Integer.toString(i++),analysis);
+
+					_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction(), uiPanel.getFittedImages());//sagar
+					//_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), SLIMProcessor.macroParams.getFunction(), uiPanel.getFittedImages());
+				}
+				Prefs.set(KEY_ANALYSIS_NUMBER, Integer.toString(i));
+				if(flagMacroRecord){
+					//record(SET_ANALYSIS_NUMBER,Integer.toString(i));
+					record(SET_ANALYSIS_SET, "true",Integer.toString(i));
+				}
+			}
+
+			else {//macro used
+				//String noOfAnalysisObtained=Prefs.get(KEY_ANALYSIS_NUMBER, "0");
+				//IJ.log("no of anaysis"+ noOfAnalysisObtained);
+	
+				int noOfAnalysis=macroParams.noOfAnalysisList;
+				if(noOfAnalysis!=0){
+
+					for(int j=0;j<noOfAnalysis;j++){
+						String analysis=Prefs.get(KEY_ANALYSIS_LIST+Integer.toString(j),null);
+						IJ.log(analysis);
+						if(analysis!=null){
+							_analysis.doAnalysis(analysis, fittedImage, uiPanel.getRegion(), uiPanel.getFunction(), uiPanel.getFittedImages());
+						}
+						
+					}
+				}
+
 			}
 		}
 	}
@@ -1496,7 +1725,13 @@ public class SLIMProcessor <T extends RealType<T>> {
 		fitInfo.setChannel(channel);
 		fitInfo.setRegion(uiPanel.getRegion());
 		fitInfo.setAlgorithm(uiPanel.getAlgorithm());
+		
 		fitInfo.setFunction(uiPanel.getFunction());
+		
+		//fitInfo.setFunction(SLIMProcessor.macroParams.getFunction());
+		
+		//IJ.log(fitInfo.getFunction().toString());
+		
 		fitInfo.setNoiseModel(uiPanel.getNoiseModel());
 		fitInfo.setFittedImages(uiPanel.getFittedImages());
 		fitInfo.setColorizeGrayScale(uiPanel.getColorizeGrayScale());
@@ -1507,12 +1742,15 @@ public class SLIMProcessor <T extends RealType<T>> {
 		fitInfo.setTransientStop(fittingCursor.getTransientStopBin());
 		fitInfo.setThreshold(uiPanel.getThreshold());
 		fitInfo.setChiSquareTarget(uiPanel.getChiSquareTarget());
-		fitInfo.setBinning(uiPanel.getBinning());
+		fitInfo.setBinning(uiPanel.getBinning());		
 		fitInfo.setX(uiPanel.getX());
+
+		
 		fitInfo.setY(uiPanel.getY());
 		fitInfo.setParameterCount(uiPanel.getParameterCount());
 		fitInfo.setParameters(uiPanel.getParameters());
 		fitInfo.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+//		fitInfo.setFree(translateFree(SLIMProcessor.macroParams.getFunction(), uiPanel.getFree()));
 		fitInfo.setRefineFit(uiPanel.getRefineFit());
 		return fitInfo;
 	}
@@ -1529,6 +1767,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private ImgPlus<DoubleType> fitImage(IUserInterfacePanel uiPanel, int channel, boolean batch) {
 		// get fit settings from the UI panel
 		FitInfo fitInfo = getFitInfo(uiPanel, channel, _fittingCursor);
+		
+	//	IJ.log((uiPanel.getAlgorithm());
 		fitInfo.setXInc(_timeRange);
 		if (_fittingCursor.getHasPrompt() && null != _excitationPanel) {
 			int startIndex = _fittingCursor.getPromptStartBin();
@@ -1620,6 +1860,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		int channel = fitInfo.getChannel();
 		boolean fitAllChannels = fitInfo.getFitAllChannels();
 
+		
 		// needed to display progress bar
 		int pixelCount = 0;
 		int totalPixelCount = totalPixelCount(width, height, channels, fitAllChannels);
@@ -1637,11 +1878,14 @@ public class SLIMProcessor <T extends RealType<T>> {
 		int[] dimension = new int[] { width, height, fittedChannels };
 		FittedImageFitter fitter = null;
 		String outputs = fitInfo.getFittedImages();
+		
+		
 		if (!batch && null != outputs) {
 			int channelNumber = -1;
 			if (channels > 1 && !fitAllChannels) {
 				channelNumber = channel + 1;
 			}
+		
 			int components = fitInfo.getComponents();
 			boolean stretched = fitInfo.getStretched();
 			FittedImageParser parser =
@@ -1668,6 +1912,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 		globalFitParams.setEstimator(new FitterEstimator());
 		globalFitParams.setFitAlgorithm(fitInfo.getAlgorithm());
 		globalFitParams.setFitFunction(fitInfo.getFunction());
+		
+		//sagar test addition
+
+		
 		globalFitParams.setNoiseModel(fitInfo.getNoiseModel());
 		globalFitParams.setTransientStart(fitInfo.getTransientStart());
 		globalFitParams.setDataStart(fitInfo.getDataStart());
@@ -1677,7 +1925,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		globalFitParams.setStartPrompt(fitInfo.getStartPrompt());
 		globalFitParams.setStopPrompt(fitInfo.getStopPrompt());
 		globalFitParams.setChiSquareTarget(fitInfo.getChiSquareTarget());
-		globalFitParams.setFree(fitInfo.getFree());
+		globalFitParams.setFree(fitInfo.getFree());// this free function is obstacle to GUI free opreation
 
 		// initialize class used for 'chunky pixel' effect
 		IChunkyPixelTable chunkyPixelTable = new ChunkyPixelTableImpl();
@@ -1937,6 +2185,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		title += _file.substring(0, _file.lastIndexOf('.'));
 		showDecayGraph(title, uiPanel, _fittingCursor,
 			dataArray[visibleChannel], photons);
+		
+		
 		//TODO AIC experimental code; second parameter is actually AIC
 		uiPanel.setParameters(dataArray[visibleChannel].getParams(), dataArray[visibleChannel].getChiSquare());
 
@@ -2061,6 +2311,7 @@ public class SLIMProcessor <T extends RealType<T>> {
 		}
 		imagePlus.show();
 
+		
 		// update UI parameters
 		//TODO AIC experimental code; second parameter is actually AIC
 		uiPanel.setParameters(dataArray[0].getParams(), dataArray[0].getChiSquare()); //TODO, just picked first ROI here!
@@ -2082,10 +2333,6 @@ public class SLIMProcessor <T extends RealType<T>> {
 		int y = uiPanel.getY();
 		_startBin = fittingCursor.getDataStartBin();
 		_stopBin = fittingCursor.getTransientStopBin();
-//		IJ.log("_startBin is " + _startBin + " _stopBin " + _stopBin);
-//		IJ.log("FYI FWIW prompt delay is " + _fittingCursor.getPromptDelay());
-//		IJ.log("prompt start is " + _fittingCursor.getPromptStartValue() + " stop " + _fittingCursor.getPromptStopValue());
-//		IJ.log("_fittingCursor start value " + _fittingCursor.getTransientStartValue() + " bin " + _fittingCursor.getTransientStartBin() + " stop value " + _fittingCursor.getTransientStopValue() + " bin " + _fittingCursor.getTransientStopBin());
 		return fitPixel(uiPanel, x, y);
 	}
 
@@ -2180,7 +2427,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		IJ.log("****TRIAL*****");
 		rld.trialRldFit(curveFitter, dataArray[0]); */
 
-		int returnValue = getCurveFitter(uiPanel).fitData(dataArray);
+		/// this is where the fitting call is made dataArray is the one which holds the fitted data
+		int returnValue = getCurveFitter(uiPanel).fitData(dataArray);///fitting library called here
 
 		// show decay graph for visible channel
 		int index = _file.lastIndexOf('.');
@@ -2192,6 +2440,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 		if (_fitAllChannels) {
 			visibleChannel = _channel;
 		}
+		
+		
+		
 		showDecayGraph(title, uiPanel, _fittingCursor,
 			dataArray[visibleChannel], photons); //TODO ARG this s/b the photon count for the appropriate channel; currently it will sum all channels.
 
@@ -2503,8 +2754,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 		return (int)(blend * (end - start) + start);
 	}
 
-	/*
-	 * Gets the appropriate curve fitter for the current fit.
+	/**
+	 * Gets the appropriate curve fitter for the current fit.  
+	 * 
+	 * This gets all the data from the GUI. Change the parameters to read from ows DS //TODO
 	 *
 	 * @param uiPanel has curve fitter selection
 	 */
@@ -2528,7 +2781,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 				break;
 		}
 		ICurveFitter.FitFunction fitFunction = null;
-		switch (uiPanel.getFunction()) {
+		switch (uiPanel.getFunction()) {//sagar
+		//switch (SLIMProcessor.macroParams.getFunction()) {
 			case SINGLE_EXPONENTIAL:
 				fitFunction = FitFunction.SINGLE_EXPONENTIAL;
 				break;
@@ -2546,7 +2800,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 		curveFitter.setFitFunction(fitFunction);
 		curveFitter.setNoiseModel(uiPanel.getNoiseModel());
 		curveFitter.setXInc(_timeRange);
-		curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));
+		curveFitter.setFree(translateFree(uiPanel.getFunction(), uiPanel.getFree()));// this is one of the main problem for getting rid of the GUI dependence
+		//curveFitter.setFree(translateFree(SLIMProcessor.macroParams.getFunction(), uiPanel.getFree()));//sagar
+		
 		if (null != _excitationPanel) {
 			double[] excitation = null;
 			int startIndex = _fittingCursor.getPromptStartBin();
@@ -2696,5 +2952,683 @@ public class SLIMProcessor <T extends RealType<T>> {
 			}
 		}
 	}
+	
+	/* **********************************************************
+	 * Macro recording related methods
+	 * *********************************************************/
 
+	/**
+	 * Macro-record a specific command. The command names match the static 
+	 * methods that reproduce that part of the code.
+	 * 
+	 * @param command name of the command including package info
+	 * @param args set of arguments for the command
+	 */
+	public static void record(String command, String... args) 
+	{
+		if(firstTime){
+			waitRecord(500);
+			//recordFirstTime();
+			firstTime=false;
+		}
+		command = "call(\"loci.slim.SLIMProcessor." + command;
+		for(int i = 0; i < args.length; i++)
+			command += "\", \"" + args[i];
+		command += "\");\n";
+		// in Windows systems, replace backslashes by double ones
+		if( IJ.isWindows() )
+			command = command.replaceAll( "\\\\", "\\\\\\\\" );
+		if(Recorder.record)
+			Recorder.recordString(command);
+	}
+	
+	public void recordFirstTime(String command, String... args){
+		
+		command = "call(\"loci.slim.SLIMProcessor." + command;
+		for(int i = 0; i < args.length; i++)
+			command += "\", \"" + args[i];
+		command += "\");\n";
+		// in Windows systems, replace backslashes by double ones
+		if( IJ.isWindows() )
+			command = command.replaceAll( "\\\\", "\\\\\\\\" );
+		if(Recorder.record)
+			Recorder.recordString(command);
+		
+	}
+	public static void recordRun(String command, String... args) 
+	{
+		//command = "run(\"loci.slim.SLIMPlugin(\"\")\")\n";
+		command = "run(\"SLIM Curve\");\n";
+		
+//		for(int i = 0; i < args.length; i++)
+//			command += "\", \"" + args[i];
+//		command += "\");\n";
+		// in Windows systems, replace backslashes by double ones
+		if( IJ.isWindows() )
+			command = command.replaceAll( "\\\\", "\\\\\\\\" );
+		if(Recorder.record)
+			Recorder.recordString(command);
+	}
+	
+	public static void waitRecord(int waitTime) 
+	{
+		//command = "run(\"loci.slim.SLIMPlugin(\"\")\")\n";
+		String timeWait=Integer.toString(waitTime);
+		String command = "wait("+timeWait+");\n";
+		
+//		for(int i = 0; i < args.length; i++)
+//			command += "\", \"" + args[i];
+//		command += "\");\n";
+		// in Windows systems, replace backslashes by double ones
+		if( IJ.isWindows() )
+			command = command.replaceAll( "\\\\", "\\\\\\\\" );
+		if(Recorder.record)
+			Recorder.recordString(command);
+	}
+	
+	
+	public static void fitImages(String fileName, String param1){
+		
+		// TODO: Consider reusing an existing SLIMProcessor/SLIM_PlugIn, if one is visible
+		SLIMProcessor slimProc = new SLIMProcessor();
+
+		IJ.log("reachederearacasdsa");
+		// TODO: Encapsulate this duplicate logic into its own method of SLIMProcessor
+		// SLIMProcessor.setFile
+		String[] pathAndFile = getPathAndFile(new File(fileName));
+		slimProc._path = pathAndFile[0];
+		slimProc._file = pathAndFile[1];
+		slimProc._image = slimProc.loadImage(slimProc._path, slimProc._file);
+		if (null == slimProc._image) {
+			showError("Error", "Could not load image");
+			return;
+		}
+
+		//TODO
+		//slimProc.setParam1(param1); // FIXME
+		
+		// show the UI; do fits
+		
+		IJ.log(slimProc._file);
+		slimProc.doFits();
+
+	}
+	
+	public  void setExponentNo(String arg ){
+		_uiPanel.disable();
+		
+
+	}
+	
+
+	
+	public static void setFunctionType(String arg){
+		///add function to set the function type in the paramSetMacro class
+		//
+		//namely it will be myparam.fucntion_type= something and it will be set to fit function parameter whenever is needed
+		// so some flag might be needed if it is operating in the macro or normal mode
+		
+	
+		//macroParams.setFunction(arg);
+		UserInterfacePanel._functionComboBox.setSelectedItem(arg);
+		
+		
+	}
+		
+		
+	public static void setAlgorithmType(String arg){
+		
+		
+		///macro recorder for algorithm change
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._algorithmComboBox.setSelectedItem(arg);
+		}
+		macroParams.setAlgorithm(arg);
+		
+	}
+	
+	public static void setBinnning(String arg){
+		
+		
+		///macro recorder for algorithm change
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._binningComboBox.setSelectedItem(arg);
+		}
+	}
+	
+	
+	public static void setFittedImagesType(String arg){
+		
+		
+		///macro recorder for algorithm change
+
+		//UserInterfacePanel._fittedImagesComboBox.setSelectedItem(UserInterfacePanel.SINGLE_FITTED_IMAGE_ITEMS);
+		
+		
+		int setIndexComboBox = Integer.parseInt(arg);
+
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._fittedImagesComboBox.setSelectedIndex(setIndexComboBox);
+		}
+
+		
+	
+	}
+	
+	
+	
+	public static void setRegionType(String arg){
+		
+		
+		///macro recorder for algorithm change
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._regionComboBox.setSelectedItem(arg);
+		}
+		
+	}
+	
+	
+	public static void setNoiseModel(String arg){
+		
+		
+		///macro recorder for algorithm change
+		
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._noiseModelComboBox.setSelectedItem( arg);
+		}
+	}
+
+	
+	/**
+	 * Works independent of the GUI, uses its own data type
+	 * @param arg
+	 */
+	
+	public static void setChi2Target(String arg){
+		
+		
+		///macro recorder for algorithm change
+
+		macroParams.setChiSquareTarget(Double.parseDouble(arg));
+		macroParams.chi2MacroUsed=true;
+
+
+	}
+
+
+	/**
+	 * 
+	 * Works independent of the GUI, uses its own data type
+	 * @param arg
+	 */
+	public static void setThersholdValue(String arg){
+
+
+		///macro recorder for algorithm change
+
+
+
+		//setChiSquareTarget
+
+		if(guiUpdateWithMacro){
+			UserInterfacePanel._thresholdSpinner.setValue(Integer.parseInt(arg));
+		}
+
+		macroParams.setThresholdValue(Integer.parseInt(arg));
+		macroParams.a1macroused=true;
+
+
+	}
+
+
+	////single exponential parameter macros
+
+	public static void setA1value(String arg){
+
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==0){
+				UserInterfacePanel._aParam1.setText(arg);
+			}
+			else if(index==1){
+				UserInterfacePanel._a1Param2.setText(arg);
+			}
+			else if(index==2){
+				UserInterfacePanel._a1Param3.setText(arg);
+			}
+			else if(index==3){
+				UserInterfacePanel._aParam4.setText(arg);
+			}
+		}
+		else{
+
+			macroParams.a1macroused=true;
+			macroParams.seta1(Double.parseDouble(arg));
+
+		}
+	}
+
+
+	public static void setT1value(String arg){
+
+		if(guiUsedforValues){
+			
+			if(guiUsedforValues){
+				int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+				if(index==0){
+					UserInterfacePanel._tParam1.setText(arg);
+				}
+				else if(index==1){
+					UserInterfacePanel._t1Param2.setText(arg);
+				}
+				else if(index==2){
+					UserInterfacePanel._t1Param3.setText(arg);
+				}
+				else if(index==3){
+					UserInterfacePanel._tParam4.setText(arg);
+				}
+			}
+			
+		}
+		else{
+
+			macroParams.t1macroused=true;
+			macroParams.sett1(Double.parseDouble(arg));
+		}
+
+	}
+
+
+	///double exponential parameter macros
+
+	public static void setA2value(String arg){
+
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==1){
+				IJ.log("in 1");
+				UserInterfacePanel._a2Param2.setText(arg);
+			}
+			else if(index==2){
+				IJ.log("in 2");
+				UserInterfacePanel._a2Param3.setText(arg);
+			}
+		}
+		else{
+			macroParams.a2macroused=true;
+			macroParams.seta2(Double.parseDouble(arg));
+		}
+
+	}
+
+
+	public static void setT2value(String arg){
+
+
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==1){
+				UserInterfacePanel._t2Param2.setText(arg);
+			}
+			else if(index==2){
+				UserInterfacePanel._t2Param3.setText(arg);
+			}
+		}
+		else{
+			macroParams.t2macroused=true;
+			macroParams.sett2(Double.parseDouble(arg));
+
+		}
+	}
+
+
+	///triple exponential parameter recorder macros
+
+	public static void setA3value(String arg){
+
+		if(guiUsedforValues){
+			//int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+				UserInterfacePanel._a3Param3.setText(arg);
+			//}
+		}
+		else{
+			macroParams.a3macroused=true;
+			macroParams.seta3(Double.parseDouble(arg));
+		}
+
+	}
+
+
+	public static void setT3value(String arg){
+
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==2){
+				UserInterfacePanel._t3Param3.setText(arg);
+			}
+		}
+		else{
+
+			macroParams.t3macroused=true;
+			macroParams.sett3(Double.parseDouble(arg));
+		}
+	}
+
+	///shift recorder macro
+
+	public static void setZ1value(String arg){
+
+
+	
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==0){
+				UserInterfacePanel._zParam1.setText(arg);
+			}
+			else if(index==1){
+				UserInterfacePanel._zParam2.setText(arg);
+			}
+			else if(index==2){
+				UserInterfacePanel._zParam3.setText(arg);
+			}
+			else if(index==3){
+				UserInterfacePanel._zParam4.setText(arg);
+			}
+		}
+		else{
+
+			macroParams.z1macroused=true;
+			macroParams.setz1(Double.parseDouble(arg));
+		}
+
+
+
+	}
+
+	public static void setH1value(String arg){
+		if(guiUsedforValues){
+			int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+			if(index==3){
+				UserInterfacePanel._hParam4.setText(arg);
+			}
+		}
+		else{
+
+			macroParams.h1macroused=true;
+			macroParams.seth1(Double.parseDouble(arg));
+		}
+
+	}
+	
+	/**
+	 * This macro does not update the GUI, instead updates a value for transient start time and uses that value for fitting
+	 * @param arg
+	 */
+	public static void setTransientStart(String arg){
+		
+		macroParams.transientStartMacroUsed=true;
+		macroParams.setTransientStartFromMacro(Double.parseDouble(arg));
+	}
+	
+	
+	/**
+	 * This macro calling function works independent for the GUI, updates its own data structure value
+	 * @param arg
+	 */
+	public static void setTransientStop(String arg){
+		
+		macroParams.transientStopMacroUsed=true;
+		macroParams.setTransientStopFromMacro(Double.parseDouble(arg));
+	}
+	
+	/**
+	 * Independent of the GUI like setTransientStop and setTransientStart
+	 * @param arg
+	 */
+	public static void setDataStart(String arg){
+		
+		macroParams.DataStartMacroUsed=true;
+		macroParams.setDataStartFromMacro(Double.parseDouble(arg));
+	}
+	
+	
+	public static void setExcitation(String args){
+		macroParams.setExcitationFileName(args);
+		macroParams.isMacroUsedForExcitation=true;
+		UserInterfacePanel._promptComboBox.setSelectedItem("Load from File");
+		
+	}
+	
+	public static void loadDefaultExcitation(String arg){
+		macroParams.isMacroUsedForDefaultExcitation=true;
+		UserInterfacePanel._promptComboBox.setSelectedItem("Use default Excitation");
+	}
+	
+
+	
+	public static void setPrompBaseLine(String arg){
+		macroParams.isPromptBaseLineMacroused=true;
+		macroParams.setPromptBaseLine(Double.parseDouble(arg));
+	}
+	
+	
+	public static void setDelayPrompt(String arg){
+		macroParams.isDelayExcitationMacroused=true;
+		macroParams.setDelayPrompt(Double.parseDouble(arg));
+		UserInterfacePanel._promptDelaySpinner.setValue(Double.parseDouble(arg));
+	}
+	
+	public static void setWidthPrompt(String arg){
+
+		UserInterfacePanel._promptWidthSpinner.setValue(Double.parseDouble(arg));
+	}
+
+	public static void startFitting(String args){
+		///set the _fitButton action listener to the desired state in UI 452
+		//UserInterfacePanel._fitButton.set
+		//_cancel = false;
+		//_fitInProgress = true;
+		
+		
+		//UserInterfacePanel._fitButton.setEnabled(false);
+		//UserInterfacePanel._fitButton.setText("Cancel Fit");
+//		UserInterfacePanel._fitButton.setActionCommand("Fit Images");
+		UserInterfacePanel._fitButton.doClick();
+		
+		
+	}
+	
+	
+	///////////////Batch Processing///////////////////////////
+	public static void  batchModeSet(String args){
+		//args should have all the file name
+		
+		macroParams.isBatchMacroUsed=Boolean.parseBoolean(args);
+		macroParams.isExportFilemacroUsed=Boolean.parseBoolean(args);
+		//Prefs.set(args, args);
+		
+		
+	}
+	
+	
+	public static void exportFileSet(String arg1, String arg2, String arg3){
+		macroParams.exportPixelFileName=arg1;
+		macroParams.exportHistofileName=arg2;
+		macroParams.exportSummaryFileName=arg3;
+	}
+	
+	public static void startBatchMacro(String arg){
+		UserInterfacePanel._openButton.doClick();
+	}
+	
+	/////////////Batch processing macro ends///////////////////
+	
+	
+	public static void setAnalysisList(String arg1, String arg2){
+		macroParams.isAnalysisListUsed=Boolean.parseBoolean(arg1);
+		macroParams.noOfAnalysisList=Integer.parseInt(arg2);
+		
+	}
+
+	public static void exportPixelFileName(String arg1,String arg2){
+		macroParams.exportPixelFileNameSingleFile=arg1;
+		macroParams.exportPixelFileNameSingleFileSeperator=arg2;
+	}
+	
+	public static void exportPixelFileNameSLIM2(String arg1,String arg2){
+		macroParams.exportPixelFileNameSingleFileSLIM2=arg1;
+		macroParams.exportPixelFileNameSingleFileSeperatorSLIM2=arg2;
+	}
+	
+	public static void exportHistoFileName(String arg1,String arg2){
+		macroParams.exportHistoFileNameSingleFile=arg1;
+		macroParams.exportHistoFileNameSingleFileSeperator=arg2;
+	}
+	
+	public static void exportHistoFileNameSLIM2(String arg1,String arg2){
+		macroParams.exportHistoFileNameSingleFileSLIM2=arg1;
+		macroParams.exportHistoFileNameSingleFileSeperatorSLIM2=arg2;
+	}
+	
+	
+	/**
+	 * macro for starting slim curve by automatic loading of file name
+	 * 
+	 */
+	public static void startSLIMCurve(String arg1, String arg2,String arg3){
+		macroParams.startSLIMCurveWithMacro=Boolean.parseBoolean(arg1);
+		macroParams.startPathName=arg2;
+		macroParams.startFileName=arg3;
+	}
+	
+	public static void setAppendMode(){
+		macroParams.isAppendUsed=true;
+	}
+	
+	public static void setAppendModePixel(){
+		macroParams.isAppendUsedPixel=true;
+		
+	}
+	
+	
+	////check box selection macros/////////
+	
+	public static void fixZ(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+		if(index==0){
+			UserInterfacePanel._zFix1.setSelected(state);
+		}
+		else if(index==1){
+			UserInterfacePanel._zFix2.setSelected(state);
+		}
+		else if(index==2){
+			UserInterfacePanel._zFix3.setSelected(state);
+		}
+		else if(index==3){
+			UserInterfacePanel._zFix4.setSelected(state);
+		}
+		
+	}
+	
+	
+	public static void fixA1(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+		if(index==0){
+			UserInterfacePanel._aFix1.setSelected(state);
+		}
+		else if(index==1){
+			UserInterfacePanel._a1Fix2.setSelected(state);
+		}
+		else if(index==2){
+			UserInterfacePanel._a1Fix3.setSelected(state);
+		}
+		else if(index==3){
+			UserInterfacePanel._aFix4.setSelected(state);
+		}
+		
+	}
+	
+	public static void fixA2(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+		if(index==1){
+			UserInterfacePanel._a2Fix2.setSelected(state);
+		}
+		else if(index==2){
+			UserInterfacePanel._a2Fix3.setSelected(state);
+		}
+
+	}
+	
+	public static void fixA3(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+
+		if(index==2){
+			UserInterfacePanel._a3Fix3.setSelected(state);
+		}
+
+	}
+	
+	public static void fixT1(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+		if(index==0){
+			UserInterfacePanel._tFix1.setSelected(state);
+		}
+		else if(index==1){
+			UserInterfacePanel._t1Fix2.setSelected(state);
+		}
+		else if(index==2){
+			UserInterfacePanel._t3Fix3.setSelected(state);
+		}
+		else if(index==3){
+			UserInterfacePanel._tFix4.setSelected(state);
+		}
+		
+	}
+	
+	public static void fixT2(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+		if(index==1){
+			UserInterfacePanel._t1Fix2.setSelected(state);
+		}
+		else if(index==2){
+			UserInterfacePanel._t3Fix3.setSelected(state);
+		}
+
+	}
+	
+	public static void fixT3(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+
+		if(index==2){
+			UserInterfacePanel._t3Fix3.setSelected(state);
+		}
+
+	}
+	
+	public static void fixH(String args){
+		boolean state=Boolean.parseBoolean(args);
+		int index=UserInterfacePanel._functionComboBox.getSelectedIndex();
+
+
+		if(index==3){
+			UserInterfacePanel._hFix4.setSelected(state);
+		}
+
+	}
+	
+	
+	
 }
+

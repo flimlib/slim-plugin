@@ -34,6 +34,7 @@ import java.util.prefs.Preferences;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
+import loci.slim.SLIMProcessor;
 import loci.slim.analysis.Binning;
 import loci.slim.analysis.HistogramStatistics;
 import loci.slim.analysis.SLIMAnalyzer;
@@ -68,32 +69,76 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 	private BufferedWriter bufferedWriter;
 	private boolean combined = true;
 
+//	@Override
+//	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
+//		// need entire fitted image
+//		if (FitRegion.EACH == region) {
+//			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
+//			if (export && null != fileName) {
+//				char separator;
+//				if (csv) {
+//					separator = COMMA;
+//					if (!fileName.endsWith(CSV_SUFFIX)) {
+//						fileName += CSV_SUFFIX;
+//					}
+//				}
+//				else {
+//					separator = TAB;
+//					if (!fileName.endsWith(TSV_SUFFIX)) {
+//						fileName += TSV_SUFFIX;
+//					}
+//				}
+//				saveFileInPreferences(fileName);
+//				saveAppendInPreferences(append);
+//				saveCSVInPreferences(csv);
+//				export(fileName, append, image, function, parameters, separator);
+//			}
+//		}
+//	}
+//	
 	@Override
 	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
-		// need entire fitted image
 		if (FitRegion.EACH == region) {
-			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
-			if (export && null != fileName) {
-				char separator;
-				if (csv) {
-					separator = COMMA;
-					if (!fileName.endsWith(CSV_SUFFIX)) {
-						fileName += CSV_SUFFIX;
+			char separator=COMMA;
+			if(!SLIMProcessor.macroParams.isAnalysisListUsed){//macro NOT used, normal execution flow
+
+				boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
+				if (export && null != fileName) {
+
+					if (csv) {
+						separator = COMMA;
+						if (!fileName.endsWith(CSV_SUFFIX)) {
+							fileName += CSV_SUFFIX;
+						}
 					}
-				}
-				else {
-					separator = TAB;
-					if (!fileName.endsWith(TSV_SUFFIX)) {
-						fileName += TSV_SUFFIX;
+					else {
+						separator = TAB;
+						if (!fileName.endsWith(TSV_SUFFIX)) {
+							fileName += TSV_SUFFIX;
+						}
 					}
+					saveFileInPreferences(fileName);
+					saveAppendInPreferences(append);
+					saveCSVInPreferences(csv);
+					String recordingCharString=Character.toString(separator);
+					SLIMProcessor.record(SLIMProcessor.SET_EXPORT_HISTO_FILE_NAME, fileName,recordingCharString);
 				}
+			}
+			else{///macro used
+				fileName=SLIMProcessor.macroParams.exportHistoFileNameSingleFile;
+				separator=SLIMProcessor.macroParams.exportHistoFileNameSingleFileSeperator.charAt(0);
+				append=SLIMProcessor.macroParams.isAppendUsed;
+				IJ.log(Character.toString(separator));
 				saveFileInPreferences(fileName);
 				saveAppendInPreferences(append);
 				saveCSVInPreferences(csv);
-				export(fileName, append, image, function, parameters, separator);
+
 			}
+
+			export(fileName, append, image, function, parameters, separator);
 		}
 	}
+
 
 	public void export(String fileName, boolean append, ImgPlus<DoubleType> image,
 		FitFunction function, String parameters, char separator)
@@ -475,6 +520,10 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 		fileName = dialog.getNextString();
 		append   = dialog.getNextBoolean();
 		csv      = dialog.getNextBoolean();
+		
+		if(append){
+			SLIMProcessor.record(SLIMProcessor.SET_APPEND_MODE);
+		}
 		return true;
 	}
 }

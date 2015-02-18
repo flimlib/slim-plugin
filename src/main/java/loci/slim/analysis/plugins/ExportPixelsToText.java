@@ -38,6 +38,7 @@ import java.util.prefs.Preferences;
 
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
+import loci.slim.SLIMProcessor;
 import loci.slim.analysis.SLIMAnalyzer;
 import loci.slim.fitted.FittedValue;
 import loci.slim.fitted.FittedValueFactory;
@@ -74,26 +75,43 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 
 	@Override
 	public void analyze(ImgPlus<DoubleType> image, FitRegion region, FitFunction function, String parameters) {
-		boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
-		if (export && null != fileName) {
-			char separator;
-			if (csv) {
-				separator = COMMA;
-				if (!fileName.endsWith(CSV_SUFFIX)) {
-					fileName += CSV_SUFFIX;
+		char separator=COMMA;
+		if(!SLIMProcessor.macroParams.isAnalysisListUsed){////macro NOT used, normal execution flow
+			boolean export = showFileDialog(getFileFromPreferences(), getAppendFromPreferences(), getCSVFromPreferences());
+			if (export && null != fileName) {
+				
+				if (csv) {
+					separator = COMMA;
+					if (!fileName.endsWith(CSV_SUFFIX)) {
+						fileName += CSV_SUFFIX;
+					}
 				}
-			}
-			else {
-				separator = TAB;
-				if (!fileName.endsWith(TSV_SUFFIX)) {
-					fileName += TSV_SUFFIX;
+				else {
+					separator = TAB;
+					if (!fileName.endsWith(TSV_SUFFIX)) {
+						fileName += TSV_SUFFIX;
+					}
 				}
+				saveFileInPreferences(fileName);
+				saveAppendInPreferences(append);
+				saveCSVInPreferences(csv);
+				String recordingCharString=Character.toString(separator);
+				SLIMProcessor.record(SLIMProcessor.SET_EXPORT_PIXEL_FILE_NAME, fileName,recordingCharString);
 			}
+		}
+		else{//macro used
+			fileName=SLIMProcessor.macroParams.exportPixelFileNameSingleFile;
+			separator=SLIMProcessor.macroParams.exportPixelFileNameSingleFileSeperator.charAt(0);
+			append=SLIMProcessor.macroParams.isAppendUsedPixel;
+			IJ.log(Character.toString(separator));
 			saveFileInPreferences(fileName);
 			saveAppendInPreferences(append);
 			saveCSVInPreferences(csv);
-			export(fileName, append, image, region, function, parameters, separator);
+			
 		}
+		
+		export(fileName, append, image, region, function, parameters, separator);
+
 	}
 
 	public void export(String fileName, boolean append, ImgPlus<DoubleType> image,
@@ -112,6 +130,7 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 				break;
 			case STRETCHED_EXPONENTIAL:
 				//TODO fix stretched; how many components?
+				///it was 1 as far as I remember
 				break;
 		}
 		FittedValue[] fittedValues = FittedValueFactory.createFittedValues(parameters, components);
@@ -329,6 +348,9 @@ public class ExportPixelsToText implements SLIMAnalyzer {
 		fileName = dialog.getNextString();
 		append   = dialog.getNextBoolean();
 		csv      = dialog.getNextBoolean();
+		if(append){
+			SLIMProcessor.record(SLIMProcessor.SET_APPEND_MODE_PIXEL);
+		}
 		return true;
 	}
 

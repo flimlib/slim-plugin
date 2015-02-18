@@ -44,6 +44,8 @@ public class SLIM_PlugIn implements PlugIn {
 		stack.push(slimProcessor);
 		slimProcessor.process(arg);
 		stack.pop();
+
+		
 	}
 
 	/**

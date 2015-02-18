@@ -165,6 +165,7 @@ public class FitInfo {
 	 */
 	public void setFunction(FitFunction function) {
 		_function = function;
+		
 	}
 
 	/**

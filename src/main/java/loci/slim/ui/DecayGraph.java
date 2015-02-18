@@ -535,7 +535,7 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 			double yPromptMax = -Double.MAX_VALUE;
 			for (int i = 0; i < prompt.length; ++i) {
 				// debugging
-				IJ.log(" " + prompt[i]);
+				//IJ.log(" " + prompt[i]);
 
 				// find max
 				if (prompt[i] > yPromptMax) {

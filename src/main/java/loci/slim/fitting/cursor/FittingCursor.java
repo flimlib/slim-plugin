@@ -23,11 +23,14 @@
 
 package loci.slim.fitting.cursor;
 
+import ij.IJ;
+
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Set;
 
 import loci.curvefitter.IFitterEstimator;
+import loci.slim.SLIMProcessor;
 import loci.slim.heuristics.FitterEstimator;
 
 /**
@@ -162,6 +165,8 @@ public class FittingCursor {
 	 * @param promptDelay 
 	 */
 	public void setPromptDelay(String promptDelay) {
+		
+		
 		Double promptDelayValue = null;
 		if (_showBins) {
 			Integer parsedInteger = getIntegerValue(promptDelay);
@@ -186,6 +191,9 @@ public class FittingCursor {
 		// either update others with new valid value or undo our invalid value
 		notifyListeners();
 	}
+
+
+
 
 	/**
 	 * Gets the start of the prompt as a string showing prompt delay.  Handles
@@ -426,10 +434,17 @@ public class FittingCursor {
 	 */
 	public double getPromptBaselineValue() {
 		double returnValue = 0.0;
-		if (_hasPrompt) {
-			returnValue = _fitterEstimator.roundToDecimalPlaces(_promptBaselineValue, DECIMAL_PLACES);
+
+		if(!SLIMProcessor.macroParams.isPromptBaseLineMacroused){
+			if (_hasPrompt) {
+				returnValue = _fitterEstimator.roundToDecimalPlaces(_promptBaselineValue, DECIMAL_PLACES);
+			}
+			return returnValue;
 		}
-		return returnValue;
+
+		else {
+			return _fitterEstimator.roundToDecimalPlaces(SLIMProcessor.macroParams.getPromptBaseLine(), DECIMAL_PLACES);
+		}
 	}
 
 	/**
@@ -497,7 +512,13 @@ public class FittingCursor {
 	 * @return 
 	 */
 	public int getTransientStartBin() {
-		return _transientStartBin;
+		
+		if(SLIMProcessor.macroParams.transientStartMacroUsed){
+			return _fitterEstimator.valueToBin(SLIMProcessor.macroParams.getTransientStartFromMacro(), _inc);
+		}
+		else
+			return _transientStartBin;
+
 	}
 
 	/**
@@ -584,7 +605,18 @@ public class FittingCursor {
 	 * @return 
 	 */
 	public int getDataStartBin() {
-		return _dataStartBin;
+		//return _dataStartBin;
+		
+		
+		if(SLIMProcessor.macroParams.DataStartMacroUsed){
+			return _fitterEstimator.valueToBin(SLIMProcessor.macroParams.getDataStartFromMacro(), _inc);
+		}
+		else
+			return _dataStartBin;
+		
+
+
+		
 	}
 
 	/**
@@ -670,7 +702,15 @@ public class FittingCursor {
 	 * @return 
 	 */
 	public int getTransientStopBin() {
-		return _transientStopBin;
+		
+		
+		
+		if(SLIMProcessor.macroParams.transientStopMacroUsed){
+			return _fitterEstimator.valueToBin(SLIMProcessor.macroParams.getTransientStopFromMacro(), _inc);
+		}
+		else
+			return  _transientStopBin;
+
 	}
 
 	/**
