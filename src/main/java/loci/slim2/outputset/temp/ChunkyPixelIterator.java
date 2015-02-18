@@ -2,7 +2,7 @@
  * #%L
  * SLIM Curve plugin for combined spectral-lifetime image analysis.
  * %%
- * Copyright (C) 2010 - 2014 Board of Regents of the University of
+ * Copyright (C) 2010 - 2015 Board of Regents of the University of
  * Wisconsin-Madison.
  * %%
  * This program is free software: you can redistribute it and/or modify
