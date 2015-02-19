@@ -79,7 +79,8 @@ public class RampGenerator {
 				j = height;
 				break;
 		}
-		if (RampType.BOTTOM == rampType) { //TODO ARG just checking if LUT range will vary for this plane
+		//TODO ARG just checking if LUT range will vary for this plane
+		if (RampType.BOTTOM == rampType) {
 			return ((double) i) / (j * 2);
 		}
 		return ((double) i) / j;

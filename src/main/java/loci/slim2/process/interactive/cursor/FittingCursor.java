@@ -82,8 +82,10 @@ public class FittingCursor {
 	 * @param listener 
 	 */
 	public void addListener(FittingCursorListener listener) {
-		if (null == listener) { System.out.println("FittingCursor.addListener is null"); //TODO ARG
-		 throw new RuntimeException("blah blah"); //TODO ARG just to show up bad listeners during development
+		//TODO ARG
+		if (null == listener) { System.out.println("FittingCursor.addListener is null");
+		 //TODO ARG just to show up bad listeners during development
+		 throw new RuntimeException("blah blah");
 		}
 		synchronized (listeners) {
 			// avoid duplicates
@@ -563,7 +565,8 @@ public class FittingCursor {
 	 * @return 
 	 */
 	public double getDataStartTime() {
-		return dataStartTime; //TODO ARG round it?
+		//TODO ARG round it?
+		return dataStartTime;
 	}
 
 	/**
@@ -619,7 +622,8 @@ public class FittingCursor {
 					synchronized (listeners) {
 						for (FittingCursorListener listener : listeners) {
 							if (null == listener) {
-								System.out.println("null listener for FC"); //TODO ARG error checking during development
+								//TODO ARG error checking during development
+								System.out.println("null listener for FC");
 							}
 							else {
 								listener.cursorChanged(this);

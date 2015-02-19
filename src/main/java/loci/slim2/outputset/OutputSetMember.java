@@ -39,7 +39,8 @@ import net.imglib2.type.numeric.RealType;
 	 * @author Aivar Grislis
 	 */
 	public class OutputSetMember <T extends RealType<T> & NativeType<T>> {
-		private final int POST_XY_INDEX = 2; //TODO ARG find Y index constant somewhere in Imglib2, + 1; also, is Z s'posed to be 2???
+		//TODO ARG find Y index constant somewhere in Imglib2, + 1; also, is Z s'posed to be 2???
+		private final int POST_XY_INDEX = 2;
 		private final String label;
 		private final int index;
 		private final MemberFormula formula;

@@ -96,7 +96,8 @@ public class FittedImageFitter {
 		int lastIndex = imageTypes.length - 1;
 		if (lastIndex >= 0) {
 			HistogramTool histogramTool = HistogramTool.getInstance();
-			histogramTool.show(false); //TODO ARG hardcoded hasChannels parameter
+			//TODO ARG hardcoded hasChannels parameter
+			histogramTool.show(false);
 			histogramTool.setHistogramData
 					(_fittedImages.get(lastIndex).getHistogramData());
 		}

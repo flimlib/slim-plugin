@@ -52,9 +52,10 @@ public class DefaultFitterEstimator implements IFitterEstimator {
 	@Override
 	public int getEstimateStartIndex(double[] yCount, int start, int stop) {
 		//System.out.println("DefaultFitterEstimator.getEstimateStartIndex " + yCount.length + " " + start + " " + stop);
+		//TODO ARG patch for an exception
 		if (start < 0) {
 			start = 0;
-		} //TODO ARG patch for an exception
+		}
 		// start index changes for RLD estimate fit
 		int transEstimateStartIndex = findMax(yCount, start, stop);
 		return transEstimateStartIndex;

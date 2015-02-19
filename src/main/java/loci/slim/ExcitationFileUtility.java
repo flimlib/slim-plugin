@@ -101,7 +101,8 @@ public class ExcitationFileUtility {
 			final ImageMetadata meta = reader.getMetadata().get(0);
 			final int bitsPerPixel = meta.getBitsPerPixel();
 			final boolean littleEndian = meta.isLittleEndian();
-			final boolean interleaved = false; // meta.isInterleaved(); // CTR FIXME use ChannelSeparator to prevent interleaved
+			// CTR FIXME use ChannelSeparator to prevent interleaved
+			final boolean interleaved = false; // meta.isInterleaved();
 			long lifetimeLength = meta.getAxisLength(SCIFIOAxes.LIFETIME);
 			if (lifetimeLength > Integer.MAX_VALUE) {
 				throw new IllegalArgumentException("Lifetime dimension too large: " + lifetimeLength);

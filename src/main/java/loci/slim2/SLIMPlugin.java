@@ -379,7 +379,8 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 		List<Dataset> datasetList = imageSet.getDatasets();
 		Display display = null;
 		for (Dataset d : datasetList) {
-			d.getImgPlus().setChannelMinimum(0, 0.0); //TODO ARG just to see if this works; set min/max
+			//TODO ARG just to see if this works; set min/max
+			d.getImgPlus().setChannelMinimum(0, 0.0);
 			d.getImgPlus().setChannelMaximum(0, 1.0);
 			d.setDirty(true);
 			//d.getImgPlus().getImg().
@@ -431,7 +432,8 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 				inputValues[i] = inputs[i].getValue(x, y);
 			}
 			for (long z = 0; z < dimensions[2]; ++z) {
-				imageSet.setPixelValue(inputValues, position); //TODO ARG how does this work?  why iterate over z when nothing changes within the loop????
+				//TODO ARG how does this work?  why iterate over z when nothing changes within the loop????
+				imageSet.setPixelValue(inputValues, position);
 			}
 		}
 		System.out.println("Elapsed chunky pixel overhead time " + (System.currentTimeMillis() - time));
@@ -530,7 +532,8 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements Comman
 	 * @return 
 	 */
 	private Tool getTool() {
-		return toolService.getTool("aivar"); //TODO ARG find instance of LifetimeTool
+		//TODO ARG find instance of LifetimeTool
+		return toolService.getTool("aivar");
 	}
 
 	/**

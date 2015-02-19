@@ -43,7 +43,9 @@ public interface LocalFitParams {
 
 	public double[] getParams();
 
-	public void setYFitted(double[] yFitted); //TODO ARG not really a fit param
+	//TODO ARG not really a fit param
+	public void setYFitted(double[] yFitted);
 
-	public double[] getYFitted(); //TODO ARG not really a fit param
+	//TODO ARG not really a fit param
+	public double[] getYFitted();
 }

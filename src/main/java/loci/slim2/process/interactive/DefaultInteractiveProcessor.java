@@ -574,7 +574,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 			fittingCursor.setTransientStopIndex ((int) results[CursorEstimator.TRANSIENT_STOP]);
 			fittingCursor.sendNotifications();
 
-			excitationPanel = new ExcitationPanel(excitation, fittingCursor); //TODO ARG excitation cursor change refit problem here; get new values before excitation ready for refit
+			//TODO ARG excitation cursor change refit problem here; get new values before excitation ready for refit
+			excitationPanel = new ExcitationPanel(excitation, fittingCursor);
 
 			success = true;
 		}
@@ -659,7 +660,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	}
 
 	/**
-	 * Combined, summed decay fitting, per plane. //TODO ARG should there be option to sum all planes???
+	 * //TODO ARG should there be option to sum all planes???
+	 * Combined, summed decay fitting, per plane.
 	 *
 	 * @param position X & Y are ignored
 	 * @return fit results
@@ -727,7 +729,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		List<Dataset> datasetList = imageSet.getDatasets();
 		Display display = null;
 		for (Dataset d : datasetList) {
-			d.getImgPlus().setChannelMinimum(0, 0.0); //TODO ARG just to see if this works; set min/max
+			//TODO ARG just to see if this works; set min/max
+			d.getImgPlus().setChannelMinimum(0, 0.0);
 			d.getImgPlus().setChannelMaximum(0, 1.0);
 			d.setDirty(true);
 			display = displayService.createDisplay(d);
@@ -1108,7 +1111,8 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 		if (null == decayGraph) {
 			decayGraph = new DefaultDecayGraph();
 		}
-		JFrame frame = decayGraph.init(uiPanel.getFrame(), bins, timeInc, null); //TODO ARG need grayscale image as 'pixel picker'
+		//TODO ARG need grayscale image as 'pixel picker'
+		JFrame frame = decayGraph.init(uiPanel.getFrame(), bins, timeInc, null);
 		frame.toFront();
 		decayGraph.setTitle(title);
 		decayGraph.setFittingCursor(fittingCursor);

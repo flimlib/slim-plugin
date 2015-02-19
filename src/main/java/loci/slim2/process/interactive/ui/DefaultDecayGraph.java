@@ -264,7 +264,8 @@ public class DefaultDecayGraph implements DecayGraph, IStartStopProportionListen
 				@Override
 				public void windowClosing(WindowEvent e) {
 					if (null != picker) {
-						picker.hideCursor(); //TODO ARG does not work if you use the name 'pixelPicker' (collides with local var; this.pP won't work).
+						//TODO ARG does not work if you use the name 'pixelPicker' (collides with local var; this.pP won't work).
+						picker.hideCursor();
 					}
 				}
 			});

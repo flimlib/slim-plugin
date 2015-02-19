@@ -633,7 +633,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		final IUserInterfacePanel uiPanel = new UserInterfacePanel(TABBED,
 			USE_TAU, _bins, _timeRange, _analysis.getChoices(),
 			_binning.getChoices(), fittingCursorHelper, fitterEstimator);
-		_uiPanel = uiPanel; //TODO almost got by having it just be a local variable
+		//TODO almost got by having it just be a local variable
+		_uiPanel = uiPanel;
 		
 		//UserInterfacePanel._promptComboBox.setSelectedItem("load deafult");
 		
@@ -986,7 +987,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 						}
 					}
 
-					//uiPanel.enable(false); //TODO this might be better to be same as grayScalePanel
+					//TODO this might be better to be same as grayScalePanel
+					//uiPanel.enable(false);
 					_grayScaleImage.enable(false);
 
 					// get settings of requested fit
@@ -1057,7 +1059,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 				}
 			}
 				);
-		// get a correction factor for photon counts //TODO this is available in metadata
+		//TODO this is available in metadata
+		// get a correction factor for photon counts
 		_minNonZeroPhotonCount = _grayScaleImage.getMinNonZeroPhotonCount();
 
 		// get estimated threshold value
@@ -1286,7 +1289,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 			for (int i = 0; i < files.length; ++i) {
 				File file = files[i];
 
-				//TODO if (i > 0) break; //TODO just process a single image
+				//TODO just process a single image
+				//TODO if (i > 0) break;
 
 
 				// show progress bar
@@ -1465,7 +1469,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 			_fittingCursor.setTransientStopBin ((int) results[CursorEstimator.TRANSIENT_STOP]);
 			_fittingCursor.sendNotifications();
 
-			_excitationPanel = new ExcitationPanel(excitation, _fittingCursor); //TODO ARG excitation cursor change refit problem here; get new values before excitation ready for refit
+			//TODO ARG excitation cursor change refit problem here; get new values before excitation ready for refit
+			_excitationPanel = new ExcitationPanel(excitation, _fittingCursor);
 
 			success = true;
 		}
@@ -1492,7 +1497,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		_param          = uiPanel.getParameters();
 		_free           = uiPanel.getFree();
 
-		_startBin       = cursor.getDataStartBin(); //TODO ARG 9/28/12 was getTrans.StartBin
+		//TODO ARG 9/28/12 was getTrans.StartBin
+		_startBin       = cursor.getDataStartBin();
 		_stopBin        = cursor.getTransientStopBin();
 	}
 
@@ -1824,7 +1830,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		// create a fitting engine to use
 		IFittingEngine fittingEngine = Configuration.getInstance().getFittingEngine();
-		ICurveFitter curveFitter = getCurveFitter(uiPanel); //TODO ARG shouldn't all UI panel info go into FitInfo???
+		//TODO ARG shouldn't all UI panel info go into FitInfo???
+		ICurveFitter curveFitter = getCurveFitter(uiPanel);
 		fittingEngine.setCurveFitter(curveFitter);
 
 		return fitImage(fittingEngine, fitInfo, decayImage, processor, previousImage, newImage, batch);
@@ -1846,7 +1853,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		IFittingEngine fittingEngine,
 		FitInfo fitInfo,
 		IDecayImage decayImage,
-		IProcessor processor, //TODO ARG really need both decayImage & processor?  Processor is a poor name
+		//TODO ARG really need both decayImage & processor?  Processor is a poor name
+		IProcessor processor,
 		IFittedImage previousImage,
 		IFittedImage newImage,
 		boolean batch)
@@ -2100,7 +2108,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		_grayScaleImage.hideCursor();
 
-		double params[] = uiPanel.getParameters(); //TODO go cumulative; i.e. refit with last fit results as estimate
+		//TODO go cumulative; i.e. refit with last fit results as estimate
+		double params[] = uiPanel.getParameters();
 
 		//IJ.log("FIT SUMMED startBin " + _startBin + " stopBin " + _stopBin);
 
@@ -2132,7 +2141,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		for (int channel : getChannelIndices(_fitAllChannels, _channel, _channels)) {
 			inputLocation[2] = channel;
 			curveFitData = new CurveFitData();
-			curveFitData.setParams(params.clone()); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
+			//TODO NO NO NO s/b either from UI or fitted point or fitted whole image
+			curveFitData.setParams(params.clone());
 			yCount = new double[_bins];
 			for (int b = 0; b < _bins; ++b) {
 				yCount[b] = 0.0;
@@ -2192,8 +2202,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		// get the results
 		int channels = _fitAllChannels ? _channels : 1;
-		//fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
-		fittedPixels = makeImage(channels + 1, 2, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
+		//TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
+		//fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount());
+		//TODO this is a workaround; unused pixels will remain NaNs
+		fittedPixels = makeImage(channels + 1, 2, 2, uiPanel.getParameterCount());
 		RandomAccess<DoubleType> resultsCursor = fittedPixels.randomAccess();
 		setFittedParamsFromData(resultsCursor, dataArray);
 		return fittedPixels;
@@ -2314,18 +2326,22 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		// update UI parameters
 		//TODO AIC experimental code; second parameter is actually AIC
-		uiPanel.setParameters(dataArray[0].getParams(), dataArray[0].getChiSquare()); //TODO, just picked first ROI here!
+		//TODO, just picked first ROI here!
+		uiPanel.setParameters(dataArray[0].getParams(), dataArray[0].getChiSquare());
 
 		// get the results
 		int channels = _fitAllChannels ? _channels : 1;
-		//fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
-		fittedPixels = makeImage(channels + 1, getRois().length + 1, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
+		//TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
+		//fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount());
+		//TODO this is a workaround; unused pixels will remain NaNs
+		fittedPixels = makeImage(channels + 1, getRois().length + 1, 2, uiPanel.getParameterCount());
 		RandomAccess<DoubleType> resultsCursor = fittedPixels.randomAccess();
 		setFittedParamsFromData(resultsCursor, dataArray);
 		return fittedPixels;
 	}
 
-	// added kludge to make moving cursors in DecayGraph do a refit. //TODO this has to change FittingCursor will know whenever cursors change.
+	//TODO this has to change FittingCursor will know whenever cursors change.
+	// added kludge to make moving cursors in DecayGraph do a refit.
 	private ImgPlus<DoubleType> fitPixel(
 		IUserInterfacePanel uiPanel,
 		FittingCursor fittingCursor) {
@@ -2362,7 +2378,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		// build the data
 		ArrayList<ICurveFitData> curveFitDataList = new ArrayList<ICurveFitData>();
-		double params[] = uiPanel.getParameters(); //TODO wrong; params should possibly come from already fitted data
+		//TODO wrong; params should possibly come from already fitted data
+		double params[] = uiPanel.getParameters();
 		double chiSquareTarget = uiPanel.getChiSquareTarget();
 		ICurveFitData curveFitData;
 		double yCount[];
@@ -2375,7 +2392,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 		// loop over all channels or just the current one
 		for (int channel : getChannelIndices(_fitAllChannels, _channel, _channels)) {
 			curveFitData = new CurveFitData();
-			curveFitData.setParams(params.clone()); //TODO NO NO NO s/b either from UI or fitted point or fitted whole image
+			//TODO NO NO NO s/b either from UI or fitted point or fitted whole image
+			curveFitData.setParams(params.clone());
 
 			location[2] = channel;
 			yCount = processor.getPixel(location);
@@ -2443,8 +2461,9 @@ public class SLIMProcessor <T extends RealType<T>> {
 		
 		
 		
+		//TODO ARG this s/b the photon count for the appropriate channel; currently it will sum all channels.
 		showDecayGraph(title, uiPanel, _fittingCursor,
-			dataArray[visibleChannel], photons); //TODO ARG this s/b the photon count for the appropriate channel; currently it will sum all channels.
+			dataArray[visibleChannel], photons);
 
 		// update UI parameters
 		//TODO experimental AIC code; second parameter is actually AIC
@@ -2452,8 +2471,10 @@ public class SLIMProcessor <T extends RealType<T>> {
 
 		// get the results
 		int channels = _fitAllChannels ? _channels : 1;
-		//fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount()); //TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
-		fittedPixels = makeImage(channels + 1, 2, 2, uiPanel.getParameterCount()); //TODO this is a workaround; unused pixels will remain NaNs
+		//TODO ImgLib bug if you use 1, 1, 1, 4; see "imglibBug()" below.
+		//fittedPixels = makeImage(channels, 1, 1, uiPanel.getParameterCount());
+		//TODO this is a workaround; unused pixels will remain NaNs
+		fittedPixels = makeImage(channels + 1, 2, 2, uiPanel.getParameterCount());
 		RandomAccess<DoubleType> resultsCursor = fittedPixels.randomAccess();
 		setFittedParamsFromData(resultsCursor, dataArray);
 		return fittedPixels;
@@ -2579,7 +2600,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 	private double getData(RandomAccess<T> cursor, int channel, int x, int y, int bin) {
 		int dim[];
 		if (_hasChannels) {
-			dim = new int[] { x, y, bin, channel }; //TODO ARG is this order guaranteed?
+			//TODO ARG is this order guaranteed?
+			dim = new int[] { x, y, bin, channel };
 		}
 		else {
 			dim = new int[] { x, y, bin };
@@ -2602,7 +2624,8 @@ public class SLIMProcessor <T extends RealType<T>> {
 //		IJ.log("channels width height params " + channels + " " + width + " " + height + " " + parameters);
 
 		// create image object
-		long[] dim = { width, height, channels, parameters }; //TODO when we keep chi square in image  ++parameters };
+		//TODO when we keep chi square in image  ++parameters };
+		long[] dim = { width, height, channels, parameters };
 		image = ImageUtils.create("Fitted", dim);
 
 		// initialize image

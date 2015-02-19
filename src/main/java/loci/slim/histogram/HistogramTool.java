@@ -300,7 +300,8 @@ public class HistogramTool {
 	private void changed(double minView, double maxView,
 		double minLUT, double maxLUT) {
 		synchronized (_synchObject) {
-			_histogramDataGroup.setMinMaxView(minView, maxView); //TODO ARG added this 9/27 to change hDG internal minMaxViews
+			//TODO ARG added this 9/27 to change hDG internal minMaxViews
+			_histogramDataGroup.setMinMaxView(minView, maxView);
 			_histogramPanel.setStatistics(_histogramDataGroup.getStatistics(WIDTH));
 			_colorBarPanel.setMinMax(minView, maxView, minLUT, maxLUT);
 			//TODO changed is currently called from two places:
@@ -492,8 +493,10 @@ public class HistogramTool {
 							pixel = cursorPixelFromValue(true, maxLUT);
 							//pixel = valueToPixel(maxLUT);
 							//IJ.log("PeriodicTask.run maxLUT is " + maxLUT + " cursor is at " + pixel);
-							//_histogramPanel.setCursors(null, INSET + pixel + 1); //TODO ARG this is still a little bit off
-							_histogramPanel.setCursors(null, pixel); //TODO ARG this is still a little off
+							//TODO ARG this is still a little bit off
+							//_histogramPanel.setCursors(null, INSET + pixel + 1);
+							//TODO ARG this is still a little off
+							_histogramPanel.setCursors(null, pixel);
 						}
 					}
 					else {
@@ -501,8 +504,10 @@ public class HistogramTool {
 							pixel = cursorPixelFromValue(false, minLUT);
 							//pixel = valueToPixel(minLUT);
 							//IJ.log("PeriodicTask.run minLUT is " + minLUT + " cursor is at " + pixel);
-							//_histogramPanel.setCursors(INSET + pixel, null); //TODO ARG this is still a little bit off
-							_histogramPanel.setCursors(pixel, null); //TODO ARG this is still a little off
+							//TODO ARG this is still a little bit off
+							//_histogramPanel.setCursors(INSET + pixel, null);
+							//TODO ARG this is still a little off
+							_histogramPanel.setCursors(pixel, null);
 
 						}
 					}
@@ -548,7 +553,8 @@ public class HistogramTool {
 		@Override
 		public void setAutoRange(boolean autoRange) {
 			synchronized (_synchObject) {
-				_histogramDataGroup.setAutoRange(autoRange); //TODO shows up twice now!!!!TRY CALLING AFTER
+				//TODO shows up twice now!!!!TRY CALLING AFTER
+				_histogramDataGroup.setAutoRange(autoRange);
 
 				if (autoRange) {
 					//TODO ARG:
@@ -631,7 +637,8 @@ public class HistogramTool {
 			if (minLUT < maxLUT) {
 				changed = true;
 
-				synchronized (_synchObject) { //TODO redo half-assed synchronization in 1.2
+				//TODO redo half-assed synchronization in 1.2
+				synchronized (_synchObject) {
 					// adjust view range to LUT range
 					minView = minLUT;
 					maxView = maxLUT;
