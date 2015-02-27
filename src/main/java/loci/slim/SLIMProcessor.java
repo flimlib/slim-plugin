@@ -375,6 +375,10 @@ public class SLIMProcessor<T extends RealType<T>> {
 
 		else {
 			final File[] files = showFileDialog(getPathFromPreferences());
+			if (files == null || files.length == 0) {
+				// operation canceled
+				return;
+			}
 			if (files.length > 1) {
 				showError("Error in Batch Processing",
 					"Need to fit a sample image first");
