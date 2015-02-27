@@ -33,8 +33,9 @@
 		<url>https://slim-curve.github.io/</url>
 	</organization>
 
-	<!-- FIXME: Switch curve-fitter to release dependency! -->
 	<properties>
+		<main-class>loci.slim.About</main-class>
+		<!-- FIXME: Switch curve-fitter to release dependency! -->
 		<enforcer.skip>true</enforcer.skip>
 	</properties>
 
@@ -111,6 +112,7 @@
 				<configuration>
 					<archive>
 						<manifest>
+							<mainClass>${main-class}</mainClass>
 							<packageName>loci.slim</packageName>
 						</manifest>
 					</archive>
@@ -170,7 +172,7 @@ Wisconsin-Madison.</organizationName>
 						<configuration>
 							<archive>
 								<manifest>
-									<mainClass>loci.slim.SLIM_PlugIn</mainClass>
+									<mainClass>${main-class}</mainClass>
 								</manifest>
 							</archive>
 							<descriptors>
