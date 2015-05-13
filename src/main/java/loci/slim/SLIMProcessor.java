@@ -262,6 +262,7 @@ public class SLIMProcessor<T extends RealType<T>> {
 	public static final String SET_T3_FIX = "fixT3";
 
 	public static final String SET_H_FIX = "fixH";
+	
 
 	public static FitInfo fitInfo = new FitInfo();
 
@@ -3724,7 +3725,8 @@ public class SLIMProcessor<T extends RealType<T>> {
 		if (index == 3) {
 			UserInterfacePanel._hFix4.setSelected(state);
 		}
-
 	}
+	
+
 
 }

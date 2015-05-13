@@ -133,6 +133,9 @@ public class paramSetMacro {
 	public String exportHistoFileNameSingleFileSeperatorSLIM2 = null;
 
 	public boolean isExcitationChanging = false;
+	//macro for exporting histogram
+	public static boolean writeParamOnce=false;
+	public static final boolean useDetailStat=false;//boolean for exporting detail statistics
 
 	// variables for starting SLIM with macro
 	public boolean startSLIMCurveWithMacro = false;

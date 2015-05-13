@@ -188,10 +188,11 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 		if (null != bufferedWriter) {
 			try {
 				// title this export
-				bufferedWriter.write("Export Histograms" + separator + image.getName());
-				bufferedWriter.newLine();
-				bufferedWriter.newLine();
-
+				if(SLIMProcessor.macroParams.useDetailStat){
+					bufferedWriter.write("Export Histograms" + separator + image.getName());
+					bufferedWriter.newLine();
+					bufferedWriter.newLine();
+				}
 				// look at image dimensions
 				final long[] dimensions = new long[image.numDimensions()];
 				image.dimensions(dimensions);
@@ -199,22 +200,32 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 
 				// for all channels
 				for (int channel = 0; channel < channels; ++channel) {
-					if (channels > 1) {
-						bufferedWriter.write("Channel" + separator + channel);
-						bufferedWriter.newLine();
-						bufferedWriter.newLine();
+					if(SLIMProcessor.macroParams.useDetailStat){
+						if (channels > 1) {
+							bufferedWriter.write("Channel" + separator + channel);
+							bufferedWriter.newLine();
+							bufferedWriter.newLine();
+						}
 					}
-
+					if(!SLIMProcessor.macroParams.useDetailStat & channel>0){continue;}//one channel if use brief stat
+					IJ.log("Channel "+Integer.toString(channel));
 					final HistogramStatistics[] statisticsArray =
 						new HistogramStatistics[fittedValues.length];
 					for (int i = 0; i < fittedValues.length; ++i) {
 						statisticsArray[i] =
 							getStatistics(image, channel, params, fittedValues[i]);
 					}
-
+					IJ.log("channels "+channels);
+					IJ.log("dim "+Integer.toString((int)dimensions[1]));
 					if (combined) {
-						HistogramStatistics.export(statisticsArray, bufferedWriter,
-							separator);
+						if(SLIMProcessor.macroParams.useDetailStat){
+							HistogramStatistics.export(statisticsArray, bufferedWriter,
+									separator);
+						}
+						else{
+							HistogramStatistics.export(statisticsArray, bufferedWriter,
+									separator,image.getName());
+						}
 					}
 					else {
 						for (final HistogramStatistics statistics : statisticsArray) {

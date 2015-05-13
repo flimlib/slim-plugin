@@ -23,11 +23,15 @@
 
 package loci.slim.analysis;
 
+import ij.IJ;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+
+import loci.slim.SLIMProcessor;
 
 /**
  * A histogram statistics class used for export to text.
@@ -259,50 +263,59 @@ public class HistogramStatistics {
 			// don't process any more parameters; all will have same count
 			return false;
 		}
-		writer.write("Parameter" + separator + getTitle());
-		writer.newLine();
 
-		// put out statistics
-		writer.write("Min" + separator + showParameter(getMin()));
-		writer.newLine();
-		writer.write("Max" + separator + showParameter(getMax()));
-		writer.newLine();
-		writer.write("Count" + separator + getCount());
-		writer.newLine();
-		writer.write("Mean" + separator + showParameter(getMean()));
-		writer.newLine();
-		writer.write("Standard Deviation" + separator +
-			showParameter(getStandardDeviation()));
-		writer.newLine();
-		writer
+		if(SLIMProcessor.macroParams.useDetailStat){
+			///add check for either all statisctics or just mean
+			//if(meanValueOnly){}else{}
+			writer.write("Parameter" + separator + getTitle());
+			writer.newLine();
+
+			// put out statistics
+			writer.write("Min" + separator + showParameter(getMin()));
+			writer.newLine();
+			writer.write("Max" + separator + showParameter(getMax()));
+			writer.newLine();
+			writer.write("Count" + separator + getCount());
+			writer.newLine();
+			writer.write("Mean" + separator + showParameter(getMean()));
+			writer.newLine();
+			writer.write("Standard Deviation" + separator +
+					showParameter(getStandardDeviation()));
+			writer.newLine();
+			writer
 			.write("1st Quartile" + separator + showParameter(getFirstQuartile()));
-		writer.newLine();
-		writer.write("Median" + separator + showParameter(getMedian()));
-		writer.newLine();
-		writer
+			writer.newLine();
+			writer.write("Median" + separator + showParameter(getMedian()));
+			writer.newLine();
+			writer
 			.write("3rd Quartile" + separator + showParameter(getThirdQuartile()));
-		writer.newLine();
+			writer.newLine();
 
-		// put out histogram
-		final long[] histo = getHistogram();
-		writer.write("Histogram");
-		writer.newLine();
-		writer.write("Bins" + separator + histo.length);
-		writer.newLine();
-		writer.write("Min" + separator + showParameter(getMinRange()));
-		writer.newLine();
-		writer.write("Max" + separator + showParameter(getMaxRange()));
-		writer.newLine();
-		writer.write("Count" + separator + getHistogramCount());
-		writer.newLine();
+			// put out histogram
+			final long[] histo = getHistogram();
+			writer.write("Histogram");
+			writer.newLine();
+			writer.write("Bins" + separator + histo.length);
+			writer.newLine();
+			writer.write("Min" + separator + showParameter(getMinRange()));
+			writer.newLine();
+			writer.write("Max" + separator + showParameter(getMaxRange()));
+			writer.newLine();
+			writer.write("Count" + separator + getHistogramCount());
+			writer.newLine();
 
-		final double[] values =
-			Binning.centerValuesPerBin(histo.length, getMinRange(), getMaxRange());
-		for (int j = 0; j < histo.length; ++j) {
-			writer.write(showParameter(values[j]) + separator + histo[j]);
+			final double[] values =
+					Binning.centerValuesPerBin(histo.length, getMinRange(), getMaxRange());
+			for (int j = 0; j < histo.length; ++j) {
+				writer.write(showParameter(values[j]) + separator + histo[j]);
+				writer.newLine();
+			}
 			writer.newLine();
 		}
-		writer.newLine();
+		else{
+			writer.write("Mean" + separator + showParameter(getMean()));
+			writer.newLine();
+		}
 		return true;
 	}
 
@@ -330,176 +343,238 @@ public class HistogramStatistics {
 			// don't process any more parameters; all will have same count
 			return false;
 		}
-
 		boolean firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Parameter" + separator + statistic.getTitle());
-		}
-		writer.newLine();
 
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Min" + separator + showParameter(statistic.getMin()));
-		}
-		writer.newLine();
 
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Max" + separator + showParameter(statistic.getMax()));
-		}
-		writer.newLine();
-
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Count" + separator + statistic.getCount());
-		}
-		writer.newLine();
-
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Mean" + separator + showParameter(statistic.getMean()));
-		}
-		writer.newLine();
-
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Standard Deviation" + separator +
-				showParameter(statistic.getStandardDeviation()));
-		}
-		writer.newLine();
-
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("1st Quartile" + separator +
-				showParameter(statistic.getFirstQuartile()));
-		}
-		writer.newLine();
-
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Median" + separator + showParameter(statistic.getMedian()));
-		}
-		writer.newLine();
-
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("3rd Quartile" + separator +
-				showParameter(statistic.getThirdQuartile()));
-		}
-		writer.newLine();
-
-		// get all of the histograms into memory
-		int maxHistosLength = Integer.MIN_VALUE;
-		final long[][] histos = new long[statistics.length][];
-		final double[][] centers = new double[statistics.length][];
-		for (int i = 0; i < statistics.length; ++i) {
-			histos[i] = statistics[i].getHistogram();
-			if (histos[i].length > maxHistosLength) {
-				maxHistosLength = histos[i].length;
-			}
-			centers[i] =
-				Binning.centerValuesPerBin(histos[i].length, statistics[i]
-					.getMinRange(), statistics[i].getMaxRange());
-		}
-
-		firstTime = true;
-		for (final long[] histo : histos) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Histogram Bins" + separator + histo.length);
-		}
-		writer.newLine();
-
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Histogram Min" + separator +
-				showParameter(statistic.getMinRange()));
-		}
-		writer.newLine();
-
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Histogram Max" + separator +
-				showParameter(statistic.getMaxRange()));
-		}
-		writer.newLine();
-
-		firstTime = true;
-		for (final HistogramStatistics statistic : statistics) {
-			if (!firstTime) {
-				writer.write(separator);
-			}
-			firstTime = false;
-			writer.write("Histogram Count" + separator +
-				statistic.getHistogramCount());
-		}
-		writer.newLine();
-
-		for (int bin = 0; bin < maxHistosLength; ++bin) {
-			firstTime = true;
-			for (int i = 0; i < histos.length; ++i) {
+		if(SLIMProcessor.macroParams.useDetailStat){///use detailed stat
+			for (final HistogramStatistics statistic : statistics) {
 				if (!firstTime) {
 					writer.write(separator);
 				}
 				firstTime = false;
-				if (bin < histos[i].length) {
-					writer.write("" + showParameter(centers[i][bin]) + separator +
-						histos[i][bin]);
-				}
-				else {
+				writer.write("Parameter" + separator + statistic.getTitle());
+				//writer.newLine();
+			}
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
 					writer.write(separator);
 				}
+				firstTime = false;
+				writer.write("Min" + separator + showParameter(statistic.getMin()));
 			}
 			writer.newLine();
+
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("Max" + separator + showParameter(statistic.getMax()));
+			}
+			writer.newLine();
+
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("Count" + separator + statistic.getCount());
+			}
+			writer.newLine();
+
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("Mean" + separator + showParameter(statistic.getMean()));
+			}
+			writer.newLine();
+
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("Standard Deviation" + separator +
+						showParameter(statistic.getStandardDeviation()));
+			}
+			writer.newLine();
+
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("1st Quartile" + separator +
+						showParameter(statistic.getFirstQuartile()));
+			}
+			writer.newLine();
+
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("Median" + separator + showParameter(statistic.getMedian()));
+			}
+			writer.newLine();
+
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("3rd Quartile" + separator +
+						showParameter(statistic.getThirdQuartile()));
+			}
+			writer.newLine();
+
+			// get all of the histograms into memory
+			int maxHistosLength = Integer.MIN_VALUE;
+			final long[][] histos = new long[statistics.length][];
+			final double[][] centers = new double[statistics.length][];
+			for (int i = 0; i < statistics.length; ++i) {
+				histos[i] = statistics[i].getHistogram();
+				if (histos[i].length > maxHistosLength) {
+					maxHistosLength = histos[i].length;
+				}
+				centers[i] =
+						Binning.centerValuesPerBin(histos[i].length, statistics[i]
+								.getMinRange(), statistics[i].getMaxRange());
+			}
+
+			firstTime = true;
+			for (final long[] histo : histos) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("Histogram Bins" + separator + histo.length);
+			}
+			writer.newLine();
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("Histogram Min" + separator +
+						showParameter(statistic.getMinRange()));
+			}
+			writer.newLine();
+
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("Histogram Max" + separator +
+						showParameter(statistic.getMaxRange()));
+			}
+			writer.newLine();
+
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write("Histogram Count" + separator +
+						statistic.getHistogramCount());
+			}
+			writer.newLine();
+
+			for (int bin = 0; bin < maxHistosLength; ++bin) {
+				firstTime = true;
+				for (int i = 0; i < histos.length; ++i) {
+					if (!firstTime) {
+						writer.write(separator);
+					}
+					firstTime = false;
+					if (bin < histos[i].length) {
+						writer.write("" + showParameter(centers[i][bin]) + separator +
+								histos[i][bin]);
+					}
+					else {
+						writer.write(separator);
+					}
+				}
+				writer.newLine();
+			}
+		}
+		else {/// for NOT detail stat
+			if(!SLIMProcessor.macroParams.writeParamOnce){
+				for (final HistogramStatistics statistic : statistics) {
+					if (!firstTime) {
+						writer.write(separator);
+					}
+					firstTime = false;//writing parameters
+					writer.write(statistic.getTitle());//title is A T Z X
+				}
+				SLIMProcessor.macroParams.writeParamOnce=true;
+			}
+			writer.newLine();
+			firstTime = true;
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;
+				writer.write( showParameter(statistic.getMean()));
+			}
+			writer.newLine();
+
 		}
 
 		return true;
+	}
+
+	/**
+	 * exports statistics only with mean values.
+	 * @param statistics
+	 * @param writer
+	 * @param separator
+	 * @param name
+	 * @return
+	 * @throws IOException
+	 */
+	public static boolean export(final HistogramStatistics[] statistics,
+			final BufferedWriter writer, final char separator,final String name) throws IOException{
+
+		boolean firstTime = true;
+		if(!SLIMProcessor.macroParams.writeParamOnce){
+			for (final HistogramStatistics statistic : statistics) {
+				if (!firstTime) {
+					writer.write(separator);
+				}
+				firstTime = false;//writing parameters
+				writer.write(statistic.getTitle());//title is A T Z X
+			}
+			SLIMProcessor.macroParams.writeParamOnce=true;
+		}
+		writer.newLine();
+		firstTime = true;
+		for (final HistogramStatistics statistic : statistics) {
+			if (!firstTime) {
+				writer.write(separator);
+			}
+			firstTime = false;
+			writer.write( showParameter(statistic.getMean()));
+		}
+		writer.write(separator+name);
+		return true;
+
+
 	}
 
 	private static String showParameter(final double parameter) {
