@@ -135,13 +135,14 @@ public class paramSetMacro {
 	public boolean isExcitationChanging = false;
 	//macro for exporting histogram
 	public static boolean writeParamOnce=false;
-	public static final boolean useDetailStat=false;//boolean for exporting detail statistics
-
+	public static boolean useDetailStat=false;//boolean for exporting detail statistics
+	public static boolean isAppendSet=false;
 	// variables for starting SLIM with macro
 	public boolean startSLIMCurveWithMacro = false;
 	public String startPathName = null;
 	public String startFileName = null;
-
+	public String[] meanStatValues; 
+	public boolean fittingDone=false;
 	// //append
 	public boolean isAppendUsed = false;
 	public boolean isAppendUsedPixel = false;

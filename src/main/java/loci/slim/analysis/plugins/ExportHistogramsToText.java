@@ -208,15 +208,15 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 						}
 					}
 					if(!SLIMProcessor.macroParams.useDetailStat & channel>0){continue;}//one channel if use brief stat
-					IJ.log("Channel "+Integer.toString(channel));
+					//IJ.log("Channel "+Integer.toString(channel));
 					final HistogramStatistics[] statisticsArray =
 						new HistogramStatistics[fittedValues.length];
 					for (int i = 0; i < fittedValues.length; ++i) {
 						statisticsArray[i] =
 							getStatistics(image, channel, params, fittedValues[i]);
 					}
-					IJ.log("channels "+channels);
-					IJ.log("dim "+Integer.toString((int)dimensions[1]));
+					//IJ.log("channels "+channels);
+					//IJ.log("dim "+Integer.toString((int)dimensions[1]));
 					if (combined) {
 						if(SLIMProcessor.macroParams.useDetailStat){
 							HistogramStatistics.export(statisticsArray, bufferedWriter,
@@ -562,6 +562,7 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 		}
 		fileName = dialog.getNextString();
 		append = dialog.getNextBoolean();
+		SLIMProcessor.macroParams.isAppendUsed=append;//recod append mode so that when we append in brief mode, it does not add titles
 		csv = dialog.getNextBoolean();
 
 		if (append) {

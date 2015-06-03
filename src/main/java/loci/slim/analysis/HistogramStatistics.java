@@ -512,13 +512,14 @@ public class HistogramStatistics {
 				writer.newLine();
 			}
 		}
-		else {/// for NOT detail stat
+		else {/// for Brief stat, concise format
 			if(!SLIMProcessor.macroParams.writeParamOnce){
 				for (final HistogramStatistics statistic : statistics) {
 					if (!firstTime) {
 						writer.write(separator);
 					}
 					firstTime = false;//writing parameters
+					IJ.log("getting titles"+statistic.getTitle());
 					writer.write(statistic.getTitle());//title is A T Z X
 				}
 				SLIMProcessor.macroParams.writeParamOnce=true;
@@ -552,25 +553,34 @@ public class HistogramStatistics {
 			final BufferedWriter writer, final char separator,final String name) throws IOException{
 
 		boolean firstTime = true;
-		if(!SLIMProcessor.macroParams.writeParamOnce){
+		if(!SLIMProcessor.macroParams.isAppendUsed){///titles are not written when in append mode
 			for (final HistogramStatistics statistic : statistics) {
+
 				if (!firstTime) {
-					writer.write(separator);
+					writer.write(separator);		
 				}
 				firstTime = false;//writing parameters
-				writer.write(statistic.getTitle());//title is A T Z X
+					writer.write(statistic.getTitle());
 			}
-			SLIMProcessor.macroParams.writeParamOnce=true;
+			writer.newLine();
 		}
-		writer.newLine();
+		SLIMProcessor.macroParams.writeParamOnce=true;
+
+
 		firstTime = true;
+		SLIMProcessor.macroParams.meanStatValues= new String[statistics.length];
+		int i=0;
+
 		for (final HistogramStatistics statistic : statistics) {
 			if (!firstTime) {
 				writer.write(separator);
 			}
 			firstTime = false;
-			writer.write( showParameter(statistic.getMean()));
+			double meanVal=statistic.getMean();
+			SLIMProcessor.macroParams.meanStatValues[i++]=String.format("%.6f", meanVal);
+			writer.write( showParameter(meanVal));
 		}
+		SLIMProcessor.macroParams.fittingDone=true;
 		writer.write(separator+name);
 		return true;
 
