@@ -65,6 +65,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.scijava.plugins.commands.debug.ParamAssignOrder;
+
 import loci.curvefitter.ICurveFitter.FitAlgorithm;
 import loci.curvefitter.ICurveFitter.FitFunction;
 import loci.curvefitter.ICurveFitter.FitRegion;
@@ -151,7 +153,10 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 		DOUBLE_EXPONENTIAL, TRIPLE_EXPONENTIAL, STRETCHED_EXPONENTIAL },
 			NOISE_MODEL_ITEMS[] = { GAUSSIAN_FIT, POISSON_FIT, POISSON_DATA,
 				MAXIMUM_LIKELIHOOD };
-
+	private static final String meanSingleStrings[]={"A",Character.toString(TAU),"Z",Character.toString(CHI)};
+	private static final String meanDoubleStrings[]={"A1","A2",Character.toString(TAU)+"1",Character.toString(TAU)+"2","Z",Character.toString(CHI)};
+	private static final String	meanTripleStrings[]={"A1","A2","A3",Character.toString(TAU)+"1",Character.toString(TAU)+"2",Character.toString(TAU)+"3","Z",Character.toString(CHI)};
+	private static final String strechedExpo[]={"Z",Character.toString(CHI)};
 	private static final String A_T_Z_X2 = "A " + TAU + " Z " + CHI + SQUARE,
 			A_T_X2 = "A " + TAU + " " + CHI + SQUARE, A_T = "A " + TAU,
 			F_UPPER_T_Z_X2 = "F " + TAU + " Z " + CHI + SQUARE, F_UPPER_T_X2 = "F " +
@@ -221,13 +226,14 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	public static JComboBox _functionComboBox;
 	public static JComboBox _binningComboBox;
 	public static JComboBox _fittedImagesComboBox;
-
+	public static JComboBox _meanValueComboBox;
 	public static JComboBox _noiseModelComboBox;
 
 	JCheckBox _colorizeGrayScale;
 	public static JCheckBox[] _analysisCheckBoxList;
 	JCheckBox _fitAllChannels;
 
+	JTextField meanValueTextField;
 	// cursor settings
 	JTextField _promptBaselineField;
 	// JTextField _transientStartField;
@@ -333,6 +339,7 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	public static JButton _fitButton;
 	String _fitButtonText = FIT_IMAGE;
 
+	public static JCheckBox useDetailStat;
 	String defaultExcitationPath;
 	boolean setAsDefault = false;
 
@@ -617,6 +624,8 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 					cl.show(_cardPanel, item);
 					reconcileStartParam();
 					updateFittedImagesComboBox(FUNCTION_ITEMS, item);
+					updateMeanValueComboBoxComboBox(FUNCTION_ITEMS, item);
+					
 //							SLIMProcessor.macroParams.fucntion_type=1;
 //							IJ.log("item llistener fro function has been reached");
 					// ADDMACRO
@@ -722,7 +731,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 			_analysisCheckBoxList = new JCheckBox[0];
 		}
 
-		// rows, cols, initX, initY, xPad, yPad
 		SpringUtilities.makeCompactGrid(fitPanel, 6 + choices, 2, 4, 4, 4, 4);
 
 		final JPanel panel = new JPanel(new BorderLayout());
@@ -756,6 +764,26 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 		}
 		else if (STRETCHED_EXPONENTIAL.equals(selectedItem)) {
 			updateComboBox(_fittedImagesComboBox, STRETCHED_FITTED_IMAGE_ITEMS);
+		}
+	}
+	
+	private void updateMeanValueComboBoxComboBox(final String[] items,
+			final String selectedItem)
+	{
+		IJ.log("in box of mean val change"+selectedItem+meanDoubleStrings.length);
+
+		if (SINGLE_EXPONENTIAL.equals(selectedItem)) {
+			updateComboBox(_meanValueComboBox, meanSingleStrings);
+		}
+		else if (DOUBLE_EXPONENTIAL.equals(selectedItem)) {
+			IJ.log("in double");
+			updateComboBox(_meanValueComboBox, meanDoubleStrings);
+		}
+		else if (TRIPLE_EXPONENTIAL.equals(selectedItem)) {
+			updateComboBox(_meanValueComboBox, meanTripleStrings);
+		}
+		else if (STRETCHED_EXPONENTIAL.equals(selectedItem)) {
+			updateComboBox(_meanValueComboBox, strechedExpo);
 		}
 	}
 
@@ -1357,8 +1385,61 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 		_binningComboBox = new JComboBox(binningChoices);
 		refitUponStateChangeBinning(_binningComboBox);// sagar
 		controlPanel.add(_binningComboBox);
+		final JLabel meanCheckBoxLabel = new JLabel("");
+		//meanCheckBoxLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		controlPanel.add(meanCheckBoxLabel);
+		useDetailStat=new JCheckBox("Display mean");
+		controlPanel.add(useDetailStat);
+		
+		final JLabel meanValueLabel = new JLabel("Mean Value");//mean vallue options
+		meanValueLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		controlPanel.add(meanValueLabel);
+		_meanValueComboBox = new JComboBox(meanSingleStrings);
+		//refitUponStateChangeMeanValue(_meanValueComboBox);// sagar
+		_meanValueComboBox.addItemListener(new ItemListener() {
 
-		int rows = 5;
+			@Override
+			public void itemStateChanged(final ItemEvent e) {
+				// /item added for macro recording
+				// sagar
+
+				if (e.getStateChange() == ItemEvent.SELECTED && null != _listener) {
+					final String item = (String) e.getItem();
+					int num=_meanValueComboBox.getSelectedIndex();
+					//get the mean values
+					///WARNINNG-> add something so that is not accessed before fit is done
+					//get some flag that enables after fitting is done
+					if(SLIMProcessor.macroParams.fittingDone){
+						meanValueTextField.setText(SLIMProcessor.macroParams.meanStatValues[num]);
+					}
+					//_listener.reFit();
+				}
+
+			}
+		});
+		controlPanel.add(_meanValueComboBox);
+		_meanValueComboBox.setEnabled(false);
+		useDetailStat.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(final ItemEvent e) {
+				SLIMProcessor.macroParams.useDetailStat=!useDetailStat.isSelected();
+				_meanValueComboBox.setEnabled(useDetailStat.isSelected());
+				if(useDetailStat.isSelected()){
+					_fittedImagesComboBox.setSelectedIndex(0);
+				}
+			}
+		});
+		
+		final JLabel MeanValLabel = new JLabel("");
+		MeanValLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		controlPanel.add(MeanValLabel);
+		meanValueTextField = new JTextField(9);
+		meanValueTextField.setEditable(false);
+		controlPanel.add(meanValueTextField);
+		
+		int rows = 8;
+
 		final boolean showScatter = userPreferences.getBoolean(SCATTER, false);
 		userPreferences.putBoolean(SCATTER, showScatter);
 		if (showScatter) {
@@ -1463,6 +1544,8 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 		expPanel.add(_errorLabel1);
 		final JLabel nullLabel4 = new JLabel("");
 		expPanel.add(nullLabel4);
+		
+		
 
 		// TODO:
 		// SLIMPlotter look & feel:
@@ -1911,6 +1994,27 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 					final String item = (String) e.getItem();
 					SLIMProcessor.record(SLIMProcessor.SET_BINNING, item);
 					_listener.reFit();
+				}
+
+			}
+		});
+	}
+	
+	private void refitUponStateChangeMeanValue(final ItemSelectable itemSelectable)
+	{
+		itemSelectable.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(final ItemEvent e) {
+				// /item added for macro recording
+				// sagar
+
+				if (e.getStateChange() == ItemEvent.SELECTED && null != _listener) {
+					final String item = (String) e.getItem();
+					int num=((JComboBox) itemSelectable).getSelectedIndex();
+					//get the mean values
+					IJ.log(Integer.toString(num));
+					//_listener.reFit();
 				}
 
 			}
