@@ -36,12 +36,14 @@ import io.scif.img.SCIFIOImgPlus;
 import io.scif.img.axes.SCIFIOAxes;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Rectangle;
 import java.awt.image.IndexColorModel;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -1553,35 +1555,47 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * @param defaultPath
 	 * @return non-null array of Files
 	 */
-	final private File[] showFileDialog(final String defaultPath) {
-		final JFileChooser chooser = new JFileChooser();
-		chooser.setCurrentDirectory(new java.io.File(defaultPath));
-		chooser.setDialogTitle("Open Lifetime Image(s)");
-		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		chooser.setMultiSelectionEnabled(true);
-		chooser.setFileFilter(new showFileDialogFilter());
+	private final File[] showFileDialog(final String defaultPath) {
+		final List<File> fileList = new ArrayList<File>();
+		try {
+			EventQueue.invokeAndWait(new Runnable() {
+				@Override
+				public void run() {
+					final JFileChooser chooser = new JFileChooser();
+					chooser.setCurrentDirectory(new File(defaultPath));
+					chooser.setDialogTitle("Open Lifetime Image(s)");
+					chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+					chooser.setMultiSelectionEnabled(true);
+					chooser.setFileFilter(new showFileDialogFilter());
 
-		if (chooser.showOpenDialog(Frame.getFrames()[0]) == JFileChooser.APPROVE_OPTION)
-		{
-			final File[] files = chooser.getSelectedFiles();
-			final List<File> fileList = new ArrayList<File>();
-			for (final File file : files) {
-				if (file.isDirectory()) {
-					for (final File f : file.listFiles()) {
-						if (f.getName().endsWith(ICS_SUFFIX) ||
-							f.getName().endsWith(SDT_SUFFIX))
-						{
-							fileList.add(f);
+					if (chooser.showOpenDialog(Frame.getFrames()[0]) == JFileChooser.APPROVE_OPTION)
+					{
+						final File[] files = chooser.getSelectedFiles();
+						for (final File file : files) {
+							if (file.isDirectory()) {
+								for (final File f : file.listFiles()) {
+									if (f.getName().endsWith(ICS_SUFFIX) ||
+											f.getName().endsWith(SDT_SUFFIX))
+									{
+										fileList.add(f);
+									}
+								}
+							}
+							else {
+								fileList.add(file);
+							}
 						}
 					}
 				}
-				else {
-					fileList.add(file);
-				}
-			}
-			return fileList.toArray(new File[fileList.size()]);
+			});
 		}
-		return NO_FILES_SELECTED;
+		catch (final InterruptedException exc) {
+			throw new RuntimeException(exc);
+		}
+		catch (final InvocationTargetException exc) {
+			throw new RuntimeException(exc);
+		}
+		return fileList.isEmpty() ? NO_FILES_SELECTED : fileList.toArray(new File[fileList.size()]);
 	}
 
 	private class showFileDialogFilter extends FileFilter {
