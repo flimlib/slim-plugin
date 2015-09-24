@@ -1568,22 +1568,21 @@ public class SLIMProcessor<T extends RealType<T>> {
 					chooser.setMultiSelectionEnabled(true);
 					chooser.setFileFilter(new showFileDialogFilter());
 
-					if (chooser.showOpenDialog(Frame.getFrames()[0]) == JFileChooser.APPROVE_OPTION)
-					{
-						final File[] files = chooser.getSelectedFiles();
-						for (final File file : files) {
-							if (file.isDirectory()) {
-								for (final File f : file.listFiles()) {
-									if (f.getName().endsWith(ICS_SUFFIX) ||
-											f.getName().endsWith(SDT_SUFFIX))
-									{
-										fileList.add(f);
-									}
+					if (chooser.showOpenDialog(Frame.getFrames()[0]) != JFileChooser.APPROVE_OPTION) return;
+
+					final File[] files = chooser.getSelectedFiles();
+					for (final File file : files) {
+						if (file.isDirectory()) {
+							for (final File f : file.listFiles()) {
+								if (f.getName().endsWith(ICS_SUFFIX) ||
+										f.getName().endsWith(SDT_SUFFIX))
+								{
+									fileList.add(f);
 								}
 							}
-							else {
-								fileList.add(file);
-							}
+						}
+						else {
+							fileList.add(file);
 						}
 					}
 				}
