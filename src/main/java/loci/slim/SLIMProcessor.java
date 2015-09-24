@@ -1550,7 +1550,7 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Prompts for a FLIM file.
 	 *
-	 * @param default path
+	 * @param defaultPath
 	 * @return non-null array of Files
 	 */
 	final private File[] showFileDialog(final String defaultPath) {
