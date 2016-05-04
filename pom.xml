@@ -196,30 +196,34 @@ Wisconsin-Madison.</organizationName>
 
 	<developers>
 		<developer>
-			<id>grislis</id>
-			<name>Aivar Grislis</name>
-			<url>http://loci.wisc.edu/people/aivar-grislis</url>
-			<organization>UW-Madison LOCI</organization>
-			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
-			<roles>
-				<role>architect</role>
-				<role>developer</role>
-			</roles>
-			<timezone>-6</timezone>
-		</developer>
-		<developer>
 			<id>ctrueden</id>
 			<name>Curtis Rueden</name>
-			<email>ctrueden@wisc.edu</email>
-			<url>http://loci.wisc.edu/people/curtis-rueden</url>
-			<organization>UW-Madison LOCI</organization>
-			<organizationUrl>http://loci.wisc.edu/</organizationUrl>
+			<url>http://imagej.net/User:Rueden</url>
 			<roles>
+				<role>lead</role>
 				<role>maintainer</role>
 			</roles>
-			<timezone>-6</timezone>
+		</developer>
+		<developer>
+			<id>aksagar</id>
+			<name>Md Abdul Kader Sagar</name>
+			<url>http://imagej.net/User:Msagar</url>
+			<roles>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
 		</developer>
 	</developers>
+	<contributors>
+		<contributor>
+			<name>Aivar Grislis</name>
+			<url>http://imagej.net/User:Grislis</url>
+			<roles><role>founder</role></roles>
+			<properties><id>grislis</id></properties>
+		</contributor>
+	</contributors>
 
 	<issueManagement>
 		<system>GitHub Issues</system>
