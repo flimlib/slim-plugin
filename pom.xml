@@ -20,7 +20,10 @@
 	<description>An ImageJ plugin for combined spectral-lifetime image analysis.</description>
 	<url>http://fiji.sc/SLIM_Curve</url>
 	<inceptionYear>2010</inceptionYear>
-
+	<organization>
+		<name>SLIM Curve</name>
+		<url>https://slim-curve.github.io/</url>
+	</organization>
 	<licenses>
 		<license>
 			<name>GNU General Public License v3+</name>
@@ -28,16 +31,75 @@
 		</license>
 	</licenses>
 
-	<organization>
-		<name>SLIM Curve</name>
-		<url>https://slim-curve.github.io/</url>
-	</organization>
+	<developers>
+		<developer>
+			<id>ctrueden</id>
+			<name>Curtis Rueden</name>
+			<url>http://imagej.net/User:Rueden</url>
+			<roles>
+				<role>lead</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+		<developer>
+			<id>aksagar</id>
+			<name>Md Abdul Kader Sagar</name>
+			<url>http://imagej.net/User:Msagar</url>
+			<roles>
+				<role>developer</role>
+				<role>debugger</role>
+				<role>support</role>
+				<role>maintainer</role>
+			</roles>
+		</developer>
+	</developers>
+	<contributors>
+		<contributor>
+			<name>Aivar Grislis</name>
+			<url>http://imagej.net/User:Grislis</url>
+			<roles><role>founder</role></roles>
+			<properties><id>grislis</id></properties>
+		</contributor>
+	</contributors>
+
+	<mailingLists>
+		<mailingList>
+			<name>SLIM Curve</name>
+			<subscribe>http://imagej.net/mailman/listinfo/slim-curve</subscribe>
+			<unsubscribe>http://imagej.net/mailman/listinfo/slim-curve</unsubscribe>
+			<post>slim-curve@imagej.net</post>
+			<archive>http://imagej.net/pipermail/slim-curve/</archive>
+		</mailingList>
+	</mailingLists>
+
+	<scm>
+		<connection>scm:git:git://github.com/slim-curve/slim-plugin</connection>
+		<developerConnection>scm:git:git@github.com:slim-curve/slim-plugin</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/slim-curve/slim-plugin</url>
+	</scm>
+	<issueManagement>
+		<system>GitHub Issues</system>
+		<url>https://github.com/slim-curve/slim-plugin/issues</url>
+	</issueManagement>
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://jenkins.imagej.net/job/SLIM-plugin/</url>
+	</ciManagement>
 
 	<properties>
 		<main-class>loci.slim.About</main-class>
 		<!-- FIXME: Switch curve-fitter to release dependency! -->
 		<enforcer.skip>true</enforcer.skip>
 	</properties>
+
+	<repositories>
+		<!-- NB: for project parent -->
+		<repository>
+			<id>imagej.public</id>
+			<url>http://maven.imagej.net/content/groups/public</url>
+		</repository>
+	</repositories>
 
 	<dependencies>
 		<dependency>
@@ -193,71 +255,4 @@ Wisconsin-Madison.</organizationName>
 			</build>
 		</profile>
 	</profiles>
-
-	<developers>
-		<developer>
-			<id>ctrueden</id>
-			<name>Curtis Rueden</name>
-			<url>http://imagej.net/User:Rueden</url>
-			<roles>
-				<role>lead</role>
-				<role>maintainer</role>
-			</roles>
-		</developer>
-		<developer>
-			<id>aksagar</id>
-			<name>Md Abdul Kader Sagar</name>
-			<url>http://imagej.net/User:Msagar</url>
-			<roles>
-				<role>developer</role>
-				<role>debugger</role>
-				<role>support</role>
-				<role>maintainer</role>
-			</roles>
-		</developer>
-	</developers>
-	<contributors>
-		<contributor>
-			<name>Aivar Grislis</name>
-			<url>http://imagej.net/User:Grislis</url>
-			<roles><role>founder</role></roles>
-			<properties><id>grislis</id></properties>
-		</contributor>
-	</contributors>
-
-	<issueManagement>
-		<system>GitHub Issues</system>
-		<url>https://github.com/slim-curve/slim-plugin/issues</url>
-	</issueManagement>
-
-	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://jenkins.imagej.net/job/SLIM-plugin/</url>
-	</ciManagement>
-
-	<mailingLists>
-		<mailingList>
-			<name>SLIM Curve</name>
-			<subscribe>http://imagej.net/mailman/listinfo/slim-curve</subscribe>
-			<unsubscribe>http://imagej.net/mailman/listinfo/slim-curve</unsubscribe>
-			<post>slim-curve@imagej.net</post>
-			<archive>http://imagej.net/pipermail/slim-curve/</archive>
-		</mailingList>
-	</mailingLists>
-
-	<scm>
-		<connection>scm:git:git://github.com/slim-curve/slim-plugin</connection>
-		<developerConnection>scm:git:git@github.com:slim-curve/slim-plugin</developerConnection>
-		<tag>HEAD</tag>
-		<url>https://github.com/slim-curve/slim-plugin</url>
-	</scm>
-
-	<repositories>
-		<!-- NB: for project parent -->
-		<repository>
-			<id>imagej.public</id>
-			<url>http://maven.imagej.net/content/groups/public</url>
-		</repository>
-	</repositories>
-
 </project>
