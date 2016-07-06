@@ -142,7 +142,7 @@ public class SLIMProcessor<T extends RealType<T>> {
 	private static final boolean USE_LAMBDA = false;
 
 	// this affects how many pixels we process at once
-	private static final int PIXEL_COUNT = 128;
+	private static final int PIXEL_COUNT = 4096;
 
 	// Unicode special characters
 	private static final Character CHI = '\u03c7';
