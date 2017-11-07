@@ -1557,10 +1557,9 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 */
 	private final File[] showFileDialog(final String defaultPath) {
 		final List<File> fileList = new ArrayList<File>();
-		try {
-			EventQueue.invokeAndWait(new Runnable() {
-				@Override
-				public void run() {
+		//	EventQueue.invokeAndWait(new Runnable() {
+		//		@Override
+		//		public void run() {
 					final JFileChooser chooser = new JFileChooser();
 					chooser.setCurrentDirectory(new File(defaultPath));
 					chooser.setDialogTitle("Open Lifetime Image(s)");
@@ -1568,7 +1567,9 @@ public class SLIMProcessor<T extends RealType<T>> {
 					chooser.setMultiSelectionEnabled(true);
 					chooser.setFileFilter(new showFileDialogFilter());
 
-					if (chooser.showOpenDialog(Frame.getFrames()[0]) != JFileChooser.APPROVE_OPTION) return;
+					if (chooser.showOpenDialog(Frame.getFrames()[0]) != JFileChooser.APPROVE_OPTION) {
+						IJ.log("null returning");
+					};
 
 					final File[] files = chooser.getSelectedFiles();
 					for (final File file : files) {
@@ -1585,19 +1586,16 @@ public class SLIMProcessor<T extends RealType<T>> {
 							fileList.add(file);
 						}
 					}
-				}
-			});
-		}
-		catch (final InterruptedException exc) {
-			throw new RuntimeException(exc);
-		}
-		catch (final InvocationTargetException exc) {
-			throw new RuntimeException(exc);
-		}
+			//	}
+			//});
 		return fileList.isEmpty() ? NO_FILES_SELECTED : fileList.toArray(new File[fileList.size()]);
 	}
 
 	private class showFileDialogFilter extends FileFilter {
+
+		showFileDialogFilter() {
+			// TODO Auto-generated constructor stub
+		}
 
 		@Override
 		public boolean accept(final File f) {
