@@ -80,14 +80,17 @@
 		<url>https://github.com/slim-curve/slim-plugin/issues</url>
 	</issueManagement>
 	<ciManagement>
-		<system>Jenkins</system>
-		<url>http://jenkins.imagej.net/job/SLIM-plugin/</url>
+		<system>Travis CI</system>
+		<url>https://travis-ci.org/slim-curve/slim-plugin</url>
 	</ciManagement>
 
 	<properties>
 		<main-class>loci.slim.About</main-class>
 		<!-- FIXME: Switch curve-fitter to release dependency! -->
 		<enforcer.skip>true</enforcer.skip>
+
+		<!-- NB: Deploy releases to the ImageJ Maven repository. -->
+		<releaseProfiles>deploy-to-imagej</releaseProfiles>
 	</properties>
 
 	<repositories>
