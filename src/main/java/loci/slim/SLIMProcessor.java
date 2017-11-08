@@ -1557,37 +1557,32 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 */
 	private final File[] showFileDialog(final String defaultPath) {
 		final List<File> fileList = new ArrayList<File>();
-		//	EventQueue.invokeAndWait(new Runnable() {
-		//		@Override
-		//		public void run() {
-					final JFileChooser chooser = new JFileChooser();
-					chooser.setCurrentDirectory(new File(defaultPath));
-					chooser.setDialogTitle("Open Lifetime Image(s)");
-					chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-					chooser.setMultiSelectionEnabled(true);
-					chooser.setFileFilter(new showFileDialogFilter());
+		final JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(new File(defaultPath));
+		chooser.setDialogTitle("Open Lifetime Image(s)");
+		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		chooser.setMultiSelectionEnabled(true);
+		chooser.setFileFilter(new showFileDialogFilter());
 
-					if (chooser.showOpenDialog(Frame.getFrames()[0]) != JFileChooser.APPROVE_OPTION) {
-						IJ.log("null returning");
-					};
+		if (chooser.showOpenDialog(Frame.getFrames()[0]) != JFileChooser.APPROVE_OPTION) {
+			IJ.log("null returning");
+		};
 
-					final File[] files = chooser.getSelectedFiles();
-					for (final File file : files) {
-						if (file.isDirectory()) {
-							for (final File f : file.listFiles()) {
-								if (f.getName().endsWith(ICS_SUFFIX) ||
-										f.getName().endsWith(SDT_SUFFIX))
-								{
-									fileList.add(f);
-								}
-							}
-						}
-						else {
-							fileList.add(file);
-						}
+		final File[] files = chooser.getSelectedFiles();
+		for (final File file : files) {
+			if (file.isDirectory()) {
+				for (final File f : file.listFiles()) {
+					if (f.getName().endsWith(ICS_SUFFIX) ||
+						f.getName().endsWith(SDT_SUFFIX))
+					{
+						fileList.add(f);
 					}
-			//	}
-			//});
+				}
+			}
+			else {
+				fileList.add(file);
+			}
+		}
 		return fileList.isEmpty() ? NO_FILES_SELECTED : fileList.toArray(new File[fileList.size()]);
 	}
 
