@@ -1562,7 +1562,26 @@ public class SLIMProcessor<T extends RealType<T>> {
 		chooser.setDialogTitle("Open Lifetime Image(s)");
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		chooser.setMultiSelectionEnabled(true);
-		chooser.setFileFilter(new showFileDialogFilter());
+		chooser.setFileFilter(new FileFilter() {
+			@Override
+			public boolean accept(final File f) {
+				if (f.getName().endsWith(ICS_SUFFIX)) {
+					return true;
+				}
+				if (f.getName().endsWith(SDT_SUFFIX)) {
+					return true;
+				}
+				if (f.isDirectory()) {
+					return true;
+				}
+				return false;
+			}
+
+			@Override
+			public String getDescription() {
+				return "Lifetime .ics & .sdt";
+			}
+		});
 
 		if (chooser.showOpenDialog(Frame.getFrames()[0]) != JFileChooser.APPROVE_OPTION) {
 			return null;
@@ -1584,32 +1603,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 			}
 		}
 		return fileList.isEmpty() ? NO_FILES_SELECTED : fileList.toArray(new File[fileList.size()]);
-	}
-
-	private class showFileDialogFilter extends FileFilter {
-
-		showFileDialogFilter() {
-			// TODO Auto-generated constructor stub
-		}
-
-		@Override
-		public boolean accept(final File f) {
-			if (f.getName().endsWith(ICS_SUFFIX)) {
-				return true;
-			}
-			if (f.getName().endsWith(SDT_SUFFIX)) {
-				return true;
-			}
-			if (f.isDirectory()) {
-				return true;
-			}
-			return false;
-		}
-
-		@Override
-		public String getDescription() {
-			return "Lifetime .ics & .sdt";
-		}
 	}
 
 	@SuppressWarnings("unchecked")
