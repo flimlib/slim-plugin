@@ -1565,8 +1565,8 @@ public class SLIMProcessor<T extends RealType<T>> {
 		chooser.setFileFilter(new showFileDialogFilter());
 
 		if (chooser.showOpenDialog(Frame.getFrames()[0]) != JFileChooser.APPROVE_OPTION) {
-			IJ.log("null returning");
-		};
+			return null;
+		}
 
 		final File[] files = chooser.getSelectedFiles();
 		for (final File file : files) {
