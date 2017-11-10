@@ -46,7 +46,7 @@ public class MaskNode implements IMaskNode {
 	/**
 	 * This method should be called when node has changed its mask.
 	 *
-	 * @param mask may be null
+	 * @param selfMask may be null
 	 */
 	@Override
 	public void updateSelfMask(final Mask selfMask) {

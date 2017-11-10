@@ -70,8 +70,6 @@ public class ThreadedFittingEngine implements IFittingEngine {
 
 	/**
 	 * Sets curve fitter to use.
-	 *
-	 * @param curve fitter
 	 */
 	@Override
 	public synchronized void setCurveFitter(final ICurveFitter curveFitter) {
@@ -98,7 +96,7 @@ public class ThreadedFittingEngine implements IFittingEngine {
 	 * Fit one or more pixels with given parameters.
 	 *
 	 * @param params given parameters
-	 * @param data one or more pixels data
+	 * @param dataList one or more pixels data
 	 * @return results one or more pixels results
 	 */
 	@Override

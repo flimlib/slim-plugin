@@ -90,7 +90,7 @@ public interface IUserInterfacePanel {
 	void setRegion(FitRegion region);
 
 	/**
-	 * Gets implementation & algorithm for the fit.
+	 * Gets implementation and algorithm for the fit.
 	 *
 	 * @return fit algorithm.
 	 */

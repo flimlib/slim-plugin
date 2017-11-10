@@ -93,7 +93,7 @@ public interface UserInterfacePanel {
 	public ICurveFitter.FitRegion getRegion();
 
 	/**
-	 * Gets implementation & algorithm for the fit.
+	 * Gets implementation and algorithm for the fit.
 	 *
 	 * @return fit algorithm.
 	 */

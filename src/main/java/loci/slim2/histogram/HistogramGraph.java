@@ -36,7 +36,7 @@ import org.scijava.util.Colors;
 
 /**
  * Histogram graph {@link Dataset} drawing class. Based on {@link ShowLUT} by
- * Barry DeZonia & Wayne Rasband.
+ * Barry DeZonia and Wayne Rasband.
  *
  * @author Aivar Grislis
  */

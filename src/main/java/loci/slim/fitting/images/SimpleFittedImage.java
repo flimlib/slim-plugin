@@ -39,9 +39,6 @@ public class SimpleFittedImage extends AbstractBaseFittedImage {
 
 	/**
 	 * Constructor, giving index of input parameter to display
-	 *
-	 * @param grayScalePixelValue;
-	 * @param maskGroup;
 	 */
 	public SimpleFittedImage(final String title, final int[] dimension,
 		final IndexColorModel indexColorModel, final int parameterIndex,

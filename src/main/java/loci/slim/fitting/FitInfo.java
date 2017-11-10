@@ -127,7 +127,7 @@ public class FitInfo {
 	}
 
 	/**
-	 * Gets implementation & algorithm for the fit.
+	 * Gets implementation and algorithm for the fit.
 	 *
 	 * @return fit algorithm.
 	 */
@@ -136,7 +136,7 @@ public class FitInfo {
 	}
 
 	/**
-	 * Sets implementation & algorithm for the fit.
+	 * Sets implementation and algorithm for the fit.
 	 *
 	 */
 	public void setAlgorithm(final FitAlgorithm algorithm) {

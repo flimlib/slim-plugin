@@ -68,7 +68,6 @@ public class FittingCursor {
 	 *
 	 * @param inc time increment per bin
 	 * @param bins total number of bins
-	 * @params fitterEstimator
 	 */
 	public FittingCursor(final double inc, final int bins,
 		final IFitterEstimator fitterEstimator)

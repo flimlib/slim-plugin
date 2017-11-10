@@ -78,7 +78,7 @@ public class ThreadPool<T> {
 	 * Given a List of Callables defining tasks, execute them in parallel chunks
 	 * using the thread pool.
 	 *
-	 * @param callableArray array of tasks
+	 * @param callableList array of tasks
 	 * @return array of results
 	 */
 	public synchronized List<T> process(

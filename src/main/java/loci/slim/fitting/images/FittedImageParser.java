@@ -63,7 +63,6 @@ public class FittedImageParser {
 	 * @param components number of exponential fit components
 	 * @param stretched whether it's a stretched exponential
 	 * @param free whether each parameter is free or fixed
-	 * @param ordinal distinguishes groups of fitted images
 	 */
 	public FittedImageParser(final String input, final int components,
 		final boolean stretched, final boolean[] free)

@@ -126,8 +126,6 @@ public class BaseFitSettings implements FitSettings {
 
 	/**
 	 * Sets vertical cursor position on excitation decay.
-	 *
-	 * @parameter excitationVertCursor
 	 */
 	public void setExcitationVertCursor(final VertCursor excitationVertCursor) {
 		this.excitationVertCursor = excitationVertCursor;

@@ -31,7 +31,7 @@ package loci.slim.mask;
 public interface IMaskNodeListener {
 
 	/**
-	 * Tells listener other & total masks have been updated.
+	 * Tells listener other and total masks have been updated.
 	 *
 	 * @param otherMask may be null
 	 * @param totalMask may be null
