@@ -35,9 +35,6 @@ public class TestHelper {
 	/**
 	 * Checks whether the percentage difference is within margin.
 	 *
-	 * @param expResult
-	 * @param result
-	 * @param margin
 	 */
 	public static void assertComparable(final double expResult,
 		final double result, final double margin)
@@ -57,9 +54,6 @@ public class TestHelper {
 	 * Instead of taking a fixed maximum different this takes a percentage
 	 * difference.
 	 *
-	 * @param expResult
-	 * @param result
-	 * @param margin
 	 */
 	public static void assertArrayComparable(final double[] expResult,
 		final double[] result, final double margin)

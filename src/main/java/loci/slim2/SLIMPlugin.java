@@ -227,7 +227,6 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements
 	/**
 	 * Throws up a warning message dialog.
 	 *
-	 * @param message
 	 */
 	private void showWarning(final String message) {
 		uiService.showDialog(message, DialogPrompt.MessageType.WARNING_MESSAGE);
@@ -236,7 +235,6 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements
 	/**
 	 * Throws up an error message dialog.
 	 *
-	 * @param message
 	 */
 	private void showError(final String message) {
 		uiService.showDialog(message, DialogPrompt.MessageType.ERROR_MESSAGE);
@@ -255,7 +253,6 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements
 	/**
 	 * Saves the path name to Java Preferences.
 	 *
-	 * @param path
 	 */
 	private void savePathInPreferences(final String path) {
 		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
@@ -265,7 +262,6 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements
 	/**
 	 * Prompts for a FLIM file.
 	 *
-	 * @param parent
 	 * @param default path
 	 * @return null or array of Files
 	 */
@@ -554,7 +550,6 @@ public class SLIMPlugin<T extends RealType<T> & NativeType<T>> implements
 	/**
 	 * Gets the lifetime tool from IJ toolbar.
 	 *
-	 * @return
 	 */
 	private Tool getTool() {
 		// TODO ARG find instance of LifetimeTool

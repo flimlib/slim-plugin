@@ -162,9 +162,6 @@ public class ChunkyPixelIterator implements Iterator<ChunkyPixel> {
 	/**
 	 * Gets complete position (adds tail).
 	 *
-	 * @param x
-	 * @param y
-	 * @return
 	 */
 	private long[] getPosition(final long x, final long y) {
 		final long[] position = new long[dimensions.length];

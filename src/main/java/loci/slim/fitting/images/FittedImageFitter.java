@@ -124,7 +124,6 @@ public class FittedImageFitter {
 	/**
 	 * Updates the fitted parameters for a pixel.
 	 *
-	 * @param location
 	 * @param parameters may be null
 	 */
 	public void updatePixel(final int[] location, final double[] parameters) {
@@ -137,8 +136,6 @@ public class FittedImageFitter {
 	 * Updates the fitted parameters for a pixel. The pixel is drawn outsized at
 	 * first.
 	 *
-	 * @param location
-	 * @param dimension
 	 * @param parameters may be null
 	 */
 	public void updateChunkyPixel(final int[] location, final int[] dimension,

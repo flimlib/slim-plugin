@@ -36,9 +36,6 @@ public class FittedValueFactory {
 	/**
 	 * Creates array of FittedValue from String descriptor.
 	 *
-	 * @param fittedValueDescriptor
-	 * @param components
-	 * @return
 	 */
 	public static FittedValue[] createFittedValues(
 		final String fittedValueDescriptor, final int components)

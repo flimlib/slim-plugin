@@ -72,8 +72,6 @@ public class SLIM_PlugIn implements PlugIn {
 	 *
 	 * @param input file name
 	 * @param output file name
-	 * @param exportPixels
-	 * @param exportText
 	 */
 	public static void batch(final String input, final String output,
 		final String exportPixels, final String exportText)

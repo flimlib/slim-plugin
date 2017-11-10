@@ -38,10 +38,6 @@ public class Binning {
 	 * <p>
 	 * This variant is inclusive, it assigns all values to the range 0..(bins-1).
 	 *
-	 * @param bins
-	 * @param min
-	 * @param max
-	 * @param value
 	 * @return bin number 0...(bins-1)
 	 */
 	public static int valueToBin(final int bins, final double min,
@@ -58,11 +54,6 @@ public class Binning {
 	 * <p>
 	 * This variant is exclusive, not all values map to the range 0...(bins-1).
 	 *
-	 * @param bins
-	 * @param min
-	 * @param max
-	 * @param value
-	 * @return
 	 */
 	public static int exclusiveValueToBin(final int bins, final double min,
 		final double max, final double value)
@@ -92,10 +83,6 @@ public class Binning {
 	/**
 	 * Returns array of left edge values for each bin.
 	 *
-	 * @param bins
-	 * @param min
-	 * @param max
-	 * @return
 	 */
 	public static double[] edgeValuesPerBin(final int bins, final double min,
 		final double max)
@@ -111,10 +98,6 @@ public class Binning {
 	/**
 	 * Returns array of center values for each bin.
 	 *
-	 * @param bins
-	 * @param min
-	 * @param max
-	 * @return
 	 */
 	public static double[] centerValuesPerBin(final int bins, final double min,
 		final double max)

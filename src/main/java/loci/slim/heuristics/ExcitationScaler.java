@@ -38,13 +38,6 @@ public class ExcitationScaler {
 	/**
 	 * This is based on TRCursors.c UpdatePrompt in TRI2.
 	 *
-	 * @param decay
-	 * @param start
-	 * @param stop
-	 * @param base
-	 * @param timeInc
-	 * @param bins
-	 * @return
 	 */
 	public static double[]
 		scale(final double[] decay, final int startIndex, final int stopIndex,

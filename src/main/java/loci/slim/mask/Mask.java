@@ -66,7 +66,6 @@ public class Mask implements Cloneable {
 	/**
 	 * Gets the boolean switches.
 	 *
-	 * @return
 	 */
 	public boolean[][] getBits() {
 		return _bits;
@@ -75,7 +74,6 @@ public class Mask implements Cloneable {
 	/**
 	 * Sets the boolean switches.
 	 *
-	 * @param bits
 	 */
 	public void setBits(final boolean[][] bits) {
 		_bits = bits;
@@ -84,9 +82,6 @@ public class Mask implements Cloneable {
 	/**
 	 * Test whether a given x and y is masked.
 	 *
-	 * @param x
-	 * @param y
-	 * @return
 	 */
 	public boolean test(final int x, final int y) {
 		boolean result = true;
@@ -99,8 +94,6 @@ public class Mask implements Cloneable {
 	/**
 	 * Sets a masked x and y.
 	 *
-	 * @param x
-	 * @param y
 	 */
 	public void set(final int x, final int y) {
 		if (null != _bits) {
@@ -111,7 +104,6 @@ public class Mask implements Cloneable {
 	/**
 	 * Any masking going on?
 	 *
-	 * @return
 	 */
 	public boolean hasExcludedPixels() {
 		for (int y = 0; y < _height; ++y) {
@@ -127,8 +119,6 @@ public class Mask implements Cloneable {
 	/**
 	 * Is mask equivalent to another mask?
 	 *
-	 * @param mask
-	 * @return
 	 */
 	public boolean equals(final Mask mask) {
 		boolean returnValue = false;
@@ -164,8 +154,6 @@ public class Mask implements Cloneable {
 	/**
 	 * Adds given mask to current mask, generating a new mask.
 	 *
-	 * @param mask
-	 * @return
 	 */
 	public Mask add(final Mask mask) {
 		if (null == mask) {
@@ -186,7 +174,6 @@ public class Mask implements Cloneable {
 	 * <p>
 	 * Having this be part of the Mask class hides implementation details.
 	 *
-	 * @param masks
 	 * @return mask or null
 	 */
 	public static Mask addMasks(final Collection<Mask> masks) {

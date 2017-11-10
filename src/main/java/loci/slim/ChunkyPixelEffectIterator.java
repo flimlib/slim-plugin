@@ -44,9 +44,6 @@ public class ChunkyPixelEffectIterator implements Iterator {
 	 * Constructor, sets up the chunky pixel iterator with a table of chunky
 	 * pixels and the width and height of the image being processed.
 	 *
-	 * @param table
-	 * @param width
-	 * @param height
 	 */
 	public ChunkyPixelEffectIterator(final IChunkyPixelTable table,
 		final int width, final int height)

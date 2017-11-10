@@ -76,7 +76,6 @@ public class HistogramTool {
 	/**
 	 * Class is a singleton for convenience.
 	 *
-	 * @return
 	 */
 	public static synchronized HistogramTool getInstance() {
 		if (null == INSTANCE) {
@@ -89,7 +88,6 @@ public class HistogramTool {
 	 * Initializer, handles layout and wiring. Called when set of images is
 	 * created.
 	 *
-	 * @param hasChannels
 	 */
 	public void show(final boolean hasChannels) {
 		if (null == _frame || !_frame.isShowing()) {
@@ -207,7 +205,6 @@ public class HistogramTool {
 	/**
 	 * Gets a LUT. Temporary expedient, belongs elsewhere.
 	 *
-	 * @return
 	 */
 	public static LUT getLUT() {
 		final IndexColorModel colorModel = getIndexColorModel();
@@ -219,7 +216,6 @@ public class HistogramTool {
 	 * This method should be called whenever a new set of histogram values is to
 	 * be displayed (i.e. when a different image gets focus).
 	 *
-	 * @param histogramData
 	 */
 	public void setHistogramData(final HistogramDataGroup histogramData) {
 		double[] minMaxView;
@@ -389,8 +385,6 @@ public class HistogramTool {
 		 * positions in pixels. Called when the cursor bar is moved and the mouse
 		 * button released. A new LUT range has been specified.
 		 *
-		 * @param min
-		 * @param max
 		 */
 		@Override
 		public void setMinMaxLUTPixels(final int min, final int max) {
@@ -420,8 +414,6 @@ public class HistogramTool {
 		 * Listens to the HistogramPanel, gets minimum and maximum cursor bar
 		 * positions in pixels. Called during a drag operation.
 		 *
-		 * @param min
-		 * @param max
 		 */
 		@Override
 		public void dragMinMaxPixels(final int min, final int max) {
@@ -548,7 +540,6 @@ public class HistogramTool {
 	/**
 	 * Saves the size to Java Preferences.
 	 *
-	 * @param size
 	 */
 	private void saveSizeInPreferences(final Dimension size) {
 		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());

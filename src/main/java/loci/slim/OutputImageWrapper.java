@@ -49,10 +49,6 @@ public class OutputImageWrapper implements IFittedImage {
 	/**
 	 * Creates a wrapper for an output image and initial image.
 	 *
-	 * @param width
-	 * @param height
-	 * @param channels
-	 * @param parameters
 	 */
 	public OutputImageWrapper(final String title, final String fitTitle,
 		final int width, final int height, final int channels, final int parameters)
@@ -83,7 +79,6 @@ public class OutputImageWrapper implements IFittedImage {
 	/**
 	 * Gets width of image.
 	 *
-	 * @return
 	 */
 	@Override
 	public int getWidth() {
@@ -93,7 +88,6 @@ public class OutputImageWrapper implements IFittedImage {
 	/**
 	 * Gets height of image.
 	 *
-	 * @return
 	 */
 	@Override
 	public int getHeight() {
@@ -103,7 +97,6 @@ public class OutputImageWrapper implements IFittedImage {
 	/**
 	 * Gets number of channels of image.
 	 *
-	 * @return
 	 */
 	@Override
 	public int getChannels() {
@@ -113,7 +106,6 @@ public class OutputImageWrapper implements IFittedImage {
 	/**
 	 * Gets number of parameters of image.
 	 *
-	 * @return
 	 */
 	@Override
 	public int getParameters() {
@@ -157,7 +149,6 @@ public class OutputImageWrapper implements IFittedImage {
 	/**
 	 * Gets associated image.
 	 *
-	 * @return
 	 */
 	@Override
 	public ImgPlus<DoubleType> getImage() {

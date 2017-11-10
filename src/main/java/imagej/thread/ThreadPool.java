@@ -66,7 +66,6 @@ public class ThreadPool<T> {
 	/**
 	 * Sets number of threads to use.
 	 *
-	 * @param threads
 	 */
 	public synchronized void setThreads(final int threads) {
 		if (threads != _threads) {

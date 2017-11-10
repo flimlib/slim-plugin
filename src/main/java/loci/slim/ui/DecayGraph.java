@@ -158,8 +158,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	/**
 	 * Initialize the graph and returns the containing JFrame.
 	 *
-	 * @param bins
-	 * @param timeInc
 	 * @return frame
 	 */
 	@Override
@@ -304,7 +302,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * Sets the fitting cursor, which keeps track of prompt and transient start
 	 * and stop cursors.
 	 *
-	 * @param fittingCursor
 	 */
 	@Override
 	public void setFittingCursor(final FittingCursor fittingCursor) {
@@ -321,7 +318,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	/**
 	 * Set or change the title.
 	 *
-	 * @param title
 	 */
 	@Override
 	public void setTitle(final String title) {
@@ -331,9 +327,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	/**
 	 * Changes (or initializes) all of the charted data.
 	 *
-	 * @param promptIndex
-	 * @param prompt
-	 * @param data
 	 */
 	@Override
 	public void setData(final int promptIndex, final double[] prompt,
@@ -346,7 +339,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	/**
 	 * Sets the reduced chi square.
 	 *
-	 * @param chiSquare
 	 */
 	@Override
 	public void setChiSquare(final double chiSquare) {
@@ -357,7 +349,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	/**
 	 * Sets the displayed photon count.
 	 *
-	 * @param photons
 	 */
 	@Override
 	public void setPhotons(final int photons) {
@@ -367,7 +358,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	/*
 	 * Sets whether vertical axis should be logarithmic.
 	 *
-	 * @param logarithmic
 	 */
 	public void setLogarithmic(final boolean logarithmic) {
 		_logarithmic = logarithmic;
@@ -376,9 +366,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	/**
 	 * Changes or initializes the start and stop vertical bars.
 	 *
-	 * @param transStart
-	 * @param dataStart
-	 * @param transStop
 	 */
 	@Override
 	public void setStartStop(final double transStart, final double dataStart,
@@ -392,9 +379,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	 * called from the UI layer that lets user drag the start and stop vertical
 	 * bars. Validates and passes changes on to external listener.
 	 *
-	 * @param transStartProportion
-	 * @param dataStartProportion
-	 * @param transStopProportion
 	 */
 	@Override
 	public void setStartStopProportion(final double transStartProportion,
@@ -626,7 +610,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 	/**
 	 * Saves the size to Java Preferences.
 	 *
-	 * @param size
 	 */
 	private void saveSizeInPreferences(final Dimension size) {
 		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
@@ -699,8 +682,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		 * Used to draw the start/stop vertical bars. Overrides 'paintLayer()', not
 		 * 'paint()'.
 		 *
-		 * @param g2D
-		 * @param layer
 		 */
 		@Override
 		protected void paintLayer(final Graphics2D g2D,
@@ -746,8 +727,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		/**
 		 * Mouse listener, catches drag events
 		 *
-		 * @param event
-		 * @param layer
 		 */
 		@Override
 		protected void processMouseMotionEvent(final MouseEvent event,
@@ -804,7 +783,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		 * Gets the currently dragged horizontal value as a proportion, a value
 		 * between 0.0 and 1.0.
 		 *
-		 * @param e
 		 * @return proportion
 		 */
 		private double getDraggedProportion(final MouseEvent e) {
@@ -824,8 +802,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		/**
 		 * Mouse listener, catches mouse button events.
 		 * 
-		 * @param e
-		 * @param l
 		 */
 		@Override
 		protected void processMouseEvent(final MouseEvent e,
@@ -929,7 +905,6 @@ public class DecayGraph implements IDecayGraph, IStartStopProportionListener {
 		/**
 		 * Converts screen x to chart x value.
 		 *
-		 * @param x
 		 * @return chart value
 		 */
 

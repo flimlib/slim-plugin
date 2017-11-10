@@ -86,7 +86,6 @@ public class FittedImageParser {
 	 * Parses the input string and creates array of FittedImageType. Only creates
 	 * images which are appropriate for current fit.
 	 *
-	 * @return
 	 */
 	public FittedImageType[] getFittedImages() {
 		final List<FittedImageType> list = new ArrayList<FittedImageType>();

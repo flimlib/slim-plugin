@@ -58,7 +58,6 @@ public interface FittedValue {
 	/**
 	 * Sets a title for a particular fitted value.
 	 *
-	 * @param title
 	 */
 	public void setTitle(String title);
 

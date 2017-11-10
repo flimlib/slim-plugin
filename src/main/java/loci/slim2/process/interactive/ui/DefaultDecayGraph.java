@@ -318,7 +318,6 @@ public class DefaultDecayGraph implements DecayGraph,
 	/*
 	 * Sets whether vertical axis should be logarithmic.
 	 *
-	 * @param logarithmic
 	 */
 	public void setLogarithmic(final boolean logarithmic) {
 		this.logarithmic = logarithmic;
@@ -569,7 +568,6 @@ public class DefaultDecayGraph implements DecayGraph,
 	/**
 	 * Saves the size to Java Preferences.
 	 *
-	 * @param size
 	 */
 	private void saveSizeInPreferences(final Dimension size) {
 		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
@@ -642,8 +640,6 @@ public class DefaultDecayGraph implements DecayGraph,
 		 * Used to draw the start/stop vertical bars. Overrides 'paintLayer()', not
 		 * 'paint()'.
 		 *
-		 * @param g2D
-		 * @param layer
 		 */
 		@Override
 		protected void paintLayer(final Graphics2D g2D,
@@ -687,8 +683,6 @@ public class DefaultDecayGraph implements DecayGraph,
 		/**
 		 * Mouse listener, catches drag events
 		 *
-		 * @param event
-		 * @param layer
 		 */
 		@Override
 		protected void processMouseMotionEvent(final MouseEvent event,
@@ -744,7 +738,6 @@ public class DefaultDecayGraph implements DecayGraph,
 		 * Gets the currently dragged horizontal value as a proportion, a value
 		 * between 0.0 and 1.0.
 		 *
-		 * @param e
 		 * @return proportion
 		 */
 		private double getDraggedProportion(final MouseEvent e) {
@@ -764,8 +757,6 @@ public class DefaultDecayGraph implements DecayGraph,
 		/**
 		 * Mouse listener, catches mouse button events.
 		 * 
-		 * @param e
-		 * @param l
 		 */
 		@Override
 		protected void processMouseEvent(final MouseEvent e,
@@ -869,7 +860,6 @@ public class DefaultDecayGraph implements DecayGraph,
 		/**
 		 * Converts screen x to chart x value.
 		 *
-		 * @param x
 		 * @return chart value
 		 */
 

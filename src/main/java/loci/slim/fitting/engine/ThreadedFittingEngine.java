@@ -62,7 +62,6 @@ public class ThreadedFittingEngine implements IFittingEngine {
 	/**
 	 * Sets number of threads to use.
 	 *
-	 * @param threads
 	 */
 	@Override
 	public synchronized void setThreads(final int threads) {
@@ -83,8 +82,6 @@ public class ThreadedFittingEngine implements IFittingEngine {
 	 * Fits a single pixel with given parameters. Nothing to parallelize, doesn't
 	 * use the ThreadPool.
 	 *
-	 * @param params
-	 * @param data
 	 * @return results
 	 */
 	@Override

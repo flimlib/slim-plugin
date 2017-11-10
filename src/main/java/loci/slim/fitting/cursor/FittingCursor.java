@@ -85,7 +85,6 @@ public class FittingCursor {
 	/**
 	 * Adds a listener for cursor changes.
 	 *
-	 * @param listener
 	 */
 	public void addListener(final IFittingCursorListener listener) {
 		synchronized (_listeners) {
@@ -98,7 +97,6 @@ public class FittingCursor {
 	/**
 	 * Removes a listener for cursor changes.
 	 *
-	 * @param listener
 	 */
 	public void removeListener(final IFittingCursorListener listener) {
 		synchronized (_listeners) {
@@ -109,7 +107,6 @@ public class FittingCursor {
 	/**
 	 * Sets whether the UI will display bins or time values.
 	 *
-	 * @param showBins
 	 */
 	public void setShowBins(final boolean showBins) {
 		_showBins = showBins;
@@ -118,7 +115,6 @@ public class FittingCursor {
 	/**
 	 * Gets whether the UI will display bins or time values.
 	 *
-	 * @return
 	 */
 	public boolean getShowBins() {
 		return _showBins;
@@ -144,7 +140,6 @@ public class FittingCursor {
 	/**
 	 * Returns whether or not a prompt has been loaded.
 	 *
-	 * @param hasPrompt
 	 */
 	public void setHasPrompt(final boolean hasPrompt) {
 		_hasPrompt = hasPrompt;
@@ -153,7 +148,6 @@ public class FittingCursor {
 	/**
 	 * Sets whether or not a prompt has been loaded.
 	 *
-	 * @return
 	 */
 	public boolean getHasPrompt() {
 		return _hasPrompt;
@@ -163,7 +157,6 @@ public class FittingCursor {
 	 * Sets the start of the prompt based on a prompt delay string. Handles bins
 	 * or time values.
 	 *
-	 * @param promptDelay
 	 */
 	public void setPromptDelay(final String promptDelay) {
 
@@ -196,7 +189,6 @@ public class FittingCursor {
 	 * Gets the start of the prompt as a string showing prompt delay. Handles bins
 	 * or time values.
 	 *
-	 * @return
 	 */
 	public String getPromptDelay() {
 		final StringBuilder returnValue = new StringBuilder();
@@ -225,7 +217,6 @@ public class FittingCursor {
 	/**
 	 * Sets the start of the prompt as a bin number.
 	 *
-	 * @param bin
 	 */
 	public void setPromptStartBin(final int bin) {
 		_promptStartValue = _fitterEstimator.binToValue(bin, _inc);
@@ -235,7 +226,6 @@ public class FittingCursor {
 	/**
 	 * Gets the start of the prompt as a bin number.
 	 *
-	 * @return
 	 */
 	public int getPromptStartBin() {
 		int returnValue = 0;
@@ -259,7 +249,6 @@ public class FittingCursor {
 	/**
 	 * Sets the start of the prompt as a time value.
 	 *
-	 * @param value
 	 */
 	public void setPromptStartValue(final double value) {
 		_promptStartValue = value;
@@ -269,7 +258,6 @@ public class FittingCursor {
 	/**
 	 * Gets the start of the prompt as a time value.
 	 *
-	 * @return
 	 */
 	public double getPromptStartValue() {
 		double returnValue = 0.0;
@@ -284,7 +272,6 @@ public class FittingCursor {
 	 * time values (that's why we are parsing a string vs taking an int or float
 	 * parameter).
 	 *
-	 * @param promptWidth
 	 */
 	public void setPromptWidth(final String promptWidth) {
 		Double promptWidthValue = null;
@@ -313,7 +300,6 @@ public class FittingCursor {
 	 * Gets the end of the prompt as a string showing prompt width. Handles bins
 	 * or time values.
 	 *
-	 * @return
 	 */
 	public String getPromptWidth() {
 		final StringBuilder returnValue = new StringBuilder();
@@ -342,7 +328,6 @@ public class FittingCursor {
 	/**
 	 * Sets the end of the prompt as a bin number.
 	 *
-	 * @param bin
 	 */
 	public void setPromptStopBin(final int bin) {
 		_promptStopValue = _fitterEstimator.binToValue(bin, _inc);
@@ -352,7 +337,6 @@ public class FittingCursor {
 	/**
 	 * Gets the end of the prompt as a bin number.
 	 *
-	 * @return
 	 */
 	public int getPromptStopBin() {
 		int returnValue = 0;
@@ -366,7 +350,6 @@ public class FittingCursor {
 	/**
 	 * Sets the end of the prompt as a time value.
 	 *
-	 * @param value
 	 */
 	public void setPromptStopValue(final double value) {
 		_promptStopValue = value;
@@ -376,7 +359,6 @@ public class FittingCursor {
 	/**
 	 * Gets the end of the prompt as a time value.
 	 *
-	 * @return
 	 */
 	public double getPromptStopValue() {
 		double returnValue = 0.0;
@@ -389,7 +371,6 @@ public class FittingCursor {
 	/**
 	 * Sets the baseline of the prompt based on a string.
 	 *
-	 * @param promptBaseline
 	 */
 	public void setPromptBaseline(final String promptBaseline) {
 		final Double promptBaselineValue = getDoubleValue(promptBaseline);
@@ -403,7 +384,6 @@ public class FittingCursor {
 	/**
 	 * Gets the baseline of the prompt based on a string.
 	 *
-	 * @return
 	 */
 	public String getPromptBaseline() {
 		String returnValue = DOUBLE_ZERO_STRING;
@@ -417,7 +397,6 @@ public class FittingCursor {
 	 * Sets the baseline of the prompt as a value. Note that this value is
 	 * actually a photon count and not based on bins or time values.
 	 *
-	 * @param value
 	 */
 	public void setPromptBaselineValue(final double value) {
 		_promptBaselineValue = value;
@@ -427,7 +406,6 @@ public class FittingCursor {
 	/**
 	 * Gets the baseline of the prompt as a value.
 	 *
-	 * @return
 	 */
 	public double getPromptBaselineValue() {
 		double returnValue = 0.0;
@@ -451,7 +429,6 @@ public class FittingCursor {
 	 * Sets the start of the transient based on a string. Handles bins or time
 	 * values.
 	 *
-	 * @param transientStart
 	 */
 	public void setTransientStart(final String transientStart) {
 		if (_showBins) {
@@ -480,7 +457,6 @@ public class FittingCursor {
 	/**
 	 * Gets the start of the transient as a string. Handles bins or time values.
 	 *
-	 * @return
 	 */
 	public String getTransientStart() {
 		final StringBuilder returnValue = new StringBuilder();
@@ -496,7 +472,6 @@ public class FittingCursor {
 	/**
 	 * Sets the start of the transient as a bin number.
 	 *
-	 * @param bin
 	 */
 	public void setTransientStartBin(final int bin) {
 		_transientStartBin = bin;
@@ -508,7 +483,6 @@ public class FittingCursor {
 	/**
 	 * Gets the start of the transient as a bin number.
 	 *
-	 * @return
 	 */
 	public int getTransientStartBin() {
 
@@ -523,7 +497,6 @@ public class FittingCursor {
 	/**
 	 * Sets the start of the transient as a time value.
 	 *
-	 * @param value
 	 */
 	public void setTransientStartValue(final double value) {
 		_transientStartValue =
@@ -536,7 +509,6 @@ public class FittingCursor {
 	/**
 	 * Gets the start of the transient as a time value.
 	 *
-	 * @return
 	 */
 	public double getTransientStartValue() {
 		return _transientStartValue;
@@ -545,7 +517,6 @@ public class FittingCursor {
 	/**
 	 * Sets the start of the data based on a string. Handles bins or time values.
 	 *
-	 * @param dataStart
 	 */
 	public void setDataStart(final String dataStart) {
 		if (_showBins) {
@@ -574,7 +545,6 @@ public class FittingCursor {
 	/**
 	 * Gets the start of the data as a string. Handles bins or time values.
 	 *
-	 * @return
 	 */
 	public String getDataStart() {
 		final StringBuilder returnValue = new StringBuilder();
@@ -590,7 +560,6 @@ public class FittingCursor {
 	/**
 	 * Sets the start of the data as a bin number.
 	 *
-	 * @param bin
 	 */
 	public void setDataStartBin(final int bin) {
 		_dataStartBin = bin;
@@ -601,7 +570,6 @@ public class FittingCursor {
 	/**
 	 * Gets the start of the data as a bin number.
 	 *
-	 * @return
 	 */
 	public int getDataStartBin() {
 		// return _dataStartBin;
@@ -617,7 +585,6 @@ public class FittingCursor {
 	/**
 	 * Sets the start of the data as a time value.
 	 *
-	 * @param value
 	 */
 	public void setDataStartValue(final double value) {
 		_dataStartValue =
@@ -629,7 +596,6 @@ public class FittingCursor {
 	/**
 	 * Gets the start of the data as a time value.
 	 *
-	 * @return
 	 */
 	public double getDataStartValue() {
 		return _dataStartValue;
@@ -639,7 +605,6 @@ public class FittingCursor {
 	 * Sets the end of the transient based on a string. Handles bins or time
 	 * values.
 	 *
-	 * @param transientStop
 	 */
 	public void setTransientStop(final String transientStop) {
 		if (_showBins) {
@@ -669,7 +634,6 @@ public class FittingCursor {
 	/**
 	 * Gets the end of the transient as a string. Handles bins or time values.
 	 *
-	 * @return
 	 */
 	public String getTransientStop() {
 		final StringBuilder returnValue = new StringBuilder();
@@ -685,7 +649,6 @@ public class FittingCursor {
 	/**
 	 * Sets the end of the transient as a bin number.
 	 *
-	 * @param bin
 	 */
 	public void setTransientStopBin(final int bin) {
 		_transientStopBin = bin;
@@ -696,7 +659,6 @@ public class FittingCursor {
 	/**
 	 * Gets the end of the transient as a bin number.
 	 *
-	 * @return
 	 */
 	public int getTransientStopBin() {
 
@@ -711,7 +673,6 @@ public class FittingCursor {
 	/**
 	 * Sets the end of the transient as a time value.
 	 *
-	 * @param value
 	 */
 	public void setTransientStopValue(final double value) {
 		_transientStopValue =
@@ -724,7 +685,6 @@ public class FittingCursor {
 	/**
 	 * Gets the end of the transient as a time value.
 	 *
-	 * @return
 	 */
 	public double getTransientStopValue() {
 		return _transientStopValue;
@@ -733,7 +693,6 @@ public class FittingCursor {
 	/**
 	 * Helper function to extract integers from strings.
 	 *
-	 * @param string
 	 * @return integer or null
 	 */
 	private Integer getIntegerValue(final String string) {
@@ -748,7 +707,6 @@ public class FittingCursor {
 	/**
 	 * Helper function to extract doubles from strings.
 	 *
-	 * @param string
 	 * @return integer or null
 	 */
 	private Double getDoubleValue(final String string) {

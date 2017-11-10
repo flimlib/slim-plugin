@@ -245,9 +245,6 @@ public class HistogramStatistics {
 	/**
 	 * Exports the histogram statistics using a BufferedWriter.
 	 *
-	 * @param writer
-	 * @param separator
-	 * @return
 	 * @throws IOException
 	 */
 	public boolean export(final BufferedWriter writer, final char separator)
@@ -322,10 +319,6 @@ public class HistogramStatistics {
 	/**
 	 * Exports a set of histograms.
 	 *
-	 * @param statistics
-	 * @param writer
-	 * @param separator
-	 * @return
 	 * @throws IOException
 	 */
 	public static boolean export(final HistogramStatistics[] statistics,
@@ -542,11 +535,6 @@ public class HistogramStatistics {
 
 	/**
 	 * exports statistics only with mean values.
-	 * @param statistics
-	 * @param writer
-	 * @param separator
-	 * @param name
-	 * @return
 	 * @throws IOException
 	 */
 	public static boolean export(final HistogramStatistics[] statistics,

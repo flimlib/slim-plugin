@@ -33,14 +33,12 @@ public interface IMaskGroup {
 	/**
 	 * Adds a mask node to group.
 	 *
-	 * @param node
 	 */
 	public void addNode(IMaskNode node);
 
 	/**
 	 * Removes a mask node from group.
 	 *
-	 * @param node
 	 */
 	public void removeNode(IMaskNode node);
 
@@ -54,7 +52,6 @@ public interface IMaskGroup {
 	/**
 	 * Gets the current total mask for this group.
 	 *
-	 * @return
 	 */
 	public Mask getMask();
 }

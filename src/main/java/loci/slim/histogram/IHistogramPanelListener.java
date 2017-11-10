@@ -35,16 +35,12 @@ public interface IHistogramPanelListener {
 	 * Sets a new minimum and maximum cursor on the histogram panel. Note that
 	 * these values are in pixels.
 	 *
-	 * @param min
-	 * @param max
 	 */
 	public void setMinMaxLUTPixels(int min, int max);
 
 	/**
 	 * Called during a mouse drag. Values in pixels.
 	 *
-	 * @param min
-	 * @param max
 	 */
 	public void dragMinMaxPixels(int min, int max);
 

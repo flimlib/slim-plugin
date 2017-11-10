@@ -40,7 +40,6 @@ public class Threshold implements IProcessor {
 	/**
 	 * Specifies a source IProcessor to be chained to this one.
 	 *
-	 * @param processor
 	 */
 	@Override
 	public void chain(final IProcessor processor) {
@@ -50,7 +49,6 @@ public class Threshold implements IProcessor {
 	/**
 	 * Gets input pixel value.
 	 *
-	 * @param location
 	 * @return null or pixel value
 	 */
 	@Override

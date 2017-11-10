@@ -44,10 +44,6 @@ public class TauMeanImage extends AbstractBaseFittedImage {
 	 * Create the fitted image. Specifies number of components which should be 2
 	 * or 3 and the current component which is ignored. respectively.
 	 *
-	 * @param title
-	 * @param dimension
-	 * @param component
-	 * @param components
 	 */
 	public TauMeanImage(final String title, final int[] dimension,
 		final IndexColorModel indexColorModel, final int component,

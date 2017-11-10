@@ -47,21 +47,18 @@ public interface FitSettings {
 	/**
 	 * Get number of bins in time histogram.
 	 *
-	 * @return
 	 */
 	public int getBins();
 
 	/**
 	 * Get time increment per time bin.
 	 *
-	 * @return
 	 */
 	public double getTimeInc();
 
 	/**
 	 * Get excitation decay values.
 	 *
-	 * @return
 	 */
 	public double[] getExcitation();
 

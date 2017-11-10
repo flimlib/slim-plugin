@@ -43,9 +43,6 @@ public class LifetimeGrayscaleDataset {
 	/**
 	 * Constructor.
 	 *
-	 * @param datasetService
-	 * @param lifetimeDatasetWrapper
-	 * @param bins
 	 */
 	public LifetimeGrayscaleDataset(final DatasetService datasetService,
 		final LifetimeDatasetWrapper lifetimeDatasetWrapper)
@@ -89,7 +86,6 @@ public class LifetimeGrayscaleDataset {
 	/**
 	 * Gets the associated dataset.
 	 *
-	 * @return
 	 */
 	public Dataset getDataset() {
 		return grayscaleDataset;
@@ -98,7 +94,6 @@ public class LifetimeGrayscaleDataset {
 	/**
 	 * Reports the full position of the brightest pixel in the first XY plane.
 	 *
-	 * @return
 	 */
 	public long[] getBrightestPixel() {
 		return maxPosition;
@@ -107,8 +102,6 @@ public class LifetimeGrayscaleDataset {
 	/**
 	 * Reports whether this position is in the first XY plane.
 	 *
-	 * @param position
-	 * @return
 	 */
 	private boolean inFirstPlane(final long[] position) {
 		for (int i = 2; i < position.length; ++i) {

@@ -48,7 +48,6 @@ public class CrossHairOverlay extends PointOverlay {
 	/**
 	 * Sets the point.
 	 *
-	 * @param point
 	 */
 	public void setPoint(final double[] point) {
 		final List<double[]> pts = super.getPoints();

@@ -109,21 +109,18 @@ public interface UserInterfacePanel {
 	/**
 	 * Gets noise model for fit.
 	 *
-	 * @return
 	 */
 	public ICurveFitter.NoiseModel getNoiseModel();
 
 	/**
 	 * Returns list of fitted images to display.
 	 *
-	 * @return
 	 */
 	public String getFittedImages();
 
 	/**
 	 * Returns whether to create colorized grayscale fitted images.
 	 *
-	 * @return
 	 */
 	public boolean getColorizeGrayScale();
 
@@ -151,7 +148,6 @@ public interface UserInterfacePanel {
 	/**
 	 * Sets photon count threshold minimum to fit a pixel.
 	 *
-	 * @param thresholdMin
 	 */
 	public void setThresholdMinimum(int thresholdMin);
 
@@ -165,21 +161,18 @@ public interface UserInterfacePanel {
 	/**
 	 * Sets photon count threshold maximum to fit a pixel.
 	 *
-	 * @param thresholdMax
 	 */
 	public void setThresholdMaximum(int thresholdMax);
 
 	/**
 	 * Gets chi square target for fit.
 	 *
-	 * @return
 	 */
 	public double getChiSquareTarget();
 
 	/**
 	 * Sets chi square target for fit.
 	 *
-	 * @param chiSqTarget
 	 */
 	public void setChiSquareTarget(double chiSqTarget);
 
@@ -200,7 +193,6 @@ public interface UserInterfacePanel {
 	/**
 	 * Sets pixel x.
 	 *
-	 * @param x
 	 */
 	public void setX(int x);
 
@@ -214,7 +206,6 @@ public interface UserInterfacePanel {
 	/**
 	 * Sets pixel y.
 	 *
-	 * @param y
 	 */
 	public void setY(int y);
 
@@ -228,7 +219,6 @@ public interface UserInterfacePanel {
 	/**
 	 * Sets number of fitted parameters after a successful fit.
 	 *
-	 * @param components
 	 */
 	public void setFittedParameterCount(int count);
 
@@ -242,8 +232,6 @@ public interface UserInterfacePanel {
 	/**
 	 * Sets the parameters of the fit
 	 *
-	 * @param parameters
-	 * @param AIC
 	 */
 	public void setParameters(double parameters[], double AIC);
 
@@ -251,7 +239,6 @@ public interface UserInterfacePanel {
 	 * Sets the parameters of the fit by function.
 	 *
 	 * @param function index
-	 * @param parameters
 	 */
 	public void setFunctionParameters(int function, double parameters[]);
 
@@ -265,7 +252,6 @@ public interface UserInterfacePanel {
 	/**
 	 * Gets whether to start next fit with results of last fit.
 	 *
-	 * @return
 	 */
 	public boolean getRefineFit();
 
@@ -274,7 +260,6 @@ public interface UserInterfacePanel {
 	 * additional scatter parameter; this is an attempt to see if scatter
 	 * correction helps the fit.
 	 *
-	 * @return
 	 */
 	public double getScatter();
 }

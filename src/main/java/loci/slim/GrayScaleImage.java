@@ -325,7 +325,6 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	/**
 	 * Sets a listener for when the user clicks on the image.
 	 *
-	 * @param listener
 	 */
 	@Override
 	public void setListener(final ISelectListener listener) {
@@ -346,7 +345,6 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	/**
 	 * Disables and enables channel selection, during and after a fit.
 	 *
-	 * @param enable
 	 */
 	@Override
 	public void enable(final boolean enable) {
@@ -356,9 +354,6 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	/**
 	 * Gets a grayscale pixel value, to test against a threshold.
 	 *
-	 * @param channel
-	 * @param x
-	 * @param y
 	 * @return unsigned byte expressed as an integer, 0...255
 	 */
 	@Override
@@ -475,7 +470,6 @@ public class GrayScaleImage<T extends RealType<T>> implements IGrayScaleImage {
 	/**
 	 * Saves the zoom factor to Java Preferences.
 	 *
-	 * @param path
 	 */
 	private void saveZoomFactorInPreferences(final float zoomFactor) {
 		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());

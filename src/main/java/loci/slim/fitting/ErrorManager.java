@@ -39,9 +39,6 @@ public class ErrorManager {
 	/**
 	 * Creates a handler for a set of bit masks by channel.
 	 *
-	 * @param width
-	 * @param height
-	 * @param channels
 	 */
 	public ErrorManager(final int width, final int height, final int channels) {
 		errorMasks = new Mask[channels];
@@ -53,7 +50,6 @@ public class ErrorManager {
 	/**
 	 * Defines an error mask listener.
 	 *
-	 * @param listener
 	 */
 	public void setListener(final IErrorListener listener) {
 		this.listener = listener;
@@ -62,9 +58,6 @@ public class ErrorManager {
 	/**
 	 * Sets an error mask bit.
 	 *
-	 * @param x
-	 * @param y
-	 * @param channel
 	 */
 	public void noteError(final int x, final int y, final int channel) {
 		errorMasks[channel].set(x, y);

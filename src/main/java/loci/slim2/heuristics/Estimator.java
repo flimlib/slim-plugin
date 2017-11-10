@@ -33,30 +33,24 @@ public interface Estimator {
 	/**
 	 * Get a decay start estimate.
 	 *
-	 * @param bins
-	 * @return
 	 */
 	int getStart(int bins);
 
 	/**
 	 * Get a decay stop estimate.
 	 *
-	 * @param bins
-	 * @return
 	 */
 	int getStop(int bins);
 
 	/**
 	 * Get a default threshold amount.
 	 *
-	 * @return
 	 */
 	int getThreshold();
 
 	/**
 	 * Get a default chi square target.
 	 *
-	 * @return
 	 */
 	double getChiSquareTarget();
 
@@ -64,9 +58,6 @@ public interface Estimator {
 	 * Gets default parameters for given number of components or stretched
 	 * exponential.
 	 *
-	 * @param components
-	 * @param stretched
-	 * @return
 	 */
 	double[] getParameters(int components, boolean stretched);
 }

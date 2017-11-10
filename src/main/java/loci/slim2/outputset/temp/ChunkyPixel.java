@@ -42,9 +42,6 @@ public class ChunkyPixel {
 	/**
 	 * Constructor.
 	 *
-	 * @param position
-	 * @param width
-	 * @param height
 	 */
 	public ChunkyPixel(final long[] position, final long width, final long height)
 	{
@@ -56,7 +53,6 @@ public class ChunkyPixel {
 	/**
 	 * Gets position of upper left pixel.
 	 *
-	 * @return
 	 */
 	public long[] getPosition() {
 		return position;
@@ -65,7 +61,6 @@ public class ChunkyPixel {
 	/**
 	 * Gets width of pixel.
 	 *
-	 * @return
 	 */
 	public long getWidth() {
 		return width;
@@ -74,7 +69,6 @@ public class ChunkyPixel {
 	/**
 	 * Gets height of pixel.
 	 *
-	 * @return
 	 */
 	public long getHeight() {
 		return height;

@@ -67,9 +67,6 @@ public class ExportSummaryToText {
 	/**
 	 * Initializes for given fitting function.
 	 *
-	 * @param parameters
-	 * @param function
-	 * @param listener
 	 */
 	public void init(final ICurveFitter.FitFunction function,
 		final FittedValue[] parameters, final BatchHistogramListener listener)
@@ -84,8 +81,6 @@ public class ExportSummaryToText {
 	/**
 	 * Processes each image in batch job.
 	 *
-	 * @param fileName
-	 * @param image
 	 */
 	public void process(final String fileName, final ImgPlus<DoubleType> image) {
 		final long[] dimensions = new long[image.numDimensions()];
@@ -154,8 +149,6 @@ public class ExportSummaryToText {
 	/**
 	 * Exports the summary to a file.
 	 *
-	 * @param fileName
-	 * @param separator
 	 */
 	public void export(final String fileName, final char separator) {
 		BufferedWriter bufferedWriter = null;
@@ -203,8 +196,6 @@ public class ExportSummaryToText {
 	 * Given an array of FittedValue creates a corresponding array of
 	 * BatchHistogram.
 	 *
-	 * @param parameters
-	 * @return
 	 */
 	private BatchHistogram[] buildBatchHistograms(final FittedValue[] parameters)
 	{

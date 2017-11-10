@@ -44,7 +44,6 @@ public interface ExcitationGraph {
 	/**
 	 * Sets the fitting cursor.
 	 *
-	 * @param fittingCursor
 	 */
 	public void setFittingCursor(FittingCursor fittingCursor);
 }

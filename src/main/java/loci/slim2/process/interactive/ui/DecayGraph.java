@@ -38,9 +38,6 @@ public interface DecayGraph {
 	/**
 	 * Initialize the graph and returns the containing JFrame.
 	 *
-	 * @param bins
-	 * @param timeInc
-	 * @param grayScale
 	 * @return frame
 	 */
 	public JFrame init(final JFrame frame, final int bins, final double timeInc,
@@ -49,46 +46,36 @@ public interface DecayGraph {
 	/**
 	 * Changes (or initializes) the cursor (start/stop bins/values) for the fit.
 	 *
-	 * @param fittingCursor
 	 */
 	public void setFittingCursor(FittingCursor fittingCursor);
 
 	/**
 	 * Changes (or initializes) the title of the graph.
 	 *
-	 * @param title
 	 */
 	public void setTitle(final String title);
 
 	/**
 	 * Changes (or initializes) all of the charted data.
 	 *
-	 * @param startIndex
-	 * @param prompt
-	 * @param fitResults
 	 */
 	public void setData(int startIndex, double[] prompt, FitResults fitResults);
 
 	/**
 	 * Sets reduced chi square of fit.
 	 *
-	 * @param chiSquare
 	 */
 	public void setChiSquare(double chiSquare);
 
 	/**
 	 * Sets number of photons in fit.
 	 *
-	 * @param photons
 	 */
 	public void setPhotons(int photons);
 
 	/**
 	 * Changes (or initializes) the start and stop vertical bars.
 	 *
-	 * @param transientStart
-	 * @param dataStart
-	 * @param transientStop
 	 */
 	public void setStartStop(double transientStart, double dataStart,
 		double transientStop);

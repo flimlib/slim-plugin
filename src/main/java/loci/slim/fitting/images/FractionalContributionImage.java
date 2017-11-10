@@ -43,10 +43,6 @@ public class FractionalContributionImage extends AbstractBaseFittedImage {
 	 * Create the fitted image. Specifies number of components which should be 2
 	 * or 3 and the current component which should be 0..1 or 0..2 respectively.
 	 *
-	 * @param title
-	 * @param dimension
-	 * @param component
-	 * @param components
 	 */
 	public FractionalContributionImage(final String title, final int[] dimension,
 		final IndexColorModel indexColorModel, final int component,

@@ -35,35 +35,30 @@ public interface IDecayImage<T extends RealType<T>> extends IProcessor {
 	/**
 	 * Gets width of image.
 	 *
-	 * @return
 	 */
 	public int getWidth();
 
 	/**
 	 * Gets height of image.
 	 * 
-	 * @return
 	 */
 	public int getHeight();
 
 	/**
 	 * Gets number of channels of image.
 	 *
-	 * @return
 	 */
 	public int getChannels();
 
 	/**
 	 * Gets number of parameters of image.
 	 *
-	 * @return
 	 */
 	public int getBins();
 
 	/**
 	 * Specifies a source IProcessor to be chained to this one.
 	 *
-	 * @param processor
 	 */
 	@Override
 	public void chain(IProcessor processor);
@@ -71,9 +66,6 @@ public interface IDecayImage<T extends RealType<T>> extends IProcessor {
 	/**
 	 * Gets input pixel value.
 	 *
-	 * @param x
-	 * @param y
-	 * @param channel
 	 * @return null or pixel value
 	 */
 	@Override
@@ -82,7 +74,6 @@ public interface IDecayImage<T extends RealType<T>> extends IProcessor {
 	/**
 	 * Gets associated image.
 	 *
-	 * @return
 	 */
 	public ImgPlus<T> getImage();
 }

@@ -380,9 +380,6 @@ public class RapidLifetimeDetermination {
 	/**
 	 * Invokes java version of SLIMCurve C code.
 	 *
-	 * @param fitter
-	 * @param data
-	 * @return
 	 */
 	public int rldFit(final ICurveFitter fitter, final ICurveFitData data) {
 		final double chiSquareDelta = 0.01;
@@ -599,12 +596,6 @@ public class RapidLifetimeDetermination {
 	 * , page 5, equations 6..8 of _A DSP-based measuring system for temperature
 	 * compensated fiberoptical oxygen sensors_, Stehing and Holst.
 	 *
-	 * @param offset
-	 * @param decay
-	 * @param xinc
-	 * @param start
-	 * @param stop
-	 * @return
 	 */
 	private int testPronysMethod(final double offset, final double[] decay,
 		final double xinc, final int start, final int stop)

@@ -41,9 +41,6 @@ public class DecayDatasetUtility {
 	/**
 	 * Converts lifetime image to grayscale.
 	 *
-	 * @param datasetService
-	 * @param dataset
-	 * @param lifetimeDimension
 	 * @return grayscale version
 	 */
 	public static Dataset convert(final DatasetService datasetService,
@@ -85,9 +82,6 @@ public class DecayDatasetUtility {
 	/**
 	 * Deletes a dimension at given dimensional index.
 	 *
-	 * @param dimensions
-	 * @param dimension
-	 * @return
 	 */
 	private static long[] deleteDimension(final ImgPlus img, final int dimension)
 	{
@@ -104,9 +98,6 @@ public class DecayDatasetUtility {
 	/**
 	 * Deletes an {@link AxisType} at given dimensional index.
 	 *
-	 * @param axes
-	 * @param dimension
-	 * @return
 	 */
 	private static AxisType[] deleteAxisType(final ImgPlus<?> img,
 		final int dimension)
@@ -124,10 +115,6 @@ public class DecayDatasetUtility {
 	/**
 	 * Gets the lifetime decay histogram.
 	 *
-	 * @param randomAccess
-	 * @param decay
-	 * @param position
-	 * @param dimension
 	 */
 	private static void getDecay(
 		final RandomAccess<? extends RealType<?>> randomAccess,
@@ -152,9 +139,6 @@ public class DecayDatasetUtility {
 	/**
 	 * Sums up the decay photons at a pixel.
 	 *
-	 * @param decay
-	 * @param factor
-	 * @return
 	 */
 	private static int sum(final double[] decay, final int factor) {
 		long returnValue = 0;
@@ -170,9 +154,6 @@ public class DecayDatasetUtility {
 	/**
 	 * Expands the position at a given dimensional index.
 	 *
-	 * @param position
-	 * @param dimension
-	 * @return
 	 */
 	private static long[] expandPosition(final long[] position,
 		final int dimension)

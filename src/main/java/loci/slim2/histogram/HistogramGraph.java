@@ -71,8 +71,6 @@ public class HistogramGraph {
 	/**
 	 * Constructor
 	 *
-	 * @param datasetService
-	 * @param renderingService
 	 */
 	public HistogramGraph(final DatasetService datasetService,
 		final RenderingService renderingService)
@@ -93,7 +91,6 @@ public class HistogramGraph {
 	/**
 	 * Gets the histogram graph dataset.
 	 *
-	 * @return
 	 */
 	public Dataset getDataset() {
 		return dataset;
@@ -102,7 +99,6 @@ public class HistogramGraph {
 	/**
 	 * Sets whether to graph logarithms.
 	 *
-	 * @param logarithmic
 	 */
 	public void setLogarithmic(final boolean logarithmic) {
 		this.logarithmic = logarithmic;
@@ -113,7 +109,6 @@ public class HistogramGraph {
 	 * Sets whether or not to emphasize single or low counts so they can be
 	 * distinguished from a zero count.
 	 *
-	 * @param distinguishNonZero
 	 */
 	public void setDistinguishNonZero(final boolean distinguishNonZero) {
 		this.distinguishNonZero = distinguishNonZero;
@@ -123,7 +118,6 @@ public class HistogramGraph {
 	/**
 	 * Updates the histogram data.
 	 *
-	 * @param histogram
 	 */
 	// TODO ARG histogram could just be live
 	// TODO ARG still need a way to swap active image
@@ -139,7 +133,6 @@ public class HistogramGraph {
 	/**
 	 * Creates a {@link Dataset} to use for histogram graph.
 	 * 
-	 * @return
 	 */
 	private Dataset createHistogramDataset() {
 		final long[] dims = new long[] { totalWidth, totalHeight, 3 };
@@ -191,9 +184,6 @@ public class HistogramGraph {
 	 * Calculates the histogram bar heights according to the current display
 	 * scheme.
 	 *
-	 * @param width
-	 * @param height
-	 * @return
 	 */
 	private int[] getBarHeights(final int width, final int height) {
 		final int[] barHeights = new int[histogram.length];

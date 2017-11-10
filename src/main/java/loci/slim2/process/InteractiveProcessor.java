@@ -41,12 +41,6 @@ public interface InteractiveProcessor {
 	/**
 	 * Initializes with required services.
 	 *
-	 * @param context
-	 * @param commandService
-	 * @param datasetService
-	 * @param displayService
-	 * @param uiService
-	 * @param estimator
 	 */
 	public void init(Context context, CommandService commandService,
 		DatasetService datasetService, DisplayService displayService,
@@ -55,14 +49,12 @@ public interface InteractiveProcessor {
 	/**
 	 * Gets current fit settings.
 	 *
-	 * @return
 	 */
 	public FitSettings getFitSettings();
 
 	/**
 	 * Processes a {@link LifetimeDatasetWrapper}.
 	 *
-	 * @param lifetime
 	 * @return whether to quit (true) or load new lifetime (false)
 	 */
 	public boolean process(LifetimeDatasetWrapper lifetime);

@@ -56,7 +56,6 @@ public class HistogramDataGroup {
 	/**
 	 * Constructor, takes an array of HistogramChannels.
 	 *
-	 * @param channel
 	 */
 	public HistogramDataGroup(final IFittedImage image, final String title,
 		final HistogramDataNode[] channel)
@@ -79,7 +78,6 @@ public class HistogramDataGroup {
 	/**
 	 * Sets a listener for histogram data changes. Listener is unique.
 	 *
-	 * @param listener
 	 */
 	public void setListener(final IHistogramDataListener listener) {
 		_listener = listener;
@@ -88,7 +86,6 @@ public class HistogramDataGroup {
 	/**
 	 * Gets a descriptive title to display on histogram UI for this data.
 	 *
-	 * @return
 	 */
 	public String getTitle() {
 		return _title;
@@ -97,7 +94,6 @@ public class HistogramDataGroup {
 	/**
 	 * Gets current channel index.
 	 *
-	 * @return
 	 */
 	public int getChannelIndex() {
 		return _channelIndex;
@@ -106,7 +102,6 @@ public class HistogramDataGroup {
 	/**
 	 * Sets current channel index.
 	 *
-	 * @param channelIndex
 	 */
 	public void setChannelIndex(final int channelIndex) {
 		_channelIndex = channelIndex;
@@ -133,7 +128,6 @@ public class HistogramDataGroup {
 	/**
 	 * Sets whether or not we should hide out-of-range pixels.
 	 *
-	 * @param excludePixels
 	 */
 	public void setExcludePixels(final boolean excludePixels) {
 		_excludePixels = excludePixels;
@@ -142,7 +136,6 @@ public class HistogramDataGroup {
 	/**
 	 * Sets whether or not we should hide out-of-range pixels.
 	 *
-	 * @return
 	 */
 	public boolean getExcludePixels() {
 		return _excludePixels;
@@ -160,7 +153,6 @@ public class HistogramDataGroup {
 	/**
 	 * Sets whether or not histogram should combine all the channels.
 	 *
-	 * @param combineChannels
 	 */
 	public void setCombineChannels(final boolean combineChannels) {
 		update(_autoRange, combineChannels);
@@ -169,7 +161,6 @@ public class HistogramDataGroup {
 	/**
 	 * Gets whether or not histogram should display all channels.
 	 *
-	 * @return
 	 */
 	public boolean getDisplayChannels() {
 		return _displayChannels;
@@ -178,7 +169,6 @@ public class HistogramDataGroup {
 	/**
 	 * Sets whether or not histogram should display all channels.
 	 *
-	 * @param displayChannels
 	 */
 	public void setDisplayChannels(final boolean displayChannels) {
 		_displayChannels = displayChannels;
@@ -187,7 +177,6 @@ public class HistogramDataGroup {
 	/**
 	 * Returns whether or not histogram has channels.
 	 *
-	 * @return
 	 */
 	public boolean hasChannels() {
 		return _channel.length > 1;
@@ -265,7 +254,6 @@ public class HistogramDataGroup {
 	/**
 	 * Gets minimum and maximum extents of the view.
 	 *
-	 * @return
 	 */
 	public double[] getMinMaxView() {
 		return new double[] { _minView, _maxView };
@@ -274,8 +262,6 @@ public class HistogramDataGroup {
 	/**
 	 * Sets minimum and maximum extents of the view.
 	 *
-	 * @param min
-	 * @param max
 	 */
 	public void setMinMaxView(final double min, final double max) {
 		_minView = min;
@@ -285,7 +271,6 @@ public class HistogramDataGroup {
 	/**
 	 * Gets minimum and maximum extents of the LUT.
 	 *
-	 * @return
 	 */
 	public double[] getMinMaxLUT() {
 		return new double[] { _minLUT, _maxLUT };
@@ -294,8 +279,6 @@ public class HistogramDataGroup {
 	/**
 	 * Sets minimum and maximum extents of the LUT.
 	 *
-	 * @param min
-	 * @param max
 	 */
 	public void setMinMaxLUT(final double min, final double max) {
 		_minLUT = min;
@@ -306,7 +289,6 @@ public class HistogramDataGroup {
 	/**
 	 * Gets minimum and maximum extents of the data.
 	 *
-	 * @return
 	 */
 	public double[] getMinMaxData() {
 		return new double[] { _minData, _maxData };

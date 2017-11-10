@@ -301,7 +301,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 			/**
 			 * Loads an excitation curve from file.
 			 *
-			 * @param fileName
 			 * @return whether successful
 			 */
 			@Override
@@ -314,7 +313,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 			/**
 			 * Creates an excitation curve from current X, Y and saves to file.
 			 *
-			 * @param fileName
 			 * @return whether successful
 			 */
 			@Override
@@ -330,7 +328,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 			/**
 			 * Estimates an excitation curve from current X, Y and saves to file.
 			 *
-			 * @param fileName
 			 * @return whether successful
 			 */
 			@Override
@@ -604,7 +601,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	/**
 	 * Does initial estimate of cursors.
 	 *
-	 * @param decay
 	 */
 	private void initCursors(final double[] decay) {
 		final int[] results = CursorEstimator.estimateDecayCursors(timeInc, decay);
@@ -655,7 +651,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	/**
 	 * Pixel fitting.
 	 *
-	 * @param position
 	 */
 	private void fitPixel(final long[] position) {
 		// make sure displayed UI panel X Y is up to date
@@ -703,8 +698,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	/**
 	 * Helper routine to do the fit.
 	 *
-	 * @param decay
-	 * @return
 	 */
 	private FitResults fitDecay(final double[] decay) {
 		final GlobalFitParams params = getGlobalFitParams(uiPanel, fittingCursor);
@@ -1000,9 +993,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	/**
 	 * Helper routine to get fit parameters for a group of pixels.
 	 *
-	 * @param ui
-	 * @param fittingCursor
-	 * @return
 	 */
 	private GlobalFitParams getGlobalFitParams(final UserInterfacePanel ui,
 		final FittingCursor fittingCursor)
@@ -1034,8 +1024,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	/**
 	 * Helper routine to get and set up fitting engine.
 	 *
-	 * @param ui
-	 * @return
 	 */
 	private FittingEngine getFittingEngine(final UserInterfacePanel ui) {
 		if (null == fittingEngine) {
@@ -1154,7 +1142,6 @@ public class DefaultInteractiveProcessor implements InteractiveProcessor {
 	/*
 	 * Shows the decay curve graph, with fitted results and residuals.
 	 *
-	 * @param title
 	 * @param uiPanel gets updates on dragged/start stop
 	 * @param data fitted data
 	 */

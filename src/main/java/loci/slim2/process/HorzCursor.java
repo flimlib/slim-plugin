@@ -37,7 +37,6 @@ public class HorzCursor {
 	/**
 	 * Constructor, specifies time increment per bin.
 	 *
-	 * @param timeInc
 	 */
 	public HorzCursor(final double timeInc) {
 		this.timeInc = timeInc;
@@ -46,7 +45,6 @@ public class HorzCursor {
 	/**
 	 * Get bin number.
 	 *
-	 * @return
 	 */
 	public int getBin() {
 		return bin;
@@ -55,7 +53,6 @@ public class HorzCursor {
 	/**
 	 * Set bin number.
 	 *
-	 * @param bin
 	 */
 	public void setBin(final int bin) {
 		this.bin = bin;
@@ -65,7 +62,6 @@ public class HorzCursor {
 	/**
 	 * Get time value.
 	 *
-	 * @return
 	 */
 	public double getTime() {
 		return time;
@@ -74,7 +70,6 @@ public class HorzCursor {
 	/**
 	 * Set time value.
 	 *
-	 * @param time
 	 */
 	public void setTime(final double time) {
 		this.time = time;

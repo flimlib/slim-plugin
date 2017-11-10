@@ -58,7 +58,6 @@ public interface UserInterfacePanelListener {
 	/**
 	 * Loads an excitation curve from file.
 	 *
-	 * @param fileName
 	 * @return whether successful
 	 */
 	public boolean loadExcitation(String fileName);
@@ -66,7 +65,6 @@ public interface UserInterfacePanelListener {
 	/**
 	 * Creates an excitation curve from current X, Y and saves to file.
 	 *
-	 * @param fileName
 	 * @return whether successful
 	 */
 	public boolean createExcitation(String fileName);
@@ -74,7 +72,6 @@ public interface UserInterfacePanelListener {
 	/**
 	 * Estimates an excitation curve from current X, Y and saves to file.
 	 *
-	 * @param fileName
 	 * @return whether successful
 	 */
 	public boolean estimateExcitation(String fileName);
@@ -82,7 +79,6 @@ public interface UserInterfacePanelListener {
 	/**
 	 * Creates excitation curve from gaussian.
 	 *
-	 * @param fileName
 	 * @return whether successful
 	 */
 	public boolean gaussianExcitation(String fileName);

@@ -78,7 +78,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Constructor. Wraps a pre-existing Dataset.
 	 *
-	 * @param dataset
 	 */
 	public LifetimeDatasetWrapper(final Dataset dataset)
 		throws NoLifetimeAxisFoundException
@@ -91,8 +90,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Constructor. Loads a Dataset and wraps it.
 	 *
-	 * @param context
-	 * @param file
 	 * @throws IOException
 	 * @throws NoLifetimeAxisFoundException
 	 */
@@ -202,7 +199,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Return wrapped {@link Dataset}.
 	 *
-	 * @return
 	 */
 	public Dataset getDataset() {
 		return dataset;
@@ -211,7 +207,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Returns external dimensions (i.e. w/o lifetime dimension).
 	 *
-	 * @return
 	 */
 	public long[] getDims() {
 		return externalDimensions;
@@ -220,7 +215,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Returns external axis types (i.e. w/o lifetime dimension).
 	 * 
-	 * @return
 	 */
 	public AxisType[] getAxes() {
 		return externalAxes;
@@ -229,7 +223,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Returns number of lifetime bins.
 	 *
-	 * @return
 	 */
 	public int getBins() {
 		return bins;
@@ -238,7 +231,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Sets photon count factor.
 	 *
-	 * @param factor
 	 */
 	private void setPhotonCountFactor(final int factor) {
 		this.factor = factor;
@@ -247,7 +239,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Gets photon count factor.
 	 *
-	 * @return
 	 */
 	public int getPhotonCountFactor() {
 		return factor;
@@ -256,7 +247,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Sets bin width as time.
 	 *
-	 * @param inc
 	 */
 	private void setTimeIncrement(final double inc) {
 		this.inc = inc;
@@ -265,7 +255,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Gets bin width as time.
 	 *
-	 * @return
 	 */
 	public double getTimeIncrement() {
 		return inc;
@@ -274,10 +263,7 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Gets decay histogram at given location.
 	 *
-	 * @param x
-	 * @param y
 	 * @param tail rest of position
-	 * @return
 	 */
 	public double[] getDecay(final long x, final long y, final long[] tail) {
 		final long[] position = new long[tail.length + 2];
@@ -293,8 +279,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Gets decay histogram at given location.
 	 *
-	 * @param position
-	 * @return
 	 */
 	public double[] getDecay(final long[] position) {
 		return getDecayFromInternalPosition(internalPosition(position));
@@ -305,8 +289,6 @@ public class LifetimeDatasetWrapper {
 	 * pixels.
 	 *
 	 * @param binSize 0=no binning, 1=3x3, 2=5x5, etc.
-	 * @param position
-	 * @return
 	 */
 	public double[] getBinnedDecay(final int binSize, final long[] position) {
 		if (0 == binSize) {
@@ -321,8 +303,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Gets decay histogram summed for the whole plane.
 	 *
-	 * @param position
-	 * @return
 	 */
 	public double[] getCombinedPlaneDecay(final int thresholdMin,
 		final int thresholdMax, final long[] position)
@@ -338,8 +318,6 @@ public class LifetimeDatasetWrapper {
 	 * Gets summed decay histogram at given location, with binning.
 	 *
 	 * @param binSize 0=no binning, 1=3x3, 2=5x5, etc.
-	 * @param position
-	 * @return
 	 */
 	public int getSummedDecay(final int binSize, final long[] position) {
 		final double[] decay = getBinnedDecay(binSize, position);
@@ -381,14 +359,6 @@ public class LifetimeDatasetWrapper {
 	 * Helper routine, creates combined decay from planar, rectangular area of
 	 * pixels.
 	 *
-	 * @param thresholdMin
-	 * @param thresholdMax
-	 * @param x0
-	 * @param x1
-	 * @param y0
-	 * @param y1
-	 * @param pos
-	 * @return
 	 */
 	private double[]
 		combineDecay(final int thresholdMin, final int thresholdMax, final long x0,
@@ -421,8 +391,6 @@ public class LifetimeDatasetWrapper {
 	 * Expands external position (without lifetime dimension) to internal position
 	 * (with lifetime dimension).
 	 *
-	 * @param position
-	 * @return
 	 */
 	private long[] internalPosition(final long[] position) {
 		final long[] internalPosition = new long[position.length + 1];
@@ -438,8 +406,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Gets the decay histogram at given location.
 	 *
-	 * @param pos
-	 * @return
 	 */
 	private double[] getDecayFromInternalPosition(final long[] pos) {
 		final long[] position = pos.clone(); // preserve incoming position
@@ -455,10 +421,6 @@ public class LifetimeDatasetWrapper {
 	/**
 	 * Checks if decay is within threshold limits.
 	 *
-	 * @param thresholdMin
-	 * @param thresholdMax
-	 * @param decay
-	 * @return
 	 */
 	private boolean withinThreshold(final int thresholdMin,
 		final int thresholdMax, final double[] decay)
@@ -520,8 +482,6 @@ public class LifetimeDatasetWrapper {
 		/**
 		 * Gets the decay at a given position.
 		 *
-		 * @param position
-		 * @return
 		 */
 		public double[] getDecay(final long[] position) {
 			double[] decay = null;

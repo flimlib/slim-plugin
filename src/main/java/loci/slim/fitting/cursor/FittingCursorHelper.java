@@ -41,7 +41,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	 * Sets the UI source and destination of fitting cursor strings, e.g. a
 	 * wrapper around some JTextField.
 	 *
-	 * @param promptCursorUI
 	 */
 	public void setFittingCursorUI(final IFittingCursorUI fittingCursorUI) {
 		_fittingCursorUI = fittingCursorUI;
@@ -51,7 +50,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Sets the fitting cursor that is keeping track of cursor settings.
 	 *
-	 * @param fittingCursor
 	 */
 	public void setFittingCursor(final FittingCursor fittingCursor) {
 		if (null == _fittingCursor) {
@@ -67,7 +65,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Gets whether to show bins or time values for cursors.
 	 *
-	 * @return
 	 */
 	public boolean getShowBins() {
 		return _fittingCursor.getShowBins();
@@ -76,7 +73,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Sets whether to show bins or time values for cursors.
 	 *
-	 * @param showBins
 	 */
 	public void setShowBins(final boolean showBins) {
 		_fittingCursor.setShowBins(showBins);
@@ -86,7 +82,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Turns on/off prompt cursors.
 	 *
-	 * @param enable
 	 */
 	public void enablePrompt(final boolean enable) {
 		_fittingCursor.setHasPrompt(enable);
@@ -95,7 +90,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Gets whether there is a prompt.
 	 *
-	 * @return
 	 */
 	public boolean getPrompt() {
 		return _fittingCursor.getHasPrompt();
@@ -104,7 +98,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Gets the transient start cursor.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getTransientStart() {
@@ -114,7 +107,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Sets the transient start cursor.
 	 *
-	 * @param transientStart
 	 */
 	@Override
 	public void setTransientStart(final String transientStart) {
@@ -124,7 +116,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Gets the data start cursor.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getDataStart() {
@@ -134,7 +125,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Sets the data start cursor.
 	 *
-	 * @param transientBaseline
 	 */
 	@Override
 	public void setDataStart(final String dataStart) {
@@ -144,7 +134,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Gets the transient end cursor.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getTransientStop() {
@@ -154,7 +143,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Sets the transient end cursor.
 	 *
-	 * @param transientStop
 	 */
 	@Override
 	public void setTransientStop(final String transientStop) {
@@ -165,7 +153,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Gets the prompt delay cursor.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getPromptDelay() {
@@ -175,7 +162,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Sets the prompt delay cursor.
 	 *
-	 * @param promptStart
 	 */
 	@Override
 	public void setPromptDelay(final String promptDelay) {
@@ -185,7 +171,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Gets the prompt width cursor.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getPromptWidth() {
@@ -195,7 +180,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Sets the prompt width cursor.
 	 *
-	 * @param promptWidth
 	 */
 	@Override
 	public void setPromptWidth(final String promptWidth) {
@@ -205,7 +189,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Gets the prompt baseline cursor as a string.
 	 * 
-	 * @return
 	 */
 	@Override
 	public String getPromptBaseline() {
@@ -215,7 +198,6 @@ public class FittingCursorHelper implements IFittingCursorUI {
 	/**
 	 * Sets the prompt baseline cursor as a string.
 	 *
-	 * @param promptBaseline
 	 */
 	@Override
 	public void setPromptBaseline(final String promptBaseline) {

@@ -33,7 +33,6 @@ public interface IMaskGroupListener {
 	/**
 	 * Sets a mask group to listen for changes.
 	 *
-	 * @param maskGroup
 	 */
 	public void listenToMaskGroup(IMaskGroup maskGroup);
 }

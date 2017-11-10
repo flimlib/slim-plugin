@@ -42,22 +42,18 @@ public interface FittingEngine {
 	/**
 	 * Sets number of threads to use in a fit.
 	 *
-	 * @param threads
 	 */
 	public void setThreads(int threads);
 
 	/**
 	 * Sets the ICurveFitter for the fitting engine to use.
 	 *
-	 * @param curveFitter
 	 */
 	public void setCurveFitter(ICurveFitter curveFitter);
 
 	/**
 	 * Fit one pixel.
 	 *
-	 * @param params
-	 * @param data
 	 * @return fitted results
 	 */
 	public FitResults fit(GlobalFitParams params, LocalFitParams data);
@@ -65,9 +61,6 @@ public interface FittingEngine {
 	/**
 	 * Fits a list of pixels.
 	 *
-	 * @param params
-	 * @param dataList
-	 * @return
 	 */
 	public List<FitResults> fit(GlobalFitParams params,
 		List<LocalFitParams> dataList);

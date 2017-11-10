@@ -37,7 +37,6 @@ public class VertCursor {
 	/**
 	 * Gets vertical cursor position.
 	 *
-	 * @return
 	 */
 	public double getPhotons() {
 		return photons;
@@ -46,7 +45,6 @@ public class VertCursor {
 	/**
 	 * Sets vertical cursor position.
 	 *
-	 * @param photons
 	 */
 	public void setPhotons(final double photons) {
 		this.photons = photons;

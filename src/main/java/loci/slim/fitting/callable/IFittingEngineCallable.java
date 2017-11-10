@@ -38,9 +38,6 @@ public interface IFittingEngineCallable extends Callable<IFitResults> {
 	/**
 	 * Set up for a fit.
 	 *
-	 * @param curveFitter
-	 * @param params
-	 * @param data
 	 */
 	public void setup(ICurveFitter curveFitter, IGlobalFitParams params,
 		ILocalFitParams data);
@@ -48,7 +45,6 @@ public interface IFittingEngineCallable extends Callable<IFitResults> {
 	/**
 	 * Do the fit.
 	 *
-	 * @return
 	 */
 	@Override
 	public IFitResults call();

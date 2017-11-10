@@ -34,9 +34,6 @@ public interface ISelectListener {
 	/**
 	 * Pixel was click-selected.
 	 *
-	 * @param channel
-	 * @param x
-	 * @param y
 	 */
 	public void selected(int channel, int x, int y);
 }

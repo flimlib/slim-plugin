@@ -40,11 +40,6 @@ public class SimpleFittedImage extends AbstractBaseFittedImage {
 	/**
 	 * Constructor, giving index of input parameter to display
 	 *
-	 * @param title
-	 * @param dimension
-	 * @param indexColorModel
-	 * @param parameterIndex
-	 * @param colorizeGrayScale
 	 * @param grayScalePixelValue;
 	 * @param maskGroup;
 	 */
@@ -61,8 +56,6 @@ public class SimpleFittedImage extends AbstractBaseFittedImage {
 	/**
 	 * Given the array of fitted parameters, get the value for this image.
 	 *
-	 * @param parameters
-	 * @return
 	 */
 	@Override
 	public double getValue(final double[] parameters) {

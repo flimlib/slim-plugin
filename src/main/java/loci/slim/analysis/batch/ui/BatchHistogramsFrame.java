@@ -61,7 +61,6 @@ public class BatchHistogramsFrame extends JFrame {
 	/**
 	 * Constructor of invisible frame.
 	 *
-	 * @param listener
 	 */
 	public BatchHistogramsFrame(final BatchHistogramListener listener) {
 		super(TITLE);

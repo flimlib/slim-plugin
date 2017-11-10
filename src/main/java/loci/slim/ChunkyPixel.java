@@ -41,10 +41,6 @@ public class ChunkyPixel {
 	/**
 	 * Constructor.
 	 *
-	 * @param x
-	 * @param y
-	 * @param width
-	 * @param height
 	 */
 	public ChunkyPixel(final int x, final int y, final int width, final int height)
 	{
@@ -59,7 +55,6 @@ public class ChunkyPixel {
 	/**
 	 * Gets the x location.
 	 *
-	 * @return
 	 */
 	public int getX() {
 		return _x;
@@ -68,7 +63,6 @@ public class ChunkyPixel {
 	/**
 	 * Gets the y location.
 	 *
-	 * @return
 	 */
 	public int getY() {
 		return _y;
@@ -77,7 +71,6 @@ public class ChunkyPixel {
 	/**
 	 * Gets the width to draw the pixel.
 	 *
-	 * @return
 	 */
 	public int getWidth() {
 		return _width;
@@ -86,7 +79,6 @@ public class ChunkyPixel {
 	/**
 	 * Gets the height to draw the pixel.
 	 *
-	 * @return
 	 */
 	public int getHeight() {
 		return _height;
@@ -95,7 +87,6 @@ public class ChunkyPixel {
 	/**
 	 * Sets the location of the pixel in the input image.
 	 *
-	 * @param location
 	 */
 	public void setInputLocation(final int[] location) {
 		_inputLocation = location;
@@ -104,7 +95,6 @@ public class ChunkyPixel {
 	/**
 	 * Gets the location of the pixel in the input image.
 	 *
-	 * @return
 	 */
 	public int[] getInputLocation() {
 		return _inputLocation;
@@ -113,7 +103,6 @@ public class ChunkyPixel {
 	/**
 	 * Sets the location of the pixel in the output image.
 	 *
-	 * @param location
 	 */
 	public void setOutputLocation(final int[] location) {
 		_outputLocation = location;
@@ -122,7 +111,6 @@ public class ChunkyPixel {
 	/**
 	 * Gets the location of the pixel in the output image.
 	 *
-	 * @return
 	 */
 	public int[] getOutputLocation() {
 		return _outputLocation;

@@ -86,12 +86,6 @@ public class DefaultFitterEstimator implements IFitterEstimator {
 	 * In TRI2 this is all table-driven, using "fitType[i].preEstimateFactors[0]"
 	 * etc. Comments below give those table entry values.
 	 *
-	 * @param params
-	 * @param free
-	 * @param fitFunction
-	 * @param A
-	 * @param tau
-	 * @param Z
 	 */
 	@Override
 	public void adjustEstimatedParams(final double[] params,
@@ -188,9 +182,6 @@ public class DefaultFitterEstimator implements IFitterEstimator {
 	 * <p>
 	 * Note that 'valueToBin' and 'binToValue' should round-trip.
 	 *
-	 * @param value
-	 * @param inc
-	 * @return
 	 */
 	@Override
 	public int valueToBin(final double value, final double inc) {
@@ -202,9 +193,6 @@ public class DefaultFitterEstimator implements IFitterEstimator {
 	 * <p>
 	 * Note that 'binToValue' and 'valueToBin' ought to round-trip.
 	 *
-	 * @param bin
-	 * @param inc
-	 * @return
 	 */
 	@Override
 	public double binToValue(final int bin, final double inc) {

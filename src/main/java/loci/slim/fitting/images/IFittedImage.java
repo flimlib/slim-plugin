@@ -45,14 +45,12 @@ public interface IFittedImage {
 	/**
 	 * Sets the color model used to display float values.
 	 *
-	 * @param colorModel
 	 */
 	public void setColorModel(IndexColorModel colorModel);
 
 	/**
 	 * Gets the associated histogram data object.
 	 *
-	 * @return
 	 */
 	public HistogramDataGroup getHistogramData();
 
@@ -74,8 +72,6 @@ public interface IFittedImage {
 	/**
 	 * Updates the fitted parameters for a pixel.
 	 *
-	 * @param location
-	 * @param parameters
 	 */
 	public void updatePixel(int[] location, double[] parameters);
 
@@ -83,9 +79,6 @@ public interface IFittedImage {
 	 * Updates the fitted parameters for a pixel. The pixel is drawn outsized at
 	 * first.
 	 *
-	 * @param location
-	 * @param dimension
-	 * @param parameters
 	 */
 	public void updateChunkyPixel(int[] location, int[] dimension,
 		double[] parameters);
@@ -104,15 +97,12 @@ public interface IFittedImage {
 	/**
 	 * Redisplays the image after masking.
 	 *
-	 * @param mask
 	 */
 	public void updateMask(Mask mask);
 
 	/**
 	 * Given the array of fitted parameters, get the value for this image.
 	 *
-	 * @param parameters
-	 * @return
 	 */
 	public double getValue(double[] parameters);
 }

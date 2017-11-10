@@ -69,8 +69,6 @@ public class ImageFitter {
 	/**
 	 * Creates a fitted image.
 	 *
-	 * @param context
-	 * @param file
 	 * @return fitted image or null; if null, errorCode is set
 	 */
 	public ImgPlus<DoubleType> fit(final Context context,
@@ -83,9 +81,6 @@ public class ImageFitter {
 	 * Creates a fitted image. This version checks the bin count for consistency
 	 * when batch processing.
 	 *
-	 * @param context
-	 * @param file
-	 * @param batchBins
 	 * @return fitted image or null; if null, errorCode is set
 	 */
 	public ImgPlus<DoubleType> fit(final Context context,
@@ -172,9 +167,6 @@ public class ImageFitter {
 	/**
 	 * Helper routine to do the fit.
 	 *
-	 * @param params
-	 * @param decay
-	 * @return
 	 */
 	private FitResults fitDecay(final FittingEngine fittingEngine,
 		final GlobalFitParams params, final double[] decay)
@@ -194,7 +186,6 @@ public class ImageFitter {
 	/**
 	 * Gets the error code of the last execution.
 	 *
-	 * @return
 	 */
 	public ErrorCode getErrorCode() {
 		return errorCode;
@@ -203,7 +194,6 @@ public class ImageFitter {
 	/**
 	 * Gets the bin count of the last execution.
 	 *
-	 * @return
 	 */
 	public int getBins() {
 		return bins;
@@ -212,12 +202,6 @@ public class ImageFitter {
 	/**
 	 * Helper routine to get and set up fitting engine.
 	 *
-	 * @param fitAlgorithm
-	 * @param fitFunction
-	 * @param noiseModel
-	 * @param timeInc
-	 * @param free
-	 * @return
 	 */
 	public FittingEngine getFittingEngine(
 		final ICurveFitter.FitAlgorithm fitAlgorithm,

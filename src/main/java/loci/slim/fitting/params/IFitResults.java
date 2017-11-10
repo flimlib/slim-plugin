@@ -33,14 +33,12 @@ public interface IFitResults {
 	/**
 	 * Sets fitted chi square result.
 	 *
-	 * @param chiSquare
 	 */
 	public void setChiSquare(double chiSquare);
 
 	/**
 	 * Gets fitted chi square result.
 	 *
-	 * @return
 	 */
 	public double getChiSquare();
 
@@ -61,14 +59,12 @@ public interface IFitResults {
 	/**
 	 * Sets fitted curve.
 	 *
-	 * @param yFitted
 	 */
 	public void setYFitted(double[] yFitted);
 
 	/**
 	 * Gets fitted curve.
 	 *
-	 * @return
 	 */
 	public double[] getYFitted();
 }

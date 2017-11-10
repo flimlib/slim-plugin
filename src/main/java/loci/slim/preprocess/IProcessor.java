@@ -33,7 +33,6 @@ public interface IProcessor {
 	/**
 	 * Specifies a source IProcessor to be chained to this one.
 	 *
-	 * @param processor
 	 */
 	public void chain(IProcessor processor);
 

@@ -64,8 +64,6 @@ public class ThresholdDisplayOverlay extends ThresholdOverlay {
 	/**
 	 * Sets the threshold value.
 	 *
-	 * @param thresholdMin
-	 * @param thresholdMax
 	 */
 	public void setThreshold(final int thresholdMin, final int thresholdMax) {
 		System.out.println("ThresholdDisplayOverlay " + thresholdMin + " " +

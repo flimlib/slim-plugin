@@ -39,9 +39,6 @@ public class SquareBinner implements IProcessor {
 	 * Initializes the binner. Must be called once after instantiation and before
 	 * use.
 	 *
-	 * @param size
-	 * @param width
-	 * @param height
 	 */
 	public void init(final int size, final int width, final int height) {
 		_size = size;
@@ -52,7 +49,6 @@ public class SquareBinner implements IProcessor {
 	/**
 	 * Specifies a source IProcessor to be chained to this one.
 	 *
-	 * @param processor
 	 */
 	@Override
 	public void chain(final IProcessor processor) {
@@ -62,7 +58,6 @@ public class SquareBinner implements IProcessor {
 	/**
 	 * Gets input pixel value.
 	 *
-	 * @param location
 	 * @return pixel value
 	 */
 	@Override

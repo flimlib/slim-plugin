@@ -138,16 +138,6 @@ public class DefaultBatchProcessor implements BatchProcessor {
 	/**
 	 * Does the batch processing.
 	 *
-	 * @param context
-	 * @param exportPixels
-	 * @param pixelsFile
-	 * @param exportHistograms
-	 * @param histogramsFile
-	 * @param exportSummary
-	 * @param summaryFile
-	 * @param fitSettings
-	 * @param files
-	 * @param csv
 	 */
 	private void batchProcessing(final Context context, final int batchBins,
 		final boolean exportPixels, final String pixelsFile,

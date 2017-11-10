@@ -352,7 +352,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Run method for the plugin. Throws up a file dialog.
 	 *
-	 * @param arg
 	 */
 	public void process(final String arg) {
 
@@ -435,7 +434,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Start batch processing. (vestigial macro code)
 	 *
-	 * @return
 	 */
 	public boolean startBatch() {
 		_uiPanel.disable();
@@ -448,10 +446,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Batch process a single file.
 	 *
-	 * @param input
-	 * @param output
-	 * @param exportPixels
-	 * @param exportHistograms
 	 */
 	public void batch(final String input, final String output,
 		final boolean exportPixels, final boolean exportHistograms)
@@ -622,7 +616,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * Loops until quitting time and handles fit requests. Fitting is driven by a
 	 * button on the UI panel which sets the global _fitInProgress.
 	 *
-	 * @param uiPanel
 	 */
 	// public static void doFits() {
 	private void doFits() {
@@ -774,7 +767,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 			/**
 			 * Loads an excitation curve from file.
 			 *
-			 * @param fileName
 			 * @return whether successful
 			 */
 			@Override
@@ -787,7 +779,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 			/**
 			 * Creates an excitation curve from current X, Y and saves to file.
 			 *
-			 * @param fileName
 			 * @return whether successful
 			 */
 			@Override
@@ -810,7 +801,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 			/**
 			 * Estimates an excitation curve from current X, Y and saves to file.
 			 *
-			 * @param fileName
 			 * @return whether successful
 			 */
 			@Override
@@ -1122,7 +1112,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * not open the fitting windows. Rather shows does the fitting in the
 	 * background.
 	 *
-	 * @param files
 	 */
 	private void batchProcessingWithUI(final File[] files) {
 		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
@@ -1222,14 +1211,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Does the batch processing.
 	 *
-	 * @param exportPixels
-	 * @param pixelsFile
-	 * @param exportHistograms
-	 * @param histogramsFile
-	 * @param exportSummary
-	 * @param summaryFile
-	 * @param files
-	 * @param csv
 	 */
 	private void batchProcessing(final boolean exportPixels,
 		final String pixelsFile, final boolean exportHistograms,
@@ -1419,7 +1400,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * This method gives an initial estimate of the decay cursors (start and stop
 	 * values).
 	 *
-	 * @param uiPanel
 	 */
 	private void updateDecayCursors(final IUserInterfacePanel uiPanel) {
 		// get selected channel
@@ -1448,7 +1428,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * This method sums the decay for all channels of all pixels.
 	 *
-	 * @return
 	 */
 	// TODO not used
 	private double[] getSummedDecay() {
@@ -1552,7 +1531,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Prompts for a FLIM file.
 	 *
-	 * @param defaultPath
 	 * @return non-null array of Files
 	 */
 	private final File[] showFileDialog(final String defaultPath) {
@@ -1695,7 +1673,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Saves the path name to Java Preferences.
 	 *
-	 * @param path
 	 */
 	private void savePathInPreferences(final String path) {
 		final Preferences prefs = Preferences.userNodeForPackage(this.getClass());
@@ -1818,10 +1795,7 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * Fits all the pixels in the image. Gets fit settings from the UI panel and
 	 * various globals.
 	 *
-	 * @param uiPanel
-	 * @param channel
 	 * @param batch whether or not batch processing is in effect
-	 * @return
 	 */
 	private ImgPlus<DoubleType> fitImage(final IUserInterfacePanel uiPanel,
 		final int channel, final boolean batch)
@@ -1909,7 +1883,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * @param previousImage previous fit results, may be null
 	 * @param newImage results of this fit
 	 * @param batch whether or not batch processing is in effect
-	 * @return
 	 */
 	private ImgPlus<DoubleType> fitImage(final IFittingEngine fittingEngine,
 		final FitInfo fitInfo, final IDecayImage decayImage,
@@ -2074,13 +2047,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * images from fit parameters, the histogram and images are updated at the end
 	 * of this function.
 	 *
-	 * @param fittingEngine
-	 * @param pixels
-	 * @param globalFitParams
-	 * @param localFitParams
-	 * @param errorManager
-	 * @param imageColorizer
-	 * @param fittedImage
 	 * @param batch whether or not batch processing is in effect
 	 */
 	private void processPixels(final IFittingEngine fittingEngine,
@@ -2424,8 +2390,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/*
 	 * Fits a given pixel.
 	 *
-	 * @param x
-	 * @param y
 	 */
 	private ImgPlus<DoubleType> fitPixel(final IUserInterfacePanel uiPanel,
 		final int x, final int y)
@@ -2625,10 +2589,8 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Gets an array of channel indices to iterate over.
 	 *
-	 * @param fitAllChannels
 	 * @param channel current channel
 	 * @param channels number of channels
-	 * @return
 	 */
 	private int[] getChannelIndices(final boolean fitAllChannels,
 		final int channel, final int channels)
@@ -2646,9 +2608,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Calculates the total number of pixels to fit. Used for progress bar.
 	 *
-	 * @param channels
-	 * @param fitAll
-	 * @return
 	 */
 	private int totalPixelCount(final int x, final int y, final int channels,
 		final boolean fitAll)
@@ -2663,11 +2622,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Calculates an array of channel indices to iterate over.
 	 *
-	 * @param channel
-	 * @param channels
-	 * @param visibleFit
-	 * @param fitAll
-	 * @return
 	 */
 	private int[] channelIndexArray(final int channel, final int channels,
 		final boolean visibleFit, final boolean fitAll)
@@ -2709,10 +2663,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Helper routine to create imglib.Image to store fitted results.
 	 *
-	 * @param width
-	 * @param height
-	 * @param components
-	 * @return
 	 */
 	private ImgPlus<DoubleType> makeImage(final int channels, final int width,
 		final int height, final int parameters)
@@ -2786,8 +2736,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * Checks whether a given pixel is included in ROIs. If no ROIs are selected
 	 * then all pixels are included.
 	 *
-	 * @param x
-	 * @param y
 	 * @return whether or not included in ROIs
 	 */
 	boolean isInROIs(final int x, final int y) {
@@ -2818,10 +2766,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * Colorizes a given lifetime value. Note this is much cruder than the
 	 * DataColorizer that is used in fitEachPixel.
 	 *
-	 * @param min
-	 * @param max
-	 * @param lifetime
-	 * @return
 	 */
 	// TODO make consistent with fitEachPixel's DataColorizer
 	// TODO this needs to use LUTs
@@ -3013,7 +2957,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/*
 	 * Helper function for the fit.  Shows the decay curve.
 	 *
-	 * @param title
 	 * @param uiPanel gets updates on dragged/start stop
 	 * @param data fitted data
 	 */
@@ -3262,7 +3205,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Works independent of the GUI, uses its own data type
 	 * 
-	 * @param arg
 	 */
 
 	public static void setChi2Target(final String arg) {
@@ -3277,7 +3219,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Works independent of the GUI, uses its own data type
 	 * 
-	 * @param arg
 	 */
 	public static void setThersholdValue(final String arg) {
 
@@ -3469,7 +3410,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * This macro does not update the GUI, instead updates a value for transient
 	 * start time and uses that value for fitting
 	 * 
-	 * @param arg
 	 */
 	public static void setTransientStart(final String arg) {
 
@@ -3481,7 +3421,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * This macro calling function works independent for the GUI, updates its own
 	 * data structure value
 	 * 
-	 * @param arg
 	 */
 	public static void setTransientStop(final String arg) {
 
@@ -3492,7 +3431,6 @@ public class SLIMProcessor<T extends RealType<T>> {
 	/**
 	 * Independent of the GUI like setTransientStop and setTransientStart
 	 * 
-	 * @param arg
 	 */
 	public static void setDataStart(final String arg) {
 

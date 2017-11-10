@@ -35,15 +35,12 @@ public interface IErrorListener {
 	/**
 	 * Clears error mask.
 	 *
-	 * @param channel
 	 */
 	public void resetErrorMask(int channel);
 
 	/**
 	 * Updates the mask that defines error pixels.
 	 *
-	 * @param mask
-	 * @param channel
 	 */
 	public void updateErrorMask(Mask mask, int channel);
 

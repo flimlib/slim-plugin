@@ -249,11 +249,6 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 	/**
 	 * Builds statistics from image and single FittedValue.
 	 *
-	 * @param image
-	 * @param channel
-	 * @param params
-	 * @param fittedValue
-	 * @return
 	 */
 	public HistogramStatistics getStatistics(final ImgPlus<DoubleType> image,
 		final int channel, final int params, final FittedValue fittedValue)
@@ -304,10 +299,6 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 	/**
 	 * First pass through the image, gathering statistics.
 	 *
-	 * @param image
-	 * @param channel
-	 * @param params
-	 * @param fittedValue
 	 * @return container of various statistics
 	 */
 	private Statistics1 getStatistics1(final ImgPlus<DoubleType> image,
@@ -427,13 +418,6 @@ public class ExportHistogramsToText implements SLIMAnalyzer {
 	/**
 	 * Second pass through the image, gathering statistics.
 	 *
-	 * @param image
-	 * @param channel
-	 * @param params
-	 * @param fittedValue
-	 * @param mean
-	 * @param range
-	 * @param bins
 	 * @return container of various statistics
 	 */
 	private Statistics2 getStatistics2(final ImgPlus<DoubleType> image,

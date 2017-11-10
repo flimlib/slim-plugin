@@ -95,7 +95,6 @@ public class DefaultExcitationGraph implements ExcitationGraph,
 	 * @param base value
 	 * @param bins number of bins
 	 * @param timeInc time increment per bin
-	 * @param values
 	 */
 	DefaultExcitationGraph(final double start, final double stop,
 		final double base, final int bins, final double[] values,
@@ -161,8 +160,6 @@ public class DefaultExcitationGraph implements ExcitationGraph,
 	 * called from the UI layer that lets user drag the start and stop vertical
 	 * bars. Validates and passes changes on to external listener.
 	 *
-	 * @param startProportion
-	 * @param stopProportion
 	 */
 	@Override
 	public void setStartStopBaseProportion(final double startProportion,
@@ -322,8 +319,6 @@ public class DefaultExcitationGraph implements ExcitationGraph,
 		 * Used to draw the start/stop vertical bars. Overrides 'paintLayer()', not
 		 * 'paint()'.
 		 *
-		 * @param g2D
-		 * @param l
 		 */
 		@Override
 		protected void
@@ -367,8 +362,6 @@ public class DefaultExcitationGraph implements ExcitationGraph,
 		/**
 		 * Mouse listener, catches drag events
 		 *
-		 * @param e
-		 * @param l
 		 */
 		@Override
 		protected void processMouseMotionEvent(final MouseEvent e,
@@ -416,7 +409,6 @@ public class DefaultExcitationGraph implements ExcitationGraph,
 		 * Gets the currently dragged horizontal value as a proportion, a value
 		 * between 0.0 and 1.0.
 		 *
-		 * @param e
 		 * @return proportion
 		 */
 		private double getHorzDraggedProportion(final MouseEvent e) {
@@ -437,7 +429,6 @@ public class DefaultExcitationGraph implements ExcitationGraph,
 		 * Gets the currently dragged vertical value as a proportion, a value
 		 * between 0.0 and 1.0.
 		 *
-		 * @param e
 		 * @return proportion
 		 */
 		private double getVertDraggedProportion(final MouseEvent e) {
@@ -460,8 +451,6 @@ public class DefaultExcitationGraph implements ExcitationGraph,
 		/**
 		 * Mouse listener, catches mouse button events.
 		 * 
-		 * @param e
-		 * @param l
 		 */
 		@Override
 		protected void processMouseEvent(final MouseEvent e,
@@ -534,7 +523,6 @@ public class DefaultExcitationGraph implements ExcitationGraph,
 		/**
 		 * Converts screen x to chart x value.
 		 *
-		 * @param x
 		 * @return chart value
 		 */
 		@Deprecated
@@ -546,7 +534,6 @@ public class DefaultExcitationGraph implements ExcitationGraph,
 		/**
 		 * Converts screen y to chart y value.
 		 *
-		 * @param y
 		 * @return chart value
 		 */
 		@Deprecated
@@ -583,8 +570,6 @@ interface IStartStopBaseProportionListener {
 	 * called from the UI layer that lets user drag the start and stop vertical
 	 * bars. Validates and passes changes on to external listener.
 	 *
-	 * @param startProportion
-	 * @param stopProportion
 	 */
 	public void setStartStopBaseProportion(double startProportion,
 		double stopProportion, double baseProportion);

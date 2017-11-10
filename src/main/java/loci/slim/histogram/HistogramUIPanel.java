@@ -94,7 +94,6 @@ public class HistogramUIPanel extends JPanel {
 	/**
 	 * Constructor.
 	 *
-	 * @param hasChannels
 	 */
 	public HistogramUIPanel(final boolean hasChannels) {
 		super();
@@ -350,7 +349,6 @@ public class HistogramUIPanel extends JPanel {
 	/**
 	 * Sets a listener for this UI panel. Listener is unique.
 	 *
-	 * @param listener
 	 */
 	public void setListener(final IUIPanelListener listener) {
 		_listener = listener;
@@ -359,7 +357,6 @@ public class HistogramUIPanel extends JPanel {
 	/**
 	 * Sets whether to automatically set the LUT range.
 	 *
-	 * @param autoRange
 	 */
 	public void setAutoRange(final boolean autoRange) {
 		_autoRange = autoRange;
@@ -370,7 +367,6 @@ public class HistogramUIPanel extends JPanel {
 	/**
 	 * Sets whether to hide out of range pixels.
 	 *
-	 * @param excludePixels
 	 */
 	public void setExcludePixels(final boolean excludePixels) {
 		_excludePixels = excludePixels;
@@ -380,7 +376,6 @@ public class HistogramUIPanel extends JPanel {
 	/**
 	 * Gets whether to hide out of range pixels.
 	 *
-	 * @return
 	 */
 	public boolean getExcludePixels() {
 		return _excludePixels;
@@ -389,7 +384,6 @@ public class HistogramUIPanel extends JPanel {
 	/**
 	 * Sets whether to combine all channels. For IJ1 this doesn't change anything.
 	 *
-	 * @param combineChannels
 	 */
 	public void setCombineChannels(final boolean combineChannels) {
 		_combineChannels = combineChannels;
@@ -399,7 +393,6 @@ public class HistogramUIPanel extends JPanel {
 	/**
 	 * Sets whether to display all channels.
 	 *
-	 * @param displayChannels
 	 */
 	public void setDisplayChannels(final boolean displayChannels) {
 		_displayChannels = displayChannels;
@@ -409,7 +402,6 @@ public class HistogramUIPanel extends JPanel {
 	/**
 	 * Enables or disables the checkbox UI.
 	 *
-	 * @param enable
 	 */
 	public void enableChannels(final boolean enable) {
 		_combineChannelsCheckBox.setEnabled(enable);
@@ -419,8 +411,6 @@ public class HistogramUIPanel extends JPanel {
 	/**
 	 * Called when the user is dragging the cursors on the histogram panel.
 	 *
-	 * @param min
-	 * @param max
 	 */
 	public void dragMinMaxLUT(final double min, final double max) {
 //        IJ.log("UIPanel.dragMinMaxLUT " + min + " " + max);
@@ -430,8 +420,6 @@ public class HistogramUIPanel extends JPanel {
 	/**
 	 * Called when the user sets new cursors on the histogram panel.
 	 *
-	 * @param min
-	 * @param max
 	 */
 	public void setMinMaxLUT(final double min, final double max) {
 //        IJ.log("UIPanel.setMinMaxLUT " + min + " " + max);

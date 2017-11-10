@@ -31,8 +31,6 @@ public interface ICursorListener {
 	/**
 	 * Show the cursor at fitted point.
 	 *
-	 * @param x
-	 * @param y
 	 */
 	public void showCursor(int x, int y);
 

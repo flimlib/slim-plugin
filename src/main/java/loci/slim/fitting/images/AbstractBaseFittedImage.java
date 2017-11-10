@@ -163,7 +163,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	/**
 	 * Gets the title of the fitted image.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getTitle() {
@@ -173,7 +172,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	/**
 	 * Sets the color model used to display values.
 	 *
-	 * @param colorModel
 	 */
 	@Override
 	public void setColorModel(final IndexColorModel colorModel) {
@@ -185,7 +183,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	/**
 	 * Gets the associated histogram data object.
 	 * 
-	 * @return
 	 */
 	@Override
 	public HistogramDataGroup getHistogramData() {
@@ -240,7 +237,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * Redraws the entire image after a masking change. Mask shows all pixels
 	 * masked by all nodes combined, including this node.
 	 *
-	 * @param mask
 	 */
 	@Override
 	public void updateMask(final Mask mask) {
@@ -302,7 +298,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	/**
 	 * Updates the fitted parameters for a pixel.
 	 *
-	 * @param location
 	 * @param parameters null signals error
 	 */
 	@Override
@@ -344,9 +339,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	 * Updates the fitted parameters for a pixel. The pixel is drawn outsized at
 	 * first.
 	 *
-	 * @param location
-	 * @param dimension
-	 * @param parameters
 	 */
 	@Override
 	public void updateChunkyPixel(final int[] location, final int[] dimension,
@@ -359,8 +351,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	/**
 	 * Given the array of fitted parameters, get the value for this image.
 	 *
-	 * @param parameters
-	 * @return
 	 */
 	@Override
 	abstract public double getValue(double[] parameters);
@@ -368,7 +358,6 @@ abstract public class AbstractBaseFittedImage implements IFittedImage {
 	/*
 	 * Clears the values for this slice.
 	 *
-	 * @param values
 	 */
 	private void clear(final double[][] values) {
 		for (int y = 0; y < values[0].length; ++y) {

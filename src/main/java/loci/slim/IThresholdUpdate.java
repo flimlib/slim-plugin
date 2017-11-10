@@ -33,14 +33,12 @@ public interface IThresholdUpdate {
 	/**
 	 * Gets an initial threshold estimate.
 	 *
-	 * @return
 	 */
 	public int estimateThreshold();
 
 	/**
 	 * Update the threshold value.
 	 *
-	 * @param threshold
 	 */
 	public void updateThreshold(int threshold);
 }

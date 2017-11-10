@@ -34,28 +34,24 @@ public interface FitResults {
 	/**
 	 * Sets error code (or 0 for no error).
 	 *
-	 * @param errorCode
 	 */
 	public void setErrorCode(int errorCode);
 
 	/**
 	 * Gets error code.
 	 *
-	 * @return
 	 */
 	public int getErrorCode();
 
 	/**
 	 * Sets fitted chi square result.
 	 *
-	 * @param chiSquare
 	 */
 	public void setChiSquare(double chiSquare);
 
 	/**
 	 * Gets fitted chi square result.
 	 *
-	 * @return
 	 */
 	public double getChiSquare();
 
@@ -76,84 +72,72 @@ public interface FitResults {
 	/**
 	 * Sets fitted curve.
 	 *
-	 * @param yFitted
 	 */
 	public void setYFitted(double[] yFitted);
 
 	/**
 	 * Gets fitted curve.
 	 *
-	 * @return
 	 */
 	public double[] getYFitted();
 
 	/**
 	 * Sets incoming transient data.
 	 *
-	 * @param decay
 	 */
 	public void setTransient(double[] trans);
 
 	/**
 	 * Gets incoming transient data.
 	 *
-	 * @return
 	 */
 	public double[] getTransient();
 
 	/**
 	 * Sets total photon count in decay.
 	 *
-	 * @param photonCount
 	 */
 	public void setPhotonCount(int photonCount);
 
 	/**
 	 * Gets total photon count in decay.
 	 *
-	 * @return
 	 */
 	public int getPhotonCount();
 
 	/**
 	 * Sets start of transient (bin index in decay).
 	 *
-	 * @param transStart
 	 */
 	public void setTransStart(int transStart);
 
 	/**
 	 * Gets start of transient.
 	 *
-	 * @return
 	 */
 	public int getTransStart();
 
 	/**
 	 * Sets start of data.
 	 *
-	 * @param dataStart
 	 */
 	public void setDataStart(int dataStart);
 
 	/**
 	 * Gets start of data.
 	 *
-	 * @return
 	 */
 	public int getDataStart();
 
 	/**
 	 * Sets end of transient.
 	 *
-	 * @param transStop
 	 */
 	public void setTransStop(int transStop);
 
 	/**
 	 * Gets end of transient.
 	 *
-	 * @return
 	 */
 	public int getTransStop();
 

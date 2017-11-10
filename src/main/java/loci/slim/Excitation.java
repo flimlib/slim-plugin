@@ -41,8 +41,6 @@ public class Excitation {
 	/**
 	 * Creates an excitation with given filename and values.
 	 *
-	 * @param fileName
-	 * @param values
 	 */
 	public Excitation(final String fileName, final double[] values,
 		final double timeInc)
@@ -55,7 +53,6 @@ public class Excitation {
 	/**
 	 * Gets the file name.
 	 *
-	 * @return
 	 */
 	public String getFileName() {
 		return fileName;
@@ -64,7 +61,6 @@ public class Excitation {
 	/**
 	 * Gets the values of the excitation curve.
 	 *
-	 * @return
 	 */
 	public double[] getValues() {
 		return values;
@@ -73,7 +69,6 @@ public class Excitation {
 	/**
 	 * Gets the horizontal time increment for the excitation curve.
 	 *
-	 * @return
 	 */
 	public double getTimeInc() {
 		return timeInc;
@@ -82,7 +77,6 @@ public class Excitation {
 	/**
 	 * Sets start cursor.
 	 *
-	 * @param start
 	 */
 	public void setStart(final int start) {
 		this.start = start;
@@ -91,7 +85,6 @@ public class Excitation {
 	/**
 	 * Gets start cursor.
 	 *
-	 * @return
 	 */
 	public int getStart() {
 		return start;
@@ -100,7 +93,6 @@ public class Excitation {
 	/**
 	 * Sets the stop cursor.
 	 *
-	 * @param stop
 	 */
 	public void setStop(final int stop) {
 		this.stop = stop;
@@ -109,7 +101,6 @@ public class Excitation {
 	/**
 	 * Gets the stop cursor.
 	 *
-	 * @return
 	 */
 	public int getStop() {
 		return stop;
@@ -118,7 +109,6 @@ public class Excitation {
 	/**
 	 * Sets the base cursor.
 	 *
-	 * @param base
 	 */
 	public void setBase(final double base) {
 		this.base = base;
@@ -127,7 +117,6 @@ public class Excitation {
 	/**
 	 * Gets the base cursor.
 	 *
-	 * @return
 	 */
 	public double getBase() {
 		return base;

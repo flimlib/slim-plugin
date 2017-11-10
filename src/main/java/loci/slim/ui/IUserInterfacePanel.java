@@ -106,21 +106,18 @@ public interface IUserInterfacePanel {
 	/**
 	 * Gets noise model for fit.
 	 *
-	 * @return
 	 */
 	NoiseModel getNoiseModel();
 
 	/**
 	 * Returns list of fitted images to display.
 	 *
-	 * @return
 	 */
 	String getFittedImages();
 
 	/**
 	 * Returns whether to create colorized grayscale fitted images.
 	 *
-	 * @return
 	 */
 	boolean getColorizeGrayScale();
 
@@ -148,21 +145,18 @@ public interface IUserInterfacePanel {
 	/**
 	 * Sets photon count threshold to fit a pixel.
 	 *
-	 * @param threshold
 	 */
 	void setThreshold(int threshold);
 
 	/**
 	 * Gets chi square target for fit.
 	 *
-	 * @return
 	 */
 	double getChiSquareTarget();
 
 	/**
 	 * Sets chi square target for fit.
 	 *
-	 * @param chiSqTarget
 	 */
 	void setChiSquareTarget(double chiSqTarget);
 
@@ -183,7 +177,6 @@ public interface IUserInterfacePanel {
 	/**
 	 * Sets pixel x.
 	 *
-	 * @param x
 	 */
 	void setX(int x);
 
@@ -197,7 +190,6 @@ public interface IUserInterfacePanel {
 	/**
 	 * Sets pixel y.
 	 *
-	 * @param y
 	 */
 	void setY(int y);
 
@@ -211,7 +203,6 @@ public interface IUserInterfacePanel {
 	/**
 	 * Sets number of fitted parameters after a successful fit.
 	 *
-	 * @param components
 	 */
 	void setFittedParameterCount(int count);
 
@@ -225,8 +216,6 @@ public interface IUserInterfacePanel {
 	/**
 	 * Sets the parameters of the fit
 	 *
-	 * @param parameters
-	 * @param AIC
 	 */
 	void setParameters(double parameters[], double AIC);
 
@@ -234,7 +223,6 @@ public interface IUserInterfacePanel {
 	 * Sets the parameters of the fit by function.
 	 *
 	 * @param function index
-	 * @param parameters
 	 */
 	void setFunctionParameters(int function, double parameters[]);
 
@@ -248,7 +236,6 @@ public interface IUserInterfacePanel {
 	/**
 	 * Gets whether to start next fit with results of last fit.
 	 *
-	 * @return
 	 */
 	boolean getRefineFit();
 
@@ -257,7 +244,6 @@ public interface IUserInterfacePanel {
 	 * additional scatter parameter; this is an attempt to see if scatter
 	 * correction helps the fit.
 	 *
-	 * @return
 	 */
 	double getScatter();
 

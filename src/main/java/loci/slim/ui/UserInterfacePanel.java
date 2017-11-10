@@ -745,8 +745,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	 * Used to build an appropriate list of fitted images, according to the fit
 	 * function selected.
 	 *
-	 * @param items
-	 * @param selectedItem
 	 */
 	private void updateFittedImagesComboBox(final String[] items,
 		final String selectedItem)
@@ -1955,7 +1953,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Triggers refit if dropdown list selection changes.
 	 *
-	 * @param itemSelectable
 	 */
 	private void refitUponStateChange(final ItemSelectable itemSelectable) {
 		itemSelectable.addItemListener(new ItemListener() {
@@ -1976,7 +1973,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * macro recorder specific macro recorder This one is for Binning
 	 *
-	 * @param itemSelectable
 	 */
 
 	private void refitUponStateChangeBinning(final ItemSelectable itemSelectable)
@@ -2022,7 +2018,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * macro recorder specific macro recorder This one is for Algorithm
 	 *
-	 * @param itemSelectable
 	 */
 
 	private void
@@ -2048,7 +2043,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * macro recorder specific macro recorder This one is for fitted Images
 	 *
-	 * @param itemSelectable
 	 */
 
 	private void refitUponStateChangeFittedImage(
@@ -2073,7 +2067,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Triggers refit if text field edited.
 	 *
-	 * @param textField
 	 */
 	private void refitUponStateChange(final JTextField textField) {
 		textField.addActionListener(new ActionListener() {
@@ -2110,8 +2103,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Triggers refit if fitted parameter value or checkbox change.
 	 *
-	 * @param textField
-	 * @param checkBox
 	 */
 	private void refitUponStateChange(final JTextField textField,
 		final JCheckBox checkBox)
@@ -2587,7 +2578,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Triggers refit if spinner value changes.
 	 *
-	 * @param spinner
 	 */
 	private void refitUponStateChange(final JSpinner spinner) {
 		spinner.addChangeListener(new ChangeListener() {
@@ -2604,7 +2594,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Propagates a threshold spinner value change.
 	 *
-	 * @param thresholdSpinner
 	 */
 	private void updateThresholdChange(final JSpinner thresholdSpinner) {
 		thresholdSpinner.addChangeListener(new ChangeListener() {
@@ -2636,7 +2625,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/*
 	 * Disables and enables UI during and after a fit.
 	 *
-	 * @param enable
 	 */
 	private void enableAll(final boolean enable) {
 		// fit algorithm settings
@@ -2727,7 +2715,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Disables and enables buttons.
 	 *
-	 * @param enable
 	 */
 	private void enableButtons(final boolean enable) {
 		_openButton.setEnabled(enable);
@@ -2838,7 +2825,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Get noise model for fit.
 	 *
-	 * @return
 	 */
 	@Override
 	public NoiseModel getNoiseModel() {
@@ -2862,7 +2848,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Returns list of fitted images to display.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getFittedImages() {
@@ -2893,7 +2878,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Returns whether to create colorized grayscale fitted images.
 	 *
-	 * @return
 	 */
 	@Override
 	public boolean getColorizeGrayScale() {
@@ -3220,8 +3204,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * This version is used to initialize the parameters.
 	 *
-	 * @param function
-	 * @param params
 	 */
 	@Override
 	public void setFunctionParameters(final int function, final double params[]) {
@@ -3326,7 +3308,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Gets the transient start cursor.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getTransientStart() {
@@ -3336,7 +3317,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Sets the transient start cursor.
 	 *
-	 * @param transientStart
 	 */
 	@Override
 	public void setTransientStart(final String transientStart) {
@@ -3346,7 +3326,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Gets the data start cursor.
 	 * 
-	 * @return
 	 */
 	@Override
 	public String getDataStart() {
@@ -3357,7 +3336,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Sets the data start cursor.
 	 * 
-	 * @return
 	 */
 	@Override
 	public void setDataStart(final String dataStart) {
@@ -3367,7 +3345,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Gets the transient end cursor.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getTransientStop() {
@@ -3377,7 +3354,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Sets the transient end cursor.
 	 *
-	 * @param transientStop
 	 */
 	@Override
 	public void setTransientStop(final String transientStop) {
@@ -3387,7 +3363,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Gets the excitation delay cursor.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getPromptDelay() {
@@ -3397,7 +3372,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Sets the excitation delay cursor.
 	 *
-	 * @param promptStart
 	 */
 	@Override
 	public void setPromptDelay(final String promptDelay) {
@@ -3407,7 +3381,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Gets the excitation width cursor.
 	 * 
-	 * @return
 	 */
 	@Override
 	public String getPromptWidth() {
@@ -3417,7 +3390,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Sets the excitation width cursor.
 	 *
-	 * @param promptWidth
 	 */
 	@Override
 	public void setPromptWidth(final String promptWidth) {
@@ -3427,7 +3399,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Gets the excitation baseline.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getPromptBaseline() {
@@ -3437,7 +3408,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Sets the excitation baseline.
 	 *
-	 * @param promptBaseline
 	 */
 	@Override
 	public void setPromptBaseline(final String promptBaseline) {
@@ -3458,7 +3428,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Gray out the prompt cursors if no prompt is loaded.
 	 *
-	 * @param enable
 	 */
 	private void enablePromptCursors(final boolean enable) {
 		_promptDelaySpinner.setEnabled(enable);
@@ -3482,8 +3451,6 @@ public class UserInterfacePanel implements IUserInterfacePanel,
 	/**
 	 * Gets the path and name for a prompt file.
 	 *
-	 * @param title
-	 * @return
 	 */
 	private String getFileName(final String title) {
 		final OpenDialog dialog = new OpenDialog(title, "");

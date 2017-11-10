@@ -92,7 +92,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 	 * @param base value
 	 * @param bins number of bins
 	 * @param timeInc time increment per bin
-	 * @param values
 	 */
 	ExcitationGraph(final double start, final double stop, final double base,
 		final int bins, final double[] values, final double timeInc)
@@ -145,7 +144,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 	/**
 	 * Sets the fitting cursor.
 	 *
-	 * @param fittingCursor
 	 */
 	public void setFittingCursor(final FittingCursor fittingCursor) {
 		if (null == _fittingCursor) {
@@ -163,8 +161,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 	 * called from the UI layer that lets user drag the start and stop vertical
 	 * bars. Validates and passes changes on to external listener.
 	 *
-	 * @param startProportion
-	 * @param stopProportion
 	 */
 	@Override
 	public void setStartStopBaseProportion(final double startProportion,
@@ -324,8 +320,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 		 * Used to draw the start/stop vertical bars. Overrides 'paintLayer()', not
 		 * 'paint()'.
 		 *
-		 * @param g2D
-		 * @param l
 		 */
 		@Override
 		protected void
@@ -370,8 +364,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 		/**
 		 * Mouse listener, catches drag events
 		 *
-		 * @param e
-		 * @param l
 		 */
 		@Override
 		protected void processMouseMotionEvent(final MouseEvent e,
@@ -419,7 +411,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 		 * Gets the currently dragged horizontal value as a proportion, a value
 		 * between 0.0 and 1.0.
 		 *
-		 * @param e
 		 * @return proportion
 		 */
 		private double getHorzDraggedProportion(final MouseEvent e) {
@@ -440,7 +431,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 		 * Gets the currently dragged vertical value as a proportion, a value
 		 * between 0.0 and 1.0.
 		 *
-		 * @param e
 		 * @return proportion
 		 */
 		private double getVertDraggedProportion(final MouseEvent e) {
@@ -463,8 +453,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 		/**
 		 * Mouse listener, catches mouse button events.
 		 * 
-		 * @param e
-		 * @param l
 		 */
 		@Override
 		protected void processMouseEvent(final MouseEvent e,
@@ -536,7 +524,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 		/**
 		 * Converts screen x to chart x value.
 		 *
-		 * @param x
 		 * @return chart value
 		 */
 		@Deprecated
@@ -548,7 +535,6 @@ public class ExcitationGraph implements IStartStopBaseProportionListener {
 		/**
 		 * Converts screen y to chart y value.
 		 *
-		 * @param y
 		 * @return chart value
 		 */
 		@Deprecated

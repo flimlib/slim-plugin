@@ -40,7 +40,6 @@ public class HistogramStatistics {
 	/**
 	 * Gets the histogram bins
 	 *
-	 * @return
 	 */
 	public int[] getBins() {
 		return _bins;
@@ -49,7 +48,6 @@ public class HistogramStatistics {
 	/**
 	 * Sets histogram bins
 	 *
-	 * @param bins
 	 */
 	public void setBins(final int[] bins) {
 		_bins = bins;
@@ -58,7 +56,6 @@ public class HistogramStatistics {
 	/**
 	 * Gets values characterizing bins
 	 *
-	 * @return
 	 */
 	public double[] getBinValues() {
 		return _binValues;
@@ -67,7 +64,6 @@ public class HistogramStatistics {
 	/**
 	 * Sets values characterizing bins
 	 *
-	 * @param binValues
 	 */
 	public void setBinValues(final double[] binValues) {
 		_binValues = binValues;
@@ -76,7 +72,6 @@ public class HistogramStatistics {
 	/**
 	 * Gets the quartile values
 	 *
-	 * @return
 	 */
 	public double[] getQuartiles() {
 		return _quartiles;
@@ -85,7 +80,6 @@ public class HistogramStatistics {
 	/**
 	 * Sets the quartile values
 	 *
-	 * @param quartiles
 	 */
 	public void setQuartiles(final double[] quartiles) {
 		_quartiles = quartiles;
@@ -94,7 +88,6 @@ public class HistogramStatistics {
 	/**
 	 * Gets the indices of the quartile values
 	 *
-	 * @return
 	 */
 	public int[] getQuartileIndices() {
 		return _quartileIndices;
@@ -103,7 +96,6 @@ public class HistogramStatistics {
 	/**
 	 * Sets the indices of the quartile values
 	 *
-	 * @param quartileIndices
 	 */
 	public void setQuartileIndices(final int[] quartileIndices) {
 		_quartileIndices = quartileIndices;
@@ -112,7 +104,6 @@ public class HistogramStatistics {
 	/**
 	 * Gets the 'fences' that demarcate outliers.
 	 *
-	 * @return
 	 */
 	public double[] getFences() {
 		double[] fences = null;
@@ -132,7 +123,6 @@ public class HistogramStatistics {
 	/**
 	 * Gets standard deviation values
 	 *
-	 * @return
 	 */
 	public double[] getStdDev() {
 		return _stdDev;
@@ -141,7 +131,6 @@ public class HistogramStatistics {
 	/**
 	 * Sets standard deviation values
 	 *
-	 * @param stdDev
 	 */
 	public void setStdDev(final double[] stdDev) {
 		_stdDev = stdDev;
@@ -150,7 +139,6 @@ public class HistogramStatistics {
 	/**
 	 * Gets indices of standard deviation values
 	 *
-	 * @return
 	 */
 	public int[] getStdDevIndices() {
 		return _stdDevIndices;
@@ -159,7 +147,6 @@ public class HistogramStatistics {
 	/**
 	 * Sets indices of standard deviation values
 	 *
-	 * @param stdDevIndices
 	 */
 	public void setStdDevIndices(final int[] stdDevIndices) {
 		_stdDevIndices = stdDevIndices;

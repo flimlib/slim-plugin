@@ -35,10 +35,6 @@ public interface BatchProcessor {
 	/**
 	 * Processes list of files with current settings.
 	 *
-	 * @param context
-	 * @param bins
-	 * @param files
-	 * @param fitSettings
 	 */
 	public void process(Context context, int bins, File[] files,
 		FitSettings fitSettings);

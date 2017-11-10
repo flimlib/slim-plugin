@@ -56,8 +56,6 @@ public class HistogramDataNode {
 	 * shows colorized grayscale, a la SPCImage, the image values will be
 	 * incorrect.
 	 *
-	 * @param fittedImage
-	 * @param values
 	 */
 	public HistogramDataNode(final IFittedImage fittedImage,
 		final double[][] values)
@@ -70,7 +68,6 @@ public class HistogramDataNode {
 	/**
 	 * Assigns a mask group.
 	 *
-	 * @param maskGroup
 	 */
 	public void setMaskGroup(final IMaskGroup maskGroup) {
 		// create a new mask node that listens to the group
@@ -90,7 +87,6 @@ public class HistogramDataNode {
 	/**
 	 * Gets the values array.
 	 *
-	 * @return
 	 */
 	public double[][] getValues() {
 		return _values;
@@ -166,11 +162,6 @@ public class HistogramDataNode {
 	 * Finds the quartiles of the histogram distribution. Uses the total mask,
 	 * ignores any pixels masked out by anyone.
 	 *
-	 * @param quartiles
-	 * @param quartileIndices
-	 * @param bins
-	 * @param min
-	 * @param max
 	 */
 	public void findQuartiles(final double[] quartiles,
 		final int[] quartileIndices, final int bins, final double min,
@@ -256,10 +247,6 @@ public class HistogramDataNode {
 	/**
 	 * Given an array and inclusive start/stop indices, computes median value.
 	 *
-	 * @param values
-	 * @param start
-	 * @param stop
-	 * @return
 	 */
 	private double getMedian(final double[] values, final int start,
 		final int stop)
@@ -270,11 +257,6 @@ public class HistogramDataNode {
 	/**
 	 * Given a quartile value, looks up the bin index.
 	 *
-	 * @param value
-	 * @param bins
-	 * @param min
-	 * @param max
-	 * @return
 	 */
 	private int getQuartileIndex(final double value, final int bins,
 		final double min, final double max)
@@ -315,7 +297,6 @@ public class HistogramDataNode {
 	 * Builds a mask based on which values are within the LUT range and sends it
 	 * out to peer nodes.
 	 *
-	 * @return
 	 */
 	public void propagateMask(final double minLUT, final double maxLUT) {
 		boolean masked = false;

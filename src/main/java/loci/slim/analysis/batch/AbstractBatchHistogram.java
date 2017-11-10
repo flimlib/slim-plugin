@@ -71,7 +71,6 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	/**
 	 * Called periodically to get current statistics.
 	 *
-	 * @return
 	 */
 	@Override
 	public HistogramStatistics getStatistics() {
@@ -84,7 +83,6 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	/**
 	 * Returns scaled-down 256-bin histogram adjusted to interquartile range.
 	 *
-	 * @return
 	 */
 	@Override
 	public long[] getScaledHistogram() {
@@ -94,8 +92,6 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	/**
 	 * Returns scaled-down histogram adjusted to interquartile range.
 	 *
-	 * @param totalBins
-	 * @return
 	 */
 	@Override
 	public long[] getScaledHistogram(final int binCount) {
@@ -184,7 +180,6 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	/**
 	 * Account for a given value in the histogram.
 	 *
-	 * @param value
 	 */
 	void process(final double value) {
 		if (Double.isNaN(value)) {
@@ -301,8 +296,6 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	 * Finds bin corresponding to the n-th value if values were ordered and
 	 * returns value for that bin.
 	 *
-	 * @param n
-	 * @return
 	 */
 	private double countToValue(final long n) {
 		// make sure that the bin for this count is within range
@@ -346,8 +339,6 @@ public abstract class AbstractBatchHistogram implements BatchHistogram {
 	/**
 	 * Computes center value of a bin.
 	 *
-	 * @param bin
-	 * @return
 	 */
 	double binToValue(final int bin) {
 		return Binning.centerValuesPerBin(totalBins, minRange, maxRange)[bin];

@@ -47,10 +47,6 @@ public class PaletteFix {
 	 * Given a 256-color palette, turns it into a 254-color palette, using the
 	 * first and last palette entries for the below and above colors.
 	 *
-	 * @param colorModel
-	 * @param below
-	 * @param above
-	 * @return
 	 */
 	public static IndexColorModel fixIndexColorModel(IndexColorModel colorModel,
 		final Color below, final Color above)
@@ -82,9 +78,6 @@ public class PaletteFix {
 	 * 256-color palette min and max. Values below 254-color min are colored with
 	 * below color and values above 254-color max are colored with above color.
 	 *
-	 * @param min
-	 * @param max
-	 * @return
 	 */
 	public static double[] adjustMinMax(final double min, final double max) {
 		final double adjust = (max - min) / ADJUSTED_SIZE;
@@ -98,7 +91,6 @@ public class PaletteFix {
 	/**
 	 * Gets the adjusted palette size.
 	 *
-	 * @return
 	 */
 	public static int getSize() {
 		return ADJUSTED_SIZE;

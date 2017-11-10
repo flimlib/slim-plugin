@@ -73,7 +73,6 @@ public class BaseFitSettings implements FitSettings {
 	/**
 	 * Set number of time bins.
 	 *
-	 * @param bins
 	 */
 	public void setBins(final int bins) {
 		this.bins = bins;
@@ -87,7 +86,6 @@ public class BaseFitSettings implements FitSettings {
 	/**
 	 * Set time increment per time bin.
 	 *
-	 * @param timeInc
 	 */
 	public void setTimeInc(final double timeInc) {
 		this.timeInc = timeInc;
@@ -101,7 +99,6 @@ public class BaseFitSettings implements FitSettings {
 	/**
 	 * Set excitation decay values.
 	 *
-	 * @param excitation
 	 */
 	public void setExcitation(final double[] excitation) {
 		this.excitation = excitation;
@@ -115,7 +112,6 @@ public class BaseFitSettings implements FitSettings {
 	/**
 	 * Sets horizontal cursor positions on excitation decay.
 	 *
-	 * @param excitationHorzCursors
 	 */
 	public void
 		setExcitationHorzCursors(final HorzCursor[] excitationHorzCursors)
@@ -145,7 +141,6 @@ public class BaseFitSettings implements FitSettings {
 	/**
 	 * Gets horizontal cursor positions on decay.
 	 *
-	 * @param decayHorzCursors
 	 */
 	public void setDecayCursors(final HorzCursor[] decayHorzCursors) {
 		this.decayHorzCursors = decayHorzCursors;
@@ -159,7 +154,6 @@ public class BaseFitSettings implements FitSettings {
 	/**
 	 * Sets vertical cursor position on decay.
 	 *
-	 * @param decayVertCursor
 	 */
 	public void setDecayVertCursor(final VertCursor decayVertCursor) {
 		this.decayVertCursor = decayVertCursor;
@@ -175,7 +169,6 @@ public class BaseFitSettings implements FitSettings {
 	 * <p>
 	 * 0=no binning, 1=3x3, 2=5x5, etc.
 	 *
-	 * @param binningFactor
 	 */
 	public void setBinningFactor(final int binningFactor) {
 		this.binningFactor = binningFactor;

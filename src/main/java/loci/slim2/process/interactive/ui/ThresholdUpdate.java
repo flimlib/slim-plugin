@@ -33,9 +33,6 @@ public interface ThresholdUpdate {
 	/**
 	 * Update the threshold values.
 	 *
-	 * @param thresholdMin
-	 * @param thresholdMax
-	 * @param summed
 	 */
 	public void
 		updateThreshold(int thresholdMin, int thresholdMax, boolean summed);

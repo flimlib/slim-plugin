@@ -62,14 +62,10 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	 * Creates an images set. This variant uses {@link MemberFormula} which allows
 	 * deriving values from a formula.
 	 *
-	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined whether images should be in a stack
 	 * @param useChannelDimension whether to use CHANNEL dimension for combined
 	 * @param type underlying Type of images
-	 * @param dimensions
-	 * @param name
-	 * @param axes
 	 * @param indices list of information per output index
 	 */
 	public OutputSet(final CommandService commandService,
@@ -86,14 +82,10 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	 * Creates a set of images. This variant uses an array of value labels. The
 	 * index of the label is also used to derive the value.
 	 *
-	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined whether images should be in a stack
 	 * @param useChannelDimension whether to use CHANNEL dimension for combined
 	 * @param type underlying Type of images
-	 * @param dimensions
-	 * @param name
-	 * @param axes
 	 * @param labels array of names per output index
 	 */
 	public OutputSet(final CommandService commandService,
@@ -108,7 +100,6 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	/**
 	 * Creates a set of images.
 	 *
-	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined whether images should be in a stack
 	 * @param useChannelDimension whether to use CHANNEL dimension for combined
@@ -136,7 +127,6 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	/**
 	 * Creates a set of images.
 	 *
-	 * @param commandService
 	 * @param datasetService or null if display not required
 	 * @param combined is true if images should be in a stack
 	 * @param type underlying {@link Type} of images
@@ -162,7 +152,6 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	/**
 	 * Gets list of datasets.
 	 *
-	 * @return
 	 */
 	public List<Dataset> getDatasets() {
 		return list;
@@ -173,8 +162,6 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	 * singly or in some combining formula to yield the output set images pixel
 	 * values.
 	 *
-	 * @param values
-	 * @param position
 	 */
 	public void setPixelValue(final double[] values, final long[] position) {
 		for (final OutputSetMember index : indices) {
@@ -190,9 +177,6 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	 * This is for use when outputs are displayed and the process is very
 	 * time-consuming.
 	 *
-	 * @param values
-	 * @param position
-	 * @param chunkySize
 	 */
 	public void setPixelValue(final double[] values, final long[] position,
 		final int[] chunkySize)
@@ -205,15 +189,6 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	/**
 	 * Initialization method with array of labels.
 	 *
-	 * @param commandService
-	 * @param datasetService
-	 * @param combined
-	 * @param useChannelDimension
-	 * @param type
-	 * @param dimensions
-	 * @param name
-	 * @param axes
-	 * @param labels
 	 */
 	private void init(final CommandService commandService,
 		final DatasetService datasetService, final boolean combined,
@@ -233,15 +208,6 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	/**
 	 * Initialization method with list of indices.
 	 *
-	 * @param commandService
-	 * @param datasetService
-	 * @param combined
-	 * @param useChannelDimension
-	 * @param type
-	 * @param dimensions
-	 * @param name
-	 * @param axes
-	 * @param indices
 	 */
 	private void init(final CommandService commandService,
 		final DatasetService datasetService, final boolean combined,
@@ -292,9 +258,6 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	/**
 	 * Adds a new dimension when combining datasets into one.
 	 *
-	 * @param dimensions
-	 * @param dimension
-	 * @return
 	 */
 	private long[] addCombinedDimension(final long[] dimensions,
 		final long dimension)
@@ -317,8 +280,6 @@ public class OutputSet<T extends RealType<T> & NativeType<T>> {
 	/**
 	 * Adds a new axis when combining datasets into one.
 	 *
-	 * @param axes
-	 * @return
 	 */
 	private AxisType[] addCombinedAxis(final AxisType[] axes) {
 		final AxisType[] combinedAxes = new AxisType[axes.length + 1];

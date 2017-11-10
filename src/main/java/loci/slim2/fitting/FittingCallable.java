@@ -35,9 +35,6 @@ public interface FittingCallable extends Callable<FitResults> {
 	/**
 	 * Set up for a fit.
 	 *
-	 * @param curveFitter
-	 * @param params
-	 * @param data
 	 */
 	public void setup(ICurveFitter curveFitter, GlobalFitParams params,
 		LocalFitParams data);
@@ -45,7 +42,6 @@ public interface FittingCallable extends Callable<FitResults> {
 	/**
 	 * Do the fit.
 	 *
-	 * @return
 	 */
 	@Override
 	public FitResults call();

@@ -64,7 +64,6 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T>
 	/**
 	 * Gets width of image.
 	 *
-	 * @return
 	 */
 	@Override
 	public int getWidth() {
@@ -74,7 +73,6 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T>
 	/**
 	 * Gets height of image.
 	 *
-	 * @return
 	 */
 	@Override
 	public int getHeight() {
@@ -84,7 +82,6 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T>
 	/**
 	 * Gets number of channels of image.
 	 *
-	 * @return
 	 */
 	@Override
 	public int getChannels() {
@@ -94,7 +91,6 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T>
 	/**
 	 * Gets number of bins in decay curve of image.
 	 *
-	 * @return
 	 */
 	@Override
 	public int getBins() {
@@ -104,7 +100,6 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T>
 	/**
 	 * Specifies a source IProcessor to be chained to this one.
 	 *
-	 * @param processor
 	 */
 	@Override
 	public void chain(final IProcessor processor) {
@@ -114,8 +109,6 @@ public class DecayImageWrapper<T extends RealType<T>> implements IDecayImage<T>
 	/**
 	 * Gets input pixel decay curve.
 	 *
-	 * @param location
-	 * @return
 	 */
 	@Override
 	public double[] getPixel(final int[] location) {

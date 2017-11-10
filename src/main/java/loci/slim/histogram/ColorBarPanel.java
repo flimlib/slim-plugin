@@ -53,9 +53,6 @@ public class ColorBarPanel extends JPanel {
 	 * Constructor. Note that for best results width should be 254, so that there
 	 * is a 1:1 relationship between colors and pixels.
 	 *
-	 * @param width
-	 * @param inset
-	 * @param height
 	 */
 	public ColorBarPanel(final int width, final int inset, final int height) {
 		super();
@@ -72,7 +69,6 @@ public class ColorBarPanel extends JPanel {
 	/**
 	 * Changes the color look-up table and redraws.
 	 *
-	 * @param lut
 	 */
 	public void setLUT(final LUT lut) {
 		synchronized (_synchObject) {
@@ -84,10 +80,6 @@ public class ColorBarPanel extends JPanel {
 	/**
 	 * Changes the values and redraws.
 	 *
-	 * @param minView
-	 * @param maxView
-	 * @param minLUT
-	 * @param maxLUT
 	 */
 	public void setMinMax(final double minView, final double maxView,
 		final double minLUT, final double maxLUT)
@@ -104,8 +96,6 @@ public class ColorBarPanel extends JPanel {
 	/**
 	 * Changes the LUT ranges and redraws.
 	 *
-	 * @param minLUT
-	 * @param maxLUT
 	 */
 	public void setMinMaxLUT(final double minLUT, final double maxLUT) {
 		synchronized (_synchObject) {
@@ -131,8 +121,6 @@ public class ColorBarPanel extends JPanel {
 	/*
 	 * Builds a full 256 color array of Colors from a LUT.
 	 *
-	 * @param lut
-	 * @return
 	 */
 	private Color[] colorsFromLUT(final LUT lut) {
 		final byte[] bytes = lut.getBytes();
@@ -151,8 +139,6 @@ public class ColorBarPanel extends JPanel {
 	/*
 	 * Given a pixel value 0..253 show appropriate color.
 	 *
-	 * @param i
-	 * @return
 	 */
 	private Color colorize(final int i) {
 		// default color

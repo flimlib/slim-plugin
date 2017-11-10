@@ -51,9 +51,6 @@ public class CursorEstimator {
 	 * saves and restores the decay cursor values even if you switch to a new
 	 * image.
 	 *
-	 * @param xInc
-	 * @param decay
-	 * @return
 	 */
 	public static int[] estimateDecayCursors(final double xInc,
 		final double[] decay)
@@ -94,11 +91,6 @@ public class CursorEstimator {
 	 * that the prompt baseline may be returned. Other values are expressed in
 	 * integer bins.
 	 *
-	 * @param xInc
-	 * @param prompt
-	 * @param decay
-	 * @param chiSqTarget
-	 * @return
 	 */
 	public static double[] estimateCursors(final double xInc,
 		final double[] prompt, final double[] decay, final double chiSqTarget)
@@ -385,9 +377,6 @@ public class CursorEstimator {
 	 * Calculates the Z background value looking at the prepulse part of the decay
 	 * curve. (Based on calcBgFromPrepulse in TRfitting.c
 	 * 
-	 * @param prepulse
-	 * @param n
-	 * @return
 	 */
 	private static double
 		calcBgFromPrepulse(final double[] prepulse, final int n)

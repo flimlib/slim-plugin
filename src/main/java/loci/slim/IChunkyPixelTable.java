@@ -54,7 +54,6 @@ public interface IChunkyPixelTable {
 	/**
 	 * Get table entry at index.
 	 *
-	 * @param index
 	 * @return ChunkyPixel
 	 */
 	public ChunkyPixel getChunkyPixel(int index);

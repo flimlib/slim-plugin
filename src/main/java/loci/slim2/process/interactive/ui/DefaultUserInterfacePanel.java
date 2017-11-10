@@ -622,8 +622,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	 * Used to build an appropriate list of fitted images, according to the fit
 	 * function selected.
 	 *
-	 * @param items
-	 * @param selectedItem
 	 */
 	private void updateFittedImagesComboBox(final String[] items,
 		final String selectedItem)
@@ -974,7 +972,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Update prompt based on new selection.
 	 *
-	 * @param selectedItem
 	 */
 	private void updatePrompt(final String selectedItem) {
 		boolean isExcitationLoaded = false;
@@ -1583,7 +1580,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Triggers fitSingleDecay if drop-down list selection changes.
 	 *
-	 * @param itemSelectable
 	 */
 	private void refitUponStateChange(final ItemSelectable itemSelectable) {
 		itemSelectable.addItemListener(new ItemListener() {
@@ -1600,7 +1596,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Triggers fitSingleDecay if text field edited.
 	 *
-	 * @param textField
 	 */
 	private void refitUponStateChange(final JTextField textField) {
 		textField.addActionListener(new ActionListener() {
@@ -1633,8 +1628,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Triggers fitSingleDecay if fitted parameter value or checkbox change.
 	 *
-	 * @param textField
-	 * @param checkBox
 	 */
 	private void refitUponStateChange(final JTextField textField,
 		final JCheckBox checkBox)
@@ -1655,7 +1648,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Triggers fitSingleDecay if spinner value changes.
 	 *
-	 * @param spinner
 	 */
 	private void refitUponStateChange(final JSpinner spinner) {
 		spinner.addChangeListener(new ChangeListener() {
@@ -1672,7 +1664,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Propagates a threshold spinner value change.
 	 *
-	 * @param thresholdMinSpinner
 	 */
 	private void updateThresholdChange(final JSpinner thresholdSpinner) {
 		thresholdSpinner.addChangeListener(new ChangeListener() {
@@ -1719,7 +1710,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Returns whether fitting summed pixels (vs. single pixel).
 	 *
-	 * @return
 	 */
 	private boolean fitSummed() {
 		return ICurveFitter.FitRegion.SUMMED == getRegion();
@@ -1728,7 +1718,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/*
 	 * Disables and enables UI during and after a fit.
 	 *
-	 * @param enable
 	 */
 	private void enableAll(final boolean enable) {
 		// fit algorithm settings
@@ -1822,7 +1811,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Disables and enables buttons.
 	 *
-	 * @param enable
 	 */
 	private void enableButtons(final boolean enable) {
 		openButton.setEnabled(enable);
@@ -1901,7 +1889,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Get noise model for fit.
 	 *
-	 * @return
 	 */
 	@Override
 	public ICurveFitter.NoiseModel getNoiseModel() {
@@ -1925,7 +1912,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Returns list of fitted images to display.
 	 *
-	 * @return
 	 */
 	@Override
 	public String getFittedImages() {
@@ -1956,7 +1942,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Returns whether to create colorized grayscale fitted images.
 	 *
-	 * @return
 	 */
 	@Override
 	public boolean getColorizeGrayScale() {
@@ -2235,8 +2220,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * This version is used to initialize the parameters.
 	 *
-	 * @param function
-	 * @param params
 	 */
 	@Override
 	public void setFunctionParameters(final int function, final double params[]) {
@@ -2351,7 +2334,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Gray out the prompt cursors if no prompt is loaded.
 	 *
-	 * @param enable
 	 */
 	private void enablePromptCursors(final boolean enable) {
 		promptDelaySpinnerA.setEnabled(enable);
@@ -2378,8 +2360,6 @@ public class DefaultUserInterfacePanel implements UserInterfacePanel {
 	/**
 	 * Gets the path and name for a prompt file.
 	 *
-	 * @param title
-	 * @return
 	 */
 	private String getFileName(final String title) {
 		final OpenDialog dialog = new OpenDialog(title, "");

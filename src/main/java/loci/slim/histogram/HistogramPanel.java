@@ -79,9 +79,6 @@ public class HistogramPanel extends JPanel {
 	/**
 	 * Constructor
 	 *
-	 * @param width
-	 * @param inset
-	 * @param height
 	 */
 	public HistogramPanel(final int width, final int inset, final int height) {
 		super();
@@ -319,7 +316,6 @@ public class HistogramPanel extends JPanel {
 	/**
 	 * Sets a listener for dragging minimum and maximum.
 	 *
-	 * @param listener
 	 */
 	public void setListener(final IHistogramPanelListener listener) {
 		_listener = listener;
@@ -328,7 +324,6 @@ public class HistogramPanel extends JPanel {
 	/**
 	 * Changes histogram counts and redraws.
 	 *
-	 * @param bins
 	 */
 	public void setBinValues(final int[] bins) {
 		synchronized (_synchObject) {

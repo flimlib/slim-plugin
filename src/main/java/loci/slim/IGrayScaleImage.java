@@ -45,7 +45,6 @@ public interface IGrayScaleImage extends IGrayScalePixelValue,
 	/**
 	 * Sets a listener for when the user clicks on the image.
 	 *
-	 * @param listener
 	 */
 	public void setListener(ISelectListener listener);
 
@@ -59,7 +58,6 @@ public interface IGrayScaleImage extends IGrayScalePixelValue,
 	/**
 	 * Disables and enables channel selection, during and after a fit.
 	 *
-	 * @param enable
 	 */
 	public void enable(boolean enable);
 
@@ -67,14 +65,12 @@ public interface IGrayScaleImage extends IGrayScalePixelValue,
 	 * Gets the minimum, non-zero photon count encountered in the image. Usually
 	 * 1.0, but sometimes its 10.0 and all photon counts are multiples of 10.0.
 	 *
-	 * @return
 	 */
 	public double getMinNonZeroPhotonCount();
 
 	/**
 	 * Gets the photon count of the brightest point in the image.
 	 *
-	 * @return
 	 */
 	public double getMaxTotalPhotons();
 
@@ -88,7 +84,6 @@ public interface IGrayScaleImage extends IGrayScalePixelValue,
 	/**
 	 * Sets a mask group to listen for changes.
 	 *
-	 * @param maskGroup
 	 */
 	@Override
 	public void listenToMaskGroup(IMaskGroup maskGroup);

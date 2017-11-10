@@ -33,7 +33,6 @@ public interface IFittingCursorListener {
 	/**
 	 * Callback when the cursor changes.
 	 *
-	 * @param cursor
 	 */
 	public void cursorChanged(FittingCursor cursor);
 }
