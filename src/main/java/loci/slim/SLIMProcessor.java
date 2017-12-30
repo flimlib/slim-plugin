@@ -31,26 +31,24 @@ import ij.gui.Roi;
 import ij.plugin.frame.Recorder;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+
 import io.scif.img.ImgOpener;
 import io.scif.img.SCIFIOImgPlus;
 import io.scif.img.axes.SCIFIOAxes;
 
 import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Frame;
+import java.awt.FileDialog;
 import java.awt.Rectangle;
 import java.awt.image.IndexColorModel;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
 
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.filechooser.FileFilter;
 
 import loci.curvefitter.CurveFitData;
 import loci.curvefitter.ICurveFitData;
@@ -1534,38 +1532,30 @@ public class SLIMProcessor<T extends RealType<T>> {
 	 * @return non-null array of Files
 	 */
 	private final File[] showFileDialog(final String defaultPath) {
-		final List<File> fileList = new ArrayList<File>();
-		final JFileChooser chooser = new JFileChooser();
-		chooser.setCurrentDirectory(new File(defaultPath));
-		chooser.setDialogTitle("Open Lifetime Image(s)");
-		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		chooser.setMultiSelectionEnabled(true);
-		chooser.setFileFilter(new FileFilter() {
+		final FileDialog chooser = new FileDialog(IJ.getInstance(),
+			"Open Lifetime Image(s)");
+		chooser.setDirectory(defaultPath);
+		chooser.setMultipleMode(true);
+		chooser.setFilenameFilter(new FilenameFilter() {
 			@Override
-			public boolean accept(final File f) {
-				if (f.getName().endsWith(ICS_SUFFIX)) {
+			public boolean accept(final File dir, String name) {
+				if (name.endsWith(ICS_SUFFIX)) {
 					return true;
 				}
-				if (f.getName().endsWith(SDT_SUFFIX)) {
+				if (name.endsWith(SDT_SUFFIX)) {
 					return true;
 				}
-				if (f.isDirectory()) {
+				if (new File(dir, name).isDirectory()) {
 					return true;
 				}
 				return false;
 			}
-
-			@Override
-			public String getDescription() {
-				return "Lifetime .ics & .sdt";
-			}
 		});
+		chooser.setVisible(true);
+		final File[] files = chooser.getFiles();
+		if (files == null || files.length == 0) return null;
 
-		if (chooser.showOpenDialog(Frame.getFrames()[0]) != JFileChooser.APPROVE_OPTION) {
-			return null;
-		}
-
-		final File[] files = chooser.getSelectedFiles();
+		final List<File> fileList = new ArrayList<>();
 		for (final File file : files) {
 			if (file.isDirectory()) {
 				for (final File f : file.listFiles()) {
