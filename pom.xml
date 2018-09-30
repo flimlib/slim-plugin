@@ -86,6 +86,13 @@
 
 	<properties>
 		<main-class>loci.slim.About</main-class>
+		<package-name>loci.slim</package-name>
+
+		<license.licenseName>gpl_v3</license.licenseName>
+		<license.projectName>SLIM Curve plugin for combined spectral-lifetime image analysis.</license.projectName>
+		<license.copyrightOwners>Board of Regents of the University of
+Wisconsin-Madison.</license.copyrightOwners>
+
 		<!-- FIXME: Switch curve-fitter to release dependency! -->
 		<enforcer.skip>true</enforcer.skip>
 
@@ -161,32 +168,6 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>${main-class}</mainClass>
-							<packageName>loci.slim</packageName>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<configuration>
-					<licenseName>gpl_v3</licenseName>
-					<projectName>SLIM Curve plugin for combined spectral-lifetime image analysis.</projectName>
-					<organizationName>Board of Regents of the University of
-Wisconsin-Madison.</organizationName>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 
 	<profiles>
 		<profile>
