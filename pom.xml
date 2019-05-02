@@ -32,7 +32,7 @@
 		<developer>
 			<id>ctrueden</id>
 			<name>Curtis Rueden</name>
-			<url>http://imagej.net/User:Rueden</url>
+			<url>https://imagej.net/User:Rueden</url>
 			<roles>
 				<role>lead</role>
 				<role>maintainer</role>
@@ -41,7 +41,7 @@
 		<developer>
 			<id>aksagar</id>
 			<name>Md Abdul Kader Sagar</name>
-			<url>http://imagej.net/User:Msagar</url>
+			<url>https://imagej.net/User:Msagar</url>
 			<roles>
 				<role>developer</role>
 				<role>debugger</role>
@@ -53,7 +53,7 @@
 	<contributors>
 		<contributor>
 			<name>Aivar Grislis</name>
-			<url>http://imagej.net/User:Grislis</url>
+			<url>https://imagej.net/User:Grislis</url>
 			<roles><role>founder</role></roles>
 			<properties><id>grislis</id></properties>
 		</contributor>
