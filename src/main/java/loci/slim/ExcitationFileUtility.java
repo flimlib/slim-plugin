@@ -24,13 +24,13 @@
 package loci.slim;
 
 import ij.IJ;
+
 import io.scif.ByteArrayPlane;
 import io.scif.FormatException;
 import io.scif.ImageMetadata;
 import io.scif.Metadata;
 import io.scif.SCIFIO;
 import io.scif.Writer;
-import io.scif.common.DataTools;
 import io.scif.filters.PlaneSeparator;
 import io.scif.filters.ReaderFilter;
 import io.scif.img.axes.SCIFIOAxes;
@@ -46,6 +46,8 @@ import java.util.Set;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.axis.CalibratedAxis;
+
+import org.scijava.util.Bytes;
 
 /**
  * Loads and saves excitation files.
@@ -121,7 +123,7 @@ public class ExcitationFileUtility {
 			for (int bin = 0; bin < bins; ++bin) {
 				bytes = reader.openPlane(0, bin).getBytes();
 				results[bin] =
-					DataTools.bytesToDouble(bytes, 0, bitsPerPixel, littleEndian);
+					Bytes.toDouble(bytes, 0, bitsPerPixel, littleEndian);
 			}
 			reader.close();
 		}
@@ -153,7 +155,7 @@ public class ExcitationFileUtility {
 			final boolean little = true;
 			final ByteArrayPlane plane = new ByteArrayPlane(scifio.getContext());
 			for (int bin = 0; bin < values.length; ++bin) {
-				plane.setData(DataTools.doubleToBytes(values[bin], little));
+				plane.setData(Bytes.fromDouble(values[bin], little));
 				writer.savePlane(0, bin, plane);
 			}
 			success = true;
