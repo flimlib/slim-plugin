@@ -110,6 +110,7 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.DoubleType;
 
 import org.scijava.Context;
+import org.scijava.util.ArrayUtils;
 
 /**
  * SLIMProcessor is the main class of the SLIM Curve plugin for ImageJ. It was
@@ -1628,6 +1629,17 @@ public class SLIMProcessor<T extends RealType<T>> {
 		}
 		// IJ.log("corrected to " + _channels);
 		_bins = (int) ImageUtils.getDimSize(image, SCIFIOAxes.LIFETIME);
+		if (_bins < 0) {
+			if (image.numDimensions() <= 2) {
+				IJ.error("No lifetime dimension found, and image is 2D. Giving up.");
+				return false;
+			}
+			final int d = 2;
+			_bins = ArrayUtils.safeMultiply32(image.dimension(d)); // safe "cast"
+			IJ.log("Warning: no lifetime axis found; using dimension " +
+					String.format("#%d: %s (%d)",
+						d, image.axis(d).type(), image.dimension(d)));
+		}
 		_binIndex = 2;
 		// IJ.log("width " + _width + " height " + _height + " timeBins " + _bins +
 		// " channels " + _channels);
