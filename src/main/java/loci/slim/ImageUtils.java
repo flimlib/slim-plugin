@@ -79,7 +79,10 @@ public class ImageUtils {
 		final int defaultIndex)
 	{
 		final int axisIndex = img.dimensionIndex(axisType);
-		return axisIndex < 0 ? defaultIndex : img.dimension(axisIndex);
+		return getDimSize(img, axisIndex < 0 ? defaultIndex : axisIndex);
 	}
 
+	private static long getDimSize(ImgPlus<?> img, int axisIndex) {
+		return axisIndex < 0 ? -1 : img.dimension(axisIndex);
+	}
 }
