@@ -1,2 +1,2 @@
-[![](https://travis-ci.org/slim-curve/slim-plugin.svg?branch=master)](https://travis-ci.org/slim-curve/slim-plugin)
-
+This plugin has been discontinued in favor of
+[FLIMJ](https://imagej.net/FLIMJ).
